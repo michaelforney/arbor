@@ -1,0 +1,27 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Tool used for applying patches such as produced by diff"
+HOMEPAGE="http://www.gnu.org/software/patch"
+SRC_URI="http://alpha.gnu.org/gnu/diffutils/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_unpack() {
+    unpack "${A}"
+
+    # DESTDIR support
+    cd "${S}"
+    sed -ri 's:(\$\(INSTALL_[^ ]+ [^ ]+ ):\1$(DESTDIR):' Makefile.in
+}
+
+src_install() {
+    dobin /usr/bin
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc AUTHORS ChangeLog INSTALL NEWS README
+}

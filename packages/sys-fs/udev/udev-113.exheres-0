@@ -1,0 +1,20 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="User space /dev manager for Linux"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
+SRC_URI="http://www.kernel.org/pub/linux/utils/kernel/hotplug/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc ChangeLog FAQ README RELEASE-NOTES TODO
+    dodoc docs/*
+    cp -r docs/writing_udev_rules "${D}/usr/share/doc/${P}"
+}

@@ -1,0 +1,27 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Module permitting access from perl to gettext() functions"
+HOMEPAGE="http://search.cpan.org/~marekr/Pod-Parser-1.35/lib/Pod/Parser.pm"
+SRC_URI="http://search.cpan.org/CPAN/authors/id/M/MA/MAREKR/Pod-Parser-1.35.tar.gz"
+
+LICENSE="Artistic"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+S="${WORKDIR}/Pod-Parser-${PV}"
+
+src_compile() {
+    cd "${S}"
+    einfo "pwd: $(pwd)"
+    perl Makefile.PL PREFIX="${D}/usr" || "Perl make failed."
+    make || die "Make failed."
+}
+
+src_install() {
+    make install || die "Install failed."
+}

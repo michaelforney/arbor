@@ -1,0 +1,25 @@
+# Copyright 2007 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Popular version control system"
+HOMEPAGE="http://subversion.tigris.org/"
+SRC_URI="http://subversion.tigris.org/downloads/${P}.tar.bz2"
+
+LICENSE="Apache-1.1"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="slowtests"
+
+DEPEND="dev-libs/apr-util
+        net-misc/neon"
+RDEPEND=""
+
+src_test() {
+    if option slowtests; then
+        make check || die "Tests failed."
+    fi
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+}

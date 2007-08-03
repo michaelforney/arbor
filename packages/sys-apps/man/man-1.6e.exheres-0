@@ -1,0 +1,23 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Man page reader"
+HOMEPAGE="http://primates.ximian.com/~flucifredi/man/"
+SRC_URI="http://primates.ximian.com/~flucifredi/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="runtime:
+                sys-apps/groff"
+
+src_compile() {
+    ./configure -default
+    emake
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+}

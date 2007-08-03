@@ -1,0 +1,55 @@
+# Copyright 1999-2007 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils
+
+DESCRIPTION="Perl is a general-purpose programming language originally developed for text manipulation"
+HOMEPAGE="http://www.perl.org"
+SRC_URI="ftp://ftp.cpan.org/pub/CPAN/src/perl-5.8.8.tar.bz2"
+
+LICENSE="|| ( Artistic GPL GPL-2 GPL-3 )"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_unpack() {
+    unpack "${A}"
+    cd "${S}"
+    epatch "${FILESDIR}/perl-gcc-4.2.patch"
+}
+
+src_compile() {
+    mkdir "${T}/build"
+    cd "${T}/build"
+
+    sh "${S}/Configure" -des \
+        -Dprefix=/usr \
+        -Doptimize="${CFLAGS}" \
+        -Duselargefiles \
+        -Darchname=${CHOST%%-*} \
+        -Duseshrplib \
+        -Dlibperl="libperl.so.1.${PV}" \
+        -Dinstallusrbinperl \
+        -Dmksymlinks \
+        || die "Configure failed."
+    make -j1 || die "Make failed."
+}
+
+src_install() {
+    cd "${T}/build"
+    make -j1 DESTDIR="${D}" install || die "Install failed."
+    dodir /usr/lib
+    dosym /usr/lib/perl5/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} /usr/lib/libperl.so.1.${PV}
+    dosym /usr/lib/libperl.so.1.${PV} /usr/lib/libperl.so.1
+    dosym /usr/lib/libperl.so.1 /usr/lib/libperl.so
+    dodoc AUTHORS Changes* INSTALL README*
+
+    # Install LDPATH env file
+    dodir /etc/env.d
+    cat <<EOF > "${D}/etc/env.d/05perl"
+LDPATH="/usr/lib/perl5/${PV}/$(uname -m)-linux/CORE/lib"
+EOF
+}
+

@@ -1,0 +1,23 @@
+# Copyright 2007-2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Exuberant ctags"
+HOMEPAGE="http://ctags.sourceforge.net"
+SRC_URI="mirror://sourceforge/ctags/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+src_compile() {
+    econf --with-posix-regex --disable-etags || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    einstall || die "Install failed."
+}

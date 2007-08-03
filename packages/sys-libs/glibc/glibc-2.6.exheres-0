@@ -1,0 +1,55 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="GNU C library"
+HOMEPAGE="http://www.gnu.org/software/libc"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.bz2
+    http://ftp.gnu.org/gnu/${PN}/glibc-libidn-${PV}.tar.bz2"
+
+LICENSE="LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build:
+                sys-apps/texinfo
+                sys-apps/awk
+                dev-lang/perl
+                app-text/sed
+              runtime:
+                sys-libs/timezone-info"
+
+ECONF_SOURCE="${S}"
+BUILDDIR="${T}/build"
+
+src_unpack() {
+    unpack "${A}"
+    mv glibc-libidn-${PV} ${S}/libidn
+}
+
+src_compile() {
+    mkdir "${BUILDDIR}"
+    cd "${BUILDDIR}"
+    econf \
+        --with-crypt \
+        --with-add-ons \
+        || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    cd "${BUILDDIR}"
+    LANGUAGE=C LC_ALL=C emake install_root="${D}" install || die "Install failed."
+
+    # Don't install /etc/{ld.so.cache,localtime}
+    rm "${D}/etc/ld.so.cache" "${D}/etc/localtime"
+
+    # don't install bundled timezone info
+    rm -r "${D}/usr/share/zoneinfo"
+
+    cd "${S}"
+    insinto /etc
+    doins conf/gai.conf nscd/nscd.conf nss/nsswitch.conf
+
+    dodoc BUGS CONFORMANCE ChangeLog* FAQ NEWS NOTES PROJECTS README*
+}

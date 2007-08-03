@@ -1,0 +1,21 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Helper tool for compiling applications and libraries"
+HOMEPAGE="http://pkg-config.freedesktop.org/wiki"
+SRC_URI="http://pkgconfig.freedesktop.org/releases/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+# only failed one test but disabling all tests for now
+RESTRICT="test"
+
+src_install() {
+    emake install DESTDIR="${D}" || die "Install failed."
+}

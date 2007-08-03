@@ -1,0 +1,54 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Filesystem utilities for use with ext2 and ext3 filesystems"
+HOMEPAGE="http://e2fsprogs.sourceforge.net"
+SRC_URI="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build:
+                sys-libs/com_err
+                sys-libs/ss
+              runtime:
+                sys-libs/com_err
+                sys-libs/ss"
+
+S="${WORKDIR}/e2fsprogs-${PV}"
+
+src_compile() {
+    cd "${S}"
+    sed -i -e 's:^\(LIB_SUBDIRS=\)lib/et lib/ss:\1:' Makefile.in
+    mkdir build
+    cd build
+    ../configure --enable-elf-shlibs || die "Configure failed."
+
+    # Remove ss and com_err libs as they're is split out
+    rm lib/{et,ss}/*
+    ln -s /usr/include/ss/ss_err.h lib/ss/ss_err.h
+    ln -s /usr/lib/libcom_err.a lib/libcom_err.a
+    ln -s /lib/libcom_err.so lib/libcom_err.so
+    ln -s /lib/libss.so lib/libss.so
+
+    emake \
+        COMPILE_ET=compile_et \
+        MK_CMDS=/usr/bin/mk_cmds \
+        || "Make failed."
+}
+
+src_test() {
+    cd "${S}/build"
+    emake -j1 \
+        IMAGE="" \
+        RM=/bin/rm \
+        LN=/bin/ln \
+        check || die "Tests failed."
+}
+
+src_install() {
+    emake -C build DESTDIR="${D}" install || die "Install failed."
+    dodoc ChangeLog README RELEASE-NOTES SUBMITTING-PATCHES
+}

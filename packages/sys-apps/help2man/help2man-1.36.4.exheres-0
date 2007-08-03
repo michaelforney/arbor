@@ -1,0 +1,20 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Tool for automatically generating manual pages from program output"
+HOMEPAGE="http://www.gnu.org/software/help2man"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+src_install() {
+    # Install target isn't parallel safe.
+    make DESTDIR="${D}" install || die "Install failed."
+    dodoc INSTALL NEWS README THANKS
+}

@@ -1,0 +1,25 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Collection of Linux man pages"
+HOMEPAGE="ftp://ftp.win.tue.nl/pub/linux-local/manpages"
+SRC_URI="ftp://ftp.win.tue.nl/pub/linux-local/manpages/${P}.tar.gz"
+
+LICENSE=""
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="runtime:
+                sys-apps/man"
+
+# There's no tests
+RESTRICT="test"
+
+src_compile() {
+    :
+}
+
+src_install() {
+    emake prefix="${D}" install || die "Install failed."
+}

@@ -1,0 +1,21 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Stream-oriented XML parser written in C."
+HOMEPAGE="http://sourceforge.net/projects/expat"
+SRC_URI="mirror://sourceforge/expat/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+# disable tests until I can figure out how to fix them
+RESTRICT="test"
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+}

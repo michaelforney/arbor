@@ -1,0 +1,31 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Generic Subsystem library (Simple tty UI)"
+HOMEPAGE="http://e2fsprogs.sourceforge.net"
+SRC_URI="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND="sys-libs/com_err"
+RDEPEND=""
+
+S="${WORKDIR}/e2fsprogs-${PV}"
+
+src_compile() {
+    cd "${S}"
+    mkdir build
+    cd build
+    ../configure --enable-elf-shlibs || die "Configure failed."
+    emake COMPILE_ET=compile_et -C lib/ss || "Make failed."
+}
+
+src_install() {
+    cd "${S}/build"
+    dodir /usr/share/man/man1
+    emake -C lib/ss DESTDIR="${D}" install || die "Install failed."
+    dodoc ChangeLog README RELEASE-NOTES SUBMITTING-PATCHES
+}

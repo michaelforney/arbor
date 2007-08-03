@@ -1,0 +1,41 @@
+# Copyright 2007 Alexander Færøy <eroyf@eroyf.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require subversion eutils
+
+DESCRIPTION="A Repoman replacement written in C++"
+HOMEPAGE="http://www.eroyf.org/"
+SRC_URI=""
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="pink git cvs"
+
+DEPEND=">=sys-apps/paludis-0.25"
+RDEPEND="${DEPEND}
+         dev-util/subversion
+         cvs? ( dev-util/cvs )
+         git? ( dev-util/git )"
+
+ESVN_REPO_URI="svn://svn.pioto.org/reprehendo/trunk"
+ESVN_BOOTSTRAP="./autogen.bash"
+
+src_unpack() {
+    subversion_src_unpack
+}
+
+src_compile() {
+    econf \
+        $(ioptions_enable pink) \
+        $(option_enable git)  \
+        --with-default-layout=exherbo \
+        || die "econf failed"
+
+    emake || die "emake failed"
+}
+
+src_install() {
+    emake install DESTDIR="${D}" || die "emake failed"
+    dodoc AUTHORS ChangeLog
+}

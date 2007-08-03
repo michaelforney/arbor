@@ -1,0 +1,32 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="User and group management related utilities"
+HOMEPAGE=""
+SRC_URI="ftp://ftp.osuosl.org/pub/lfs/lfs-packages/development/${P}.tar.bz2"
+
+LICENSE="AS-IS"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="pam"
+
+DEPENDENCIES="build:
+                pam? ( sys-libs/pam )
+                sys-libs/cracklib
+              runtime:
+                pam? ( sys-libs/pam )
+                sys-libs/cracklib"
+
+src_compile() {
+    econf \
+        --without-selinux \
+        $(option_with pam) \
+        --with-libcrack \
+        || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc ChangeLog NEWS README TODO
+}

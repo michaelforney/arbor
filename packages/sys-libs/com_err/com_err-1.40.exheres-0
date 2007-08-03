@@ -1,0 +1,35 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Common error code library"
+HOMEPAGE="http://e2fsprogs.sourceforge.net"
+SRC_URI="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+
+LICENSE="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+S="${WORKDIR}/e2fsprogs-${PV}"
+
+src_compile() {
+    cd "${S}"
+    mkdir build
+    cd build
+    ../configure --enable-elf-shlibs || die "Configure failed."
+    emake -C lib/et || "Make failed."
+}
+
+src_test() {
+    cd "${S}/build"
+    emake -C lib/et check || die "Tests failed."
+}
+
+src_install() {
+    cd "${S}/build"
+    emake -C lib/et DESTDIR="${D}" install || die "Install failed."
+    dodoc ChangeLog README RELEASE-NOTES SUBMITTING-PATCHES
+}

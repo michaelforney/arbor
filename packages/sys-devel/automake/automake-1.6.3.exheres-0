@@ -1,0 +1,26 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+MY_P="${P/_/-}"
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="Tool used to automatically generate Makefile.in files"
+HOMEPAGE="http://www.gnu.org/software/automake"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${MY_P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="1.6"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_compile() {
+    econf --program-suffix="-${PV%%_*}" || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    rm "${D}"/usr/bin/*-${PV}-*
+}

@@ -1,0 +1,26 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="A proactive password sanity library"
+HOMEPAGE="http://sourceforge.net/projects/cracklib"
+SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="python"
+
+DEPEND="python? ( dev-lang/python )"
+RDEPEND="${DEPEND}"
+
+src_compile() {
+    econf \
+        $(option_with python) \
+        || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc AUTHORS ChangeLog NEWS README*
+}

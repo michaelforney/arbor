@@ -1,0 +1,42 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="GNU Compiler Collection"
+HOMEPAGE="http://gcc.gnu.org"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="${PV}"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
+
+DEPENDENCIES="build:
+                sys-devel/make
+                >=dev-libs/gmp-4.1
+                dev-libs/mpfr"
+
+OBJDIR="${T}/${CHOST}"
+
+src_compile() {
+    mkdir "${OBJDIR}"
+    cd "${OBJDIR}"
+
+    LANGS="c++"
+    for i in ada fortran objc obj-c++ java; do
+        option ${i} && LANGS="${LANGS} ${i}"
+    done
+    LANGS="${LANGS/ /,}"
+
+    "${S}/configure" \
+        --prefix=/usr \
+        --enable-languages="${LANGS}" \
+        $(option_enable propolice libssp) \
+        $(option_enable nls) \
+        || die "Configure failed."
+    emake bootstrap || die "Make failed."
+}
+
+src_install() {
+    cd "${OBJDIR}"
+    emake DESTDIR="${D}" install || die "Install failed."
+}

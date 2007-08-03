@@ -1,0 +1,36 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Extensible M4 macro package producing configure scripts"
+HOMEPAGE="http://www.gnu.org/software/autoconf"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="2.1"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build: sys-apps/help2man"
+
+src_unpack() {
+    unpack ${A}
+
+    cd ${S}
+    # DESTDIR support
+    sed -ri 's:(\$\(INSTALL_[^ ]+ [^ ]+ ):\1$(DESTDIR):' Makefile.in
+    # Make all needed directories during installation
+    sed -ri 's:(^INSTALL.+=.+):\1 -D:' Makefile.in
+}
+
+src_compile() {
+    econf \
+        --prefix=/usr \
+        --program-suffix=-${PV} \
+        --infodir=/usr/share/info \
+        || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+}

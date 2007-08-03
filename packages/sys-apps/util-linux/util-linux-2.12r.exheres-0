@@ -1,0 +1,26 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils
+
+DESCRIPTION="Common linux utilities"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/util-linux"
+SRC_URI="mirror://kernel/linux/utils/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_unpack() {
+    unpack "${A}"
+    cd "${S}"
+    epatch "${FILESDIR}/${P}-llseek.patch"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc HISTORY MAINTAINER README VERSION
+}

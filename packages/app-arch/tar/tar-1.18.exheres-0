@@ -1,0 +1,26 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Tar archiver"
+HOMEPAGE="http://www.gnu.org/software/tar/"
+SRC_URI="mirror://gnu/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+RESTRICT="test"
+
+src_compile() {
+    econf --bindir=/bin
+    emake
+}
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc ABOUT-NLS AUTHORS ChangeLog ChangeLog.1 INSTALL NEWS \
+        PORTS README THANKS TODO
+}

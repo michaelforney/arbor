@@ -1,0 +1,36 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="BusyBox provides tiny replacements for many common UNIX utilities"
+HOMEPAGE="http://busybox.net"
+SRC_URI="http://busybox.net/downloads/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build:
+                app-arch/zip"
+
+RESTRICT="test"
+
+src_compile() {
+    emake defconfig || die "Failed to make default config."
+    emake || die "Make failed."
+
+    # Preserve dynamically linked executable
+    mv busybox_unstripped{,.dynamic}
+    emake CONFIG_STATIC=y busybox || die "Make static busybox failed."
+    mv busybox_unstripped bb
+    mv busybox_unstripped{.dynamic,}
+}
+
+src_install() {
+    into /
+    newbin busybox_unstripped busybox
+    dobin bb
+
+    dodoc AUTHORS README TODO
+    cp -r examples ${D}/usr/share/doc/${P}
+}

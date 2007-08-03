@@ -1,0 +1,23 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Archive manager for cpio archives"
+HOMEPAGE="http://www.gnu.org/software/cpio"
+SRC_URI="mirror://gnu/cpio/${P}.tar.bz2"
+
+LICENSE="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_compile() {
+    econf --bindir /bin --enable-mt || die "econf failed."
+    emake || die "emake failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "install failed."
+    dodoc ABOUT-NLS AUTHORS ChangeLog INSTALL NEWS README THANKS TODO
+}

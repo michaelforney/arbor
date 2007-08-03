@@ -1,0 +1,25 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+
+DESCRIPTION="neon is an HTTP and WebDAV client library"
+HOMEPAGE="http://www.webdav.org/neon/"
+SRC_URI="http://www.webdav.org/neon/${P}.tar.gz"
+
+LICENSE="LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+src_compile() {
+    econf --enable-shared || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc AUTHORS BUGS ChangeLog* NEWS README THANKS TODO doc
+}

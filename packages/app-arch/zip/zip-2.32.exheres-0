@@ -1,0 +1,26 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require versionator
+
+MY_PV="$(delete_all_version_separators ${PV})"
+
+DESCRIPTION="Zip is a compression and file packaging/archive utility."
+HOMEPAGE="http://www.info-zip.org/Zip.html"
+SRC_URI="ftp://ftp.info-zip.org/pub/infozip/src/zip${MY_PV}.tgz"
+
+LICENSE="Info-ZIP"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+src_compile() {
+    emake -f unix/Makefile generic
+}
+
+src_install() {
+    make prefix="${D}/usr" -f unix/Makefile install || die "Install failed."
+}

@@ -1,0 +1,37 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils
+
+DESCRIPTION="Groff produces formatted output from plain text"
+HOMEPAGE="http://www.gnu.org/software/groff"
+SRC_URI="ftp://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="nls"
+
+DEPENDENCIES=""
+
+src_unpack() {
+    unpack "${A}"
+    cd "${S}"
+    epatch "${FILESDIR}/${P}-parallel-make.patch"
+}
+
+src_install() {
+    dodir /usr/bin
+    emake \
+        prefix="${D}/usr" \
+        datadir="${D}/usr/share" \
+        infodir="${D}/usr/share/info" \
+        mandir="${D}/usr/share/man" \
+        install || die "Install failed."
+
+    dosym tbl /usr/bin/gtbl
+    dosym eqn /usr/bin/geqn
+
+    dodoc BUG-REPORT ChangeLog* FDL INSTALL* MORE.STUFF NEWS PROBLEMS \
+        PROJECTS README REVISION TODO VERSION
+}

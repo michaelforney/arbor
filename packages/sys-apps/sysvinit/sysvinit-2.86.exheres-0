@@ -1,0 +1,32 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+
+DESCRIPTION="SYSV init system"
+HOMEPAGE="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/"
+SRC_URI="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+S="${WORKDIR}/${P}/src"
+
+src_compile() {
+    emake || die "Make failed."
+}
+
+src_install() {
+    dodir /bin /sbin /usr/bin /usr/include \
+        /usr/share/man/man1 /usr/share/man/man5 /usr/share/man/man8
+    emake ROOT="${D}" install || die "Install failed."
+
+    cd "${S}"
+    dodoc doc/*
+
+    # FIXME: Need to install /etc/inittab and reboot+shutdown scripts
+}

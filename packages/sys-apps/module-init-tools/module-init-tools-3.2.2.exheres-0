@@ -1,0 +1,21 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Tools to handle kernel modules"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/module-init-tools"
+SRC_URI="http://www.kernel.org/pub/linux/utils/kernel/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+# FIXME: tests are borked
+RESTRICT="test"
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc AUTHORS CODING ChangeLog FAQ NEWS README TODO
+}

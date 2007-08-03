@@ -1,0 +1,36 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Collection of binary tools including ld and as"
+HOMEPAGE="http://www.gnu.org/software/binutils"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+
+    # Construct env.d/binutils configuration
+    mkdir -p "${D}/etc/env.d/binutils"
+
+    insinto /etc/env.d/binutils
+    cat <<EOF > binutils.env
+TARGET="${CHOST}"
+VER="${PV}"
+LIBPATH="/usr/lib/binutils/${CHOST}-${PV}"
+FAKE_TARGETS="${CHOST}"
+EOF
+    newins binutils.env ${CHOST}-${PV}
+
+    # Make sure a binutils version is selected for ${CHOST}
+    if [[ ! -e "${D}/etc/env.d/binutils/config-${CHOST}" ]]; then
+        cat <<EOF > "${D}/etc/env.d/binutils/config-${CHOST}"
+CURRENT="${PV}"
+EOF
+    fi
+}

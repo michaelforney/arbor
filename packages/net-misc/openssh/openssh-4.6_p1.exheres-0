@@ -1,0 +1,39 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require versionator
+
+MY_PV="$(delete_version_separator _ ${PV})"
+MY_P="${PN}-${MY_PV}"
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="OpenSSH is a free version of the SSH connectivity tools."
+HOMEPAGE="http://openssh.org"
+SRC_URI="ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${MY_P}.tar.gz"
+
+LICENSE="BSD"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="skey tcp-wrappers ssl-engine pam"
+
+DEPENDENCIES="build:
+                >=dev-libs/openssl-0.9.6
+                pam? ( sys-libs/pam )
+              runtime:
+                pam? ( sys-libs/pam )
+                tcp-wrappers? ( sys-apps/tcp-wrappers )"
+
+src_compile() {
+    econf \
+        $(option_enable skey) \
+        $(option_enable tcp-wrappers) \
+        $(option_enable ssl-engine) \
+        $(option_enable pam) \
+        --with-md5-passwords \
+        --sysconfdir=/etc/ssh \
+        --disable-strip
+}
+
+src_install() {
+    emake DESTDIR="${D}" install
+}

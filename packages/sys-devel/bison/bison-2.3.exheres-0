@@ -1,0 +1,19 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="General-purpose parser generator for LALR(1) or GLR parsers"
+HOMEPAGE="ihttp://www.gnu.org/software/bison"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc ABOUT-NLS AUTHORS ChangeLog INSTALL NEWS README THANKS TODO
+}

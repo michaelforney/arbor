@@ -1,0 +1,20 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+
+DESCRIPTION="library getting human-readable backtrace messages in C++"
+HOMEPAGE="http://libebt.berlios.de/"
+SRC_URI="mirror://berlios/${PN}/${P}.tar.bz2"
+
+LICENSE="as-is"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc ChangeLog README
+}

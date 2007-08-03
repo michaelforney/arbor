@@ -1,0 +1,39 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+MY_P="${PN}-s${PV}"
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="Small useful utilities for networking"
+HOMEPAGE="http://www.skbuff.net/iputils/"
+SRC_URI="http://www.skbuff.net/${PN}/${MY_P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="ipv6"
+
+DEPENDENCIES=""
+
+src_compile() {
+    emake || die "Make failed."
+# Need docbook for html and man targets to work
+#   emake html || die "Make html failed."
+#   emake man || die "Make man failed."
+}
+
+src_install() {
+    into /
+    dobin ping
+    into /usr
+    dosbin arping clockdiff ipg rarpd rdisc tftpd tracepath
+
+    if option ipv6; then
+        into /
+        dobin ping6
+        into /usr
+        dosbin tracepath6 traceroute6
+    fi
+
+    dodoc RELNOTES
+}

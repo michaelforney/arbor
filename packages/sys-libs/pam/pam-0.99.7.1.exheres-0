@@ -1,0 +1,27 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+MY_P="Linux-PAM-${PV}"
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="Linux-PAM provides Pluggable Authentication Modules"
+HOMEPAGE="http://www.kernel.org/pub/linux/libs/pam"
+SRC_URI="http://www.kernel.org/pub/linux/libs/pam/pre/library/${MY_P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="nls"
+
+DEPEND=""
+RDEPEND=""
+
+src_compile() {
+    econf $(option_enable nls) || die "Configure failed."
+    emake || die "Make failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc ABOUT-NLS AUTHORS CHANGELOG ChangeLog Copyright INSTALL NEWS README
+}

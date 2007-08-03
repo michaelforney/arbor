@@ -1,0 +1,111 @@
+# ChangeLog for ia64 profile
+# Copyright 1999-2007 Gentoo Foundation; Distributed under the GPL v2
+# $Header: /var/cvsroot/gentoo-x86/profiles/default-linux/ia64/ChangeLog,v 1.29 2007/04/23 19:43:37 armin76 Exp $
+
+  23 Apr 2007; Raúl Porcel <armin76@gentoo.org> use.mask:
+  Use.mask networkmanager as it depends on libnl which doesn't compile on
+  ia64, bug 175714
+
+  23 Apr 2007; Raúl Porcel <armin76@gentoo.org> use.mask:
+  Use.mask cpufreq, as it's not needed
+
+  20 Apr 2007; Raúl Porcel <armin76@gentoo.org> package.mask:
+  Unmask dev-ruby/ruby-gd as it works now
+
+  17 Apr 2007; Bryan Østergaard <kloeri@gentoo.org> 2007.0/packages:
+  Fix 2007.0/packages to require a slightly older minimum gcc. Fixes
+  virtual/libstdc++ dependency issue.
+
+  16 Apr 2007; Chris Gianelloni <wolf31o2@gentoo.org>
+  +2007.0/desktop/make.defaults, -dev/2007.0/desktop/make.defaults,
+  +2007.0/desktop/parent, -dev/2007.0/desktop/parent,
+  +2007.0/desktop/virtuals, -dev/2007.0/desktop/virtuals,
+  +2007.0/make.defaults, -dev/2007.0/make.defaults, +2007.0/packages,
+  -dev/2007.0/packages, +2007.0/parent, -dev/2007.0/parent,
+  +2007.0/server/make.defaults, -dev/2007.0/server/make.defaults,
+  +2007.0/server/parent, -dev/2007.0/server/parent:
+  Adding the 2007.0 profile from the release snapshot. This will allow us to
+  do final testing/QA on the release media before it hits the mirrors. This
+  profile is designed to work with the release media, so beware if you're
+  using it yourself without knowing the implications of what it will affect
+  for you.
+
+  02 Apr 2007; Raúl Porcel <armin76@gentoo.org> use.mask:
+  Unmask seamonkey USE-flag, as seamonkey is now keyworded
+
+  26 Mar 2007; Raúl Porcel <armin76@gentoo.org> +package.mask:
+  Add package.mask file and mask dev-ruby/ruby-gd wrt bug 166527
+
+  22 Mar 2007; Steve Dibb <beandog@gentoo.org> use.mask:
+  Add ivtv to use.mask
+
+  02 Mar 2007; Samuli Suominen <drac@gentoo.org> use.mask:
+  battery		
+  http://bugs.gentoo.org/show_bug.cgi?id=157881#c6
+
+  14 Feb 2007; Bryan Østergaard <kloeri@gentoo.org> +2004.3/package.mask,
+  +2005.0/package.mask, +2006.0/package.mask:
+  Mask >=sys-libs/glibc-2.5 on profiles allowing linuxthreads.
+
+  12 Feb 2007; Bryan Østergaard <kloeri@gentoo.org> +package.use.force:
+  Force nptlonly for glibc-2.5.
+
+  12 Feb 2007; Bryan Østergaard <kloeri@gentoo.org>
+  dev/2007.0/make.defaults:
+  Removed unicode from STAGE1_USE as it breaks stage building.
+
+  12 Feb 2007; Chris Gianelloni <wolf31o2@gentoo.org>
+  dev/2007.0/desktop/make.defaults:
+  Removed dlloader from USE since it's already in default-linux's make.defaults.
+
+  12 Feb 2007; Chris Gianelloni <wolf31o2@gentoo.org> 2006.0/make.defaults,
+  dev/2007.0/make.defaults:
+  Removed udev from default USE due to bug #158114.
+
+  09 Feb 2007; Bryan Østergaard <kloeri@gentoo.org>
+  +dev/2007.0/desktop/make.defaults, +dev/2007.0/desktop/parent,
+  +dev/2007.0/desktop/virtuals, dev/2007.0/make.defaults,
+  dev/2007.0/packages, +dev/2007.0/server/make.defaults,
+  +dev/2007.0/server/parent:
+  Sync dev/2007.0 profile with x86.
+
+  09 Feb 2007; Bryan Østergaard <kloeri@gentoo.org>
+  dev/2007.0/make.defaults:
+  NPTL love for stage building.
+
+  26 Jan 2007; Bryan Østergaard <kloeri@gentoo.org> ChangeLog:
+  Add development profile.
+
+  04 Jan 2007; Diego Pettenò <flameeyes@gentoo.org> use.mask:
+  Revert masking of PHP binary useflags.
+
+  29 Dec 2006; Diego Pettenò <flameeyes@gentoo.org> use.mask:
+  Mask fdftk useflag on base profile and unmask for x86 only.
+
+  11 Dec 2006; <kloeri@gentoo.org> use.mask:
+  Use mask sms.
+
+  25 Nov 2006; Bryan Østergaard <kloeri@gentoo.org> use.mask:
+  Add oci8 to use.mask
+
+  28 Oct 2006; Diego Pettenò <flameeyes@gentoo.org> 2005.0/make.defaults,
+  2006.0/make.defaults:
+  Remove xmms useflag from defaults.
+
+  16 Oct 2006; Joshua Nichols <nichoj@gentoo.org> use.mask:
+  Added javamail, jms, and jmx to the list of other java related use masks.
+
+  16 Oct 2006; Joshua Nichols <nichoj@gentoo.org> use.mask:
+  Reverting premature unmasking of java, java-internal and java-external.
+  Need to get dev-java/ant marked stable first.
+
+  15 Oct 2006; Joshua Nichols <nichoj@gentoo.org> use.mask:
+  Removing java and company from use.mask, since it is stable now.
+
+  04 Oct 2006; Chris Gianelloni <wolf31o2@gentoo.org> 2005.0/make.defaults,
+  2006.0/make.defaults:
+  Removing obsolete avi and pdflib USE flags from default USE for bug #147322.
+
+  18 Aug 2006; Donnie Berkholz <dberkholz@gentoo.org>; make.defaults:
+  Defaults for video drivers.
+

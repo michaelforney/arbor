@@ -1,0 +1,45 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils
+
+DESCRIPTION="Core file, shell and text utilities expected to be on any system."
+HOMEPAGE="http://www.gnu.org/software/coreutils"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="nls acl"
+
+DEPENDENCIES="build:
+                acl? ( sys-apps/acl sys-apps/attr )"
+
+src_unpack() {
+    unpack "${A}"
+    epatch "${FILESDIR}/${P}-futimens.patch"
+}
+
+src_compile() {
+    econf \
+    $(option_enable nls) \
+    $(option_enable acl) \
+    || die "Configure failed."
+    emake || die "Make failed."
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+
+    local binfiles="basename cat chgrp chmod chown cp chroot \
+                    cut date df dir dirname du echo env expr \
+                    false head ln ls mkdir mkfifo mknod mv pwd \
+                    readlink rm rmdir seq sleep sort stty sync \
+                    tail touch tr true tty uname vdir wc yes"
+
+    dodir /bin
+    for binfile in ${binfiles}; do
+        mv ${D}/usr/bin/${binfile} ${D}/bin/${binfile}
+        dosym /bin/${binfile} /usr/bin/${binfile} || die "Dosym failed."
+    done
+}
