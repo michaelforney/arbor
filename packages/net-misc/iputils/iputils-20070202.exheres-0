@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require eutils
+
 MY_P="${PN}-s${PV}"
 S="${WORKDIR}/${MY_P}"
 
@@ -14,6 +16,13 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
+
+src_unpack() {
+    unpack ${A}
+    cd "${S}"
+    epatch "${FILESDIR}/${P}-linux-headers-types.patch"
+    epatch "${FILESDIR}/${P}-kernel-ifaddr.patch"
+}
 
 src_compile() {
     emake || die "Make failed."
