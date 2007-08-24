@@ -1046,10 +1046,10 @@ newicon() {
 find_unpackable_file() {
 	local src=$1
 	if [[ -z ${src} ]] ; then
-		src=${DISTDIR}/${A}
+		src=${FETCHEDDIR}/${A}
 	else
-		if [[ -e ${DISTDIR}/${src} ]] ; then
-			src=${DISTDIR}/${src}
+		if [[ -e ${FETCHEDDIR}/${src} ]] ; then
+			src=${FETCHEDDIR}/${src}
 		elif [[ -e ${PWD}/${src} ]] ; then
 			src=${PWD}/${src}
 		elif [[ -e ${src} ]] ; then

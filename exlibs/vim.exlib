@@ -226,7 +226,7 @@ vim_src_unpack() {
 		else
 			ECVS_MODULE="vim"
 		fi
-		ECVS_TOP_DIR="${PORTAGE_ACTUAL_DISTDIR-${DISTDIR}}/cvs-src/${ECVS_MODULE}"
+		ECVS_TOP_DIR="${FETCHEDDIR}/cvs-src/${ECVS_MODULE}"
 		cvs_src_unpack
 
 	else
@@ -241,7 +241,7 @@ vim_src_unpack() {
 			# Changed this from bzip2 |tar to tar -j since the former broke for
 			# some reason on freebsd.
 			#  --spb, 2004/12/18
-			tar xjf ${DISTDIR}/${VIM_RUNTIME_SNAP}
+			tar xjf ${FETCHEDDIR}/${VIM_RUNTIME_SNAP}
 			assert  # this will check both parts of the pipeline; eend would not
 			eend 0
 		fi
@@ -256,7 +256,7 @@ vim_src_unpack() {
 	# ask, you don't want to know.
 	if [[ -n "${VIM_NETRW_SNAP}" ]] ; then
 		ebegin "Unpacking updated netrw snapshot"
-		tar xjf ${DISTDIR}/${VIM_NETRW_SNAP} -C runtime/
+		tar xjf ${FETCHEDDIR}/${VIM_NETRW_SNAP} -C runtime/
 		eend $?
 	fi
 
