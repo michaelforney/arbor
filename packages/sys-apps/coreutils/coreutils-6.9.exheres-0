@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
+require eutils autotools
 
 DESCRIPTION="Core file, shell and text utilities expected to be on any system."
 HOMEPAGE="http://www.gnu.org/software/coreutils"
@@ -18,6 +18,9 @@ DEPENDENCIES="build:
 src_unpack() {
     unpack ${A}
     epatch "${FILESDIR}/${P}-futimens.patch"
+    cd "${S}"
+    epatch "${FILESDIR}/009_all_coreutils-tests.patch"
+    AT_M4DIR="m4" eautoreconf || die "Eautoreconf failed."
 }
 
 src_compile() {
@@ -42,4 +45,10 @@ src_install() {
         mv ${D}/usr/bin/${binfile} ${D}/bin/${binfile}
         dosym /bin/${binfile} /usr/bin/${binfile} || die "Dosym failed."
     done
+}
+
+src_test() {
+    addwrite /dev/full
+    export RUN_EXPENSIVE_TESTS="yes"
+    make check || die "Make check failed"
 }

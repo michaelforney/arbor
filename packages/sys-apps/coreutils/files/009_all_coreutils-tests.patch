@@ -1,0 +1,17 @@
+two of the touch tests (not-owner / fail-diag) will attempt to mess 
+with stuff in / (which is normally OK), but in our case, it pisses 
+off sandbox.  so we just disable them ;).
+
+--- coreutils/tests/touch/Makefile.am
++++ coreutils/tests/touch/Makefile.am
+@@ -4,9 +4,8 @@
+ TESTS = \
+   read-only \
+   relative \
+-  not-owner \
+   no-create-missing \
+-  fail-diag dir-1 dangling-symlink empty-file fifo no-rights obsolescent
++            dir-1 dangling-symlink empty-file fifo no-rights obsolescent
+ EXTRA_DIST = $(TESTS)
+ TESTS_ENVIRONMENT = \
+   host_triplet=$(host_triplet) \
