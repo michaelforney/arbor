@@ -27,5 +27,6 @@ src_install() {
     cd "${S}/build"
     dodir /usr/share/man/man1
     emake -C lib/ss DESTDIR="${D}" install || die "Install failed."
+    cd "${S}"
     dodoc ChangeLog README RELEASE-NOTES SUBMITTING-PATCHES
 }

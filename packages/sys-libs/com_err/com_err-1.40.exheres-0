@@ -31,5 +31,6 @@ src_test() {
 src_install() {
     cd "${S}/build"
     emake -C lib/et DESTDIR="${D}" install || die "Install failed."
+    cd "${S}"
     dodoc ChangeLog README RELEASE-NOTES SUBMITTING-PATCHES
 }
