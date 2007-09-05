@@ -16,8 +16,13 @@ DEPENDENCIES=""
 
 src_unpack() {
     unpack ${A}
+    cd "${S}"
     epatch "${FILESDIR}/net-tools-syntax.patch"
     cp "${FILESDIR}/config.h" "${S}"
+    sed -i \
+        -e "/^COPTS = /s~=~= ${CFLAGS} ~" \
+        -e "/^LOPTS = /s~=~= ${LDFLAGS} ~" \
+        Makefile || die "sed failed"
 }
 
 src_compile() {
