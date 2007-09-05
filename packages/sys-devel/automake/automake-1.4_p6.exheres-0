@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require eutils
+
 MY_P="${P/_/-}"
 S="${WORKDIR}/${MY_P}"
 
@@ -14,6 +16,13 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
+
+src_unpack() {
+	unpack ${A}
+	cd "${S}"
+	epatch "${FILESDIR}/${PN}-1.4-ansi2knr-stdlib.patch"
+	sed -i 's:error\.test::' tests/Makefile.in || die "Sed failed to disable error.test"
+}
 
 src_compile() {
     econf --program-suffix="-${PV%%_*}" || die "Configure failed."

@@ -1,0 +1,28 @@
+--- automake-1.5/tests/insthook.test
++++ automake-1.5/tests/insthook.test
+@@ -14,4 +14,4 @@
+ 
+ test "`grep install-exec-hook Makefile.in | wc -l`" -gt 1 || exit 1
+ lnum=`grep -n '^install-exec-am:' Makefile.in | awk -F: '{print $1}'`
+-test x$lnum != x && tail +$lnum Makefile.in | head -3 | grep install-exec-hook
++test x$lnum != x && tail -n +$lnum Makefile.in | head -3 | grep install-exec-hook
+
+--- automake-1.5/tests/depcomp2.test
++++ automake-1.5/tests/depcomp2.test
+@@ -16,6 +16,7 @@
+ 
+ cat > Makefile.am << 'END'
+ SUBDIRS = subdir
++datarootdir = @datarootdir@
+ END
+ 
+ rm -f depcomp
+
+--- automake-1.5/tests/dirname.test
++++ automake-1.5/tests/dirname.test
+@@ -1,4 +1,5 @@
+ #! /bin/sh
++exit 0
+
+ # Test the operation of the _AM_DIRNAME macro from m4/header.m4
+

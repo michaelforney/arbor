@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require eutils
+
 MY_P="${P/_/-}"
 S="${WORKDIR}/${MY_P}"
 
@@ -16,6 +18,7 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_compile() {
+    epatch "${FILESDIR}/${P}-test-fixes.patch"
     econf --program-suffix="-${PV%%_*}" || die "Configure failed."
     emake || die "Make failed."
 }

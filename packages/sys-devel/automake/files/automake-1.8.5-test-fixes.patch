@@ -1,0 +1,40 @@
+diff -ur automake-1.8.5.orig/tests/man2.test automake-1.8.5/tests/man2.test
+--- automake-1.8.5.orig/tests/man2.test	2003-11-14 22:25:59.000000000 +0100
++++ automake-1.8.5/tests/man2.test	2007-09-05 09:02:35.000000000 +0200
+@@ -44,12 +44,12 @@
+ ./configure --prefix=''
+ DESTDIR="`pwd`/_inst" $MAKE -e install
+ 
+-test -f ./_inst/man/man2/foo.2
+-test -f ./_inst/man/man4/foo.4
+-test -f ./_inst/man/man4/bar.4
++test -f ./_inst/share/man/man2/foo.2
++test -f ./_inst/share/man/man4/foo.4
++test -f ./_inst/share/man/man4/bar.4
+ 
+ DESTDIR="`pwd`/_inst" $MAKE -e uninstall
+ 
+-test ! -f ./_inst/man/man2/foo.2
+-test ! -f ./_inst/man/man4/foo.4
+-test ! -f ./_inst/man/man4/bar.4
++test ! -f ./_inst/share/man/man2/foo.2
++test ! -f ./_inst/share/man/man4/foo.4
++test ! -f ./_inst/share/man/man4/bar.4
+diff -ur automake-1.8.5.orig/tests/transform.test automake-1.8.5/tests/transform.test
+--- automake-1.8.5.orig/tests/transform.test	2004-01-08 23:29:59.000000000 +0100
++++ automake-1.8.5/tests/transform.test	2007-09-05 09:02:35.000000000 +0200
+@@ -38,7 +38,7 @@
+ test-install: install
+ 	test -f inst/bin/gnu-h$(EXEEXT)
+ 	test -f inst/bin/gnu-h.sh
+-	test -f inst/man/man1/gnu-h.1
++	test -f inst/share/man/man1/gnu-h.1
+ EOF
+ 
+ cat >h.c <<'EOF'
+@@ -66,4 +66,4 @@
+ rm -rf inst
+ $MAKE installdirs
+ test -d inst/bin
+-test -d inst/man/man1
++test -d inst/share/man/man1
