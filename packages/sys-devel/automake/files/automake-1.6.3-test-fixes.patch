@@ -9,16 +9,14 @@
  
  rm -f depcomp
 
-diff -ur automake-1.6.3.orig/tests/man2.test automake-1.6.3/tests/man2.test
---- automake-1.6.3.orig/tests/man2.test	2002-04-26 17:58:38.000000000 +0200
-+++ automake-1.6.3/tests/man2.test	2007-09-05 07:27:00.000000000 +0200
-@@ -26,6 +26,6 @@
- ./configure --prefix=''
+--- automake-1.6.3/tests/man2.test
++++ automake-1.6.3/tests/man2.test
+@@ -23,7 +23,7 @@
+ $AUTOMAKE
+
+ # Let's play with $DESTDIR too, it shouldn't hurt.
+-./configure --prefix=''
++./configure --prefix='' --mandir=/man
  DESTDIR="`pwd`/=inst" $MAKE -e SHELL=/bin/sh install
- 
--test -f ./=inst/man/man2/foo.2
--test -f ./=inst/man/man4/foo.4
--test -f ./=inst/man/man4/bar.4
-+test -f ./=inst/share/man/man2/foo.2
-+test -f ./=inst/share/man/man4/foo.4
-+test -f ./=inst/share/man/man4/bar.4
+
+ test -f ./=inst/man/man2/foo.2
