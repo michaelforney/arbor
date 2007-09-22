@@ -12,7 +12,7 @@ require vim-doc
 
 VIM_PLUGIN_VIM_VERSION="${VIM_PLUGIN_VIM_VERSION:-6.4}"
 
-IUSE=""
+MYOPTIONS="userland_BSD userland_Darwin"
 DEPEND="|| ( >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
 	>=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION} )"
 RDEPEND="${DEPEND}"
@@ -26,7 +26,7 @@ vim-plugin_src_install() {
 	# Make sure perms are good
 	chmod -R a+rX ${S} || die "chmod failed"
 	find ${S} -user  'portage' -exec chown root '{}' \; || die "chown failed"
-	if use userland_BSD || use userland_Darwin ; then
+	if option userland_BSD || option userland_Darwin ; then
 		find ${S} -group 'portage' -exec chgrp wheel '{}' \; || die "chgrp failed"
 	else
 		find ${S} -group 'portage' -exec chgrp root '{}' \; || die "chgrp failed"
