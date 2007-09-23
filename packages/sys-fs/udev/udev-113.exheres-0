@@ -14,6 +14,8 @@ DEPENDENCIES=""
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
+    dosbin udevstart || die "Install udevstart failed"
+    doman udevstart.8
     dodoc ChangeLog FAQ README RELEASE-NOTES TODO
     dodoc docs/*
     cp -r docs/writing_udev_rules "${D}/usr/share/doc/${P}"
