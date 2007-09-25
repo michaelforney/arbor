@@ -8,7 +8,7 @@ DESCRIPTION="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
 SRC_URI=""
 
-MYOPTIONS="contrarius cran doc gems gtk glsa inquisitio portage pink qa ruby vim-syntax zsh-completion"
+MYOPTIONS="accerso contrarius cran doc gems gtk glsa inquisitio instruo portage pink qa ruby vim-syntax zsh-completion"
 LICENSE="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
@@ -65,9 +65,10 @@ src_unpack() {
 }
 
 src_compile() {
+    subversion_wc_info
     local repositories=`echo default $(optionv cran ) $(optionv gems ) | tr -s \  ,`
     local clients=`echo default $(optionv contrarius ) $(optionv inquisitio ) \
-        $(optionq gtk && echo gtkpaludis ) | tr -s \  ,`
+        $(optionq gtk && echo gtkpaludis ) $(optionv accerso) $(optionv instruo) | tr -s \  ,`
     local environments=`echo default $(optionv portage ) | tr -s \  ,`
     econf \
         $(option_enable doc doxygen ) \
@@ -75,6 +76,7 @@ src_compile() {
         $(option_enable qa) \
         $(option_enable ruby) \
         $(option_enable glsa) \
+        --disable-python \
         $(option_enable vim-syntax vim ) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-sandbox \
@@ -82,6 +84,7 @@ src_compile() {
         --with-clients=${clients} \
         --with-environments=${environments} \
         --with-default-distribution=exherbo \
+        --with-svn-revision=${ESVN_WC_REVISION} \
         || die "econf failed"
 
     emake || die "emake failed"
