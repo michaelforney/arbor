@@ -33,6 +33,7 @@ src_compile() {
         --enable-languages="${LANGS}" \
         $(option_enable propolice libssp) \
         $(option_enable nls) \
+        --disable-multilib \
         || die "Configure failed."
     emake bootstrap || die "Make failed."
 }
