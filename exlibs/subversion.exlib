@@ -149,7 +149,7 @@ function subversion_fetch() {
 	addwrite "${ESVN_STORE_DIR}"
 
 	if [[ ! -d "${ESVN_STORE_DIR}" ]]; then
-		debug-print "${FUNCNAME}: initial checkout. creating subversion directory"
+		#debug-print "${FUNCNAME}: initial checkout. creating subversion directory"
 		mkdir -p "${ESVN_STORE_DIR}" || die "${ESVN}: can't mkdir ${ESVN_STORE_DIR}."
 	fi
 
@@ -158,16 +158,16 @@ function subversion_fetch() {
 	local wc_path="$(subversion__get_wc_path "${repo_uri}")"
 	local options="${ESVN_OPTIONS} --config-dir ${ESVN_STORE_DIR}/.subversion"
 
-	debug-print "${FUNCNAME}: wc_path = \"${wc_path}\""
-	debug-print "${FUNCNAME}: ESVN_OPTIONS = \"${ESVN_OPTIONS}\""
-	debug-print "${FUNCNAME}: options = \"${options}\""
+	#debug-print "${FUNCNAME}: wc_path = \"${wc_path}\""
+	#debug-print "${FUNCNAME}: ESVN_OPTIONS = \"${ESVN_OPTIONS}\""
+	#debug-print "${FUNCNAME}: options = \"${options}\""
 
 	if [[ ! -d "${wc_path}/.svn" ]]; then
 		# first check out
 		einfo "subversion check out start -->"
 		einfo "     repository: ${repo_uri}"
 
-		debug-print "${FUNCNAME}: ${ESVN_FETCH_CMD} ${options} ${repo_uri}"
+		#debug-print "${FUNCNAME}: ${ESVN_FETCH_CMD} ${options} ${repo_uri}"
 
 		mkdir -p "${ESVN_PROJECT}" || die "${ESVN}: can't mkdir ${ESVN_PROJECT}."
 		cd "${ESVN_PROJECT}" || die "${ESVN}: can't chdir to ${ESVN_PROJECT}"
@@ -184,7 +184,7 @@ function subversion_fetch() {
 		einfo "subversion update start -->"
 		einfo "     repository: ${repo_uri}"
 
-		debug-print "${FUNCNAME}: ${ESVN_UPDATE_CMD} ${options}"
+		#debug-print "${FUNCNAME}: ${ESVN_UPDATE_CMD} ${options}"
 
 		cd "${wc_path}" || die "${ESVN}: can't chdir to ${wc_path}"
 		${ESVN_UPDATE_CMD} ${options} || die "${ESVN}: can't update from ${repo_uri}."
@@ -283,8 +283,8 @@ function subversion_wc_info() {
 	local repo_uri="$(subversion__get_repository_uri "${1}")"
 	local wc_path="$(subversion__get_wc_path "${repo_uri}")"
 
-	debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
-	debug-print "${FUNCNAME}: wc_path = ${wc_path}"
+	#debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
+	#debug-print "${FUNCNAME}: wc_path = ${wc_path}"
 
 	if [[ ! -e "${wc_path}" ]]; then
 		return 1
@@ -328,8 +328,8 @@ function subversion__get_repository_uri() {
 	local repo_uri="${1:-${ESVN_REPO_URI}}"
 	local remove_peg_revision="${2}"
 
-	debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
-	debug-print "${FUNCNAME}: remove_peg_revision = ${remove_peg_revision}"
+	#debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
+	#debug-print "${FUNCNAME}: remove_peg_revision = ${remove_peg_revision}"
 
 	if [[ -z "${repo_uri}" ]]; then
 		die "${ESVN}: ESVN_REPO_URI (or specified URI) is empty."
@@ -344,8 +344,8 @@ function subversion__get_repository_uri() {
 		if subversion__has_peg_revision "${repo_uri}"; then
 			repo_uri="${repo_uri%@*}"
 
-			debug-print "${FUNCNAME}: repo_uri has a peg revision"
-			debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
+			#debug-print "${FUNCNAME}: repo_uri has a peg revision"
+			#debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
 		fi
 	fi
 
@@ -362,7 +362,7 @@ function subversion__get_wc_path() {
 
 	local repo_uri="$(subversion__get_repository_uri "${1}" 1)"
 
-	debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
+	#debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
 
 	echo "${ESVN_STORE_DIR}/${ESVN_PROJECT}/${repo_uri##*/}"
 
@@ -377,11 +377,11 @@ function subversion__has_peg_revision() {
 
 	local repo_uri="${1}"
 
-	debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
+	#debug-print "${FUNCNAME}: repo_uri = ${repo_uri}"
 
 	# repo_uri has peg revision ?
 	if [[ "${repo_uri}" != *@* ]]; then
-		debug-print "${FUNCNAME}: repo_uri does not have a peg revision."
+		#debug-print "${FUNCNAME}: repo_uri does not have a peg revision."
 		return 1
 	fi
 
@@ -397,12 +397,12 @@ function subversion__has_peg_revision() {
 			# DATE
 			;;
 		*)
-			debug-print "${FUNCNAME}: repo_uri does not have a peg revision."
+			#debug-print "${FUNCNAME}: repo_uri does not have a peg revision."
 			return 1
 			;;
 	esac
 
-	debug-print "${FUNCNAME}: peg_rev = ${peg_rev}"
+	#debug-print "${FUNCNAME}: peg_rev = ${peg_rev}"
 
 	return 0
 
