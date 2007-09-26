@@ -1,5 +1,5 @@
---- wgetpaste	2007-09-26 10:45:54.000000000 +0200
-+++ wgetpaste	2007-09-26 10:49:39.000000000 +0200
+--- wgetpaste	2007-09-26 11:21:48.000000000 +0200
++++ wgetpaste	2007-09-26 11:22:01.000000000 +0200
 @@ -11,7 +11,7 @@
  N=$'\n'
  
@@ -9,7 +9,7 @@
  # ca
  ENGINE_ca=ca
  URL_ca="http://pastebin.ca/"
-@@ -30,6 +30,10 @@
+@@ -30,6 +30,11 @@
  # tinyurl
  ENGINE_tinyurl=tinyurl
  URL_tinyurl="http://tinyurl.com/ create.php"
@@ -17,10 +17,11 @@
 +ENGINE_zlin=knopaste
 +URL_zlin="http://zlin.dk/p/ ?"
 +EXPIRATION_INFO_zlin="Pastes on zlin: ${URL_zlin% *} do not expire."$'\n'
++DEFAULT_LANGUAGE_zlin="text"
  
  ### engines
  # ca
-@@ -43,6 +47,12 @@
+@@ -43,6 +48,11 @@
  POST_ca="s=Submit+Post name description type expiry % content"
  REGEX_URL_ca='s|^.*content="[0-9]\+;\(http://[^/]\+/[0-9]\+\)".*$|\1|p'
  REGEX_RAW_ca='s|^\(http://[^/]\+/\)\([0-9]\+\)$|\1raw/\2|'
@@ -29,7 +30,6 @@
 +POST_knopaste="submit=Submit % % lang % % paste"
 +REGEX_knopaste='s|$|\.txt|'
 +REGEX_RAW_knopaste='s|^http://.*$|&.txt|'
-+DEFAULT_LANGUAGE_knopaste="text"
  # rafb
  LANGUAGES_rafb="C C89 C99 C++ C# Java Pascal Perl PHP PL/I Python Ruby SQL VB Plain%Text"
  POST_rafb="% nick desc lang % cvt_tabs text"
