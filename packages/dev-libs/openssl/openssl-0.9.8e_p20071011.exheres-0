@@ -3,9 +3,13 @@
 
 require eutils
 
+MY_P=${PN}"-0.9.8-stable-SNAP-20071011"
+S="${WORKDIR}/${MY_P}"
+
 DESCRIPTION="Open source SSL and TLS implementation and cryptographic library"
 HOMEPAGE="http://www.openssl.org"
-SRC_URI="http://www.openssl.org/source/${P}.tar.gz"
+#SRC_URI="http://www.openssl.org/source/${P}.tar.gz"
+SRC_URI="ftp://ftp.openssl.org/snapshot/${MY_P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
@@ -14,12 +18,6 @@ MYOPTIONS=""
 
 DEPEND=""
 RDEPEND=""
-
-src_unpack() {
-    unpack $A
-    cd "${S}"
-    epatch "${FILESDIR}/${P}-gcc4.2.patch"
-}
 
 src_compile() {
     ./config --test-sanity || die "Sanity test failed."
