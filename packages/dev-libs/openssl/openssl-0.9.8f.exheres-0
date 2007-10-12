@@ -15,12 +15,6 @@ MYOPTIONS=""
 DEPEND=""
 RDEPEND=""
 
-src_unpack() {
-    unpack $A
-    cd "${S}"
-    epatch "${FILESDIR}/${P}-gcc4.2.patch"
-}
-
 src_compile() {
     ./config --test-sanity || die "Sanity test failed."
     ./config --prefix=/usr --openssldir=/etc/ssl \
