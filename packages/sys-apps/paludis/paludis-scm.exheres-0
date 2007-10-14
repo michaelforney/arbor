@@ -8,7 +8,7 @@ DESCRIPTION="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
 SRC_URI=""
 
-MYOPTIONS="accerso contrarius cran doc gems gtk glsa inquisitio instruo portage pink qa ruby vim-syntax zsh-completion"
+MYOPTIONS="accerso contrarius cran doc gems gtk glsa importare inquisitio instruo portage pink qa ruby vim-syntax zsh-completion"
 LICENSE="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
@@ -66,9 +66,11 @@ src_unpack() {
 
 src_compile() {
     subversion_wc_info
-    local repositories=`echo default $(optionv cran ) $(optionv gems ) | tr -s \  ,`
-    local clients=`echo default $(optionv contrarius ) $(optionv inquisitio ) \
-        $(optionq gtk && echo gtkpaludis ) $(optionv accerso) $(optionv instruo) | tr -s \  ,`
+    local repositories=`echo default $(optionv cran ) $(optionv gems ) \
+        $(optionq importare && echo unpackaged) | tr -s \  ,`
+    local clients=`echo default $(optionv contrarius ) $(optionv importare ) \
+        $(optionv inquisitio ) $(optionq gtk && echo gtkpaludis ) \
+        $(optionv accerso) $(optionv instruo) | tr -s \  ,`
     local environments=`echo default $(optionv portage ) | tr -s \  ,`
     econf \
         $(option_enable doc doxygen ) \
