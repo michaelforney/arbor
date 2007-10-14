@@ -1,0 +1,31 @@
+Index: gcc-4.2.2/gcc/testsuite/g++.dg/debug/using3.C
+===================================================================
+--- gcc-4.2.2/gcc/testsuite/g++.dg/debug/using3.C	(revision 0)
++++ gcc-4.2.2/gcc/testsuite/g++.dg/debug/using3.C	(revision 129199)
+@@ -0,0 +1,8 @@
++// PR debug/31899
++
++namespace NS {
++  int x = 0;
++  int &ref = x;
++}
++
++using NS::ref;
+Index: gcc-4.2.2/gcc/dwarf2out.c
+===================================================================
+--- gcc-4.2.2/gcc/dwarf2out.c	(revision 129198)
++++ gcc-4.2.2/gcc/dwarf2out.c	(revision 129199)
+@@ -10005,9 +10005,12 @@
+     return *tp;
+   else if (!flag_unit_at_a_time)
+     return NULL_TREE;
++  /* ???  The C++ FE emits debug information for using decls, so
++     putting gcc_unreachable here falls over.  See PR31899.  For now
++     be conservative.  */
+   else if (!cgraph_global_info_ready
+ 	   && (TREE_CODE (*tp) == VAR_DECL || TREE_CODE (*tp) == FUNCTION_DECL))
+-    gcc_unreachable ();
++    return *tp;
+   else if (DECL_P (*tp) && TREE_CODE (*tp) == VAR_DECL)
+     {
+       struct cgraph_varpool_node *node = cgraph_varpool_node (*tp);
