@@ -1,0 +1,20 @@
+--- news.eselect-20070709	2007-07-10 02:20:08.000000000 +0200
++++ news.eselect-20070709	2007-10-13 00:34:53.000000000 +0200
+@@ -4,7 +4,7 @@
+ 
+ DESCRIPTION="Read GLEP 42 news items"
+ MAINTAINER="ciaranm@ciaranm.org"
+-SVN_DATE='$Date: $'
++SVN_DATE='$Date: 2007-07-09 22:35:11 +0200 (Mon, 09 Jul 2007) $'
+ VERSION=$(svn_date_to_version "${SVN_DATE}" )
+ 
+ get_data_dir() {
+@@ -41,7 +41,7 @@
+ 	repos=( $(get_repositories ) )
+ 	for repo in ${repos[@]} ; do
+ 		[[ -f "$(get_data_dir)/news-${repo}.read" ]] || continue
+-		sed -e '/^#/d' -e "/./s,$,::${repo}," < \ "$(get_data_dir )"/news-${repo}.read
++		sed -e '/^#/d' -e "/./s,$,::${repo}," < "$(get_data_dir )"/news-${repo}.read
+ 	done
+ }
+ 
