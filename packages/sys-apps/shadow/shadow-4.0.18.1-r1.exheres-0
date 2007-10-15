@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require eutils
+
 DESCRIPTION="User and group management related utilities"
 HOMEPAGE=""
 SRC_URI="ftp://ftp.osuosl.org/pub/lfs/lfs-packages/development/${P}.tar.bz2"
@@ -16,6 +18,12 @@ DEPENDENCIES="build:
               runtime:
                 pam? ( sys-libs/pam )
                 sys-libs/cracklib"
+
+src_unpack() {
+    unpack ${A}
+    cd "${S}"
+    epatch "${FILESDIR}"/shadow-4.0.18.1-useradd-usermod.patch
+}
 
 src_compile() {
     econf \
