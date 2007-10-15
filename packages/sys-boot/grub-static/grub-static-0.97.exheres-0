@@ -1,0 +1,22 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+
+DESCRIPTION="GRUB (Grand Unified Boot) bootlader (precompiled version for amd64)"
+HOMEPAGE="http://www.gnu.org/software/grub"
+SRC_URI="mirror://gentoo/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPEND=""
+RDEPEND=""
+
+GRUB_P="grub-0.97-r3"
+
+src_install() {
+    cp -a "${WORKDIR}"/* "${D}"
+    mv "${D}"/usr/share/doc/{${GRUB_P},${P}}
+}
