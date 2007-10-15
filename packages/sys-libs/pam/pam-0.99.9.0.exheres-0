@@ -16,6 +16,9 @@ MYOPTIONS="nls"
 DEPEND=""
 RDEPEND=""
 
+# Tests requires /etc/pam.d/other to be installed
+RESTRICT="test"
+
 src_compile() {
     econf $(option_enable nls) || die "Configure failed."
     emake || die "Make failed"
