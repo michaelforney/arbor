@@ -4,7 +4,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # Automake wrapper v0.1
 
-AUTOMAKE_VERSIONS="1.9:1.9.6 1.8:1.8.5 1.7:1.7.9 1.6:1.6.3 1.4:1.4_p6"
+AUTOMAKE_VERSIONS="1.10:1.10 1.9:1.9.6 1.8:1.8.5 1.7:1.7.9 1.6:1.6.3 1.4:1.4_p6"
 AUTOMAKE_PROGRAM="$(basename $0)"
 
 # Default to latest if WANT_AUTOMAKE isn't set
@@ -17,13 +17,9 @@ if [[ -x "/usr/bin/${AUTOMAKE_PROGRAM}-${WANT_AUTOMAKE}" ]]; then
 fi
 
 if [[ "${WANT_AUTOMAKE}" != "latest" ]]; then
-	WANT_VERSION="${AUTOMAKE_VERSIONS%%:${WANT_AUTOMAKE}*}"
-	if [[ "${WANT_VERSION}" != "${AUTOMAKE_VERSIONS}" ]]; then
-		WANT_VERSION="${WANT_VERSION##* }"
-	fi
-	if [[ "${WANT_VERSION}" != "${AUTOMAKE_VERSIONS}" ]]; then
-		TARGET="/usr/bin/${AUTOMAKE_PROGRAM}-${WANT_VERSION}"
-	fi
+	WANT_VERSION="${AUTOMAKE_VERSIONS##*${WANT_AUTOMAKE}:}"
+	WANT_VERSION="${WANT_VERSION%% *}"
+	TARGET="/usr/bin/${AUTOMAKE_PROGRAM}-${WANT_VERSION}"
 else
 	# Handle "latest" version
 	WANT_VERSION="$(ls /usr/bin/automake-* | grep -v wrapper | sort -n | tail -n 1)"
