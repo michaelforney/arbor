@@ -20,6 +20,10 @@ src_compile() {
 	emake || die "make failed."
 }
 
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+}
+
 src_test() {
 # Kill some failing tests.
 	sed -i -e "/test1 - 27/d" testit.sh
