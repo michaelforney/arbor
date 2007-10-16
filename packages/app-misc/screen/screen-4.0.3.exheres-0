@@ -1,0 +1,25 @@
+# Copyright 2007 David Leverton
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="A full-screen terminal multiplexer/window manager"
+HOMEPAGE="http://www.gnu.org/software/screen/"
+SRC_URI="ftp://ftp.uni-erlangen.de/pub/utilities/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="pam"
+
+DEPENDENCIES="sys-libs/ncurses
+              pam? ( sys-libs/pam )"
+
+src_compile() {
+    econf $(option_enable pam) --enable-colors256 --with-sys-screenrc=/etc/screenrc
+    emake || die "emake failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install
+}
+
+
