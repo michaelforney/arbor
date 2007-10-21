@@ -1,0 +1,28 @@
+# Copyright 2007 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="XML C Parser and Toolkit v2"
+HOMEPAGE="http://www.xmlsoft.org/"
+SRC_URI="ftp://www.xmlsoft.org/${PN}/${P}.tar.gz"
+
+LICENSE="MIT"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="ipv6 python readline"
+
+DEPENDENCIES=""
+
+src_compile() {
+    econf \
+      $(option_with ipv6) \
+      $(option_with python) \
+      $(option_with readline) \
+      $(option_with readline history) \
+      || die "Configure failed"
+    emake || die "Make failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed"
+	dodoc AUTHORS ChangeLog Copyright NEWS README README.tests TODO TODO_SCHEMAS
+}
