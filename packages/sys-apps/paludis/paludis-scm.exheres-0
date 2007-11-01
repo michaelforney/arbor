@@ -8,12 +8,14 @@ DESCRIPTION="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
 SRC_URI=""
 
-MYOPTIONS="accerso contrarius cran doc gems gtk glsa importare inquisitio instruo portage pink qa ruby vim-syntax zsh-completion"
+MYOPTIONS="accerso contrarius cran doc gems gtk glsa importare inquisitio instruo pink qa ruby vim-syntax visibility zsh-completion"
 LICENSE="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 
 COMMON_DEPEND="
+    >=app-admin/eselect-1.0.2
+    app-admin/eselect-news
     >=app-shells/bash-3
     qa? ( dev-libs/pcre++ >=dev-libs/libxml2-2.6 app-crypt/gnupg )
     inquisitio? ( dev-libs/pcre++ )
@@ -36,7 +38,6 @@ DEPENDENCIES="build:
 
               runtime:
                 ${COMMON_DEPEND}
-                >=app-admin/eselect-1.0.2
                 net-misc/wget
                 net-misc/rsync
                 sys-apps/sandbox
@@ -49,7 +50,7 @@ ESVN_BOOTSTRAP="./autogen.bash"
 
 create-paludis-user() {
     enewgroup "paludisbuild"
-    enewuser "paludisbuild" -1 -1 -1 "paludisbuild"
+    enewuser "paludisbuild" -1 -1 "/var/tmp/paludis" "paludisbuild"
 }
 
 pkg_setup() {
@@ -58,7 +59,6 @@ pkg_setup() {
 }
 
 src_unpack() {
-    #subversion_fetch
     subversion_src_unpack
 
     cp "${FILESDIR}"/exherbo.conf "${S}"/paludis/distributions/
@@ -71,7 +71,7 @@ src_compile() {
     local clients=`echo default $(optionv contrarius ) $(optionv importare ) \
         $(optionv inquisitio ) $(optionq gtk && echo gtkpaludis ) \
         $(optionv accerso) $(optionv instruo) | tr -s \  ,`
-    local environments=`echo default $(optionv portage ) | tr -s \  ,`
+    local environments="default"
     econf \
         $(option_enable doc doxygen ) \
         $(option_enable pink) \
@@ -80,6 +80,7 @@ src_compile() {
         $(option_enable glsa) \
         --disable-python \
         $(option_enable vim-syntax vim ) \
+        $(option_enable visibility ) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-sandbox \
         --with-repositories=${repositories} \
@@ -90,30 +91,19 @@ src_compile() {
         || die "econf failed"
 
     emake || die "emake failed"
-    if option doc ; then
-        make doxygen || die "make doxygen failed"
-    fi
 }
 
 src_install() {
     emake DESTDIR="${D}" install || die "install failed"
     dodoc AUTHORS README ChangeLog NEWS
 
-    BASH_COMPLETION_NAME="adjutrix" dobashcompletion bash-completion/adjutrix
-    BASH_COMPLETION_NAME="paludis" dobashcompletion bash-completion/paludis
-    option qa && \
-        BASH_COMPLETION_NAME="qualudis" \
-        dobashcompletion bash-completion/qualudis
-    option contrarius && \
-        BASH_COMPLETION_NAME="contrarius" \
-        dobashcompletion bash-completion/contrarius
-    option inquisitio && \
-        BASH_COMPLETION_NAME="inquisitio" \
-        dobashcompletion bash-completion/inquisitio
-
-    if option doc ; then
-        dohtml -r -V doc/www/*
-    fi
+    local bashcomp bashcompletions
+    bashcompletions="$(optionv accerso) adjutrix $(optionv contrarius)
+        $(optionv importare) $(optionv inquisitio) $(optionv instruo)
+        $(optionq qa && echo qualudis) paludis reconcilio"
+    for bashcomp in ${bashcompletions}; do
+        BASH_COMPLETION_NAME="${bashcomp}" dobashcompletion bash-completion/"${bashcomp}"
+    done
 
     if option zsh-completion ; then
         insinto /usr/share/zsh/site-functions
@@ -136,24 +126,3 @@ src_test() {
 pkg_preinst() {
     create-paludis-user
 }
-
-pkg_postinst() {
-    if option bash-completion ; then
-        echo
-        einfo "The following bash completion scripts have been installed:"
-        einfo "  paludis"
-        einfo "  adjutrix"
-        option qa && einfo "  qualudis"
-        option contrarius && einfo "  contrarius"
-        option inquisitio && einfo "  inquisitio"
-        einfo
-        einfo "To enable these scripts, run:"
-        einfo "  eselect bashcomp enable <scriptname>"
-    fi
-
-    echo
-    einfo "Before using Paludis and before reporting issues, you should read:"
-    einfo "    http://paludis.pioto.org/faq.html"
-    echo
-}
-
