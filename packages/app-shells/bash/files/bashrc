@@ -1,0 +1,11 @@
+# Don't run anything here unless we have an interactive shell.
+if [[ $- != *i* ]] ; then
+	return
+fi
+
+# Things in /etc/bash/bashrc.d/ will be sourced for all interactive shells.
+# This is used by bash-completion, and maybe other things.
+for f in /etc/bash/bashrc.d/* ; do
+	[[ -r "${f}" ]] && . "${f}"
+done
+unset f
