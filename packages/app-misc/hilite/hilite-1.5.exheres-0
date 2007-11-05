@@ -1,0 +1,29 @@
+# Copyright 2007 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
+
+DESCRIPTION="Highlights stderr output in red"
+HOMEPAGE="http://sourceforge.net/projects/${PN}"
+SRC_URI="mirror://sourceforge/${PN}/${PN}.c -> ${P}.c"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+S="${WORKDIR}"
+
+src_unpack() {
+    cp "${FETCHEDDIR}/${A}" "${WORKDIR}" || die "cp failed."
+}
+
+src_compile() {
+    $(tc-getCC) ${CFLAGS} -o ${PN} ${P}.c || die "compile failed."
+}
+
+src_install() {
+    dobin ${PN} || die "dobin failed."
+}
