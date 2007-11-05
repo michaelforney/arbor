@@ -26,7 +26,7 @@ src_unpack() {
 
 src_compile() {
     LSOF_CC=$(tc-getCC) ./Configure -n linux || die "Configure failed."
-    emake || die "Emake failed."
+    emake DEBUG="" || die "Emake failed."
 }
 
 src_test() {
