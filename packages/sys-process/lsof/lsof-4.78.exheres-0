@@ -1,0 +1,45 @@
+# Copyright 2007 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
+
+MY_P="${P/-/_}"
+
+DESCRIPTION="List open files for running UNIX processes"
+HOMEPAGE="ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/"
+SRC_URI="ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/${MY_P}.tar.bz2"
+
+LICENSE="lsof"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+S="${WORKDIR}/${MY_P}_src"
+
+src_unpack() {
+    unpack ${A}
+    unpack ./${MY_P}/${MY_P}_src.tar
+    patch -p0 < "${FILESDIR}/${P}".patch || die "patch failed."
+}
+
+src_compile() {
+    LSOF_CC=$(tc-getCC) ./Configure -n linux || die "Configure failed."
+    emake || die "Emake failed."
+}
+
+src_test() {
+    cd tests
+    emake test || die "make test failed."
+}
+
+src_install() {
+    dobin lsof || die "dobin failed."
+    dolib lib/liblsof.a || die "dolib failed."
+    doman lsof.8 || die "doman failed."
+    dodoc 00* || die "dodoc failed."
+
+    insinto /usr/share/lsof/scripts
+    doins scripts/* || die "doins failed."
+}

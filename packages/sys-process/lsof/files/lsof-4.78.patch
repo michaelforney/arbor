@@ -1,0 +1,33 @@
+--- lsof_4.78_src/Configure
++++ lsof_4.78_src/Configure
+@@ -2294,7 +2294,7 @@
+ 
+       LSOF_VERS=`echo $LSOF_VSTR | sed 's/\./ /g' | awk '{printf "%d%d%03d",\$1,\$2,\$3}'`
+     fi	# }
+-    LSOF_CFGF="-DLINUXV=$LSOF_VERS"
++    LSOF_CFGF="-DLINUXV=$LSOF_VERS ${CFLAGS}"
+     if test $LSOF_VERS -lt 21072	# {
+     then
+       echo ""
+@@ -4828,7 +4828,7 @@
+ if test "X$LSOF_LIB_NO" = "X"	# {
+ then
+   echo "" >> $LSOF_MKFC
+-  echo "CFGL=	$LSOF_FCFGL -L./$LSOF_LIB -llsof $LSOF_CFGL" >> $LSOF_MKFC
++  echo "CFGL=	$LSOF_FCFGL -L./$LSOF_LIB -llsof $LSOF_CFGL ${LDFLAGS}" >> $LSOF_MKFC
+ fi	# }
+ echo "" >> $LSOF_MKFC
+ if test "X$LSOF_DEBUG" = "X"	# {
+--- lsof_4.78_src/tests/CkTestDB
++++ lsof_4.78_src/tests/CkTestDB
+@@ -116,8 +116,8 @@
+ while test $END = 0
+ do
+   echo "" > /dev/tty
+-  echo $EO "Do you want to continue (y|n) [n]? $EC" > /dev/tty
+-  read ANS EXCESS
++  echo $EO "Do you want to continue (y|n) [n]? y" > /dev/tty
++  ANS=y
+   if test "X$ANS" = "Xn" -o "X$ANS" = "XN"
+   then
+     exit 1
