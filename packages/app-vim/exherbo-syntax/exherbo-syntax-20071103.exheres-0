@@ -4,8 +4,8 @@
 require vim-plugin
 
 DESCRIPTION="vim plugin: Exherbo packages, exlibs etc."
-HOMEPAGE="http://www.eroyf.org/"
-SRC_URI="http://projects.eroyf.org/exherbo/${PN}/${P}.tar.bz2"
+HOMEPAGE="http://www.exherbo.org/"
+SRC_URI="http://dev.exherbo.org/~pioto/distfiles/${P}.tar.bz2"
 
 LICENSE="vim"
 PLATFORMS="~amd64 ~ia64 ~x86"
@@ -13,16 +13,3 @@ MYOPTIONS=""
 
 VIM_PLUGIN_HELPFILES="exherbo-syntax"
 VIM_PLUGIN_MESSAGES="filetype"
-
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
-}
-
-src_install() {
-    vim-plugin_src_install
-}
-
-pkg_postinst() {
-    vim-plugin_pkg_postinst
-}
