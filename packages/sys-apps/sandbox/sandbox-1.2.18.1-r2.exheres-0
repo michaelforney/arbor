@@ -1,0 +1,49 @@
+# Copyright 2007 Peter Tersløv Forsberg
+# Based on work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Sandbox gives some security assurance when installing packages"
+HOMEPAGE="http://gentoo.org/"
+SRC_URI="mirror://gentoo/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86 ~amd64 ~ia64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_unpack() {
+
+    unpack ${A}
+    cd ${P}
+    # 135745 and 196720 refers to bugs on bugs.gentoo.org
+    patch -p0 < "${FILESDIR}"/${P}-open-normal-fail.patch || die "patch failed" #135745
+    patch -p1 < "${FILESDIR}"/${P}-open-cloexec.patch || die "patch failed" #196720
+
+}
+
+src_compile() {
+
+    econf || die "econf failed"
+    emake || die "emake failed"
+
+}
+
+src_install() {
+
+    make DESTDIR=${D} install || die "install failed"
+
+    keepdir /var/log/sandbox
+    fowners root:paludisbuild /var/log/sandbox
+    fperms 0770 /var/log/sandbox
+
+    cd "${S}"
+    dodoc AUTHORS ChangeLog NEWS README
+
+}
+
+pkg_preinst() {
+    chown root:paludisbuild "${D}"/var/log/sandbox
+    chmod 0770 "${D}"/var/log/sandbox
+}
