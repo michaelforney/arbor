@@ -1,0 +1,36 @@
+# Copyright 2007 Bryan Østergaard, Peter Tersløv Forsberg
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="NcFTP - Versatile ncurses based FTP client"
+HOMEPAGE="http://www.ncftp.com/ncftp/"
+SRC_URI="ftp://ftp.ncftp.com/ncftp/ncftp-${PV}-src.tar.bz2"
+
+LICENSE="ClarifiedArtistic"
+SLOT="0"
+PLATFORMS="~amd64 ~x86 ~ia64"
+MYOPTIONS="socks5 ipv6"
+
+DEPENDENCIES="
+                build,runtime:
+                    sys-libs/ncurses
+              "
+
+src_compile() { 
+
+    econf \
+    --with-ncurses \
+    $(option_enable socks5 ) \
+    $(option_enable ipv6 ) \
+    || die "econf failed"
+
+    emake || die "emake failed"
+}
+
+src_install() {
+
+    dodir /usr/share/man/man1
+    emake DESTDIR="${D}" install || die "install failed"
+    dodoc doc/FIREWALLS_AND_PROXIES.txt doc/CHANGELOG.txt DONATE.txt
+    dohtml -r doc/html/*
+
+}
