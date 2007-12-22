@@ -28,82 +28,74 @@
 # GVIMRC_FILE_SUFFIX
 # For example, vim-7.1.047 has a VIM_VERSION="7.1" and VIM_PATCH_LEVEL="047"
 
-require vim/doc flag-o-matic fdo-mime bash-completion
+#require vim/doc flag-o-matic fdo-mime bash-completion
+require vim/doc flag-o-matic bash-completion
 
 export_exlib_phases pkg_setup src_unpack src_compile src_install src_test pkg_postinst pkg_postrm
 
-MYOPTIONS="nls acl"
-
+#MYOPTIONS="nls acl"
+MYOPTIONS="nls"
 DEPENDENCIES="
-    build,runtime:
+    build,run:
         nls? ( virtual/libintl )"
 
 if [[ "${PN}" == "vim-runtime" ]] ; then
 	MYOPTIONS="${MYOPTIONS} livecd"
 else
-	MYOPTIONS="${MYOPTIONS} cscope gpm perl python ruby"
+	#MYOPTIONS="${MYOPTIONS} cscope gpm perl python ruby"
+	MYOPTIONS="${MYOPTIONS} perl python"
 	DEPENDENCIES="${DEPENDENCIES}
-        build:
-    		cscope?  ( dev-util/cscope )
-	    	gpm?     ( >=sys-libs/gpm-1.19.3 )
+        build,run:
 		    perl?    ( dev-lang/perl )
-		    python?  ( dev-lang/python )
-    		acl?     ( kernel_linux? ( sys-apps/acl ) )
-	    	ruby?    ( virtual/ruby )
-        runtime:
-            cscope?  ( dev-util/cscope )
-            gpm?     ( >=sys-libs/gpm-1.19.3 )
-            perl?    ( dev-lang/perl )
-            python?  ( dev-lang/python )
-            acl?     ( kernel_linux? ( sys-apps/acl ) )
-            ruby?    ( virtual/ruby )"
+		    python?  ( dev-lang/python )"
+    		#cscope?  ( dev-util/cscope )
+	    	#gpm?     ( >=sys-libs/gpm-1.19.3 )
+    		#acl?     ( kernel_linux? ( sys-apps/acl ) )
+	    	#ruby?    ( virtual/ruby )
 
 	if [[ "${PN}" == "vim" ]] ; then
-		MYOPTIONS="${MYOPTIONS} vim-with-x minimal"
-		DEPENDENCIES="${DEPENDENCIES}
-            build:
-                vim-with-x? (
-                    x11-libs/libXt
-                    x11-libs/libX11
-                    x11-libs/libSM
-                    x11-proto/xproto
-                    )
-		    runtime:
-                vim-with-x? ( x11-libs/libXt )"
-	elif [[ "${PN}" == "gvim" ]] ; then
-		MYOPTIONS="${MYOPTIONS} gnome gtk motif"
+		#MYOPTIONS="${MYOPTIONS} vim-with-x minimal"
+		MYOPTIONS="${MYOPTIONS} minimal"
+		#DEPENDENCIES="${DEPENDENCIES}
+        #    build:
+        #        vim-with-x? (
+        #            x11-libs/libXt
+        #            x11-libs/libX11
+        #            x11-libs/libSM
+        #            x11-proto/xproto
+        #            )
+		#    run:
+        #        vim-with-x? ( x11-libs/libXt )"
+	#elif [[ "${PN}" == "gvim" ]] ; then
+	#	MYOPTIONS="${MYOPTIONS} gnome gtk motif"
 	fi
 fi
 
-if [[ "${PN}" == "gvim" ]] ; then
-    MYOPTIONS="${MYOPTIONS} netbeans aqua nextaw"
-    DEPENDENCIES="${DEPENDENCIES}
-        build:
-            netbeans? ( dev-util/netbeans )
-        runtime:
-            netbeans? ( dev-util/netbeans )"
-fi
+#if [[ "${PN}" == "gvim" ]] ; then
+#    MYOPTIONS="${MYOPTIONS} netbeans aqua nextaw"
+#    DEPENDENCIES="${DEPENDENCIES}
+#        build,run:
+#            netbeans? ( dev-util/netbeans )"
+#fi
 if [[ "${PN}" == "vim" ]] ; then
     MYOPTIONS="${MYOPTIONS} vim-pager"
 fi
 
 # app-vim blocks
-if [[ "${PN}" != "vim-runtime" ]] ; then
-    # align: bug 79982
-    DEPENDENCIES="${DEPENDENCIES}
-        runtime:
-            !<app-vim/align-30-r1
-            !app-vim/vimspell
-            !<app-vim/vimbuddy-0.9.1-r1
-            !<app-vim/autoalign-11
-            !<app-vim/supertab-0.41"
-fi
+#if [[ "${PN}" != "vim-runtime" ]] ; then
+#    # align: bug 79982
+#    DEPENDENCIES="${DEPENDENCIES}
+#        run:
+#            !<app-vim/align-30-r1
+#            !app-vim/vimspell
+#            !<app-vim/vimbuddy-0.9.1-r1
+#            !<app-vim/autoalign-11
+#            !<app-vim/supertab-0.41"
+#fi
 
 # eselect-vi support
 DEPENDENCIES="${DEPENDENCIES}
-    build:
-        >=app-admin/eselect-vi-1.1
-    runtime:
+    build,run:
         >=app-admin/eselect-vi-1.1"
 
 HOMEPAGE="http://www.vim.org/"
@@ -115,9 +107,7 @@ DEPENDENCIES="${DEPENDENCIES}
     build:
     	>=sys-apps/sed-4
 	    sys-devel/autoconf
-    	dev-util/ctags
-	    >=sys-libs/ncurses-5.2-r2
-    runtime:
+    run,build:
     	dev-util/ctags
 	    >=sys-libs/ncurses-5.2-r2"
 
@@ -166,24 +156,17 @@ vim_src_unpack() {
 	# Use exuberant ctags which installs as /usr/bin/exuberant-ctags.
 	# Hopefully this pattern won't break for a while at least.
 	# This fixes bug 29398 (27 Sep 2003 agriffis)
-	sed -i 's/\<ctags\("\| [-*.]\)/exuberant-&/g' \
-		${S}/runtime/doc/syntax.txt \
-		${S}/runtime/doc/tagsrch.txt \
-		${S}/runtime/doc/usr_29.txt \
-		${S}/runtime/menu.vim \
-		${S}/src/configure.in || die 'exuberant-ctags sed failed'
+	#sed -i 's/\<ctags\("\| [-*.]\)/exuberant-&/g' \
+	#	${S}/runtime/doc/syntax.txt \
+	#	${S}/runtime/doc/tagsrch.txt \
+	#	${S}/runtime/doc/usr_29.txt \
+	#	${S}/runtime/menu.vim \
+	#	${S}/src/configure.in || die 'exuberant-ctags sed failed'
 
 	# Don't be fooled by /usr/include/libc.h.  When found, vim thinks
 	# this is NeXT, but it's actually just a file in dev-libs/9libs
 	# This fixes bug 43885 (20 Mar 2004 agriffis)
-	sed -i 's/ libc\.h / /' ${S}/src/configure.in || die 'libc.h sed failed'
-
-	# gcc on sparc32 has this, uhm, interesting problem with detecting EOF
-	# correctly. To avoid some really entertaining error messages about stuff
-	# which isn't even in the source file being invalid, we'll do some trickery
-	# to make the error never occur. bug 66162 (02 October 2004 ciaranm)
-    # TODO: Is this still needed?
-	find ${S} -name '*.c' | while read c ; do echo >> "$c" ; done
+	#sed -i 's/ libc\.h / /' ${S}/src/configure.in || die 'libc.h sed failed'
 
 	# if we're vim-7 and USE vim-pager, make the manpager.sh script
 	if [[ "${PN}" == "vim" ]] && option vim-pager ; then
@@ -253,55 +236,58 @@ vim_src_compile() {
 
 	else
 		myconf="--with-features=huge \
-			--enable-multibyte"
-		myconf="${myconf} `option_enable cscope`"
-		myconf="${myconf} `option_enable gpm`"
+			--enable-multibyte \
+            --disable-gpm \
+            --disable-rubyinterp"
+		#myconf="${myconf} `option_enable cscope`"
+		#myconf="${myconf} `option_enable gpm`"
 		myconf="${myconf} `option_enable perl perlinterp`"
 		myconf="${myconf} `option_enable python pythoninterp`"
-		myconf="${myconf} `option_enable ruby rubyinterp`"
-        if [[ "${PN}" == "gvim" ]] ; then
-            myconf="${myconf} `option_enable netbeans`"
-        fi
+		#myconf="${myconf} `option_enable ruby rubyinterp`"
+        #if [[ "${PN}" == "gvim" ]] ; then
+        #    myconf="${myconf} `option_enable netbeans`"
+        #fi
 
 		# --with-features=huge forces on cscope even if we --disable it. We need
 		# to sed this out to avoid screwiness. (1 Sep 2004 ciaranm)
-		if ! option cscope ; then
+		#if ! option cscope ; then
 			sed -i -e '/# define FEAT_CSCOPE/d' src/feature.h || \
 				die "couldn't disable cscope"
-		fi
+		#fi
 
 		if [[ "${PN}" == "vim" ]] ; then
 			# don't test USE=X here ... see bug #19115
 			# but need to provide a way to link against X ... see bug #20093
-			myconf="${myconf} --enable-gui=no `option_with vim-with-x x`"
+			#myconf="${myconf} --enable-gui=no `option_with vim-with-x x`"
+            myconf="${myconf} --enable-gui=no"
 
-		elif [[ "${PN}" == "gvim" ]] ; then
-			myconf="${myconf} --with-vim-name=gvim --with-x"
+		#elif [[ "${PN}" == "gvim" ]] ; then
+		#	myconf="${myconf} --with-vim-name=gvim --with-x"
 
-			echo ; echo
-			if option aqua ; then
-				einfo "Building gvim with the Carbon GUI"
-				myconf="${myconf} --enable-gui=carbon"
-			elif option gtk ; then
-                myconf="${myconf} --enable-gtk2-check"
-                if option gnome ; then
-                    einfo "Building gvim with the Gnome 2 GUI"
-                    myconf="${myconf} --enable-gui=gnome2"
-                else
-                    einfo "Building gvim with the gtk+-2 GUI"
-                    myconf="${myconf} --enable-gui=gtk2"
-                fi
-			elif option motif ; then
-				einfo "Building gvim with the MOTIF GUI"
-				myconf="${myconf} --enable-gui=motif"
-			elif option nextaw ; then
-				einfo "Building gvim with the neXtaw GUI"
-				myconf="${myconf} --enable-gui=nextaw"
-			else
-				einfo "Building gvim with the Athena GUI"
-				myconf="${myconf} --enable-gui=athena"
-			fi
-			echo ; echo
+		#	echo ; echo
+		#	if option aqua ; then
+		#		einfo "Building gvim with the Carbon GUI"
+		#		myconf="${myconf} --enable-gui=carbon"
+		#	elif option gtk ; then
+        #        myconf="${myconf} --enable-gtk2-check"
+        #        if option gnome ; then
+        #            einfo "Building gvim with the Gnome 2 GUI"
+        #            myconf="${myconf} --enable-gui=gnome2"
+        #        else
+        #            einfo "Building gvim with the gtk+-2 GUI"
+        #            myconf="${myconf} --enable-gui=gtk2"
+        #        fi
+		#	elif option motif ; then
+		#		einfo "Building gvim with the MOTIF GUI"
+		#		myconf="${myconf} --enable-gui=motif"
+		#	elif option nextaw ; then
+		#		einfo "Building gvim with the neXtaw GUI"
+		#		myconf="${myconf} --enable-gui=nextaw"
+		#	else
+		#		einfo "Building gvim with the Athena GUI"
+		#		myconf="${myconf} --enable-gui=athena"
+		#	fi
+		#	echo ; echo
 
 		else
 			die "vim.exlib doesn't understand PN=${PN}"
@@ -311,7 +297,8 @@ vim_src_compile() {
 	if [[ "${PN}" == "vim" ]] && option minimal ; then
 		myconf="${myconf} --disable-nls --disable-multibyte --disable-acl"
 	else
-		myconf="${myconf} `option_enable nls` `option_enable acl`"
+		#myconf="${myconf} `option_enable nls` `option_enable acl`"
+		myconf="${myconf} `option_enable nls` --disable-acl"
 	fi
 
 	# Note: If USE=gpm, then ncurses will still be required. See bug #93970
@@ -491,24 +478,24 @@ vim_pkg_postinst() {
 	update_vim_helptags
 
 	# Update fdo mime stuff, bug #78394
-	if [[ "${PN}" == "gvim" ]] ; then
-		fdo-mime_mime_database_update
-	fi
+	#if [[ "${PN}" == "gvim" ]] ; then
+	#	fdo-mime_mime_database_update
+	#fi
 
-    if [[ "${PN}" == "vim" ]] ; then
-        echo
-        elog "To install a GUI version of vim, use the app-editors/gvim"
-        elog "package."
-    fi
-    echo
-    elog "Vim 7 includes an integrated spell checker. You need to install"
-    elog "word list files before you can use it. There are exheri for"
-    elog "some of these named app-vim/vim-spell-*. If your language of"
-    elog "choice is not included, please consult vim-spell.exlib for"
-    elog "instructions on how to make a package."
-    ewarn
-    ewarn "Note that the English word lists are no longer installed by"
-    ewarn "default."
+    #if [[ "${PN}" == "vim" ]] ; then
+    #    echo
+    #    elog "To install a GUI version of vim, use the app-editors/gvim"
+    #    elog "package."
+    #fi
+    #echo
+    #elog "Vim 7 includes an integrated spell checker. You need to install"
+    #elog "word list files before you can use it. There are exheri for"
+    #elog "some of these named app-vim/vim-spell-*. If your language of"
+    #elog "choice is not included, please consult vim-spell.exlib for"
+    #elog "instructions on how to make a package."
+    #ewarn
+    #ewarn "Note that the English word lists are no longer installed by"
+    #ewarn "default."
 
 	if [[ "${PN}" != "vim-runtime" ]] ; then
 		echo
@@ -516,13 +503,13 @@ vim_pkg_postinst() {
 	fi
 
 	# Warn about VIMRUNTIME
-	if [ -n "$VIMRUNTIME" -a "${VIMRUNTIME##*/vim}" != "${VIM_VERSION/./}" ] ; then
-		ewarn
-		ewarn "WARNING: You have VIMRUNTIME set in your environment from an old"
-		ewarn "installation.  You will need to either unset VIMRUNTIME in each"
-		ewarn "terminal, or log out completely and back in.  This problem won't"
-		ewarn "happen again since the exheri no longer sets VIMRUNTIME."
-	fi
+	#if [ -n "$VIMRUNTIME" -a "${VIMRUNTIME##*/vim}" != "${VIM_VERSION/./}" ] ; then
+	#	ewarn
+	#	ewarn "WARNING: You have VIMRUNTIME set in your environment from an old"
+	#	ewarn "installation.  You will need to either unset VIMRUNTIME in each"
+	#	ewarn "terminal, or log out completely and back in.  This problem won't"
+	#	ewarn "happen again since the exheri no longer sets VIMRUNTIME."
+	#fi
 
 	echo
 
@@ -540,9 +527,9 @@ vim_pkg_postrm() {
 	update_vim_symlinks
 
 	# Update fdo mime stuff, bug #78394
-	if [[ "${PN}" == "gvim" ]] ; then
-		fdo-mime_mime_database_update
-	fi
+	#if [[ "${PN}" == "gvim" ]] ; then
+	#	fdo-mime_mime_database_update
+	#fi
 }
 
 vim_src_test() {
@@ -565,14 +552,14 @@ vim_src_test() {
 	# Don't let vim talk to X
 	unset DISPLAY
 
-	if [[ "${PN}" == "gvim" ]] ; then
-		# Make gvim not try to connect to X. See :help gui-x11-start
-		# in vim for how this evil trickery works.
-		ln -s ${S}/src/gvim ${S}/src/testvim
-		testprog="../testvim"
-	else
+	#if [[ "${PN}" == "gvim" ]] ; then
+	#	# Make gvim not try to connect to X. See :help gui-x11-start
+	#	# in vim for how this evil trickery works.
+	#	ln -s ${S}/src/gvim ${S}/src/testvim
+	#	testprog="../testvim"
+	#else
 		testprog="../vim"
-	fi
+	#fi
 
 	# We've got to call make test from within testdir, since the Makefiles
 	# don't pass through our VIMPROG argument
