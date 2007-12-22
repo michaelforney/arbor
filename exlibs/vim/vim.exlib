@@ -28,16 +28,14 @@
 # GVIMRC_FILE_SUFFIX
 # For example, vim-7.1.047 has a VIM_VERSION="7.1" and VIM_PATCH_LEVEL="047"
 
-require vim-doc flag-o-matic fdo-mime bash-completion
+require vim/doc flag-o-matic fdo-mime bash-completion
 
 export_exlib_phases pkg_setup src_unpack src_compile src_install src_test pkg_postinst pkg_postrm
 
 MYOPTIONS="nls acl"
 
 DEPENDENCIES="
-    build:
-        nls? ( virtual/libintl )
-    runtime:
+    build,runtime:
         nls? ( virtual/libintl )"
 
 if [[ "${PN}" == "vim-runtime" ]] ; then
