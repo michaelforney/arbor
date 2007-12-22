@@ -35,9 +35,9 @@ export_exlib_phases pkg_setup src_unpack src_compile src_install src_test pkg_po
 
 #MYOPTIONS="nls acl"
 MYOPTIONS="nls"
-DEPENDENCIES="
-    build,run:
-        nls? ( virtual/libintl )"
+#DEPENDENCIES="
+#    build,run:
+#        nls? ( sys-devel/gettext )"
 
 if [[ "${PN}" == "vim-runtime" ]] ; then
 	MYOPTIONS="${MYOPTIONS} livecd"
@@ -191,10 +191,6 @@ END
 
 vim_src_compile() {
 	local myconf confrule
-
-	# Fix bug 37354: Disallow -funroll-all-loops on amd64
-	# Bug 57859 suggests that we want to do this for all archs
-	filter-flags -funroll-all-loops
 
 	# Fix bug 76331: -O3 causes problems, use -O2 instead. We'll do this for
 	# everyone since previous flag filtering bugs have turned out to affect
