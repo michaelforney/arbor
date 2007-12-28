@@ -1,0 +1,35 @@
+# Copyright (c) 2007 Alexander Færøy <eroyf@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="A utility for scanning networks"
+HOMEPAGE="http://insecure.org/nmap/"
+SRC_URI="http://download.insecure.org/nmap/dist/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="ssl"
+
+# Alexander Færøy <eroyf@exherbo.org>:
+#   FIXME:
+#     Add GTK interface support when we have X.
+
+DEPENDENCIES="
+    build,runtime:
+        ssl? ( dev-libs/openssl )
+        dev-libs/libpcap
+        dev-libs/libpcre
+"
+
+src_compile() {
+    econf \
+        $(option_with ssl openssl) \
+        --without-zenmap \
+        || die "econf failed"
+
+    emake || die "emake failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "emake install failed"
+}
