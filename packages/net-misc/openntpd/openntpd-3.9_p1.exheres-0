@@ -1,0 +1,52 @@
+# Copyright (c) 2007 Alexander Færøy <eroyf@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils
+
+NTP_P="${P/_/}"
+
+DESCRIPTION="OpenNTPD is a free implementation of the Network Time Protocol"
+HOMEPAGE="http://www.openntpd.org/"
+SRC_URI="ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/${NTP_P}.tar.gz"
+
+LICENSE=""
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="ssl"
+
+DEPENDENCIES="
+    build,runtime:
+        ssl? ( dev-libs/openssl )
+"
+
+NTP_USER="ntp"
+NTP_GROUP="${NTP_USER}"
+
+S="${WORKDIR}/${NTP_P}"
+
+create-ntp-user() {
+    enewgroup "${NTP_GROUP}"
+    enewuser "${NTP_USER}" -1 -1 "/var/empty" "${NTP_GROUP}"
+}
+
+pkg_setup() {
+    create-ntp-user
+}
+
+src_unpack() {
+    unpack ${A}
+    cd "${S}"
+
+    sed -i 's/_ntp/ntp/' ntpd.h || die "sed failed"
+}
+
+src_compile() {
+    econf $(option_with !ssl builtin-arc4random) || die "econf failed"
+    emake || die "emake failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "emake install failed"
+
+    dodoc README ChangeLog CREDITS
+}
