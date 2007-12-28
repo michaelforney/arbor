@@ -1,0 +1,46 @@
+# Copyright (c) 2007 Alexander Færøy <eroyf@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Irssi is a terminal based IRC client for UNIX systems"
+HOMEPAGE="http://www.irssi.org/"
+SRC_URI="http://irssi.org/files/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+
+# Alexander Færøy <eroyf@exherbo.org>:
+#   FIXME: 
+#     Add "socks" option flag, when 'dante' enters the tree.
+
+MYOPTIONS="ipv6 ssl perl irssi-proxy irssi-bot"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+
+    build,runtime:
+        sys-libs/ncurses
+        dev-libs/glib
+        ssl? ( dev-libs/openssl )
+        perl? ( dev-lang/perl )"
+
+src_compile() {
+    econf \
+        $(option_with irssi-proxy proxy) \
+        $(option_with irssi-bot bot) \
+        $(option_with perl) \
+        $(option_enable ssl) \
+        $(option_enable ipv6) \
+        --with-ncurses \
+        --with-perl-lib=vendor \
+        || die "econf failed"
+
+    emake || die "emake failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" docdir="/usr/share/doc/${PF}/" install || "emake install failed"
+
+    dodoc ChangeLog NEWS README TODO AUTHORS
+}
