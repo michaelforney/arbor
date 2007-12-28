@@ -1,0 +1,33 @@
+# Copyright (c) 2007 Alexander Færøy <eroyf@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Configurable ident server that supports NAT/IP masq"
+HOMEPAGE="http://dev.ojnk.net/"
+SRC_URI="http://prdownloads.sourceforge.net/ojnk/oidentd-2.0.8.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="masquerading ipv6"
+
+DEPENDENCIES=""
+
+# Alexander Færøy <eroyf@exherbo.org>:
+#   FIXME:
+#     Add init scripts when upstart is usable.
+
+src_compile() {
+    econf \
+        $(option_enable masquerading masq) \
+        $(option_enable masquerading nat) \
+        $(option_enable ipv6) \
+        || die "econf failed"
+
+    emake || die "emake failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "emake install failed"
+
+    dodoc AUTHORS NEWS README TODO
+}
