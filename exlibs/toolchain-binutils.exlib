@@ -40,6 +40,7 @@ fi
 
 require eutils libtool flag-o-matic gnuconfig multilib ${extra_eclass}
 
+export_exlib_phases src_unpack src_compile src_test src_install pkg_postinst pkg_postrm
 
 export CTARGET=${CTARGET:-${CHOST}}
 if [[ ${CTARGET} == ${CHOST} ]] ; then
