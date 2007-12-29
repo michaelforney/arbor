@@ -25,11 +25,7 @@ vim-plugin_src_install() {
 	# Make sure perms are good
 	chmod -R a+rX ${S} || die "chmod failed"
 	find ${S} -user  'portage' -exec chown root '{}' \; || die "chown failed"
-	if option userland_BSD || option userland_Darwin ; then
-		find ${S} -group 'portage' -exec chgrp wheel '{}' \; || die "chgrp failed"
-	else
-		find ${S} -group 'portage' -exec chgrp root '{}' \; || die "chgrp failed"
-	fi
+	find ${S} -group 'portage' -exec chgrp root '{}' \; || die "chgrp failed"
 	eend $?
 
 	# Install non-vim-help-docs
