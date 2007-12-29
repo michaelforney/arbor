@@ -21,13 +21,6 @@ export_exlib_phases src_install pkg_postinst pkg_postrm
 vim-plugin_src_install() {
 	local f
 
-	ebegin "Fixing file permissions"
-	# Make sure perms are good
-	chmod -R a+rX ${S} || die "chmod failed"
-	find ${S} -user  'portage' -exec chown root '{}' \; || die "chown failed"
-	find ${S} -group 'portage' -exec chgrp root '{}' \; || die "chgrp failed"
-	eend $?
-
 	# Install non-vim-help-docs
 	cd ${S}
 	for f in *; do
