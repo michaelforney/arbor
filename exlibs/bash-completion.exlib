@@ -45,19 +45,19 @@ dobashcompletion() {
 bash-completion_pkg_postinst() {
 	if optionq bash-completion ; then
 		echo
-		einfo "To enable command-line completion for ${PN}, run:"
-		einfo
+		elog "To enable command-line completion for ${PN}, run:"
+		elog
 		if has_version app-admin/eselect ; then
-			einfo "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
+			elog "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
 		else
-			einfo "  bash-completion-config --install ${BASH_COMPLETION_NAME:-${PN}}"
-			einfo
-			einfo "to install locally, or"
-			einfo
-			einfo "  bash-completion-config --global --install ${BASH_COMPLETION_NAME:-${PN}}"
-			einfo
-			einfo "to install system-wide."
-			einfo "Read bash-completion-config(1) for more information."
+			elog "  bash-completion-config --install ${BASH_COMPLETION_NAME:-${PN}}"
+			elog
+			elog "to install locally, or"
+			elog
+			elog "  bash-completion-config --global --install ${BASH_COMPLETION_NAME:-${PN}}"
+			elog
+			elog "to install system-wide."
+			elog "Read bash-completion-config(1) for more information."
 		fi
 		echo
 	fi
