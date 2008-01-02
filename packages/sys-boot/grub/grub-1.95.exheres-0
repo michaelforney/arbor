@@ -11,10 +11,11 @@ SLOT="0"
 PLATFORMS="~x86"
 MYOPTIONS=""
 
-DEPEND="sys-devel/make
-	sys-devel/bison
-	app-arch/lzo"
-RDEPEND=""
+DEPENDENCIES="
+	build:
+		sys-devel/make
+		sys-devel/bison
+		app-arch/lzo"
 
 src_compile() {
     econf \
