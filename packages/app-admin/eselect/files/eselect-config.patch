@@ -1,36 +1,5 @@
-diff -ur eselect-1.0.10.orig/libs/package-manager.bash.in eselect-1.0.10/libs/package-manager.bash.in
---- eselect-1.0.10.orig/libs/package-manager.bash.in	2007-06-17 00:15:04.000000000 +0200
-+++ eselect-1.0.10/libs/package-manager.bash.in	2007-09-24 20:09:40.000000000 +0200
-@@ -120,6 +120,20 @@
-     esac
- }
- 
-+get_config_protect_dirs() {
-+    local manager=$(package-manager)
-+    case ${manager} in
-+        paludis)
-+            cat "$(${PALUDIS_COMMAND:-@PALUDIS@} --configuration-variable installed location)"/.cache/all_CONFIG_PROTECT
-+            ;;
-+        portage)
-+            envvar sys-devel/gcc CONFIG_PROTECT
-+            ;;
-+        *)
-+            die "Unknown package manager: \"${manager}\"!"
-+    esac
-+}
-+
- # package-manager PRIVATE
- # Return the package manager we're going to use.
- package-manager() {
-@@ -142,5 +156,3 @@
- }
- 
- # vim: set sw=4 et sts=4 tw=80 :
--
--
-diff -ur eselect-1.0.10.orig/modules/config.eselect eselect-1.0.10/modules/config.eselect
---- eselect-1.0.10.orig/modules/config.eselect	2007-06-17 00:15:06.000000000 +0200
-+++ eselect-1.0.10/modules/config.eselect	2007-09-24 20:44:16.000000000 +0200
+--- eselect-1.0.11/modules/config.eselect	2007-06-17 00:15:06.000000000 +0200
++++ eselect-1.0.11/modules/config.eselect	2007-09-24 20:44:16.000000000 +0200
 @@ -2,7 +2,7 @@
  # Distributed under the terms of the GNU General Public License v2
  # $Id: config.eselect 370 2007-06-16 22:18:30Z kugelfang $
@@ -58,9 +27,8 @@ diff -ur eselect-1.0.10.orig/modules/config.eselect eselect-1.0.10/modules/confi
  								show_list=yes
  								break
  								;;
-diff -ur eselect-1.0.10.orig/modules/Makefile.in eselect-1.0.10/modules/Makefile.in
---- eselect-1.0.10.orig/modules/Makefile.in	2007-06-17 00:17:48.000000000 +0200
-+++ eselect-1.0.10/modules/Makefile.in	2007-09-24 18:15:25.000000000 +0200
+--- eselect-1.0.11/modules/Makefile.in
++++ eselect-1.0.11/modules/Makefile.in
 @@ -130,6 +130,7 @@
  safe_scripts = \
  		 bashcomp.eselect \
