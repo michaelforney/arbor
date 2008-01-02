@@ -17,12 +17,7 @@ DEPENDENCIES="run:
               post:
                 sys-apps/paludis"
 
-src_unpack() {
-    cp "${FETCHEDDIR}/${A}" "${WORKDIR}"
-    epatch "${FILESDIR}/${PF}.patch"
-}
-
 src_install() {
     insinto /usr/share/eselect/modules
-    newins "${WORKDIR}/news.eselect-${PV}" news.eselect || die "newins failed"
+    newins "${FETCHEDDIR}/news.eselect-${PV}" news.eselect || die "newins failed"
 }
