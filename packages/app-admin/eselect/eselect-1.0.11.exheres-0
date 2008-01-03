@@ -18,7 +18,9 @@ DEPENDENCIES="build,run:
 
 src_unpack() {
     unpack ${A}
-    patch -p0 < "$FILESDIR/$PN"-config.patch || die "Patch failed"
+    cd "${S}"
+    echo "patch -p1 -s -f < $FILESDIR/$PN-config.patch"
+    patch -p1 -s -f < "$FILESDIR/$PN"-config.patch || die "Patch failed"
 }
 
 src_compile() {
