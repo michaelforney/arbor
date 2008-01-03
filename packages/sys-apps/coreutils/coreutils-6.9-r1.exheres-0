@@ -1,4 +1,4 @@
-# Copyright 2007 Bryan Østergaard
+# Copyright 2007-2008 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
 require eutils autotools
@@ -42,9 +42,12 @@ src_install() {
 
     dodir /bin
     for binfile in ${binfiles}; do
-        mv ${D}/usr/bin/${binfile} ${D}/bin/${binfile}
+        mv "${D}"/usr/bin/${binfile} "${D}"/bin/${binfile}
         dosym /bin/${binfile} /usr/bin/${binfile} || die "Dosym failed."
     done
+
+    insinto /etc
+    newins src/dircolors.hin DIR_COLORS || die "newins failed."
 }
 
 src_test() {
