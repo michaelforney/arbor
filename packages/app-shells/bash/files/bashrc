@@ -3,9 +3,54 @@ if [[ $- != *i* ]] ; then
 	return
 fi
 
+_use_color=false
+
+# Set colorful PS1 only on colorful terminals.
+# dircolors --print-database uses its own built-in database
+# instead of using /etc/DIR_COLORS.  Try to use the external file
+# first to take advantage of user additions.  Use internal bash
+# globbing instead of external grep binary.
+_safe_term=${TERM//[^[:alnum:]]/?}   # sanitize TERM
+_match_lhs=""
+[[ -f /etc/DIR_COLORS ]] && _match_lhs="${_match_lhs}$(</etc/DIR_COLORS)"
+[[ -f ~/.dir_colors   ]] && _match_lhs="${_match_lhs}$(<~/.dir_colors)"
+[[ -z ${_match_lhs}    ]] \
+        && type -P dircolors >/dev/null \
+        && _match_lhs=$(dircolors --print-database)
+[[ $'\n'${_match_lhs} == *$'\n'"TERM "${_safe_term}* ]] && _use_color=true
+
+if ${_use_color} ; then
+        # Enable colors for ls, etc.  Prefer ~/.dir_colors #64489
+        if type -P dircolors >/dev/null ; then
+                if [[ -f ~/.dir_colors ]] ; then
+                        eval $(dircolors -b ~/.dir_colors)
+                elif [[ -f /etc/DIR_COLORS ]] ; then
+                        eval $(dircolors -b /etc/DIR_COLORS)
+                fi
+        fi
+
+        if [[ ${EUID} == 0 ]] ; then
+                PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+        else
+                PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+        fi
+
+        alias ls='ls --color=auto'
+        alias grep='grep --colour=auto'
+else
+        if [[ ${EUID} == 0 ]] ; then
+                # show root@ when we don't have colors
+                PS1='\u@\h \W \$ '
+        else
+                PS1='\u@\h \w \$ '
+        fi
+fi
+
 # Things in /etc/bash/bashrc.d/ will be sourced for all interactive shells.
-# This is used by bash-completion, and maybe other things.
-for f in /etc/bash/bashrc.d/* ; do
-	[[ -r "${f}" ]] && . "${f}"
+# This is useful for e.g. bash-completion.
+for _f in /etc/bash/bashrc.d/* ; do
+	[[ -r "${_f}" ]] && . "${_f}"
 done
-unset f
+
+# Try to keep environment pollution down.
+unset _use_color _safe_term _match_lhs _f
