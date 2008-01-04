@@ -10,9 +10,10 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="slowtests"
 
-DEPEND="dev-libs/apr-util
+DEPENDENCIES="
+    build:
+        dev-libs/apr-util
         net-misc/neon"
-RDEPEND=""
 
 src_test() {
     if option slowtests; then
