@@ -1,0 +1,106 @@
+# Copyright 2007 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools multilib versionator
+
+DESCRIPTION="An object-oriented scripting language"
+HOMEPAGE="http://www.ruby-lang.org/"
+
+MY_P="${PN}-$(replace_version_separator 3 '-')"
+S=${WORKDIR}/${MY_P}
+
+SLOT=$(get_version_component_range 1-2)
+MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
+
+SRC_URI="ftp://ftp.ruby-lang.org/pub/ruby/${SLOT}/${MY_P}.tar.bz2"
+
+LICENSE="Ruby"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
+
+DEPENDENCIES="build,run:
+                sys-libs/db
+                berkdb? ( sys-libs/db )
+                gdbm? ( sys-libs/gdbm )
+                ssl? ( sys-libs/openssl )
+"
+
+src_unpack() {
+    unpack ${A}
+
+    cd "${S}"
+
+    sed -i -e "s:\(RUBY_LIB_PREFIX=\"\${prefix}/\)lib:\1$(get_libdir):" \
+        configure.in || die "sed failed"
+
+    patch -p2 < "${FILESDIR}/${P}-r13657.patch" || die "patch ${P}-r13657.patch failed"
+    patch -p0 < "${FILESDIR}/${P}-to-p113.patch" || die "patch ${P}-to-p113.patch failed"
+    
+    eautoreconf
+}
+
+src_compile() {
+    filter-flags -fomit-frame-pointer
+
+    unset SOCKS_SERVER
+
+    #Yes, this does always --enable-ipv6
+    myconf="--enable-ipv6"
+    if ! option ipv6; then
+        myconf="${myconf} --with-lookup-order-hack=INET"
+    fi
+
+    econf --program-suffix=$MY_SUFFIX --enable-shared \
+        $(option_enable doc install-doc) \
+        $(option_enable debug) \
+        $(option_with berkdb dbm) \
+        $(option_with gdbm) \
+        $(option_with ssl openssl) \
+        --disable-socks \
+        --disable-threads \
+        --without-tk \
+        --with-sitedir=/usr/$(get_libdir)/ruby/site_ruby \
+        $myconf \
+        || die "econf failed"
+
+    emake EXTLDFLAGS="${LDFLAGS}" || die "emake failed"
+}
+
+src_test() {
+    emake -j1 test || die "make test failed"
+
+}
+
+src_install() {
+    D_LIBDIR="${D}/usr/$(get_libdir)"
+    LD_LIBRARY_PATH="${D_LIBDIR}"
+    RUBYLIB="${S}:${D_LIBDIR}/ruby/${SLOT}"
+
+    for dir in $(find "${S}/ext" -type d) ; do
+        RUBYLIB="${RUBYLIB}:${dir}"
+    done
+
+    export LD_LIBRARY_PATH RUBYLIB
+
+    emake DESTDIR="${D}" install || die "make install failed"
+
+    MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
+    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitelibdir']")
+    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")
+
+    dodoc ChangeLog NEWS README* ToDo
+
+    for i in ruby irb erb testrb rdoc ri; do
+        dosym /usr/bin/$i$MY_SUFFIX /usr/bin/$i
+    done
+
+    if option doc; then
+        emake DESTDIR="${D}" install-doc
+    fi
+
+    if option examples; then
+        dodir /usr/share/doc/${PF}
+        cp -dpPR sample "${D}/usr/share/doc/${PF}"
+    fi
+}
+
