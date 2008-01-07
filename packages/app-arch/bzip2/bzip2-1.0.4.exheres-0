@@ -31,4 +31,10 @@ src_install() {
     mv "${D}/include" "${D}/usr/"
 
     dodoc CHANGES README README.COMPILATION.PROBLEMS README.XML.STUFF 
+
+    # Fix symlinks
+    dosym bzgrep /bin/bzegrep
+    dosym bzgrep /bin/bzfgrep
+    dosym bzmore /bin/bzless
+    dosym bzdiff /bin/bzcmp
 }
