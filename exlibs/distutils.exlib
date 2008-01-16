@@ -26,13 +26,13 @@ export_exlib_phases src_compile src_install pkg_postinst pkg_postrm
 # This helps make it possible to add extensions to python slots.
 # Normally only a -py21- ebuild would set PYTHON_SLOT_VERSION.
 if [ "${PYTHON_SLOT_VERSION}" = "2.1" ] ; then
-	DEPEND="=dev-lang/python-2.1*"
+	DEPENDENCIES="build: =dev-lang/python-2.1*"
 	python="python2.1"
 elif [ "${PYTHON_SLOT_VERSION}" = "2.3" ] ; then
-	DEPEND="=dev-lang/python-2.3*"
+	DEPENDENCIES="build: =dev-lang/python-2.3*"
 	python="python2.3"
 else
-	DEPEND="dev-lang/python"
+	DEPENDENCIES="build: dev-lang/python"
 	python="python"
 fi
 

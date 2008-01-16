@@ -35,10 +35,9 @@ if [[ -n ${WANT_AUTOCONF} ]] ; then
 	[[ ${WANT_AUTOCONF} == "latest" ]] && WANT_AUTOCONF="2.5"
 	export WANT_AUTOCONF
 fi
-DEPEND="${_automake_atom}
+DEPENDENCIES="build: ${_automake_atom}
 	${_autoconf_atom}
 	sys-devel/libtool"
-RDEPEND=""
 unset _automake_atom _autoconf_atom
 
 # Variables:

@@ -11,9 +11,12 @@ require vim-doc
 
 VIM_PLUGIN_VIM_VERSION="${VIM_PLUGIN_VIM_VERSION:-6.4}"
 
-DEPEND="|| ( >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
-	>=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION} )"
-RDEPEND="${DEPEND}"
+DEPENDENCIES="
+    build,run:
+        || (
+            >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
+            >=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION}
+        )"
 SRC_URI="mirror://gentoo/${P}.tar.bz2"
 
 export_exlib_phases src_install pkg_postinst pkg_postrm
