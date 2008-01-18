@@ -4,7 +4,8 @@
 DESCRIPTION="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
 SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.bz2
-    http://ftp.gnu.org/gnu/${PN}/glibc-libidn-${PV}.tar.bz2"
+    http://ftp.gnu.org/gnu/${PN}/glibc-libidn-${PV}.tar.bz2
+    http://ftp.gnu.org/gnu/${PN}/glibc-ports-${PV}.tar.bz2"
 
 LICENSE="LGPL-2"
 SLOT="0"
@@ -25,6 +26,7 @@ BUILDDIR="${T}/build"
 src_unpack() {
     unpack ${A}
     mv glibc-libidn-${PV} ${S}/libidn
+    mv glibc-ports-${PV} ${S}/ports
 }
 
 src_compile() {
