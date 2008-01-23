@@ -1,6 +1,8 @@
 # Copyright 2008 Mike Kelly <pioto@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require pam
+
 MY_PV="${PV/_p/p}"
 MY_P="${PN}-${MY_PV}"
 
@@ -8,12 +10,14 @@ DESCRIPTION="Sudo allows a system administrator to give certain users the abilit
 HOMEPAGE="http://www.sudo.ws/"
 SRC_URI="ftp://ftp.sudo.ws/pub/${PN}/${MY_P}.tar.gz"
 
-LICENSE="sudo"
+LICENSE="ISC BSD"
 SLOT="0"
 PLATFORMS="~x86"
 MYOPTIONS="offensive"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build,run:
+        pam? ( sys-libs/pam )"
 
 S="${WORKDIR}/${MY_P}"
 
@@ -22,6 +26,7 @@ src_compile() {
         --with-env-editor \
         $(option_with offensive insults) \
         $(option_with offensive all-insluts) \
+        $(option_with pam) \
         || die "econf failed"
 
     emake || die "emake failed"
@@ -31,4 +36,8 @@ src_install() {
     emake DESTDIR="${D}" install || die "emake install failed"
 
     dodoc BUGS CHANGES HISTORY README TROUBLESHOOTING UPGRADE
+
+    if option pam; then
+        pamd_mimic_system sudo auth account password session
+    fi
 }
