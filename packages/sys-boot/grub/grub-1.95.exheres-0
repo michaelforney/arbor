@@ -26,5 +26,9 @@ src_compile() {
 
 src_install() {
     emake DESTDIR=${D} install || die "Install failed."
-    dodoc AUTHORS ChangeLog DISTLIST INSTALL NEWS README THANKS TODO
+    dodoc AUTHORS ChangeLog DISTLIST INSTALL NEWS README THANKS TODO "${FILESDIR}/grub.cfg.example"
+    elog "Use grub-install /dev/your-device e.g. sda to install grub onto the"
+    elog "device you wish to boot from"
+    elog "A sample grub.cfg has been installed into /usr/share/doc/${P}"
+    elog "Copy this to /boot/grub and edit it to fit your configuration"
 }
