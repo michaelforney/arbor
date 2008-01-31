@@ -19,5 +19,7 @@ src_install() {
     dodoc ChangeLog FAQ README RELEASE-NOTES TODO
     dodoc docs/*
     cp -r docs/writing_udev_rules "${D}/usr/share/doc/${P}"
-    cp -r etc/udev/rules.d/ "${D}/etc/udev/"
+    insinto /etc/udev/rules.d/
+    doins etc/udev/rules.d/*.rules
+    doins etc/udev/gentoo/*.rules
 }
