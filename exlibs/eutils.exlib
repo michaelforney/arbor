@@ -71,16 +71,16 @@ gen_usr_ldscript() {
 
     for lib in "${@}" ; do
         cat > "${D}/usr/${libdir}/${lib}" <<-END_LDSCRIPT
-        /* GNU ld script
-           Since Gentoo has critical dynamic libraries
-           in /lib, and the static versions in /usr/lib,
-           we need to have a "fake" dynamic lib in /usr/lib,
-           otherwise we run into linking problems.
+/* GNU ld script
+   Since Gentoo has critical dynamic libraries
+   in /lib, and the static versions in /usr/lib,
+   we need to have a "fake" dynamic lib in /usr/lib,
+   otherwise we run into linking problems.
 
-           See bug http://bugs.gentoo.org/4411 for more info.
-         */
-        GROUP ( /${libdir}/${lib} )
-        END_LDSCRIPT
+   See bug http://bugs.gentoo.org/4411 for more info.
+ */
+GROUP ( /${libdir}/${lib} )
+END_LDSCRIPT
         fperms a+x "/usr/${libdir}/${lib}" || die "could not change perms on ${lib}"
     done
 }
@@ -897,18 +897,18 @@ make_desktop_entry() {
     #local desktop=${T}/${exec%% *:-${desktop_name}}.desktop
 
     cat <<-EOF > "${desktop}"
-    [Desktop Entry]
-    Encoding=UTF-8
-    Version=0.9.2
-    Name=${name}
-    Type=Application
-    Comment=${DESCRIPTION}
-    Exec=${exec}
-    TryExec=${exec%% *}
-    Path=${path}
-    Icon=${icon}
-    Categories=Application;${type};
-    EOF
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.2
+Name=${name}
+Type=Application
+Comment=${DESCRIPTION}
+Exec=${exec}
+TryExec=${exec%% *}
+Path=${path}
+Icon=${icon}
+Categories=Application;${type};
+EOF
 
     (
         # wrap the env here so that the 'insinto' call
@@ -962,14 +962,14 @@ make_session_desktop() {
     local desktop=${T}/${wm}.desktop
 
     cat <<-EOF > "${desktop}"
-    [Desktop Entry]
-    Encoding=UTF-8
-    Name=${title}
-    Comment=This session logs you into ${title}
-    Exec=${command}
-    TryExec=${command}
-    Type=Application
-    EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=${title}
+Comment=This session logs you into ${title}
+Exec=${command}
+TryExec=${command}
+Type=Application
+EOF
 
     (
     # wrap the env here so that the 'insinto' call
@@ -1274,14 +1274,14 @@ check_license() {
 
     local licmsg=$(emktemp)
     cat <<-EOF > ${licmsg}
-    **********************************************************
-    The following license outlines the terms of use of this
-    package.  You MUST accept this license for installation to
-    continue.  When you are done viewing, hit 'q'.  If you
-    CTRL+C out of this, the install will not run!
-    **********************************************************
-    
-    EOF
+**********************************************************
+The following license outlines the terms of use of this
+package.  You MUST accept this license for installation to
+continue.  When you are done viewing, hit 'q'.  If you
+CTRL+C out of this, the install will not run!
+**********************************************************
+
+EOF
     cat ${lic} >> ${licmsg}
     ${PAGER:-less} ${licmsg} || die "Could not execute pager (${PAGER}) to accept ${lic}"
     einfon "Do you accept the terms of this license (${l})? [yes/no] "
