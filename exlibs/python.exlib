@@ -8,14 +8,14 @@
 # Python or Python modules.
 #
 # - Features:
-# python_version()        - sets PYVER/PYVER_MAJOR/PYVER_MINOR
+# python_version()	  - sets PYVER/PYVER_MAJOR/PYVER_MINOR
 # python_tkinter_exists() - Checks for tkinter support in python
-# python_mod_exists()     - Checks if a python module exists
-# python_mod_compile()    - Compiles a .py file to a .pyc/.pyo
+# python_mod_exists()	  - Checks if a python module exists
+# python_mod_compile()	  - Compiles a .py file to a .pyc/.pyo
 # python_mod_optimize()   - Generates .pyc/.pyo precompiled scripts
-# python_mod_cleanup()    - Goes through /usr/lib*/python* to remove
-#                           orphaned *.pyc *.pyo
-# python_makesym()        - Makes /usr/bin/python symlinks
+# python_mod_cleanup()	  - Goes through /usr/lib*/python* to remove
+#			    orphaned *.pyc *.pyo
+# python_makesym()	  - Makes /usr/bin/python symlinks
 
 require alternatives multilib
 
@@ -46,8 +46,8 @@ __python_eclass_test() {
 #
 # name:   python_disable/enable_pyc
 # desc:   tells python not to automatically recompile modules to .pyc/.pyo
-#         even if the timestamps/version stamps don't match. this is
-#         done to protect sandbox.
+#	  even if the timestamps/version stamps don't match. this is
+#	  done to protect sandbox.
 #
 # note:   supported by >=dev-lang/python-2.2.3-r3 only.
 #
@@ -64,7 +64,7 @@ python_disable_pyc
 #
 # name:   python_version
 # desc:   run without arguments and it will export the version of python
-#         currently in use as $PYVER
+#	  currently in use as $PYVER
 #
 
 __python_version_extract() {
@@ -88,7 +88,7 @@ python_version() {
 #
 # name:   python_makesym
 # desc:   run without arguments, it will create the /usr/bin/python symlinks
-#         to the latest installed version
+#	  to the latest installed version
 #
 python_makesym() {
 	alternatives_auto_makesym "/usr/bin/python" "python[0-9].[0-9]"
@@ -98,7 +98,7 @@ python_makesym() {
 #
 # name:   python_tkinter_exists
 # desc:   run without arguments, checks if python was compiled with Tkinter
-#         support.  If not, prints an error message and dies.
+#	  support.  If not, prints an error message and dies.
 #
 python_tkinter_exists() {
 	if ! python -c "import Tkinter" >/dev/null 2>&1; then
@@ -113,13 +113,13 @@ python_tkinter_exists() {
 #
 # name:   python_mod_exists
 # desc:   run with the module name as an argument. it will check if a
-#         python module is installed and loadable. it will return
-#         TRUE(0) if the module exists, and FALSE(1) if the module does
-#         not exist.
+#	  python module is installed and loadable. it will return
+#	  TRUE(0) if the module exists, and FALSE(1) if the module does
+#	  not exist.
 # exam:
-#         if python_mod_exists gtk; then
-#             echo "gtk support enabled"
-#         fi
+#	  if python_mod_exists gtk; then
+#	      echo "gtk support enabled"
+#	  fi
 #
 python_mod_exists() {
 	[ -z "$1" ] && die "${FUNCTION} requires an argument!"
@@ -132,9 +132,9 @@ python_mod_exists() {
 #
 # name:   python_mod_compile
 # desc:   given a filename, it will pre-compile the module's .pyc and .pyo.
-#         should only be run in pkg_postinst()
+#	  should only be run in pkg_postinst()
 # exam:
-#         python_mod_compile ${ROOT}usr/lib/python2.3/site-packages/pygoogle.py
+#	  python_mod_compile ${ROOT}usr/lib/python2.3/site-packages/pygoogle.py
 #
 python_mod_compile() {
 	# allow compiling for older python versions
@@ -157,13 +157,13 @@ python_mod_compile() {
 #
 # name:   python_mod_optimize
 # desc:   if no arguments supplied, it will recompile all modules under
-#         sys.path (eg. /usr/lib/python2.3, /usr/lib/python2.3/site-packages/ ..)
-#         no recursively
+#	  sys.path (eg. /usr/lib/python2.3, /usr/lib/python2.3/site-packages/ ..)
+#	  no recursively
 #
-#         if supplied with arguments, it will recompile all modules recursively
-#         in the supplied directory
+#	  if supplied with arguments, it will recompile all modules recursively
+#	  in the supplied directory
 # exam:
-#         python_mod_optimize ${ROOT}usr/share/codegen
+#	  python_mod_optimize ${ROOT}usr/share/codegen
 #
 python_mod_optimize() {
 	local myroot
@@ -193,11 +193,11 @@ python_mod_optimize() {
 #
 # name:   python_mod_cleanup
 # desc:   run with optional arguments, where arguments are directories of
-#         python modules. if none given, it will look in /usr/lib/python[0-9].[0-9]
+#	  python modules. if none given, it will look in /usr/lib/python[0-9].[0-9]
 #
-#         it will recursively scan all compiled python modules in the directories
-#         and determine if they are orphaned (eg. their corresponding .py is missing.)
-#         if they are, then it will remove their corresponding .pyc and .pyo
+#	  it will recursively scan all compiled python modules in the directories
+#	  and determine if they are orphaned (eg. their corresponding .py is missing.)
+#	  if they are, then it will remove their corresponding .pyc and .pyo
 #
 python_mod_cleanup() {
 	local SEARCH_PATH myroot

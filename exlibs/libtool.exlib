@@ -63,7 +63,7 @@ ELT_libtool_version() {
 	local version=
 
 	version=$(eval $(grep -e '^[[:space:]]*VERSION=' "${ltmain_sh}"); \
-	                 echo "${VERSION}")
+			 echo "${VERSION}")
 	[[ -z ${version} ]] && version="0"
 
 	echo "${version}"
@@ -224,7 +224,7 @@ elibtoolize() {
 						ret=$?
 					# ltmain.sh and co might be in a subdirectory ...
 					elif [[ ! -e ${x}/configure && -e ${x}/../configure && \
-					        -n $(grep 'Transform linux' "${x}/../configure") ]] ; then
+						-n $(grep 'Transform linux' "${x}/../configure") ]] ; then
 						ELT_walk_patches "${x}/../configure" "${y}"
 						ret=$?
 					fi
@@ -243,7 +243,7 @@ elibtoolize() {
 						ret=$?
 					# ltmain.sh and co might be in a subdirectory ...
 					elif [[ ! -e ${x}/configure && -e ${x}/../configure && \
-					        -n $(grep 'version_type=freebsd-' "${x}/../configure") ]] ; then
+						-n $(grep 'version_type=freebsd-' "${x}/../configure") ]] ; then
 						ELT_walk_patches "${x}/../configure" "${y}"
 						ret=$?
 					fi

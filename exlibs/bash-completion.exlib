@@ -49,13 +49,13 @@ bash-completion_pkg_postinst() {
 		elog "To enable command-line completion for ${PN}, run:"
 		elog
 		if has_version app-admin/eselect ; then
-			elog "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
+			elog "	eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
 		else
-			elog "  bash-completion-config --install ${BASH_COMPLETION_NAME:-${PN}}"
+			elog "	bash-completion-config --install ${BASH_COMPLETION_NAME:-${PN}}"
 			elog
 			elog "to install locally, or"
 			elog
-			elog "  bash-completion-config --global --install ${BASH_COMPLETION_NAME:-${PN}}"
+			elog "	bash-completion-config --global --install ${BASH_COMPLETION_NAME:-${PN}}"
 			elog
 			elog "to install system-wide."
 			elog "Read bash-completion-config(1) for more information."

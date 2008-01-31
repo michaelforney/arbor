@@ -8,18 +8,18 @@
 # us easily merge multiple versions for multiple targets (if we wish) and
 # then switch the versions on the fly (with `binutils-config`).
 #
-# binutils-9999           -> live cvs
+# binutils-9999		  -> live cvs
 # binutils-9999_preYYMMDD -> nightly snapshot date YYMMDD
-# binutils-#              -> normal release
+# binutils-#		  -> normal release
 
 extra_eclass=""
 if [[ -n ${BINUTILS_TYPE} ]] ; then
 	BTYPE=${BINUTILS_TYPE}
 else
 	case ${PV} in
-	9999)      BTYPE="cvs";;
+	9999)	   BTYPE="cvs";;
 	9999_pre*) BTYPE="snap";;
-	*)         BTYPE="rel";;
+	*)	   BTYPE="rel";;
 	esac
 fi
 
@@ -298,10 +298,10 @@ toolchain-binutils_src_install() {
 	local targ=${CTARGET/-*} src="" dst=""
 	local FAKE_TARGETS=${CTARGET}
 	case ${targ} in
-		mips*)    src="mips"    dst="mips64";;
+		mips*)	  src="mips"	dst="mips64";;
 		powerpc*) src="powerpc" dst="powerpc64";;
-		s390*)    src="s390"    dst="s390x";;
-		sparc*)   src="sparc"   dst="sparc64";;
+		s390*)	  src="s390"	dst="s390x";;
+		sparc*)   src="sparc"	dst="sparc64";;
 	esac
 	case ${targ} in
 		mips64*|powerpc64*|s390x*|sparc64*) targ=${src} src=${dst} dst=${targ};;
@@ -359,9 +359,9 @@ toolchain-binutils_pkg_postrm() {
 	# If no other versions exist, then uninstall for this
 	# target ... otherwise, switch to the newest version
 	# Note: only do this if this version is unmerged.  We
-	#       rerun binutils-config if this is a remerge, as
-	#       we want the mtimes on the symlinks updated (if
-	#       it is the same as the current selected profile)
+	#	rerun binutils-config if this is a remerge, as
+	#	we want the mtimes on the symlinks updated (if
+	#	it is the same as the current selected profile)
 	if [[ ! -e ${BINPATH}/ld ]] && [[ ${current_profile} == ${CTARGET}-${BVER} ]] ; then
 		local choice=$(binutils-config -l | grep ${CTARGET} | awk '{print $2}')
 		choice=${choice//$'\n'/ }

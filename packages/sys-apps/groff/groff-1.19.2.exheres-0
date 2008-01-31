@@ -23,17 +23,17 @@ src_unpack() {
 src_install() {
     dodir /usr/bin
     emake \
-        prefix="${D}/usr" \
-        datadir="${D}/usr/share" \
+	prefix="${D}/usr" \
+	datadir="${D}/usr/share" \
 	libdir="${D}/usr/$(get_libdir)" \
-        infodir="${D}/usr/share/info" \
-        mandir="${D}/usr/share/man" \
-        appresdir="${D}/etc/X11/app-defaults" \
-        install || die "Install failed."
+	infodir="${D}/usr/share/info" \
+	mandir="${D}/usr/share/man" \
+	appresdir="${D}/etc/X11/app-defaults" \
+	install || die "Install failed."
 
     dosym tbl /usr/bin/gtbl
     dosym eqn /usr/bin/geqn
 
     dodoc BUG-REPORT ChangeLog* FDL INSTALL* MORE.STUFF NEWS PROBLEMS \
-        PROJECTS README REVISION TODO VERSION
+	PROJECTS README REVISION TODO VERSION
 }

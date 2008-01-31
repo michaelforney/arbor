@@ -13,10 +13,10 @@ VIM_PLUGIN_VIM_VERSION="${VIM_PLUGIN_VIM_VERSION:-6.4}"
 
 DEPENDENCIES="
     build,run:
-        || (
-            >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
-            >=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION}
-        )"
+	|| (
+	    >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
+	    >=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION}
+	)"
 SRC_URI="mirror://gentoo/${P}.tar.bz2"
 
 export_exlib_phases src_install pkg_postinst pkg_postrm
@@ -106,7 +106,7 @@ display_vim_plugin_help() {
 		elog "This plugin provides documentation via vim's help system. To"
 		elog "view it, use:"
 		for h in ${VIM_PLUGIN_HELPFILES} ; do
-			elog "    :help ${h}"
+			elog "	  :help ${h}"
 		done
 		elog " "
 
@@ -120,15 +120,15 @@ display_vim_plugin_help() {
 	elif [[ -n "${VIM_PLUGIN_HELPURI}" ]] ; then
 		elog " "
 		elog "Documentation for this plugin is available online at:"
-		elog "    ${VIM_PLUGIN_HELPURI}"
+		elog "	  ${VIM_PLUGIN_HELPURI}"
 		elog " "
 	fi
 
 	if hasq "filetype" "${VIM_PLUGIN_MESSAGES}" ; then
 		elog "This plugin makes use of filetype settings. To enable these,"
 		elog "add lines like:"
-		elog "    filetype plugin on"
-		elog "    filetype indent on"
+		elog "	  filetype plugin on"
+		elog "	  filetype indent on"
 		elog "to your ~/.vimrc file."
 		elog " "
 	fi

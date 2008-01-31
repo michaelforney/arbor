@@ -14,8 +14,8 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     run:
-        app-admin/eselect
-	   	>=app-shells/bash-3.2_p19"
+	app-admin/eselect
+		>=app-shells/bash-3.2_p19"
 
 S="${WORKDIR}/${PN/-/_}"
 
@@ -23,15 +23,15 @@ src_unpack() {
 	unpack ${A}
 	cd "${S}"
     for p in "${FILESDIR}/${PV}"/*diff ; do
-        patch -p1 -s -f < "${p}" || die "patch failed"
+	patch -p1 -s -f < "${p}" || die "patch failed"
     done
 }
 
 src_install() {
 	# split /etc/bash_completion into three parts:
-	# 1. /usr/share/bash-completion/.pre    -- hidden from eselect
+	# 1. /usr/share/bash-completion/.pre	-- hidden from eselect
 	# 2. /usr/share/bash-completion/default -- eselectable
-	# 3. /usr/share/bash-completion/.post   -- hidden from eselect
+	# 3. /usr/share/bash-completion/.post	-- hidden from eselect
 	dodir /usr/share/bash-completion
 	awk -v D="$D" '
 		BEGIN { out=".pre" }

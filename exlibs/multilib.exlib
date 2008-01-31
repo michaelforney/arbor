@@ -14,7 +14,7 @@ DESCRIPTION="Based on the ${ECLASS} eclass"
 
 # has_multilib_profile:
 # Return true if the current profile is a multilib profile and lists more than
-# one abi in ${MULTILIB_ABIS}.  You might want to use this like
+# one abi in ${MULTILIB_ABIS}.	You might want to use this like
 # 'use multilib || has_multilib_profile' until all profiles utilizing the
 # 'multilib' use flag are removed from portage
 
@@ -40,7 +40,7 @@ DESCRIPTION="Based on the ${ECLASS} eclass"
 
 # get_libdir:
 # Returns the libdir for the selected ABI.  This is backwards compatible
-# and simply calls get_abi_LIBDIR() on newer profiles.  You should use this
+# and simply calls get_abi_LIBDIR() on newer profiles.	You should use this
 # to determine where to install shared objects (ex: /usr/$(get_libdir))
 
 # get_abi_var <VAR> [<ABI>]:
@@ -63,7 +63,7 @@ DESCRIPTION="Based on the ${ECLASS} eclass"
 # prep_ml_includes:
 # Some includes (include/asm, glibc, etc) are ABI dependent.  In this case,
 # We can install them in different locations for each ABI and create a common
-# header which includes the right one based on CDEFINE_${ABI}.  If your
+# header which includes the right one based on CDEFINE_${ABI}.	If your
 # package installs ABI-specific headers, just add 'prep_ml_includes' to the
 # end of your src_install().  It takes a list of directories that include
 # files are installed in (default is /usr/include if none are passed).
@@ -122,7 +122,7 @@ has_multilib_profile() {
 #
 # Jeremy Huddleston <eradicator@gentoo.org> (23 Dec 2004):
 #   Added support for ${ABI} and ${DEFAULT_ABI}.  If they're both not set,
-#   fall back on old behavior.  Any profile that has these set should also
+#   fall back on old behavior.	Any profile that has these set should also
 #   depend on a newer version of portage (not yet released) which uses these
 #   over CONF_LIBDIR in econf, dolib, etc...
 get_libdir() {
@@ -156,7 +156,7 @@ get_multilibdir() {
 # Travis Tilley <lv@gentoo.org> (31 Aug 2004)
 get_libdir_override() {
 	if has_multilib_profile; then
-		eerror "get_libdir_override called, but it shouldn't be needed with the new multilib approach.  Please file a bug at http://bugs.gentoo.org and assign it to eradicator@gentoo.org"
+		eerror "get_libdir_override called, but it shouldn't be needed with the new multilib approach.	Please file a bug at http://bugs.gentoo.org and assign it to eradicator@gentoo.org"
 		exit 1
 	fi
 	CONF_LIBDIR="$1"
@@ -328,7 +328,7 @@ get_ml_incdir() {
 #
 # Some includes (include/asm, glibc, etc) are ABI dependent.  In this case,
 # We can install them in different locations for each ABI and create a common
-# header which includes the right one based on CDEFINE_${ABI}.  If your
+# header which includes the right one based on CDEFINE_${ABI}.	If your
 # package installs ABI-specific headers, just add 'prep_ml_includes' to the
 # end of your src_install().  It takes a list of directories that include
 # files are installed in (default is /usr/include if none are passed).
@@ -539,7 +539,7 @@ get_libname() {
 	local ver=$1
 	case ${CHOST} in
 		*-darwin*) libname="dylib";;
-		*)         libname="so";;
+		*)	   libname="so";;
 	esac
 
 	if [[ -z $@ ]] ; then
@@ -548,7 +548,7 @@ get_libname() {
 		for ver in "$@" ; do
 			case ${CHOST} in
 				*-darwin*) echo ".${ver}.${libname}";;
-				*)         echo ".${libname}.${ver}";;
+				*)	   echo ".${libname}.${ver}";;
 			esac
 		done
 	fi

@@ -16,24 +16,24 @@
 #
 # Full list of user usable functions provided by this eclass (see the functions
 # themselves for documentation):
-#     get_all_version_components          ver_str
-#     get_version_components              ver_str
-#     get_major_version                   ver_str
-#     get_version_component_range         range     ver_str
-#     get_after_major_version             ver_str
-#     replace_version_separator           index     newvalue   ver_str
-#     replace_all_version_separators      newvalue  ver_str
-#     delete_version_separator            index ver_str
-#     delete_all_version_separators       ver_str
-#     get_version_component_count         ver_str
-#     get_last_version_component_index    ver_str
+#     get_all_version_components	  ver_str
+#     get_version_components		  ver_str
+#     get_major_version			  ver_str
+#     get_version_component_range	  range     ver_str
+#     get_after_major_version		  ver_str
+#     replace_version_separator		  index     newvalue   ver_str
+#     replace_all_version_separators	  newvalue  ver_str
+#     delete_version_separator		  index ver_str
+#     delete_all_version_separators	  ver_str
+#     get_version_component_count	  ver_str
+#     get_last_version_component_index	  ver_str
 #
 # Rather than being a number, the index parameter can be a separator character
 # such as '-', '.' or '_'. In this case, the first separator of this kind is
 # selected.
 #
 # There's also:
-#     version_is_at_least             want      have
+#     version_is_at_least	      want	have
 # which may be buggy, so use with caution.
 
 # Quick function to toggle the shopts required for some functions on and off
@@ -60,11 +60,11 @@ __versionator_shopt_toggle() {
 
 # Split up a version string into its component parts. If no parameter is
 # supplied, defaults to $PV.
-#     0.8.3       ->  0 . 8 . 3
-#     7c          ->  7 c
-#     3.0_p2      ->  3 . 0 _ p2
-#     20040905    ->  20040905
-#     3.0c-r1     ->  3 . 0 c - r1
+#     0.8.3	  ->  0 . 8 . 3
+#     7c	  ->  7 c
+#     3.0_p2	  ->  3 . 0 _ p2
+#     20040905	  ->  20040905
+#     3.0c-r1	  ->  3 . 0 c - r1
 get_all_version_components() {
 	__versionator_shopt_toggle on
 	local ver_str=${1:-${PV}} result result_idx=0
@@ -119,11 +119,11 @@ get_all_version_components() {
 
 # Get the important version components, excluding '.', '-' and '_'. Defaults to
 # $PV if no parameter is supplied.
-#     0.8.3       ->  0 8 3
-#     7c          ->  7 c
-#     3.0_p2      ->  3 0 p2
-#     20040905    ->  20040905
-#     3.0c-r1     ->  3 0 c r1
+#     0.8.3	  ->  0 8 3
+#     7c	  ->  7 c
+#     3.0_p2	  ->  3 0 p2
+#     20040905	  ->  20040905
+#     3.0c-r1	  ->  3 0 c r1
 get_version_components() {
 	__versionator_shopt_toggle on
 	local c="$(get_all_version_components "${1:-${PV}}")"
@@ -133,11 +133,11 @@ get_version_components() {
 }
 
 # Get the major version of a value. Defaults to $PV if no parameter is supplied.
-#     0.8.3       ->  0
-#     7c          ->  7
-#     3.0_p2      ->  3
-#     20040905    ->  20040905
-#     3.0c-r1     ->  3
+#     0.8.3	  ->  0
+#     7c	  ->  7
+#     3.0_p2	  ->  3
+#     20040905	  ->  20040905
+#     3.0c-r1	  ->  3
 get_major_version() {
 	__versionator_shopt_toggle on
 	local c
@@ -148,9 +148,9 @@ get_major_version() {
 
 # Get a particular component or range of components from the version. If no
 # version parameter is supplied, defaults to $PV.
-#    1      1.2.3       -> 1
-#    1-2    1.2.3       -> 1.2
-#    2-     1.2.3       -> 2.3
+#    1	    1.2.3	-> 1
+#    1-2    1.2.3	-> 1.2
+#    2-     1.2.3	-> 2.3
 get_version_component_range() {
 	__versionator_shopt_toggle on
 	local c v="${2:-${PV}}" range="${1}" range_start range_end i=-1 j=0
@@ -175,11 +175,11 @@ get_version_component_range() {
 
 # Get everything after the major version and its separator (if present) of a
 # value. Defaults to $PV if no parameter is supplied.
-#     0.8.3       ->  8.3
-#     7c          ->  c
-#     3.0_p2      ->  0_p2
-#     20040905    ->  (empty string)
-#     3.0c-r1     ->  0c-r1
+#     0.8.3	  ->  8.3
+#     7c	  ->  c
+#     3.0_p2	  ->  0_p2
+#     20040905	  ->  (empty string)
+#     3.0c-r1	  ->  0c-r1
 get_after_major_version() {
 	__versionator_shopt_toggle on
 	echo $(get_version_component_range 2- "${1:-${PV}}" )
@@ -188,9 +188,9 @@ get_after_major_version() {
 
 # Replace the $1th separator with $2 in $3 (defaults to $PV if $3 is not
 # supplied). If there are fewer than $1 separators, don't change anything.
-#     1 '_' 1.2.3       -> 1_2.3
-#     2 '_' 1.2.3       -> 1.2_3
-#     1 '_' 1b-2.3      -> 1b_2.3
+#     1 '_' 1.2.3	-> 1_2.3
+#     2 '_' 1.2.3	-> 1.2_3
+#     1 '_' 1b-2.3	-> 1b_2.3
 # Rather than being a number, $1 can be a separator character such as '-', '.'
 # or '_'. In this case, the first separator of this kind is selected.
 replace_version_separator() {
@@ -223,7 +223,7 @@ replace_version_separator() {
 }
 
 # Replace all version separators in $2 (defaults to $PV) with $1.
-#     '_' 1b.2.3        -> 1b_2_3
+#     '_' 1b.2.3	-> 1b_2_3
 replace_all_version_separators() {
 	__versionator_shopt_toggle on
 	local c
@@ -235,9 +235,9 @@ replace_all_version_separators() {
 
 # Delete the $1th separator in $2 (defaults to $PV if $2 is not supplied). If
 # there are fewer than $1 separators, don't change anything.
-#     1 1.2.3       -> 12.3
-#     2 1.2.3       -> 1.23
-#     1 1b-2.3      -> 1b2.3
+#     1 1.2.3	    -> 12.3
+#     2 1.2.3	    -> 1.23
+#     1 1b-2.3	    -> 1b2.3
 # Rather than being a number, $1 can be a separator character such as '-', '.'
 # or '_'. In this case, the first separator of this kind is deleted.
 delete_version_separator() {
@@ -247,7 +247,7 @@ delete_version_separator() {
 }
 
 # Delete all version separators in $1 (defaults to $PV).
-#     1b.2.3        -> 1b23
+#     1b.2.3	    -> 1b23
 delete_all_version_separators() {
 	__versionator_shopt_toggle on
 	replace_all_version_separators "" "${1}"
@@ -255,8 +255,8 @@ delete_all_version_separators() {
 }
 
 # How many version components are there in $1 (defaults to $PV)?
-#     1.0.1       ->  3
-#     3.0c-r1     ->  4
+#     1.0.1	  ->  3
+#     3.0c-r1	  ->  4
 #
 get_version_component_count() {
 	__versionator_shopt_toggle on
@@ -268,8 +268,8 @@ get_version_component_count() {
 
 # What is the index of the last version component in $1 (defaults to $PV)?
 # Equivalent to get_version_component_count - 1.
-#     1.0.1       ->  3
-#     3.0c-r1     ->  4
+#     1.0.1	  ->  3
+#     3.0c-r1	  ->  4
 #
 get_last_version_component_index() {
 	__versionator_shopt_toggle on
@@ -452,53 +452,53 @@ __versionator__test_version_compare() {
 	}
 
 	echo "
-		0             $lt 1
-		1             $lt 2
-		2             $gt 1
-		2             $eq 2
-		0             $eq 0
-		10            $lt 20
-		68            $eq 068
-		068           $gt 67
-		068           $lt 69
+		0	      $lt 1
+		1	      $lt 2
+		2	      $gt 1
+		2	      $eq 2
+		0	      $eq 0
+		10	      $lt 20
+		68	      $eq 068
+		068	      $gt 67
+		068	      $lt 69
 
-		1.0           $lt 2.0
-		2.0           $eq 2.0
-		2.0           $gt 1.0
+		1.0	      $lt 2.0
+		2.0	      $eq 2.0
+		2.0	      $gt 1.0
 
-		1.0           $gt 0.0
-		0.0           $eq 0.0
-		0.0           $lt 1.0
+		1.0	      $gt 0.0
+		0.0	      $eq 0.0
+		0.0	      $lt 1.0
 
-		0.1           $lt 0.2
-		0.2           $eq 0.2
-		0.3           $gt 0.2
+		0.1	      $lt 0.2
+		0.2	      $eq 0.2
+		0.3	      $gt 0.2
 
-		1.2           $lt 2.1
-		2.1           $gt 1.2
+		1.2	      $lt 2.1
+		2.1	      $gt 1.2
 
-		1.2.3         $lt 1.2.4
-		1.2.4         $gt 1.2.3
+		1.2.3	      $lt 1.2.4
+		1.2.4	      $gt 1.2.3
 
-		1.2.0         $eq 1.2
-		1.2.1         $gt 1.2
-		1.2           $lt 1.2.1
+		1.2.0	      $eq 1.2
+		1.2.1	      $gt 1.2
+		1.2	      $lt 1.2.1
 
-		1.2b          $eq 1.2b
-		1.2b          $lt 1.2c
-		1.2b          $gt 1.2a
-		1.2b          $gt 1.2
-		1.2           $lt 1.2a
+		1.2b	      $eq 1.2b
+		1.2b	      $lt 1.2c
+		1.2b	      $gt 1.2a
+		1.2b	      $gt 1.2
+		1.2	      $lt 1.2a
 
-		1.3           $gt 1.2a
-		1.3           $lt 1.3a
+		1.3	      $gt 1.2a
+		1.3	      $lt 1.3a
 
 		1.0_alpha7    $lt 1.0_beta7
 		1.0_beta      $lt 1.0_pre
 		1.0_pre5      $lt 1.0_rc2
 		1.0_rc2       $lt 1.0
 
-		1.0_p1        $gt 1.0
+		1.0_p1	      $gt 1.0
 		1.0_p1-r1     $gt 1.0_p1
 
 		1.0_alpha6-r1 $gt 1.0_alpha6
@@ -506,9 +506,9 @@ __versionator__test_version_compare() {
 
 		1.0_pre1      $lt 1.0-p1
 
-		1.0p          $gt 1.0_p1
-		1.0r          $gt 1.0-r1
-		1.6.15        $gt 1.6.10-r2
+		1.0p	      $gt 1.0_p1
+		1.0r	      $gt 1.0-r1
+		1.6.15	      $gt 1.6.10-r2
 		1.6.10-r2     $lt 1.6.15
 
 	" | while read a b c ; do

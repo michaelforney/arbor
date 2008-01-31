@@ -3,10 +3,10 @@
 # Distributed under the terms of the GNU General Public License v2
 
 # Authors:
-# 	Ryan Phillips <rphillips@gentoo.org>
-# 	Seemant Kulleen <seemant@gentoo.org>
-# 	Aron Griffis <agriffis@gentoo.org>
-# 	Ciaran McCreesh <ciaranm@gentoo.org>
+#	Ryan Phillips <rphillips@gentoo.org>
+#	Seemant Kulleen <seemant@gentoo.org>
+#	Aron Griffis <agriffis@gentoo.org>
+#	Ciaran McCreesh <ciaranm@gentoo.org>
 #	Mike Kelly <pioto@exherbo.org>
 
 # Look for TODO around here for things that still need doing...
@@ -14,12 +14,12 @@
 # This exlib handles vim, gvim and vim-runtime.
 
 # gvim's GUI preference order is as follows:
-# aqua                          CARBON (not tested, 7+)
-# -aqua gtk gnome               GNOME2 (6.3-r1+, earlier uses GTK2)
-# -aqua gtk -gnome              GTK2
-# -aqua -gtk  motif             MOTIF
-# -aqua -gtk -motif nextaw      NEXTAW (7+)
-# -aqua -gtk -motif -nextaw     ATHENA
+# aqua				CARBON (not tested, 7+)
+# -aqua gtk gnome		GNOME2 (6.3-r1+, earlier uses GTK2)
+# -aqua gtk -gnome		GTK2
+# -aqua -gtk  motif		MOTIF
+# -aqua -gtk -motif nextaw	NEXTAW (7+)
+# -aqua -gtk -motif -nextaw	ATHENA
 
 # Variables used here that need to be set in the exheres:
 # VIM_VERSION = The version of the distributed main tarball (e.g. 7.1a)
@@ -37,7 +37,7 @@ export_exlib_phases pkg_setup src_unpack src_compile src_install src_test pkg_po
 MYOPTIONS="nls"
 #DEPENDENCIES="
 #    build,run:
-#        nls? ( sys-devel/gettext )"
+#	 nls? ( sys-devel/gettext )"
 
 if [[ "${PN}" == "vim-runtime" ]] ; then
 	MYOPTIONS="${MYOPTIONS} livecd"
@@ -45,27 +45,27 @@ else
 	#MYOPTIONS="${MYOPTIONS} cscope gpm perl python ruby"
 	MYOPTIONS="${MYOPTIONS} perl python"
 	DEPENDENCIES="${DEPENDENCIES}
-        build,run:
+	build,run:
 		    perl?    ( dev-lang/perl )
 		    python?  ( dev-lang/python )"
-    		#cscope?  ( dev-util/cscope )
-	    	#gpm?     ( >=sys-libs/gpm-1.19.3 )
-    		#acl?     ( kernel_linux? ( sys-apps/acl ) )
-	    	#ruby?    ( virtual/ruby )
+		#cscope?  ( dev-util/cscope )
+		#gpm?	  ( >=sys-libs/gpm-1.19.3 )
+		#acl?	  ( kernel_linux? ( sys-apps/acl ) )
+		#ruby?	  ( virtual/ruby )
 
 	if [[ "${PN}" == "vim" ]] ; then
 		#MYOPTIONS="${MYOPTIONS} vim-with-x minimal"
 		MYOPTIONS="${MYOPTIONS} minimal"
 		#DEPENDENCIES="${DEPENDENCIES}
-        #    build:
-        #        vim-with-x? (
-        #            x11-libs/libXt
-        #            x11-libs/libX11
-        #            x11-libs/libSM
-        #            x11-proto/xproto
-        #            )
+	#    build:
+	#	 vim-with-x? (
+	#	     x11-libs/libXt
+	#	     x11-libs/libX11
+	#	     x11-libs/libSM
+	#	     x11-proto/xproto
+	#	     )
 		#    run:
-        #        vim-with-x? ( x11-libs/libXt )"
+	#	 vim-with-x? ( x11-libs/libXt )"
 	#elif [[ "${PN}" == "gvim" ]] ; then
 	#	MYOPTIONS="${MYOPTIONS} gnome gtk motif"
 	fi
@@ -74,8 +74,8 @@ fi
 #if [[ "${PN}" == "gvim" ]] ; then
 #    MYOPTIONS="${MYOPTIONS} netbeans aqua nextaw"
 #    DEPENDENCIES="${DEPENDENCIES}
-#        build,run:
-#            netbeans? ( dev-util/netbeans )"
+#	 build,run:
+#	     netbeans? ( dev-util/netbeans )"
 #fi
 if [[ "${PN}" == "vim" ]] ; then
     MYOPTIONS="${MYOPTIONS} vim-pager"
@@ -85,18 +85,18 @@ fi
 #if [[ "${PN}" != "vim-runtime" ]] ; then
 #    # align: bug 79982
 #    DEPENDENCIES="${DEPENDENCIES}
-#        run:
-#            !<app-vim/align-30-r1
-#            !app-vim/vimspell
-#            !<app-vim/vimbuddy-0.9.1-r1
-#            !<app-vim/autoalign-11
-#            !<app-vim/supertab-0.41"
+#	 run:
+#	     !<app-vim/align-30-r1
+#	     !app-vim/vimspell
+#	     !<app-vim/vimbuddy-0.9.1-r1
+#	     !<app-vim/autoalign-11
+#	     !<app-vim/supertab-0.41"
 #fi
 
 # eselect-vi support
 DEPENDENCIES="${DEPENDENCIES}
     build,run:
-        >=app-admin/eselect-vi-1.1"
+	>=app-admin/eselect-vi-1.1"
 
 HOMEPAGE="http://www.vim.org/"
 LICENSE="vim"
@@ -105,10 +105,10 @@ LICENSE="vim"
 # with detection of exuberant-ctags by configure.
 DEPENDENCIES="${DEPENDENCIES}
     build:
-    	>=sys-apps/sed-4
+	>=sys-apps/sed-4
 	    sys-devel/autoconf
     run,build:
-    	dev-util/ctags
+	dev-util/ctags
 	    >=sys-libs/ncurses-5.2-r2"
 
 vim_pkg_setup() {
@@ -128,18 +128,18 @@ vim_src_unpack() {
 
     # Apply any patches available from vim.org for this version
     for ((i=1; i<=VIM_PATCH_LEVEL; i++)); do
-        p=$(printf "vim-patch-${VIM_VERSION}.%03d\n" "${i}")
-        ebegin "Applying ${p}"
-        patch -p0 -s -f < "${FETCHEDDIR}/${p}" || die "patch failed"
-        eend 0
+	p=$(printf "vim-patch-${VIM_VERSION}.%03d\n" "${i}")
+	ebegin "Applying ${p}"
+	patch -p0 -s -f < "${FETCHEDDIR}/${p}" || die "patch failed"
+	eend 0
     done
 
 	# Another set of patches borrowed from src rpm to fix syntax errors etc.
     for p in "${WORKDIR}"/patches/* ; do
-        [[ -f "${p}" ]] || continue
-        ebegin "Applying $(basename ${p})"
-        patch -p0 -s -f < "${p}" || die "patch failed"
-        eend 0
+	[[ -f "${p}" ]] || continue
+	ebegin "Applying $(basename ${p})"
+	patch -p0 -s -f < "${p}" || die "patch failed"
+	eend 0
     done
 
 	# Fixup a script to use awk instead of nawk
@@ -233,16 +233,16 @@ vim_src_compile() {
 	else
 		myconf="--with-features=huge \
 			--enable-multibyte \
-            --disable-gpm \
-            --disable-rubyinterp"
+	    --disable-gpm \
+	    --disable-rubyinterp"
 		#myconf="${myconf} `option_enable cscope`"
 		#myconf="${myconf} `option_enable gpm`"
 		myconf="${myconf} `option_enable perl perlinterp`"
 		myconf="${myconf} `option_enable python pythoninterp`"
 		#myconf="${myconf} `option_enable ruby rubyinterp`"
-        #if [[ "${PN}" == "gvim" ]] ; then
-        #    myconf="${myconf} `option_enable netbeans`"
-        #fi
+	#if [[ "${PN}" == "gvim" ]] ; then
+	#    myconf="${myconf} `option_enable netbeans`"
+	#fi
 
 		# --with-features=huge forces on cscope even if we --disable it. We need
 		# to sed this out to avoid screwiness. (1 Sep 2004 ciaranm)
@@ -255,7 +255,7 @@ vim_src_compile() {
 			# don't test USE=X here ... see bug #19115
 			# but need to provide a way to link against X ... see bug #20093
 			#myconf="${myconf} --enable-gui=no `option_with vim-with-x x`"
-            myconf="${myconf} --enable-gui=no"
+	    myconf="${myconf} --enable-gui=no"
 
 		#elif [[ "${PN}" == "gvim" ]] ; then
 		#	myconf="${myconf} --with-vim-name=gvim --with-x"
@@ -265,14 +265,14 @@ vim_src_compile() {
 		#		einfo "Building gvim with the Carbon GUI"
 		#		myconf="${myconf} --enable-gui=carbon"
 		#	elif option gtk ; then
-        #        myconf="${myconf} --enable-gtk2-check"
-        #        if option gnome ; then
-        #            einfo "Building gvim with the Gnome 2 GUI"
-        #            myconf="${myconf} --enable-gui=gnome2"
-        #        else
-        #            einfo "Building gvim with the gtk+-2 GUI"
-        #            myconf="${myconf} --enable-gui=gtk2"
-        #        fi
+	#	 myconf="${myconf} --enable-gtk2-check"
+	#	 if option gnome ; then
+	#	     einfo "Building gvim with the Gnome 2 GUI"
+	#	     myconf="${myconf} --enable-gui=gnome2"
+	#	 else
+	#	     einfo "Building gvim with the gtk+-2 GUI"
+	#	     myconf="${myconf} --enable-gui=gtk2"
+	#	 fi
 		#	elif option motif ; then
 		#		einfo "Building gvim with the MOTIF GUI"
 		#		myconf="${myconf} --enable-gui=motif"
@@ -331,20 +331,20 @@ vim_src_install() {
 	if [[ "${PN}" == "vim-runtime" ]] ; then
 		dodir /usr/{bin,share/{man/man1,vim}}
 		cd src || die "cd src failed"
-        emake \
-            installruntime \
-            installmanlinks \
-            installmacros \
-            installtutor \
-            installtutorbin \
-            installtools \
-            install-languages \
-            install-icons \
-            DESTDIR=${D} \
-            BINDIR=/usr/bin \
-            MANDIR=/usr/share/man \
-            DATADIR=/usr/share \
-            || die "install failed"
+	emake \
+	    installruntime \
+	    installmanlinks \
+	    installmacros \
+	    installtutor \
+	    installtutorbin \
+	    installtools \
+	    install-languages \
+	    install-icons \
+	    DESTDIR=${D} \
+	    BINDIR=/usr/bin \
+	    MANDIR=/usr/share/man \
+	    DATADIR=/usr/share \
+	    || die "install failed"
 
 		keepdir /usr/share/vim/vim${VIM_VERSION/./}/keymap
 
@@ -384,15 +384,15 @@ vim_src_install() {
 		dosym gvim /usr/bin/evim
 		dosym gvim /usr/bin/eview
 		# bug #74349 says we should install these
-        dosym gvim /usr/bin/gview
-        dosym gvim /usr/bin/rgvim
-        dosym gvim /usr/bin/rgview
+	dosym gvim /usr/bin/gview
+	dosym gvim /usr/bin/rgvim
+	dosym gvim /usr/bin/rgview
 
 		dosym vim.1.gz /usr/share/man/man1/gvim.1.gz
 		dosym vim.1.gz /usr/share/man/man1/gview.1.gz
 		dosym vimdiff.1.gz /usr/share/man/man1/gvimdiff.1.gz
 
-    	insinto /etc/vim
+	insinto /etc/vim
 		newins ${FILESDIR}/gvimrc${GVIMRC_FILE_SUFFIX} gvimrc
 
 		# as of 6.3-r1, we install a desktop entry. bug #44633, and bug #68622
@@ -423,9 +423,9 @@ vim_src_install() {
 
 	# bash completion script, bug #79018.
     if [[ "${PN}" == "vim-runtime" ]] ; then
-        dobashcompletion ${FILESDIR}/xxd-completion xxd
+	dobashcompletion ${FILESDIR}/xxd-completion xxd
     else
-        dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
+	dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
     fi
 
     # We shouldn't be installing the ex or view man page symlinks, as they
@@ -479,9 +479,9 @@ vim_pkg_postinst() {
 	#fi
 
     #if [[ "${PN}" == "vim" ]] ; then
-    #    echo
-    #    elog "To install a GUI version of vim, use the app-editors/gvim"
-    #    elog "package."
+    #	 echo
+    #	 elog "To install a GUI version of vim, use the app-editors/gvim"
+    #	 elog "package."
     #fi
     #echo
     #elog "Vim 7 includes an integrated spell checker. You need to install"
