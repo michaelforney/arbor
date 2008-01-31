@@ -87,8 +87,8 @@ export_exlib_phases pkg_setup pkg_preinst pkg_postinst pkg_prerm pkg_postrm src_
 # and it will set your HOMEPAGE and SRC_URI correctly for a CPAN package.
 
 if [ -z "${HOMEPAGE}" -a -z "${SRC_URI}" -a -n "${MODULE_AUTHOR}" ]; then
-	HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
-	SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}.tar.gz"
+    HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
+    SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}.tar.gz"
 fi
 
 SRC_PREP="no"
@@ -106,204 +106,204 @@ BUILDER_VER=""
 pm_echovar=""
 
 perl-module_src_unpack() {
-	if [[ -n ${PATCHES} ]]; then
-		base_src_unpack unpack
-		base_src_unpack autopatch
-	else
-		base_src_unpack unpack
-	fi
+    if [[ -n ${PATCHES} ]]; then
+        base_src_unpack unpack
+        base_src_unpack autopatch
+    else
+        base_src_unpack unpack
+    fi
 }
 
 perl-module_src_prep() {
 
-	perlinfo
+    perlinfo
 
-	export PERL_MM_USE_DEFAULT=1
-	# Disable ExtUtils::AutoInstall from prompting
-	export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
+    export PERL_MM_USE_DEFAULT=1
+    # Disable ExtUtils::AutoInstall from prompting
+    export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
 
 
-	SRC_PREP="yes"
-	find ${S} -type d -name "\.svn" -exec /bin/rm -rf {} \; 2>/dev/null
-	if [ "${PREFER_BUILDPL}" == "yes" ] && ( [ -f Build.PL ] || [ ${PN} == "module-build" ] ); then
-		einfo "Using Module::Build"
-		echo "$pm_echovar" | perl Build.PL ${myconf} --installdirs=vendor --destdir=${D} --libdoc= || die "Unable to build! (are you using USE=\"build\"?)"
-	elif [ -f Makefile.PL ] && [ ! ${PN} == "module-build" ]; then
-		einfo "Using ExtUtils::MakeMaker"
-		echo "$pm_echovar" | perl Makefile.PL ${myconf} INSTALLMAN3DIR='none'\
-		PREFIX=/usr INSTALLDIRS=vendor DESTDIR=${D} || die "Unable to build! (are you using USE=\"build\"?)"
-	fi
-	if [ ! -f Build.PL ] && [ ! -f Makefile.PL ]; then
-		einfo "No Make or Build file detected..."
-		return
-	fi
+    SRC_PREP="yes"
+    find ${S} -type d -name "\.svn" -exec /bin/rm -rf {} \; 2>/dev/null
+    if [ "${PREFER_BUILDPL}" == "yes" ] && ( [ -f Build.PL ] || [ ${PN} == "module-build" ] ); then
+        einfo "Using Module::Build"
+        echo "$pm_echovar" | perl Build.PL ${myconf} --installdirs=vendor --destdir=${D} --libdoc= || die "Unable to build! (are you using USE=\"build\"?)"
+    elif [ -f Makefile.PL ] && [ ! ${PN} == "module-build" ]; then
+        einfo "Using ExtUtils::MakeMaker"
+        echo "$pm_echovar" | perl Makefile.PL ${myconf} INSTALLMAN3DIR='none'\
+        PREFIX=/usr INSTALLDIRS=vendor DESTDIR=${D} || die "Unable to build! (are you using USE=\"build\"?)"
+    fi
+    if [ ! -f Build.PL ] && [ ! -f Makefile.PL ]; then
+        einfo "No Make or Build file detected..."
+        return
+    fi
 }
 
 perl-module_src_compile() {
 
-	perlinfo
-	[ "${SRC_PREP}" != "yes" ] && perl-module_src_prep
-	if [ -f Makefile ]; then
-		make ${mymake} || die "compilation failed"
-	elif [ -f Build ]; then
-		perl Build build || die "compilation failed"
-	fi
-	fixlocalpod
+    perlinfo
+    [ "${SRC_PREP}" != "yes" ] && perl-module_src_prep
+    if [ -f Makefile ]; then
+        make ${mymake} || die "compilation failed"
+    elif [ -f Build ]; then
+        perl Build build || die "compilation failed"
+    fi
+    fixlocalpod
 
 }
 
 perl-module_src_test() {
-	if [ "${SRC_TEST}" == "do" ]; then
-		perlinfo
-		if [ -f Makefile ]; then
-			make test || die "test failed"
-		elif [ -f Build ]; then
-			perl Build  test || die "test failed"
-		fi
-	fi
+    if [ "${SRC_TEST}" == "do" ]; then
+        perlinfo
+        if [ -f Makefile ]; then
+            make test || die "test failed"
+        elif [ -f Build ]; then
+            perl Build  test || die "test failed"
+        fi
+    fi
 }
 
 perl-module_src_install() {
 
-	perlinfo
+    perlinfo
 
-	test -z ${mytargets} && mytargets="install"
+    test -z ${mytargets} && mytargets="install"
 
-	if [ -f Makefile ]; then
-		make ${myinst} ${mytargets} || die
-	elif [ -f Build ]; then
-		perl ${S}/Build install
-	fi
+    if [ -f Makefile ]; then
+        make ${myinst} ${mytargets} || die
+    elif [ -f Build ]; then
+        perl ${S}/Build install
+    fi
 
 
-	einfo "Cleaning out stray man files"
-	for FILE in `find ${D} -type f -name "*.3pm*"`; do
-		rm -rf ${FILE}
-	done
-	find ${D}/usr/share/man -depth -type d 2>/dev/null | xargs -r rmdir 2>/dev/null
+    einfo "Cleaning out stray man files"
+    for FILE in `find ${D} -type f -name "*.3pm*"`; do
+        rm -rf ${FILE}
+    done
+    find ${D}/usr/share/man -depth -type d 2>/dev/null | xargs -r rmdir 2>/dev/null
 
-	fixlocalpod
+    fixlocalpod
 
-	for FILE in `find ${D} -type f |grep -v '.so'`; do
-		STAT=`file $FILE| grep -i " text"`
-		if [ "${STAT}x" != "x" ]; then
-			sed -i -e "s:${D}:/:g" ${FILE}
-		fi
-	done
+    for FILE in `find ${D} -type f |grep -v '.so'`; do
+        STAT=`file $FILE| grep -i " text"`
+        if [ "${STAT}x" != "x" ]; then
+            sed -i -e "s:${D}:/:g" ${FILE}
+        fi
+    done
 
-	for doc in Change* MANIFEST* README* ${mydoc}; do
-		[ -s "$doc" ] && dodoc $doc
-	done
+    for doc in Change* MANIFEST* README* ${mydoc}; do
+        [ -s "$doc" ] && dodoc $doc
+    done
 }
 
 
 perl-module_pkg_setup() {
 
-	perlinfo
+    perlinfo
 }
 
 
 perl-module_pkg_preinst() {
 
-	perlinfo
+    perlinfo
 }
 
 perl-module_pkg_postinst() {
 
-	einfo "Man pages are not installed for most modules now."
-	einfo "Please use perldoc instead."
-	updatepod
+    einfo "Man pages are not installed for most modules now."
+    einfo "Please use perldoc instead."
+    updatepod
 }
 
 perl-module_pkg_prerm() {
 
-	updatepod
+    updatepod
 }
 
 perl-module_pkg_postrm() {
 
-	updatepod
+    updatepod
 }
 
 perlinfo() {
 
-	local version
-	eval `perl '-V:version'`
-	PERL_VERSION=${version}
+    local version
+    eval `perl '-V:version'`
+    PERL_VERSION=${version}
 
-	local installsitearch
-	eval `perl '-V:installsitearch'`
-	SITE_ARCH=${installsitearch}
+    local installsitearch
+    eval `perl '-V:installsitearch'`
+    SITE_ARCH=${installsitearch}
 
-	local installsitelib
-	eval `perl '-V:installsitelib'`
-	SITE_LIB=${installsitelib}
+    local installsitelib
+    eval `perl '-V:installsitelib'`
+    SITE_LIB=${installsitelib}
 
-	local installarchlib
-	eval `perl '-V:installarchlib'`
-	ARCH_LIB=${installarchlib}
+    local installarchlib
+    eval `perl '-V:installarchlib'`
+    ARCH_LIB=${installarchlib}
 
-	local installvendorlib
-	eval `perl '-V:installvendorlib'`
-	VENDOR_LIB=${installvendorlib}
+    local installvendorlib
+    eval `perl '-V:installvendorlib'`
+    VENDOR_LIB=${installvendorlib}
 
-	local installvendorarch
-	eval `perl '-V:installvendorarch'`
-	VENDOR_ARCH=${installvendorarch}
+    local installvendorarch
+    eval `perl '-V:installvendorarch'`
+    VENDOR_ARCH=${installvendorarch}
 
-	if [ "${PREFER_BUILDPL}" == "yes" ]; then
-		if [ ! -f ${S}/Makefile.PL ] || [ ${PN} == "module-build" ]; then
-			if [ -f ${S}/Build.PL ]; then
-				if [ ${PN} == "module-build" ]; then
-					BUILDER_VER="1" # A bootstrapping if you will
-				else
-					BUILDER_VER=`perl -MModule::Build -e 'print "$Module::Build::VERSION;"' `
-				fi
-			fi
-		fi
-	fi
+    if [ "${PREFER_BUILDPL}" == "yes" ]; then
+        if [ ! -f ${S}/Makefile.PL ] || [ ${PN} == "module-build" ]; then
+            if [ -f ${S}/Build.PL ]; then
+                if [ ${PN} == "module-build" ]; then
+                    BUILDER_VER="1" # A bootstrapping if you will
+                else
+                    BUILDER_VER=`perl -MModule::Build -e 'print "$Module::Build::VERSION;"' `
+                fi
+            fi
+        fi
+    fi
 
-	if [ -f /usr/bin/perl ]
-	then
-		POD_DIR="/usr/share/perl/gentoo-pods/${version}"
-	fi
+    if [ -f /usr/bin/perl ]
+    then
+        POD_DIR="/usr/share/perl/gentoo-pods/${version}"
+    fi
 }
 
 fixlocalpod() {
-	perlinfo
+    perlinfo
 
-	if [ -f ${D}${ARCH_LIB}/perllocal.pod ];
-	then
-		rm -f ${D}/${ARCH_LIB}/perllocal.pod
-	fi
+    if [ -f ${D}${ARCH_LIB}/perllocal.pod ];
+    then
+        rm -f ${D}/${ARCH_LIB}/perllocal.pod
+    fi
 
-	if [ -f ${D}${SITE_LIB}/perllocal.pod ];
-	then
-		rm -f ${D}/${SITE_LIB}/perllocal.pod
-	fi
+    if [ -f ${D}${SITE_LIB}/perllocal.pod ];
+    then
+        rm -f ${D}/${SITE_LIB}/perllocal.pod
+    fi
 
-	if [ -f ${D}${VENDOR_LIB}/perllocal.pod ];
-	then
-		rm -f ${D}/${VENDOR_LIB}/perllocal.pod
-	fi
+    if [ -f ${D}${VENDOR_LIB}/perllocal.pod ];
+    then
+        rm -f ${D}/${VENDOR_LIB}/perllocal.pod
+    fi
 }
 
 updatepod() {
-	perlinfo
+    perlinfo
 
-	if [ -d "${POD_DIR}" ]
-	then
-		for FILE in `find ${POD_DIR} -type f -name "*.pod.arch"`; do
-			cat ${FILE} >> ${ARCH_LIB}/perllocal.pod
-			rm -f ${FILE}
-		done
-		for FILE in `find ${POD_DIR} -type f -name "*.pod.site"`; do
-			cat ${FILE} >> ${SITE_LIB}/perllocal.pod
-			rm -f ${FILE}
-		done
-		for FILE in `find ${POD_DIR} -type f -name "*.pod.vendor"`; do
-			cat ${FILE} >> ${VENDOR_LIB}/perllocal.pod
-			rm -f ${FILE}
-		done
-	fi
+    if [ -d "${POD_DIR}" ]
+    then
+        for FILE in `find ${POD_DIR} -type f -name "*.pod.arch"`; do
+            cat ${FILE} >> ${ARCH_LIB}/perllocal.pod
+            rm -f ${FILE}
+        done
+        for FILE in `find ${POD_DIR} -type f -name "*.pod.site"`; do
+            cat ${FILE} >> ${SITE_LIB}/perllocal.pod
+            rm -f ${FILE}
+        done
+        for FILE in `find ${POD_DIR} -type f -name "*.pod.vendor"`; do
+            cat ${FILE} >> ${VENDOR_LIB}/perllocal.pod
+            rm -f ${FILE}
+        done
+    fi
 }

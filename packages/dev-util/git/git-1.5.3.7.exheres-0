@@ -17,10 +17,10 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build,run:
-	app-arch/cpio
-	dev-lang/perl
-	sys-libs/zlib
-	dev-libs/openssl"
+    app-arch/cpio
+    dev-lang/perl
+    sys-libs/zlib
+    dev-libs/openssl"
 
 src_unpack()
 {
@@ -36,11 +36,11 @@ src_install()
     doman man?/*
 
     dodoc README Documentation/{SubmittingPatches,CodingGuidelines}
-	for d in / /howto/ /technical/ ; do
-		docinto ${d}
-		dodoc Documentation${d}*.txt
-	done
-	docinto /
+    for d in / /howto/ /technical/ ; do
+        docinto ${d}
+        dodoc Documentation${d}*.txt
+    done
+    docinto /
 
     dobashcompletion contrib/completion/git-completion.bash ${PN}
 }

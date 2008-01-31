@@ -4,7 +4,7 @@
 
 # Author :     Alastair Tse <liquidx@gentoo.org> (03 Oct 2003)
 # Short Desc:  Creates symlink to the latest version of multiple slotted
-#	       packages.
+#          packages.
 #
 # Long Desc:
 #
@@ -48,81 +48,81 @@
 export_exlib_phases pkg_postinst pkg_postrm
 
 alternatives_auto_makesym() {
-	local SYMLINK REGEX ALT myregex
-	SYMLINK=$1
-	REGEX=$2
-	if [ "${REGEX:0:1}" != "/" ]
-	then
-		#not an absolute path:
-		#inherit the root directory of our main link path for our regex search
-		myregex="${SYMLINK%/*}/${REGEX}"
-	else
-		myregex=${REGEX}
-	fi
+    local SYMLINK REGEX ALT myregex
+    SYMLINK=$1
+    REGEX=$2
+    if [ "${REGEX:0:1}" != "/" ]
+    then
+        #not an absolute path:
+        #inherit the root directory of our main link path for our regex search
+        myregex="${SYMLINK%/*}/${REGEX}"
+    else
+        myregex=${REGEX}
+    fi
 
-	# sort a space delimited string by converting it to a multiline list
-	# and then run sort -r over it.
-	# make sure we use ${ROOT} because otherwise stage-building will break
-	ALT="$(for i in $(echo ${ROOT}${myregex}); do echo ${i#${ROOT}}; done | sort -r)"
-	alternatives_makesym ${SYMLINK} ${ALT}
+    # sort a space delimited string by converting it to a multiline list
+    # and then run sort -r over it.
+    # make sure we use ${ROOT} because otherwise stage-building will break
+    ALT="$(for i in $(echo ${ROOT}${myregex}); do echo ${i#${ROOT}}; done | sort -r)"
+    alternatives_makesym ${SYMLINK} ${ALT}
 }
 
 alternatives_makesym() {
-	local ALTERNATIVES=""
-	local SYMLINK=""
-	local alt pref
+    local ALTERNATIVES=""
+    local SYMLINK=""
+    local alt pref
 
-	# usage: alternatives_makesym <resulting symlink> [alternative targets..]
-	SYMLINK=$1
-	# this trick removes the trailing / from ${ROOT}
-	pref=$(echo ${ROOT} | sed 's:/$::')
-	shift
-	ALTERNATIVES=$@
+    # usage: alternatives_makesym <resulting symlink> [alternative targets..]
+    SYMLINK=$1
+    # this trick removes the trailing / from ${ROOT}
+    pref=$(echo ${ROOT} | sed 's:/$::')
+    shift
+    ALTERNATIVES=$@
 
-	# step through given alternatives from first to last
-	# and if one exists, link it and finish.
+    # step through given alternatives from first to last
+    # and if one exists, link it and finish.
 
-	for alt in ${ALTERNATIVES}; do
-		if [ -f "${pref}${alt}" ]; then
-			#are files in same directory?
-			if [ "${alt%/*}" = "${SYMLINK%/*}" ]
-			then
-				#yes; strip leading dirname from alt to create relative symlink
-				einfo "Linking ${alt} to ${pref}${SYMLINK} (relative)"
-				ln -sf ${alt##*/} ${pref}${SYMLINK}
-			else
-				#no; keep absolute path
-				einfo "Linking ${alt} to ${pref}${SYMLINK} (absolute)"
-				ln -sf ${pref}${alt} ${pref}${SYMLINK}
-			fi
-			break
-		fi
-	done
+    for alt in ${ALTERNATIVES}; do
+        if [ -f "${pref}${alt}" ]; then
+            #are files in same directory?
+            if [ "${alt%/*}" = "${SYMLINK%/*}" ]
+            then
+                #yes; strip leading dirname from alt to create relative symlink
+                einfo "Linking ${alt} to ${pref}${SYMLINK} (relative)"
+                ln -sf ${alt##*/} ${pref}${SYMLINK}
+            else
+                #no; keep absolute path
+                einfo "Linking ${alt} to ${pref}${SYMLINK} (absolute)"
+                ln -sf ${pref}${alt} ${pref}${SYMLINK}
+            fi
+            break
+        fi
+    done
 
-	# report any errors
-	if [ ! -L ${pref}${SYMLINK} ]; then
-		ewarn "Unable to establish ${pref}${SYMLINK} symlink"
-	else
-		# we need to check for either the target being in relative path form
-		# or absolute path form
-		if [ ! -f "`dirname ${pref}${SYMLINK}`/`readlink ${pref}${SYMLINK}`" -a \
-			 ! -f "`readlink ${pref}${SYMLINK}`" ]; then
-			ewarn "Removing dead symlink ${pref}${SYMLINK}"
-			rm -f ${pref}${SYMLINK}
-		fi
-	fi
+    # report any errors
+    if [ ! -L ${pref}${SYMLINK} ]; then
+        ewarn "Unable to establish ${pref}${SYMLINK} symlink"
+    else
+        # we need to check for either the target being in relative path form
+        # or absolute path form
+        if [ ! -f "`dirname ${pref}${SYMLINK}`/`readlink ${pref}${SYMLINK}`" -a \
+             ! -f "`readlink ${pref}${SYMLINK}`" ]; then
+            ewarn "Removing dead symlink ${pref}${SYMLINK}"
+            rm -f ${pref}${SYMLINK}
+        fi
+    fi
 }
 
 alternatives_pkg_postinst() {
-	if [ -n "${ALTERNATIVES}" -a -n "${SOURCE}" ]; then
-		alternatives_makesym ${SOURCE} ${ALTERNATIVES}
-	fi
+    if [ -n "${ALTERNATIVES}" -a -n "${SOURCE}" ]; then
+        alternatives_makesym ${SOURCE} ${ALTERNATIVES}
+    fi
 }
 
 alternatives_pkg_postrm() {
-	if [ -n "${ALTERNATIVES}" -a -n "${SOURCE}" ]; then
-		alternatives_makesym ${SOURCE} ${ALTERNATIVES}
-	fi
+    if [ -n "${ALTERNATIVES}" -a -n "${SOURCE}" ]; then
+        alternatives_makesym ${SOURCE} ${ALTERNATIVES}
+    fi
 }
 
 

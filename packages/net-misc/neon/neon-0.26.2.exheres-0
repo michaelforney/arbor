@@ -18,15 +18,15 @@ src_compile() {
     local myconf
 
     if option ssl; then
-	myconf="${myconf} --with-ssl=openssl"
+    myconf="${myconf} --with-ssl=openssl"
     else
-	myconf="${myconf} --without-ssl"
+    myconf="${myconf} --without-ssl"
     fi
 
     econf \
-	--enable-shared \
-	${myconf} \
-	    || die "Configure failed."
+    --enable-shared \
+    ${myconf} \
+        || die "Configure failed."
     emake || die "Make failed."
 }
 

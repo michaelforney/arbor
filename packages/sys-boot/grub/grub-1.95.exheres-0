@@ -12,15 +12,15 @@ PLATFORMS="~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
-	build:
-		sys-devel/make
-		sys-devel/bison
-		app-arch/lzo"
+    build:
+        sys-devel/make
+        sys-devel/bison
+        app-arch/lzo"
 
 src_compile() {
     econf \
-	--prefix=/ \
-	|| die "Configure failed."
+    --prefix=/ \
+    || die "Configure failed."
     emake -j1 || die "Make failed."
 }
 

@@ -13,16 +13,16 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 
 DEPENDENCIES="build:
-		sys-devel/make
-		>=dev-libs/gmp-4.1
-		dev-libs/mpfr"
+        sys-devel/make
+        >=dev-libs/gmp-4.1
+        dev-libs/mpfr"
 
 OBJDIR="${T}/${CHOST}"
 
 src_unpack() {
-	unpack ${A}
-	# fix for gcc bug #31899. this will be fixed upstream in gcc 4.2.3
-	epatch "${FILESDIR}/${P}-ICE-fix.patch"
+    unpack ${A}
+    # fix for gcc bug #31899. this will be fixed upstream in gcc 4.2.3
+    epatch "${FILESDIR}/${P}-ICE-fix.patch"
 }
 
 src_compile() {
@@ -31,18 +31,18 @@ src_compile() {
 
     LANGS="c++"
     for i in ada fortran objc obj-c++ java; do
-	option ${i} && LANGS="${LANGS} ${i}"
+    option ${i} && LANGS="${LANGS} ${i}"
     done
     LANGS="${LANGS/ /,}"
 
     "${S}/configure" \
-	--prefix=/usr \
-	--infodir=/usr/share/info \
-	--enable-languages="${LANGS}" \
-	$(option_enable propolice libssp) \
-	$(option_enable nls) \
-	--disable-multilib \
-	|| die "Configure failed."
+    --prefix=/usr \
+    --infodir=/usr/share/info \
+    --enable-languages="${LANGS}" \
+    $(option_enable propolice libssp) \
+    $(option_enable nls) \
+    --disable-multilib \
+    || die "Configure failed."
     emake bootstrap || die "Make failed."
 }
 

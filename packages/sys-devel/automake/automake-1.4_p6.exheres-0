@@ -18,10 +18,10 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_unpack() {
-	unpack ${A}
-	cd "${S}"
-	epatch "${FILESDIR}/${PN}-1.4-ansi2knr-stdlib.patch"
-	sed -i 's:error\.test::' tests/Makefile.in || die "Sed failed to disable error.test"
+    unpack ${A}
+    cd "${S}"
+    epatch "${FILESDIR}/${PN}-1.4-ansi2knr-stdlib.patch"
+    sed -i 's:error\.test::' tests/Makefile.in || die "Sed failed to disable error.test"
 }
 
 src_compile() {

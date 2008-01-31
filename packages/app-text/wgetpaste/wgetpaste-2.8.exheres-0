@@ -12,14 +12,14 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="run:
-		sys-apps/sed
-				net-misc/wget"
+        sys-apps/sed
+                net-misc/wget"
 
 src_unpack() {
-	unpack ${A}
-	patch "${P}" < "${FILESDIR}"/zlin.patch || die "Patch failed"
+    unpack ${A}
+    patch "${P}" < "${FILESDIR}"/zlin.patch || die "Patch failed"
 }
 
 src_install() {
-	newbin "${WORKDIR}/${P}" "${PN}" || die "Install failed"
+    newbin "${WORKDIR}/${P}" "${PN}" || die "Install failed"
 }

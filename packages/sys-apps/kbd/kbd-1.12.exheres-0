@@ -13,12 +13,12 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_compile() {
-	./configure || die "Configure failed."
-	emake || die "Make failed."
+    ./configure || die "Configure failed."
+    emake || die "Make failed."
 }
 
 src_install() {
-	emake DESTDIR="${D}" install || die "Install failed."
-	dodoc CHANGES CREDITS README
-	cp -r doc/* ${D}/usr/share/doc/${P}/
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc CHANGES CREDITS README
+    cp -r doc/* ${D}/usr/share/doc/${P}/
 }

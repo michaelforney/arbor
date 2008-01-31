@@ -3,23 +3,23 @@
 # Distributed under the terms of the GNU General Public License v2
 
 # Authors:
-#	Ryan Phillips <rphillips@gentoo.org>
-#	Seemant Kulleen <seemant@gentoo.org>
-#	Aron Griffis <agriffis@gentoo.org>
-#	Ciaran McCreesh <ciaranm@gentoo.org>
-#	Mike Kelly <pioto@exherbo.org>
+#   Ryan Phillips <rphillips@gentoo.org>
+#   Seemant Kulleen <seemant@gentoo.org>
+#   Aron Griffis <agriffis@gentoo.org>
+#   Ciaran McCreesh <ciaranm@gentoo.org>
+#   Mike Kelly <pioto@exherbo.org>
 
 # Look for TODO around here for things that still need doing...
 
 # This exlib handles vim, gvim and vim-runtime.
 
 # gvim's GUI preference order is as follows:
-# aqua				CARBON (not tested, 7+)
-# -aqua gtk gnome		GNOME2 (6.3-r1+, earlier uses GTK2)
-# -aqua gtk -gnome		GTK2
-# -aqua -gtk  motif		MOTIF
-# -aqua -gtk -motif nextaw	NEXTAW (7+)
-# -aqua -gtk -motif -nextaw	ATHENA
+# aqua              CARBON (not tested, 7+)
+# -aqua gtk gnome       GNOME2 (6.3-r1+, earlier uses GTK2)
+# -aqua gtk -gnome      GTK2
+# -aqua -gtk  motif     MOTIF
+# -aqua -gtk -motif nextaw  NEXTAW (7+)
+# -aqua -gtk -motif -nextaw ATHENA
 
 # Variables used here that need to be set in the exheres:
 # VIM_VERSION = The version of the distributed main tarball (e.g. 7.1a)
@@ -37,45 +37,45 @@ export_exlib_phases pkg_setup src_unpack src_compile src_install src_test pkg_po
 MYOPTIONS="nls"
 #DEPENDENCIES="
 #    build,run:
-#	 nls? ( sys-devel/gettext )"
+#    nls? ( sys-devel/gettext )"
 
 if [[ "${PN}" == "vim-runtime" ]] ; then
-	MYOPTIONS="${MYOPTIONS} livecd"
+    MYOPTIONS="${MYOPTIONS} livecd"
 else
-	#MYOPTIONS="${MYOPTIONS} cscope gpm perl python ruby"
-	MYOPTIONS="${MYOPTIONS} perl python"
-	DEPENDENCIES="${DEPENDENCIES}
-	build,run:
-		    perl?    ( dev-lang/perl )
-		    python?  ( dev-lang/python )"
-		#cscope?  ( dev-util/cscope )
-		#gpm?	  ( >=sys-libs/gpm-1.19.3 )
-		#acl?	  ( kernel_linux? ( sys-apps/acl ) )
-		#ruby?	  ( virtual/ruby )
+    #MYOPTIONS="${MYOPTIONS} cscope gpm perl python ruby"
+    MYOPTIONS="${MYOPTIONS} perl python"
+    DEPENDENCIES="${DEPENDENCIES}
+    build,run:
+            perl?    ( dev-lang/perl )
+            python?  ( dev-lang/python )"
+        #cscope?  ( dev-util/cscope )
+        #gpm?     ( >=sys-libs/gpm-1.19.3 )
+        #acl?     ( kernel_linux? ( sys-apps/acl ) )
+        #ruby?    ( virtual/ruby )
 
-	if [[ "${PN}" == "vim" ]] ; then
-		#MYOPTIONS="${MYOPTIONS} vim-with-x minimal"
-		MYOPTIONS="${MYOPTIONS} minimal"
-		#DEPENDENCIES="${DEPENDENCIES}
-	#    build:
-	#	 vim-with-x? (
-	#	     x11-libs/libXt
-	#	     x11-libs/libX11
-	#	     x11-libs/libSM
-	#	     x11-proto/xproto
-	#	     )
-		#    run:
-	#	 vim-with-x? ( x11-libs/libXt )"
-	#elif [[ "${PN}" == "gvim" ]] ; then
-	#	MYOPTIONS="${MYOPTIONS} gnome gtk motif"
-	fi
+    if [[ "${PN}" == "vim" ]] ; then
+        #MYOPTIONS="${MYOPTIONS} vim-with-x minimal"
+        MYOPTIONS="${MYOPTIONS} minimal"
+        #DEPENDENCIES="${DEPENDENCIES}
+    #    build:
+    #    vim-with-x? (
+    #        x11-libs/libXt
+    #        x11-libs/libX11
+    #        x11-libs/libSM
+    #        x11-proto/xproto
+    #        )
+        #    run:
+    #    vim-with-x? ( x11-libs/libXt )"
+    #elif [[ "${PN}" == "gvim" ]] ; then
+    #   MYOPTIONS="${MYOPTIONS} gnome gtk motif"
+    fi
 fi
 
 #if [[ "${PN}" == "gvim" ]] ; then
 #    MYOPTIONS="${MYOPTIONS} netbeans aqua nextaw"
 #    DEPENDENCIES="${DEPENDENCIES}
-#	 build,run:
-#	     netbeans? ( dev-util/netbeans )"
+#    build,run:
+#        netbeans? ( dev-util/netbeans )"
 #fi
 if [[ "${PN}" == "vim" ]] ; then
     MYOPTIONS="${MYOPTIONS} vim-pager"
@@ -85,18 +85,18 @@ fi
 #if [[ "${PN}" != "vim-runtime" ]] ; then
 #    # align: bug 79982
 #    DEPENDENCIES="${DEPENDENCIES}
-#	 run:
-#	     !<app-vim/align-30-r1
-#	     !app-vim/vimspell
-#	     !<app-vim/vimbuddy-0.9.1-r1
-#	     !<app-vim/autoalign-11
-#	     !<app-vim/supertab-0.41"
+#    run:
+#        !<app-vim/align-30-r1
+#        !app-vim/vimspell
+#        !<app-vim/vimbuddy-0.9.1-r1
+#        !<app-vim/autoalign-11
+#        !<app-vim/supertab-0.41"
 #fi
 
 # eselect-vi support
 DEPENDENCIES="${DEPENDENCIES}
     build,run:
-	>=app-admin/eselect-vi-1.1"
+    >=app-admin/eselect-vi-1.1"
 
 HOMEPAGE="http://www.vim.org/"
 LICENSE="vim"
@@ -105,327 +105,327 @@ LICENSE="vim"
 # with detection of exuberant-ctags by configure.
 DEPENDENCIES="${DEPENDENCIES}
     build:
-	>=sys-apps/sed-4
-	    sys-devel/autoconf
+    >=sys-apps/sed-4
+        sys-devel/autoconf
     run,build:
-	dev-util/ctags
-	    >=sys-libs/ncurses-5.2-r2"
+    dev-util/ctags
+        >=sys-libs/ncurses-5.2-r2"
 
 vim_pkg_setup() {
-	# people with broken alphabets run into trouble. bug 82186.
-	unset LANG LC_ALL
-	export LC_COLLATE="C"
+    # people with broken alphabets run into trouble. bug 82186.
+    unset LANG LC_ALL
+    export LC_COLLATE="C"
 
-	# Gnome sandbox silliness. bug #114475.
-	mkdir -p "${T}/home"
-	export HOME="${T}/home"
+    # Gnome sandbox silliness. bug #114475.
+    mkdir -p "${T}/home"
+    export HOME="${T}/home"
 }
 
 vim_src_unpack() {
-	unpack --if-compressed ${A}
+    unpack --if-compressed ${A}
 
     cd "${S}" || die "cd ${S} failed"
 
     # Apply any patches available from vim.org for this version
     for ((i=1; i<=VIM_PATCH_LEVEL; i++)); do
-	p=$(printf "vim-patch-${VIM_VERSION}.%03d\n" "${i}")
-	ebegin "Applying ${p}"
-	patch -p0 -s -f < "${FETCHEDDIR}/${p}" || die "patch failed"
-	eend 0
+    p=$(printf "vim-patch-${VIM_VERSION}.%03d\n" "${i}")
+    ebegin "Applying ${p}"
+    patch -p0 -s -f < "${FETCHEDDIR}/${p}" || die "patch failed"
+    eend 0
     done
 
-	# Another set of patches borrowed from src rpm to fix syntax errors etc.
+    # Another set of patches borrowed from src rpm to fix syntax errors etc.
     for p in "${WORKDIR}"/patches/* ; do
-	[[ -f "${p}" ]] || continue
-	ebegin "Applying $(basename ${p})"
-	patch -p0 -s -f < "${p}" || die "patch failed"
-	eend 0
+    [[ -f "${p}" ]] || continue
+    ebegin "Applying $(basename ${p})"
+    patch -p0 -s -f < "${p}" || die "patch failed"
+    eend 0
     done
 
-	# Fixup a script to use awk instead of nawk
-	sed -i '1s|.*|#!/usr/bin/awk -f|' ${S}/runtime/tools/mve.awk \
-		|| die "mve.awk sed failed"
+    # Fixup a script to use awk instead of nawk
+    sed -i '1s|.*|#!/usr/bin/awk -f|' ${S}/runtime/tools/mve.awk \
+        || die "mve.awk sed failed"
 
-	# Patch to build with ruby-1.8.0_pre5 and following
-	sed -i 's/defout/stdout/g' ${S}/src/if_ruby.c || die "defout->stdout sed broke"
+    # Patch to build with ruby-1.8.0_pre5 and following
+    sed -i 's/defout/stdout/g' ${S}/src/if_ruby.c || die "defout->stdout sed broke"
 
-	# Read vimrc and gvimrc from /etc/vim
-	echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> ${S}/src/feature.h
-	echo '#define SYS_GVIMRC_FILE "/etc/vim/gvimrc"' >> ${S}/src/feature.h
+    # Read vimrc and gvimrc from /etc/vim
+    echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> ${S}/src/feature.h
+    echo '#define SYS_GVIMRC_FILE "/etc/vim/gvimrc"' >> ${S}/src/feature.h
 
-	# Use exuberant ctags which installs as /usr/bin/exuberant-ctags.
-	# Hopefully this pattern won't break for a while at least.
-	# This fixes bug 29398 (27 Sep 2003 agriffis)
-	#sed -i 's/\<ctags\("\| [-*.]\)/exuberant-&/g' \
-	#	${S}/runtime/doc/syntax.txt \
-	#	${S}/runtime/doc/tagsrch.txt \
-	#	${S}/runtime/doc/usr_29.txt \
-	#	${S}/runtime/menu.vim \
-	#	${S}/src/configure.in || die 'exuberant-ctags sed failed'
+    # Use exuberant ctags which installs as /usr/bin/exuberant-ctags.
+    # Hopefully this pattern won't break for a while at least.
+    # This fixes bug 29398 (27 Sep 2003 agriffis)
+    #sed -i 's/\<ctags\("\| [-*.]\)/exuberant-&/g' \
+    #   ${S}/runtime/doc/syntax.txt \
+    #   ${S}/runtime/doc/tagsrch.txt \
+    #   ${S}/runtime/doc/usr_29.txt \
+    #   ${S}/runtime/menu.vim \
+    #   ${S}/src/configure.in || die 'exuberant-ctags sed failed'
 
-	# Don't be fooled by /usr/include/libc.h.  When found, vim thinks
-	# this is NeXT, but it's actually just a file in dev-libs/9libs
-	# This fixes bug 43885 (20 Mar 2004 agriffis)
-	#sed -i 's/ libc\.h / /' ${S}/src/configure.in || die 'libc.h sed failed'
+    # Don't be fooled by /usr/include/libc.h.  When found, vim thinks
+    # this is NeXT, but it's actually just a file in dev-libs/9libs
+    # This fixes bug 43885 (20 Mar 2004 agriffis)
+    #sed -i 's/ libc\.h / /' ${S}/src/configure.in || die 'libc.h sed failed'
 
-	# if we're vim-7 and USE vim-pager, make the manpager.sh script
-	if [[ "${PN}" == "vim" ]] && option vim-pager ; then
-		cat <<END > ${S}/runtime/macros/manpager.sh
+    # if we're vim-7 and USE vim-pager, make the manpager.sh script
+    if [[ "${PN}" == "vim" ]] && option vim-pager ; then
+        cat <<END > ${S}/runtime/macros/manpager.sh
 #!/bin/sh
 tr '\\267' '.' | col -b | \\
-		vim \\
-			-c 'let no_plugin_maps = 1' \\
-			-c 'set nolist nomod ft=man' \\
-			-c 'let g:showmarks_enable=0' \\
-			-c 'runtime! macros/less.vim' -
+        vim \\
+            -c 'let no_plugin_maps = 1' \\
+            -c 'set nolist nomod ft=man' \\
+            -c 'let g:showmarks_enable=0' \\
+            -c 'runtime! macros/less.vim' -
 END
-	fi
+    fi
 
-	# Try to avoid sandbox problems. Bug #114475.
-	if [[ -d "${S}/src/po" ]] ; then
-		sed -i -e \
-			'/-S check.vim/s,..VIM.,ln -s $(VIM) testvim \; ./testvim -X,' \
-			"${S}/src/po/Makefile"
-	fi
+    # Try to avoid sandbox problems. Bug #114475.
+    if [[ -d "${S}/src/po" ]] ; then
+        sed -i -e \
+            '/-S check.vim/s,..VIM.,ln -s $(VIM) testvim \; ./testvim -X,' \
+            "${S}/src/po/Makefile"
+    fi
 }
 
 vim_src_compile() {
-	local myconf confrule
+    local myconf confrule
 
-	# Fix bug 76331: -O3 causes problems, use -O2 instead. We'll do this for
-	# everyone since previous flag filtering bugs have turned out to affect
-	# multiple archs...
-	replace-flags -O3 -O2
+    # Fix bug 76331: -O3 causes problems, use -O2 instead. We'll do this for
+    # everyone since previous flag filtering bugs have turned out to affect
+    # multiple archs...
+    replace-flags -O3 -O2
 
-	# Fix bug 18245: Prevent "make" from the following chain:
-	# (1) Notice configure.in is newer than auto/configure
-	# (2) Rebuild auto/configure
-	# (3) Notice auto/configure is newer than auto/config.mk
-	# (4) Run ./configure (with wrong args) to remake auto/config.mk
-	ebegin "Creating configure script"
-	sed -i 's/ auto.config.mk:/:/' src/Makefile || die "Makefile sed failed"
-	rm -f src/auto/configure
-	# vim-6.2 changed the name of this rule from auto/configure to autoconf
-	confrule=auto/configure
-	grep -q ^autoconf: src/Makefile && confrule=autoconf
-	# autoconf-2.13 needed for this package -- bug 35319
-	# except it seems we actually need 2.5 now -- bug 53777
-	WANT_AUTOCONF=2.5 \
-		make -j1 -C src $confrule || die "make $confrule failed"
-	eend $?
+    # Fix bug 18245: Prevent "make" from the following chain:
+    # (1) Notice configure.in is newer than auto/configure
+    # (2) Rebuild auto/configure
+    # (3) Notice auto/configure is newer than auto/config.mk
+    # (4) Run ./configure (with wrong args) to remake auto/config.mk
+    ebegin "Creating configure script"
+    sed -i 's/ auto.config.mk:/:/' src/Makefile || die "Makefile sed failed"
+    rm -f src/auto/configure
+    # vim-6.2 changed the name of this rule from auto/configure to autoconf
+    confrule=auto/configure
+    grep -q ^autoconf: src/Makefile && confrule=autoconf
+    # autoconf-2.13 needed for this package -- bug 35319
+    # except it seems we actually need 2.5 now -- bug 53777
+    WANT_AUTOCONF=2.5 \
+        make -j1 -C src $confrule || die "make $confrule failed"
+    eend $?
 
-	# This should fix a sandbox violation (see bug 24447). The hvc
-	# things are for ppc64, see bug 86433.
-	for file in /dev/pty/s* /dev/console /dev/hvc/* /dev/hvc* ; do
-		[[ -e ${file} ]] && addwrite $file
-	done
+    # This should fix a sandbox violation (see bug 24447). The hvc
+    # things are for ppc64, see bug 86433.
+    for file in /dev/pty/s* /dev/console /dev/hvc/* /dev/hvc* ; do
+        [[ -e ${file} ]] && addwrite $file
+    done
 
-	if [[ "${PN}" == "vim-runtime" ]] ||
-			( [[ "${PN}" == "vim" ]] && option minimal ); then
-		myconf="--with-features=tiny \
-			--enable-gui=no \
-			--without-x \
-			--disable-perlinterp \
-			--disable-pythoninterp \
-			--disable-rubyinterp \
-			--disable-gpm"
+    if [[ "${PN}" == "vim-runtime" ]] ||
+            ( [[ "${PN}" == "vim" ]] && option minimal ); then
+        myconf="--with-features=tiny \
+            --enable-gui=no \
+            --without-x \
+            --disable-perlinterp \
+            --disable-pythoninterp \
+            --disable-rubyinterp \
+            --disable-gpm"
 
-	else
-		myconf="--with-features=huge \
-			--enable-multibyte \
-	    --disable-gpm \
-	    --disable-rubyinterp"
-		#myconf="${myconf} `option_enable cscope`"
-		#myconf="${myconf} `option_enable gpm`"
-		myconf="${myconf} `option_enable perl perlinterp`"
-		myconf="${myconf} `option_enable python pythoninterp`"
-		#myconf="${myconf} `option_enable ruby rubyinterp`"
-	#if [[ "${PN}" == "gvim" ]] ; then
-	#    myconf="${myconf} `option_enable netbeans`"
-	#fi
+    else
+        myconf="--with-features=huge \
+            --enable-multibyte \
+        --disable-gpm \
+        --disable-rubyinterp"
+        #myconf="${myconf} `option_enable cscope`"
+        #myconf="${myconf} `option_enable gpm`"
+        myconf="${myconf} `option_enable perl perlinterp`"
+        myconf="${myconf} `option_enable python pythoninterp`"
+        #myconf="${myconf} `option_enable ruby rubyinterp`"
+    #if [[ "${PN}" == "gvim" ]] ; then
+    #    myconf="${myconf} `option_enable netbeans`"
+    #fi
 
-		# --with-features=huge forces on cscope even if we --disable it. We need
-		# to sed this out to avoid screwiness. (1 Sep 2004 ciaranm)
-		#if ! option cscope ; then
-			sed -i -e '/# define FEAT_CSCOPE/d' src/feature.h || \
-				die "couldn't disable cscope"
-		#fi
+        # --with-features=huge forces on cscope even if we --disable it. We need
+        # to sed this out to avoid screwiness. (1 Sep 2004 ciaranm)
+        #if ! option cscope ; then
+            sed -i -e '/# define FEAT_CSCOPE/d' src/feature.h || \
+                die "couldn't disable cscope"
+        #fi
 
-		if [[ "${PN}" == "vim" ]] ; then
-			# don't test USE=X here ... see bug #19115
-			# but need to provide a way to link against X ... see bug #20093
-			#myconf="${myconf} --enable-gui=no `option_with vim-with-x x`"
-	    myconf="${myconf} --enable-gui=no"
+        if [[ "${PN}" == "vim" ]] ; then
+            # don't test USE=X here ... see bug #19115
+            # but need to provide a way to link against X ... see bug #20093
+            #myconf="${myconf} --enable-gui=no `option_with vim-with-x x`"
+        myconf="${myconf} --enable-gui=no"
 
-		#elif [[ "${PN}" == "gvim" ]] ; then
-		#	myconf="${myconf} --with-vim-name=gvim --with-x"
+        #elif [[ "${PN}" == "gvim" ]] ; then
+        #   myconf="${myconf} --with-vim-name=gvim --with-x"
 
-		#	echo ; echo
-		#	if option aqua ; then
-		#		einfo "Building gvim with the Carbon GUI"
-		#		myconf="${myconf} --enable-gui=carbon"
-		#	elif option gtk ; then
-	#	 myconf="${myconf} --enable-gtk2-check"
-	#	 if option gnome ; then
-	#	     einfo "Building gvim with the Gnome 2 GUI"
-	#	     myconf="${myconf} --enable-gui=gnome2"
-	#	 else
-	#	     einfo "Building gvim with the gtk+-2 GUI"
-	#	     myconf="${myconf} --enable-gui=gtk2"
-	#	 fi
-		#	elif option motif ; then
-		#		einfo "Building gvim with the MOTIF GUI"
-		#		myconf="${myconf} --enable-gui=motif"
-		#	elif option nextaw ; then
-		#		einfo "Building gvim with the neXtaw GUI"
-		#		myconf="${myconf} --enable-gui=nextaw"
-		#	else
-		#		einfo "Building gvim with the Athena GUI"
-		#		myconf="${myconf} --enable-gui=athena"
-		#	fi
-		#	echo ; echo
+        #   echo ; echo
+        #   if option aqua ; then
+        #       einfo "Building gvim with the Carbon GUI"
+        #       myconf="${myconf} --enable-gui=carbon"
+        #   elif option gtk ; then
+    #    myconf="${myconf} --enable-gtk2-check"
+    #    if option gnome ; then
+    #        einfo "Building gvim with the Gnome 2 GUI"
+    #        myconf="${myconf} --enable-gui=gnome2"
+    #    else
+    #        einfo "Building gvim with the gtk+-2 GUI"
+    #        myconf="${myconf} --enable-gui=gtk2"
+    #    fi
+        #   elif option motif ; then
+        #       einfo "Building gvim with the MOTIF GUI"
+        #       myconf="${myconf} --enable-gui=motif"
+        #   elif option nextaw ; then
+        #       einfo "Building gvim with the neXtaw GUI"
+        #       myconf="${myconf} --enable-gui=nextaw"
+        #   else
+        #       einfo "Building gvim with the Athena GUI"
+        #       myconf="${myconf} --enable-gui=athena"
+        #   fi
+        #   echo ; echo
 
-		else
-			die "vim.exlib doesn't understand PN=${PN}"
-		fi
-	fi
+        else
+            die "vim.exlib doesn't understand PN=${PN}"
+        fi
+    fi
 
-	if [[ "${PN}" == "vim" ]] && option minimal ; then
-		myconf="${myconf} --disable-nls --disable-multibyte --disable-acl"
-	else
-		#myconf="${myconf} `option_enable nls` `option_enable acl`"
-		myconf="${myconf} `option_enable nls` --disable-acl"
-	fi
+    if [[ "${PN}" == "vim" ]] && option minimal ; then
+        myconf="${myconf} --disable-nls --disable-multibyte --disable-acl"
+    else
+        #myconf="${myconf} `option_enable nls` `option_enable acl`"
+        myconf="${myconf} `option_enable nls` --disable-acl"
+    fi
 
-	# Note: If USE=gpm, then ncurses will still be required. See bug #93970
-	# for the reasons behind the USE flag change.
-	myconf="${myconf} --with-tlib=curses"
+    # Note: If USE=gpm, then ncurses will still be required. See bug #93970
+    # for the reasons behind the USE flag change.
+    myconf="${myconf} --with-tlib=curses"
 
-	myconf="${myconf} --disable-selinux"
+    myconf="${myconf} --disable-selinux"
 
-	# Let Portage do the stripping. Some people like that.
-	export ac_cv_prog_STRIP="$(type -P true ) faking strip"
+    # Let Portage do the stripping. Some people like that.
+    export ac_cv_prog_STRIP="$(type -P true ) faking strip"
 
-	myconf="${myconf} --with-modified-by=Exherbo-${PVR}"
-	econf ${myconf} || die "vim configure failed"
+    myconf="${myconf} --with-modified-by=Exherbo-${PVR}"
+    econf ${myconf} || die "vim configure failed"
 
-	# The following allows emake to be used
-	make -j1 -C src auto/osdef.h objects || die "make failed"
+    # The following allows emake to be used
+    make -j1 -C src auto/osdef.h objects || die "make failed"
 
-	if [[ "${PN}" == "vim-runtime" ]] ; then
-		emake tools || die "emake tools failed"
-		rm -f src/vim
-	else
-		if ! emake ; then
-			eerror "If the above messages seem to be talking about perl"
-			eerror "and undefined references, please try re-emerging both"
-			eerror "perl and libperl with the same USE flags. For more"
-			eerror "information, see:"
-			eerror "    https://bugs.gentoo.org/show_bug.cgi?id=18129"
-			die "emake failed"
-		fi
-	fi
+    if [[ "${PN}" == "vim-runtime" ]] ; then
+        emake tools || die "emake tools failed"
+        rm -f src/vim
+    else
+        if ! emake ; then
+            eerror "If the above messages seem to be talking about perl"
+            eerror "and undefined references, please try re-emerging both"
+            eerror "perl and libperl with the same USE flags. For more"
+            eerror "information, see:"
+            eerror "    https://bugs.gentoo.org/show_bug.cgi?id=18129"
+            die "emake failed"
+        fi
+    fi
 }
 
 vim_src_install() {
-	if [[ "${PN}" == "vim-runtime" ]] ; then
-		dodir /usr/{bin,share/{man/man1,vim}}
-		cd src || die "cd src failed"
-	emake \
-	    installruntime \
-	    installmanlinks \
-	    installmacros \
-	    installtutor \
-	    installtutorbin \
-	    installtools \
-	    install-languages \
-	    install-icons \
-	    DESTDIR=${D} \
-	    BINDIR=/usr/bin \
-	    MANDIR=/usr/share/man \
-	    DATADIR=/usr/share \
-	    || die "install failed"
-
-		keepdir /usr/share/vim/vim${VIM_VERSION/./}/keymap
-
-		# default vimrc is installed by vim-runtime since it applies to
-		# both vim and gvim
-		insinto /etc/vim/
-		newins ${FILESDIR}/vimrc${VIMRC_FILE_SUFFIX} vimrc
-
-		if option livecd ; then
-			# To save space, install only a subset of the files if we're on a
-			# livecd. bug 65144.
-			einfo "Removing some files for a smaller livecd install ..."
-
-			local vimfiles=${D}/usr/share/vim/vim${VIM_VERSION/.}
-			shopt -s extglob
-			rm -fr ${vimfiles}/{compiler,doc,ftplugin,indent}
-			rm -fr ${vimfiles}/{macros,print,tools,tutor}
-			rm ${D}/usr/bin/vimtutor
-
-			local keep_colors="default"
-			ignore=$(rm -fr ${vimfiles}/colors/!(${keep_colors}).vim )
-
-			local keep_syntax="conf|crontab|fstab|inittab|resolv|sshdconfig"
-			# tinkering with the next line might make bad things happen ...
-			keep_syntax="${keep_syntax}|syntax|nosyntax|synload"
-			ignore=$(rm -fr ${vimfiles}/syntax/!(${keep_syntax}).vim )
-		fi
-
-		# These files might have slight security issues, so we won't
-		# install them. See bug #77841. We don't mind if these don't
-		# exist.
-		rm ${D}/usr/share/vim/vim${VIM_VERSION/.}/tools/{vimspell.sh,tcltags}
-
-	elif [[ "${PN}" == "gvim" ]] ; then
-		dobin src/gvim
-		dosym gvim /usr/bin/gvimdiff
-		dosym gvim /usr/bin/evim
-		dosym gvim /usr/bin/eview
-		# bug #74349 says we should install these
-	dosym gvim /usr/bin/gview
-	dosym gvim /usr/bin/rgvim
-	dosym gvim /usr/bin/rgview
-
-		dosym vim.1.gz /usr/share/man/man1/gvim.1.gz
-		dosym vim.1.gz /usr/share/man/man1/gview.1.gz
-		dosym vimdiff.1.gz /usr/share/man/man1/gvimdiff.1.gz
-
-	insinto /etc/vim
-		newins ${FILESDIR}/gvimrc${GVIMRC_FILE_SUFFIX} gvimrc
-
-		# as of 6.3-r1, we install a desktop entry. bug #44633, and bug #68622
-		# for the nicer updated version.
-		insinto /usr/share/applications
-		doins ${FILESDIR}/gvim.desktop
-		insinto /usr/share/pixmaps
-		doins ${FILESDIR}/gvim.xpm
-
-	else
-		dobin src/vim
-		ln -s vim ${D}/usr/bin/vimdiff && \
-		ln -s vim ${D}/usr/bin/rvim && \
-		ln -s vim ${D}/usr/bin/ex && \
-		ln -s vim ${D}/usr/bin/view && \
-		ln -s vim ${D}/usr/bin/rview \
-			|| die "/usr/bin symlinks failed"
-		if option vim-pager ; then
-			ln -s /usr/share/vim/vim${VIM_VERSION//./}/macros/less.sh \
-					${D}/usr/bin/vimpager
-			ln -s /usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh \
-					${D}/usr/bin/vimmanpager
-			insinto /usr/share/vim/vim${VIM_VERSION//./}/macros
-			doins runtime/macros/manpager.sh
-			fperms a+x /usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh
-		fi
-	fi
-
-	# bash completion script, bug #79018.
     if [[ "${PN}" == "vim-runtime" ]] ; then
-	dobashcompletion ${FILESDIR}/xxd-completion xxd
+        dodir /usr/{bin,share/{man/man1,vim}}
+        cd src || die "cd src failed"
+    emake \
+        installruntime \
+        installmanlinks \
+        installmacros \
+        installtutor \
+        installtutorbin \
+        installtools \
+        install-languages \
+        install-icons \
+        DESTDIR=${D} \
+        BINDIR=/usr/bin \
+        MANDIR=/usr/share/man \
+        DATADIR=/usr/share \
+        || die "install failed"
+
+        keepdir /usr/share/vim/vim${VIM_VERSION/./}/keymap
+
+        # default vimrc is installed by vim-runtime since it applies to
+        # both vim and gvim
+        insinto /etc/vim/
+        newins ${FILESDIR}/vimrc${VIMRC_FILE_SUFFIX} vimrc
+
+        if option livecd ; then
+            # To save space, install only a subset of the files if we're on a
+            # livecd. bug 65144.
+            einfo "Removing some files for a smaller livecd install ..."
+
+            local vimfiles=${D}/usr/share/vim/vim${VIM_VERSION/.}
+            shopt -s extglob
+            rm -fr ${vimfiles}/{compiler,doc,ftplugin,indent}
+            rm -fr ${vimfiles}/{macros,print,tools,tutor}
+            rm ${D}/usr/bin/vimtutor
+
+            local keep_colors="default"
+            ignore=$(rm -fr ${vimfiles}/colors/!(${keep_colors}).vim )
+
+            local keep_syntax="conf|crontab|fstab|inittab|resolv|sshdconfig"
+            # tinkering with the next line might make bad things happen ...
+            keep_syntax="${keep_syntax}|syntax|nosyntax|synload"
+            ignore=$(rm -fr ${vimfiles}/syntax/!(${keep_syntax}).vim )
+        fi
+
+        # These files might have slight security issues, so we won't
+        # install them. See bug #77841. We don't mind if these don't
+        # exist.
+        rm ${D}/usr/share/vim/vim${VIM_VERSION/.}/tools/{vimspell.sh,tcltags}
+
+    elif [[ "${PN}" == "gvim" ]] ; then
+        dobin src/gvim
+        dosym gvim /usr/bin/gvimdiff
+        dosym gvim /usr/bin/evim
+        dosym gvim /usr/bin/eview
+        # bug #74349 says we should install these
+    dosym gvim /usr/bin/gview
+    dosym gvim /usr/bin/rgvim
+    dosym gvim /usr/bin/rgview
+
+        dosym vim.1.gz /usr/share/man/man1/gvim.1.gz
+        dosym vim.1.gz /usr/share/man/man1/gview.1.gz
+        dosym vimdiff.1.gz /usr/share/man/man1/gvimdiff.1.gz
+
+    insinto /etc/vim
+        newins ${FILESDIR}/gvimrc${GVIMRC_FILE_SUFFIX} gvimrc
+
+        # as of 6.3-r1, we install a desktop entry. bug #44633, and bug #68622
+        # for the nicer updated version.
+        insinto /usr/share/applications
+        doins ${FILESDIR}/gvim.desktop
+        insinto /usr/share/pixmaps
+        doins ${FILESDIR}/gvim.xpm
+
     else
-	dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
+        dobin src/vim
+        ln -s vim ${D}/usr/bin/vimdiff && \
+        ln -s vim ${D}/usr/bin/rvim && \
+        ln -s vim ${D}/usr/bin/ex && \
+        ln -s vim ${D}/usr/bin/view && \
+        ln -s vim ${D}/usr/bin/rview \
+            || die "/usr/bin symlinks failed"
+        if option vim-pager ; then
+            ln -s /usr/share/vim/vim${VIM_VERSION//./}/macros/less.sh \
+                    ${D}/usr/bin/vimpager
+            ln -s /usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh \
+                    ${D}/usr/bin/vimmanpager
+            insinto /usr/share/vim/vim${VIM_VERSION//./}/macros
+            doins runtime/macros/manpager.sh
+            fperms a+x /usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh
+        fi
+    fi
+
+    # bash completion script, bug #79018.
+    if [[ "${PN}" == "vim-runtime" ]] ; then
+    dobashcompletion ${FILESDIR}/xxd-completion xxd
+    else
+    dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
     fi
 
     # We shouldn't be installing the ex or view man page symlinks, as they
@@ -439,49 +439,49 @@ vim_src_install() {
 # of these links are "owned" by the vim exheres when it is installed,
 # but they might be good for gvim as well (see bug 45828)
 update_vim_symlinks() {
-	local f syms
+    local f syms
     syms="vimdiff rvim rview"
     einfo "Calling eselect vi update..."
     eselect vi update --if-unset
 
-	# Make or remove convenience symlink, vim -> gvim
-	if [[ -f ${ROOT}/usr/bin/gvim ]]; then
-		ln -s gvim ${ROOT}/usr/bin/vim 2>/dev/null
-	elif [[ -L ${ROOT}/usr/bin/vim && ! -f ${ROOT}/usr/bin/vim ]]; then
-		rm ${ROOT}/usr/bin/vim
-	fi
+    # Make or remove convenience symlink, vim -> gvim
+    if [[ -f ${ROOT}/usr/bin/gvim ]]; then
+        ln -s gvim ${ROOT}/usr/bin/vim 2>/dev/null
+    elif [[ -L ${ROOT}/usr/bin/vim && ! -f ${ROOT}/usr/bin/vim ]]; then
+        rm ${ROOT}/usr/bin/vim
+    fi
 
-	# Make or remove convenience symlinks to vim
-	if [[ -f ${ROOT}/usr/bin/vim ]]; then
-		for f in ${syms}; do
-			ln -s vim ${ROOT}/usr/bin/${f} 2>/dev/null
-		done
-	else
-		for f in ${syms}; do
-			if [[ -L ${ROOT}/usr/bin/${f} && ! -f ${ROOT}/usr/bin/${f} ]]; then
-				rm -f ${ROOT}/usr/bin/${f}
-			fi
-		done
-	fi
+    # Make or remove convenience symlinks to vim
+    if [[ -f ${ROOT}/usr/bin/vim ]]; then
+        for f in ${syms}; do
+            ln -s vim ${ROOT}/usr/bin/${f} 2>/dev/null
+        done
+    else
+        for f in ${syms}; do
+            if [[ -L ${ROOT}/usr/bin/${f} && ! -f ${ROOT}/usr/bin/${f} ]]; then
+                rm -f ${ROOT}/usr/bin/${f}
+            fi
+        done
+    fi
 
-	# This will still break if you merge then remove the vi package,
-	# but there's only so much you can do, eh?  Unfortunately we don't
-	# have triggers like are done in rpm-land.
+    # This will still break if you merge then remove the vi package,
+    # but there's only so much you can do, eh?  Unfortunately we don't
+    # have triggers like are done in rpm-land.
 }
 
 vim_pkg_postinst() {
-	# Update documentation tags (from vim-doc.exlib)
-	update_vim_helptags
+    # Update documentation tags (from vim-doc.exlib)
+    update_vim_helptags
 
-	# Update fdo mime stuff, bug #78394
-	#if [[ "${PN}" == "gvim" ]] ; then
-	#	fdo-mime_mime_database_update
-	#fi
+    # Update fdo mime stuff, bug #78394
+    #if [[ "${PN}" == "gvim" ]] ; then
+    #   fdo-mime_mime_database_update
+    #fi
 
     #if [[ "${PN}" == "vim" ]] ; then
-    #	 echo
-    #	 elog "To install a GUI version of vim, use the app-editors/gvim"
-    #	 elog "package."
+    #    echo
+    #    elog "To install a GUI version of vim, use the app-editors/gvim"
+    #    elog "package."
     #fi
     #echo
     #elog "Vim 7 includes an integrated spell checker. You need to install"
@@ -493,86 +493,86 @@ vim_pkg_postinst() {
     #ewarn "Note that the English word lists are no longer installed by"
     #ewarn "default."
 
-	if [[ "${PN}" != "vim-runtime" ]] ; then
-		echo
-		elog "To see what's new in this release, use :help version${VIM_VERSION/.*/}.txt"
-	fi
+    if [[ "${PN}" != "vim-runtime" ]] ; then
+        echo
+        elog "To see what's new in this release, use :help version${VIM_VERSION/.*/}.txt"
+    fi
 
-	# Warn about VIMRUNTIME
-	#if [ -n "$VIMRUNTIME" -a "${VIMRUNTIME##*/vim}" != "${VIM_VERSION/./}" ] ; then
-	#	ewarn
-	#	ewarn "WARNING: You have VIMRUNTIME set in your environment from an old"
-	#	ewarn "installation.  You will need to either unset VIMRUNTIME in each"
-	#	ewarn "terminal, or log out completely and back in.  This problem won't"
-	#	ewarn "happen again since the exheri no longer sets VIMRUNTIME."
-	#fi
+    # Warn about VIMRUNTIME
+    #if [ -n "$VIMRUNTIME" -a "${VIMRUNTIME##*/vim}" != "${VIM_VERSION/./}" ] ; then
+    #   ewarn
+    #   ewarn "WARNING: You have VIMRUNTIME set in your environment from an old"
+    #   ewarn "installation.  You will need to either unset VIMRUNTIME in each"
+    #   ewarn "terminal, or log out completely and back in.  This problem won't"
+    #   ewarn "happen again since the exheri no longer sets VIMRUNTIME."
+    #fi
 
-	echo
+    echo
 
-	bash-completion_pkg_postinst
+    bash-completion_pkg_postinst
 
-	# Make convenience symlinks
-	update_vim_symlinks
+    # Make convenience symlinks
+    update_vim_symlinks
 }
 
 vim_pkg_postrm() {
-	# Update documentation tags (from vim-doc.exlib)
-	update_vim_helptags
+    # Update documentation tags (from vim-doc.exlib)
+    update_vim_helptags
 
-	# Make convenience symlinks
-	update_vim_symlinks
+    # Make convenience symlinks
+    update_vim_symlinks
 
-	# Update fdo mime stuff, bug #78394
-	#if [[ "${PN}" == "gvim" ]] ; then
-	#	fdo-mime_mime_database_update
-	#fi
+    # Update fdo mime stuff, bug #78394
+    #if [[ "${PN}" == "gvim" ]] ; then
+    #   fdo-mime_mime_database_update
+    #fi
 }
 
 vim_src_test() {
 
-	if [[ "${PN}" == "vim-runtime" ]] ; then
-		einfo "No testing needs to be done for vim-runtime"
-		return
-	fi
+    if [[ "${PN}" == "vim-runtime" ]] ; then
+        einfo "No testing needs to be done for vim-runtime"
+        return
+    fi
 
-	einfo " "
-	einfo "Starting vim tests. Several error messages will be shown "
-	einfo "whilst the tests run. This is normal behaviour and does not "
-	einfo "indicate a fault."
-	einfo " "
-	ewarn "If the tests fail, your terminal may be left in a strange "
-	ewarn "state. Usually, running 'reset' will fix this."
-	ewarn " "
-	echo
+    einfo " "
+    einfo "Starting vim tests. Several error messages will be shown "
+    einfo "whilst the tests run. This is normal behaviour and does not "
+    einfo "indicate a fault."
+    einfo " "
+    ewarn "If the tests fail, your terminal may be left in a strange "
+    ewarn "state. Usually, running 'reset' will fix this."
+    ewarn " "
+    echo
 
-	# Don't let vim talk to X
-	unset DISPLAY
+    # Don't let vim talk to X
+    unset DISPLAY
 
-	#if [[ "${PN}" == "gvim" ]] ; then
-	#	# Make gvim not try to connect to X. See :help gui-x11-start
-	#	# in vim for how this evil trickery works.
-	#	ln -s ${S}/src/gvim ${S}/src/testvim
-	#	testprog="../testvim"
-	#else
-		testprog="../vim"
-	#fi
+    #if [[ "${PN}" == "gvim" ]] ; then
+    #   # Make gvim not try to connect to X. See :help gui-x11-start
+    #   # in vim for how this evil trickery works.
+    #   ln -s ${S}/src/gvim ${S}/src/testvim
+    #   testprog="../testvim"
+    #else
+        testprog="../vim"
+    #fi
 
-	# We've got to call make test from within testdir, since the Makefiles
-	# don't pass through our VIMPROG argument
-	cd ${S}/src/testdir
+    # We've got to call make test from within testdir, since the Makefiles
+    # don't pass through our VIMPROG argument
+    cd ${S}/src/testdir
 
-	# Test 49 won't work inside a portage environment
-	einfo "Test 49 isn't sandbox-friendly, so it will be skipped."
-	sed -i -e 's~test49.out~~g' Makefile
+    # Test 49 won't work inside a portage environment
+    einfo "Test 49 isn't sandbox-friendly, so it will be skipped."
+    sed -i -e 's~test49.out~~g' Makefile
 
-	# We don't want to rebuild vim before running the tests
-	sed -i -e 's,: \$(VIMPROG),: ,' Makefile
+    # We don't want to rebuild vim before running the tests
+    sed -i -e 's,: \$(VIMPROG),: ,' Makefile
 
-	# Give the user time to read the "what to do if these break" messages
-	epause 10
+    # Give the user time to read the "what to do if these break" messages
+    epause 10
 
-	# Don't try to do the additional GUI test
-	make VIMPROG=${testprog} nongui \
-		|| die "At least one test failed"
+    # Don't try to do the additional GUI test
+    make VIMPROG=${testprog} nongui \
+        || die "At least one test failed"
 }
 
