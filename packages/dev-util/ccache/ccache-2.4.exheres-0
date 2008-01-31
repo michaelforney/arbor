@@ -1,0 +1,31 @@
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+#
+# Inspired from Gentoo's ccache-2.4-r7.ebuild which is:
+#   Copyright 1999-2008 Gentoo Foundation
+
+DESCRIPTION="compiler cache"
+HOMEPAGE="http://ccache.samba.org/"
+SRC_URI="http://samba.org/ftp/ccache/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_install() {
+    emake DESTDIR="${D}" install || die "make install failed."
+
+    dodoc README
+    insinto /usr/share/doc/$PF/html
+    doins web/*.html
+
+    dodir /usr/lib/ccache/bin
+    insinto /usr/lib/ccache/bin
+    local f
+    for f in {${CHOST}-,}{gcc,g++,c++}; do
+        dosym /usr/bin/ccache /usr/lib/ccache/bin/${f}
+    done
+}
