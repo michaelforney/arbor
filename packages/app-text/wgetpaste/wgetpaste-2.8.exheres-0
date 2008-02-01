@@ -12,11 +12,10 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="run:
-        sys-apps/sed
-                net-misc/wget"
+    sys-apps/sed
+    net-misc/wget"
 
-src_unpack() {
-    unpack ${A}
+src_prepare() {
     patch "${P}" < "${FILESDIR}"/zlin.patch || die "Patch failed"
 }
 
