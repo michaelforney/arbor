@@ -16,16 +16,8 @@ DEPENDENCIES="build,run:
           run:
         sys-apps/coreutils"
 
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
-    echo "patch -p1 -s -f < $FILESDIR/$PN-config.patch"
+src_prepare() {
     patch -p1 -s -f < "$FILESDIR/$PN"-config.patch || die "Patch failed"
-}
-
-src_compile() {
-    econf || die "econf failed"
-    emake || die "emake failed"
 }
 
 src_install() {
