@@ -31,13 +31,13 @@
 #require vim/doc flag-o-matic fdo-mime bash-completion
 require vim-doc flag-o-matic bash-completion
 
-export_exlib_phases pkg_setup src_unpack src_compile src_install src_test pkg_postinst pkg_postrm
+export_exlib_phases pkg_setup src_unpack src_prepare src_configure src_compile src_install src_test pkg_postinst pkg_postrm
 
 #MYOPTIONS="nls acl"
 MYOPTIONS="nls"
-#DEPENDENCIES="
-#    build,run:
-#    nls? ( sys-devel/gettext )"
+DEPENDENCIES="
+    build,run:
+        nls? ( sys-devel/gettext )"
 
 if [[ "${PN}" == "vim-runtime" ]] ; then
     MYOPTIONS="${MYOPTIONS} livecd"
@@ -96,7 +96,7 @@ fi
 # eselect-vi support
 DEPENDENCIES="${DEPENDENCIES}
     build,run:
-    >=app-admin/eselect-vi-1.1"
+        >=app-admin/eselect-vi-1.1"
 
 HOMEPAGE="http://www.vim.org/"
 LICENSE="vim"
@@ -105,10 +105,10 @@ LICENSE="vim"
 # with detection of exuberant-ctags by configure.
 DEPENDENCIES="${DEPENDENCIES}
     build:
-    >=sys-apps/sed-4
+        >=sys-apps/sed-4
         sys-devel/autoconf
     run,build:
-    dev-util/ctags
+        dev-util/ctags
         >=sys-libs/ncurses-5.2-r2"
 
 vim_pkg_setup() {
@@ -121,11 +121,7 @@ vim_pkg_setup() {
     export HOME="${T}/home"
 }
 
-vim_src_unpack() {
-    unpack --if-compressed ${A}
-
-    cd "${S}" || die "cd ${S} failed"
-
+vim_src_prepare() {
     # Apply any patches available from vim.org for this version
     for ((i=1; i<=VIM_PATCH_LEVEL; i++)); do
     p=$(printf "vim-patch-${VIM_VERSION}.%03d\n" "${i}")
@@ -189,7 +185,7 @@ END
     fi
 }
 
-vim_src_compile() {
+vim_src_configure() {
     local myconf confrule
 
     # Fix bug 76331: -O3 causes problems, use -O2 instead. We'll do this for
@@ -308,7 +304,9 @@ vim_src_compile() {
 
     myconf="${myconf} --with-modified-by=Exherbo-${PVR}"
     econf ${myconf} || die "vim configure failed"
+}
 
+vim_src_compile() {
     # The following allows emake to be used
     make -j1 -C src auto/osdef.h objects || die "make failed"
 
