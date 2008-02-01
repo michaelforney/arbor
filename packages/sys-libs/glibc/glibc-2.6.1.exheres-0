@@ -29,14 +29,13 @@ src_unpack() {
     mv glibc-ports-${PV} ${S}/ports
 }
 
-src_compile() {
+src_configure() {
     mkdir "${BUILDDIR}"
     cd "${BUILDDIR}"
     econf \
         --with-crypt \
         --with-add-ons \
         || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
