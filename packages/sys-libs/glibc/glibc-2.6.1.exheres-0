@@ -38,6 +38,11 @@ src_configure() {
         || die "Configure failed."
 }
 
+src_compile() {
+    cd "${BUILDDIR}"
+    emake || die "Make failed."
+}
+
 src_install() {
     cd "${BUILDDIR}"
     LANGUAGE=C LC_ALL=C emake install_root="${D}" install || die "Install failed."
