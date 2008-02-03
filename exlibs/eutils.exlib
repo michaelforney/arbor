@@ -142,6 +142,10 @@ EPATCH_FORCE="no"
 # <azarah@gentoo.org> (10 Nov 2002)
 #
 epatch() {
+    if [[ "${EBUILD_PHASE}" != "prepare" ]] ; then
+        die "epatch called in phase ${EBUILD_PHASE}"
+    fi
+
     _epatch_draw_line() {
         [[ -z $1 ]] && set "$(printf "%65s" '')"
         echo "${1//?/=}"
