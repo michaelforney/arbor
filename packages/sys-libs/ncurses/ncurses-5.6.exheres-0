@@ -28,6 +28,7 @@ src_configure() {
 }
 
 src_compile() {
+    cd "${S}/narrow"
     emake || die "Make failed."
 
     # Now built wide char version if unicode is set
