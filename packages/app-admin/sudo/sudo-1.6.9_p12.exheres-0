@@ -21,15 +21,13 @@ DEPENDENCIES="
 
 S="${WORKDIR}/${MY_P}"
 
-src_compile() {
+src_configure() {
     econf \
         --with-env-editor \
         $(option_with offensive insults) \
         $(option_with offensive all-insults) \
         $(option_with pam) \
         || die "econf failed"
-
-    emake || die "emake failed"
 }
 
 src_install() {
@@ -41,3 +39,4 @@ src_install() {
         pamd_mimic_system sudo auth account password session
     fi
 }
+
