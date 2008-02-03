@@ -13,14 +13,6 @@
 
 # This exlib handles vim, gvim and vim-runtime.
 
-# gvim's GUI preference order is as follows:
-# aqua              CARBON (not tested, 7+)
-# -aqua gtk gnome       GNOME2 (6.3-r1+, earlier uses GTK2)
-# -aqua gtk -gnome      GTK2
-# -aqua -gtk  motif     MOTIF
-# -aqua -gtk -motif nextaw  NEXTAW (7+)
-# -aqua -gtk -motif -nextaw ATHENA
-
 # Variables used here that need to be set in the exheres:
 # VIM_VERSION = The version of the distributed main tarball (e.g. 7.1a)
 # VIM_PATCH_LEVEL = The current patch level. If empty, assumed to be 0.
@@ -31,7 +23,7 @@
 #require vim/doc flag-o-matic fdo-mime bash-completion
 require vim-doc flag-o-matic bash-completion
 
-export_exlib_phases pkg_setup src_prepare src_configure src_compile src_install src_test pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_configure src_compile src_install src_test pkg_postinst pkg_postrm
 
 #MYOPTIONS="nls acl"
 MYOPTIONS="nls"
@@ -110,16 +102,6 @@ DEPENDENCIES="${DEPENDENCIES}
     run,build:
         dev-util/ctags
         >=sys-libs/ncurses-5.2-r2"
-
-vim_pkg_setup() {
-    # people with broken alphabets run into trouble. bug 82186.
-    unset LANG LC_ALL
-    export LC_COLLATE="C"
-
-    # Gnome sandbox silliness. bug #114475.
-    mkdir -p "${T}/home"
-    export HOME="${T}/home"
-}
 
 vim_src_prepare() {
     # Apply any patches available from vim.org for this version
@@ -251,23 +233,12 @@ vim_src_configure() {
             # don't test USE=X here ... see bug #19115
             # but need to provide a way to link against X ... see bug #20093
             #myconf="${myconf} --enable-gui=no `option_with vim-with-x x`"
-        myconf="${myconf} --enable-gui=no"
+            myconf="${myconf} --enable-gui=no"
 
-        #elif [[ "${PN}" == "gvim" ]] ; then
-        #   myconf="${myconf} --with-vim-name=gvim --with-x"
-
-        #   echo ; echo
-        #   if option aqua ; then
-        #       einfo "Building gvim with the Carbon GUI"
-        #       myconf="${myconf} --enable-gui=carbon"
-        #   elif option gtk ; then
-    #    myconf="${myconf} --enable-gtk2-check"
-    #    if option gnome ; then
-    #        einfo "Building gvim with the Gnome 2 GUI"
-    #        myconf="${myconf} --enable-gui=gnome2"
-    #    else
-    #        einfo "Building gvim with the gtk+-2 GUI"
-    #        myconf="${myconf} --enable-gui=gtk2"
+        elif [[ "${PN}" == "gvim" ]] ; then
+           myconf="${myconf} --with-vim-name=gvim --with-x"
+           myconf="${myconf} --enable-gtk2-check"
+           myconf="${myconf} --enable-gui=gtk2"
     #    fi
         #   elif option motif ; then
         #       einfo "Building gvim with the MOTIF GUI"
@@ -381,24 +352,14 @@ vim_src_install() {
         dosym gvim /usr/bin/gvimdiff
         dosym gvim /usr/bin/evim
         dosym gvim /usr/bin/eview
-        # bug #74349 says we should install these
-    dosym gvim /usr/bin/gview
-    dosym gvim /usr/bin/rgvim
-    dosym gvim /usr/bin/rgview
+        dosym gvim /usr/bin/gview
+        dosym gvim /usr/bin/rgvim
+        dosym gvim /usr/bin/rgview
 
+        dodir /usr/share/man/man1
         dosym vim.1.gz /usr/share/man/man1/gvim.1.gz
         dosym vim.1.gz /usr/share/man/man1/gview.1.gz
         dosym vimdiff.1.gz /usr/share/man/man1/gvimdiff.1.gz
-
-    insinto /etc/vim
-        newins ${FILESDIR}/gvimrc${GVIMRC_FILE_SUFFIX} gvimrc
-
-        # as of 6.3-r1, we install a desktop entry. bug #44633, and bug #68622
-        # for the nicer updated version.
-        insinto /usr/share/applications
-        doins ${FILESDIR}/gvim.desktop
-        insinto /usr/share/pixmaps
-        doins ${FILESDIR}/gvim.xpm
 
     else
         dobin src/vim
@@ -421,9 +382,9 @@ vim_src_install() {
 
     # bash completion script, bug #79018.
     if [[ "${PN}" == "vim-runtime" ]] ; then
-    dobashcompletion ${FILESDIR}/xxd-completion xxd
-    else
-    dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
+        dobashcompletion ${FILESDIR}/xxd-completion xxd
+    elif [[ "${PN}" == "vim" ]] ; then
+        dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
     fi
 
     # We shouldn't be installing the ex or view man page symlinks, as they
@@ -546,14 +507,14 @@ vim_src_test() {
     # Don't let vim talk to X
     unset DISPLAY
 
-    #if [[ "${PN}" == "gvim" ]] ; then
-    #   # Make gvim not try to connect to X. See :help gui-x11-start
-    #   # in vim for how this evil trickery works.
-    #   ln -s ${S}/src/gvim ${S}/src/testvim
-    #   testprog="../testvim"
-    #else
+    if [[ "${PN}" == "gvim" ]] ; then
+       # Make gvim not try to connect to X. See :help gui-x11-start
+       # in vim for how this evil trickery works.
+       ln -s ${S}/src/gvim ${S}/src/testvim
+       testprog="../testvim"
+    else
         testprog="../vim"
-    #fi
+    fi
 
     # We've got to call make test from within testdir, since the Makefiles
     # don't pass through our VIMPROG argument
