@@ -14,18 +14,16 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-    cd "${S}"
-    unpack ${A}
+src_prepare() {
     epatch "${FILESDIR}/${PN}-futimens.patch"
 }
 
-src_compile() {
+src_configure() {
     econf --prefix=/ || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
     make install DESTDIR="${D}"
     dodoc AUTHORS ChangeLog NEWS README* THANKS TODO
 }
+
