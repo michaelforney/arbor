@@ -12,13 +12,12 @@ MYOPTIONS="ipv6 tcp-wrappers"
 
 DEPENDENCIES="dev-libs/glib"
 
-src_compile() {
+src_configure() {
     econf \
         --enable-dynamic-linking \
         $(option_enable ipv6) \
         $(option_enable tcp-wrappers) \
         || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {

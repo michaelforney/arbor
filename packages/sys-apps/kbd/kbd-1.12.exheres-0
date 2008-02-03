@@ -12,9 +12,9 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_compile() {
+src_configure() {
+    # not autotools => no econf
     ./configure || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
