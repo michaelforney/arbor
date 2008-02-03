@@ -12,7 +12,7 @@ MYOPTIONS="unicode"
 
 DEPENDENCIES=""
 
-src_compile() {
+src_configure() {
     ECONF_SOURCE="${S}"
     common_conf="--with-shared \
         --with-normal \
@@ -25,6 +25,9 @@ src_compile() {
     econf \
          ${common_conf} \
         || die "Configure failed."
+}
+
+src_compile() {
     emake || die "Make failed."
 
     # Now built wide char version if unicode is set
