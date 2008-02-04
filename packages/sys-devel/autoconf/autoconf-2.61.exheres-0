@@ -12,9 +12,8 @@ MYOPTIONS=""
 
 DEPENDENCIES="build: sys-apps/help2man"
 
-src_compile() {
+src_configure() {
     econf --program-suffix="-${PV}" || die "Configure failed."
-    make || die "Make failed."
 }
 
 src_install() {
