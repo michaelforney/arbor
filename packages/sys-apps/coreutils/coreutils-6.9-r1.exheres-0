@@ -15,20 +15,17 @@ MYOPTIONS="nls acl"
 DEPENDENCIES="build:
                 acl? ( sys-apps/acl sys-apps/attr )"
 
-src_unpack() {
-    unpack ${A}
+src_prepare() {
     epatch "${FILESDIR}/${P}-futimens.patch"
-    cd "${S}"
     epatch "${FILESDIR}/009_all_coreutils-tests.patch"
     AT_M4DIR="m4" eautoreconf || die "Eautoreconf failed."
 }
 
-src_compile() {
+src_configure() {
     econf \
     $(option_enable nls) \
     $(option_enable acl) \
     || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
