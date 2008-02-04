@@ -27,6 +27,10 @@ src_configure() {
         || die "Configure failed."
 }
 
+src_compile() {
+    emake -j1 || die "Make failed."
+}
+
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
 }
