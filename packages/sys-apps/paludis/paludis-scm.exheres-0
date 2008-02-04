@@ -8,7 +8,7 @@ DESCRIPTION="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
 SRC_URI=""
 
-MYOPTIONS="cran glsa inquisitio pink qa vim-syntax visibility"
+MYOPTIONS="cran glsa inquisitio pink qa ruby vim-syntax visibility"
 LICENSE="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
@@ -21,6 +21,7 @@ DEPENDENCIES="
         qa? ( dev-libs/pcre++ >=dev-libs/libxml2-2.6 app-crypt/gnupg )
         inquisitio? ( dev-libs/pcre++ )
         glsa? ( >=dev-libs/libxml2-2.6 )
+        ruby? ( dev-lang/ruby )
     build:
         sys-devel/autoconf:2.5
         sys-devel/automake:1.10
@@ -46,13 +47,11 @@ pkg_setup() {
     create-paludis-user
 }
 
-src_unpack() {
-    subversion_src_unpack
-
+src_prepare() {
     cp "${FILESDIR}"/exherbo.conf "${S}"/paludis/distributions/
 }
 
-src_compile() {
+src_configure() {
     subversion_wc_info
     local repositories=`echo default unpackaged $(optionv cran ) | tr -s \  ,`
     local clients=`echo default accerso adjutrix contrarius importare \
@@ -62,7 +61,7 @@ src_compile() {
         --disable-doxygen \
         $(option_enable pink) \
         $(option_enable qa) \
-        --disable-ruby \
+        $(option_enable ruby) \
         $(option_enable glsa) \
         --disable-python \
         $(option_enable vim-syntax vim ) \
@@ -75,8 +74,6 @@ src_compile() {
         --with-default-distribution=exherbo \
         --with-svn-revision=${ESVN_WC_REVISION} \
         || die "econf failed"
-
-    emake || die "emake failed"
 }
 
 src_install() {
