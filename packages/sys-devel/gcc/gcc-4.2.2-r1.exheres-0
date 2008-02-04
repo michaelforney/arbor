@@ -19,13 +19,12 @@ DEPENDENCIES="build:
 
 OBJDIR="${T}/${CHOST}"
 
-src_unpack() {
-    unpack ${A}
+src_prepare() {
     # fix for gcc bug #31899. this will be fixed upstream in gcc 4.2.3
     epatch "${FILESDIR}/${P}-ICE-fix.patch"
 }
 
-src_compile() {
+src_configure() {
     mkdir "${OBJDIR}"
     cd "${OBJDIR}"
 
@@ -43,6 +42,10 @@ src_compile() {
     $(option_enable nls) \
     --disable-multilib \
     || die "Configure failed."
+}
+
+src_compile() {
+    cd ${OBJDIR}
     emake bootstrap || die "Make failed."
 }
 
