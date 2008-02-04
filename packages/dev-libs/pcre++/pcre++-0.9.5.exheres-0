@@ -13,10 +13,9 @@ MYOPTIONS=""
 DEPEND=""
 RDEPEND=""
 
-src_compile() {
+src_configure() {
     econf || die "Configure failed."
     sed -i -e 's:(prefix):(DESTDIR)/usr/share:' doc/Makefile
-    emake || die "Make failed."
 }
 
 src_install() {
