@@ -13,25 +13,14 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-
-    unpack ${A}
-    cd ${P}
+src_prepare() {
     # 135745 and 196720 refers to bugs on bugs.gentoo.org
     patch -p0 < "${FILESDIR}"/${P}-open-normal-fail.patch || die "patch failed" #135745
     patch -p1 < "${FILESDIR}"/${P}-open-cloexec.patch || die "patch failed" #196720
 
 }
 
-src_compile() {
-
-    econf || die "econf failed"
-    emake || die "emake failed"
-
-}
-
 src_install() {
-
     make DESTDIR=${D} install || die "install failed"
 
     keepdir /var/log/sandbox
@@ -40,10 +29,10 @@ src_install() {
 
     cd "${S}"
     dodoc AUTHORS ChangeLog NEWS README
-
 }
 
 pkg_preinst() {
     chown root:paludisbuild "${D}"/var/log/sandbox
     chmod 0770 "${D}"/var/log/sandbox
 }
+
