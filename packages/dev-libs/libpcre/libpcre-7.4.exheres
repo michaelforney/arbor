@@ -17,11 +17,11 @@ MYOPTIONS=""
 DEPEND=""
 RDEPEND=""
 
-src_compile() {
+src_configure() {
     econf --enable-shared || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
     emake DESTDIR="${D}" install
 }
+
