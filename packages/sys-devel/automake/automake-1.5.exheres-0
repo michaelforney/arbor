@@ -17,10 +17,12 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_compile() {
+src_prepare() {
     epatch "${FILESDIR}/${P}-test-fixes.patch"
+}
+
+src_configure() {
     econf --program-suffix="-${PV%%_*}" || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {

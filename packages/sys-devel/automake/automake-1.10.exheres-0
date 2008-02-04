@@ -15,9 +15,8 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_compile() {
+src_configure() {
     econf --program-suffix="-${PV}" || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
