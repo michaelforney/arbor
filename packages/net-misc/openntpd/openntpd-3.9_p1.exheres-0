@@ -33,16 +33,12 @@ pkg_setup() {
     create-ntp-user
 }
 
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
-
+src_prepare() {
     sed -i 's/_ntp/ntp/' ntpd.h || die "sed failed"
 }
 
-src_compile() {
+src_configure() {
     econf $(option_with !ssl builtin-arc4random) || die "econf failed"
-    emake || die "emake failed"
 }
 
 src_install() {
@@ -50,3 +46,4 @@ src_install() {
 
     dodoc README ChangeLog CREDITS
 }
+
