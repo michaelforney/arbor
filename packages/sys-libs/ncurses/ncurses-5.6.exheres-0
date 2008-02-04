@@ -19,19 +19,12 @@ src_configure() {
         --without-termcap \
         --libdir=/lib"
 
-    # Build narrow version first
     mkdir "${S}/narrow"
     cd "${S}/narrow"
     econf \
          ${common_conf} \
         || die "Configure failed."
-}
 
-src_compile() {
-    cd "${S}/narrow"
-    emake || die "Make failed."
-
-    # Now built wide char version if unicode is set
     if option unicode ; then
         mkdir "${S}/wide"
         cd "${S}/wide"
@@ -39,6 +32,15 @@ src_compile() {
             ${common_conf} \
             $(option_enable unicode widec) \
             || die "Configure failed."
+    fi
+}
+
+src_compile() {
+    cd "${S}/narrow"
+    emake || die "Make failed."
+
+    if option unicode ; then
+        cd "${S}/wide"
         emake || die "Make failed."
     fi
 }
@@ -54,3 +56,4 @@ src_install() {
         emake DESTDIR="${D}" install || die "Install failed"
     fi
 }
+
