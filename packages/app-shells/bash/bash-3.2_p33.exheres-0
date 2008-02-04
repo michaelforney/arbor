@@ -21,10 +21,7 @@ MYOPTIONS="nls"
 DEPENDENCIES="build,run:
                 sys-libs/ncurses"
 
-src_unpack() {
-    unpack "${MY_P}.tar.gz"
-    cd "${S}"
-
+src_prepare() {
     local i
     for ((i=1; i<=PATCH_LEVEL; i++)); do
         patch -p0 -s -f < "${FETCHEDDIR}/bash32-"$(printf "%03d" ${i}) || die "patching failed."
@@ -33,14 +30,13 @@ src_unpack() {
     patch -p1 -s -f < "${FILESDIR}/${MY_P}-config.diff"
 }
 
-src_compile() {
+src_configure() {
     econf \
         --bindir=/bin \
         --without-installed-readline \
         --with-curses \
         $(option_enable nls) \
         || die "configure failed."
-    emake || die "make failed."
 }
 
 src_install() {
