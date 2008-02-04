@@ -1,8 +1,7 @@
-# Copyright 2007, 2008 Richard Brown
+# Copyright 2007 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
-# Inspired by ruby-1.8.6_p111-r1.ebuild which is Copyright 1999-2007 Gentoo Foundation
 
-require autotools multilib versionator
+require autotools flag-o-matic multilib versionator
 
 DESCRIPTION="An object-oriented scripting language"
 HOMEPAGE="http://www.ruby-lang.org/"
@@ -25,11 +24,7 @@ DEPENDENCIES="build,run:
                 ssl? ( dev-libs/openssl )
 "
 
-src_unpack() {
-    unpack ${A}
-
-    cd "${S}"
-
+src_prepare() {
     sed -i -e "s:\(RUBY_LIB_PREFIX=\"\${prefix}/\)lib:\1$(get_libdir):" \
         configure.in || die "sed failed"
 
