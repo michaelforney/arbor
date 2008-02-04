@@ -14,9 +14,7 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
+src_prepare() {
     epatch "${FILESDIR}/${P}-parallel-make.patch"
 }
 
@@ -37,3 +35,4 @@ src_install() {
     dodoc BUG-REPORT ChangeLog* FDL INSTALL* MORE.STUFF NEWS PROBLEMS \
     PROJECTS README REVISION TODO VERSION
 }
+
