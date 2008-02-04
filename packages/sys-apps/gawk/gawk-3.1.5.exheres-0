@@ -12,9 +12,8 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-src_compile() {
+src_configure() {
     econf $(option_enable nls) || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
@@ -22,3 +21,4 @@ src_install() {
     dodoc ABOUT-NLS AUTHORS ChangeLog FUTURES INSTALL LIMITATIONS NEWS \
         POSIX.STD PROBLEMS README README_d
 }
+
