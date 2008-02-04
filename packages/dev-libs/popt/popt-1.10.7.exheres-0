@@ -14,11 +14,10 @@ MYOPTIONS="nls"
 DEPEND=""
 RDEPEND=""
 
-src_compile() {
+src_configure() {
     econf \
         --with-included-gettext \
         $(option_enable nls) || die "configure failed."
-    emake || die "make failed."
 }
 
 src_install() {
@@ -32,3 +31,4 @@ src_test() {
 
     make check || die "Tests failed."
 }
+
