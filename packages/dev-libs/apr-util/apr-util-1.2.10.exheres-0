@@ -19,14 +19,14 @@ DEPENDENCIES="build:
                 dev-libs/apr
                 gdbm? ( sys-libs/gdbm )"
 
-src_compile() {
+src_configure() {
     econf \
         --with-apr=/usr \
         $(option_with gdbm) \
         || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
 }
+
