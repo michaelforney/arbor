@@ -14,14 +14,8 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-    unpack ${A}
-    cd ${S}
+src_prepare() {
     epatch ${FILESDIR}/bzip2-manpage-install.patch
-}
-
-src_compile() {
-    emake || die "Make failed."
 }
 
 src_install() {
