@@ -15,11 +15,11 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-src_compile() {
+src_configure() {
     econf --enable-shared $(option_enable ipv6)
-    emake
 }
 
 src_install() {
     emake install DESTDIR=${D}
 }
+
