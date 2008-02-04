@@ -19,9 +19,8 @@ RDEPEND=""
 # Tests requires /etc/pam.d/other to be installed
 RESTRICT="test"
 
-src_compile() {
+src_configure() {
     econf $(option_enable nls) || die "Configure failed."
-    emake || die "Make failed"
 }
 
 src_install() {
