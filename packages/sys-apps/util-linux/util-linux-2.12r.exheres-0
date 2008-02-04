@@ -14,9 +14,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
+src_prepare() {
     epatch "${FILESDIR}/${P}-llseek.patch"
 }
 
@@ -24,3 +22,4 @@ src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc HISTORY MAINTAINER README VERSION
 }
+
