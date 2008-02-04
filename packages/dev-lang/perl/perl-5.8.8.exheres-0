@@ -14,14 +14,12 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
+src_prepare() {
     epatch "${FILESDIR}/perl-gcc-4.2.patch"
     epatch "${FILESDIR}/perl-asm-page-h.patch"
 }
 
-src_compile() {
+src_configure() {
     mkdir "${T}/build"
     cd "${T}/build"
 
@@ -35,6 +33,9 @@ src_compile() {
         -Dinstallusrbinperl \
         -Dmksymlinks \
         || die "Configure failed."
+}
+
+src_compile() {
     make -j1 || die "Make failed."
 }
 
