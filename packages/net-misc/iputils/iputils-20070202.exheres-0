@@ -33,14 +33,19 @@ src_compile() {
 src_install() {
     into /
     dobin ping
+    fperms +s /bin/ping
+
     into /usr
     dosbin arping clockdiff ipg rarpd rdisc tftpd tracepath
 
     if option ipv6; then
         into /
         dobin ping6
+        fperms +s /bin/ping6
+
         into /usr
         dosbin tracepath6 traceroute6
+        fperms +s /usr/bin/traceroute6
     fi
 
     dodoc RELNOTES
