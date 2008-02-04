@@ -17,9 +17,7 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-src_unpack() {
-    unpack ${A}
-    cd "${S}"
+src_prepare() {
     epatch "${FILESDIR}/${P}-linux-headers-types.patch"
     epatch "${FILESDIR}/${P}-kernel-ifaddr.patch"
     epatch "${FILESDIR}/${P}-no-open-max.patch"
@@ -47,3 +45,4 @@ src_install() {
 
     dodoc RELNOTES
 }
+
