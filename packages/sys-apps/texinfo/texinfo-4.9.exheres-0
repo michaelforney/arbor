@@ -19,9 +19,8 @@ DEPENDENCIES="build:
               run:
                 sys-libs/ncurses"
 
-src_compile() {
+src_configure() {
     econf $(option_enable nls) || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
@@ -29,3 +28,4 @@ src_install() {
     dodoc ABOUT-NLS AUTHORS ChangeLog* INSTALL* INTRODUCTION \
         NEWS README* TODO
 }
+
