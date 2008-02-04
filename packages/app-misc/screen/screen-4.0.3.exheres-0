@@ -13,9 +13,11 @@ MYOPTIONS="pam"
 DEPENDENCIES="sys-libs/ncurses
               pam? ( sys-libs/pam )"
 
-src_compile() {
-    econf $(option_enable pam) --enable-colors256 --with-sys-screenrc=/etc/screenrc
-    emake || die "emake failed"
+src_configure() {
+    econf \
+        $(option_enable pam) \
+        --enable-colors256 \
+        --with-sys-screenrc=/etc/screenrc
 }
 
 src_install() {
