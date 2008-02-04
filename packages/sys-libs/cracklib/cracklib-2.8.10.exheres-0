@@ -13,14 +13,14 @@ MYOPTIONS="python"
 DEPEND="python? ( dev-lang/python )"
 RDEPEND="${DEPEND}"
 
-src_compile() {
+src_configure() {
     econf \
         $(option_with python) \
         || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc AUTHORS ChangeLog NEWS README*
 }
+
