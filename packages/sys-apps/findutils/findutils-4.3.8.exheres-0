@@ -12,12 +12,12 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-src_compile() {
+src_configure() {
     econf $(option_enable nls) || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc ABOUT-NLS AUTHORS INSTALL NEWS README README-alpha THANKS TODO
 }
+
