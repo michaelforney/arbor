@@ -17,10 +17,13 @@ DEPENDENCIES="
         sys-devel/bison
         app-arch/lzo"
 
-src_compile() {
+src_configure() {
     econf \
-    --prefix=/ \
-    || die "Configure failed."
+        --prefix=/ \
+        || die "Configure failed."
+}
+
+src_compile() {
     emake -j1 || die "Make failed."
 }
 
@@ -32,3 +35,4 @@ src_install() {
     elog "A sample grub.cfg has been installed into /usr/share/doc/${P}"
     elog "Copy this to /boot/grub and edit it to fit your configuration"
 }
+
