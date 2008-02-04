@@ -14,7 +14,7 @@ MYOPTIONS="ssl"
 DEPEND=""
 RDEPEND=""
 
-src_compile() {
+src_configure() {
     local myconf
 
     if option ssl; then
@@ -27,7 +27,6 @@ src_compile() {
     --enable-shared \
     ${myconf} \
         || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
