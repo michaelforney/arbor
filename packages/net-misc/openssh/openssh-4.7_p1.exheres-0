@@ -23,7 +23,7 @@ DEPENDENCIES="build:
                 pam? ( sys-libs/pam )
                 tcp-wrappers? ( sys-apps/tcp-wrappers )"
 
-src_compile() {
+src_configure() {
     econf \
         $(option_enable skey) \
         $(option_enable tcp-wrappers) \
@@ -37,3 +37,4 @@ src_compile() {
 src_install() {
     emake DESTDIR="${D}" -j1 install
 }
+
