@@ -14,11 +14,11 @@ DEPENDENCIES=""
 
 WANT_AUTOMAKE="1.10"
 
-src_compile() {
+src_configure() {
     econf --exec-prefix="/" || die "Configure failed."
-    emake || die "Make failed."
 }
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
 }
+
