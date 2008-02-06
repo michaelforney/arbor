@@ -11,7 +11,7 @@ SRC_URI="http://ftp.gnu.org/gnu/${PN}/${MY_P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="1.9"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="slowtests"
 
 DEPENDENCIES="run: sys-devel/automake-wrapper"
 
@@ -22,4 +22,8 @@ src_configure() {
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     rm "${D}"/usr/bin/*-${PV}-*
+}
+
+src_test() {
+    option slowtests && default "$@"
 }
