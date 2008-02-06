@@ -8,7 +8,7 @@ SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="2.1"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="slowtests"
 
 DEPENDENCIES="
     build:
@@ -37,4 +37,8 @@ src_compile() {
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
+}
+
+src_test() {
+    option slowtests && default "$@"
 }
