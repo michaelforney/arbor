@@ -10,8 +10,16 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPEND=""
-RDEPEND=""
+DEPENDENCIES=""
+
+src_configure() {
+    default "$@"
+
+    # Make sure we use the system libtool
+    sed -i 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${S}"/build/apr_rules.mk || die "sed1 failed"
+    sed -i 's,${installbuilddir}/libtool,/usr/bin/libtool,' "${S}"/apr-1-config || die "sed2 failed"
+    rm -f "${S}"/libtool 
+}
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
