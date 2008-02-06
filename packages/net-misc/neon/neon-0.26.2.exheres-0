@@ -9,23 +9,32 @@ SRC_URI="http://www.webdav.org/neon/${P}.tar.gz"
 LICENSE="LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="ssl"
+MYOPTIONS="expat ssl"
 
-DEPEND=""
-RDEPEND=""
+DEPENDENCIES="
+    run,build:
+        ssl? ( dev-libs/openssl )
+        !expat? ( dev-libs/libxml2 )
+        expat? ( dev-libs/expat )"
 
 src_configure() {
     local myconf
 
-    if option ssl; then
-    myconf="${myconf} --with-ssl=openssl"
+    if option expat; then
+        myconf="${myconf} --with-expat --without-libxml2"
     else
-    myconf="${myconf} --without-ssl"
+        myconf="${myconf} --with-libxml2 --without-expat"
+    fi
+
+    if option ssl; then
+        myconf="${myconf} --with-ssl=openssl"
+    else
+        myconf="${myconf} --without-ssl"
     fi
 
     econf \
-    --enable-shared \
-    ${myconf} \
+        --enable-shared \
+        ${myconf} \
         || die "Configure failed."
 }
 
