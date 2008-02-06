@@ -10,7 +10,11 @@ SLOT="2.1"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="build: sys-apps/help2man"
+DEPENDENCIES="
+    build:
+        sys-apps/help2man
+    run:
+        sys-devel/autoconf-wrapper"
 
 src_prepare() {
     # DESTDIR support
