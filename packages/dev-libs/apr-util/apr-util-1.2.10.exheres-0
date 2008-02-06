@@ -10,18 +10,16 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="gdbm"
 
-DEPENDENCIES="build:
+DEPENDENCIES="build,run:
                 net-misc/neon
                 dev-libs/apr
-                gdbm? ( sys-libs/gdbm )
-              run:
-                net-misc/neon
-                dev-libs/apr
+                dev-libs/expat
                 gdbm? ( sys-libs/gdbm )"
 
 src_configure() {
     econf \
         --with-apr=/usr \
+        --with-expat=/usr \
         $(option_with gdbm) \
         || die "Configure failed."
 }
