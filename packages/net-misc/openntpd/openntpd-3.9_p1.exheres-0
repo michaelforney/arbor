@@ -45,5 +45,9 @@ src_install() {
     emake DESTDIR="${D}" install || die "emake install failed"
 
     dodoc README ChangeLog CREDITS
+    rmdir "${D}"/var/empty
 }
 
+pkg_postinst() {
+    [[ ! -d "${ROOT}/var/empty" ]] && mkdir "${ROOT}/var/empty"
+}
