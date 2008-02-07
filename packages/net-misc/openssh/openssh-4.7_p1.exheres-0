@@ -38,3 +38,6 @@ src_install() {
     emake DESTDIR="${D}" -j1 install
 }
 
+pkg_postinst() {
+    [[ ! -d "${ROOT}/var/empty" ]] && mkdir "${ROOT}/var/empty"
+}
