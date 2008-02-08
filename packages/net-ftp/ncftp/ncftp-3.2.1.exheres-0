@@ -10,27 +10,27 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86 ~ia64"
 MYOPTIONS="socks5 ipv6"
 
-DEPENDENCIES="
-                build,run:
-                    sys-libs/ncurses
-              "
+DEPENDENCIES="build,run:
+                    sys-libs/ncurses"
 
-src_compile() { 
+src_prepare() {
+    sed -i 's/"$DESTDIR"/"$(DESTDIR)"/p' "${S}"/Makefile.in || \
+        die "Sed failed."
+}
 
+src_configure() { 
     econf \
-    --with-ncurses \
-    $(option_enable socks5 ) \
-    $(option_enable ipv6 ) \
-    || die "econf failed"
-
-    emake || die "emake failed"
+        --with-ncurses \
+        $(option_enable socks5 ) \
+        $(option_enable ipv6 ) \
+        || die "econf failed"
 }
 
 src_install() {
-
     dodir /usr/share/man/man1
     emake DESTDIR="${D}" install || die "install failed"
     dodoc doc/FIREWALLS_AND_PROXIES.txt doc/CHANGELOG.txt DONATE.txt
-    dohtml -r doc/html/*
-
+    insinto /usr/share/doc/${P}/html
+    doins doc/html/*
 }
+
