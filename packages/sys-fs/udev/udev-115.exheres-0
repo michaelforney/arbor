@@ -1,0 +1,39 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="User space /dev manager for Linux"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
+SRC_URI="http://www.kernel.org/pub/linux/utils/kernel/hotplug/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dosbin udevstart || die "Install udevstart failed"
+    doman udevstart.8
+    dodoc ChangeLog FAQ README RELEASE-NOTES TODO
+    dodoc docs/*
+    cp -r docs/writing_udev_rules "${D}/usr/share/doc/${P}"
+    insinto /etc/udev/rules.d/
+    doins etc/udev/rules.d/*.rules
+    doins etc/udev/gentoo/*.rules
+    doins "${FILESDIR}/80-load-modules.rules"
+}
+
+pkg_postinst() {
+    einfo "Making necessary device nodes..."
+    if [[ ! -c ${ROOT}/dev/console ]] ; then
+        mknod ${ROOT}/dev/console c 5 1 || die "mknod /dev/console failed"
+    fi
+    if [[ ! -c ${ROOT}/dev/tty1 ]] ; then
+        mknod ${ROOT}/dev/tty1 c 4 1 || die "mknod /dev/tty1 failed"
+    fi
+    if [[ ! -c ${ROOT}/dev/null ]] ; then
+        mknod ${ROOT}/dev/null c 1 3 || die "mknod /dev/null failed"
+    fi
+}
