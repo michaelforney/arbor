@@ -17,7 +17,7 @@ DEPENDENCIES=""
 src_prepare() {
     sed -i \
         -e 's,^PREFIX=.*,PREFIX=/usr,' \
-        -e 's,^IDSDIR=.*,$(SHAREDIR)/misc,' \
+        -e 's,^IDSDIR=.*,IDSDIR=$(SHAREDIR)/misc,' \
         Makefile || die "sed failed"
 }
 
