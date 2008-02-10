@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 DESCRIPTION="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org"
 SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}/${P}.tar.bz2"
@@ -13,15 +11,16 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 
 DEPENDENCIES="build:
-        sys-devel/make
-        >=dev-libs/gmp-4.1
-        dev-libs/mpfr"
+                sys-devel/make
+              build,run:
+                fortran? ( >=dev-libs/gmp-4.1
+                    dev-libs/mpfr )"
 
 OBJDIR="${T}/${CHOST}"
 
 src_prepare() {
     # fix for gcc bug #31899. this will be fixed upstream in gcc 4.2.3
-    epatch "${FILESDIR}/${P}-ICE-fix.patch"
+    patch -p1 < "${FILESDIR}/${P}-ICE-fix.patch" || die "patch failed."
 }
 
 src_configure() {
@@ -30,22 +29,23 @@ src_configure() {
 
     LANGS="c++"
     for i in ada fortran objc obj-c++ java; do
-    option ${i} && LANGS="${LANGS} ${i}"
+        option ${i} && LANGS="${LANGS} ${i}"
     done
     LANGS="${LANGS/ /,}"
 
     "${S}/configure" \
-    --prefix=/usr \
-    --infodir=/usr/share/info \
-    --enable-languages="${LANGS}" \
-    $(option_enable propolice libssp) \
-    $(option_enable nls) \
-    --disable-multilib \
-    || die "Configure failed."
+        --host=${CHOST} \
+        --prefix=/usr \
+        --infodir=/usr/share/info \
+        --enable-languages="${LANGS}" \
+        $(option_enable propolice libssp) \
+        $(option_enable nls) \
+        --disable-multilib \
+        || die "Configure failed."
 }
 
 src_compile() {
-    cd ${OBJDIR}
+    cd "${OBJDIR}"
     emake bootstrap || die "Make failed."
 }
 
