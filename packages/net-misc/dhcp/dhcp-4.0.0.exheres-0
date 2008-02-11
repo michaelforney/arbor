@@ -1,0 +1,26 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="ISC DHCP server and client"
+HOMEPAGE="http://www.isc.org/sw/dhcp/"
+SRC_URI="http://ftp.isc.org/isc/dhcp/${P}.tar.gz"
+
+LICENSE="ISC"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="ipv6"
+
+DEPENDENCIES=""
+
+src_configure() {
+    local myconf
+
+    if option ipv6; then
+            myconf="${myconf} --enable-dhcpv6"
+    fi
+    econf ${myconf} || die "Configure failed" 
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+}
