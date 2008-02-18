@@ -1,0 +1,31 @@
+# Copyright 2007 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+require subversion
+
+DESCRIPTION="Some replacements for programs formerly provided by sysvinit."
+HOMEPAGE="http://www.exherbo.org/"
+SRC_URI=""
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="visibility"
+
+DEPENDENCIES=""
+
+ESVN_REPO_URI="http://svn.exherbo.org/annie"
+ESVN_BOOTSTRAP="./autogen.bash"
+
+src_configure() {
+    econf \
+        $(option_enable visibility) \
+        --exec-prefix=/ \
+        --libexecdir=/lib \
+        || die "econf failed"
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "emake install failed"
+    dodoc AUTHORS ChangeLog NEWS README 
+}
