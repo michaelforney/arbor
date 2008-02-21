@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
+require multilib
 
 PATCH_LEVEL=${P##*_p}
 
@@ -26,17 +26,15 @@ DEPENDENCIES="build:
                 sys-libs/ncurses"
 
 src_prepare() {
-    cd "${S}"
-
     local i
     for ((i=1; i<=PATCH_LEVEL; i++)); do
-        epatch "${FETCHEDDIR}/readline52-"$(printf "%03d" ${i}) || die "patching failed."
+        expatch -p0 "${FETCHEDDIR}/readline52-"$(printf "%03d" ${i}) || die "patching failed."
     done
 }
 
 src_configure() {
     econf \
-        --libdir=/lib \
+        --libdir=/$(get_libdir) \
         || die "Configure failed."
 }
 
