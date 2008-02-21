@@ -21,4 +21,5 @@ src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc CHANGES CREDITS README
     cp -r doc/* ${D}/usr/share/doc/${P}/
+    rmdir "${D}"/usr/share/locale/{da,fr,sv,tr}/{LC_MESSAGES,}
 }
