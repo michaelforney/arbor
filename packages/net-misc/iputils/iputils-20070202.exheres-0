@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 MY_P="${PN}-s${PV}"
 S="${WORKDIR}/${MY_P}"
 
@@ -17,11 +15,10 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-src_prepare() {
-    epatch "${FILESDIR}/${P}-linux-headers-types.patch"
-    epatch "${FILESDIR}/${P}-kernel-ifaddr.patch"
-    epatch "${FILESDIR}/${P}-no-open-max.patch"
-}
+DEFAULT_SRC_PREPARE_PATCHES=(-p0
+    "${FILESDIR}/${P}-linux-headers-types.patch"
+    "${FILESDIR}/${P}-kernel-ifaddr.patch"
+    "${FILESDIR}/${P}-no-open-max.patch")
 
 src_compile() {
     emake || die "Make failed."
