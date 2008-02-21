@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 DESCRIPTION="Groff produces formatted output from plain text"
 HOMEPAGE="http://www.gnu.org/software/groff"
 SRC_URI="ftp://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
@@ -14,25 +12,26 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-src_prepare() {
-    epatch "${FILESDIR}/${P}-parallel-make.patch"
-}
+DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/${P}-parallel-make.patch"
 
 src_install() {
     dodir /usr/bin
     emake \
-    prefix="${D}/usr" \
-    datadir="${D}/usr/share" \
-    libdir="${D}/usr/$(get_libdir)" \
-    infodir="${D}/usr/share/info" \
-    mandir="${D}/usr/share/man" \
-    appresdir="${D}/etc/X11/app-defaults" \
-    install || die "Install failed."
+        prefix="${D}/usr" \
+        datadir="${D}/usr/share" \
+        libdir="${D}/usr/$(get_libdir)" \
+        infodir="${D}/usr/share/info" \
+        mandir="${D}/usr/share/man" \
+        appresdir="${D}/etc/X11/app-defaults" \
+        install || die "Install failed."
+
+    rmdir "${D}"/usr/share/groff/site-font "${D}"/usr/groff/site-tmac || \
+        die "rmdir failed."
 
     dosym tbl /usr/bin/gtbl
     dosym eqn /usr/bin/geqn
 
     dodoc BUG-REPORT ChangeLog* FDL INSTALL* MORE.STUFF NEWS PROBLEMS \
-    PROJECTS README REVISION TODO VERSION
+       PROJECTS README REVISION TODO VERSION
 }
 
