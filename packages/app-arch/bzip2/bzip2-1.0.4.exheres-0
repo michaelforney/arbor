@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 DESCRIPTION="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
 SRC_URI="http://www.bzip.org/${PV}/${P}.tar.gz"
@@ -14,9 +12,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_prepare() {
-    epatch ${FILESDIR}/bzip2-manpage-install.patch
-}
+DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/bzip2-manpage-install.patch")
 
 src_install() {
     emake install PREFIX=${D} MANPREFIX=${D}/usr/share
