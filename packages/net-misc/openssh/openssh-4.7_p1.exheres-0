@@ -36,6 +36,7 @@ src_configure() {
 
 src_install() {
     emake DESTDIR="${D}" -j1 install
+    rmdir "${D}"/var{/empty,}
 }
 
 pkg_postinst() {
