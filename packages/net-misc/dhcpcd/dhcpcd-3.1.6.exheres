@@ -14,4 +14,7 @@ DEPENDENCIES=""
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
+    rmdir "${D}"/var/lib
+    dodir /var/run
+    keepdir /var/run
 }
