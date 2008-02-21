@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 MY_P="${P/_/-}"
 S="${WORKDIR}/${MY_P}"
 
@@ -17,9 +15,7 @@ MYOPTIONS="slowtests"
 
 DEPENDENCIES="run: sys-devel/automake-wrapper"
 
-src_prepare() {
-    epatch "${FILESDIR}/${P}-test-fixes.patch"
-}
+DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/${P}-test-fixes.patch"
 
 src_configure() {
     econf --program-suffix="-${PV%%_*}" || die "Configure failed."
@@ -27,7 +23,7 @@ src_configure() {
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
-    rm "${D}"/usr/bin/*-${PV}-*
+    rm -f "${D}"/usr/bin/*-${PV}-*
 }
 
 src_test() {
