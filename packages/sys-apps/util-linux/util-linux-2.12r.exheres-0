@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 DESCRIPTION="Common linux utilities"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/util-linux"
 SRC_URI="mirror://kernel/linux/utils/${PN}/${P}.tar.bz2"
@@ -14,9 +12,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_prepare() {
-    epatch "${FILESDIR}/${P}-llseek.patch"
-}
+DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/${P}-llseek.patch"
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
