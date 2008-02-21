@@ -15,4 +15,5 @@ DEPENDENCIES=""
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc ChangeLog MAINT PORTING README
+    rmdir "${D}"/usr/share/man/man5
 }
