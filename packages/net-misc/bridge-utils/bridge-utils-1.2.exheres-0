@@ -1,7 +1,7 @@
 # Copyright (c) 2007 Alexander Færøy <eroyf@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils autotools
+require autotools
 
 DESCRIPTION="Tools for configuring 802.11d ethernet bridges with Linux"
 HOMEPAGE="http://www.linux-foundation.org/en/Net:Bridge"
@@ -9,7 +9,7 @@ SRC_URI="http://surfnet.dl.sourceforge.net/sourceforge/bridge/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-PLATFORMS="~x86"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -18,18 +18,18 @@ DEPENDENCIES="
         sys-devel/autoconf
 "
 
-src_compile() {
+src_prepare() {
     eautomake || die "eautomake failed"
     eautoconf || die "eautoconf failed"
+}
 
+src_configure() {
     econf \
         --prefix="/" \
         --with-linux-headers="/usr/include" \
         --includedir="/usr/include" \
         --libdir="/usr/$(get_libdir)/" \
         || die "econf failed"
-
-    emake || die "emake failed"
 }
 
 src_install() {
