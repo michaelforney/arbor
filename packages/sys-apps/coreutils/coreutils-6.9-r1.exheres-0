@@ -1,7 +1,7 @@
 # Copyright 2007-2008 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils autotools
+require autotools
 
 DESCRIPTION="Core file, shell and text utilities expected to be on any system."
 HOMEPAGE="http://www.gnu.org/software/coreutils"
@@ -16,17 +16,12 @@ DEPENDENCIES="build:
                 acl? ( sys-apps/acl sys-apps/attr )"
 
 src_prepare() {
-    epatch "${FILESDIR}/${P}-futimens.patch"
-    epatch "${FILESDIR}/009_all_coreutils-tests.patch"
+    expatch -p1 "${FILESDIR}/${P}-futimens.patch" \
+        "${FILESDIR}/009_all_coreutils-tests.patch"
     AT_M4DIR="m4" eautoreconf || die "Eautoreconf failed."
 }
 
-src_configure() {
-    econf \
-    $(option_enable nls) \
-    $(option_enable acl) \
-    || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="acl nls"
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
