@@ -527,9 +527,6 @@ vim_src_test() {
     # We don't want to rebuild vim before running the tests
     sed -i -e 's,: \$(VIMPROG),: ,' Makefile
 
-    # Give the user time to read the "what to do if these break" messages
-    epause 10
-
     # Don't try to do the additional GUI test
     make VIMPROG=${testprog} nongui \
         || die "At least one test failed"

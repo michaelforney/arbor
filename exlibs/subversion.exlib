@@ -15,8 +15,6 @@
 #
 ## --------------------------------------------------------------------------- #
 
-require eutils
-
 export_exlib_phases src_unpack
 
 ESVN="subversion.eclass"
@@ -90,20 +88,6 @@ ESVN_UPDATE_CMD="svn update"
 # bootstrap script or command like autogen.sh or etc..
 #
 : ESVN_BOOTSTRAP=${ESVN_BOOTSTRAP:=}
-
-
-## -- ESVN_PATCHES:
-#
-# subversion eclass can apply pathces in subversion_bootstrap().
-# you can use regexp in this valiable like *.diff or *.patch or etc.
-# NOTE: this patches will apply before eval ESVN_BOOTSTRAP.
-#
-# the process of applying the patch is:
-#   1. just epatch it, if the patch exists in the path.
-#   2. scan it under FILESDIR and epatch it, if the patch exists in FILESDIR.
-#   3. die.
-#
-: ESVN_PATCHES=${ESVN_PATCHES:=}
 
 
 ## -- ESVN_RESTRICT:
@@ -213,34 +197,6 @@ function subversion_bootstrap() {
     fi
 
     cd "${S}"
-
-    if [[ -n "${ESVN_PATCHES}" ]]; then
-        einfo "apply patches -->"
-
-        local p=
-
-        for p in ${ESVN_PATCHES}; do
-            if [[ -f "${p}" ]]; then
-                epatch "${p}"
-
-            else
-                local q=
-
-                for q in ${FILESDIR}/${p}; do
-                    if [[ -f "${q}" ]]; then
-                        epatch "${q}"
-
-                    else
-                        die "${ESVN}; ${p} is not found"
-
-                    fi
-                done
-            fi
-        done
-
-        echo
-
-    fi
 
     if [[ -n "${ESVN_BOOTSTRAP}" ]]; then
         einfo "begin bootstrap -->"
