@@ -19,5 +19,6 @@ src_configure() {
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc ABOUT-NLS AUTHORS INSTALL NEWS README README-alpha THANKS TODO
+    rmdir "${D}"/var{/lib,}
 }
 
