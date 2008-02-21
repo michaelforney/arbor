@@ -1,7 +1,7 @@
 # Copyright 2007 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require subversion
+require multilib subversion
 
 DESCRIPTION="Some replacements for programs formerly provided by sysvinit."
 HOMEPAGE="http://www.exherbo.org/"
@@ -9,7 +9,7 @@ SRC_URI=""
 
 LICENSE="GPL-2"
 SLOT="0"
-PLATFORMS="~x86"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="visibility"
 
 DEPENDENCIES=""
@@ -21,7 +21,7 @@ src_configure() {
     econf \
         $(option_enable visibility) \
         --exec-prefix=/ \
-        --libexecdir=/lib \
+        --libexecdir=/$(get_libdir) \
         || die "econf failed"
 }
 
