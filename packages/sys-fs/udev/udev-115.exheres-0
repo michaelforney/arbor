@@ -23,6 +23,7 @@ src_install() {
     doins etc/udev/rules.d/*.rules
     doins etc/udev/gentoo/*.rules
     doins "${FILESDIR}/80-load-modules.rules"
+    rmdir "${D}"/dev
 }
 
 pkg_postinst() {
