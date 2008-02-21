@@ -1,8 +1,6 @@
 # Copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils
-
 DESCRIPTION="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
 SRC_URI="ftp://ftp.cpan.org/pub/CPAN/src/perl-5.8.8.tar.bz2"
@@ -12,12 +10,11 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="build,run:
+    perl-core/PodParser"
 
-src_prepare() {
-    epatch "${FILESDIR}/perl-gcc-4.2.patch"
-    epatch "${FILESDIR}/perl-asm-page-h.patch"
-}
+DEFAULT_SRC_PREPARE_PATCHES=("${FILESDIR}/perl-gcc-4.2.patch"
+    "${FILESDIR}/perl-asm-page-h.patch")
 
 src_configure() {
     mkdir "${T}/build"
@@ -49,9 +46,12 @@ src_install() {
     dosym /usr/lib/libperl.so.1 /usr/lib/libperl.so
     dodoc AUTHORS Changes* INSTALL README*
 
+    # Remove empty dirs
+    rmdir "${D}"/usr/lib/perl5/site_perl{/5.8.8/x86_64,/5.8.8,}
+
     # Install LDPATH env file
     dodir /etc/env.d
-    cat <<EOF > "${D}/etc/env.d/05perl"
+    cat <<EOF > "${D}"/etc/env.d/05perl
 LDPATH="/usr/lib/perl5/${PV}/$(uname -m)-linux/CORE/lib"
 EOF
 }
