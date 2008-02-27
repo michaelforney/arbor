@@ -13,21 +13,17 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_prepare() {
-    # 135745 and 196720 refers to bugs on bugs.gentoo.org
-    patch -p0 < "${FILESDIR}"/${P}-open-normal-fail.patch || die "patch failed" #135745
-    patch -p1 < "${FILESDIR}"/${P}-open-cloexec.patch || die "patch failed" #196720
-
-}
+# Gentoo bugs 135745, 196720 respectively.
+DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/${P}-open-normal-fail.patch"
+    -p1 "${FILESDIR}"/${P}-open-cloexec.patch)
 
 src_install() {
-    make DESTDIR=${D} install || die "install failed"
+    emake DESTDIR="${D}" install || die "install failed"
 
     keepdir /var/log/sandbox
     fowners root:paludisbuild /var/log/sandbox
     fperms 0770 /var/log/sandbox
 
-    cd "${S}"
     dodoc AUTHORS ChangeLog NEWS README
 }
 
