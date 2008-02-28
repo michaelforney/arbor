@@ -1,0 +1,22 @@
+# Copyright 2008 Anders Ossowicki
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Error/exception handling in an OO-ish way"
+HOMEPAGE="http://search.cpan.org/~shlomif/${P}/"
+SRC_URI="http://search.cpan.org/CPAN/authors/id/S/SH/SHLOMIF/${P}.tar.gz"
+
+LICENSE="GPL-2 Artistic"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_compile() {
+    perl Makefile.PL PREFIX="${D}/usr" || die "perl Makefile.PL failed"
+    emake || die "Make failed"
+}
+
+src_install() {
+    emake install || die "Install failed"
+}
