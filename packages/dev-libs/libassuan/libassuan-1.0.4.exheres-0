@@ -1,0 +1,21 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Standalone IPC library used by gpg, gpgme and newpg"
+HOMEPAGE="http://www.gnupg.org/related_software/libassuan"
+SRC_URI="mirror://gnupg/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libgpg-error
+        dev-libs/pth"
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc AUTHORS ChangeLog NEWS README THANKS TODO
+}
