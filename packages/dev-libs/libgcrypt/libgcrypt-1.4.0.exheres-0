@@ -1,0 +1,31 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="General purpose crypto library based on the code used in GnuPG"
+HOMEPAGE="http://www.gnupg.org/"
+SRC_URI="mirror://gnupg/libgcrypt/${P}.tar.bz2"
+
+LICENSE="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="nls"
+
+DEPENDENCIES="
+    build:
+        nls? ( sys-devel/gettext )
+    run:
+        dev-libs/libgpg-error"
+
+DEFAULT_SRC_CONFIGURE_PARAMS="
+--disable-padlock-support
+--disable-dependency-tracking
+--with-pic --enable-noexecstack"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc AUTHORS BUGS ChangeLog NEWS README* THANKS TODO VERSION
+    rmdir "${D}"/usr/sbin # Empty directory
+}
+
