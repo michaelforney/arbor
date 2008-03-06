@@ -18,19 +18,22 @@ LICENSE="Ruby"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
 
-DEPENDENCIES="build,run:
-                berkdb? ( sys-libs/db )
-                gdbm? ( sys-libs/gdbm )
-                ssl? ( dev-libs/openssl )
+DEPENDENCIES="
+    build,run:
+        berkdb? ( sys-libs/db )
+        gdbm? ( sys-libs/gdbm )
+        ssl? ( dev-libs/openssl )
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p2 "${FILESDIR}/${P}-r13657.patch"
+    -p0 "${FILESDIR}/${P}-to-p113.patch")
 
 src_prepare() {
     sed -i -e "s:\(RUBY_LIB_PREFIX=\"\${prefix}/\)lib:\1$(get_libdir):" \
         configure.in || die "sed failed"
 
-    patch -p2 < "${FILESDIR}/${P}-r13657.patch" || die "patch ${P}-r13657.patch failed"
-    patch -p0 < "${FILESDIR}/${P}-to-p113.patch" || die "patch ${P}-to-p113.patch failed"
-    
+    default
     eautoreconf
 }
 
@@ -65,7 +68,6 @@ src_compile() {
 
 src_test() {
     emake -j1 test || die "make test failed"
-
 }
 
 src_install() {
