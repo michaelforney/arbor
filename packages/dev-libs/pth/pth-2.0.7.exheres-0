@@ -1,0 +1,35 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+require fixheadtails
+
+DESCRIPTION="GNU Portable Threads"
+HOMEPAGE="http://www.gnu.org/software/pth/"
+SRC_URI="mirror://gnu/${PN}/${P}.tar.gz"
+
+LICENSE="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+# When passing --enable-debug to ./configure, pth doesn't install a shared
+# library, gentoo bug 205875. Thus, no debug option added.
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILESDIR}/${PN}-2.0.7-parallelfix.patch"
+    -p1 "${FILESDIR}/${PN}-2.0.7-ldflags.patch"
+    "${FILESDIR}/${PN}-2.0.7-sigstack.patch" )
+
+src_prepare() {
+    default
+    ht_fix_file aclocal.m4 configure
+}
+
+src_install() {
+    # make install is not parallel safe
+    emake -j1 DESTDIR="${D}" install
+    dodoc ANNOUNCE AUTHORS ChangeLog NEWS README THANKS USERS
+}
+
