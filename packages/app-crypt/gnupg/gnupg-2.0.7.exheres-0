@@ -1,0 +1,59 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="The GNU Privacy Guard, a GPL pgp replacement"
+HOMEPAGE="http://www.gnupg.org/"
+SRC_URI="mirror://gnupg/gnupg/${P}.tar.bz2"
+
+LICENSE="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="doc nls"
+
+DEPENDENCIES="
+build:
+    dev-libs/libassuan
+    doc? ( sys-apps/texinfo )
+    nls? ( sys-devel/gettext )
+build+run:
+    app-arch/bzip2
+    app-crypt/pinentry
+    dev-libs/libgcrypt
+    dev-libs/libgpg-error
+    dev-libs/libksba
+    dev-libs/pth
+    net-misc/curl"
+
+src_configure() {
+    econf \
+        --enable-symcryptrun \
+        --enable-gpg \
+        --enable-gpgsm \
+        --enable-agent \
+        --enable-bzip2 \
+        --disable-ldap \
+        $(option_enable nls) \
+        --without-capabilities
+}
+
+src_compile() {
+    emake
+    option doc && emake html
+}
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc ChangeLog NEWS README THANKS TODO VERSION \
+        doc/{DETAILS,FAQ,HACKING,KEYSERVER,OpenPGP,TRANSLATE}
+
+    for bin in /usr/bin/gpg{,v}2; do
+        dosym ${bin} ${bin/2}
+    done
+
+    if option doc; then
+        insinto /usr/share/doc/${PF}/html
+        doins doc/*.{jpg,png} doc/gnupg.html/*
+    fi
+}
+
