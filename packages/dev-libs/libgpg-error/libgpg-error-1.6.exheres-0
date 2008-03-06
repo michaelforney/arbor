@@ -1,0 +1,21 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Contains error handling functions used by GnuPG software"
+HOMEPAGE="http://www.gnupg.org/related_software/libgpg-error/index.en.html"
+SRC_URI="mirror://gnupg/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="nls"
+
+DEPENDENCIES="
+    build: nls? ( sys-devel/gettext )"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc AUTHORS ChangeLog NEWS README THANKS || die "dodoc failed"
+}
