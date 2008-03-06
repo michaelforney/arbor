@@ -1,0 +1,23 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Makes X.509 certificates and CMS easily accessible to applications"
+HOMEPAGE="http://www.gnupg.org/related_software/libksba"
+SRC_URI="mirror://gnupg/libksba/${P}.tar.bz2"
+
+LICENSE="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libgcrypt
+        dev-libs/libgpg-error"
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc AUTHORS ChangeLog NEWS README THANKS TODO VERSION
+}
+
