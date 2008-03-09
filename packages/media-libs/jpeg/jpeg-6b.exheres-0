@@ -1,34 +1,27 @@
-# Copyright 2007 Kim Højgaard-Hansen
+# Copyright 2008 Kim Højgaard-Hansen
 # Distributed under the terms of the GNU General Public License v2
 
 DESCRIPTION="Library for JPEG image compression"
 HOMEPAGE="http://www.ijg.org/"
-SRC_URI="http://www.ijg.org/files/jpegsrc.v6b.tar.gz"
+SRC_URI="http://www.ijg.org/files/${PN}src.v${PV}.tar.gz"
 
 LICENSE="IJG MIT GPL GPL-2"
 SLOT="0"
-PLATFORMS="~x86"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="static"
 
 DEPENDENCIES=""
 
-src_prepare() {
-    patch -p1 -s -f < "${FILESDIR}/jpeg-Makefile.patch" || die "Patching failed"
-    patch -p1 -s -f < "${FILESDIR}/jpeg-jpeglib.h_c++.patch" || die "Patching failed"
-    patch -p1 -s -f < "${FILESDIR}/jpeg-rdppm.patch" || die "Patching failed"
-}
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}/${PN}-Makefile.patch"
+    "${FILESDIR}/${PN}-jpeglib.h_c++.patch"
+    "${FILESDIR}/${PN}-rdppm.patch")
 
-src_configure() {
-
-    # For systems with little memory and/or no swap
-    # it's possible to enable tmp files with
-    # --enable-maxmem[=N] to set max mem usage to N MB
-
-    econf \
-        --enable-shared \
-        $(option_enable static) || die "Configure failed" 
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="static"
+DEFAULT_SRC_CONFIGURE_PARAMS="--enable-shared"
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
+    dodoc README
 }
+
