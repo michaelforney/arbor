@@ -1,0 +1,22 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Command line parsing library"
+HOMEPAGE="http://www.rpm.org"
+SRC_URI="http://rpm5.org/files/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="nls"
+
+DEPENDENCIES="
+build: nls? ( sys-devel/gettext )"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+DEFAULT_SRC_CONFIGURE_PARAMETERS="--with-included-gettext"
+
+src_install() {
+    emake DESTDIR="${D}" install
+}
+
