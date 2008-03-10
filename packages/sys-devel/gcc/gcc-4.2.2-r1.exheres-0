@@ -59,6 +59,6 @@ src_install() {
     find . -name *.h -exec gcc {} \; || die "Precompiling headers failed."
     find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed."
 
-    rmdir "${D}"/usr/lib/gcc/x86_64-pc-linux-gnu/4.2.2/finclude \
+    rmdir "${D}"/usr/lib/gcc/${CHOST}/4.2.2/finclude \
         || die "Failed to delete empty directory"
 }
