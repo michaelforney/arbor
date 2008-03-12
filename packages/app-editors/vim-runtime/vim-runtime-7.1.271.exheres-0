@@ -1,5 +1,7 @@
 # Copyright 2007 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'vim-core-7.1.042.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
 
 require vim
 
@@ -17,7 +19,7 @@ SRC_URI="ftp://ftp.vim.org/pub/vim/unix/vim-${VIM_VERSION}.tar.bz2
     ftp://ftp.vim.org/pub/vim/extra/vim-${VIM_VERSION}-extra.tar.gz
 
     $(for ((i=1; i<=VIM_PATCH_LEVEL; i++)); do
-    printf "ftp://ftp.vim.org/pub/vim/patches/${VIM_VERSION}/${VIM_VERSION}.%03d -> vim-patch-${VIM_VERSION}.%03d\n" "${i}" "${i}"
+        printf "ftp://ftp.vim.org/pub/vim/patches/${VIM_VERSION}/${VIM_VERSION}.%03d -> vim-patch-${VIM_VERSION}.%03d\n" "${i}" "${i}"
     done)
 
     http://dev.exherbo.org/~pioto/distfiles/vim-${VIM_VERSION}-exherbo-patches.tar.bz2"
@@ -31,4 +33,4 @@ S="${WORKDIR}/vim${VIM_VERSION/.}"
 
 DEPENDENCIES="
     run:
-    !app-editors/vim-core"
+        !app-editors/vim-core"
