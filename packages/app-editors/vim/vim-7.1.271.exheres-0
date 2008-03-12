@@ -1,5 +1,7 @@
 # Copyright 2007 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'vim-7.1.042.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
 
 require vim
 
@@ -29,8 +31,6 @@ MYOPTIONS=""
 S="${WORKDIR}/vim${VIM_VERSION/.}"
 
 DEPENDENCIES="
-    build:
-    !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
-    run:
-    !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )"
+    build,run:
+        !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )"
 
