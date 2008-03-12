@@ -1,5 +1,7 @@
 # Copyright 2007 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
 
 require autotools flag-o-matic multilib versionator
 
@@ -14,7 +16,7 @@ MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
 
 SRC_URI="ftp://ftp.ruby-lang.org/pub/ruby/${SLOT}/${MY_P}.tar.bz2"
 
-LICENSE="Ruby"
+LICENSE="|| ( Ruby GPL-2 )"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
 
