@@ -1,0 +1,67 @@
+# Copyright 2007 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'rubygems-1.0.1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require multilib versionator
+
+DESCRIPTION="Centralised Ruby extension management"
+HOMEPAGE="http://rubyforge.org/projects/rubygems/"
+LICENSE="|| ( Ruby GPL-2 )"
+
+PLATFORMS="~amd64 ~x86"
+SLOT="0"
+MYOPTIONS="doc examples"
+
+# The URL changes with each new release
+SRC_URI="http://rubyforge.org/frs/download.php/29548/${P}.tgz"
+
+DEPENDENCIES="
+    build,run:
+        ( dev-lang/ruby )
+"
+    
+get_ver() {
+    echo $(ruby -r rbconfig -e 'print Config::CONFIG["ruby_version"]')
+}
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILESDIR}/${PN}-1.0.1-setup.patch"
+)
+ 
+src_install() {
+
+    ver=$(get_ver)
+    ver_stripped=$(delete_version_separator 1 ${ver})
+
+
+    export GEM_HOME="${D}/usr/$(get_libdir)/ruby/gems/${ver}/"
+    keepdir /usr/$(get_libdir)/ruby/gems/${ver}/{doc,gems,cache,specifications}
+
+    myconf=""
+    if ! option doc; then
+        myconf="${myconf} --no-rdoc --no-ri"
+    fi
+
+    ruby setup.rb $myconf --prefix="${D}" || die "setup.rb failed"
+
+    dosym "/usr/bin/gem${ver_stripped}" /usr/bin/gem || die "dosym gem failed"
+
+    # This is for updating rubygems itself, so we don't want it.
+    rm "${D}/usr/bin/update_rubygems${ver_stripped}"
+
+    dodoc README
+    if option examples; then
+        cp -a examples "${D}/usr/share/doc/${PF}" ||
+            die "failed to cp examples"
+    fi
+}
+
+pkg_postinst() {
+    
+    source_cache="/usr/$(get_libdir)/ruby/gems/$(get_ver)/source_cache"
+    if [[ -e "${source_cache}" ]]; then
+        rm "${source_cache}"
+    fi
+}
+

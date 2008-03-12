@@ -1,0 +1,61 @@
+Source: Richard Brown
+Upstream: no
+Reason: respect --prefix properly, stop stamping on live filesystem.
+--- setup.rb.orig	2008-03-12 21:05:10.000000000 +0000
++++ setup.rb	2008-03-12 21:08:27.000000000 +0000
+@@ -72,8 +72,8 @@
+ 
+   raise "invalid --prefix #{prefix.inspect}" if prefix.nil?
+ 
+-  lib_dir = File.join prefix, 'lib'
+-  bin_dir = File.join prefix, 'bin'
++  lib_dir = File.join prefix, Config::CONFIG['sitelibdir']
++  bin_dir = File.join prefix, Config::CONFIG['bindir']
+ 
+   mkdir_p lib_dir
+   mkdir_p bin_dir
+@@ -173,30 +173,15 @@
+   end
+ end
+ 
+-# Remove source caches
+-
+-require 'rubygems/source_info_cache'
+-
+-user_cache_file = Gem::SourceInfoCache.user_cache_file
+-system_cache_file = Gem::SourceInfoCache.system_cache_file
+-
+-rm user_cache_file if File.writable? user_cache_file
+-rm system_cache_file if File.writable? system_cache_file
+-
+ # install RDoc
+ 
+ gem_doc_dir = File.join Gem.dir, 'doc'
+ 
+ if File.writable? gem_doc_dir then
+-  puts "Removing old RubyGems RDoc and ri..."
+-  Dir[File.join(Gem.dir, 'doc', 'rubygems-[0-9]*')].each do |dir|
+-    rm_rf dir
+-  end
+-
+   def run_rdoc(*args)
+     args << '--quiet'
+     args << '--main' << 'README'
+-    args << '.' << 'README' << 'LICENSE.txt' << 'GPL.txt'
++    args << '.' << 'README'
+ 
+     r = RDoc::RDoc.new
+     r.document args
+@@ -223,6 +208,7 @@
+ end
+ 
+ # Remove stubs
++if false # Don't want this
+ 
+ def stub?(path)
+   return unless File.readable? path
+@@ -268,3 +254,4 @@
+   puts "No library stubs found."
+ end
+ 
++end
