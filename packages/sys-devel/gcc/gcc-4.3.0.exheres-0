@@ -1,0 +1,59 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="GNU Compiler Collection"
+HOMEPAGE="http://gcc.gnu.org"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="${PV}"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
+
+DEPENDENCIES="build:
+                sys-devel/make
+              build,run:
+                >=dev-libs/gmp-4.1
+                dev-libs/mpfr"
+
+OBJDIR="${T}/${CHOST}"
+
+src_configure() {
+    mkdir "${OBJDIR}"
+    cd "${OBJDIR}"
+
+    LANGS="c++"
+    for i in ada fortran objc obj-c++ java; do
+        option ${i} && LANGS="${LANGS} ${i}"
+    done
+    LANGS="${LANGS/ /,}"
+
+    "${S}/configure" \
+        --host=${CHOST} \
+        --prefix=/usr \
+        --infodir=/usr/share/info \
+        --enable-languages="${LANGS}" \
+        $(option_enable propolice libssp) \
+        $(option_enable nls) \
+        --disable-multilib \
+        || die "Configure failed."
+}
+
+src_compile() {
+    cd "${OBJDIR}"
+    emake bootstrap || die "Make failed."
+}
+
+src_install() {
+    cd "${OBJDIR}"
+    emake DESTDIR="${D}" install || die "Install failed."
+
+    # Precompile headers
+    # FIXME: Should use gcc version from $D instead of old system gcc
+    cd "${D}"
+    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed."
+    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed."
+
+    rmdir "${D}"/usr/lib/gcc/${CHOST}/${PV}/finclude \
+        || die "Failed to delete empty directory"
+}
