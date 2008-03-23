@@ -28,6 +28,9 @@ src_configure() {
 }
 
 src_install() {
+    # Fix default home directory path
+    sed -i -e 's:/home/users:/home:' etc/useradd
+
     emake DESTDIR="${D}" install || die "Install failed."
     dodoc ChangeLog NEWS README TODO
 }
