@@ -16,7 +16,7 @@ RDEPEND="${DEPEND}"
 src_configure() {
     econf \
         $(option_with python) \
-	--with-default-dict=/lib/cracklib_dict \
+	--with-default-dict=/var/cache/cracklib/cracklib_dict \
         || die "Configure failed."
 }
 
@@ -26,8 +26,12 @@ src_install() {
     insinto /usr/share/dict
     doins dicts/cracklib-small
 
-    create-cracklib-dict /usr/share/dict/cracklib-small
+    dodir /var/cache/cracklib
+    keepdir /var/cache/cracklib
 
     dodoc AUTHORS ChangeLog NEWS README*
 }
 
+pkg_postinst() {
+    create-cracklib-dict /usr/share/dict/cracklib-small || die "Failed to create cracklib dictionary."
+}
