@@ -15,9 +15,8 @@
 # python_mod_optimize()   - Generates .pyc/.pyo precompiled scripts
 # python_mod_cleanup()    - Goes through /usr/lib*/python* to remove
 #               orphaned *.pyc *.pyo
-# python_makesym()    - Makes /usr/bin/python symlinks
 
-require alternatives multilib
+require multilib
 
 
 if [[ -n "${NEED_PYTHON}" ]] ; then
@@ -83,16 +82,6 @@ python_version() {
     tmpstr="$(${python} -V 2>&1 )"
     export PYVER_ALL="${tmpstr#Python }"
     __python_version_extract $PYVER_ALL
-}
-
-#
-# name:   python_makesym
-# desc:   run without arguments, it will create the /usr/bin/python symlinks
-#     to the latest installed version
-#
-python_makesym() {
-    alternatives_auto_makesym "/usr/bin/python" "python[0-9].[0-9]"
-    alternatives_auto_makesym "/usr/bin/python2" "python2.[0-9]"
 }
 
 #
