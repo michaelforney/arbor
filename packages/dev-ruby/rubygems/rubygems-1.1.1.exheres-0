@@ -11,30 +11,25 @@ LICENSE="|| ( Ruby GPL-2 )"
 
 PLATFORMS="~amd64 ~x86"
 SLOT="0"
-MYOPTIONS="doc examples"
+MYOPTIONS="doc"
 
-# The URL changes with each new release
-SRC_URI="http://rubyforge.org/frs/download.php/29548/${P}.tgz"
+SRC_URI="mirror://rubyforge/${PN}/${P}.tgz"
 
 DEPENDENCIES="
     build,run:
         ( dev-lang/ruby )
 "
-    
-get_ver() {
-    echo $(ruby -r rbconfig -e 'print Config::CONFIG["ruby_version"]')
-}
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${PN}-1.0.1-setup.patch"
+    -p0 "${FILESDIR}/${PN}-1.1.1-setup.patch"
 )
  
 src_install() {
 
-    ver=$(get_ver)
+    ver=$(ruby -r rbconfig -e 'print Config::CONFIG["ruby_version"]')
     ver_stripped=$(delete_version_separator 1 ${ver})
-
-
+    unset RUBYOPT
+    
     export GEM_HOME="${D}/usr/$(get_libdir)/ruby/gems/${ver}/"
     keepdir /usr/$(get_libdir)/ruby/gems/${ver}/{doc,gems,cache,specifications}
 
@@ -45,23 +40,16 @@ src_install() {
 
     ruby setup.rb $myconf --prefix="${D}" || die "setup.rb failed"
 
-    dosym "/usr/bin/gem${ver_stripped}" /usr/bin/gem || die "dosym gem failed"
+    dosym "gem${ver_stripped}" /usr/bin/gem || die "dosym gem failed"
 
-    # This is for updating rubygems itself, so we don't want it.
-    rm "${D}/usr/bin/update_rubygems${ver_stripped}"
-
-    dodoc README
-    if option examples; then
-        cp -a examples "${D}/usr/share/doc/${PF}" ||
-            die "failed to cp examples"
-    fi
+    dodoc README || die "dodoc README failed"
 }
 
 pkg_postinst() {
     
-    source_cache="/usr/$(get_libdir)/ruby/gems/$(get_ver)/source_cache"
+    source_cache="/usr/$(get_libdir)/ruby/gems/${ver}/source_cache"
     if [[ -e "${source_cache}" ]]; then
-        rm "${source_cache}"
+        rm "${source_cache}" || die "unable to remove src_cache"
     fi
 }
 
