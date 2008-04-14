@@ -8,19 +8,18 @@ SRC_URI="mirror://gnu/${PN}/${P}.tar.bz2"
 LICENSE="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-RESTRICT="test"
-
 src_configure() {
-    econf --bindir=/bin
+    econf --bindir=/bin \
+        $(option_enable nls)
 }
 
 src_install() {
     emake DESTDIR="${D}" install
-    dodoc ABOUT-NLS AUTHORS ChangeLog ChangeLog.1 INSTALL NEWS \
+    dodoc ABOUT-NLS AUTHORS ChangeLog ChangeLog.1 NEWS \
         PORTS README THANKS TODO
     rmdir "${D}"/usr/sbin
 }
