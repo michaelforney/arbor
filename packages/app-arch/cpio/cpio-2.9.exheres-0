@@ -8,15 +8,20 @@ SRC_URI="mirror://gnu/cpio/${P}.tar.bz2"
 LICENSE="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-gnu-inline.patch" )
+
 src_configure() {
-    econf --bindir /bin --enable-mt || die "econf failed."
+    econf --bindir /bin --enable-mt \
+        $(option_enable nls) \
+        || die "econf failed."
 }
 
 src_install() {
     emake DESTDIR="${D}" install || die "install failed."
-    dodoc ABOUT-NLS AUTHORS ChangeLog INSTALL NEWS README THANKS TODO
+    dodoc ABOUT-NLS AUTHORS ChangeLog NEWS README THANKS TODO
 }
+
