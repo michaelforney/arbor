@@ -1,0 +1,40 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sqlite-3.5.6.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+RESTRICT="test" # Tests need dev-lang/tcl
+
+require versionator flag-o-matic
+
+DESCRIPTION="An embedded SQL database engine"
+HOMEPAGE="http://www.sqlite.org/"
+SRC_URI="http://www.sqlite.org/${P}.tar.gz"
+##    doc? ( http://www.sqlite.org/${PN}_docs_$(replace_all_version_separators _).zip )
+
+LICENSE="as-is"
+SLOT="3"
+PLATFORMS="~amd64"
+MYOPTIONS="debug soundex" ## doc tcl
+
+DEPENDENCIES="" ## build: doc ? ( app-arch/unzip )
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="debug"
+DEFAULT_SRC_CONFIGURE_PARAMS="
+--enable-threadsafe --enable-cross-thread-connections
+--disable-tcl"
+## --enable-tempstore
+
+src_configure() {
+    option soundex && append-flags -DSQLITE_SOUNDEX=1
+    default
+}
+
+src_install() {
+    emake DESTDIR="${D}" install
+
+    newbin lemon lemon-${SLOT}
+    dodoc README
+    doman sqlite3.1
+}
+
