@@ -14,7 +14,7 @@ DEPENDENCIES=""
 
 src_prepare() {
     # Fix manpath
-    sed -i 's:^MANDIR=.*$:MANDIR=/usr/share/man:' Makefile || die "sed failed."
+    sed -i 's:^MANDIR=.*$:MANDIR=/usr/share/man:' Makefile.org || die "sed failed."
 }
 
 src_configure() {
@@ -32,7 +32,8 @@ src_install() {
     # .. and parallel installation is also broken
     emake -j1 INSTALL_PREFIX="${D}" install
 
-    rmdir /etc/ssl/{certs,private}
+    keepdir /etc/ssl/{certs,private}
 
     dodoc FAQ INSTALL NEWS PROBLEMS README*
 }
+
