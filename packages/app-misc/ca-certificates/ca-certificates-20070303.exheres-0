@@ -1,0 +1,43 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ca-certificates-20070303-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+DESCRIPTION="Common CA Certificates PEM files"
+HOMEPAGE="http://www.cacert.org/"
+SRC_URI="mirror://debian/pool/main/c/${PN}/${PN}_${PV}_all.deb"
+
+LICENSE="MPL-1.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+build:
+    || ( >=sys-apps/coreutils-6.10 sys-apps/mktemp )
+run:
+    dev-libs/openssl"
+
+src_unpack() {
+    default
+    unpack ./data.tar.gz
+    rm -f {control,data}.tar.gz debian-binary
+}
+
+src_install() {
+    dodoc usr/share/doc/ca-certificates/* || die
+
+    cp -pPR * "${D}"/ || die "Installing data failed"
+
+	(
+    cd "${D}"/usr/share/ca-certificates
+    find . -name '*.crt' | sort | cut -b3-
+	) > "${D}"/etc/ca-certificates.conf
+}
+
+pkg_postinst() {
+    [[ ${ROOT} != "/" ]] && return 0
+    update-ca-certificates
+}
+
