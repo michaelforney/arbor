@@ -8,7 +8,8 @@
 # The perl-module eclass is designed to allow easier installation of perl
 # modules, and their incorporation into the Gentoo Linux system.
 
-export_exlib_phases pkg_setup pkg_preinst pkg_postinst pkg_prerm pkg_postrm src_compile src_install src_test
+export_exlib_phases pkg_setup pkg_preinst pkg_postinst pkg_prerm pkg_postrm \
+    src_configure src_compile src_test src_install
 
 # 2005.04.28 mcummings
 # Mounting problems with src_test functions has forced me to make the
@@ -91,7 +92,6 @@ if [ -z "${HOMEPAGE}" -a -z "${SRC_URI}" -a -n "${MODULE_AUTHOR}" ]; then
     SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}.tar.gz"
 fi
 
-SRC_PREP="no"
 SRC_TEST="skip"
 PREFER_BUILDPL="yes"
 
@@ -105,35 +105,33 @@ POD_DIR=""
 BUILDER_VER=""
 pm_echovar=""
 
-perl-module_src_prep() {
-
+perl-module_src_configure() {
     perlinfo
 
-    export PERL_MM_USE_DEFAULT=1
+    export PERL_MM_USE_DEFAULT="1"
     # Disable ExtUtils::AutoInstall from prompting
     export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
 
 
-    SRC_PREP="yes"
-    find ${S} -type d -name "\.svn" -exec /bin/rm -rf {} \; 2>/dev/null
-    if [ "${PREFER_BUILDPL}" == "yes" ] && ( [ -f Build.PL ] || [ ${PN} == "module-build" ] ); then
+    find "${S}" -type d -name "\.svn" -print0 | xargs -print0 rm -rf
+    if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
         einfo "Using Module::Build"
-        echo "$pm_echovar" | perl Build.PL ${myconf} --installdirs=vendor --destdir=${D} --libdoc= || die "Unable to build! (are you using USE=\"build\"?)"
-    elif [ -f Makefile.PL ] && [ ! ${PN} == "module-build" ]; then
+        perl Build.PL ${myconf} --installdirs=vendor --destdir="${D}" --libdoc= <<< ${pm_echovar} \
+            || die "Unable to build!"
+    elif [[ -f Makefile.PL && ! ${PN} == "module-build" ]]; then
         einfo "Using ExtUtils::MakeMaker"
-        echo "$pm_echovar" | perl Makefile.PL ${myconf} INSTALLMAN3DIR='none'\
-        PREFIX=/usr INSTALLDIRS=vendor DESTDIR=${D} || die "Unable to build! (are you using USE=\"build\"?)"
+        perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${D}" <<< ${pm_echovar} \
+            || die "Unable to build!"
     fi
-    if [ ! -f Build.PL ] && [ ! -f Makefile.PL ]; then
+
+    if [[ ! -f Build.PL && ! -f Makefile.PL ]]; then
         einfo "No Make or Build file detected..."
-        return
     fi
 }
 
 perl-module_src_compile() {
 
     perlinfo
-    [ "${SRC_PREP}" != "yes" ] && perl-module_src_prep
     if [ -f Makefile ]; then
         make ${mymake} || die "compilation failed"
     elif [ -f Build ]; then
