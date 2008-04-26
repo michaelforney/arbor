@@ -22,6 +22,8 @@ src_configure() {
 
     sh "${S}/Configure" -des \
         -Dprefix=/usr \
+        -Dvendorprefix=/usr \
+        -Dsiteprefix=/usr \
         -Doptimize="${CFLAGS}" \
         -Duselargefiles \
         -Darchname=${CHOST%%-*} \
@@ -44,20 +46,20 @@ src_test() {
 
 src_install() {
     cd "${T}/build"
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake -j1 DESTDIR="${D}" install
+
     dodir /usr/lib
     dosym /usr/lib/perl5/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} /usr/lib/libperl.so.1.${PV}
     dosym /usr/lib/libperl.so.1.${PV} /usr/lib/libperl.so.1
     dosym /usr/lib/libperl.so.1 /usr/lib/libperl.so
     dodoc AUTHORS Changes* INSTALL README
 
-    # Remove empty dirs
-    find "${D}" -depth -type d -print0 | xargs -0 -r rmdir --ignore-fail-on-empty
+    keepdir /usr/lib/perl5/{site,vendor}_perl/${PV}/${CHOST%%-*}
 
     # Install LDPATH env file
     dodir /etc/env.d
-    cat <<EOF > "${D}"/etc/env.d/05perl
-LDPATH="/usr/lib/perl5/${PV}/$(uname -m)-linux/CORE/lib"
+    cat <<-EOF > "${D}"/etc/env.d/05perl
+    LDPATH="/usr/lib/perl5/${PV}/${CHOST%%-*}-linux/CORE/lib"
 EOF
 }
 
