@@ -34,20 +34,25 @@ src_configure() {
 
 src_compile() {
     cd "${T}/build"
-    make -j1 || die "Make failed."
+    default_src_compile
+}
+
+src_test() {
+    cd "${T}/build"
+    default_src_test
 }
 
 src_install() {
     cd "${T}/build"
-    make -j1 DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install || die "Install failed."
     dodir /usr/lib
     dosym /usr/lib/perl5/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} /usr/lib/libperl.so.1.${PV}
     dosym /usr/lib/libperl.so.1.${PV} /usr/lib/libperl.so.1
     dosym /usr/lib/libperl.so.1 /usr/lib/libperl.so
-    dodoc AUTHORS Changes* INSTALL README*
+    dodoc AUTHORS Changes* INSTALL README
 
     # Remove empty dirs
-    rmdir "${D}"/usr/lib/perl5/site_perl{/5.8.8/x86_64,/5.8.8,}
+    find "${D}" -depth -type d | xargs -r rmdir --ignore-fail-on-non-empty
 
     # Install LDPATH env file
     dodir /etc/env.d
