@@ -92,8 +92,11 @@ if [ -z "${HOMEPAGE}" -a -z "${SRC_URI}" -a -n "${MODULE_AUTHOR}" ]; then
     SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}.tar.gz"
 fi
 
-SRC_TEST="skip"
 PREFER_BUILDPL="yes"
+case ${CATEGORY} in
+    dev-perl|perl-core) SRC_TEST="do" ;;
+    *) : ;;
+esac
 
 PERL_VERSION=""
 SITE_ARCH=""
@@ -140,12 +143,12 @@ perl-module_src_compile() {
 }
 
 perl-module_src_test() {
-    if [ "${SRC_TEST}" == "do" ]; then
+    if [[ "${SRC_TEST}" == "do" ]]; then
         perlinfo
-        if [ -f Makefile ]; then
-            make test || die "test failed"
-        elif [ -f Build ]; then
-            perl Build  test || die "test failed"
+        if [[ -f Makefile ]]; then
+            default_src_test
+        elif [[ -f Build ]]; then
+            perl Build test || die "test failed"
         fi
     fi
 }
