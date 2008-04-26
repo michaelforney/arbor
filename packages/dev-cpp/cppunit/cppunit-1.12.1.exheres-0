@@ -1,0 +1,26 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="C++ port of the famous JUnit framework for unit testing"
+HOMEPAGE="http://cppunit.sourceforge.net/"
+SRC_URI="http://downloads.sourceforge.net/${PN}/${P}.tar.gz"
+
+LICENSE="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="" # doc qt3
+
+DEPENDENCIES=""
+#build: doc? ( app-doc/doxygen
+#           media-gfx/graphviz )
+
+#econf \
+#    $(option_enable doc dot) \
+#    $(option_enable doc doxygen)
+
+src_install() {
+    emake DESTDIR="${D}" install
+    dodoc AUTHORS BUGS CodingGuideLines.txt NEWS README THANKS TODO doc/FAQ
+    rmdir "${D}"/usr/share/doc/cppunit # Empty directory
+}
+
