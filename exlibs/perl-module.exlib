@@ -87,7 +87,7 @@ export_exlib_phases pkg_setup pkg_preinst pkg_postinst pkg_prerm pkg_postrm \
 # Added the 'MODULE_AUTHOR' variable. Set it before inheriting the eclass
 # and it will set your HOMEPAGE and SRC_URI correctly for a CPAN package.
 
-if [ -z "${HOMEPAGE}" -a -z "${SRC_URI}" -a -n "${MODULE_AUTHOR}" ]; then
+if [[ -z "${HOMEPAGE}" && -z "${SRC_URI}" && -n "${MODULE_AUTHOR}" ]]; then
     HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
     SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}.tar.gz"
 fi
@@ -115,8 +115,6 @@ perl-module_src_configure() {
     # Disable ExtUtils::AutoInstall from prompting
     export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
 
-
-    find "${S}" -type d -name "\.svn" -print0 | xargs -print0 rm -rf
     if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
         einfo "Using Module::Build"
         perl Build.PL ${myconf} --installdirs=vendor --destdir="${D}" --libdoc= <<< ${pm_echovar} \
@@ -133,12 +131,11 @@ perl-module_src_configure() {
 }
 
 perl-module_src_compile() {
-
     perlinfo
-    if [ -f Makefile ]; then
-        make ${mymake} || die "compilation failed"
-    elif [ -f Build ]; then
-        perl Build build || die "compilation failed"
+    if [[ -f Makefile ]]; then
+        emake -j1 ${mymake} || die "Compilation failed"
+    elif [[ -f Build ]]; then
+        perl Build build || die "Compilation failed"
     fi
 }
 
@@ -148,114 +145,93 @@ perl-module_src_test() {
         if [[ -f Makefile ]]; then
             default_src_test
         elif [[ -f Build ]]; then
-            perl Build test || die "test failed"
+            perl Build test || die "Test failed"
         fi
     fi
 }
 
 perl-module_src_install() {
-
     perlinfo
 
-    test -z ${mytargets} && mytargets="install"
+    [[ -z ${mytargets} ]] && mytargets="install"
 
-    if [ -f Makefile ]; then
-        make ${myinst} ${mytargets} || die
-    elif [ -f Build ]; then
-        perl ${S}/Build install
+    if [[ -f Makefile ]]; then
+        emake -j1 ${myinst} ${mytargets}
+    elif [[ -f Build ]]; then
+        perl "${S}/Build" install
     fi
 
 
     einfo "Cleaning out stray man files"
-    for FILE in `find ${D} -type f -name "*.3pm*"`; do
-        rm -rf ${FILE}
+    local file stat
+    find "${D}" -type f -name "*.3pm*" | while read file
+    do
+        rm -f "${file}"
     done
-    find ${D}/usr/share/man -depth -type d 2>/dev/null | xargs -r rmdir 2>/dev/null
+    find "${D}"/usr/share/man -depth -type d -print0 2>/dev/null | xargs -0 -r rmdir
 
     fixlocalpod
 
-    for FILE in `find ${D} -type f |grep -v '.so'`; do
-        STAT=`file $FILE| grep -i " text"`
-        if [ "${STAT}x" != "x" ]; then
-            sed -i -e "s:${D}:/:g" ${FILE}
+    find "${D}" -type f | grep -v '.so' | while read file
+    do
+        stat=$(file "${file}" | grep -i " text")
+        if [[ -n "${stat}" ]]; then
+            sed -i -e "s:${D}:/:g" "${file}"
         fi
     done
 
     for doc in Change* MANIFEST* README* ${mydoc}; do
-        [ -s "$doc" ] && dodoc $doc
+        [[ -s "${doc}" ]] && dodoc ${doc}
     done
 }
 
 
 perl-module_pkg_setup() {
-
     perlinfo
 }
 
 
 perl-module_pkg_preinst() {
-
     perlinfo
 }
 
 perl-module_pkg_postinst() {
-
-    einfo "Man pages are not installed for most modules now."
-    einfo "Please use perldoc instead."
     updatepod
 }
 
 perl-module_pkg_prerm() {
-
     updatepod
 }
 
 perl-module_pkg_postrm() {
-
     updatepod
 }
 
 perlinfo() {
+    local v version installsitearch installsitelib installarchlib installvendorlib installvendorarch
+    for v in version installsitearch installsitelib installarchlib \
+        installvendorlib installvendorarch; do
+        eval "$(perl -V:${v})"
+    done
 
-    local version
-    eval `perl '-V:version'`
     PERL_VERSION=${version}
-
-    local installsitearch
-    eval `perl '-V:installsitearch'`
     SITE_ARCH=${installsitearch}
-
-    local installsitelib
-    eval `perl '-V:installsitelib'`
     SITE_LIB=${installsitelib}
-
-    local installarchlib
-    eval `perl '-V:installarchlib'`
     ARCH_LIB=${installarchlib}
-
-    local installvendorlib
-    eval `perl '-V:installvendorlib'`
     VENDOR_LIB=${installvendorlib}
-
-    local installvendorarch
-    eval `perl '-V:installvendorarch'`
     VENDOR_ARCH=${installvendorarch}
 
-    if [ "${PREFER_BUILDPL}" == "yes" ]; then
-        if [ ! -f ${S}/Makefile.PL ] || [ ${PN} == "module-build" ]; then
-            if [ -f ${S}/Build.PL ]; then
-                if [ ${PN} == "module-build" ]; then
-                    BUILDER_VER="1" # A bootstrapping if you will
+    if [[ "${PREFER_BUILDPL}" == "yes" ]]; then
+        if [[ ! -f ${S}/Makefile.PL ]] || [[ ${PN} == "module-build" ]]; then
+            if [[ -f ${S}/Build.PL ]]; then
+                if [[ ${PN} == "module-build" ]]; then
+                    # A bootstrapping if you will
+                    BUILDER_VER="1"
                 else
-                    BUILDER_VER=`perl -MModule::Build -e 'print "$Module::Build::VERSION;"' `
+                    BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
                 fi
             fi
         fi
-    fi
-
-    if [ -f /usr/bin/perl ]
-    then
-        POD_DIR="/usr/share/perl/gentoo-pods/${version}"
     fi
 }
 
@@ -274,19 +250,20 @@ fixlocalpod() {
 updatepod() {
     perlinfo
 
-    if [ -d "${POD_DIR}" ]
-    then
-        for FILE in `find ${POD_DIR} -type f -name "*.pod.arch"`; do
-            cat ${FILE} >> ${ARCH_LIB}/perllocal.pod
-            rm -f ${FILE}
+    if [[ -d "${POD_DIR}" ]]; then
+        local file
+        for file in $(find ${POD_DIR} -type f -name "*.pod.arch"); do
+            cat "${file}" >> "${ARCH_LIB}/perllocal.pod"
+            rm -f "${file}"
         done
-        for FILE in `find ${POD_DIR} -type f -name "*.pod.site"`; do
-            cat ${FILE} >> ${SITE_LIB}/perllocal.pod
-            rm -f ${FILE}
+        for file in $(find ${POD_DIR} -type f -name "*.pod.site"); do
+            cat "${file}" >> "${SITE_LIB}/perllocal.pod"
+            rm -f "${file}"
         done
-        for FILE in `find ${POD_DIR} -type f -name "*.pod.vendor"`; do
-            cat ${FILE} >> ${VENDOR_LIB}/perllocal.pod
-            rm -f ${FILE}
+        for file in $(find ${POD_DIR} -type f -name "*.pod.vendor"); do
+            cat "${file}" >> "${VENDOR_LIB}/perllocal.pod"
+            rm -f ${file}
         done
     fi
 }
+
