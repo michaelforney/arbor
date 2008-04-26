@@ -34,12 +34,12 @@ src_configure() {
 
 src_compile() {
     cd "${T}/build"
-    default_src_compile
+    default
 }
 
 src_test() {
     cd "${T}/build"
-    default_src_test
+    default
 }
 
 src_install() {
@@ -52,7 +52,7 @@ src_install() {
     dodoc AUTHORS Changes* INSTALL README
 
     # Remove empty dirs
-    find "${D}" -depth -type d | xargs -r rmdir --ignore-fail-on-non-empty
+    find "${D}" -depth -type d -print0 | xargs -0 -r rmdir --ignore-fail-on-empty
 
     # Install LDPATH env file
     dodir /etc/env.d
