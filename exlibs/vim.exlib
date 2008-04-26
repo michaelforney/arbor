@@ -105,20 +105,19 @@ DEPENDENCIES="${DEPENDENCIES}
 
 vim_src_prepare() {
     # Apply any patches available from vim.org for this version
+    DEFAULT_SRC_PREPARE_PATCHES+=( "-p0" )
+
     for ((i=1; i<=VIM_PATCH_LEVEL; i++)); do
-    p=$(printf "vim-patch-${VIM_VERSION}.%03d\n" "${i}")
-    ebegin "Applying ${p}"
-    patch -p0 -s -f < "${FETCHEDDIR}/${p}" || die "patch failed"
-    eend 0
+        DEFAULT_SRC_PREPARE_PATCHES+=( $(printf "${FETCHEDDIR}/vim-patch-${VIM_VERSION}.%03d\n" "${i}") )
     done
 
     # Another set of patches borrowed from src rpm to fix syntax errors etc.
-    for p in "${WORKDIR}"/patches/* ; do
-    [[ -f "${p}" ]] || continue
-    ebegin "Applying $(basename ${p})"
-    patch -p0 -s -f < "${p}" || die "patch failed"
-    eend 0
+    for p in "${WORKDIR}"/patches/*; do
+        [[ -f "${p}" ]] || continue
+        DEFAULT_SRC_PREPARE_PATCHES+=( "${p}" )
     done
+    
+    default_src_prepare
 
     # Fixup a script to use awk instead of nawk
     sed -i '1s|.*|#!/usr/bin/awk -f|' ${S}/runtime/tools/mve.awk \
