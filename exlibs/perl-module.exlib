@@ -1,91 +1,16 @@
-# Copyright 1999-2004 Gentoo Foundation
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/perl-module.eclass,v 1.110 2007/10/17 08:01:12 robbat2 Exp $
 #
-# Author: Seemant Kulleen <seemant@gentoo.org>
-# Maintained by the Perl herd <perl@gentoo.org>
+# Based in part upon 'perl-module.eclass' which is
+#   Copyright 1999-2007 Gentoo Foundation
 #
-# The perl-module eclass is designed to allow easier installation of perl
-# modules, and their incorporation into the Gentoo Linux system.
+#   Original Authors:
+#       Seemant Kulleen <seemant@gentoo.org>
+#       Robin Johnson <robbat2@gentoo.org>
+#       Michael Cummings <mcummings@gentoo.org>
 
-export_exlib_phases pkg_setup pkg_preinst pkg_postinst pkg_prerm pkg_postrm \
-    src_configure src_compile src_test src_install
+export_exlib_phases src_configure src_compile src_test src_install
 
-# 2005.04.28 mcummings
-# Mounting problems with src_test functions has forced me to make the
-# compilation of perl modules honor the FEATURES maketest flag rather than what
-# is generally necessary. I've left a block to make sure we still need to set
-# the SRC_TEST="do" flag on the suspicion that otherwise we will face 10 times
-# as many bug reports as we have lately.
-#
-# 2004.05.10 rac
-# block on makemaker versions earlier than that in the 5.8.2 core. in
-# actuality, this should be handled in the perl ebuild, so every perl
-# ebuild should block versions of MakeMaker older than the one it
-# carries. in the meantime, since we have dumped support for MakeMaker
-# <6.11 and the associated broken DESTDIR handling, block here to save
-# people from sandbox trouble.
-#
-# 2004.05.25 rac
-# for the same reasons, make the perl dep >=5.8.2 to get everybody
-# with 5.8.0 and its 6.03 makemaker up to a version that can
-# understand DESTDIR
-#
-# 2004.10.01 mcummings
-# noticed a discrepancy in how we were sed fixing references to ${D}
-#
-# 2005.03.14 mcummings
-# Updated eclass to include a specific function for dealing with perlocal.pods -
-# this should avoid the conflicts we've been running into with the introduction
-# of file collision features by giving us a single exportable function to deal
-# with the pods. Modifications to the eclass provided by Yaakov S
-# <yselkowitz@hotmail.com> in bug 83622
-#
-# <later the same day>
-# The long awaited (by me) fix for automagically detecting and dealing
-# with module-build dependancies. I've chosen not to make it a default dep since
-# this adds overhead to people that might not otherwise need it, and instead
-# modified the eclass to detect the existence of a Build.PL and behave
-# accordingly. This will fix issues with g-cpan builds that needs module-build
-# support, as well as get rid of the (annoying) style=builder vars. I know of
-# only one module that needed to be hacked for this, Class-MethodMaker-2.05, but
-# that module has a bad Build.PL to begin with. Ebuilds should continue to
-# DEPEND on module-build<-version> as needed, but there should be no need for
-# the style directive any more (especially since it isn't in the eclass
-# anymore). Enjoy!
-#
-# 2005.07.18 mcummings
-# Fix for proper handling of $mydoc - thanks to stkn for noticing we were
-# bombing out there
-#
-# 2005.07.19 mcummings
-# Providing an override var for the use of Module::Build. While it is being
-# incorporated in more and more modules, not all module authors have working
-# Build.PL's in place. The override is to allow for a fallback to the "classic"
-# Makfile.PL - example is Class::MethodMaker, which provides a Build.PL that is
-# severely broken.
-#
-# 2006.02.11 mcummings
-# Per a conversation with solar, adding a change to the dep/rdep lines for
-# minimal. Should fix bug 68367 and bug 83622, as well as other embedded builds
-# that use perl components without providing perl
-#
-# 2006.06.13 mcummings
-# I've reordered and extended the logic on when to invoke module-build versus
-# MakeMaker. The problem that has arisen is that some modules provide a
-# Makefile.PL that passes all arguments on to a Build.PL - including PREFIX,
-# which causes module-build to build with a target of /usr/usr/
-# (how broken is that?). Current logic is if there is a Build.PL and we aren't
-# overriding, use it; otherwise use the Makefile.PL; otherwise return (maybe we
-# want all the functionality of the perl-module eclass without needing to
-# compile??).
-#
-# 2007.08.19 ian
-# Added ${myconf} - bug #176818
-#
-# 2007.10.17 robbat2
-# Added the 'MODULE_AUTHOR' variable. Set it before inheriting the eclass
-# and it will set your HOMEPAGE and SRC_URI correctly for a CPAN package.
 
 if [[ -z "${HOMEPAGE}" && -z "${SRC_URI}" && -n "${MODULE_AUTHOR}" ]]; then
     HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
@@ -185,28 +110,6 @@ perl-module_src_install() {
     done
 }
 
-
-perl-module_pkg_setup() {
-    perlinfo
-}
-
-
-perl-module_pkg_preinst() {
-    perlinfo
-}
-
-perl-module_pkg_postinst() {
-    updatepod
-}
-
-perl-module_pkg_prerm() {
-    updatepod
-}
-
-perl-module_pkg_postrm() {
-    updatepod
-}
-
 perlinfo() {
     local v version installsitearch installsitelib installarchlib installvendorlib installvendorarch
     for v in version installsitearch installsitelib installarchlib \
@@ -245,25 +148,5 @@ fixlocalpod() {
             rmdir "${perldir}" "$(dirname "${perldir}")" "$(dirname "$(dirname "${perldir}")")" 2>/dev/null
         fi
     done
-}
-
-updatepod() {
-    perlinfo
-
-    if [[ -d "${POD_DIR}" ]]; then
-        local file
-        for file in $(find ${POD_DIR} -type f -name "*.pod.arch"); do
-            cat "${file}" >> "${ARCH_LIB}/perllocal.pod"
-            rm -f "${file}"
-        done
-        for file in $(find ${POD_DIR} -type f -name "*.pod.site"); do
-            cat "${file}" >> "${SITE_LIB}/perllocal.pod"
-            rm -f "${file}"
-        done
-        for file in $(find ${POD_DIR} -type f -name "*.pod.vendor"); do
-            cat "${file}" >> "${VENDOR_LIB}/perllocal.pod"
-            rm -f ${file}
-        done
-    fi
 }
 
