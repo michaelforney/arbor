@@ -139,8 +139,6 @@ perl-module_src_compile() {
     elif [ -f Build ]; then
         perl Build build || die "compilation failed"
     fi
-    fixlocalpod
-
 }
 
 perl-module_src_test() {
@@ -263,20 +261,13 @@ perlinfo() {
 fixlocalpod() {
     perlinfo
 
-    if [ -f ${D}${ARCH_LIB}/perllocal.pod ];
-    then
-        rm -f ${D}/${ARCH_LIB}/perllocal.pod
-    fi
-
-    if [ -f ${D}${SITE_LIB}/perllocal.pod ];
-    then
-        rm -f ${D}/${SITE_LIB}/perllocal.pod
-    fi
-
-    if [ -f ${D}${VENDOR_LIB}/perllocal.pod ];
-    then
-        rm -f ${D}/${VENDOR_LIB}/perllocal.pod
-    fi
+    for perldir in "${D}${ARCH_LIB}" "${D}${SITE_LIB}" "${D}${VENDOR_LIB}"; do
+        if [[ -f ${perldir}/perllocal.pod ]]; then
+            rm -f "${perldir}/perllocal.pod"
+            # Don't leave empty directories behind.
+            rmdir "${perldir}" "$(dirname "${perldir}")" "$(dirname "$(dirname "${perldir}")")" 2>/dev/null
+        fi
+    done
 }
 
 updatepod() {
