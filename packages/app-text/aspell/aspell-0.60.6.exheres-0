@@ -1,0 +1,72 @@
+# Copyright 2008 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'aspell-0.60.6.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+DESCRIPTION="A Free and Open Source spell checker designed to eventually replace Ispell"
+HOMEPAGE="http://aspell.net/"
+SRC_URI="mirror://gnu/aspell/${P}.tar.gz"
+
+LICENSE="LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+
+option_expands() {
+    local prefix=${1} option
+    shift
+    for option in "${@}"; do
+        MYOPTIONS+=" ${prefix}:${option}"
+    done
+}
+
+option_expand_dependencies() {
+    local prefix=${1} option
+    shift
+    for option in "${@}"; do
+        echo "${prefix}:${option}? ( app-dicts/aspell-${option} )"
+    done
+}
+
+MYOPTIONS="examples nls doc"
+
+# there's plenty of these to add
+MY_LINGUAS="en"
+
+option_expands linguas ${MY_LINGUAS}
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses
+        nls? ( sys-devel/gettext )
+    post:
+        $(option_expand_dependencies linguas ${MY_LINGUAS})
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS="--enable-docdir=/usr/share/doc/${PF}"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+
+src_install() {
+    dodoc README* TODO || die "dodoc README failed"
+
+    emake DESTDIR="${D}" install || die "installation failed"
+
+    # install ispell/aspell compatibility scripts
+    exeinto /usr/bin
+    newexe scripts/ispell ispell-aspell
+    newexe scripts/spell spell-aspell
+
+    if option examples ; then
+        pushd examples
+        make clean || die
+        docinto examples
+        dodoc "${S}"/examples/* || die "installing examples failed"
+        popd
+    fi
+
+    mkdir -p "${D}/usr/share/doc/${PF}/manual/" || die "mkdir manual failed"
+    cp -a manual/aspell.html "${D}/usr/share/doc/${PF}/manual/" || die "cp aspell.html failed"
+
+    if option doc; then
+        cp -a manual/aspell-dev.html "${D}/usr/share/doc/${PF}/manual/" || die "cp aspell-dev.html failed"
+    fi
+}

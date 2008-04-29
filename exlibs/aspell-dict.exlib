@@ -1,0 +1,61 @@
+# Copyright 2008 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'aspell-dict.eclass' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+# @BLURB: An eclass to streamline the construction of ebuilds for new aspell
+# dicts
+# @DESCRIPTION: 
+# The aspell-dict eclass is designed to streamline the construction of
+# ebuilds for the new aspell dictionaries.
+
+# @ECLASS-VARIABLE: ASPELL_DESC
+# @DESCRIPTION:
+# Which language is the dictionary for? It's used for the DESCRIPTION of the
+# package.
+
+# @ECLASS-VARIABLE: ASPOSTFIX
+# @DESCRIPTION:
+# What major version of aspell is this dictionary for?
+
+require versionator
+
+export_exlib_phases src_configure src_install 
+
+SPELL_LANG=${PN/aspell-/}
+# replace last separator
+MY_PV=$(replace_version_separator $(get_last_version_component_index) '-' $PV)
+
+# With APOSTFIX=6 aspell-en-6.0.0 becomes aspell6-en-6.0-0
+MY_P=aspell${ASPOSTFIX}-${SPELL_LANG}-${MY_PV}
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="${ASPELL_DESC} language dictionary for aspell"
+HOMEPAGE="http://aspell.net"
+SRC_URI="ftp://ftp.gnu.org/gnu/aspell/dict/${SPELL_LANG}/${MY_P}.tar.bz2"
+
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        app-text/aspell
+"
+
+# @FUNCTION: aspell-dict_src_configure
+# @DESCRIPTION:
+# The aspell-dict src_compile function which is exported.
+aspell-dict_src_configure() {
+    ./configure
+}
+
+# @FUNCTION: aspell-dict_src_install
+# @DESCRIPTION:
+# The aspell-dict src_install function which is exported.
+aspell-dict_src_install() {
+    make DESTDIR="${D}" install || die "make install failed"
+
+    for doc in README info ; do
+        [ -s "$doc" ] && dodoc $doc
+    done
+
+}
