@@ -9,12 +9,14 @@ SRC_URI="http://curl.haxx.se/download/${P}.tar.bz2"
 LICENSE="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ipv6" # ssl
+MYOPTIONS="idn ipv6" # ssl
 
 DEPENDENCIES="
 build:
     dev-lang/perl
-    sys-apps/diffutils"
+    sys-apps/diffutils
+build+run:
+    idn? ( net-dns/libidn )"
 #build+run:
 #    ssl? ( app-misc/ca-certificates
 #           dev-libs/openssl )"
@@ -23,6 +25,7 @@ src_configure() {
         # $(option_enable ssl) \
     econf \
         $(option_enable ipv6) \
+        $(option_with idn libidn) \
         --enable-http \
         --enable-ftp \
         --enable-gopher \
@@ -36,7 +39,7 @@ src_configure() {
         --disable-sspi \
         --without-gnutls --without-nss --without-ssl \
         --without-krb4 --disable-gssapi --disable-ldap \
-        --without-libidn --without-libssh2 --without-spnego
+        --without-libssh2 --without-spnego
 }
 
 src_test() {
