@@ -9,8 +9,6 @@
 #
 # NB:  If you add anything, please comment it!
 
-require libtool
-
 [[ -z ${WANT_AUTOCONF} ]] && WANT_AUTOCONF="latest"
 [[ -z ${WANT_AUTOMAKE} ]] && WANT_AUTOMAKE="latest"
 
@@ -79,7 +77,7 @@ eautoreconf() {
         for x in $(autotools_get_subdirs); do
             if [[ -d ${x} ]] ; then
                 cd "${x}"
-                AT_NOELIBTOOLIZE="yes" eautoreconf
+                eautoreconf
                 cd "${pwd}"
             fi
         done
@@ -94,14 +92,6 @@ eautoreconf() {
     eautoconf
     eautoheader
     FROM_EAUTORECONF="yes" eautomake ${AM_OPTS}
-
-    [[ ${AT_NOELIBTOOLIZE} == "yes" ]] && return 0
-
-    # Call it here to prevent failures due to elibtoolize called _before_
-    # eautoreconf.
-    elibtoolize
-
-    return 0
 }
 
 # These functions runs the autotools using autotools_run_tool with the
