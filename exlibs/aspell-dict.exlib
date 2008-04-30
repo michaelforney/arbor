@@ -43,19 +43,19 @@ DEPENDENCIES="
 
 # @FUNCTION: aspell-dict_src_configure
 # @DESCRIPTION:
-# The aspell-dict src_compile function which is exported.
+# The aspell-dict src_configure function which is exported.
 aspell-dict_src_configure() {
-    ./configure
+    ./configure || die "configure failed"
 }
 
 # @FUNCTION: aspell-dict_src_install
 # @DESCRIPTION:
 # The aspell-dict src_install function which is exported.
 aspell-dict_src_install() {
-    make DESTDIR="${D}" install || die "make install failed"
+    emake DESTDIR="${D}" install || die "make install failed"
 
     for doc in README info ; do
-        [ -s "$doc" ] && dodoc $doc
+        [[ -s "$doc" ]] && dodoc $doc
     done
 
 }
