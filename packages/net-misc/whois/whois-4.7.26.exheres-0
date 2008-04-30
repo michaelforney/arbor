@@ -1,0 +1,51 @@
+# Copyright 2008 Santiago M. Mola
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'whois-4.7.24.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+#XXX: whois bin may be renamed to mdwhois on *bsd, if we ever support it.
+
+require toolchain-funcs
+
+MY_P=${P/-/_}
+DESCRIPTION="improved Whois Client"
+HOMEPAGE="http://www.linux.it/~md/software/"
+SRC_URI="mirror://debian/pool/main/w/whois/${MY_P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="idn nls"
+RESTRICT="test" # Gentoo bug #59327
+
+DEPENDENCIES="
+    run+build: idn? ( net-dns/libidn )
+    build: dev-lang/perl"
+
+src_prepare() {
+    expatch -p0 "${FILESDIR}"/${PN}-4.7.2-config-file.patch
+
+    sed -i -e "s:/usr/bin/install:install:" po/Makefile
+    if ! option nls ; then
+        sed -i -e '/ENABLE_NLS/s:define:undef:' config.h
+        sed -i -e "s:cd po.*::" Makefile
+    fi
+}
+
+src_compile() {
+    local mydefines
+    if option idn ; then
+        mydefines=HAVE_LIBIDN=1
+    fi
+
+    emake OPTS="${CFLAGS}" \
+        CC="$(tc-getCC)" \
+        ${mydefines} || die "emake failed"
+}
+
+src_install() {
+    emake BASEDIR="${D}" prefix=/usr install || die "emake install failed"
+    insinto /etc
+    doins whois.conf
+    dodoc README
+}
