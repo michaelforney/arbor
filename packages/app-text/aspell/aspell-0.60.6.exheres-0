@@ -63,10 +63,10 @@ src_install() {
         popd
     fi
 
-    mkdir -p "${D}/usr/share/doc/${PF}/manual/" || die "mkdir manual failed"
-    cp -a manual/aspell.html "${D}/usr/share/doc/${PF}/manual/" || die "cp aspell.html failed"
+    docinto "manual" || die "docinto manual failed"
+    dodoc manual/aspell.html || die "dodoc manual/aspell.html failed"
 
     if option doc; then
-        cp -a manual/aspell-dev.html "${D}/usr/share/doc/${PF}/manual/" || die "cp aspell-dev.html failed"
+        dodoc manual/aspell-dev.html || die "dodoc manual/aspell.html"
     fi
 }
