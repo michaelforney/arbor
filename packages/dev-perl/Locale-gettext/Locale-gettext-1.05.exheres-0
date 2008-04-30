@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require perl-module
+
 DESCRIPTION="Module permitting access from perl to gettext() functions"
 HOMEPAGE="http://search.cpan.org/~pvandry/${P}/gettext.pm"
 SRC_URI="http://search.cpan.org/CPAN/authors/id/P/PV/PVANDRY/gettext-${PV}.tar.gz"
@@ -10,16 +12,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPEND=""
-RDEPEND=""
+DEPENDENCIES=""
 
 S="${WORKDIR}/gettext-${PV}"
 
-src_compile() {
-    perl Makefile.PL PREFIX="${D}/usr" || "Perl make failed."
-    make || die "Make failed."
-}
-
-src_install() {
-    make install || die "Install failed."
-}
