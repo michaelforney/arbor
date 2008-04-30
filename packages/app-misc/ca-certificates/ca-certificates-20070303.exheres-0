@@ -14,7 +14,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
-build:
+build+run:
     || ( >=sys-apps/coreutils-6.10 sys-apps/mktemp )
 run:
     dev-libs/openssl"
@@ -22,11 +22,10 @@ run:
 src_unpack() {
     default
     unpack ./data.tar.gz
-    rm -f {control,data}.tar.gz debian-binary
 }
 
 src_install() {
-    dodoc usr/share/doc/ca-certificates/* || die
+    dodoc usr/share/doc/ca-certificates/* || die 'Dodoc failed.'
 
     cp -pPR * "${D}"/ || die "Installing data failed"
 
@@ -34,6 +33,9 @@ src_install() {
     cd "${D}"/usr/share/ca-certificates
     find . -name '*.crt' | sort | cut -b3-
 	) > "${D}"/etc/ca-certificates.conf
+
+    rmdir "${D}"/etc/ssl/{certs/,}
+    rm -rf "${D}"/usr/share/doc/ca-certificates
 }
 
 pkg_postinst() {
