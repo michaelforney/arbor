@@ -18,10 +18,11 @@ DEPENDENCIES=""
 
 S="${WORKDIR}/${MY_P}_src"
 
+DEFAULT_SRC_PREPARE_PATCHES=("${FILESDIR}"/${P}.patch)
+
 src_unpack() {
     unpack ${A}
     unpack ./${MY_P}/${MY_P}_src.tar
-    patch -p0 < "${FILESDIR}/${P}".patch || die "patch failed."
 }
 
 src_compile() {
@@ -31,7 +32,8 @@ src_compile() {
 
 src_test() {
     cd tests
-    emake test || die "make test failed."
+
+    default
 }
 
 src_install() {

@@ -1,5 +1,9 @@
---- lsof_4.78_src/Configure
-+++ lsof_4.78_src/Configure
+Source: Written by Bo Ørsted Andresen
+Upstream: No
+Reason: Respect CFLAGS and LDFLAGS. Avoid interactivity.
+
+--- lsof_4.79_src/Configure
++++ lsof_4.79_src/Configure
 @@ -2294,7 +2294,7 @@
  
        LSOF_VERS=`echo $LSOF_VSTR | sed 's/\./ /g' | awk '{printf "%d%d%03d",\$1,\$2,\$3}'`
@@ -18,8 +22,8 @@
  fi	# }
  echo "" >> $LSOF_MKFC
  if test "X$LSOF_DEBUG" = "X"	# {
---- lsof_4.78_src/tests/CkTestDB
-+++ lsof_4.78_src/tests/CkTestDB
+--- lsof_4.79_src/tests/CkTestDB
++++ lsof_4.79_src/tests/CkTestDB
 @@ -116,8 +116,8 @@
  while test $END = 0
  do
