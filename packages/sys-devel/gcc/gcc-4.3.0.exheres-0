@@ -29,6 +29,7 @@ src_configure() {
     LANGS="${LANGS/ /,}"
 
     "${S}/configure" \
+        --build=${CHOST} \
         --host=${CHOST} \
         --prefix=/usr \
         --infodir=/usr/share/info \
