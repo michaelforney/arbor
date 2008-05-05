@@ -1,0 +1,21 @@
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'Net-SSLeay-1.30.ebuild' from Gentoo, which is:
+#    Copyright 1999-2008 Gentoo Foundation
+
+MODULE_AUTHOR="FLORA"
+require perl-module
+
+DESCRIPTION="Perl extension for using OpenSSL"
+
+LICENSE="|| ( BSD openssl )"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build,run: 
+    dev-libs/openssl
+    dev-perl/Test-Warn
+    dev-lang/perl"
+
+DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/Net-SSLeay-tests.patch")
