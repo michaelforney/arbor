@@ -83,13 +83,6 @@ ESVN_UPDATE_CMD="svn update"
 : ESVN_PROJECT=${ESVN_PROJECT:=${PN/-svn}}
 
 
-## -- ESVN_BOOTSTRAP:
-#
-# bootstrap script or command like autogen.sh or etc..
-#
-: ESVN_BOOTSTRAP=${ESVN_BOOTSTRAP:=}
-
-
 ## -- ESVN_RESTRICT:
 #
 # this should be a space delimited list of subversion eclass features to
@@ -100,13 +93,12 @@ ESVN_UPDATE_CMD="svn update"
 : ESVN_RESTRICT=${ESVN_RESTRICT:=}
 
 
-## -- subversion_fetch() ----------------------------------------------------- #
+## -- subversion_src_unpack() ----------------------------------------------------- #
 #
 # @param $1 - a repository URI. default is the ESVN_REPO_URI.
 # @param $2 - a check out path in S.
 #
-function subversion_fetch() {
-
+subversion_src_unpack() {
     local repo_uri="$(subversion__get_repository_uri "${1}")"
     local S_dest="${2}"
 
@@ -184,43 +176,6 @@ function subversion_fetch() {
     fi
 
     echo
-
-}
-
-
-## -- subversion_bootstrap() ------------------------------------------------ #
-#
-function subversion_bootstrap() {
-
-    if has "export" ${ESVN_RESTRICT}; then
-        return
-    fi
-
-    cd "${S}"
-
-    if [[ -n "${ESVN_BOOTSTRAP}" ]]; then
-        einfo "begin bootstrap -->"
-
-        if [[ -f "${ESVN_BOOTSTRAP}" && -x "${ESVN_BOOTSTRAP}" ]]; then
-            einfo "   bootstrap with a file: ${ESVN_BOOTSTRAP}"
-            eval "./${ESVN_BOOTSTRAP}" || die "${ESVN}: can't execute ESVN_BOOTSTRAP."
-
-        else
-            einfo "   bootstrap with commands: ${ESVN_BOOTSTRAP}"
-            eval "${ESVN_BOOTSTRAP}" || die "${ESVN}: can't eval ESVN_BOOTSTRAP."
-
-        fi
-    fi
-
-}
-
-
-## -- subversion_src_unpack() ------------------------------------------------ #
-#
-function subversion_src_unpack() {
-
-    subversion_fetch     || die "${ESVN}: unknown problem occurred in subversion_fetch."
-    subversion_bootstrap || die "${ESVN}: unknown problem occurred in subversion_bootstrap."
 
 }
 
