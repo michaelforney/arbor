@@ -34,7 +34,6 @@ DEPENDENCIES="
         vim-syntax? ( >=app-editors/vim-runtime-7 )"
 
 ESVN_REPO_URI="svn://svn.pioto.org/paludis/trunk"
-ESVN_BOOTSTRAP="./autogen.bash"
 
 create-paludis-user() {
     enewgroup "paludisbuild"
@@ -48,6 +47,8 @@ pkg_setup() {
 }
 
 src_prepare() {
+    default
+    ./autogen.bash || die "autogen.bash failed"
     cp "${FILESDIR}"/exherbo.conf "${S}"/paludis/distributions/
 }
 
