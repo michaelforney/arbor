@@ -15,7 +15,10 @@ MYOPTIONS="visibility"
 DEPENDENCIES=""
 
 ESVN_REPO_URI="http://svn.exherbo.org/annie"
-ESVN_BOOTSTRAP="./autogen.bash"
+
+src_prepare() {
+    ./autogen.bash || die "autogen.bash failed"
+}
 
 src_configure() {
     econf \
