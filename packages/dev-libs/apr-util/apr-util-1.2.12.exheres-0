@@ -8,23 +8,26 @@ SRC_URI="mirror://apache/apr/${P}.tar.bz2"
 LICENSE="Apache"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="gdbm"
+MYOPTIONS="gdbm sqlite"
 
-DEPENDENCIES="build,run:
-                net-misc/neon
-                dev-libs/apr
-                dev-libs/expat
-                gdbm? ( sys-libs/gdbm )"
+DEPENDENCIES="
+build,run:
+    dev-libs/apr
+    dev-libs/expat
+    net-misc/neon
+    gdbm? ( sys-libs/gdbm )
+    sqlite? ( dev-db/sqlite:3 )"
 
 src_configure() {
     econf \
         --with-apr=/usr \
         --with-expat=/usr \
         $(option_with gdbm) \
-        || die "Configure failed."
+        $(option_with sqlite sqlite3)
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
+    dodoc CHANGES NOTICE
 }
 
