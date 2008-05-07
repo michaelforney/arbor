@@ -1,0 +1,97 @@
+# Copyright 2008 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'subversion-1.4.6-r2.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+WANT_AUTOCONF="2.5"
+require bash-completion autotools perl-module python
+
+DESCRIPTION="Popular version control system"
+HOMEPAGE="http://subversion.tigris.org/"
+SRC_URI="http://subversion.tigris.org/downloads/${P}.tar.bz2"
+
+LICENSE="Apache-1.1"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="debug nls perl python ruby slowtests"
+
+DEPENDENCIES="
+build:
+    nls? ( sys-devel/gettext )
+    perl? ( dev-lang/swig[perl] )
+    python? ( dev-lang/swig[python] )
+    ruby? ( dev-lang/swig[ruby] )
+build+run:
+    dev-libs/apr-util
+    >=net-misc/neon-0.26.4[ssl?]
+    perl? ( dev-lang/perl )
+    python? ( dev-lang/python )
+    ruby? ( dev-lang/ruby )
+run:
+    perl? ( dev-perl/URI )"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${PN}-perl-vendor.patch"
+    "${FILESDIR}/${P}-neon-0.28.patch" )
+
+src_prepare() {
+    default
+
+    sed -e 's/\(NEON_ALLOWED_LIST=.* 0.26.4\)"/\1 0.28.2"/' \
+        -i "${S}"/configure.in
+
+    eautoreconf
+}
+
+src_configure() {
+    if option perl || option python || option ruby; then
+        myconf+=" --with-swig"
+    else
+        myconf+=" --without-swig"
+    fi
+
+    econf ${myconf} \
+        $(option_enable debug maintainer-mode) \
+        $(option_enable nls)
+}
+
+src_compile() {
+    default
+    option perl && emake swig-pl
+    option python && emake swig-py
+    option ruby && emake swig-rb
+}
+
+src_test() {
+    if option slowtests; then
+        default
+    fi
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+
+    if option perl; then
+        emake DESTDIR="${D}" install-swig-pl
+        fixlocalpod
+    fi
+
+    if option python; then
+        python_version
+        PYTHON_DIR=/usr/$(get_libdir)/python${PYVER}
+
+        emake DESTDIR="${D}" DISTUTIL_PARAM="--prefix=${D}" LD_LIBRARY_PATH="-L${D}/usr/$(get_libdir)" install-swig-py
+
+        dodir "${PYTHON_DIR}/site-packages"
+        mv "${D}"/usr/$(get_libdir)/svn-python/svn "${D}${PYTHON_DIR}/site-packages"
+        mv "${D}"/usr/$(get_libdir)/svn-python/libsvn "${D}${PYTHON_DIR}/site-packages"
+        rm -Rf "${D}"/usr/$(get_libdir)/svn-python
+    fi
+
+    if option ruby; then
+        emake DESTDIR="${D}" install-swig-rb
+    fi
+
+    dobashcompletion tools/client-side/bash_completion subversion
+}
+
