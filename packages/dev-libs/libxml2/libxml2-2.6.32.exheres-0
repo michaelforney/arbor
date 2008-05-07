@@ -24,7 +24,7 @@ src_unpack() {
 }
 
 src_prepare() {
-    cp "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ || \
+    ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ || \
         die "Failed to install test tarballs."
 }
 
