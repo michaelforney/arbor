@@ -1,0 +1,18 @@
+Source: http://www.redhat.com/archives/fedora-devel-list/2008-January/msg01413.html
+Upstream: no
+Reason: Fix compile-failure on GCC 4.3
+--- src/recodext.h.orig      2001-01-04 14:36:54.000000000 +0000
++++ src/recodext.h   2008-01-15 15:23:56.000000000 +0000
+@@ -215,10 +215,10 @@
+     struct recode_single *unsurfacer;
+ 
+     /* Non zero if this is an acceptable charset (not only a surface).  */
+-    enum recode_symbol_type type : 3;
++    enum recode_symbol_type type : 2;
+ 
+     /* Non zero if this one should be ignored.  */
+-    bool ignore : 2;
++    bool ignore : 1;
+   };
+ 
+ struct recode_surface_list
