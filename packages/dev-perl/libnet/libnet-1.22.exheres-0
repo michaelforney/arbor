@@ -1,0 +1,23 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'libnet-1.22.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+MODULE_AUTHOR="GBARR"
+require perl-module
+
+DESCRIPTION="A URI Perl Module"
+
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="sasl"
+
+DEPENDENCIES="
+build+run:
+    sasl? ( dev-perl/Authen-SASL )"
+
+src_unpack() {
+    default
+    cp "${FILESDIR}"/libnet.cfg "${S}"
+}
+
