@@ -14,10 +14,7 @@ DEPENDENCIES="
     build,run:
         sys-libs/ncurses"
 
-src_compile() {
-    econf $(option_enable openvz) || die "econf failed"
-    emake || die "emake failed"
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="openvz"
 
 src_install() {
     emake DESTDIR="${D}" install || die "emake install failed"
