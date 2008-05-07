@@ -2,6 +2,8 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 DESCRIPTION="GNU awk implementation"
 HOMEPAGE="http://www.gnu.org/software/gawk"
 SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.gz"
@@ -19,6 +21,17 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="FUTURES LIMITATIONS POSIX.STD"
 
+src_prepare() {
+    cp -R "${FILESDIR}"/filefuncs "${WORKDIR}" || die "cp filefuncs failed"
+}
+
+src_configure() {
+    default
+
+    cd "${WORKDIR}"/filefuncs
+    emake
+}
+
 src_install() {
     default
 
@@ -32,5 +45,8 @@ src_install() {
         dosym ${x}-${PV} /bin/${x} || die "dosym ${x} failed"
         dosym ../../bin/${x} /usr/bin/${x} || die "dosym /usr/bin/${x} failed"
     done
+
+    cd "${WORKDIR}"/filefuncs
+    emake DESTDIR="${D}" LIBDIR=$(get_libdir) install
 }
 
