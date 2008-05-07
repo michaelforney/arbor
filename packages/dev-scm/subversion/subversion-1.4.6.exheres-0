@@ -14,7 +14,7 @@ SRC_URI="http://subversion.tigris.org/downloads/${P}.tar.bz2"
 LICENSE="Apache-1.1"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="debug nls perl python ruby slowtests"
+MYOPTIONS="debug nls perl python ruby slowtests ssl"
 
 DEPENDENCIES="
 build:
@@ -36,10 +36,6 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${PN}-perl-vendor.patch"
 
 src_prepare() {
     default
-
-    sed -e 's/\(NEON_ALLOWED_LIST=.* 0.26.4\)"/\1 0.28.2"/' \
-        -i "${S}"/configure.in
-
     eautoreconf
 }
 

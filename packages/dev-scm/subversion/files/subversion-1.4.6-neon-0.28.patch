@@ -2,6 +2,19 @@ Source: Arfrever Frehtes Taifersar Araheis, Gentoo, http://bugs.gentoo.org/show_
 Upstream: Yes.
 Reason: Allow subversion to build against neon-0.28.2 without disabling libsvn_ra_dav.
 
+Index: subversion-1.4.6/configure.in
+===================================================================
+--- subversion-1.4.6.orig/configure.in
++++ subversion-1.4.6/configure.in
+@@ -69,7 +69,7 @@
+ 
+ # Either a space-separated list of allowable Neon versions, or "any" to
+ # mean allow anything.
+-NEON_ALLOWED_LIST="0.24.7 0.25.0 0.25.1 0.25.2 0.25.3 0.25.4 0.25.5 0.26.0 0.26.1 0.26.2 0.26.4"
++NEON_ALLOWED_LIST="0.24.7 0.25.0 0.25.1 0.25.2 0.25.3 0.25.4 0.25.5 0.26.0 0.26.1 0.26.2 0.26.4 0.28.2"
+ NEON_LATEST_WORKING_VER=0.25.5
+ NEON_URL="http://www.webdav.org/neon/neon-${NEON_LATEST_WORKING_VER}.tar.gz"
+ dnl You can skip the neon version check only if you know what you are doing
 Index: subversion-1.4.6/build/ac-macros/neon.m4
 ===================================================================
 --- subversion-1.4.6.orig/build/ac-macros/neon.m4
