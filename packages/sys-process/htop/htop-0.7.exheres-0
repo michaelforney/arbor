@@ -7,7 +7,7 @@ SRC_URI="http://garr.dl.sourceforge.net/sourceforge/${PN}/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-PLATFORMS="~x86"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="openvz"
 
 DEPENDENCIES="
@@ -16,8 +16,3 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="openvz"
 
-src_install() {
-    emake DESTDIR="${D}" install || die "emake install failed"
-
-    dodoc AUTHORS ChangeLog README NEWS TODO
-}
