@@ -14,7 +14,7 @@ export_exlib_phases src_configure src_compile src_test src_install
 
 if [[ -z ${HOMEPAGE} && -z ${SRC_URI} && -n ${MODULE_AUTHOR} ]]; then
     HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
-    SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}.tar.gz"
+    SRC_URI="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}${MODULE_EXTENSION:-.tar.gz}"
 fi
 
 # Default license, for packages licensed under perl's terms.
