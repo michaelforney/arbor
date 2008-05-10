@@ -1,0 +1,73 @@
+# Copyright 2007, 2008 Bryan Østergaard & Anders Ossowicki
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require multilib
+
+DESCRIPTION="Perl is a general-purpose programming language originally developed for text manipulation"
+HOMEPAGE="http://www.perl.org"
+SRC_URI="mirror://cpan/src/${P}.tar.bz2"
+
+LICENSE="|| ( Artistic GPL GPL-2 GPL-3 )"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build+run:
+    perl-core/PodParser"
+
+DEFAULT_SRC_PREPARE_PATCHES=("${FILESDIR}/perl-gcc-4.2.patch"
+    "${FILESDIR}/perl-asm-page-h.patch"
+    "${FILESDIR}/${PN}-${PVR}-cve.patch"
+    -p0 "${FILESDIR}/${P}-lib64.patch")
+
+src_configure() {
+    mkdir "${T}/build"
+    cd "${T}/build"
+
+    sh "${S}/Configure" -des \
+        -Dprefix=/usr \
+        -Dvendorprefix=/usr \
+        -Dsiteprefix=/usr \
+        -Doptimize="${CFLAGS}" \
+        -Duselargefiles \
+        -Darchname=${CHOST%%-*} \
+        -Duseshrplib \
+        -Dlibperl="libperl.so.1.${PV}" \
+        -Dinstallusrbinperl \
+        -Dmksymlinks \
+        || die "Configure failed."
+}
+
+src_compile() {
+    cd "${T}/build"
+    default
+}
+
+src_test() {
+    cd "${T}/build"
+    default
+}
+
+src_install() {
+    cd "${T}/build"
+    emake -j1 DESTDIR="${D}" install
+
+    local mylib=$(get_libdir)
+    dodir /usr/${mylib}
+    dosym /usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} \
+    /usr/${mylib}/libperl.so.1.${PV}
+    dosym /usr/${mylib}/libperl.so.1.${PV} /usr/${mylib}/libperl.so.1
+    dosym /usr/${mylib}/libperl.so.1 /usr/${mylib}/libperl.so
+    dodoc AUTHORS Changes* INSTALL README
+
+    keepdir /usr/${mylib}/perl5/{site,vendor}_perl/${PV}/${CHOST%%-*}
+
+    # Install LDPATH env file
+    dodir /etc/env.d
+    cat <<-EOF > "${D}"/etc/env.d/05perl
+    LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}-linux/CORE/"
+EOF
+}
+
