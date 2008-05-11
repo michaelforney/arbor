@@ -9,21 +9,19 @@ HOMEPAGE="http://www.gnu.org/software/automake"
 SRC_URI="http://ftp.gnu.org/gnu/${PN}/${MY_P}.tar.gz"
 
 LICENSE="GPL-2"
-SLOT="1.7"
+SLOT="1.10"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="slowtests"
 
 DEPENDENCIES="run: sys-devel/automake-wrapper"
 
-DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/${P}-test-fixes.patch"
-
 src_configure() {
-    econf --program-suffix="-${PV%%_*}" || die "Configure failed."
+    econf --program-suffix="-${SLOT}" || die "Configure failed."
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
-    rm -f "${D}"/usr/bin/*-${PV}-*
+    default
+    rm "${D}"/usr/bin/*-${SLOT}-${SLOT} || die "Rm failed"
 }
 
 src_test() {
