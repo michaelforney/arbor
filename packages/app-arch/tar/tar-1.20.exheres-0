@@ -12,15 +12,12 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-src_configure() {
-    econf --bindir=/bin \
-        $(option_enable nls)
-}
+DEFAULT_SRC_CONFIGURE_PARAMS="--bindir=/bin"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="PORTS"
 
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc ABOUT-NLS AUTHORS ChangeLog ChangeLog.1 NEWS \
-        PORTS README THANKS TODO
-    rmdir "${D}"/usr/sbin
+    default
+    rmdir "${D}"/usr/sbin || die "rmdir failed"
 }
 
