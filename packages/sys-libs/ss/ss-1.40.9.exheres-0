@@ -1,0 +1,77 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ss-1.40.9.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require toolchain-funcs multilib
+
+DESCRIPTION="Generic Subsystem library (Simple tty UI)"
+HOMEPAGE="http://e2fsprogs.sourceforge.net/"
+SRC_URI="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        ~sys-libs/com_err-${PV}
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILESDIR}/${P}-makefile.patch"
+) 
+
+S="${WORKDIR}/e2fsprogs-${PV}"
+
+env_prepare() {
+    export LDCONFIG=/bin/true
+    export CC=$(tc-getCC)
+    export STRIP=/bin/true
+}
+
+src_prepare() {
+    default
+
+    # Since we've split out com_err/ss into their own exheres, we
+    # need to fake out the local files. Let the toolchain find them.
+    echo "GROUP ( /usr/$(get_libdir)/libcom_err.a )" > lib/libcom_err.a
+    echo "GROUP ( /usr/$(get_libdir)/libcom_err.so )" > lib/libcom_err.so
+}
+
+src_configure() {
+    env_prepare
+
+    econf \
+        --enable-elf-shlibs \
+        --with-ldopts="${LDFLAGS}"
+}
+
+src_compile() {
+    env_prepare
+
+    emake -C lib/ss COMPILE_ET=compile_et
+}
+
+src_test() {
+    env_prepare
+
+    emake -j1 -C lib/ss check
+}
+
+src_install() {
+    env_prepare
+
+    dodir /usr/share/man/man1
+    emake -C lib/ss DESTDIR="${D}" install
+
+    # Move shared libraries to /lib/, install static libraries to /usr/lib/,
+    # and install linker scripts to /usr/lib/.
+    dodir /$(get_libdir)
+    mv "${D}"/usr/$(get_libdir)/*.so* "${D}"/$(get_libdir)/ || die "move .so"
+    dolib.a lib/libss.a
+    gen_usr_ldscript libss.so
+
+    dodoc README RELEASE-NOTES SUBMITTING-PATCHES
+}
