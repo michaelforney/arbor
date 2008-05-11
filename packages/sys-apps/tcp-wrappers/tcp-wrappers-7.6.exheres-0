@@ -1,0 +1,76 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'tcp-wrappers-7.6-r8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require multilib toolchain-funcs
+
+MY_P="${P//-/_}"
+PATCH_VER="1.1"
+DESCRIPTION="TCP Wrappers"
+HOMEPAGE="ftp://ftp.porcupine.org/pub/security/index.html"
+SRC_URI="ftp://ftp.porcupine.org/pub/security/${MY_P}.tar.gz
+	http://dev.exherbo.org/~philantrop/distfiles/${P}-patches-${PATCH_VER}.tar.bz2"
+
+LICENSE="tcp_wrappers_license"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="ipv6"
+
+DEPENDENCIES=""
+
+S="${WORKDIR}/${MY_P}"
+PATCHDIR="${WORKDIR}/${PV}"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${PATCHDIR}/${P}-makefile.patch"
+    "${PATCHDIR}/${P}-shared.patch"
+    "${PATCHDIR}/generic"
+    )
+
+src_prepare() {
+    option ipv6 && DEFAULT_SRC_PREPARE_PATCHES+=( -p2 "${PATCHDIR}/${P}-ipv6-1.14.diff" )
+
+    default
+}
+
+src_compile() {
+    tc-export AR CC RANLIB
+
+    local myconf="-DHAVE_WEAKSYMS"
+    option ipv6 && myconf+=" -DINET6=1 -Dss_family=__ss_family -Dss_len=__ss_len"
+
+    emake \
+        REAL_DAEMON_DIR=/usr/sbin \
+        EXHERBO_OPT="${myconf}" \
+        MAJOR=0 MINOR=${PV:0:1} REL=${PV:2:3} \
+        config-check
+
+    emake \
+        REAL_DAEMON_DIR=/usr/sbin \
+        EXHERBO_OPT="${myconf}" \
+        MAJOR=0 MINOR=${PV:0:1} REL=${PV:2:3} \
+        linux
+}
+
+src_install() {
+    dosbin tcpd tcpdchk tcpdmatch safe_finger try-from
+
+    doman *.[358]
+    dosym hosts_access.5 /usr/share/man/man5/hosts.allow.5
+    dosym hosts_access.5 /usr/share/man/man5/hosts.deny.5
+
+    insinto /usr/include
+    doins tcpd.h
+
+    into /usr
+    dolib.a libwrap.a
+
+    into /
+    newlib.so libwrap.so libwrap.so.0.${PV}
+    dosym libwrap.so.0.${PV} /$(get_libdir)/libwrap.so.0
+    dosym libwrap.so.0 /$(get_libdir)/libwrap.so
+    gen_usr_ldscript libwrap.so || die "gen_usr_ldscript failed"
+
+    dodoc BLURB CHANGES DISCLAIMER README* "${FILESDIR}"/hosts.allow.example
+}
