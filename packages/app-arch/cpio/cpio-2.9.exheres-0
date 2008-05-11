@@ -13,15 +13,5 @@ MYOPTIONS="nls"
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-gnu-inline.patch" )
-
-src_configure() {
-    econf --bindir /bin --enable-mt \
-        $(option_enable nls) \
-        || die "econf failed."
-}
-
-src_install() {
-    emake DESTDIR="${D}" install || die "install failed."
-    dodoc ABOUT-NLS AUTHORS ChangeLog NEWS README THANKS TODO
-}
-
+DEFAULT_SRC_CONFIGURE_PARAMS="--bindir=/bin --enable-mt"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
