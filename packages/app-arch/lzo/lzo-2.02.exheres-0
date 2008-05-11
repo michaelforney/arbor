@@ -13,10 +13,4 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_configure() {
-    econf --enable-shared || die "Configure failed."
-}
-
-src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS="--enable-shared"
