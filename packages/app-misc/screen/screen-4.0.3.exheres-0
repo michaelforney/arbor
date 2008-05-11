@@ -15,15 +15,6 @@ MYOPTIONS="pam"
 DEPENDENCIES="sys-libs/ncurses
               pam? ( sys-libs/pam )"
 
-src_configure() {
-    econf \
-        $(option_enable pam) \
-        --enable-colors256 \
-        --with-sys-screenrc=/etc/screenrc
-}
-
-src_install() {
-    emake DESTDIR="${D}" install
-}
-
-
+DEFAULT_SRC_CONFIGURE_PARAMS="--enable-colors256
+    --with-sys-screenrc=/etc/screenrc"
+DEFAULT_SRC_CONFIGURE_OPTION_EANBLES="pam"
