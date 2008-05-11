@@ -1,0 +1,49 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'portmap-6.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require eutils toolchain-funcs
+
+DESCRIPTION="daemon for implementing remote procedure calls between computer programs"
+HOMEPAGE="http://neil.brown.name/portmap/"
+SRC_URI="http://neil.brown.name/portmap/${P}.tgz"
+
+LICENSE="UoC"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="tcpd"
+
+DEPENDENCIES="
+    build+run:
+        tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
+"
+
+S="${WORKDIR}/${PN}_${PV}"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}/${P}-tcpd.patch"
+)
+
+pkg_setup() {
+    enewgroup rpc 111
+    enewuser rpc 111 -1 /dev/null rpc
+}
+
+src_compile() {
+    tc-export CC
+    emake NO_TCP_WRAPPER="$(option tcpd || echo NO)"
+}
+
+src_install() {
+    into /
+    dosbin portmap
+    into /usr
+    dosbin pmap_dump pmap_set
+
+    doman *.8
+    dodoc BLURBv5 CHANGES README*
+
+    newinitd "${FILESDIR}"/portmap.rc6 portmap
+    newconfd "${FILESDIR}"/portmap.confd portmap
+}
