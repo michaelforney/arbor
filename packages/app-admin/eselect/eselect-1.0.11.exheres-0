@@ -10,17 +10,12 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="build+run:
-        sys-apps/sed
-        sys-apps/mktemp
-          run:
-        sys-apps/coreutils"
+DEPENDENCIES="
+build+run:
+    sys-apps/sed
+    sys-apps/mktemp
+run:
+    sys-apps/coreutils"
 
-src_prepare() {
-    patch -p1 -s -f < "$FILESDIR/$PN"-config.patch || die "Patch failed"
-}
-
-src_install() {
-    emake DESTDIR="${D}" install || die "make install failed"
-    dodoc AUTHORS ChangeLog NEWS README TODO doc/*.txt
-}
+DEFAULT_SRC_PREPARE_PATCHES=(-p1 "${FILESDIR}"/${PN}-config.patch)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="doc/*.txt"
