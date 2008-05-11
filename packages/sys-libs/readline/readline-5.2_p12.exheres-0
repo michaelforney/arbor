@@ -1,0 +1,38 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+PATCH_LEVEL=${P##*_p}
+
+MY_P=${P%_p*}
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="Bash shell"
+HOMEPAGE="http://tiswww.case.edu/php/chet/readline/rltop.html"
+SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz
+        $(for ((i=1; i<=PATCH_LEVEL; i++)); do
+            printf "ftp://ftp.cwru.edu/pub/bash/${MY_P}-patches/readline52-%03d\n" ${i}
+        done)"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="nls"
+
+DEPENDENCIES="build+run:
+                sys-libs/ncurses"
+
+src_prepare() {
+    local i patches=(-p0)
+    for ((i=1; i<=PATCH_LEVEL; i++)); do
+        patches+=("${FETCHEDDIR}/readline52-$(printf "%03d" ${i})")
+    done
+    expatch "${patches[@]}"
+}
+
+src_configure() {
+    econf \
+        --libdir=/$(get_libdir) \
+        || die "Configure failed."
+}
