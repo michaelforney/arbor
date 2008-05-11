@@ -1,0 +1,92 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'e2fsprogs-1.40.9.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require toolchain-funcs multilib
+
+DESCRIPTION="Filesystem utilities for use with ext2 and ext3 filesystems"
+HOMEPAGE="http://e2fsprogs.sourceforge.net/"
+SRC_URI="mirror://sourceforge/e2fsprogs/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="static"
+
+DEPENDENCIES="
+    build+run:
+        ~sys-libs/com_err-${PV}
+        ~sys-libs/ss-${PV}
+    build:
+        sys-apps/texinfo
+"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="
+    RELEASE-NOTES
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILESDIR}/e2fsprogs-1.40.9-makefile.patch"
+) 
+
+src_prepare() {
+    default
+
+    # fake out files we forked into sep packages
+    sed -i \
+        -e '/^LIB_SUBDIRS/s:lib/et::' \
+        -e '/^LIB_SUBDIRS/s:lib/ss::' \
+        Makefile.in || die "remove subdirs"
+
+    # Since we've split out com_err/ss into their own ebuilds, we
+    # need to fake out the local files. Let the toolchain find them.
+    echo "GROUP ( /usr/$(get_libdir)/libcom_err.a )" > lib/libcom_err.a
+    echo "GROUP ( /usr/$(get_libdir)/libcom_err.so )" > lib/libcom_err.so
+    echo "GROUP ( /usr/$(get_libdir)/libss.a )" > lib/libss.a
+    echo "GROUP ( /usr/$(get_libdir)/libss.so )" > lib/libss.so
+    echo '#include_next <ss/ss_err.h>' > lib/ss/ss_err.h
+    ln -s /usr/bin/mk_cmds lib/ss/mk_cmds
+}
+
+src_configure() {
+    # Keep the package from doing silly things
+    export LDCONFIG=:
+    export CC=$(tc-getCC)
+    export STRIP=:
+
+    econf \
+        --bindir=/bin \
+        --sbindir=/sbin \
+        --enable-elf-shlibs \
+        --enable-tls \
+        --enable-fsck \
+        --with-ldopts="${LDFLAGS}" \
+        --without-included-gettext \
+        $(option_enable !static dynamic-e2fsck)
+}
+
+src_compile() {
+    # Parallel make sometimes fails
+    emake -j1 COMPILE_ET=compile_et
+}
+
+src_install() {
+    default
+
+    # Move shared libraries to /lib/, install static libraries to /usr/lib/,
+    # and install linker scripts to /usr/lib/.
+    dodir /$(get_libdir)
+    mv "${D}"/usr/$(get_libdir)/*.so* "${D}"/$(get_libdir)/
+    dolib.a lib/*.a || die "dolib.a"
+    rm -f "${D}"/usr/$(get_libdir)/lib{com_err,ss}.a
+    local x
+    cd "${D}"/$(get_libdir)
+    for x in *.so ; do
+        gen_usr_ldscript ${x} || die "gen ldscript ${x}"
+    done
+
+    # move 'useless' stuff to /usr/
+    dosbin "${D}"/sbin/mklost+found
+    rm -f "${D}"/sbin/mklost+found
+}
