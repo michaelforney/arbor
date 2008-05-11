@@ -32,10 +32,10 @@ src_configure() {
         || die "econf failed"
 }
 
-src_install() {
-    make DESTDIR="${D}" install || die "emake install failed"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="TROUBLESHOOTING UPGRADE"
 
-    dodoc BUGS CHANGES HISTORY README TROUBLESHOOTING UPGRADE
+src_install() {
+    default
 
     if option pam; then
         pamd_mimic_system sudo auth account password session
