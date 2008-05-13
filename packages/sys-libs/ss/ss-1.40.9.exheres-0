@@ -25,12 +25,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 
 S="${WORKDIR}/e2fsprogs-${PV}"
 
-env_prepare() {
-    export LDCONFIG=/bin/true
-    export CC=$(tc-getCC)
-    export STRIP=/bin/true
-}
-
 src_prepare() {
     default
 
@@ -41,7 +35,9 @@ src_prepare() {
 }
 
 src_configure() {
-    env_prepare
+    export LDCONFIG=/bin/true
+    export CC=$(tc-getCC)
+    export STRIP=/bin/true
 
     econf \
         --enable-elf-shlibs \
@@ -49,20 +45,14 @@ src_configure() {
 }
 
 src_compile() {
-    env_prepare
-
     emake -C lib/ss COMPILE_ET=compile_et
 }
 
 src_test() {
-    env_prepare
-
     emake -j1 -C lib/ss check
 }
 
 src_install() {
-    env_prepare
-
     dodir /usr/share/man/man1
     emake -C lib/ss DESTDIR="${D}" install
 

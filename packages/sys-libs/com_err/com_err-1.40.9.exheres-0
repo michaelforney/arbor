@@ -18,18 +18,14 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILESDIR}/${P}-makefile.patch"
-) 
+)
 
 S="${WORKDIR}/e2fsprogs-${PV}"
 
-env_prepare() {
+src_configure() {
     export LDCONFIG=/bin/true
     export CC=$(tc-getCC)
     export STRIP=/bin/true
-}
-
-src_configure() {
-    env_prepare
 
     econf \
         --enable-elf-shlibs \
@@ -37,20 +33,14 @@ src_configure() {
 }
 
 src_compile() {
-	env_prepare
-
     emake -C lib/et
 }	
 
 src_test() {
-    env_prepare
-
     emake -C lib/et check
 }
 
 src_install() {
-    env_prepare
-
     emake -C lib/et DESTDIR="${D}" install
     sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' "${D}"/usr/bin/compile_et
     dosym et/com_err.h /usr/include/com_err.h
