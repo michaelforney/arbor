@@ -1,0 +1,77 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sysvinit-2.86-r10.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require toolchain-funcs flag-o-matic
+
+PATCHTBZ2_VER="1.0"
+
+DESCRIPTION="System V init system"
+HOMEPAGE="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/"
+SRC_URI="ftp://ftp.cistron.nl/pub/people/miquels/software/${P}.tar.gz
+    ftp://sunsite.unc.edu/pub/Linux/system/daemons/init/${P}.tar.gz
+    http://dev.exherbo.org/~philantrop/distfiles/${P}-patches-${PATCHTBZ2_VER}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="static"
+
+DEPENDENCIES="
+    build:
+        sys-kernel/linux-headers
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${WORKDIR}/${P}-docs.patch"
+    -p0 "${WORKDIR}/${P}-shutdown-usage.patch"
+    -p0 "${WORKDIR}/${P}-off-by-one.patch"
+    -p1 "${WORKDIR}/${P}-kexec.patch"
+    -p1 "${WORKDIR}/${P}-execl.patch"
+    -p1 "${WORKDIR}/${P}-utmp-64bit.patch"
+    -p1 "${WORKDIR}/${P}-shutdown-single.patch"
+    -p0 "${WORKDIR}/${P}-utmp-smp.patch"
+    -p1 "${WORKDIR}/${P}-build.patch"
+)
+
+src_unpack() {
+    default
+
+    cp "${WORKDIR}"/change_console.{c,8} "${S}"/src/ \
+        || die "copying extra sources failed."
+}
+
+src_compile() {
+    option static && append-ldflags -static
+    emake -C src \
+        CC="$(tc-getCC)" \
+        all change_console
+}
+
+src_install() {
+    emake -C src install ROOT="${D}"
+
+    # Installing "Install", too, because it contains some information beyond
+    # simple installation instructions.
+    dodoc README doc/Changelog doc/Install doc/Propaganda doc/bootlogd.README
+
+    into /
+    dosbin src/change_console
+    doman src/change_console.8
+
+    insinto /etc
+    doins "${WORKDIR}"/inittab
+
+    doinitd "${WORKDIR}"/{reboot,shutdown}.sh
+}
+
+pkg_postinst() {
+    # Reload init to fix unmounting problems of / on next reboot.
+    # This is really needed because without it, init wouldn't quit properly during
+    # the next shutdown and would cause a fsck of / during the next reboot.
+    if [[ ${ROOT} == / ]] ; then
+        # Do not return an error if this fails
+        /sbin/telinit U &>/dev/null
+    fi
+}
