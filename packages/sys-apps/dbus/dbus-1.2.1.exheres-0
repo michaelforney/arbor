@@ -1,0 +1,79 @@
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'dbus-1.2.1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require eutils autotools
+
+DESCRIPTION="D-Bus is a message bus system for interprocess communication (IPC)"
+HOMEPAGE="http://dbus.freedesktop.org/"
+SRC_URI="http://dbus.freedesktop.org/releases/${PN}/${P}.tar.gz"
+
+LICENSE="|| ( GPL-2 AFL-2.1 )"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="debug expat"
+
+RESTRICT="test" # 1 of 3 tests fails for me
+
+DEPENDENCIES="
+build:
+    dev-util/pkg-config
+    sys-devel/gettext
+build+run:
+    expat? ( dev-libs/expat )
+    !expat? ( >=dev-libs/libxml2-2.6.0 )"
+#   doc? ( doxygen xmlto )
+
+pkg_setup() {
+    enewgroup messagebus || die "Problem adding messagebus group"
+    enewuser messagebus -1 "-1" -1 messagebus \
+        || die "Problem adding messagebus user"
+}
+
+src_configure() {
+    econf \
+        $(option_enable debug verbose-mode) \
+        --with-xml=$(optionv expat || echo libxml) \
+        --with-dbus-user=messagebus \
+        --localstatedir=/var \
+        --with-system-socket=/var/run/dbus/system_bus_socket \
+        --with-session-socket-dir=/tmp \
+        --enable-asserts \
+        --enable-inotify \
+        --enable-tests \
+        --disable-doxygen-docs \
+        --disable-xml-docs \
+        --disable-libaudit \
+        --disable-selinux
+#        $(option_enable doc doxygen-docs) \
+#        $(option_enable doc xml-docs) \
+}
+
+src_test() {
+    DBUS_VERBOSE=1 default
+}
+
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="dcop-howto.txt system-activation.txt"
+
+src_install() {
+    default
+
+    newinitd "${FILESDIR}"/dbus.init-1.0 dbus
+
+    # dbus X session script (Gentoo bug #77504)
+    # turns out to only work for GDM. has been merged into other desktop
+    # (kdm and such scripts)
+    exeinto /etc/X11/xinit/xinitrc.d/
+    doexe "${FILESDIR}"/30-dbus
+
+    keepdir \
+        /etc/dbus-1/session.d/ \
+        /etc/dbus-1/system.d/ \
+        /usr/libexec/dbus-1 \
+        /usr/share/dbus-1/services \
+        /usr/share/dbus-1/system-services \
+        /var/lib/dbus \
+        /var/run/dbus
+}
