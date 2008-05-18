@@ -1,0 +1,40 @@
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools
+
+DESCRIPTION="D-Bus GLib Bindings"
+HOMEPAGE="http://www.freedesktop.org/wiki/Software/DBusBindings"
+SRC_URI="http://dbus.freedesktop.org/releases/${PN}/${P}.tar.gz"
+
+LICENSE="|| ( GPL-2 AFL-2.1 )"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="debug expat"
+
+DEPENDENCIES="
+build:
+    dev-util/pkg-config
+    sys-devel/gettext
+build+run:
+    >=dev-libs/glib-2.6
+    >=sys-apps/dbus-0.93
+    expat? ( dev-libs/expat )
+    !expat? ( >=dev-libs/libxml2-2.6.0 )"
+#build: doc? ( doxygen xmlto )
+
+src_configure() {
+    econf \
+        $(option_enable debug verbose-mode) \
+        --with-dbus-user=messagebus \
+		--with-session-socket-dir=/tmp \
+        --with-system-socket=/var/run/dbus/system_bus_socket \
+        --with-xml=$(optionv expat || echo libxml) \
+        --enable-asserts \
+        --disable-doxygen-docs \
+        --disable-xml-docs \
+        --disable-selinux \
+        --disable-tests # --enable-tests is broken
+#        $(option_enable doc doxygen-docs) \
+#        $(option_enable doc xml-docs) \
+}
