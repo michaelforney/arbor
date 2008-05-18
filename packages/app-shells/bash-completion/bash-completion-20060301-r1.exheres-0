@@ -13,13 +13,13 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
-    run:
+run:
     app-admin/eselect
-        >=app-shells/bash-3.2_p19"
+    >=app-shells/bash-3.2_p19"
 
 S="${WORKDIR}/${PN/-/_}"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${PV}" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${PV} )
 
 src_install() {
     # split /etc/bash_completion into three parts:
@@ -39,9 +39,8 @@ src_install() {
     doexe ${FILESDIR}/bash-completion.sh || die "failed to install profile.d"
 
     # dev-scm/subversion provides an extremely superior completion
-    rm contrib/subversion
     insinto /usr/share/bash-completion
     doins contrib/* || die "failed to install contrib completions"
 
-    dodoc Changelog README
+    default
 }

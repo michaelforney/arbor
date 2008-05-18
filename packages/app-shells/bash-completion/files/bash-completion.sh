@@ -21,6 +21,7 @@ then
 		# in .pre.  See the ebuild for how this is created.
 		if ! $loaded_pre; then
 		    BASH_COMPLETION=/usr/share/bash-completion/base
+		    BASH_COMPLETION_DIR=/etc/bash_completion.d
 		    source /usr/share/bash-completion/.pre
 		    loaded_pre=true
 		fi
