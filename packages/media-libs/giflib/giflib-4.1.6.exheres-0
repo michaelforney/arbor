@@ -1,0 +1,26 @@
+# Copyright 2008 Kim Højgaard-Hansen
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Library for processing GIFs"
+HOMEPAGE="http://sourceforge.net/projects/giflib/"
+SRC_URI="mirror://sourceforge/${PN}/${P}.tar.bz2"
+
+LICENSE="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="X rle"
+
+DEPENDENCIES="
+    build,run:
+        X? ( x11-libs/libX11 )
+        rle? ( media-libs/urt )
+"
+
+#TODO: when doing media-libs/urt, get patch from Gentoo
+src_configure(){
+
+    econf $(option_enable X x11) $(option_with X) "--disable-gl"
+}
+
+#we diable gl by default, since it is the old SGI graphics library
+DEFAULT_SRC_CONFIGURE_PARAMS="--disable-gl"
