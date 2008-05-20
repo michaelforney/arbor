@@ -1,0 +1,43 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'valgrind-3.3.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools flag-o-matic toolchain-funcs
+
+DESCRIPTION="An open-source memory debugger for GNU/Linux"
+HOMEPAGE="http://www.valgrind.org"
+SRC_URI="http://www.valgrind.org/downloads/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="-* ~amd64 ~x86"
+MYOPTIONS="platform:amd64 X"
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+"${FILESDIR}/${P}-pkg-config.patch"
+-p0 "${FILESDIR}/${P}-c++.patch" )
+
+src_prepare() {
+    default
+    sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
+    sed -e "s:doc/${PN}:doc/${P}:" -i docs/Makefile.am
+
+    eautoreconf
+}
+
+src_configure() {
+    filter-flags -fomit-frame-pointer
+    # -ggdb3 causes segfaults at startup
+    replace-flags -ggdb3 -ggdb2
+
+    if option platform:amd64 && ! has_multilib_profile; then
+        myconf='--enable-only64bit'
+    fi
+
+    econf ${myconf} \
+        $(option X && echo ' --with-x' || echo ' --with-x=no')
+}
+
