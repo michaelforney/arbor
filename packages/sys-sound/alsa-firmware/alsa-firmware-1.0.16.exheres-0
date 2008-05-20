@@ -3,7 +3,7 @@
 
 DESCRIPTION="Firmware files for ALSA"
 HOMEPAGE="http://www.alsa-project.org"
-SRC_URI="ftp://ftp.alsa-project.org/pub/firmware/${P}.tar.bz2"
+SRC_URI="ftp://ftp.alsa-project.org/pub/${PN/alsa-}/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -13,7 +13,6 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_install() {
-    emake DESTDIR="${D}" install || die "emake install failed"
+    default
     rmdir "${D}/usr/bin"
-    dodoc README
 }
