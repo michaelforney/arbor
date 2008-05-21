@@ -1,0 +1,32 @@
+# Copyright 2008 Fernando J. Pereda
+# Distributed under the terms of the GPLv2
+
+DESCRIPTION="A text-based email client"
+HOMEPAGE="http://www.mutt.org"
+SRC_URI="ftp://ftp.mutt.org/mutt/devel/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="nls ssl"
+
+DEPENDENCIES="
+    sys-libs/ncurses
+    ssl? ( dev-libs/openssl )
+    sys-libs/gdbm
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=" \
+    --with-curses \
+    --sysconfdir=/etc/${PN} \
+    --with-docdir=/usr/share/doc/${P} \
+    --with-regex \
+    --disable-fcntl --enable-flock \
+    --enable-nfs-fix --enable-external-dotlock \
+    --with-homespool=Maildir \
+    --enable-imap --disable-pop --enable-smtp \
+    --enable-hcache --with-gdbm --without-qdbm --without-bdb \
+    --without-gnutls --without-sasl"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS="ssl"
