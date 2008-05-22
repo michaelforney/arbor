@@ -1,0 +1,120 @@
+# Copyright 2007-2007 Bryan Østergaard
+# Copyright 2008 Ali Polatel
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'python-2.5.2-r4.ebuild' from Gentoo, which is:
+#  Copyright 1999-2008 Gentoo Foundation
+
+require autotools multilib python toolchain-funcs
+
+MY_P="Python-${PV}"
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="Python interpreter"
+HOMEPAGE="http://www.python.org"
+SRC_URI="http://python.org/ftp/python/${PV}/${MY_P}.tar.bz2
+    http://hawking.nonlogic.org/dist/python-exherbo-patches-${PV}.tar.bz2"
+
+LICENSE="PSF-2.2"
+SLOT="2.5"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="berkdb gdbm examples ipv6 ncurses readline sqlite ssl tk"
+
+DEPENDENCIES="
+build+run:
+    dev-libs/expat
+    >=sys-libs/zlib-1.1.3
+    berkdb? ( >=sys-libs/db-3.1:= )
+    gdbm? ( sys-libs/gdbm )
+    ncurses? (
+        >=sys-libs/ncurses-5.2
+        readline? ( >=sys-libs/readline-4.1 )
+        )
+    sqlite? ( >=dev-db/sqlite-3 )
+    ssl? ( dev-libs/openssl )
+    tk? ( >=dev-lang/tk-8.0 )"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${WORKDIR}/${PV}/01_all_readline.patch"
+    "${WORKDIR}/${PV}/02_all_db4.patch"
+    "${WORKDIR}/${PV}/03_all_py-dontcompile.patch"
+    "${WORKDIR}/${PV}/04_all_disable_modules_and_ssl.patch"
+    "${WORKDIR}/${PV}/05_all_mimetypes_gentoo_apache.patch"
+    "${WORKDIR}/${PV}/06_all_libdir.patch"
+    "${WORKDIR}/${PV}/07_all_dbm_default_gdbm_compat.patch"
+    -p1 "${WORKDIR}/${PV}/08_all_zlib-decompressobj_flush-bad-param.patch"
+    "${WORKDIR}/${PV}/09_all_pystring-size-fix.patch"
+    "${WORKDIR}/${PV}/10_all_threadsafe-fileobjects.patch"
+    "${WORKDIR}/${PV}/11_all_infinite-recursions-fix.patch"
+    -p0 "${WORKDIR}/${PV}/12_all_infinite-recursions-fix.patch"
+    "${WORKDIR}/${PV}/13_all_internal-expat.patch"
+    "${WORKDIR}/${PV}/14_all_cflags.patch" )
+
+src_prepare() {
+    default
+
+    sed -i -e "s:@@EXHERBO_LIBDIR@@:$(get_libdir):g" \
+        Lib/distutils/command/install.py \
+        Lib/distutils/sysconfig.py \
+        Lib/site.py \
+        Makefile.pre.in \
+        Modules/Setup.dist \
+        Modules/getpath.c \
+        setup.py || die "sed failed to replace EXHERBO_LIBDIR."
+
+    eautoreconf
+}
+
+src_configure() {
+    # dbm module can link to berkdb or gdbm.
+    # default to gdbm when both are enabled.
+    local disable
+    option berkdb   || option gdbm || disable="${disable} dbm"
+    option berkdb   || disable="${disable} bsddb"
+    option gdbm     || disable="${disable} gdbm"
+    option ncurses  || disable="${disable} _curses _curses_panel"
+    option readline || disable="${disable} readline"
+    option sqlite   || disable="${disable} _sqlite3"
+    option ssl      || export PYTHON_DISABLE_SSL=1
+    option tk       || disable="${disable} _tkinter"
+    export PYTHON_DISABLE_MODULES="${disable}"
+
+    export OPT="${CFLAGS}"
+
+    # export CXX so it ends up in /usr/lib/python2.x/config/Makefile
+    tc-export CXX
+
+    econf \
+        --enable-shared \
+        --enable-unicode=ucs4 \
+        $(option_enable ipv6)
+}
+
+src_test() {
+    # PYTHON_DONTCOMPILE shouldn't be set here.
+    if [[ -n "${PYTHON_DONTCOMPILE}" ]]; then
+        unset PYTHON_DONTCOMPILE
+    fi
+
+    # rerun failed tests in verbose mode (regrtest -w)
+    EXTRATESTOPTS="-w" emake test || die "emake test failed"
+}
+
+src_install() {
+    default
+
+    for f in idle pydoc python-config python ; do
+        dosym /usr/bin/{${f},${f}${PYVER}}
+    done
+}
+
+pkg_postinst() {
+    python_version
+
+    python_mod_optimize
+    python_mod_optimize -x site-packages \
+                        -x test /usr/$(get_libdir)/python${PYVER}
+}
+
+pkg_postrm() {
+    python_version
+    python_mod_cleanup /usr/$(get_libdir)/python${PYVER}
+}
