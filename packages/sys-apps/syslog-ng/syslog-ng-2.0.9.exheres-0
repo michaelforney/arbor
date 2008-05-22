@@ -1,0 +1,56 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+DESCRIPTION="Popular system logger"
+HOMEPAGE="http://www.balabit.com/network-security/syslog-ng/"
+SRC_URI="http://www.balabit.com/downloads/files/${PN}/sources/stable/src/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="ipv6 tcpd"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/glib
+        sys-apps/eventlog
+        tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
+    build:
+        dev-util/pkg-config
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS="
+    --sysconfdir=/etc/syslog-ng
+    --disable-dependency-tracking
+    --enable-dynamic-linking
+    --without-libnet
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="ipv6"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="
+    VERSION
+    contrib/syslog-ng.conf.doc
+    contrib/syslog-ng.vim
+    doc/reference/syslog-ng.txt
+"
+
+src_configure() {
+    DEFAULT_SRC_CONFIGURE_PARAMS+=" $(option_enable tcpd tcp-wrapper)"
+
+    default
+}
+
+src_install() {
+    default
+
+    # Install default configuration
+    insinto /etc/syslog-ng
+    doins doc/examples/syslog-ng.conf.sample
+
+    newinitd "${FILESDIR}/syslog-ng.rc6" syslog-ng
+    newconfd "${FILESDIR}/syslog-ng.confd" syslog-ng
+}
