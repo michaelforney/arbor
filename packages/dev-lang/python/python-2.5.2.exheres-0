@@ -101,8 +101,9 @@ src_test() {
 src_install() {
     default
 
+    python_version
     for f in idle pydoc python-config python ; do
-        dosym /usr/bin/{${f},${f}${PYVER}}
+        dosym /usr/bin/{${f}${PYVER},${f}}
     done
 }
 
