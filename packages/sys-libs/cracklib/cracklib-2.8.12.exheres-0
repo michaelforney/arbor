@@ -12,27 +12,24 @@ MYOPTIONS="python"
 
 DEPENDENCIES="
 build+run:
-    python? ( dev-lang/python )"
+    python? ( dev-lang/python:= )"
 
-src_configure() {
-    econf \
-        $(option_with python) \
-	--with-default-dict=/var/cache/cracklib/cracklib_dict \
-        || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS="--with-default-dict=/var/cache/cracklib/cracklib_dict"
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS="python"
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    default
 
+    dodir /usr/share/dict
     insinto /usr/share/dict
     doins dicts/cracklib-small
 
     dodir /var/cache/cracklib
     keepdir /var/cache/cracklib
-
-    dodoc AUTHORS ChangeLog NEWS README*
 }
 
 pkg_postinst() {
-    create-cracklib-dict /usr/share/dict/cracklib-small || die "Failed to create cracklib dictionary."
+    create-cracklib-dict "${ROOT}/usr/share/dict/cracklib-small" \
+        || die "Failed to create cracklib dictionary."
 }
+
