@@ -1,0 +1,138 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require eutils multilib autotools pam
+
+# Make it more portable between straight releases and _p? releases.
+PARCH=${P/_/}
+
+X509_PATCH="${PARCH}+x509-6.1.1.diff.gz"
+HPN_PATCH="${PARCH}-hpn13v3.diff.gz"
+
+DESCRIPTION="OpenSSH is a free version of the SSH connectivity tools."
+HOMEPAGE="http://www.openssh.org/"
+SRC_URI="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
+    http://www.sxw.org.uk/computing/patches/${PARCH}-gsskex-20080404.patch
+    X509? ( http://roumenpetrov.info/${PN}/x509-6.1.1/${X509_PATCH} )
+    hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )"
+
+LICENSE="BSD"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="hpn pam tcpd X X509"
+
+# Unfortunately, the tests need to be run as root.
+RESTRICT="userpriv"
+
+DEPENDENCIES="
+    build+run:
+        sys-apps/shadow
+        >=dev-libs/openssl-0.9.8f
+        >=sys-libs/zlib-1.2.3
+        pam? ( >=sys-libs/pam-0.78 )
+        tcpd? ( >=sys-apps/tcp-wrappers-7.6 )        
+        X? ( x11-apps/xauth )
+    build:
+        dev-util/pkg-config
+        sys-kernel/linux-headers
+"
+    
+S="${WORKDIR}/${PARCH}"
+
+src_prepare() {
+    sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
+        || die "sed to fix the xauth path failed"
+
+    if [[ -n ${X509_PATCH} ]] && option X509 ; then
+        DEFAULT_SRC_PREPARE_PATCHES+=( 
+            -p1 "${WORKDIR}/${X509_PATCH/.gz}"
+            -p0 "${FILESDIR}/${PN}-4.9_p1-x509-hpn-glue.patch"
+            -p0 "${FILESDIR}/${PN}-4.7_p1-GSSAPI-dns.patch"
+        )
+    else
+        DEFAULT_SRC_PREPARE_PATCHES+=(
+            -p0 "${FETCHEDDIR}/${PARCH}-gsskex-20080404.patch"
+        )
+    fi
+
+    if [[ -n ${HPN_PATCH} ]] && option hpn ; then
+        DEFAULT_SRC_PREPARE_PATCHES+=(
+            -p1 "${WORKDIR}/${HPN_PATCH/.gz}"
+        )
+    fi
+
+    default
+
+    sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac} \
+        || die "sed to fix linking to openssl failed"
+
+    eautoreconf
+}
+
+src_configure() {
+    econf \
+        --with-ldflags="${LDFLAGS}" \
+        --disable-strip \
+        --sysconfdir=/etc/ssh \
+        --libexecdir=/usr/$(get_libdir)/misc \
+        --datadir=/usr/share/openssh \
+        --disable-suid-ssh \
+        --with-privsep-path=/var/empty \
+        --with-privsep-user=sshd \
+        --with-md5-passwords \
+        --with-ssl-engine \
+        --without-ldap \
+        --without-libedit \
+        --without-kerberos5 \
+        $(option_with tcpd tcp-wrappers) \
+        $(option_with pam)
+}
+
+src_test() {
+    option X509 && export SSH_X509TESTS="blob_auth"
+
+    emake -j1 tests || die "make tests failed"
+}
+
+src_install() {
+    emake install-nokeys DESTDIR="${D}"
+    fperms 600 /etc/ssh/sshd_config
+    dobin contrib/ssh-copy-id
+    newinitd "${FILESDIR}"/sshd.rc6 sshd
+    newconfd "${FILESDIR}"/sshd.confd sshd
+    keepdir /etc/ssh/ca
+    keepdir /etc/skel/.ssh
+    keepdir /var/run
+
+    if option pam ; then 
+        sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${D}"/etc/ssh/sshd_config \
+            || die "sed for UsePAM failed."
+        sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
+            "${D}"/etc/ssh/sshd_config || die "sed for passwd auth failed."
+        newpamd "${FILESDIR}"/sshd.pam_include.1 sshd
+    fi
+
+    doman contrib/ssh-copy-id.1
+    dodoc ChangeLog CREDITS OVERVIEW README* TODO sshd_config
+
+    diropts -m 0700
+    dodir /etc/skel/.ssh
+    rmdir "${D}"/var{/empty,}
+}
+
+pkg_postinst() {
+    [[ ! -d ${ROOT}/var/empty ]] && mkdir -p "${ROOT}"/var/empty
+
+    enewgroup sshd 22
+    enewuser sshd 22 -1 /var/empty sshd
+
+    ewarn "Remember to merge your config files in /etc/ssh/ and then"
+    ewarn "restart sshd: '/etc/init.d/sshd restart'."
+    if option pam ; then
+        echo
+        ewarn "Please be aware users need a valid shell in /etc/passwd"
+        ewarn "in order to be allowed to login."
+    fi
+}
