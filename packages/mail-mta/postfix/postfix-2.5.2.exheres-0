@@ -1,0 +1,86 @@
+# Copyright 2008 Fernando J. Pereda
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'postfix-2.5.1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require eutils multilib toolchain-funcs pam
+
+DESCRIPTION="Fast, easy to administer and secure mail transport agent."
+HOMEPAGE="http://www.postfix.org"
+SRC_URI="ftp://ftp.porcupine.org/mirrors/postfix-release/official/${P}.tar.gz"
+
+LICENSE="IPL-1.0"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="ssl"
+
+DEPENDENCIES="
+    dev-libs/libpcre
+    sys-libs/db
+    ssl? ( dev-libs/openssl )
+    sys-libs/pam
+    "
+
+create_group_user()
+{
+    enewgroup postfix
+    enewgroup postdrop
+    enewuser postfix -1 -1 "/var/spool/postfix" postfix
+}
+
+pkg_setup()
+{
+    create_group_user
+}
+
+src_compile()
+{
+    local ccargs="" auxlibs=""
+
+    auxlibs+=" -pthread -lpam"
+
+    if option ssl ; then
+        ccargs+=" -DUSE_TLS"
+        auxlibs+=" -lssl -lcrypto"
+    fi
+
+    ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'$(get_libdir)'/postfix\"'
+    ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'
+    ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PF}'/readme\"'
+    ccargs+=' -DDEF_HTML_DIR=\"/usr/share/doc/'${PF}'/html\"'
+
+    emake CC="$(tc-getCC)" OPT="${CFLAGS}" \
+        CCARGS="${ccargs}" AUXLIBS="${auxlibs}" makefiles
+    emake
+}
+
+src_install()
+{
+    /bin/sh postfix-install \
+        -non-interactive \
+        install_root="${D}" \
+        config_directory="/usr/share/doc/${PF}/defaults" \
+        readme_directory="/usr/share/doc/${PF}/readme" \
+        || die 'postfix-install failed'
+    dosym /usr/sbin/sendmail /usr/$(get_libdir)/sendmail
+
+    keepdir /var/lib/postfix
+    fowners postfix:postfix /var/lib/postfix/
+
+    keepdir /var/spool/postfix
+    rmdir "${D}"/var/spool/postfix/*
+    fowners root /var/spool/postfix
+
+    fowners root:postdrop /usr/sbin/post{drop,queue}
+    fperms 2711 /usr/sbin/post{drop,queue}
+
+    pamd_mimic_system smtp auth account
+
+    dodir /etc/postfix
+    cp "${D}"/usr/share/doc/${PF}/defaults/{master.cf,post*-*} "${D}"/etc/postfix/
+    cp "${FILESDIR}"/main.cf.example-0 "${D}"/etc/postfix/main.cf.example
+
+    mv "${S}"/examples "${D}"/usr/share/doc/${PF}
+
+    dosym /usr/share/doc/${PF} /usr/share/doc/${PN}
+}
