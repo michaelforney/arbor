@@ -98,15 +98,6 @@ src_test() {
     EXTRATESTOPTS="-w" emake test || die "emake test failed"
 }
 
-src_install() {
-    default
-
-    python_version
-    for f in idle pydoc python-config python ; do
-        dosym /usr/bin/{${f}${PYVER},${f}}
-    done
-}
-
 pkg_postinst() {
     python_version
 
