@@ -7,7 +7,8 @@ MY_P="${P/-/_}"
 
 DESCRIPTION="List open files for running UNIX processes"
 HOMEPAGE="ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/"
-SRC_URI="ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/${MY_P}.tar.bz2"
+SRC_URI="ftp://lsof.itap.purdue.edu/pub/tools/unix/${PN}/${MY_P}.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${MY_P}.tar.bz2"
 
 LICENSE="lsof"
 SLOT="0"
@@ -18,7 +19,7 @@ DEPENDENCIES=""
 
 S="${WORKDIR}/${MY_P}_src"
 
-DEFAULT_SRC_PREPARE_PATCHES=("${FILESDIR}"/${P}.patch)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${P}.patch )
 
 src_unpack() {
     unpack ${A}
@@ -42,6 +43,7 @@ src_install() {
     doman lsof.8 || die "doman failed."
     dodoc 00* || die "dodoc failed."
 
-    insinto /usr/share/lsof/scripts
+    insinto /usr/share/${PN}/scripts
     doins scripts/* || die "doins failed."
 }
+
