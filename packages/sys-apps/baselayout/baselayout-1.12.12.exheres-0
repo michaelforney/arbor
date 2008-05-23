@@ -1,0 +1,139 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'baselayout-1.12.12.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require flag-o-matic multilib toolchain-funcs
+
+DESCRIPTION="Filesystem baselayout and init scripts"
+HOMEPAGE="http://www.gentoo.org/"
+SRC_URI="mirror://gentoo/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="" # static || Always build statically
+
+DEPENDENCIES="
+    run:
+        >=sys-apps/coreutils-6.11-r1
+        >=sys-apps/sysvinit-2.86-r1
+        >=sys-fs/udev-120
+        >=sys-apps/gawk-3.1.6-r1
+    post:
+        sys-apps/module-init-tools
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}/${P}-runlevels.patch"
+    "${FILESDIR}/${P}-paths.patch"
+    "${FILESDIR}/${P}-branding.patch"
+)
+
+src_prepare() {
+    # Use correct path to filefuncs.so on multilib systems
+    sed -e "s:/lib/rcscripts:/$(get_libdir)/rcscripts:" \
+        -i "${S}"/src/awk/{cachedepends,genenviron}.awk || die 'Sed failed.'
+
+    default
+}
+
+src_compile() {
+    append-ldflags -static
+    
+    libdir="lib"
+    [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
+
+    cd "${S}/src"
+    emake \
+        CC="$(tc-getCC)" \
+        LD="$(tc-getCC) ${LDFLAGS}" \
+        CFLAGS="${CFLAGS}" \
+        LIBDIR="${libdir}"
+}
+
+src_install() {
+    local x rcscripts_dir=/${libdir}/rcscripts
+    for x in /boot /dev{,/pts,/shm} /etc/runlevels /usr{,/local} /var{,/lock}; do
+        dodir "${x}" || die "dodir ${x} failed"
+        keepdir "${x}" || die "keepdir ${x} failed"
+    done
+
+    if [[ ${SYMLINK_LIB} == yes ]]; then
+        for x in {,/usr,/usr/local}/lib; do
+            dosym ${libdir} ${x} || die "dosym ${libdir} ${x} failed"
+        done
+    fi
+
+    insinto /etc
+    doins -r "${S}"/etc/* || die "doins /etc/* failed"
+    fperms 0640 /etc/sysctl.conf
+
+    fperms 0600 /etc/shadow
+
+    dodir /etc/init.d
+    # doinitd doesnt respect symlinks
+    cp -P "${S}"/init.d/* "${D}"/etc/init.d/ || die "doinitd"
+
+    insinto /usr/share/baselayout
+    doins "${S}"/rc-lists/* || die "doins rc-lists failed"
+
+    into /
+    dosbin "${S}"/sbin/{MAKEDEV,rc,rc-update,runscript.sh,functions.sh,depscan.sh,env-update.sh} || die "dosbin failed"
+    dobin "${S}"/bin/{rc-status,checkpath} || die "dobin failed"
+
+    exeinto ${rcscripts_dir}/sh
+    doexe "${S}"/sbin/{rc-services.sh,rc-daemon.sh,rc-help.sh} || die "doexe failed"
+
+    insinto ${rcscripts_dir}/awk
+    doins "${S}"/src/awk/*.awk || die "doins *.awk failed"
+
+    insinto ${rcscripts_dir}/net
+    doins "${S}"/lib/rcscripts/net/* || die "doins net/* failed"
+    chown -R root:0 "${D}"${rcscripts_dir}
+
+    doman "${S}"/man/*.*
+    dodoc "${S}"/ChangeLog
+
+    # Compat symlinks between /etc/init.d and /sbin
+    # (some stuff have hardcoded paths)
+    dosym ../../sbin/depscan.sh /etc/init.d/depscan.sh
+    dosym ../../sbin/runscript.sh /etc/init.d/runscript.sh
+    dosym ../../sbin/functions.sh /etc/init.d/functions.sh
+
+    cd "${S}/src"
+    emake DESTDIR="${D}" LIBDIR="${libdir}" install
+
+    if ! [[ -f "${ROOT}"/sbin/update-modules ]]; then
+        dosbin "${FILESDIR}"/update-modules
+        doman "${FILESDIR}"/update-modules.8
+    fi
+
+    # If /dev/pts already exists in ${ROOT} it might not be writable for us.
+    [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${D}"/dev/pts
+}
+
+pkg_postinst() {
+    local x y
+    if [[ -z $(ls "${ROOT}"/etc/runlevels 2>/dev/null) ]]; then
+        for x in "${ROOT}"/usr/share/baselayout/*; do
+            mkdir -p "${ROOT}"/etc/runlevels/${x##*/} || die "mkdir ${x##*/} failed"
+            for y in $(<"${x}"); do
+                if [[ ! -e ${ROOT}/etc/init.d/${y} ]]; then
+                    die "/etc/init.d/${y} not found"
+                else
+                    ln -sfn ../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/} || \
+                        die "Linking ${y} into runlevel ${x##*/} failed"
+                fi
+            done
+        done
+    fi
+
+    if [[ ${ROOT} == / ]]; then
+        /sbin/depscan.sh --update &>/dev/null
+    else
+        rm -f "${ROOT}"/etc/modules.conf
+    fi
+}

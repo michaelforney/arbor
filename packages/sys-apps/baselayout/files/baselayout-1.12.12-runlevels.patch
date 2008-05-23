@@ -1,0 +1,24 @@
+Upstream: Fixes it in the ebuild.
+Source: philantrop@exherbo.org
+Summary: The domainname file has been removed but is still included in the boot
+runlevel from where it needs to be removed. The hdparm init script is installed
+by sys-apps/hdparm in Gentoo. 
+
+diff -Naur baselayout-1.12.12.orig/rc-lists/boot baselayout-1.12.12/rc-lists/boot
+--- baselayout-1.12.12.orig/rc-lists/boot	2007-10-24 00:59:25.000000000 +0200
++++ baselayout-1.12.12/rc-lists/boot	2008-05-12 17:54:44.000000000 +0200
+@@ -7,7 +7,6 @@
+ urandom
+ checkfs
+ clock
+-domainname
+ hostname
+ localmount
+ net.lo
+diff -Naur baselayout-1.12.12.orig/rc-lists/default baselayout-1.12.12/rc-lists/default
+--- baselayout-1.12.12.orig/rc-lists/default	2007-10-24 00:59:25.000000000 +0200
++++ baselayout-1.12.12/rc-lists/default	2008-05-12 16:58:23.000000000 +0200
+@@ -1,3 +1,2 @@
+-hdparm
+ local
+ netmount
