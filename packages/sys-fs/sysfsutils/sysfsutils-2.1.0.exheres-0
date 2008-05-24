@@ -1,0 +1,29 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sysfsutils-2.1.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require toolchain-funcs
+
+DESCRIPTION="System Utilities Based on Sysfs"
+HOMEPAGE="http://linux-diag.sourceforge.net/Sysfsutils.html"
+SRC_URI="mirror://sourceforge/linux-diag/${P}.tar.gz"
+
+# Util is GPL-2, lib is LPGL-2.1
+LICENSE="GPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="docs/libsysfs.txt"
+
+src_install() {
+    default
+
+    rm "${D}"/usr/bin/dlist_test || die "Removing dlist_test failed."
+
+    # Move shared libs to /
+    dodir /$(get_libdir)
+    mv "${D}"/usr/$(get_libdir)/lib*.so* "${D}"/$(get_libdir)/ || die
+    gen_usr_ldscript libsysfs.so
+}
