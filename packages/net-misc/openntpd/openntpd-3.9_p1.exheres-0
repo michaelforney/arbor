@@ -33,19 +33,14 @@ pkg_setup() {
     create-ntp-user
 }
 
-src_prepare() {
-    sed -i 's/_ntp/ntp/' ntpd.h || die "sed failed"
-}
-
 src_configure() {
-    econf $(option_with !ssl builtin-arc4random) || die "econf failed"
+    econf $(option_with !ssl builtin-arc4random) \
+        --with-privsep-user=ntp || die "econf failed"
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "emake install failed"
-
-    dodoc README ChangeLog CREDITS
-    rmdir "${D}"/var/empty
+    default
+    rmdir "${D}"/var{/empty,}
 }
 
 pkg_postinst() {
