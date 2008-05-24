@@ -1,0 +1,44 @@
+# Copyright 2008 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'wireless-tools-29.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require multilib toolchain-funcs
+
+MY_P="${PN}.${PV}"
+S="${WORKDIR}/${MY_P}"
+
+DESCRIPTION="Wireless Tools for Linux"
+HOMEPAGE="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html"
+SRC_URI="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/${MY_P}.tar.gz"
+
+
+LICENSE="GPL-2.new(repo_dir)"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        >=sys-fs/udev-120
+"
+
+DEFAULT_SRC_INSTALL_EMAKE_EXTRA_PARAMS="
+    PREFIX=\"${D}\"
+    INSTALL_INC=\"${D}/usr/include\"
+    INSTALL_MAN=\"${D}/usr/share/man\"
+"
+
+
+src_prepare() {
+    sed -i \
+        -e "s:^\(CC\) = gcc:\1 = $(tc-getCC):" \
+        -e "s:^\(AR\) = ar:\1 = $(tc-getAR):" \
+        -e "s:^\(RANLIB\) = ranlib:\1 = $(tc-getRANLIB):" \
+        -e "s:^\(CFLAGS=-0s\):#\1:" \
+        -e "s:^\(@\$(LDCONFIG).*\):#\1:" \
+        -e "s:^\(INSTALL_MAN= \$(PREFIX)\)/man/:\1/share/man:" \
+        -e "s:^\(INSTALL_LIB= \$(PREFIX)\)/lib/:\1/$(get_libdir)/:" \
+        -e "s:^\(CC\) = gcc:\1 = $(tc-getCC):" \
+        Makefile || die "sed failed"
+}
