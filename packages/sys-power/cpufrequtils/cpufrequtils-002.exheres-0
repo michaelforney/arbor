@@ -1,0 +1,35 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'cpufrequtils-002-r3.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require toolchain-funcs
+
+DESCRIPTION="Userspace utilities for the Linux kernel cpufreq subsystem"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufrequtils.html"
+SRC_URI="mirror://kernel/linux/utils/kernel/cpufreq/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="debug nls"
+
+DEPENDENCIES="
+    build+run:
+        sys-fs/sysfsutils"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}"/${P}-parallel-make.patch
+)
+
+src_compile() {
+    emake V=true CC=$(tc-getCC) LD=$(tc-getCC) AR=$(tc-getAR) \
+        DEBUG=$(option debug && echo true || echo false) \
+        NLS=$(option nls && echo true || echo false) \
+        STRIP=echo RANLIB=$(tc-getRANLIB)
+}
+
+src_install() {
+    emake DESTDIR="${D}" mandir=/usr/share/man libdir=/usr/$(get_libdir) \
+        NLS=$(option nls && echo true || echo false) install
+}
