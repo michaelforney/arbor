@@ -1,0 +1,25 @@
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Library and utilities for handling TIFF-files"
+HOMEPAGE="http://remotesensing.org/libtiff/"
+SRC_URI="ftp://ftp.remotesensing.org/pub/libtiff/${P}.tar.gz"
+
+LICENSE="as-is"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="jpeg zlib X"
+
+#DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "zlib" "jpeg" )
+
+DEPENDENCIES="
+    X? ( x11-libs/libICE
+          x11-libs/libX11 )
+    zlib? ( sys-libs/zlib )
+    jpeg? ( media-libs/jpeg )"
+
+src_configure() {
+    econf $(option_with zlib) \
+    $(option_with jpeg) \
+    $(option_with X x)
+}
