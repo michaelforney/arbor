@@ -17,12 +17,12 @@ ACTION="$2"
 # similar. Addresses can be removed, changed and daemons can be stopped, but
 # the interface must remain up for wpa_supplicant to work.
 
-if [ -f /etc/gentoo-release ]; then
+#if [ -f /etc/gentoo-release ]; then
 	EXEC="/etc/init.d/net.${INTERFACE} --quiet"
-else
-	logger -t wpa_cli "I don't know what to do with this distro!"
-	exit 1
-fi
+#else
+#	logger -t wpa_cli "I don't know what to do with this distro!"
+#	exit 1
+#fi
 
 case ${ACTION} in
 	CONNECTED)
