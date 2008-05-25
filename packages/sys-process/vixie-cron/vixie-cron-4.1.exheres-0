@@ -1,0 +1,77 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require toolchain-funcs pam
+
+PATCH_VER="1.0"
+
+HOMEPAGE="ftp://ftp.isc.org/isc/cron/"
+DESCRIPTION="Paul Vixie's cron daemon, a fully featured crond implementation"
+SRC_URI="mirror://gentoo/${P}.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${P}-exherbo-${PATCH_VER}.tar.bz2"
+
+LICENSE="as-is"
+PLATFORMS="~amd64"
+MYOPTIONS="pam"
+
+DEPENDENCIES="
+    build+run:
+       pam? ( sys-libs/pam )
+"
+
+pkg_setup() {
+    enewgroup cron 16
+    enewuser cron 16 -1 /var/spool/cron cron
+}
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${WORKDIR}/${P}-gentoo-r4.patch"
+    -p0 "${WORKDIR}/${P}-crontab.5.patch"
+    -p0 "${WORKDIR}/${P}-commandline.patch"
+    -p1 "${WORKDIR}/${P}-basename.patch"
+    -p1 "${WORKDIR}/${P}-setuid_check.patch"
+    -p0 "${WORKDIR}/${P}-hardlink.patch"
+)
+
+src_prepare() {
+    option pam && DEFAULT_SRC_PREPARE_PATCHES+=( -p1 "${WORKDIR}/${P}-pam.patch" )
+    
+    default
+
+    sed -i -e "s:gcc \(-Wall.*\):$(tc-getCC) \1 ${CFLAGS}:" \
+        -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile \
+        || die "sed Makefile failed"
+}
+
+src_install() {
+    newsbin "${WORKDIR}"/vixie-cron-4.1-run-crons run-crons
+
+    diropts -m0750; keepdir /etc/cron.{hourly,daily,weekly,monthly}
+    diropts -m0750 -o root -g cron; keepdir /var/spool/cron
+    diropts -m0750; keepdir /var/spool/cron/lastrun
+    diropts -m 1730 -o root -g crontab; keepdir /var/spool/cron/crontabs
+
+    exeopts -m 0750 -o root -g wheel
+    exeinto /usr/sbin
+    doexe cron
+
+    exeopts -m 2755 -o root -g crontab
+    exeinto /usr/bin
+    doexe crontab
+
+    # /etc stuff
+    insinto /etc
+    newins "${FILESDIR}"/crontab-${PV} crontab
+    newins "${WORKDIR}"/${P}-cron.deny cron.deny
+
+    keepdir /etc/cron.d
+    newinitd "${FILESDIR}"/vixie-cron.rc6 vixie-cron
+
+    option pam && newpamd "${FILESDIR}"/pamd.compatible cron
+
+    # doc stuff
+    doman crontab.1 crontab.5 cron.8
+    dodoc CHANGES CONVERSION FEATURES MAIL README THANKS
+}
