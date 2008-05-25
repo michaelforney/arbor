@@ -13,22 +13,18 @@ MYOPTIONS="socks5 ipv6"
 DEPENDENCIES="build+run:
                     sys-libs/ncurses"
 
-src_prepare() {
-    sed -i 's/"$DESTDIR"/"$(DESTDIR)"/p' "${S}"/Makefile.in || \
-        die "Sed failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( "--with-ncurses" )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "socks5" "ipv6" )
 
-src_configure() { 
-    econf \
-        --with-ncurses \
-        $(option_enable socks5 ) \
-        $(option_enable ipv6 ) \
-        || die "econf failed"
+src_prepare() {
+    sed -i -e 's/"$DESTDIR"/"$(DESTDIR)"/p' \
+        -e 's:"$(DESTDIR)$(SYSCONFDIR)"::' \
+        "${S}"/Makefile.in || die "Sed failed."
 }
 
 src_install() {
     dodir /usr/share/man/man1
-    emake DESTDIR="${D}" install || die "install failed"
+    default
     dodoc doc/FIREWALLS_AND_PROXIES.txt doc/CHANGELOG.txt DONATE.txt
     insinto /usr/share/doc/${P}/html
     doins doc/html/*
