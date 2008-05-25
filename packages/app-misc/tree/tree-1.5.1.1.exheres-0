@@ -1,0 +1,29 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
+
+DESCRIPTION="Lists directories recursively"
+HOMEPAGE="http://mama.indstate.edu/users/ice/tree/"
+SRC_URI="ftp://mama.indstate.edu/linux/${PN}/${P}.tgz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_compile() {
+    emake \
+        CC="$(tc-getCC)" \
+        CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64" \
+        LDFLAGS="${LDFLAGS}"
+}
+
+src_install() {
+    dobin tree
+    doman man/tree.1
+    default
+}
+
