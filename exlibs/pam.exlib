@@ -14,10 +14,6 @@ require multilib
 dopamd() {
     [[ -z $1 ]] && die "dopamd requires at least one argument"
 
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0;
-    fi
-
     ( # dont want to pollute calling env
         insinto /etc/pam.d
         insopts -m 0644
@@ -31,10 +27,6 @@ dopamd() {
 # Install pam file <old name> as <new name> in /etc/pam.d
 newpamd() {
     [[ $# -ne 2 ]] && die "newpamd requires two arguments"
-
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0;
-    fi
 
     ( # dont want to pollute calling env
         insinto /etc/pam.d
@@ -50,10 +42,6 @@ newpamd() {
 dopamsecurity() {
     [[ $# -lt 2 ]] && die "dopamsecurity requires at least two arguments"
 
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0
-    fi
-
     ( # dont want to pollute calling env
         insinto /etc/security/$1
         insopts -m 0644
@@ -66,10 +54,6 @@ dopamsecurity() {
 # Installs the config file <old name> as <new name> in /etc/security/<section>/
 newpamsecurity() {
     [[ $# -ne 3 ]] && die "newpamsecurity requires three arguments"
-
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0;
-    fi
 
     ( # dont want to pollute calling env
         insinto /etc/security/$1
@@ -101,10 +85,6 @@ getpam_mod_dir() {
 dopammod() {
     [[ -z $1 ]] && die "dopammod requires at least one argument"
 
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0;
-    fi
-
     exeinto $(getpam_mod_dir)
     doexe "$@" || die "failed to install $@"
 }
@@ -116,10 +96,6 @@ dopammod() {
 newpammod() {
     [[ $# -ne 2 ]] && die "newpammod requires two arguements"
 
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0;
-    fi
-
     exeinto $(getpam_mod_dir)
     newexe "$1" "$2" || die "failed to install $1 as $2"
 }
@@ -130,10 +106,6 @@ newpammod() {
 # for the given levels in the /etc/pam.d directory.
 pamd_mimic_system() {
     [[ $# -lt 2 ]] && die "pamd_mimic_system requires at least two argments"
-
-    if hasq pam ${IUSE} && ! use pam; then
-        return 0;
-    fi
 
     dodir /etc/pam.d
     pamdfile=${D}/etc/pam.d/$1

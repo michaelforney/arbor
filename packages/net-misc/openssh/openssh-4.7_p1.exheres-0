@@ -14,13 +14,13 @@ SRC_URI="ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${MY_P}.tar.gz"
 LICENSE="BSD"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="skey tcp-wrappers ssl-engine pam"
+MYOPTIONS="skey tcp-wrappers ssl-engine"
 
 DEPENDENCIES="build:
                 >=dev-libs/openssl-0.9.6
-                pam? ( sys-libs/pam )
+                sys-libs/pam
               run:
-                pam? ( sys-libs/pam )
+                sys-libs/pam
                 tcp-wrappers? ( sys-apps/tcp-wrappers )"
 
 src_configure() {
@@ -28,7 +28,7 @@ src_configure() {
         $(option_enable skey) \
         $(option_enable tcp-wrappers) \
         $(option_enable ssl-engine) \
-        $(option_enable pam) \
+        --enable-pam \
         --with-md5-passwords \
         --sysconfdir=/etc/ssh \
         --disable-strip

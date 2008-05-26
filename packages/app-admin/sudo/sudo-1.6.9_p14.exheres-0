@@ -15,20 +15,19 @@ SRC_URI="ftp://ftp.sudo.ws/pub/${PN}/${MY_P}.tar.gz"
 LICENSE="ISC BSD"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="offensive pam"
+MYOPTIONS="offensive"
 
 DEPENDENCIES="
     build+run:
-        pam? ( sys-libs/pam )"
+        sys-libs/pam"
 
 S="${WORKDIR}/${MY_P}"
 
 src_configure() {
     econf \
-        --with-env-editor \
+        --with-env-editor --with-pam \
         $(option_with offensive insults) \
         $(option_with offensive all-insults) \
-        $(option_with pam) \
         || die "econf failed"
 }
 
@@ -36,9 +35,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS="TROUBLESHOOTING UPGRADE"
 
 src_install() {
     default
-
-    if option pam; then
-        pamd_mimic_system sudo auth account password session
-    fi
+    pamd_mimic_system sudo auth account password session
 }
 

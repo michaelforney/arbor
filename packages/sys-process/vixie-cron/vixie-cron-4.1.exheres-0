@@ -14,11 +14,11 @@ SRC_URI="mirror://gentoo/${P}.tar.bz2
 
 LICENSE="as-is"
 PLATFORMS="~amd64"
-MYOPTIONS="pam"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-       pam? ( sys-libs/pam )
+       sys-libs/pam
 "
 
 pkg_setup() {
@@ -33,13 +33,11 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${WORKDIR}/${P}-basename.patch"
     -p1 "${WORKDIR}/${P}-setuid_check.patch"
     -p0 "${WORKDIR}/${P}-hardlink.patch"
+    -p1 "${WORKDIR}/${P}-pam.patch"
 )
 
 src_prepare() {
-    option pam && DEFAULT_SRC_PREPARE_PATCHES+=( -p1 "${WORKDIR}/${P}-pam.patch" )
-    
     default
-
     sed -i -e "s:gcc \(-Wall.*\):$(tc-getCC) \1 ${CFLAGS}:" \
         -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile \
         || die "sed Makefile failed"
@@ -69,7 +67,7 @@ src_install() {
     keepdir /etc/cron.d
     newinitd "${FILESDIR}"/vixie-cron.rc6 vixie-cron
 
-    option pam && newpamd "${FILESDIR}"/pamd.compatible cron
+    newpamd "${FILESDIR}"/pamd.compatible cron
 
     # doc stuff
     doman crontab.1 crontab.5 cron.8

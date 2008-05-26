@@ -21,7 +21,7 @@ SRC_URI="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
 LICENSE="BSD"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="hpn pam tcpd X X509"
+MYOPTIONS="hpn tcpd X X509"
 
 # Unfortunately, the tests need to be run as root.
 RESTRICT="userpriv"
@@ -31,14 +31,14 @@ DEPENDENCIES="
         sys-apps/shadow
         >=dev-libs/openssl-0.9.8f
         >=sys-libs/zlib-1.2.3
-        pam? ( >=sys-libs/pam-0.78 )
-        tcpd? ( >=sys-apps/tcp-wrappers-7.6 )        
+        >=sys-libs/pam-0.78
+        tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
         X? ( x11-apps/xauth )
     build:
         dev-util/pkg-config
         sys-kernel/linux-headers
 "
-    
+
 S="${WORKDIR}/${PARCH}"
 
 src_prepare() {
@@ -86,8 +86,8 @@ src_configure() {
         --without-ldap \
         --without-libedit \
         --without-kerberos5 \
-        $(option_with tcpd tcp-wrappers) \
-        $(option_with pam)
+        --with-pam \
+        $(option_with tcpd tcp-wrappers)
 }
 
 src_test() {
@@ -106,13 +106,11 @@ src_install() {
     keepdir /etc/skel/.ssh
     keepdir /var/run
 
-    if option pam ; then 
-        sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${D}"/etc/ssh/sshd_config \
-            || die "sed for UsePAM failed."
-        sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
-            "${D}"/etc/ssh/sshd_config || die "sed for passwd auth failed."
-        newpamd "${FILESDIR}"/sshd.pam_include.1 sshd
-    fi
+    sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${D}"/etc/ssh/sshd_config \
+        || die "sed for UsePAM failed."
+    sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
+        "${D}"/etc/ssh/sshd_config || die "sed for passwd auth failed."
+    newpamd "${FILESDIR}"/sshd.pam_include.1 sshd
 
     doman contrib/ssh-copy-id.1
     dodoc ChangeLog CREDITS OVERVIEW README* TODO sshd_config
@@ -130,9 +128,7 @@ pkg_postinst() {
 
     ewarn "Remember to merge your config files in /etc/ssh/ and then"
     ewarn "restart sshd: '/etc/init.d/sshd restart'."
-    if option pam ; then
-        echo
-        ewarn "Please be aware users need a valid shell in /etc/passwd"
-        ewarn "in order to be allowed to login."
-    fi
+    echo
+    ewarn "Please be aware users need a valid shell in /etc/passwd"
+    ewarn "in order to be allowed to login."
 }

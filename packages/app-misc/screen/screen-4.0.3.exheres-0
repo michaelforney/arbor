@@ -10,11 +10,10 @@ SRC_URI="ftp://ftp.uni-erlangen.de/pub/utilities/${PN}/${P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="pam"
+MYOPTIONS=""
 
 DEPENDENCIES="sys-libs/ncurses
-              pam? ( sys-libs/pam )"
+              sys-libs/pam"
 
 DEFAULT_SRC_CONFIGURE_PARAMS="--enable-colors256
-    --with-sys-screenrc=/etc/screenrc"
-DEFAULT_SRC_CONFIGURE_OPTION_EANBLES="pam"
+    --with-sys-screenrc=/etc/screenrc --enable-pam"
