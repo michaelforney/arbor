@@ -15,7 +15,7 @@ SRC_URI="ftp://ftp.sudo.ws/pub/${PN}/${MY_P}.tar.gz"
 LICENSE="ISC BSD"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="offensive"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
@@ -23,13 +23,12 @@ DEPENDENCIES="
 
 S="${WORKDIR}/${MY_P}"
 
-src_configure() {
-    econf \
-        --with-env-editor --with-pam \
-        $(option_with offensive insults) \
-        $(option_with offensive all-insults) \
-        || die "econf failed"
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--with-env-editor"
+    "--with-pam"
+    "--with-insults"
+    "--with-all-insults"
+)
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="TROUBLESHOOTING UPGRADE"
 
