@@ -14,8 +14,11 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 # Gentoo bugs 135745, 196720 respectively.
-DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/${P}-open-normal-fail.patch"
-    -p1 "${FILESDIR}"/${P}-open-cloexec.patch)
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILESDIR}/${P}-open-normal-fail.patch"
+    -p1 "${FILESDIR}"/${P}-open-cloexec.patch
+        "${FILESDIR}"/${P}-remove-work_dir.patch
+)
 
 src_install() {
     emake DESTDIR="${D}" install || die "install failed"
