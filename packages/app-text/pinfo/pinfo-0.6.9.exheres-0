@@ -1,0 +1,33 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'pinfo-0.6.9.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools
+
+DESCRIPTION="Hypertext info and man viewer based on (n)curses"
+HOMEPAGE="http://pinfo.alioth.debian.org/"
+SRC_URI="http://alioth.debian.org/download.php/1498/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="nls readline"
+
+DEPENDENCIES="
+    build:
+        sys-devel/bison
+        nls? ( sys-devel/gettext )
+    build+run:
+        sys-libs/ncurses"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}"/${P}-FTPVIEWER.patch
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITH=( readline )
+
+src_prepare() {
+    AT_M4DIR="${S}/macros" eautoreconf
+}
+
