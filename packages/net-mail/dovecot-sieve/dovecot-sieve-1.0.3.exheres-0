@@ -1,0 +1,27 @@
+# Copyright 2008 Fernando J. Pereda
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+DESCRIPTION="sieve plugin for dovecot"
+HOMEPAGE="http://www.dovecot.org"
+SRC_URI="http://www.dovecot.org/releases/sieve/${P}.tar.gz"
+
+LICENSE="GPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    net-mail/dovecot
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--with-dovecot=/usr/$(get_libdir)/dovecot"
+)
+
+src_install()
+{
+    default
+    rmdir "${D}"/usr/libexec{/dovecot,}
+}
