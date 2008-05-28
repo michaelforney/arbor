@@ -18,10 +18,7 @@ DEPENDENCIES="build:
 
 OBJDIR="${T}/${CHOST}"
 
-src_prepare() {
-    # fix for gcc bug #31899. this will be fixed upstream in gcc 4.2.3
-    patch -p1 < "${FILESDIR}/${P}-ICE-fix.patch" || die "patch failed."
-}
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-ICE-fix.patch" )
 
 src_configure() {
     mkdir "${OBJDIR}"
