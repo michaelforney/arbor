@@ -27,9 +27,9 @@ build+run:
 run:
     dev-perl/Error
 post,suggested:
-    dev-scm/subversion[perl]
-    dev-perl/libwww-perl
-    dev-perl/TermReadKey" ##        [[ description = [ Dependencies for git-svn. ] ]]
+    dev-scm/subversion[perl]    [[ description = [ Dependency for git-svn. ] ]]
+    dev-perl/libwww-perl        [[ description = [ Dependency for git-svn. ] ]]
+    dev-perl/TermReadKey        [[ description = [ Dependency for git-svn. ] ]]"
 
 #   tk? ( dev-lang/tk )
 #   git-send-email: dev-perl/Authen-SASL, dev-perl/Net-SMTP-SSL
@@ -51,10 +51,8 @@ src_unpack() {
 }
 
 src_prepare() {
-    # Make sure symlinks point to ROOT instead of D
-    # Use symlinks instead of hardlinks
+    # Make sure links point to ROOT instead of D
     sed -e "s:ln '\$(DESTDIR_SQ)\$(gitexecdir_SQ)/git\$X':ln '\$(gitexecdir_SQ)/git\$X':" \
-        -e 's:ln :ln -s :g' \
         -i Makefile || die "sed failed"
 }
 
@@ -107,6 +105,7 @@ src_install() {
     dobashcompletion contrib/completion/git-completion.bash ${PN}
 
     fixlocalpod
-    rmdir "${D}"/usr/share/git-core/templates/branches
+
+    keepdir "${D}"/usr/share/git-core/templates/branches
 }
 
