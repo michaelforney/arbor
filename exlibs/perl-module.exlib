@@ -25,12 +25,6 @@ build+run:
     dev-lang/perl"
 
 
-PREFER_BUILDPL="yes"
-case ${CATEGORY} in
-    dev-perl|perl-core) SRC_TEST="do" ;;
-    *) : ;;
-esac
-
 PERL_VERSION=""
 SITE_ARCH=""
 SITE_LIB=""
@@ -39,6 +33,7 @@ VENDOR_ARCH=""
 ARCH_LIB=""
 POD_DIR=""
 BUILDER_VER=""
+PREFER_BUILDPL="yes"
 pm_echovar=""
 
 perl-module_src_configure() {
@@ -73,13 +68,11 @@ perl-module_src_compile() {
 }
 
 perl-module_src_test() {
-    if [[ "${SRC_TEST}" == "do" ]]; then
-        perlinfo
-        if [[ -f Makefile ]]; then
-            default_src_test
-        elif [[ -f Build ]]; then
-            perl Build test || die "Test failed"
-        fi
+    perlinfo
+    if [[ -f Makefile ]]; then
+        emake -j1 test
+    elif [[ -f Build ]]; then
+        perl Build test || die "Test failed"
     fi
 }
 
