@@ -44,6 +44,7 @@ src_compile()
         auxlibs+=" -lssl -lcrypto"
     fi
 
+    ccargs+=' -DUSE_SASL_AUTH'
     ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'$(get_libdir)'/postfix\"'
     ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'
     ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PF}'/readme\"'
