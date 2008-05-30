@@ -3,7 +3,7 @@
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require autotools multilib flag-o-matic
+require autotools multilib flag-o-matic pam
 
 MY_PN="Linux-PAM"
 MY_P="${MY_PN}-${PV}"
@@ -15,7 +15,7 @@ SRC_URI="mirror://kernel/linux/libs/pam/library/${MY_P}.tar.bz2"
 LICENSE="|| ( GPL-2 BSD )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="cracklib nls"
+MYOPTIONS="nls"
 
 # Tests requires /etc/pam.d/other to be installed and some are simply broken.
 RESTRICT="test"
@@ -23,7 +23,7 @@ RESTRICT="test"
 DEPENDENCIES="
     build+run:
         nls? ( sys-devel/gettext )
-        cracklib? ( >=sys-libs/cracklib-2.8.3 )
+        >=sys-libs/cracklib-2.8.3
 "
 
 S="${WORKDIR}/${MY_P}"
@@ -49,7 +49,6 @@ src_configure() {
 
     econf \
         $(option_enable nls) \
-        $(option_enable cracklib) \
         --libdir=/usr/$(get_libdir) \
         --disable-audit \
         --enable-db=no \
@@ -59,11 +58,15 @@ src_configure() {
         --disable-dependency-tracking \
         --disable-prelude \
         --enable-docdir=/usr/share/doc/${PF} \
-        --disable-regenerate-man
+        --disable-regenerate-man \
+        --enable-cracklib
 }
 
 src_install() {
     default
+
+    # install the base pam configuration
+    dopamd "${FILESDIR}"/pam.d/*
 
     keepdir /etc/security/limits.d
     keepdir /etc/security/namespace.d
@@ -79,5 +82,4 @@ src_install() {
 
     rm "${D}"/usr/share/man/man8/pam_userdb.8*
     rm -rf "${D}"/var
-    option cracklib || rm "${D}"/usr/share/man/man8/pam_cracklib.8*
 }
