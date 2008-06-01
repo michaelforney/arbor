@@ -50,12 +50,6 @@ src_unpack() {
     fi
 }
 
-src_prepare() {
-    # Make sure links point to ROOT instead of D
-    sed -e "s:ln '\$(DESTDIR_SQ)\$(gitexecdir_SQ)/git\$X':ln '\$(gitexecdir_SQ)/git\$X':" \
-        -i Makefile || die "sed failed"
-}
-
 # No option: mozsha1/ppcsha1
 src_configure() {
     myoptions+=" NO_TCLTK=YesPlease"
