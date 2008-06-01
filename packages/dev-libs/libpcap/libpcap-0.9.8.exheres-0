@@ -18,33 +18,20 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-#
-# We have to do this because libpcap is retarded.
-#
-make_shared_object() {
-    $(tc-getCC) ${LDFLAGS} ${LDFLAGS} -Wl,-soname,libpcap.so.0 -shared -fPIC -o libpcap.so.${PV:0:3} *.o \
-        || die "Unable to generate shared object file"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="ipv6"
+
+src_compile() {
+    default
+
+    $(tc-getCC) ${LDFLAGS} -Wl,-soname,libpcap.so.0 -shared -fPIC -o libpcap.so.${PV:0:3} *.o || die "Unable to generate shared object file"
 }
 
-install_shared_object() {
+src_install() {
+    default
+
     insopts -m 755
     insinto /usr/$(get_libdir)/
     doins libpcap.so.${PV:0:3}
     dosym libpcap.so.${PV:0:3} /usr/$(get_libdir)/libpcap.so.0
     dosym libpcap.so.${PV:0:3} /usr/$(get_libdir)/libpcap.so
-}
-
-src_compile() {
-    econf $(option_enable ipv6) || die "econf failed"
-    emake || die "emake failed"
-
-    make_shared_object
-}
-
-src_install() {
-    emake DESTDIR="${D}" install || die "emake install failed"
-
-    install_shared_object
-
-    dodoc README.linux CREDITS VERSION TODO FILES CHANGES
 }
