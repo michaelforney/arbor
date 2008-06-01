@@ -18,18 +18,8 @@ DEPENDENCIES="
     build+run:
         ssl? ( dev-libs/openssl )
         dev-libs/libpcap
-        dev-libs/libpcre
-"
+        dev-libs/libpcre"
 
-src_compile() {
-    econf \
-        $(option_with ssl openssl) \
-        --without-zenmap \
-        || die "econf failed"
-
-    emake || die "emake failed"
-}
-
-src_install() {
-    emake DESTDIR="${D}" install || die "emake install failed"
+src_configure() {
+    econf $(option_with ssl openssl) --without-zenmap || die "econf failed"
 }
