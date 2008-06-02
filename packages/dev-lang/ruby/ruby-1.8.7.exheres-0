@@ -1,0 +1,91 @@
+# Copyright 2007 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require autotools flag-o-matic multilib versionator
+
+DESCRIPTION="An object-oriented scripting language"
+HOMEPAGE="http://www.ruby-lang.org/"
+
+MY_P="${PN}-$(replace_version_separator 3 '-')"
+S=${WORKDIR}/${MY_P}
+
+SLOT=$(get_version_component_range 1-2)
+MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
+
+SRC_URI="mirror://ruby/${SLOT}/${MY_P}.tar.bz2"
+
+LICENSE="|| ( Ruby GPL-2 )"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
+
+DEPENDENCIES="
+    build+run:
+        berkdb? ( sys-libs/db )
+        gdbm? ( sys-libs/gdbm )
+        ssl? ( dev-libs/openssl )
+"
+
+src_configure() {
+    filter-flags -fomit-frame-pointer
+
+    unset SOCKS_SERVER
+
+    #Yes, this does always --enable-ipv6
+    myconf="--enable-ipv6"
+    if ! option ipv6; then
+        myconf+=" --with-lookup-order-hack=INET"
+    fi
+
+    econf --program-suffix=$MY_SUFFIX --enable-shared \
+        $(option_enable doc install-doc) \
+        $(option_enable debug) \
+        $(option_with berkdb dbm) \
+        $(option_with gdbm) \
+        $(option_with ssl openssl) \
+        --disable-socks \
+        --disable-threads \
+        --without-tk \
+        --with-vendordir=/usr/$(get_libdir)/ruby/vendor_ruby \
+        $myconf \
+        || die "econf failed"
+}
+
+src_compile() {
+    emake EXTLDFLAGS="${LDFLAGS}" || die "emake failed"
+}
+
+src_test() {
+    emake -j1 test || die "make test failed"
+}
+
+src_install() {
+    D_LIBDIR="${D}/usr/$(get_libdir)"
+    LD_LIBRARY_PATH="${D_LIBDIR}"
+    RUBYLIB="${S}:${D_LIBDIR}/ruby/${SLOT}"
+
+    for dir in $(find "${S}/ext" -type d) ; do
+        RUBYLIB="${RUBYLIB}:${dir}"
+    done
+
+    export LD_LIBRARY_PATH RUBYLIB
+
+    default
+
+    MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
+    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']") || die "vendor keepdir failed"
+    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']") || die "site keepdir failed"
+
+    for i in ruby irb erb testrb rdoc ri; do
+        dosym /usr/bin/$i$MY_SUFFIX /usr/bin/$i
+    done
+
+    dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1
+
+    if option examples; then
+        dodir /usr/share/doc/${PF}
+        cp -dpPR sample "${D}/usr/share/doc/${PF}"
+    fi
+}
+
