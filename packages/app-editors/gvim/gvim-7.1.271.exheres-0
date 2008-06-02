@@ -26,13 +26,15 @@ SRC_URI="ftp://ftp.vim.org/pub/vim/unix/vim-${VIM_VERSION}.tar.bz2
 LICENSE="vim"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="minimal"
 
 S="${WORKDIR}/vim${VIM_VERSION/.}"
 
 DEPENDENCIES="
     build+run:
         !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
-        >=x11-libs/gtk+-2.6.0
-        x11-libs/libXft"
+        >=x11-libs/gtk+-2.6.0:2
+        x11-libs/libXext
+        x11-libs/libXft
+        x11-libs/libXt"
 
