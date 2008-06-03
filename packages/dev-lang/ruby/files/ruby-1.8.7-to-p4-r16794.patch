@@ -1,0 +1,497 @@
+Source; upstream svn
+Upstream: duh
+Reason: to fix bugs
+Index: ChangeLog
+===================================================================
+--- ChangeLog	(.../tags/v1_8_7)	(revision 16794)
++++ ChangeLog	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -1,3 +1,38 @@
++Tue Jun  3 19:33:22 2008  Akinori MUSHA  <knu@iDaemons.org>
++
++	* enumerator.c (enumerator_init_copy): Take care of
++	  initialize_copy as well as initialize.
++
++	* test/ruby/test_enumerator.rb: Pull in the test suite for
++	  enumerator from trunk.
++
++Tue Jun  3 12:51:57 2008  Akinori MUSHA  <knu@iDaemons.org>
++
++	* enumerator.c (enumerator_allocate, enumerator_ptr): Properly
++	  detect if the object is initialized and raise error when
++	  appropriate.
++	  (enumerator_initialize): Fix a typo in rdoc. [ruby-core:17052]
++
++Tue Jun  3 10:16:40 2008  Akinori MUSHA  <knu@iDaemons.org>
++
++	* lib/erb.rb (ERB::Compiler::TrimScanner#scan_line): Fix a bug
++	  where tokens are not yilelded one by one.
++	  (ERB::Compiler::TrimScanner#explicit_trim_line): Fix without-
++	  strscan problems. [ruby_core:17028].
++
++	* test/erb/test_erb.rb (TestERBCore#_test_01)
++	  (TestERBCore#test_02_safe_04): The expected value should come
++	  first for assert_equal().
++	  (TestERBCoreWOStrScan): Add test class for without-strscan.
++
++Mon Jun  2 19:47:16 2008  Akinori MUSHA  <knu@iDaemons.org>
++
++	* lib/delegate.rb (DelegateClass, Delegator#respond_to?):
++	  respond_to? must take optional second argument.  This was a
++	  latent bug exposed by a recent internal change of marshal.c to
++	  call respond_to? with a second argument; submitted by Jeremy
++	  Kemper <jeremy at bitsweat.net> in [ruby-core:17045].
++
+ Sat May 31 23:53:35 2008  Akinori MUSHA  <knu@iDaemons.org>
+ 
+ 	* .: Release as Ruby 1.8.7.
+Index: enumerator.c
+===================================================================
+--- enumerator.c	(.../tags/v1_8_7)	(revision 16794)
++++ enumerator.c	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -55,7 +55,7 @@
+ 		 "wrong argument type %s (expected Enumerable::Enumerator)",
+ 		 rb_obj_classname(obj));
+     }
+-    if (!ptr) {
++    if (!ptr || ptr->obj == Qundef) {
+ 	rb_raise(rb_eArgError, "uninitialized enumerator");
+     }
+     return ptr;
+@@ -214,8 +214,13 @@
+     VALUE klass;
+ {
+     struct enumerator *ptr;
+-    return Data_Make_Struct(klass, struct enumerator,
+-			    enumerator_mark, -1, ptr);
++    VALUE enum_obj;
++
++    enum_obj = Data_Make_Struct(klass, struct enumerator,
++				enumerator_mark, -1, ptr);
++    ptr->obj = Qundef;
++
++    return enum_obj;
+ }
+ 
+ static VALUE enumerator_each_i _((VALUE, VALUE));
+@@ -235,8 +240,14 @@
+     int argc;
+     VALUE *argv;
+ {
+-    struct enumerator *ptr = enumerator_ptr(enum_obj);
++    struct enumerator *ptr;
+ 
++    Data_Get_Struct(enum_obj, struct enumerator, ptr);
++
++    if (!ptr) {
++	rb_raise(rb_eArgError, "unallocated enumerator");
++    }
++
+     ptr->obj  = obj;
+     ptr->meth = rb_to_id(meth);
+     ptr->iter = enumerator_each_i;
+@@ -253,8 +264,7 @@
+  *  used as an Enumerable object using the given object's given
+  *  method with the given arguments.
+  *
+- *  Use of this method is not discouraged.  Use Kernel#enum_for()
+- *  instead.
++ *  Use of this method is discouraged.  Use Kernel#enum_for() instead.
+  */
+ static VALUE
+ enumerator_initialize(argc, argv, obj)
+@@ -283,8 +293,13 @@
+     struct enumerator *ptr0, *ptr1;
+ 
+     ptr0 = enumerator_ptr(orig);
+-    ptr1 = enumerator_ptr(obj);
+ 
++    Data_Get_Struct(obj, struct enumerator, ptr1);
++
++    if (!ptr1) {
++	rb_raise(rb_eArgError, "unallocated enumerator");
++    }
++
+     ptr1->obj  = ptr0->obj;
+     ptr1->meth = ptr0->meth;
+     ptr1->iter = ptr0->iter;
+Index: version.h
+===================================================================
+--- version.h	(.../tags/v1_8_7)	(revision 16794)
++++ version.h	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -1,15 +1,15 @@
+ #define RUBY_VERSION "1.8.7"
+-#define RUBY_RELEASE_DATE "2008-05-31"
++#define RUBY_RELEASE_DATE "2008-06-03"
+ #define RUBY_VERSION_CODE 187
+-#define RUBY_RELEASE_CODE 20080531
+-#define RUBY_PATCHLEVEL 0
++#define RUBY_RELEASE_CODE 20080603
++#define RUBY_PATCHLEVEL 4
+ 
+ #define RUBY_VERSION_MAJOR 1
+ #define RUBY_VERSION_MINOR 8
+ #define RUBY_VERSION_TEENY 7
+ #define RUBY_RELEASE_YEAR 2008
+-#define RUBY_RELEASE_MONTH 5
+-#define RUBY_RELEASE_DAY 31
++#define RUBY_RELEASE_MONTH 6
++#define RUBY_RELEASE_DAY 3
+ 
+ #ifdef RUBY_EXTERN
+ RUBY_EXTERN const char ruby_version[];
+Index: lib/delegate.rb
+===================================================================
+--- lib/delegate.rb	(.../tags/v1_8_7)	(revision 16794)
++++ lib/delegate.rb	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -163,9 +163,9 @@
+   # Checks for a method provided by this the delegate object by fowarding the 
+   # call through \_\_getobj\_\_.
+   # 
+-  def respond_to?(m)
++  def respond_to?(m, include_private = false)
+     return true if super
+-    return self.__getobj__.respond_to?(m)
++    return self.__getobj__.respond_to?(m, include_private)
+   end
+ 
+   #
+@@ -270,9 +270,9 @@
+       end
+       @_dc_obj.__send__(m, *args)
+     end
+-    def respond_to?(m)  # :nodoc:
++    def respond_to?(m, include_private = false)  # :nodoc:
+       return true if super
+-      return @_dc_obj.respond_to?(m)
++      return @_dc_obj.respond_to?(m, include_private)
+     end
+     def __getobj__  # :nodoc:
+       @_dc_obj
+Index: lib/erb.rb
+===================================================================
+--- lib/erb.rb	(.../tags/v1_8_7)	(revision 16794)
++++ lib/erb.rb	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -327,16 +327,18 @@
+       end
+ 
+       def scan_line(line)
+-        line.scan(/(.*?)(<%%|%%>|<%=|<%#|<%|%>|\n|\z)/m) do |token|
+-	  next if token.empty?
+-	  yield(token)
++        line.scan(/(.*?)(<%%|%%>|<%=|<%#|<%|%>|\n|\z)/m) do |tokens|
++          tokens.each do |token|
++            next if token.empty?
++            yield(token)
++          end
+ 	end
+       end
+ 
+       def trim_line1(line)
+         line.scan(/(.*?)(<%%|%%>|<%=|<%#|<%|%>\n|%>|\n|\z)/m) do |tokens|
+           tokens.each do |token|
+-	  next if token.empty?
++            next if token.empty?
+             if token == "%>\n"
+               yield('%>')
+               yield(:cr)
+@@ -355,7 +357,7 @@
+             head = token unless head
+             if token == "%>\n"
+               yield('%>')
+-              if  is_erb_stag?(head)
++              if is_erb_stag?(head)
+                 yield(:cr)
+               else
+                 yield("\n")
+@@ -369,21 +371,22 @@
+ 	end
+       end
+ 
+-      ExplicitTrimRegexp = /(^[ \t]*<%-)|(-%>\n?\z)|(<%-)|(-%>)|(<%%)|(%%>)|(<%=)|(<%#)|(<%)|(%>)|(\n)/
+       def explicit_trim_line(line)
+-	line.split(ExplicitTrimRegexp).each do |token|
+-	  next if token.empty?
+-	  if @stag.nil? && /[ \t]*<%-/ =~ token
+-	    yield('<%')
+-	  elsif @stag && /-%>\n/ =~ token
+-	    yield('%>')
+-	    yield(:cr)
+-	  elsif @stag && token == '-%>'
+-	    yield('%>')
+-	  else
+-	    yield(token)
+-	  end
+-	end
++        line.scan(/(.*?)(^[ \t]*<%\-|<%\-|<%%|%%>|<%=|<%#|<%|-%>\n|-%>|%>|\z)/m) do |tokens|
++          tokens.each do |token|
++            next if token.empty?
++            if @stag.nil? && /[ \t]*<%-/ =~ token
++              yield('<%')
++            elsif @stag && token == "-%>\n"
++              yield('%>')
++              yield(:cr)
++            elsif @stag && token == '-%>'
++              yield('%>')
++            else
++              yield(token)
++            end
++          end
++        end
+       end
+ 
+       ERB_STAG = %w(<%= <%# <%)
+Index: test/ruby/test_enumerator.rb
+===================================================================
+--- test/ruby/test_enumerator.rb	(.../tags/v1_8_7)	(revision 0)
++++ test/ruby/test_enumerator.rb	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -0,0 +1,105 @@
++require 'test/unit'
++
++class TestEnumerator < Test::Unit::TestCase
++  def setup
++    @obj = Object.new
++    class << @obj
++      include Enumerable
++      def foo(*a)
++        a.each {|x| yield x }
++      end
++    end
++  end
++
++  def enum_test obj
++    i = 0
++    obj.map{|e|
++      e
++    }.sort
++  end
++
++  def test_iterators
++    assert_equal [0, 1, 2], enum_test(3.times)
++    assert_equal ["x", "y", "z"], enum_test(["z", "y", "x"].each)
++    assert_equal [["x", 1], ["y", 2]], enum_test({"y"=>2, "x"=>1})
++  end
++
++  ## Enumerator as Iterator
++
++  def test_next
++    e = 3.times
++    3.times{|i|
++      assert_equal i, e.next
++    }
++    assert_raise(StopIteration){e.next}
++  end
++
++  def test_loop
++    e = 3.times
++    i = 0
++    loop{
++      assert_equal(i, e.next)
++      i += 1
++    }
++  end
++
++  def test_nested_itaration
++    def (o = Object.new).each
++      yield :ok1
++      yield [:ok2, :x].each.next
++    end
++    e = o.to_enum
++    assert_equal :ok1, e.next
++    assert_equal :ok2, e.next
++    assert_raise(StopIteration){e.next}
++  end
++
++
++  def test_initialize
++    assert_equal([1, 2, 3], @obj.to_enum(:foo, 1, 2, 3).to_a)
++    assert_equal([1, 2, 3], Enumerable::Enumerator.new(@obj, :foo, 1, 2, 3).to_a)
++    assert_raise(ArgumentError) { Enumerable::Enumerator.new }
++  end
++
++  def test_initialize_copy
++    assert_equal([1, 2, 3], @obj.to_enum(:foo, 1, 2, 3).dup.to_a)
++    e = @obj.to_enum(:foo, 1, 2, 3)
++    assert_nothing_raised { assert_equal(1, e.next) }
++    #assert_raise(TypeError) { e.dup }
++  end
++
++  def test_gc
++    assert_nothing_raised do
++      1.times do
++        foo = [1,2,3].to_enum
++        GC.start
++      end
++      GC.start
++    end
++  end
++
++  def test_slice
++    assert_equal([[1,2,3],[4,5,6],[7,8,9],[10]], (1..10).each_slice(3).to_a)
++  end
++
++  def test_cons
++    a = [[1,2,3], [2,3,4], [3,4,5], [4,5,6], [5,6,7], [6,7,8], [7,8,9], [8,9,10]]
++    assert_equal(a, (1..10).each_cons(3).to_a)
++  end
++
++  def test_with_index
++    assert_equal([[1,0],[2,1],[3,2]], @obj.to_enum(:foo, 1, 2, 3).with_index.to_a)
++  end
++
++  def test_next_rewind
++    e = @obj.to_enum(:foo, 1, 2, 3)
++    assert_equal(1, e.next)
++    assert_equal(2, e.next)
++    e.rewind
++    assert_equal(1, e.next)
++    assert_equal(2, e.next)
++    assert_equal(3, e.next)
++    assert_raise(StopIteration) { e.next }
++  end
++end
++
+
+Property changes on: test/ruby/test_enumerator.rb
+___________________________________________________________________
+Name: svn:eol-style
+   + LF
+
+Index: test/erb/test_erb.rb
+===================================================================
+--- test/erb/test_erb.rb	(.../tags/v1_8_7)	(revision 16794)
++++ test/erb/test_erb.rb	(.../branches/ruby_1_8_7)	(revision 16794)
+@@ -44,26 +44,26 @@
+     @erb = ERB
+   end
+ 
+-  def test_01
+-    _test_01(nil)
+-    _test_01(0)
+-    _test_01(1)
+-    _test_01(2)
+-    _test_01(3)
++  def test_core
++    _test_core(nil)
++    _test_core(0)
++    _test_core(1)
++    _test_core(2)
++    _test_core(3)
+   end
+ 
+-  def _test_01(safe)
++  def _test_core(safe)
+     erb = @erb.new("hello")
+-    assert_equal(erb.result, "hello")
++    assert_equal("hello", erb.result)
+ 
+     erb = @erb.new("hello", safe, 0)
+-    assert_equal(erb.result, "hello")
++    assert_equal("hello", erb.result)
+ 
+     erb = @erb.new("hello", safe, 1)
+-    assert_equal(erb.result, "hello")
++    assert_equal("hello", erb.result)
+ 
+     erb = @erb.new("hello", safe, 2)
+-    assert_equal(erb.result, "hello")
++    assert_equal("hello", erb.result)
+ 
+     src = <<EOS
+ %% hi
+@@ -157,14 +157,14 @@
+     assert_equal(ans, erb.result)
+   end
+ 
+-  def test_02_safe_04
++  def test_safe_04
+     erb = @erb.new('<%=$SAFE%>', 4)
+-    assert_equal(erb.result(TOPLEVEL_BINDING.taint), '4')
++    assert_equal('4', erb.result(TOPLEVEL_BINDING.taint))
+   end
+ 
+   class Foo; end
+ 
+-  def test_03_def_class
++  def test_def_class
+     erb = @erb.new('hello')
+     cls = erb.def_class
+     assert_equal(Object, cls.superclass)
+@@ -177,7 +177,7 @@
+     assert(cls.new.respond_to?('erb'))
+   end
+ 
+-  def test_04_percent
++  def test_percent
+     src = <<EOS
+ %n = 1
+ <%= n%>
+@@ -218,26 +218,24 @@
+     assert_equal(ans, ERB.new(src, nil, '%').result)
+   end
+ 
+-  class Bar; end
+-
+-  def test_05_def_method
+-    assert(! Bar.new.respond_to?('hello'))
+-    Bar.module_eval do
++  def test_def_method
++    klass = Class.new
++    klass.module_eval do
+       extend ERB::DefMethod
+       fname = File.join(File.dirname(File.expand_path(__FILE__)), 'hello.erb')
+       def_erb_method('hello', fname)
+     end
+-    assert(Bar.new.respond_to?('hello'))
++    assert(klass.new.respond_to?('hello'))
+ 
+-    assert(! Bar.new.respond_to?('hello_world'))
++    assert(! klass.new.respond_to?('hello_world'))
+     erb = @erb.new('hello, world')
+-    Bar.module_eval do
++    klass.module_eval do
+       def_erb_method('hello_world', erb)
+     end
+-    assert(Bar.new.respond_to?('hello_world'))    
++    assert(klass.new.respond_to?('hello_world'))    
+   end
+ 
+-  def test_06_escape
++  def test_escape
+     src = <<EOS
+ 1.<%% : <%="<%%"%>
+ 2.%%> : <%="%%>"%>
+@@ -274,7 +272,7 @@
+     assert_equal(ans, ERB.new(src, nil, '%').result)
+   end
+ 
+-  def test_07_keep_lineno
++  def test_keep_lineno
+     src = <<EOS
+ Hello, 
+ % x = "World"
+@@ -378,7 +376,7 @@
+     end
+   end
+ 
+-  def test_08_explicit
++  def test_explicit
+     src = <<EOS
+ <% x = %w(hello world) -%>
+ NotSkip <%- y = x -%> NotSkip
+@@ -411,3 +409,16 @@
+    assert_equal(ans, ERB.new(src, nil, '-%').result)
+   end
+ end
++
++class TestERBCoreWOStrScan < TestERBCore
++  def setup
++    @save_map = ERB::Compiler::Scanner.instance_variable_get('@scanner_map')
++    map = {[nil, false]=>ERB::Compiler::SimpleScanner}
++    ERB::Compiler::Scanner.instance_variable_set('@scanner_map', map)
++    super
++  end
++
++  def teardown
++    ERB::Compiler::Scanner.instance_variable_set('@scanner_map', @save_map)
++  end
++end

@@ -27,6 +27,8 @@ DEPENDENCIES="
         ssl? ( dev-libs/openssl )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( '-p0' "${FILESDIR}/${P}-to-p4-r16794.patch" )
+
 src_configure() {
     filter-flags -fomit-frame-pointer
 
