@@ -27,12 +27,15 @@ build+run:
 run:
     dev-perl/Error
 post,suggested:
-    dev-scm/subversion[perl]    [[ description = [ Dependency for git-svn. ] ]]
-    dev-perl/libwww-perl        [[ description = [ Dependency for git-svn. ] ]]
-    dev-perl/TermReadKey        [[ description = [ Dependency for git-svn. ] ]]"
+    dev-scm/subversion[perl]  [[ description = [ Dependency for git-svn ] ]]
+    dev-perl/libwww-perl      [[ description = [ Dependency for git-svn ] ]]
+    dev-perl/TermReadKey      [[ description = [ Dependency for git-svn ] ]]
+    dev-perl/Authen-SASL   [[ description = [ Dependency for git-send-email ] ]]
+    dev-perl/Net-SMTP-SSL  [[ description = [ Dependency for git-send-email ] ]]
+    virtual/mta            [[ description = [ Dependency for git-send-email ] ]]
+"
 
 #   tk? ( dev-lang/tk )
-#   git-send-email: dev-perl/Authen-SASL, dev-perl/Net-SMTP-SSL
 #   cvs: ( dev-scm/cvsps dev-perl/DBI dev-perl/DBI-SQLite )
 
 pkg_pretend() {
@@ -57,7 +60,6 @@ src_configure() {
     option ipv6 || myoptions+=" NO_IPV6=YesPlease"
     option threads && myoptions+=" THREADED_DELTA_SEARCH=YesPlease"
     option webdav || myoptions+=" NO_EXPAT=YesPlease"
-#   WITH_SEND_EMAIL=YesPlease" ## needs an MTA ;)
 #   option tk || myoptions+=" NO_TCLTK=YesPlease"
 }
 
