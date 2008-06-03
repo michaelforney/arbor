@@ -1,0 +1,146 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+#
+# Based in part upon 'boost-1.35.0-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+#
+# Original author of aforementioned ebuild: Tiziano Mueller <dev-zero@gentoo.org>
+
+require versionator flag-o-matic multilib toolchain-funcs ## check_requirements, 1024M disk
+
+MY_P=${PN}_$(replace_all_version_separators '_')
+
+DESCRIPTION="Boost Libraries for C++"
+HOMEPAGE="http://www.boost.org/"
+SRC_URI="mirror://sourceforge/${PN}/${MY_P}.tar.bz2"
+
+LICENSE="freedist Boost-1.0"
+SLOT="0"
+
+MYOPTIONS="doc expat slowtests"
+# Libraries that need compiling:
+# PARTS+=" date_time filesystem function_types graph iostreams mpi program_options python regex serialization signals system test thread wave"
+#
+# See output of:
+# tools/jam/src/bin.linuxx86_64/bjam -d0 --show-libraries | while read line; do [[ ${line:0:1} == - ]] && echo ${line/- }; done"
+#
+# Others are header-only.
+
+DEPENDENCIES="
+    build+run:
+        dev-lang/python:=
+        expat? ( dev-libs/expat )"
+
+S=${WORKDIR}/${MY_P}
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${PVR} )
+
+ebjam() {
+    local arch
+    case ${ARCH} in
+        amd64)      arch=x86_64 ;;
+        x86|ia64)   arch=${ARCH} ;;
+        *) die "Unknown arch" ;;
+    esac
+
+    echo "${S}"/tools/jam/src/bin.linux${arch}/bjam ${BJAM_OPTIONS[@]} "$@"
+    "${S}"/tools/jam/src/bin.linux${arch}/bjam ${BJAM_OPTIONS[@]} "$@" \
+        || die 'ebjam failed.'
+}
+
+generate_user_config.jam() {
+    :
+}
+
+src_configure() {
+    local j
+
+    pushd "${S}"/tools/jam/src >/dev/null || die "pushd ${S}/tools/jam/src failed"
+    echo "Building bjam:" CC=$(tc-getCC) ./build.sh gcc
+    CC=$(tc-getCC) ./build.sh gcc || die 'Building jam failed.'
+    popd >/dev/null || die 'popd failed'
+
+    generate_user_config.jam
+
+    j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
+    [[ -z ${j} ]] && ewarn "Couldn't determine number of jobs from \$MAKEOPTS='${MAKEOPTS}', falling back to -j1"
+
+    BJAM_OPTIONS=(
+        -q                          # Stop at first error
+        -j${j:-1}                   # Parallel make, note: '-j' without a digit just hangs. FIXME exlibify
+        --release
+        --layout=system
+        --prefix="${D}"/usr
+        --toolset=gcc               # FIXME
+        link=shared
+        runtime-link=shared
+        threading=single,multi
+        $(option expat && echo "-sEXPAT_INCLUDE=/usr/include") 
+        $(option expat && echo "-sEXPAT_LIBPATH=/usr/$(get_libdir)")
+        --without-mpi               # Dependencies not in arbor.git
+    )
+    export BJAM_OPTIONS BOOST_ROOT=${S}
+}
+
+src_compile() {
+    ebjam
+}
+
+src_test() {
+    option slowtests || return 0
+
+    pushd "${S}/tools/regression/build" >/dev/null || die "pushd ${S}/tools/regression/build failed."
+    ebjam
+    popd >/dev/null || die "popd failed."
+
+    echo -e "\nRunning ${PN} tests, go make some coffee!\n"
+
+    cd "${S}/status"
+    
+    ebjam --dump-tests 2>&1 | tee regress.log
+
+    "${S}/dist/bin/process_jam_log" --v2 < regress.log || ewarn "Post-processing ./regress.log failed."
+    cat > "${S}/status/comment.html" <<-EOF
+<p>Tests are run on an <a href="http://www.exherbo.org">Exherbo</a> system.</p>
+EOF
+
+    "${S}/dist/bin/compiler_status" \
+        --v2 \
+        --comment "${S}/status/comment.html" \
+        "${S}" \
+        cs-$(uname).html cs-$(uname)-links.html \
+        || ewarn "Generating the build log html summary page failed"
+
+    sed -e 's|../boost.png|boost.png|' -i *.html # Cosmetic fix.
+}
+
+src_install() {
+    local libdir=$(get_libdir)
+
+    ebjam \
+        --include-dir="${D}"/usr/include \
+        --libdir="${D}"/usr/${libdir} \
+        install
+
+    for lib in $(ls -1 "${D}"/usr/${libdir}/libboost_thread-mt.* | sed -e "s:${D}/usr/${libdir}/::") ; do
+        dosym ${lib} "/usr/${libdir}/${lib/-mt/}"
+    done
+
+    if option doc; then
+        insinto /usr/share/doc/${PF}/html
+        doins -r doc more people wiki
+
+        find libs -iname test -o -iname src -print0 | xargs -0 rm -r \
+            || die "Couldn't clean out ./libs/."
+        doins -r libs
+
+        doins LICENSE_1_0.txt # Avoid broken links
+
+        dosym /usr/include/${PN} /usr/share/doc/${PF}/html/${PN}
+    fi
+
+    docinto status
+    nonfatal dodoc "${S}"/status/*.{html,gif} "${S}"/boost.png regress.log \
+        || echo "No cs-*.html found, you probably didn't run src_test(). No cookies for you."
+}
+
