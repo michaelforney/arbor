@@ -1,0 +1,50 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'raptor-1.4.17.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+DESCRIPTION="The RDF Parser Toolkit"
+HOMEPAGE="http://librdf.org/raptor"
+SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
+
+LICENSE="|| ( LGPL-2.1 Apache-2.0 )"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="curl unicode xml"
+
+DEPENDENCIES="
+    build: 
+        sys-devel/flex
+        dev-util/pkg-config
+    build+run:
+        dev-libs/libxslt
+        curl? ( net-misc/curl )
+        unicode? ( dev-libs/glib:2 )
+        xml? ( dev-libs/libxml2 )
+        !xml? ( dev-libs/expat )"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="{NEWS,README,RELEASE}.html"
+
+src_configure() {
+    local myconf=""
+
+    if option xml; then
+        myconf+=" --with-xml-parser=libxml"
+    else
+        myconf+=" --with-xml-parser=expat"
+    fi
+
+    if option curl; then
+        myconf+=" --with-www=curl"
+    elif option xml; then
+        myconf+=" --with-www=xml"
+    else
+        myconf+=" --with-www=none"
+    fi
+
+    econf \
+        $(option_enable unicode nfc-check) \
+        ${myconf}
+}
+
