@@ -25,6 +25,7 @@ DEFAULT_SRC_PREPARE_PATCHES=("${FILESDIR}/perl-gcc-4.2.patch"
 src_configure() {
     mkdir "${T}/build"
     cd "${T}/build"
+    
 
     sh "${S}/Configure" -des \
         -Dprefix=/usr \
@@ -67,7 +68,7 @@ src_install() {
     # Install LDPATH env file
     dodir /etc/env.d
     cat <<-EOF > "${D}"/etc/env.d/05perl
-    LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}-linux/CORE/"
+    LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/"
 EOF
 }
 
