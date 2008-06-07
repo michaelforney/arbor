@@ -1,0 +1,29 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'eject-2.1.5.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+DESCRIPTION="A command to eject a disc from the CD-ROM drive"
+HOMEPAGE="http://eject.sourceforge.net/ http://ca.geocities.com/jefftranter@rogers.com/eject.html"
+SRC_URI="http://www.ibiblio.org/pub/Linux/utils/disk-management/${P}.tar.gz
+	http://www.pobox.com/~tranter/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="nls"
+
+DEPENDENCIES=""
+
+S=${WORKDIR}/${PN}
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+	-p0 "${FILESDIR}/${PN}"-2.0.13-xmalloc.patch
+	-p1 "${FILESDIR}/${PN}"-2.1.4-scsi-rdwr.patch
+	-p0 "${FILESDIR}/${PN}"-2.1.5-handle-spaces.patch #151257
+	"${FILESDIR}/${PN}"-2.1.5-man-typo.patch #165248
+    )
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+
