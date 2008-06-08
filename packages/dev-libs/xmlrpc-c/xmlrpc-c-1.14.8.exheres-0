@@ -1,0 +1,63 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'xmlrpc-c-1.14.07.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require multilib
+
+DESCRIPTION="A lightweigt RPC library based on XML and HTTP"
+SRC_URI="http://dev.exherbo.org/~philantrop/distfiles/${P}.tar.bz2"
+HOMEPAGE="http://xmlrpc-c.sourceforge.net/"
+LICENSE="BSD"
+
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+# The tests are... interesting. They need lots of gcc-4.3 fixes, the C++ tests
+# are missing a lot of C headers and even if it all builds fine and the examples
+# work, the tests always fail. If you want to try, you'll need to enable the
+# abyss server (not necessarily with threads).
+RESTRICT="test"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libxml2
+        net-misc/curl
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS="
+        --disable-wininet-client
+        --disable-libwww-client
+        --disable-abyss-server
+        --disable-abyss-threads
+        --enable-libxml2-backend
+        --enable-cgi-server
+        --enable-curl-client
+        --enable-cplusplus
+"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="
+    doc/CREDITS
+    doc/HISTORY
+    doc/SECURITY
+    doc/TODO
+"
+
+src_prepare() {
+    # Respect the user's LDFLAGS.
+    export LADD=${LDFLAGS}
+
+    # Respect the user's CFLAGS/CXXFLAGS.
+    sed -i -e "/CFLAGS_COMMON/s:-g -O3$:${CFLAGS}:" Makefile.common \
+        || die "sed to respect CFLAGS failed"
+    sed -i -e "/CXXFLAGS_COMMON/s:-g$:${CXXFLAGS}:" Makefile.common \
+        || die "sed to respect CXXLAGS failed"
+
+    # Use the correct libdir.
+    sed -i -e "/LIBINST_DIR/s:lib:$(get_libdir):" Makefile.config.in \
+        || die "sed to set the correct libdir failed"
+
+    # We need to filter this. cf. Gentoo bug 214137.
+    unset SRCDIR
+}
