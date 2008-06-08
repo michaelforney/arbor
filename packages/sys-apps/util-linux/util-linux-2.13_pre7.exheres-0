@@ -1,0 +1,19 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Common linux utilities"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/util-linux"
+SRC_URI="mirror://kernel/linux/utils/${PN}/testing/${P/_pre/-pre}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+S="${WORKDIR}/${PN}-${PV/_pre/-pre}"
+
+# Otherwise things end up in /usr/usr. Which would be bad.
+DEFAULT_SRC_CONFIGURE_PARAMS="--prefix=/"
+
