@@ -58,6 +58,9 @@ src_prepare() {
     sed -i -e "/LIBINST_DIR/s:lib:$(get_libdir):" Makefile.config.in \
         || die "sed to set the correct libdir failed"
 
+    sed -i -e "/libxmlrpc_server_abyss++/d" src/cpp/Makefile \
+        || die "removing the remains of the abyss failed" 
+
     # We need to filter this. cf. Gentoo bug 214137.
     unset SRCDIR
 }
