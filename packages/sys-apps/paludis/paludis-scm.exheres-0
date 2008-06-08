@@ -87,8 +87,6 @@ src_install() {
     for bashcomp in ${bashcompletions}; do
         BASH_COMPLETION_NAME="${bashcomp}" dobashcompletion bash-completion/"${bashcomp}"
     done
-
-    cp "${FILESDIR}"/exherbo.conf "${D}"/usr/share/paludis/distributions/
 }
 
 src_test() {
@@ -96,7 +94,7 @@ src_test() {
     export PALUDIS_DO_NOTHING_SANDBOXY="portage sucks"
     export BASH_ENV=/dev/null
 
-    emake check || die "Make check failed"
+    emake -j1 check || die "Make check failed"
 }
 
 pkg_preinst() {
