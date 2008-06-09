@@ -1,0 +1,37 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'bc-1.06.95.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+DESCRIPTION="Handy console-based calculator utility"
+HOMEPAGE="http://www.gnu.org/software/bc/bc.html"
+SRC_URI="ftp://alpha.gnu.org/gnu/${PN}/${P}.tar.bz2
+    mirror://gnu/${PN}/${P}.tar.bz2"
+
+LICENSE="|| ( GPL-2 LPL-2.1 )"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="readline"
+
+DEPENDENCIES="
+    build:
+        sys-devel/flex
+    build+run:
+        readline? (
+            sys-libs/ncurses
+            sys-libs/readline
+        )"
+
+src_configure() {
+    local myconf="--without-libedit "
+
+    if option readline; then
+        myconf+="--with-readline"
+    else
+        myconf+="--without-readline"
+    fi
+
+    econf ${myconf}
+}
+
