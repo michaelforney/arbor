@@ -1,7 +1,7 @@
 # Copyright 2007 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib subversion
+require multilib git
 
 DESCRIPTION="Some replacements for programs formerly provided by sysvinit."
 HOMEPAGE="http://www.exherbo.org/"
@@ -14,7 +14,7 @@ MYOPTIONS="visibility"
 
 DEPENDENCIES=""
 
-ESVN_REPO_URI="http://svn.exherbo.org/annie"
+EGIT_REPO_URI="git://git.exherbo.org/${PN}.git"
 
 src_prepare() {
     ./autogen.bash || die "autogen.bash failed"
