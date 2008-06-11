@@ -63,10 +63,10 @@ src_install() {
         popd
     fi
 
-    docinto "manual" || die "docinto manual failed"
-    dodoc manual/aspell.html || die "dodoc manual/aspell.html failed"
+    docinto "manual"
+    dodoc manual/aspell.html/*
 
     if option doc; then
-        dodoc manual/aspell-dev.html || die "dodoc manual/aspell.html"
+        dodoc manual/aspell-dev.html/*
     fi
 }
