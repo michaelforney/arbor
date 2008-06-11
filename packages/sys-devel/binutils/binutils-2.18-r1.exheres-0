@@ -12,8 +12,12 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}/76_all_use-new-ld-dtags.patch"
+)
+
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    default
 
     # Construct env.d/binutils configuration
     mkdir -p "${D}/etc/env.d/binutils"
