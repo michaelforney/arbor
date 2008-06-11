@@ -53,9 +53,9 @@ src_prepare() {
 
 src_configure() {
     subversion_wc_info
-    local repositories=`echo default unpackaged $(optionv cran ) | tr -s \  ,`
-    local clients=`echo default accerso adjutrix contrarius importare \
-        $(optionv inquisitio ) instruo paludis reconcilio | tr -s \  ,`
+    local repositories=$(echo default unavailable unpackaged $(optionv cran ) | tr -s \  ,)
+    local clients=$(echo default accerso adjutrix contrarius importare \
+        $(optionv inquisitio ) instruo paludis reconcilio | tr -s \  ,)
     local environments="default"
     econf \
         --disable-doxygen \
@@ -72,12 +72,11 @@ src_configure() {
         --with-clients=${clients} \
         --with-environments=${environments} \
         --with-default-distribution=exherbo \
-        --with-svn-revision=${ESVN_WC_REVISION} \
-        || die "econf failed"
+        --with-svn-revision=${ESVN_WC_REVISION}
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "install failed"
+    emake DESTDIR="${D}" install
     dodoc AUTHORS README ChangeLog NEWS
 
     local bashcomp bashcompletions
@@ -94,7 +93,7 @@ src_test() {
     export PALUDIS_DO_NOTHING_SANDBOXY="portage sucks"
     export BASH_ENV=/dev/null
 
-    emake -j1 check || die "Make check failed"
+    emake -j1 check
 }
 
 pkg_preinst() {
