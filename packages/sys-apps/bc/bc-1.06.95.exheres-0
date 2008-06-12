@@ -3,15 +3,14 @@
 # Based in part upon 'bc-1.06.95.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-
 DESCRIPTION="Handy console-based calculator utility"
 HOMEPAGE="http://www.gnu.org/software/bc/bc.html"
 SRC_URI="ftp://alpha.gnu.org/gnu/${PN}/${P}.tar.bz2
     mirror://gnu/${PN}/${P}.tar.bz2"
 
-LICENSE="|| ( GPL-2 LPL-2.1 )"
+LICENSE="|| ( GPL-2 LGPL-2.1 )"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="readline"
 
 DEPENDENCIES="
@@ -23,15 +22,5 @@ DEPENDENCIES="
             sys-libs/readline
         )"
 
-src_configure() {
-    local myconf="--without-libedit "
-
-    if option readline; then
-        myconf+="--with-readline"
-    else
-        myconf+="--without-readline"
-    fi
-
-    econf ${myconf}
-}
-
+DEFAULT_SRC_CONFIGURE_PARAMS="--without-libedit"
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS="readline"
