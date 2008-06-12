@@ -26,24 +26,26 @@ src_unpack() {
     unpack ./${MY_P}/${MY_P}_src.tar
 }
 
-src_compile() {
+src_configure() {
     LSOF_CC=$(tc-getCC) ./Configure -n linux || die "Configure failed."
-    emake DEBUG="" || die "Emake failed."
+}
+
+src_compile() {
+    emake DEBUG=""
 }
 
 src_test() {
     cd tests
-
-    default
+    emake -j1 test opt
 }
 
 src_install() {
-    dobin lsof || die "dobin failed."
-    dolib lib/liblsof.a || die "dolib failed."
-    doman lsof.8 || die "doman failed."
-    dodoc 00* || die "dodoc failed."
+    dobin lsof
+    dolib lib/liblsof.a
+    doman lsof.8
+    dodoc 00*
 
     insinto /usr/share/${PN}/scripts
-    doins scripts/* || die "doins failed."
+    doins scripts/*
 }
 
