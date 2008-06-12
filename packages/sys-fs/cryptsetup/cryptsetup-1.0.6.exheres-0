@@ -1,7 +1,7 @@
 # Copyright (C) 2008 Stephen Bennett
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools
+require autotools multilib
 
 DESCRIPTION="Userland utilities for dm-crypt"
 HOMEPAGE="http://code.google.com/p/cryptsetup"
@@ -9,14 +9,17 @@ SRC_URI="http://cryptsetup.googlecode.com/files/cryptsetup-1.0.6.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
-MYOPTIONS=""
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="static"
 
 DEPENDENCIES="build+run: sys-fs/device-mapper"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="static"
+DEFAULT_SRC_CONFIGURE_PARAMS="--with-sbindir=/sbin"
 
 src_install() {
     default
 
     # make install creates this empty dir for some reason. Nuke it.
-    rmdir "${D}/usr/lib64/cryptsetup"
+    rmdir "${D}/usr/$(get_libdir)/cryptsetup"
 }
