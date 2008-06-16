@@ -82,6 +82,8 @@ git_fetch()
 
     mkdir -p "${S}"
     git_cmd archive --format=tar ${EGIT_TREE} | ( cd "${S}" ; tar xf - )
+
+    export GIT_DIR="${EGIT_STORE_DIR}/${EGIT_REPO_NAME}"
 }
 
 git_src_unpack()
