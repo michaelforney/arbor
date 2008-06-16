@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-require subversion bash-completion eutils flag-o-matic
+require eutils bash-completion flag-o-matic git
 
 DESCRIPTION="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
@@ -33,7 +33,7 @@ DEPENDENCIES="
     post:
         vim-syntax? ( >=app-editors/vim-runtime-7 )"
 
-ESVN_REPO_URI="svn://svn.pioto.org/paludis/trunk"
+EGIT_REPO_URI="git://git.pioto.org/paludis"
 
 create-paludis-user() {
     enewgroup "paludisbuild"
@@ -52,11 +52,11 @@ src_prepare() {
 }
 
 src_configure() {
-    subversion_wc_info
-    local repositories=$(echo default unavailable unpackaged $(optionv cran ) | tr -s \  ,)
-    local clients=$(echo default accerso adjutrix contrarius importare \
-        $(optionv inquisitio ) instruo paludis reconcilio | tr -s \  ,)
-    local environments="default"
+    local clients environments repositories
+    clients=$(echo default accerso adjutrix contrarius importare $(optionv inquisitio ) \
+        instruo paludis reconcilio | tr -s \  ,)
+    environments="default"
+    repositories=$(echo default unavailable unpackaged $(optionv cran ) | tr -s \  ,)
     econf \
         --disable-doxygen \
         $(option_enable pink) \
@@ -68,16 +68,16 @@ src_configure() {
         $(option_enable visibility ) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-sandbox \
-        --with-repositories=${repositories} \
         --with-clients=${clients} \
         --with-environments=${environments} \
+        --with-repositories=${repositories} \
         --with-default-distribution=exherbo \
-        --with-svn-revision=${ESVN_WC_REVISION}
+        --with-git_head=$(git rev-parse HEAD)
 }
 
 src_install() {
     emake DESTDIR="${D}" install
-    dodoc AUTHORS README ChangeLog NEWS
+    dodoc AUTHORS README NEWS
 
     local bashcomp bashcompletions
     bashcompletions="accerso adjutrix contrarius
