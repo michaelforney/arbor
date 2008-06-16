@@ -49,14 +49,15 @@ git_die()
 
 git_cmd()
 {
-    local cmd="git --git-dir=${EGIT_REPO_NAME}"
-    echo ${cmd} $@ >&2
-    GIT_PAGER=cat ${cmd} $@ || git_die "$1 failed"
+    echo git "$@" >&2
+    GIT_PAGER=cat git "$@" || git_die "$1 failed"
 }
 
 git_fetch()
 {
     [[ -z ${EGIT_REPO_URI} ]] && git_die "EGIT_REPO_URI is empty."
+
+    export GIT_DIR="${EGIT_STORE_DIR}/${EGIT_REPO_NAME}"
 
     if [[ ! -d ${EGIT_STORE_DIR} ]] ; then
         addwrite /
@@ -65,11 +66,10 @@ git_fetch()
         export SANDBOX_WRITE="${SANDBOX_WRITE%%:/}"
     fi
 
-    cd -P "${EGIT_STORE_DIR}" || git_die "can't chdir to ${EGIT_STORE_DIR}"
-    addwrite "${PWD}"
+    addwrite "${EGIT_STORE_DIR}"
 
-    if [[ ! -d ${EGIT_REPO_NAME} ]] ; then
-        git_cmd clone --bare ${EGIT_REPO_URI} ${EGIT_REPO_NAME}
+    if [[ ! -d ${EGIT_STORE_DIR}/${EGIT_REPO_NAME} ]] ; then
+        git_cmd clone --bare ${EGIT_REPO_URI} "${EGIT_STORE_DIR}"/${EGIT_REPO_NAME}
         git_cmd config remote.origin.url ${EGIT_REPO_URI}
     else
         git_cmd config remote.origin.url ${EGIT_REPO_URI}
@@ -82,8 +82,6 @@ git_fetch()
 
     mkdir -p "${S}"
     git_cmd archive --format=tar ${EGIT_TREE} | ( cd "${S}" ; tar xf - )
-
-    export GIT_DIR="${EGIT_STORE_DIR}/${EGIT_REPO_NAME}"
 }
 
 git_src_unpack()
