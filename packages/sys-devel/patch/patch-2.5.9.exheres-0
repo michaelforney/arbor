@@ -12,16 +12,8 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-    unpack ${A}
-
-    # DESTDIR support
-    cd "${S}"
-    sed -ri 's:(\$\(INSTALL_[^ ]+ [^ ]+ ):\1$(DESTDIR):' Makefile.in
-}
-
 src_install() {
-    dobin /usr/bin
-    emake DESTDIR="${D}" install || die "Install failed."
-    dodoc AUTHORS ChangeLog INSTALL NEWS README
+    dobin patch
+    newman patch.man patch.1
+    dodoc AUTHORS ChangeLog NEWS README
 }
