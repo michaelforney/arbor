@@ -57,7 +57,9 @@ git_fetch()
 {
     [[ -z ${EGIT_REPO_URI} ]] && git_die "EGIT_REPO_URI is empty."
 
+    mkdir -p "${S}"
     export GIT_DIR="${EGIT_STORE_DIR}/${EGIT_REPO_NAME}"
+    export GIT_WORK_TREE="${S}"
 
     if [[ ! -d ${EGIT_STORE_DIR} ]] ; then
         addwrite /
@@ -80,8 +82,7 @@ git_fetch()
 
     git_cmd gc --auto
 
-    mkdir -p "${S}"
-    git_cmd archive --format=tar ${EGIT_TREE} | ( cd "${S}" ; tar xf - )
+    git_cmd checkout -f ${EGIT_TREE}
 }
 
 git_src_unpack()
