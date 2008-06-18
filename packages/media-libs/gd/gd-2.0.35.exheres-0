@@ -1,0 +1,40 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gd-2.0.35.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+DESCRIPTION="A graphics library for fast image creation"
+HOMEPAGE="http://libgd.org/"
+SRC_URI="http://libgd.org/releases/${P}.tar.bz2"
+
+LICENSE="as-is"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="fontconfig jpeg png truetype xpm"
+
+DEPENDENCIES="
+    build+run:
+        fontconfig? ( media-libs/fontconfig )
+        jpeg? ( media-libs/jpeg )
+        png? ( media-libs/libpng )
+        truetype? ( media-libs/freetype )
+        xpm? (
+            x11-libs/libXpm
+            x11-libs/libXt
+        )"
+
+src_prepare() {
+    # ./configure runs twice without this.
+    find . -type f -print0 | xargs -0 touch -r configure || die "Can't fix mtimes"
+}
+
+src_configure() {
+    econf \
+        $(option_with fontconfig) \
+        $(option_with png) \
+        $(option_with truetype freetype) \
+        $(option_with jpeg) \
+        $(option_with xpm)
+}
+
