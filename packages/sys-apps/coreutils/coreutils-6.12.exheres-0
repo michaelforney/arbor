@@ -1,0 +1,56 @@
+# Copyright 2007-2008 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools
+
+DESCRIPTION="Core file, shell and text utilities expected to be on any system."
+HOMEPAGE="http://www.gnu.org/software/coreutils/"
+SRC_URI="mirror://gnu/${PN}/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS="nls acl"
+
+DEPENDENCIES="
+    build:
+        >=sys-devel/automake-1.10.1
+    build+run:
+        acl? ( sys-apps/acl sys-apps/attr )"
+
+src_prepare() {
+    expatch "${FILESDIR}"/${P}-disable-tests.patch
+    AT_M4DIR="m4" eautoreconf || die "Eautoreconf failed."
+}
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="acl nls"
+
+src_install() {
+    default
+
+    local binfiles="basename cat chgrp chmod chown cp chroot \
+                    cut date df dir dirname du echo env expr \
+                    false head ln ls mkdir mkfifo mknod mktemp \
+                    mv pwd readlink rm rmdir seq sleep sort \
+                    stty sync tail touch tr true tty uname \
+                    vdir wc yes"
+
+    dodir /bin
+    for binfile in ${binfiles}; do
+        mv "${D}"/usr/bin/${binfile} "${D}"/bin/${binfile}
+        dosym /bin/${binfile} /usr/bin/${binfile}
+    done
+
+    insinto /etc
+    newins src/dircolors.hin DIR_COLORS
+}
+
+src_test() {
+    addwrite /dev/full
+    export RUN_EXPENSIVE_TESTS="yes"
+    default
+    if [[ ${EUID} -eq 0 ]]; then
+        echo "Since we're root run make check-root"
+        emake -j1 check-root
+    fi
+}

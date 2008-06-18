@@ -1,0 +1,35 @@
+Source: Bo Ørsted Andresen / Richard Brown
+Upstream: No.
+Reasons: Disable tests that are skipped as root and fail as non-root (probably sandbox related).
+
+diff -ur coreutils-6.12.orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
+--- coreutils-6.12.orig/tests/Makefile.am	2008-05-27 12:47:53.000000000 +0100
++++ coreutils-6.12/tests/Makefile.am	2008-06-18 21:44:56.000000000 +0100
+@@ -290,7 +290,6 @@
+   du/slink					\
+   du/trailing-slash				\
+   du/two-args					\
+-  install/basic-1				\
+   install/create-leading			\
+   install/d-slashdot				\
+   install/trap					\
+@@ -319,7 +318,6 @@
+   ls/x-option					\
+   mkdir/p-1					\
+   mkdir/p-2					\
+-  mkdir/p-3					\
+   mkdir/p-slashdot				\
+   mkdir/p-thru-slink				\
+   mkdir/p-v					\
+@@ -380,11 +378,9 @@
+   tail-2/start-middle				\
+   touch/dangling-symlink			\
+   touch/dir-1					\
+-  touch/fail-diag				\
+   touch/fifo					\
+   touch/no-create-missing			\
+   touch/no-rights				\
+-  touch/not-owner				\
+   touch/obsolescent				\
+   touch/read-only				\
+   touch/relative				\
