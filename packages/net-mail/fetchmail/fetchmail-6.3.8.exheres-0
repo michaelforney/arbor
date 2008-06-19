@@ -1,0 +1,52 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'fetchmail-6.3.8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+DESCRIPTION="The legendary remote-mail retrieval and forwarding utility"
+HOMEPAGE="http://fetchmail.berlios.de"
+SRC_URI="mirror://berlios/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2 public-domain"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="ipv6 nls ssl"
+
+DEPENDENCIES="
+    build:
+        nls? ( sys-devel/gettext )"
+#build+run:
+#    python? ( dev-lang/python:=[tk] )
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}/${P}-broken-headers.patch"
+    "${FILESDIR}/${P}-null-msg-pointer.patch"
+)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="FEATURES"
+
+src_configure() {
+    # fetchmailconf.py needs dev-lang/python[tk]
+    export PYTHON=:
+
+    econf \
+        --disable-dependency-tracking \
+        --enable-RPA \
+        --enable-NTLM \
+        --enable-SDPS \
+        $(option_enable nls) \
+        $(option_enable ipv6) \
+        $(option_with ssl) \
+        --without-gssapi --without-kerberos5 --without-kerberos --without-hesiod
+}
+
+src_install() {
+    default
+
+    dodir /usr/share/doc/${PF}/html
+    insinto /usr/share/doc/${PF}/html
+    doins *.html
+
+    docinto contrib
+    dodoc contrib/*
+}
+
