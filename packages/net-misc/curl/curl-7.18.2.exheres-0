@@ -12,18 +12,20 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="idn ipv6 ssl"
 
 DEPENDENCIES="
-build:
-    dev-lang/perl
-    sys-apps/diffutils
-build+run:
-    idn? ( net-dns/libidn )
-    ssl? ( app-misc/ca-certificates
-           dev-libs/openssl )"
+    build:
+        dev-lang/perl
+        sys-apps/diffutils
+    build+run:
+        idn? ( net-dns/libidn )
+        ssl? (
+            app-misc/ca-certificates
+            dev-libs/openssl
+        )"
 
 src_configure() {
     econf \
         $(option_enable ipv6) \
-        $(option_enable ssl) \
+        $(option_with ssl) \
         $(option ssl && echo '--without-ca-bundle --with-ca-path=/etc/ssl/certs') \
         $(option_with idn libidn) \
         --enable-http \
@@ -40,13 +42,6 @@ src_configure() {
         --without-gnutls --without-nss \
         --without-krb4 --disable-gssapi --disable-ldap \
         --without-libssh2 --without-spnego
-}
-
-src_test() {
-    # Disable failing tests (one per line).
-    echo '1001' >> "${S}"/tests/data/DISABLED \
-        || die "Failed to disable some tests (${S}/tests/data/DISABLED)"
-    default
 }
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="docs/"
