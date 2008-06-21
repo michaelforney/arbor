@@ -9,6 +9,8 @@
 #
 # NB:  If you add anything, please comment it!
 
+export_exlib_phases src_prepare
+
 [[ -z ${WANT_AUTOCONF} ]] && WANT_AUTOCONF="latest"
 [[ -z ${WANT_AUTOMAKE} ]] && WANT_AUTOMAKE="latest"
 
@@ -244,4 +246,10 @@ autotools_get_auxdir() {
     }' | uniq
 
     return 0
+}
+
+autotools_src_prepare() {
+    default_src_prepare
+
+    eautoreconf
 }
