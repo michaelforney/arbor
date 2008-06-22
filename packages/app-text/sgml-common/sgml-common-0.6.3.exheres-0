@@ -1,0 +1,66 @@
+# Copyright 2008 Ali Polatel
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sgml-common-0.6.3-r5.ebuild' from Gentoo, which is:
+#   Copyright 1999-2008 Gentoo Foundation
+
+WANT_AUTOCONF=2.1
+WANT_AUTOMAKE=1.5
+
+require autotools
+
+DESCRIPTION="Base ISO character entities and utilities for SGML"
+HOMEPAGE="http://www.iso.ch/cate/3524030.html"
+SRC_URI="mirror://kde/devel/docbook/SOURCES/${P}.tgz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-configure.in.patch"
+    "${FILESDIR}/${P}-root-support.patch" )
+
+src_prepare() {
+    default
+    eautoreconf
+}
+
+pkg_postinst() {
+    local installer="${ROOT}"/usr/bin/install-catalog
+    if [[ ! -x $installer ]] ; then
+        die "install-catalog not found"
+    fi
+
+    einfo "Installing catalogs..."
+    "$installer" --add \
+        /etc/sgml/sgml-ent.cat \
+        /usr/share/sgml/sgml-iso-entities-8879.1986/catalog
+    "$installer" --add \
+        /etc/sgml/sgml-docbook.cat \
+        /etc/sgml/sgml-ent.cat
+}
+
+pkg_prerm() {
+    cp "${ROOT}"/usr/bin/install-catalog "${T}"
+}
+
+pkg_postrm() {
+    if [[ ! -x  ${T}/install-catalog ]] ; then
+        return
+    fi
+
+    einfo "Removing Catalogs..."
+    if [[ -e ${ROOT}/etc/sgml/sgml-ent.cat ]] ; then
+        "${T}"/install-catalog --remove \
+        /etc/sgml/sgml-ent.cat \
+        /usr/share/sgml/sgml-iso-entities-8879.1986/catalog
+    fi
+
+    if [[ -e ${ROOT}/etc/sgml/sgml-docbook.cat ]] ; then
+        "${T}"/install-catalog --remove \
+        /etc/sgml/sgml-docbook.cat \
+        /etc/sgml/sgml-ent.cat
+    fi
+}
