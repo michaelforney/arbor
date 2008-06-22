@@ -2,8 +2,8 @@
 # Distributed under the terms of the GNU General Public License v2
 
 DESCRIPTION="Collection of Linux man pages"
-HOMEPAGE="ftp://ftp.win.tue.nl/pub/linux-local/manpages"
-SRC_URI="ftp://ftp.win.tue.nl/pub/linux-local/manpages/${P}.tar.gz"
+HOMEPAGE="http://www.kernel.org/doc/man-pages/"
+SRC_URI="http://www.kernel.org/pub/linux/docs/man-pages/${P}.tar.bz2"
 
 LICENSE=""
 SLOT="0"
@@ -13,13 +13,6 @@ MYOPTIONS=""
 DEPENDENCIES="run:
                 sys-apps/man"
 
-# There are no tests
-RESTRICT="test"
-
 src_compile() {
     :
-}
-
-src_install() {
-    emake prefix="${D}/usr" install || die "Install failed."
 }
