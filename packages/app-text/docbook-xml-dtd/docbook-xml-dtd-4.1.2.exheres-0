@@ -1,0 +1,55 @@
+# Copyright 2008 Santiago M. Mola
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'docbook-xml-dtd-4.1.2-r6.ebuild', which is:
+#   Copyright 1999-2007 Gentoo Foundation
+
+require sgml-catalog
+
+MY_P="docbkx412"
+DESCRIPTION="Docbook DTD for XML"
+HOMEPAGE="http://www.oasis-open.org/docbook/"
+SRC_URI="http://www.oasis-open.org/docbook/xml/${PV}/${MY_P}.zip"
+
+LICENSE="X11"
+SLOT="4.1.2"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+build:
+    app-arch/unzip
+    dev-libs/libxml2
+    app-text/docbook-xsl-stylesheets
+    app-text/build-docbook-catalog"
+
+SGML_CATALOGS=(
+    "/etc/sgml/xml-docbook-${PV}.cat /etc/sgml/sgml-docbook.cat"
+    "/etc/sgml/xml-docbook-${PV}.cat
+    /usr/share/sgml/docbook/xml-dtd-${PV}/docbook.cat" )
+
+src_prepare() {
+    # Prepend OVERRIDE directive
+    sed -i -e '1i\\OVERRIDE YES' docbook.cat
+}
+
+src_install() {
+    keepdir /etc/xml
+
+    insinto /usr/share/sgml/docbook/xml-dtd-${PV}
+    doins *.dtd *.mod docbook.cat
+    insinto /usr/share/sgml/docbook/xml-dtd-${PV}/ent
+    doins ent/*.ent
+
+    dodoc ChangeLog *.txt
+}
+
+pkg_postinst() {
+    build-docbook-catalog
+    sgml-catalog_pkg_postinst
+}
+
+pkg_postrm() {
+    #FIXME: may not be available
+    build-docbook-catalog
+    sgml-catalog_pkg_postrm
+}
