@@ -1,0 +1,51 @@
+# Copyright 2007,2008 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'rubygems-1.0.1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+DESCRIPTION="Centralised Ruby extension management"
+HOMEPAGE="http://rubyforge.org/projects/rubygems/"
+LICENSE="|| ( Ruby GPL-2 )"
+
+PLATFORMS="~amd64 ~x86"
+SLOT="0"
+MYOPTIONS="doc"
+
+SRC_URI="mirror://rubyforge/${PN}/${P}.tgz"
+
+DEPENDENCIES="
+    build+run:
+        >=dev-lang/ruby-1.8.7
+"
+
+src_install() {
+    unset GEM_HOME GEM_PATH RUBYOPT
+
+    site_gem_dir=$(ruby -I./lib/ -rubygems -e 'print Gem.dir')
+    vendor_gem_dir=${site_gem_dir/gems/vendor_gems}
+    ver=$(basename ${site_gem_dir})
+    ver_stripped=${ver/./}
+
+    keepdir {${site_gem_dir},${vendor_gem_dir}}/{doc,gems,cache,specifications}
+
+    myconf=""
+    if ! option doc; then
+        myconf+="--no-rdoc --no-ri"
+    fi
+
+    ruby setup.rb ${myconf} --vendor --destdir="${D}" || die "setup.rb failed"
+
+    dosym "gem${ver_stripped}" /usr/bin/gem
+
+    dodoc README doc/release_notes/rel_1_2_0.rdoc
+
+    dodir /etc/env.d
+    echo "GEM_PATH=\"${site_gem_dir}:${vendor_gem_dir}\"" > ${D}/etc/env.d/10rubygems
+}
+
+pkg_postinst() {
+    if [[ -e ${site_gem_dir}/source_cache ]]; then
+        rm ${site_gem_dir}/source_cache || die "unable to remove src_cache"
+    fi
+}
+
