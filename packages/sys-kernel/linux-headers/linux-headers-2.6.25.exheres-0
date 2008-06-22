@@ -15,6 +15,7 @@ DEPENDENCIES=""
 S="${WORKDIR}/linux-${PV}"
 
 # FIXME: Need to sanitize headers at some point
+
 src_compile() {
     # Fix ARCH to match linux-headers values
     case ${ARCH} in
@@ -26,10 +27,10 @@ src_compile() {
             ;;
     esac
 
-    emake mrproper || die "Make mrproper failed"
-    emake headers_check || die "Headers check failed"
+    emake mrproper
+    emake headers_check
 }
 
 src_install() {
-    emake INSTALL_HDR_PATH="${D}/usr" headers_install || die "Install failed."
+    emake INSTALL_HDR_PATH="${D}/usr" headers_install
 }
