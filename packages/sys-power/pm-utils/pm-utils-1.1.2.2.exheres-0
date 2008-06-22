@@ -1,0 +1,45 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="Suspend and hibernation utilties for HAL"
+HOMEPAGE="http://pm-utils.freedesktop.org/"
+SRC_URI="http://pm-utils.freedesktop.org/releases/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="alsa debug video_driver:intel video_driver:radeon"
+
+DEPENDENCIES="
+    run:
+        >=sys-apps/hal-0.5.10
+        >=sys-apps/dbus-1.0.0
+        >=sys-apps/util-linux-2.13
+        alsa? ( media-sound/alsa-utils )
+        !video_driver:intel? ( sys-apps/vbetool )
+        video_driver:radeon? ( app-laptop/radeontool )
+"
+
+src_install()
+{
+    local ignore="01grub 10NetworkManager 90clock"
+
+    default
+
+    # until xmlto is in
+    rmdir "${D}/usr/share/man/{man1,man8,}"
+
+    keepdir /etc/pm/sleep.d
+    keepdir /etc/pm/power.d
+
+    option alsa || ignore="${ignore} 60alsa"
+
+    if option debug ; then
+        echo 'PM_DEBUG="true"' > "${S}/exherbo"
+    fi
+
+    echo "HOOK_BLACKLIST=\"${ignore}\"" >> "${S}/exherbo"
+
+    insinto /etc/pm/config.d/
+    doins "${S}/exherbo"
+}
