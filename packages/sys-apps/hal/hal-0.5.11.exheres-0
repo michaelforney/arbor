@@ -1,0 +1,132 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part on 'hal-0.5.11-r1.ebuild' from Gentoo which is:
+#    Copyright 1999-2008 Gentoo Foundation
+
+require eutils
+
+PATCH_VERSION="1"
+
+DESCRIPTION="Hardware Abstraction Layer"
+HOMEPAGE="http://hal.freedesktop.org/"
+SRC_URI="http://hal.freedesktop.org/releases/${P}.tar.bz2
+         http://dev.gentoo.org/~compnerd/files/${PN}/${P}-gentoo-patches-${PATCH_VERSION}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="acpi apm verbose"
+
+DEPENDENCIES="
+    build+run:
+        >=sys-fs/udev-112
+        >=sys-apps/dbus-1.0
+        >=dev-libs/glib-2.14
+        >=dev-util/gperf-3.0.3
+        >=dev-libs/expat-1.95.8
+        >=sys-apps/dmidecode-2.7
+        >=dev-libs/libusb-0.1.10a
+        >=dev-libs/dbus-glib-0.61
+        >=sys-apps/pciutils-2.2.7
+        >=sys-apps/util-linux-2.13
+        >=sys-kernel/linux-headers-2.6.22
+          sys-apps/usbutils
+    build:
+          dev-util/pkg-config
+        >=dev-util/intltool-0.35
+    run:
+        post,required:
+            =app-misc/hal-info-20080310
+        post,suggested:
+            >=sys-power/pm-utils-0.99.3
+"
+
+# tests for HAL *NEVER* actually work/ed
+RESTRICT="test"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${WORKDIR}/${P}-patches/" )
+
+pkg_setup()
+{
+    enewgroup haldaemon
+    enewgroup plugdev
+
+    enewuser haldaemon -1 -1 /dev/null "haldaemon,plugdev,disk,cdrom,cdrw,floppy,usb"
+}
+
+src_configure()
+{
+    econf --disable-console-kit                 \
+          --disable-policy-kit                  \
+          --disable-acl-management              \
+          --with-backend=linux                  \
+          --with-os-type=exherbo                \
+          --with-pid-file=/var/run/hald.pid     \
+          --with-socket-dir=/var/run            \
+          --with-hwdata=/usr/share/misc         \
+          --enable-umount-helper                \
+          --enable-man-pages                    \
+          --enable-pci                          \
+          --enable-sonypic                      \
+          --with-cpufreq                        \
+          --with-usb-csr                        \
+          --with-keymaps                        \
+          --disable-acpi-ibm                    \
+          --disable-acpi-toshiba                \
+          --disable-dell-backlight              \
+          $(option_enable acpi)                 \
+          $(option_enable acpi acpi-proc)       \
+          --disable-acpi-acpid                  \
+          $(option_enable apm)                  \
+          --disable-pmu                         \
+          --without-omap                        \
+          $(option_enable verbose verbose-mode) \
+          --disable-parted                      \
+          --disable-docbook-docs                \
+          --disable-doxygen-docs                \
+          --docdir=/usr/share/doc/${PF}
+}
+
+src_install()
+{
+    default
+
+    # Empty directories
+    rmdir "${D}"/usr/share/hal/fdi/{information,preprobe,policy}/20thirdparty \
+          "${D}"/usr/share/hal/fdi/information/{10freedesktop,}               \
+          "${D}"/usr/share/hal/fdi/preprobe/{10osvendor,}                     \
+    || die "failed to cleanup empty directories"
+
+    # useless directories
+    find "${D}"/var/run -depth -type d -print0 2> /dev/null | xargs -0 -r rmdir
+
+    # hal unmount helper for unclean unmounts
+    exeinto /lib/udev
+    newexe "${FILESDIR}/hal-unmount.dev" hal_unmount
+
+    # initscript
+    newinitd "${FILESDIR}/0.5.11-hald.rc" hald
+
+    # configuration
+    cp "${FILESDIR}/0.5.11-hald.conf" "${WORKDIR}/"
+
+    if option verbose ; then
+        sed -e 's:HALD_VERBOSE="no":HALD_VERBOSE="yes":' \
+            -i "${WORKDIR}/0.5.11-hald.conf" || die "sed failed"
+    fi
+
+    newconfd "${WORKDIR}/0.5.11-hald.conf" hald
+
+    dodoc "${WORKDIR}/hal-config-examples/"*.fdi
+    dobin "${WORKDIR}/hal-config-examples/migrate-xorg-to-fdi.py"
+
+    # create and keep /media to prevent DE mounters from colliding
+    keepdir /media
+
+    # HAL uses this location for its FDI cache
+    keepdir /var/lib/cache/hald/
+    fowners haldaemon:haldaemon /var/lib/cache/hald/
+
+    # cache directories
+    keepdir /etc/hal/fdi/{information,preprobe,policy}
+}
