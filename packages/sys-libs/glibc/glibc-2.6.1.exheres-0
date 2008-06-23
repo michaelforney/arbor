@@ -12,21 +12,22 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="build:
-                sys-apps/texinfo
-                sys-apps/gawk
-                dev-lang/perl
-                sys-apps/sed
-              run:
-                sys-libs/timezone-data"
+DEPENDENCIES="
+    build:
+        dev-lang/perl
+        sys-apps/gawk
+        sys-apps/sed
+        sys-apps/texinfo
+    run:
+        sys-libs/timezone-data"
 
 ECONF_SOURCE="${S}"
 BUILDDIR="${T}/build"
 
 src_unpack() {
     unpack ${A}
-    mv glibc-libidn-${PV} ${S}/libidn
-    mv glibc-ports-${PV} ${S}/ports
+    mv glibc-libidn-${PV} "${S}"/libidn || die "Moving glibc-libidn-${PV} failed."
+    mv glibc-ports-${PV} "${S}"/ports || die "Moving glibc-ports-${PV} failed."
 }
 
 src_configure() {
@@ -48,14 +49,15 @@ src_install() {
     LANGUAGE=C LC_ALL=C emake install_root="${D}" install || die "Install failed."
 
     # Don't install /etc/{ld.so.cache,localtime}
-    rm "${D}/etc/ld.so.cache" "${D}/etc/localtime"
+    rm "${D}/etc/ld.so.cache" "${D}/etc/localtime" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime."
 
     # don't install bundled timezone info
-    rm -r "${D}/usr/share/zoneinfo"
+    rm -r "${D}/usr/share/zoneinfo" || die "Couldn't remove bundled timezone info"
 
     cd "${S}"
     insinto /etc
-    doins conf/gai.conf nscd/nscd.conf nss/nsswitch.conf
+    doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
 
     dodoc BUGS CONFORMANCE ChangeLog* FAQ NEWS NOTES PROJECTS README*
 }
+
