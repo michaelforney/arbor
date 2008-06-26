@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require autotools
+
 DESCRIPTION="System call trace utility"
 HOMEPAGE="http://sourceforge.net/projects/strace"
 SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
@@ -12,13 +14,4 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_prepare() {
-    cd "${S}"
-    ls -l configure*
-    expatch "${FILESDIR}/${PN}-missing_include.patch"
-    autoconf
-}
-
-src_install() {
-    emake install DESTDIR="${D}" || die "Install failed."
-}
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${PN}-missing_include.patch" )
