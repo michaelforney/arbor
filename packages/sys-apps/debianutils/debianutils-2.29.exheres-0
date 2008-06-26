@@ -20,11 +20,11 @@ src_install() {
     # into /usr and include which.
 
     into /
-    dobin tempfile run-parts || die "dobin tempfile/runparts failed"
-    dosbin installkernel || die "dosbin installkernel failed"
+    dobin tempfile run-parts
+    dosbin installkernel
 
     into /usr
-    dosbin savelog mkboot || die "savelog/mkboot failed"
+    dosbin savelog mkboot
 
     doman tempfile.1 run-parts.8 savelog.8 installkernel.8 mkboot.8
     cd debian
