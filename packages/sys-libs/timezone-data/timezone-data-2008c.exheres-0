@@ -1,10 +1,12 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+code_pv=${PV/c/a}
+data_pv=${PV}
 DESCRIPTION="Timezone data"
 HOMEPAGE="ftp://elsie.nci.nih.gov/pub"
-SRC_URI="ftp://elsie.nci.nih.gov/pub/tzcode${PV}.tar.gz
-    ftp://elsie.nci.nih.gov/pub/tzdata${PV}.tar.gz"
+SRC_URI="ftp://elsie.nci.nih.gov/pub/tzcode${code_pv}.tar.gz
+         ftp://elsie.nci.nih.gov/pub/tzdata${data_pv}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -15,15 +17,15 @@ DEPENDENCIES=""
 
 src_test() {
     # Don't validate webpages as that requires open{jade+sp} dependencies
-    sed -i -e '/^check:/ s/ check_web//' Makefile
+    sed -i -e '/^check:/ s/ check_web//' Makefile || die "sed failed"
 
     emake AWK=awk check || die "Tests failed."
 }
 
 src_install() {
     # Fix weird installation paths
-    sed -i -e 's:-posix:/posix:' Makefile
-    sed -i -e 's:-leaps:/leaps:' Makefile
+    sed -i -e 's:-posix:/posix:' \
+           -e 's:-leaps:/leaps:' Makefile || die "sed failed"
 
     dodir /usr/bin
     emake \
@@ -31,7 +33,7 @@ src_install() {
         ETCDIR="${D}/usr/bin" \
         MANDIR="${D}/usr/share/man" \
         TOPDIR="${D}" \
-        install || die "Install failed."
+        install
 
     dodoc README Theory
 }
