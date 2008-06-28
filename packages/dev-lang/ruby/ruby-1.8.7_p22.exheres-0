@@ -3,7 +3,7 @@
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require autotools flag-o-matic multilib versionator
+require flag-o-matic multilib versionator autotools
 
 DESCRIPTION="An object-oriented scripting language"
 HOMEPAGE="http://www.ruby-lang.org/"
@@ -47,16 +47,15 @@ src_configure() {
         --disable-socks \
         --disable-threads \
         --without-tk \
-        $myconf \
-        || die "econf failed"
+        ${myconf}
 }
 
 src_compile() {
-    emake EXTLDFLAGS="${LDFLAGS}" || die "emake failed"
+    emake EXTLDFLAGS="${LDFLAGS}"
 }
 
 src_test() {
-    emake -j1 test || die "make test failed"
+    emake -j1 test
 }
 
 src_install() {
@@ -73,8 +72,8 @@ src_install() {
     default
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
-    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']") || die "vendor keepdir failed"
-    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']") || die "site keepdir failed"
+    keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
+            "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
 
     for i in ruby irb erb testrb rdoc ri; do
         dosym /usr/bin/$i$MY_SUFFIX /usr/bin/$i
@@ -83,8 +82,8 @@ src_install() {
     dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1
 
     if option examples; then
-        dodir /usr/share/doc/${PF}
-        cp -dpPR sample "${D}/usr/share/doc/${PF}"
+        insinto /usr/share/doc/${PF}
+        doins -r sample
     fi
 }
 
