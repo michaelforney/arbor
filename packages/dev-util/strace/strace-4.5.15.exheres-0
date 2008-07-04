@@ -12,6 +12,13 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+src_prepare() {
+    cd "${S}"
+    ls -l configure*
+    expatch "${FILESDIR}/${PN}-missing_include.patch"
+    autoconf
+}
+
 src_install() {
     emake install DESTDIR="${D}" || die "Install failed."
 }
