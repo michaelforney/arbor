@@ -1,0 +1,62 @@
+# Copyright 2007-2008 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+DESCRIPTION="GNU C library"
+HOMEPAGE="http://www.gnu.org/software/libc"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.bz2
+    http://ftp.gnu.org/gnu/${PN}/glibc-libidn-${PV}.tar.bz2
+    http://ftp.gnu.org/gnu/${PN}/glibc-ports-${PV}.tar.bz2"
+
+LICENSE="LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl
+        sys-apps/gawk
+        sys-apps/sed
+        sys-apps/texinfo
+    run:
+        sys-libs/timezone-data"
+
+ECONF_SOURCE="${S}"
+BUILDDIR="${T}/build"
+
+src_unpack() {
+    unpack ${A}
+    mv glibc-libidn-${PV} "${S}"/libidn || die "Moving glibc-libidn-${PV} failed."
+    mv glibc-ports-${PV} "${S}"/ports || die "Moving glibc-ports-${PV} failed."
+}
+
+src_configure() {
+    mkdir "${BUILDDIR}"
+    cd "${BUILDDIR}"
+    econf \
+        --with-crypt \
+        --with-add-ons
+}
+
+src_compile() {
+    cd "${BUILDDIR}"
+    emake
+}
+
+src_install() {
+    cd "${BUILDDIR}"
+    LANGUAGE=C LC_ALL=C emake install_root="${D}" install
+
+    # Don't install /etc/{ld.so.cache,localtime}
+    rm "${D}/etc/ld.so.cache" "${D}/etc/localtime" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime."
+
+    # don't install bundled timezone info
+    rm -r "${D}/usr/share/zoneinfo" || die "Couldn't remove bundled timezone info"
+
+    cd "${S}"
+    insinto /etc
+    doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
+
+    dodoc BUGS CONFORMANCE ChangeLog* FAQ NEWS NOTES PROJECTS README*
+}
+
