@@ -61,7 +61,7 @@ perl-module_src_configure() {
 perl-module_src_compile() {
     perlinfo
     if [[ -f Makefile ]]; then
-        emake -j1 ${mymake} || die "Compilation failed"
+        default
     elif [[ -f Build ]]; then
         perl Build build || die "Compilation failed"
     fi
@@ -70,7 +70,7 @@ perl-module_src_compile() {
 perl-module_src_test() {
     perlinfo
     if [[ -f Makefile ]]; then
-        emake -j1 test
+        default
     elif [[ -f Build ]]; then
         perl Build test || die "Test failed"
     fi
@@ -79,12 +79,11 @@ perl-module_src_test() {
 perl-module_src_install() {
     perlinfo
 
-    [[ -z ${mytargets} ]] && mytargets="install"
-
     if [[ -f Makefile ]]; then
-        emake -j1 ${myinst} ${mytargets}
+        default
     elif [[ -f Build ]]; then
         perl "${S}/Build" install
+        default
     fi
 
 
@@ -104,10 +103,6 @@ perl-module_src_install() {
         if [[ -n "${stat}" ]]; then
             sed -i -e "s:${D}:/:g" "${file}"
         fi
-    done
-
-    for doc in Change* README* ${mydoc}; do
-        [[ -s "${doc}" ]] && dodoc ${doc}
     done
 }
 
