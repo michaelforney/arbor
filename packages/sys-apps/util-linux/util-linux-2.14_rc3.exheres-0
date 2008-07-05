@@ -1,0 +1,29 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN="${PN}-ng"
+MY_P="${MY_PN}-${PV/_/-}"
+
+DESCRIPTION="Common linux utilities"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/util-linux-ng/"
+SRC_URI="mirror://kernel/linux/utils/${MY_PN}/v${PV:0:4}/${MY_P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+          dev-lang/perl
+        >=sys-fs/udev-112
+        >=sys-libs/ncurses-5.6
+        >=sys-fs/e2fsprogs-1.34
+    build:
+        >=sys-devel/gettext-0.14.1
+"
+
+S="${WORKDIR}/${MY_P}"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
