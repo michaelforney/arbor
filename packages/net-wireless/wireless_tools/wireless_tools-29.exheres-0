@@ -23,12 +23,7 @@ DEPENDENCIES="
         >=sys-fs/udev-120
 "
 
-DEFAULT_SRC_INSTALL_EMAKE_EXTRA_PARAMS="
-    PREFIX=\"${D}\"
-    INSTALL_INC=\"${D}/usr/include\"
-    INSTALL_MAN=\"${D}/usr/share/man\"
-"
-
+DEFAULT_SRC_INSTALL_PARAMS="PREFIX=${D}/usr"
 
 src_prepare() {
     sed -i \
