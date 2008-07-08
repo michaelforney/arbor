@@ -1,0 +1,68 @@
+# Copyright 2008 Wulf Krueger <philantrop@exherbo.org>
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require versionator
+
+MY_PV="${PV/rc/RC-}"
+MY_P="${PN}-$(replace_version_separator 3 - ${MY_PV})"
+
+DESCRIPTION="Cross platform Make"
+HOMEPAGE="http://www.cmake.org/"
+SRC_URI="http://www.cmake.org/files/v$(get_version_component_range 1-2)/${MY_P}.tar.gz"
+
+LICENSE="CMake"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="vim-syntax"
+
+DEPENDENCIES="
+    build+run:
+        >=net-misc/curl-7.16.4
+        >=dev-libs/expat-2.0.1
+        >=dev-libs/libxml2-2.6.28
+        >=dev-libs/xmlrpc-c-1.06.09
+        vim-syntax? (
+            || (
+                app-editors/vim
+                app-editors/gvim
+            )
+        )
+"
+
+VIMFILE="${PN}.vim"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}/${PN}-FindPythonLibs.patch" )
+
+src_configure() {
+    j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
+
+    echo ./bootstrap --parallel=${j:-1}
+    ./bootstrap \
+        --parallel=${j:-1} \
+        --no-qt-gui \
+        --system-libs \
+        --prefix=/usr \
+        --docdir=/share/doc/${PF} \
+        --datadir=/share/${PN} \
+        --mandir=/share/man \
+        || die "./bootstrap failed."
+}
+
+src_install() {
+    default
+
+    if option vim-syntax; then
+        insinto /usr/share/vim/vimfiles/syntax
+        doins "${S}"/Docs/cmake-syntax.vim
+
+        insinto /usr/share/vim/vimfiles/indent
+        doins "${S}"/Docs/cmake-indent.vim
+
+        insinto /usr/share/vim/vimfiles/ftdetect
+        doins "${FILESDIR}/${VIMFILE}"
+    fi
+}
+
