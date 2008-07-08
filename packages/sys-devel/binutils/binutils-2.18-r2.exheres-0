@@ -24,19 +24,20 @@ src_install() {
     mkdir -p "${D}/etc/env.d/binutils"
 
     insinto /etc/env.d/binutils
-    cat <<EOF > binutils.env
-TARGET="${CHOST}"
-VER="${PV}"
-LIBPATH="/usr/lib/binutils/${CHOST}-${PV}"
-FAKE_TARGETS="${CHOST}"
-EOF
+    cat <<-"    EOF" > binutils.env
+    TARGET="${CHOST}"
+    VER="${PV}"
+    LIBPATH="/usr/lib/binutils/${CHOST}-${PV}"
+    FAKE_TARGETS="${CHOST}"
+    EOF
+
     newins binutils.env ${CHOST}-${PV}
 
     # Make sure a binutils version is selected for ${CHOST}
     if [[ ! -e "${D}/etc/env.d/binutils/config-${CHOST}" ]]; then
-        cat <<EOF > "${D}/etc/env.d/binutils/config-${CHOST}"
-CURRENT="${PV}"
-EOF
+        cat <<-"        EOF" > "${D}/etc/env.d/binutils/config-${CHOST}"
+        CURRENT="${PV}"
+        EOF
     fi
 
     for f in "${D}"/usr/${CHOST}/bin/* ; do
