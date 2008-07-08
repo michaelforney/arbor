@@ -15,6 +15,7 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILESDIR}/76_all_use-new-ld-dtags.patch"
 )
+DEFAULT_SRC_CONFIGURE_PARAMS="--host=${CHOST}"
 
 src_install() {
     default
@@ -37,4 +38,12 @@ EOF
 CURRENT="${PV}"
 EOF
     fi
+
+    for f in "${D}"/usr/${CHOST}/bin/* ; do
+        target=${f#${D}}
+        name=${f##*/}
+        dosym ${target} /usr/bin/${CHOST}-${name} || die "dosym ${target} ${CHOST}-${name} failed."
+        dosym ${target} /usr/bin/${name} || die "dosym ${target} ${name} failed."
+     done
 }
+
