@@ -1,0 +1,157 @@
+# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'cmake-utils.eclass' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+# The cmake exlib contains functions that make creating ebuilds for
+# cmake-based packages easy.
+# Its main features are support of out-of-source builds as well as in-source
+# builds and an implementation of the well-known option_enable and option_with
+# functions for CMake.
+
+require multilib toolchain-funcs
+
+DEPENDENCIES="
+    build:
+        >=dev-util/cmake-2.6.0"
+
+export_exlib_phases src_configure src_compile src_test src_install
+
+ECMAKE_BUILD_DIR="${WORKDIR}"/${PN}_build
+
+# Similar to option_enable for cmake. A few examples:
+#   `cmake_enable Foo`     -> foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
+#   `cmake_enable FOO`     -> foo ? -DENABLE_FOO=ON : -DENABLE_FOO=OFF
+#   `cmake_enable foo Bar` -> foo ? -DENABLE_Bar=ON : -DENABLE_Bar=OFF
+#   `cmake_enable Foo Foo` -> Foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
+cmake_enable() {
+    _cmake_option ENABLE "$@"
+}
+
+# Similar to cmake_enable but using HAVE instead of ENABLE.
+cmake_have() {
+    _cmake_option HAVE "$@"
+}
+
+# Similar to cmake_enable but using WANT instead of ENABLE.
+cmake_want() {
+    _cmake_option WANT "$@"
+}
+
+# Similar to cmake_enable but using WITH instead of ENABLE.
+cmake_with() {
+    _cmake_option WITH "$@"
+}
+
+# Calls cmake with default arguments. If CMAKE_NO_COLOR is set it disables
+# colours. If debug is in MYOPTIONS and enabled it sets build type to Debug
+# rather than Release. It also respects the following variables similarly to
+# default_src_configure and econf:
+#    CMAKE_SRC_CONFIGURE_PARAMS
+#    CMAKE_SRC_CONFIGURE_OPTION_ENABLES
+#    CMAKE_SRC_CONFIGURE_OPTION_HAVES
+#    CMAKE_SRC_CONFIGURE_OPTION_WANTS
+#    CMAKE_SRC_CONFIGURE_OPTION_WITHS
+#    EXTRA_ECONF
+# All arguments passed to ecmake are passed on to cmake right before $EXTRA_ECONF.
+ecmake() {
+    case "${ECMAKE_BUILD_TYPE-out-of-source}" in
+        in-source)
+            ;;
+        out-of-source)
+            mkdir -p "${ECMAKE_BUILD_DIR}" || \
+                die_unless_nonfatal "Failed to create ${PN}_build" || return 1
+            pushd "${ECMAKE_BUILD_DIR}" || \
+                die_unless_nonfatal "Could not enter ${PN}_build" || return 1
+            ;;
+        *)
+            die_unless_nonfatal "Invalid value for ECMAKE_BUILD_TYPE, ${ECMAKE_BUILD_TYPE}." || return 1
+            ;;
+    esac
+
+    local cmakeargs tmp_libdir=$(get_libdir)
+
+    cmakeargs="${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
+        -DCMAKE_C_COMPILER=$(type -P $(tc-getCC))
+        -DCMAKE_CXX_COMPILER=$(type -P $(tc-getCXX))
+        -DCMAKE_INSTALL_PREFIX=${PREFIX:=/usr}
+        -DLIB_SUFFIX=${tmp_libdir/lib}
+        -DLIB_INSTALL_DIR=${PREFIX}/${tmp_libdir}"
+    if has debug ${MYOPTIONS} && option debug; then
+        cmakeargs+=" -DCMAKE_BUILD_TYPE=Debug"
+    else
+        cmakeargs+=" -DCMAKE_BUILD_TYPE=Release"
+    fi
+
+    echo cmake ${cmakeargs} "$@" ${EXTRA_ECONF} "${S}"
+    cmake ${cmakeargs} "$@" ${EXTRA_ECONF} "${S}" || die_unless_nonfatal "Cmake failed" || return 1
+
+    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+        popd
+    fi
+}
+
+# Function for configuring a package. Set ECMAKE_BUILD_TYPE=in-source to make this
+# exlib perform the build in the sources. Otherwise it defaults to
+# out-of-source.
+cmake_src_configure() {
+    ecmake \
+        ${CMAKE_SRC_CONFIGURE_PARAMS[@]} \
+        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_ENABLES[@]} ; do
+            cmake_enable "${s}"
+        done ) \
+        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_HAVES[@]} ; do
+            cmake_have "${s}"
+        done ) \
+        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_WANTS[@]} ; do
+            cmake_want "${s}"
+        done ) \
+        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_WITHS[@]} ; do
+            cmake_with "${s}"
+        done )
+}
+
+# Function for building the package. Automatically detects the correct build
+# dir.  All arguments including CMAKE_SRC_COMPILE_PARAMS are passed to emake.
+# Set CMAKE_VERBOSE to make cmake more verbose.
+cmake_src_compile() {
+    _cmake_run emake ${CMAKE_SRC_COMPILE_PARAMS[@]} ${CMAKE_VERBOSE:+VERBOSE=1} "$@"
+}
+
+# Function for testing the package. Automatically detects the build dir. Uses
+# default_src_test.
+cmake_src_test() {
+    _cmake_run default_src_test
+}
+
+# Function for installing the package. Automatically detects the build dir.
+# Uses default_src_install.
+cmake_src_install() {
+    _cmake_run default_src_install
+}
+
+### Functions below this are for internal use only.
+
+# Used by cmake_enable, cmake_have, cmake_want and cmake_with.
+_cmake_option() {
+    [[ -n ${2} ]] || die "cmake_$(tr '[:upper:]' '[:lower:]' <<< "${1}") <option flag> [<flag name>]"
+    local flag
+    if [[ -n ${3} ]]; then
+        flag=${2}
+    else
+        flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
+    fi
+    echo "-D${1}_${3:-${2}}=$(option ${flag} && echo ON || echo OFF)"
+}
+
+# Used to enter the correct build dir and run a command in
+# cmake_src_{compile,test,install}.
+_cmake_run() {
+    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+        pushd "${ECMAKE_BUILD_DIR}"
+    fi
+    "${@}"
+    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+        popd
+    fi
+}
