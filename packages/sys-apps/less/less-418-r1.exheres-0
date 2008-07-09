@@ -1,0 +1,43 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+LESSPIPE_PV=1.53
+
+DESCRIPTION="Popular pager utility"
+HOMEPAGE="http://www.greenwoodsoftware.com/less"
+SRC_URI="http://www.greenwoodsoftware.com/${PN}/${P}.tar.gz
+         ftp://ftp.ifh.de/pub/unix/utility/lesspipe-${LESSPIPE_PV}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_configure()
+{
+    # cant use econf as its not really autotools, just a terrible shell script
+    cd "${WORKDIR}/lesspipe-${LESSPIPE_PV}"
+    ./configure --prefix=/usr --default --nomake || \
+        die "failed to configure lesspipe"
+
+    cd "${S}"
+    default
+}
+
+src_install() {
+    emake DESTDIR="${D}" install || die "Install failed."
+    dodoc INSTALL NEWS README
+
+    cd "${WORKDIR}/lesspipe-${LESSPIPE_PV}"
+    dobin code2color lesspipe.sh sxw2txt
+    cat << EOF > "${S}/70less"
+LESSOPEN="| lesspipe.sh %S"
+LESS="-R -M --shift 5"
+EOF
+
+    doenvd "${S}/70less"
+    doman lesspipe.1
+}
