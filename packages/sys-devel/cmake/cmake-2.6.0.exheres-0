@@ -34,8 +34,6 @@ DEPENDENCIES="
 
 VIMFILE="${PN}.vim"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}/${PN}-FindPythonLibs.patch" )
-
 src_configure() {
     j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
 
