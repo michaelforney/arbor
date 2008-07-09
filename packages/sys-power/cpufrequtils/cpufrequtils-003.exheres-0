@@ -11,16 +11,12 @@ SRC_URI="mirror://kernel/linux/utils/kernel/cpufreq/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug nls"
 
 DEPENDENCIES="
     build+run:
         sys-fs/sysfsutils"
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}"/${P}-parallel-make.patch
-)
 
 src_compile() {
     emake V=true CC=$(tc-getCC) LD=$(tc-getCC) AR=$(tc-getAR) \
