@@ -3,8 +3,6 @@
 # Based in part upon 'iso-codes-1.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-WANT_AUTOMAKE="latest"
-WANT_AUTOCONF="none"
 require autotools
 
 DESCRIPTION="Provides the list of country and language names"
@@ -18,14 +16,14 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build:
+          sys-devel/gettext
         >=dev-lang/python-2.3
-        sys-devel/gettext"
+"
 
 src_prepare() {
-	sed -e 's:(datadir)/pkgconfig:(libdir)/pkgconfig:g' \
+    sed -e 's:(datadir)/pkgconfig:(libdir)/pkgconfig:g' \
         -i "${S}"/Makefile.am \
-        || die "Fixing pc file install location failed."
+    || die "Fixing pc file install location failed."
 
-	eautomake
+    eautoreconf
 }
-
