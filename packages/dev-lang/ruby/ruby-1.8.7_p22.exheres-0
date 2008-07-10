@@ -78,7 +78,7 @@ src_install() {
             "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
 
     for i in ruby irb erb testrb rdoc ri; do
-        dosym /usr/bin/${i}${MY_SUFFIX}/usr/bin/${i}
+        dosym /usr/bin/${i}${MY_SUFFIX} /usr/bin/${i}
     done
 
     dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1
