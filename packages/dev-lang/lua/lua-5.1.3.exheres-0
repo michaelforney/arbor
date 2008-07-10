@@ -55,15 +55,12 @@ src_test() {
     # Skipped, because they're interactive: globals luac table xd
     tests="bisect cf echo env factorial fibfor fib hello life printf readonly sieve sort trace-calls trace-globals"
     for t in ${tests}; do
-        ret=0
         echo "./src/lua test/${t}.lua"
-        ./src/lua test/${t}.lua || ret=$?
-
         case ${t} in
             readonly)
-                [[ ${ret} != 0 ]] || die "Test ./src/lua test/${t}.lua failed." ;;
+                ./src/lua test/${t}.lua && die "Test ./src/lua test/${t}.lua failed." ;;
             *)
-                [[ ${ret} != 0 ]] && die "Test ./src/lua test/${t}.lua failed." ;;
+                ./src/lua test/${t}.lua || die "Test ./src/lua test/${t}.lua failed." ;;
         esac
     done
 }
