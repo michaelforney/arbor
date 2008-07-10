@@ -1,0 +1,25 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gnu-gs-fonts-std-8.11.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+DESCRIPTION="Ghostscript Standard Fonts"
+HOMEPAGE="http://www.cups.org/"
+SRC_URI="mirror://sourceforge/ghostscript/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+S="${WORKDIR}/fonts"
+
+src_install() {
+    insinto /usr/share/fonts/default/ghostscript
+    doins *.{afm,pfb,pfm} fonts.{dir,scale}
+    dodoc ChangeLog README* TODO
+}
+
