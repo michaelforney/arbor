@@ -12,13 +12,10 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-src_configure() {
-    econf $(option_enable nls) || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
-    dodoc ABOUT-NLS AUTHORS INSTALL NEWS README README-alpha THANKS TODO
+    default
     rmdir "${D}"/var{/lib,}
 }
 
