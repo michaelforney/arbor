@@ -7,20 +7,15 @@ SRC_URI="http://ftp.isc.org/isc/dhcp/${P}.tar.gz"
 
 LICENSE="ISC"
 SLOT="0"
-PLATFORMS="~x86"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ipv6"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        sys-apps/net-tools"
 
 src_configure() {
-    local myconf
-
-    if option ipv6; then
-            myconf="${myconf} --enable-dhcpv6"
-    fi
-    econf ${myconf} || die "Configure failed" 
+    econf \
+        $(option_enable ipv6 dhcpv6)
 }
 
-src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
-}
