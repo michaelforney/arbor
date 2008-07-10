@@ -38,7 +38,7 @@ src_configure() {
         myconf+=" --with-lookup-order-hack=INET"
     fi
 
-    econf --program-suffix=$MY_SUFFIX --enable-shared \
+    econf --program-suffix=${MY_SUFFIX} --enable-shared \
         $(option_enable doc install-doc) \
         $(option_enable debug) \
         $(option_with berkdb dbm) \
@@ -59,6 +59,7 @@ src_test() {
 }
 
 src_install() {
+    unset RUBYOPT
     D_LIBDIR="${D}/usr/$(get_libdir)"
     LD_LIBRARY_PATH="${D_LIBDIR}"
     RUBYLIB="${S}:${D_LIBDIR}/ruby/${SLOT}"
@@ -72,11 +73,12 @@ src_install() {
     default
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
+    ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run."
     keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
             "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
 
     for i in ruby irb erb testrb rdoc ri; do
-        dosym /usr/bin/$i$MY_SUFFIX /usr/bin/$i
+        dosym /usr/bin/${i}${MY_SUFFIX}/usr/bin/${i}
     done
 
     dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1

@@ -36,7 +36,6 @@ src_prepare() {
         configure.in || die "sed failed"
 
     default
-    eautoreconf
 }
 
 src_configure() {
@@ -73,6 +72,7 @@ src_test() {
 }
 
 src_install() {
+    unset RUBYOPT
     D_LIBDIR="${D}/usr/$(get_libdir)"
     LD_LIBRARY_PATH="${D_LIBDIR}"
     RUBYLIB="${S}:${D_LIBDIR}/ruby/${SLOT}"
@@ -86,13 +86,14 @@ src_install() {
     emake DESTDIR="${D}" install || die "make install failed"
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
-    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitelibdir']")
-    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")
+    ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run."
+    keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitelibdir']") \
+            $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")
 
     dodoc ChangeLog NEWS README* ToDo
 
     for i in ruby irb erb testrb rdoc ri; do
-        dosym /usr/bin/$i$MY_SUFFIX /usr/bin/$i
+        dosym /usr/bin/${i}${MY_SUFFIX} /usr/bin/${i}
     done
 
     if option doc; then
