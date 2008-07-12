@@ -1,0 +1,33 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Purpose License v2
+# Based in part upon 'alsa-headers-1.0.16.ebuild' which is
+#    Copyright 1999-2008 Gentoo Foundation
+
+MY_PN="${PN/headers/driver}"
+MY_P="${MY_PN}-${PV}"
+
+DESCRIPTION="Headers for ALSA Kernel modules"
+HOMEPAGE="http://www.alsa-project.org/"
+SRC_URI="mirror://alsaproject/driver/${MY_P}.tar.bz2"
+
+LICENSE="GPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+S="${WORKDIR}/${MY_P}"
+
+RESTRICT="test"
+
+src_configure() { :; }
+src_compile() { :; }
+
+src_install()
+{
+    cd "${S}/alsa-kernel/include"
+
+    insinto /usr/include/sound
+    doins *.h
+}
