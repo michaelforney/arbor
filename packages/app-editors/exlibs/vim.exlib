@@ -28,6 +28,7 @@ export_exlib_phases src_prepare src_configure src_compile src_test src_install p
 VIM_VERSION="${VIM_VERSION:-$(get_version_component_range 1-2)}"
 VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL:-${PV#${VIM_VERSION}.}}"
 VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL##0}"
+VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL:-0}"
 
 HOMEPAGE="http://www.vim.org/"
 LICENSE="vim"
@@ -104,11 +105,11 @@ vim_src_uri_patches() {
     done
 }
 
-VIM_BASE_URI="ftp://ftp.vim.org/pub/vim"
+VIM_BASE_URI="${VIM_BASE_URI:-ftp://ftp.vim.org/pub/vim}"
 SRC_URI="${VIM_BASE_URI}/unix/vim-${VIM_VERSION}.tar.bz2
     ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-lang.tar.gz
     ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-extra.tar.gz
-    http://dev.exherbo.org/~pioto/distfiles/vim-${VIM_VERSION}-exherbo-patches.tar.bz2
+    ${VIM_EXHERBO_PATCHES_URI:-http://dev.exherbo.org/~pioto/distfiles/vim-${VIM_VERSION}-exherbo-patches.tar.bz2}
     $(vim_src_uri_patches SRC_URI)"
 S="${WORKDIR}/vim${VIM_VERSION//.}"
 
