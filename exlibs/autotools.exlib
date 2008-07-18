@@ -87,7 +87,7 @@ eautoreconf() {
 
     auxdir=$(autotools_get_auxdir)
 
-    einfo "Running eautoreconf in '$(pwd)' ..."
+    echo "eautoreconf: running in ${PWD} ..."
     [[ -n ${auxdir} ]] && mkdir -p ${auxdir}
     eaclocal
     _elibtoolize --copy --force
@@ -187,25 +187,14 @@ eautomake() {
 
 # Internal function to run an autotools' tool
 autotools_run_tool() {
-    local STDERR_TARGET="${T}/$$.out"
-    local ris
+    local ret=0
 
-    echo "***** $1 *****" > ${STDERR_TARGET%/*}/$1-${STDERR_TARGET##*/}
-    echo >> ${STDERR_TARGET%/*}/$1-${STDERR_TARGET##*/}
+    echo $@
+    $@
+    ret=$?
 
-    ebegin "Running $@"
-    $@ >> ${STDERR_TARGET%/*}/$1-${STDERR_TARGET##*/} 2>&1
-    ris=$?
-    eend ${ris}
-
-    if [[ ${ris} != 0 && ${NO_FAIL} != 1 ]]; then
-        echo
+    if [[ ${ret} != 0 && ${NO_FAIL} != 1 ]]; then
         eerror "Failed Running $1 !"
-        eerror
-        eerror "Include in your bugreport the contents of:"
-        eerror
-        eerror "  ${STDERR_TARGET%/*}/$1-${STDERR_TARGET##*/}"
-        echo
         die "Failed Running $1 !"
     fi
 }
@@ -253,3 +242,4 @@ autotools_src_prepare() {
 
     eautoreconf
 }
+
