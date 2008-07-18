@@ -6,7 +6,7 @@
 #
 # Original author of aforementioned ebuild: Tiziano Mueller <dev-zero@gentoo.org>
 
-require versionator flag-o-matic multilib toolchain-funcs ## check_requirements, 1024M disk
+require versionator flag-o-matic multilib toolchain-funcs python ## check_requirements, 1024M disk
 
 MY_P=${PN}_$(replace_all_version_separators '_')
 
@@ -45,11 +45,34 @@ ebjam() {
 
     echo "${S}"/tools/jam/src/bin.linux${arch}/bjam ${BJAM_OPTIONS[@]} "$@"
     "${S}"/tools/jam/src/bin.linux${arch}/bjam ${BJAM_OPTIONS[@]} "$@" \
-        || die 'ebjam failed.'
+        || die_unless_nonfatal 'ebjam failed.'
 }
 
 generate_user_config.jam() {
-    :
+    python_version
+
+    cat >"${S}"/user-config.jam <<EOF
+variant exherbo : release : <optimization>custom <debug-symbols>custom ;
+
+using gcc : $(gcc-fullversion) : $(tc-getCXX) : <cxxflags>"${CXXFLAGS}" <linkflags>"${LDFLAGS}" ;
+using python : ${PYVER} : /usr : /usr/include/python${PYVER} : /usr/lib/python${PYVER} ;
+
+EOF
+    echo "Using ${S}/user-config.jam:"
+    cat "${S}"/user-config.jam
+}
+
+src_prepare() {
+    default
+
+    # Don't strip
+    sed -e "s/-s\b//" -i "${S}"/tools/jam/src/build.jam || die "Sed to remove stripping failed."
+
+    # <optimization>off forces -O0 on, overriding the user's flags, so we add dummy options "custom",
+    # and use those instead, allowing user's *FLAGS to be used.
+    sed -e "s/off speed space/& custom/" \
+        -e "s/debug-symbols[[:space:]]*: on off/& custom/" \
+        -i "${S}"/tools/build/v2/tools/builtin.jam || die "Sed to control optimisation failed."
 }
 
 src_configure() {
@@ -68,7 +91,8 @@ src_configure() {
     BJAM_OPTIONS=(
         -q                          # Stop at first error
         -j${j:-1}                   # Parallel make, note: '-j' without a digit just hangs. FIXME exlibify
-        --release
+        exherbo
+        --user-config=${S}/user-config.jam
         --layout=system
         --prefix="${D}"/usr
         --toolset=gcc               # FIXME
@@ -97,7 +121,7 @@ src_test() {
 
     cd "${S}/status"
     
-    ebjam --dump-tests 2>&1 | tee regress.log
+    nonfatal ebjam --dump-tests 2>&1 | tee regress.log
 
     "${S}/dist/bin/process_jam_log" --v2 < regress.log || ewarn "Post-processing ./regress.log failed."
     cat > "${S}/status/comment.html" <<-EOF
