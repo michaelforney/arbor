@@ -1,13 +1,12 @@
-# Copyright 1999-2007 Gentoo Foundation
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/autotools.eclass,v 1.65 2007/03/04 21:03:59 vapier Exp $
 #
-# Maintainer: base-system@gentoo.org
+# Based in part upon autotools.eclass which is:
+#    Copyright 1999-2007 Gentoo Foundation
+#    $Header: /var/cvsroot/gentoo-x86/eclass/autotools.eclass,v 1.65 2007/03/04 21:03:59 vapier Exp $
 #
-# This eclass is for handling autotooled software packages that
-# needs to regenerate their build scripts.
-#
-# NB:  If you add anything, please comment it!
+# This exlib is for handling autotooled software packages that
+# need to regenerate their build scripts.
 
 export_exlib_phases src_prepare
 
@@ -18,8 +17,7 @@ _automake_atom="sys-devel/automake"
 _autoconf_atom="sys-devel/autoconf"
 if [[ -n ${WANT_AUTOMAKE} ]]; then
     case ${WANT_AUTOMAKE} in
-        # workaround while we have different versions of automake in arch and ~arch
-        none) _automake_atom="" ;; # some packages don't require automake at all
+        none) _automake_atom="" ;;
         latest) _automake_atom="=sys-devel/automake-1.10*" ;;
         *) _automake_atom="=sys-devel/automake-${WANT_AUTOMAKE}*" ;;
     esac
@@ -35,6 +33,7 @@ if [[ -n ${WANT_AUTOCONF} ]] ; then
     [[ ${WANT_AUTOCONF} == "latest" ]] && WANT_AUTOCONF="2.5"
     export WANT_AUTOCONF
 fi
+
 DEPENDENCIES="build: ${_automake_atom}
     ${_autoconf_atom}
     sys-devel/libtool"
@@ -61,16 +60,10 @@ unset _automake_atom _autoconf_atom
 #   eautoconf      - Runs autoconf.
 #   eautoheader    - Runs autoheader.
 #   eautomake      - Runs automake
-#
-
-# XXX: M4DIR should be depreciated
-AT_M4DIR=${AT_M4DIR:-${M4DIR}}
-AT_GNUCONF_UPDATE="no"
 
 
 # This function mimes the behavior of autoreconf, but uses the different
-# eauto* functions to run the tools. It doesn't accept parameters, but
-# the directory with include files can be specified with AT_M4DIR variable.
+# eauto* functions to run the tools. It doesn't take any parameters.
 eautoreconf() {
     local pwd=$(pwd) x auxdir
 
@@ -88,7 +81,7 @@ eautoreconf() {
     auxdir=$(autotools_get_auxdir)
 
     echo "eautoreconf: running in ${PWD} ..."
-    [[ -n ${auxdir} ]] && mkdir -p ${auxdir}
+    [[ -n ${auxdir} ]] && mkdir -p "${auxdir}"
     eaclocal
     _elibtoolize --copy --force
     eautoconf
@@ -96,8 +89,8 @@ eautoreconf() {
     FROM_EAUTORECONF="yes" eautomake ${AM_OPTS}
 }
 
-# These functions runs the autotools using autotools_run_tool with the
-# specified parametes. The name of the tool run is the same of the function
+# These functions run the autotools using autotools_run_tool with the
+# specified parametres. The name of the tool run is the same of the function
 # without e prefix.
 # They also force installing the support files for safety.
 eaclocal() {
@@ -122,13 +115,12 @@ eaclocal() {
 }
 
 _elibtoolize() {
-    local opts
-    local lttest
+    local opts lttest
 
     # Check if we should run libtoolize (AM_PROG_LIBTOOL is an older macro,
-    # check for both it and the current AC_PROG_LIBTOOL)
+    # check for both AM_PROG_LIBTOOL and the current AC_PROG_LIBTOOL)
     lttest="$(autotools_check_macro "AC_PROG_LIBTOOL")$(autotools_check_macro "AM_PROG_LIBTOOL")"
-    [[ -n $lttest ]] || return 0
+    [[ -n ${lttest} ]] || return 0
 
     [[ -f Makefile.am ]] && opts="--automake"
 
@@ -148,9 +140,9 @@ eautoheader() {
 eautoconf() {
     if [[ ! -f configure.ac && ! -f configure.in ]] ; then
         echo
-        eerror "No configure.{ac,in} present in '$(pwd | sed -e 's:.*/::')'!"
+        eerror "No configure.{ac,in} present in ${PWD##*/}!"
         echo
-        die "No configure.{ac,in} present!"
+        die "No configure.{ac,in} present in ${PWD##*/}!"
     fi
 
     autotools_run_tool autoconf "$@"
@@ -162,8 +154,7 @@ eautomake() {
     [[ -f Makefile.am ]] || return 0
 
     if [[ -z ${FROM_EAUTORECONF} && -f Makefile.in ]]; then
-        local used_automake
-        local installed_automake
+        local used_automake installed_automake
 
         installed_automake=$(automake --version | head -n 1 | \
             sed -e 's:.*(GNU automake) ::')
@@ -171,8 +162,7 @@ eautomake() {
             sed -e 's:.*by automake \(.*\) from .*:\1:')
 
         if [[ ${installed_automake} != ${used_automake} ]]; then
-            einfo "Automake used for the package (${used_automake}) differs from"
-            einfo "the installed version (${installed_automake})."
+            einfo "Automake used for the package (${used_automake}) differs from the installed version (${installed_automake})."
             eautoreconf
             return 0
         fi
