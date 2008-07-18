@@ -20,9 +20,11 @@ fi
 # Default license, for packages licensed under perl's terms.
 LICENSE="${LICENSE:-|| ( Artistic GPL GPL-2 GPL-3 )}"
 
-DEPENDENCIES="
-build+run:
-    dev-lang/perl"
+case ${PN} in
+    # Avoid circular dependencies
+    Pod-Parser) : ;;
+    *) DEPENDENCIES="build+run: dev-lang/perl" ;;
+esac
 
 
 PERL_VERSION=""
