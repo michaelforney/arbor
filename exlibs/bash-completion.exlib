@@ -7,15 +7,11 @@
 # bash-completion scripts.
 #
 # Author: Aaron Walker <ka0ttic@gentoo.org>
-#
-# Please assign any bug reports to shell-tools@gentoo.org.
 
 export_exlib_phases pkg_postinst
 
 MYOPTIONS="bash-completion"
 
-# bash-completion-config is deprecated in favor of eselect,
-# however, eselect currently lacks stable keywords.
 DEPENDENCIES="
     run:
         bash-completion? (
@@ -44,21 +40,8 @@ dobashcompletion() {
 
 bash-completion_pkg_postinst() {
     if optionq bash-completion ; then
-        echo
         elog "To enable command-line completion for ${PN}, run:"
-        elog
-        if has_version app-admin/eselect ; then
-            elog "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
-        else
-            elog "  bash-completion-config --install ${BASH_COMPLETION_NAME:-${PN}}"
-            elog
-            elog "to install locally, or"
-            elog
-            elog "  bash-completion-config --global --install ${BASH_COMPLETION_NAME:-${PN}}"
-            elog
-            elog "to install system-wide."
-            elog "Read bash-completion-config(1) for more information."
-        fi
-        echo
+        elog "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
     fi
 }
+
