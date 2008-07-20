@@ -15,6 +15,10 @@ DEPENDENCIES=""
 S="${WORKDIR}/linux-${PV}"
 
 # FIXME: Need to sanitize headers at some point
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}"/${P}-includefix.patch
+    )
+
 
 src_compile() {
     # Fix ARCH to match linux-headers values
