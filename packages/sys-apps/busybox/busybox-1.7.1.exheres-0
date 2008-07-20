@@ -15,6 +15,10 @@ DEPENDENCIES="build:
 
 RESTRICT="test"
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}"/${PN}-1.10.0-tcpudp.patch
+    )
+
 src_compile() {
     emake defconfig || die "Failed to make default config."
     emake || die "Make failed."
