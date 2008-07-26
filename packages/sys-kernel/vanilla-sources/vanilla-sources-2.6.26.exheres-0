@@ -1,0 +1,25 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+
+DESCRIPTION="Linux kernel"
+HOMEPAGE="http://www.kernel.org"
+SRC_URI="mirror://kernel/linux/kernel/v2.6/linux-${PV}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="${PV}"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_unpack() {
+    dodir /usr/src
+    cd "${D}/usr/src"
+    unpack ${A}
+}
+
+src_compile() {
+    :
+}
+
