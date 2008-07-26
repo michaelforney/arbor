@@ -3,7 +3,7 @@
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require toolchain-funcs pam
+require eutils toolchain-funcs pam
 
 PATCH_VER="1.0"
 
@@ -50,13 +50,13 @@ src_install() {
     diropts -m0750; keepdir /etc/cron.{hourly,daily,weekly,monthly}
     diropts -m0750 -o root -g cron; keepdir /var/spool/cron
     diropts -m0750; keepdir /var/spool/cron/lastrun
-    diropts -m 1730 -o root -g crontab; keepdir /var/spool/cron/crontabs
+    diropts -m 1730 -o root -g cron; keepdir /var/spool/cron/crontabs
 
     exeopts -m 0750 -o root -g wheel
     exeinto /usr/sbin
     doexe cron
 
-    exeopts -m 2755 -o root -g crontab
+    exeopts -m 2755 -o root -g cron
     exeinto /usr/bin
     doexe crontab
 
