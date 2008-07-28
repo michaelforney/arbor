@@ -121,7 +121,7 @@ src_test() {
 
     cd "${S}/status"
     
-    nonfatal ebjam --dump-tests 2>&1 | tee regress.log
+    ebjam --dump-tests 2>&1 | tee regress.log
 
     "${S}/dist/bin/process_jam_log" --v2 < regress.log || ewarn "Post-processing ./regress.log failed."
     cat > "${S}/status/comment.html" <<-EOF
@@ -158,13 +158,13 @@ src_install() {
             || die "Couldn't clean out ./libs/."
         doins -r libs
 
-        doins LICENSE_1_0.txt # Avoid broken links
+        doins LICENSE_1_0.txt # Avoid broken links (FIXME)
 
         dosym /usr/include/${PN} /usr/share/doc/${PF}/html/${PN}
     fi
 
     docinto status
-    nonfatal dodoc "${S}"/status/*.{html,gif} "${S}"/boost.png regress.log \
+    nonfatal dodoc "${S}"/status/{*.html,regress.log} "${S}"/boost.png \
         || echo "No cs-*.html found, you probably didn't run src_test(). No cookies for you."
 }
 
