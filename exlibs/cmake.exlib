@@ -76,7 +76,8 @@ ecmake() {
         -DCMAKE_CXX_COMPILER=$(type -P $(tc-getCXX))
         -DCMAKE_INSTALL_PREFIX=${PREFIX:=/usr}
         -DLIB_SUFFIX=${tmp_libdir/lib}
-        -DLIB_INSTALL_DIR=${PREFIX}/${tmp_libdir}"
+        -DLIB_INSTALL_DIR=${PREFIX}/${tmp_libdir}
+        -DCMAKE_NO_BUILTIN_CHRPATH:BOOL=ON" # Gentoo 224901
     if has debug ${MYOPTIONS} && option debug; then
         cmakeargs+=" -DCMAKE_BUILD_TYPE=Debug"
     else
