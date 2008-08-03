@@ -43,8 +43,9 @@ ebjam() {
         *) die "Unknown arch" ;;
     esac
 
-    echo "${S}"/tools/jam/src/bin.linux${arch}/bjam ${BJAM_OPTIONS[@]} "$@"
-    "${S}"/tools/jam/src/bin.linux${arch}/bjam ${BJAM_OPTIONS[@]} "$@" \
+    # -q: Stop at first error, unless we're called using nonfatal
+    echo "${S}"/tools/jam/src/bin.linux${arch}/bjam $(is_nonfatal || echo "-q") ${BJAM_OPTIONS[@]} "$@"
+    "${S}"/tools/jam/src/bin.linux${arch}/bjam $(is_nonfatal || echo "-q") ${BJAM_OPTIONS[@]} "$@" \
         || die_unless_nonfatal 'ebjam failed.'
 }
 
@@ -89,13 +90,12 @@ src_configure() {
     [[ -z ${j} ]] && ewarn "Couldn't determine number of jobs from \$MAKEOPTS='${MAKEOPTS}', falling back to -j1"
 
     BJAM_OPTIONS=(
-        -q                          # Stop at first error
         -j${j:-1}                   # Parallel make, note: '-j' without a digit just hangs. FIXME exlibify
         exherbo
         --user-config=${S}/user-config.jam
         --layout=system
         --prefix="${D}"/usr
-        --toolset=gcc               # FIXME
+        --toolset=gcc               # FIXME: don't hardcode gcc
         link=shared
         runtime-link=shared
         threading=single,multi
@@ -121,7 +121,7 @@ src_test() {
 
     cd "${S}/status"
     
-    ebjam --dump-tests 2>&1 | tee regress.log
+    nonfatal ebjam --dump-tests 2>&1 | tee regress.log || ewarn "'ebjam --dump-tests' returned non-zero exit status: $?"
 
     "${S}/dist/bin/process_jam_log" --v2 < regress.log || ewarn "Post-processing ./regress.log failed."
     cat > "${S}/status/comment.html" <<-EOF
