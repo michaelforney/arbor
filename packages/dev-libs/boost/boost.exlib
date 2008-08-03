@@ -123,17 +123,26 @@ src_test() {
     
     nonfatal ebjam --dump-tests 2>&1 | tee regress.log || ewarn "'ebjam --dump-tests' returned non-zero exit status: $?"
 
-    "${S}/dist/bin/process_jam_log" --v2 < regress.log || ewarn "Post-processing ./regress.log failed."
+    "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/process_jam_log --v2 < regress.log \
+        || ewarn "Post-processing ./regress.log failed."
     cat > "${S}/status/comment.html" <<-EOF
 <p>Tests are run on an <a href="http://www.exherbo.org">Exherbo</a> system.</p>
 EOF
+
+    "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/compiler_status \
+        --v2 \
+        --comment "${S}/status/comment.html" \
+        "${S}" \
+        cs-$(uname).html cs-$(uname)-links.html \
+        || ewarn "Generating the build log html summary page failed (1)"
+                                
 
     "${S}/dist/bin/compiler_status" \
         --v2 \
         --comment "${S}/status/comment.html" \
         "${S}" \
         cs-$(uname).html cs-$(uname)-links.html \
-        || ewarn "Generating the build log html summary page failed"
+        || ewarn "Generating the build log html summary page failed (2)"
 
     sed -e 's|../boost.png|boost.png|' -i *.html # Cosmetic fix.
 }
@@ -157,8 +166,6 @@ src_install() {
         find libs -iname test -o -iname src -print0 | xargs -0 rm -r \
             || die "Couldn't clean out ./libs/."
         doins -r libs
-
-        doins LICENSE_1_0.txt # Avoid broken links (FIXME)
 
         dosym /usr/include/${PN} /usr/share/doc/${PF}/html/${PN}
     fi
