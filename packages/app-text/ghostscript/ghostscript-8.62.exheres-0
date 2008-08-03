@@ -1,0 +1,95 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools multilib
+
+DESCRIPTION="An interpreter for the PostScript language and for PDF"
+HOMEPAGE="http://ghostscript.com"
+SRC_URI="mirror://sourceforge/${PN}/${P}.tar.bz2"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="cups gtk X" # djvu jpeg2k
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        X? ( x11-proto/xextproto )
+    build+run:
+        media-libs/fontconfig
+        media-libs/jpeg
+        media-libs/libpng
+        media-libs/tiff
+        cups? ( fixme/cups )
+        gtk? ( x11-libs/gtk+:2 )
+        X? (
+            x11-libs/libXext
+            x11-libs/libXt
+        )
+    run:
+        x11-fonts/ghostscript-fonts-std"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}"/${P}-fPIC.patch
+)
+
+src_prepare() {
+    rm -rf ./{expat,jasper,jpeg,libpng,Resource/Font} \
+        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng."
+
+    if option !gtk; then
+        sed -e 's:\$(GSSOX)::' \
+            -e 's:.*\$(GSSOX_XENAME)$::' \
+            -i src/*.mak \
+            || die 'GSSOX sed failed.'
+    fi
+
+    sed -e 's:^\(docdir=\).*$:\1@docdir@:' \
+        -i Makefile.in src/*.mak || die 'docdir sed failed.'
+
+    autotools_src_prepare
+    cd "${S}/ijs"
+    eautoreconf
+}
+
+src_configure() {
+    econf \
+        --docdir=/usr/share/doc/${PF} \
+        --with-fontpath=/usr/share/fonts/default/ghostscript \
+        --disable-compile-inits \
+        --enable-dynamic \
+        --enable-fontconfig \
+        --with-drivers=ALL \
+        --with-ijs \
+        --with-jbig2dec \
+        $(option_enable cups) \
+        $(option_enable gtk) \
+        $(option_with X x) \
+        --without-jasper
+
+    cd "${S}/ijs"
+    econf
+}
+
+src_compile() {
+    # Parallel make is broken
+    emake -j1 so all
+
+    cd "${S}/ijs"
+    default
+}
+
+src_install() {
+    emake DESTDIR="${D}" install-so install
+
+    cd "${S}/ijs"
+    default
+
+    if option !X && option !gtk; then
+        rmdir "${D}"/usr/$(get_libdir)/${PN}{/${PV},}
+    fi
+}
+
