@@ -6,19 +6,19 @@
 require multilib autotools
 
 SUMMARY="XSLT libraries and tools"
-HOMEPAGE="http://www.xmlsoft.org/"
+HOMEPAGE="http://www.xmlsoft.org/XSLT/"
 SRC_URI="ftp://xmlsoft.org/${PN}/${P}.tar.gz"
 
 LICENSE="MIT"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="crypt debug examples python"
 
 DEPENDENCIES="
     build+run:
         >=dev-libs/libxml2-2.6.27
         crypt?  ( >=dev-libs/libgcrypt-1.1.92 )
-        python? ( dev-lang/python )
+        python? ( dev-lang/python:= )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -42,10 +42,10 @@ src_configure() {
     # Always pass --with-debugger. It is required by third parties (see
     # e.g. Gentoo bug #98345)
     econf --with-debugger \
-        $(option_with python) \
         $(option_with crypt crypto) \
         $(option_with debug) \
-        $(option_with debug mem-debug)
+        $(option_with debug mem-debug) \
+        $(option_with python)
 }
 
 src_install() {
