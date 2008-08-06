@@ -8,15 +8,15 @@ SUMMARY="The RDF Parser Toolkit"
 HOMEPAGE="http://librdf.org/raptor"
 SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
 
-LICENSE="|| ( LGPL-2.1 Apache-2.0 )"
+LICENSE="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="curl unicode xml"
 
 DEPENDENCIES="
     build: 
-        sys-devel/flex
         dev-util/pkg-config
+        sys-devel/flex
     build+run:
         dev-libs/libxslt
         curl? ( net-misc/curl )
@@ -24,16 +24,8 @@ DEPENDENCIES="
         xml? ( dev-libs/libxml2 )
         !xml? ( dev-libs/expat )"
 
-DEFAULT_SRC_INSTALL_EXTRA_DOCS="{NEWS,README,RELEASE}.html"
-
 src_configure() {
     local myconf=""
-
-    if option xml; then
-        myconf+=" --with-xml-parser=libxml"
-    else
-        myconf+=" --with-xml-parser=expat"
-    fi
 
     if option curl; then
         myconf+=" --with-www=curl"
@@ -44,6 +36,7 @@ src_configure() {
     fi
 
     econf \
+        --with-xml-parser=$(option xml && echo 'libxml' || echo 'expat') \
         $(option_enable unicode nfc-check) \
         ${myconf}
 }
