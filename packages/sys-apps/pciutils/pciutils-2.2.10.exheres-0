@@ -26,7 +26,7 @@ src_prepare() {
 src_compile() {
     export ZLIB="no"
     tc-export AR CC RANLIB
-    emake OPT="${CFLAGS}" || die "emake failed"
+    emake OPT="${CFLAGS} -fPIC"
 }
 
 src_install() {
