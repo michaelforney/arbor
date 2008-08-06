@@ -65,7 +65,7 @@ ecmake() {
                 die_unless_nonfatal "Could not enter ${PN}_build" || return 1
             ;;
         *)
-            die_unless_nonfatal "Invalid value for ECMAKE_BUILD_TYPE, ${ECMAKE_BUILD_TYPE}." || return 1
+            die "Invalid value for ECMAKE_BUILD_TYPE, ${ECMAKE_BUILD_TYPE}."
             ;;
     esac
 
@@ -139,7 +139,7 @@ cmake_src_test() {
             ectest || die_unless_nonfatal "Test failures encountered." || return 1
             ;;
         *)
-            die_unless_nonfatal "Invalid value for ECMAKE_TEST_TYPE, ${ECMAKE_TEST_TYPE}." || return 1
+            die "Invalid value for ECMAKE_TEST_TYPE, ${ECMAKE_TEST_TYPE}."
             ;;
     esac
 }
