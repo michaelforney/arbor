@@ -11,33 +11,21 @@ SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
 LICENSE="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="curl unicode xml"
+MYOPTIONS="unicode"
 
 DEPENDENCIES="
     build: 
         dev-util/pkg-config
         sys-devel/flex
     build+run:
+        dev-libs/libxml2
         dev-libs/libxslt
-        curl? ( net-misc/curl )
-        unicode? ( dev-libs/glib:2 )
-        xml? ( dev-libs/libxml2 )
-        !xml? ( dev-libs/expat )"
+        unicode? ( dev-libs/glib:2 )"
 
 src_configure() {
-    local myconf=""
-
-    if option curl; then
-        myconf+=" --with-www=curl"
-    elif option xml; then
-        myconf+=" --with-www=xml"
-    else
-        myconf+=" --with-www=none"
-    fi
-
     econf \
-        --with-xml-parser=$(option xml && echo 'libxml' || echo 'expat') \
-        $(option_enable unicode nfc-check) \
-        ${myconf}
+        --with-www=xml \
+        --with-xml-parser=libxml \
+        $(option_enable unicode nfc-check)
 }
 

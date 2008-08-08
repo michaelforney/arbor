@@ -11,7 +11,7 @@ SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
 LICENSE="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="debug gmp pcre xml"
+MYOPTIONS="debug gmp pcre"
 
 DEPENDENCIES="
     build:
@@ -19,21 +19,21 @@ DEPENDENCIES="
         dev-perl/XML-DOM
         sys-devel/flex
     build+run:
+        dev-libs/libxml2
         media-libs/raptor
         gmp? ( dev-libs/gmp )
         !gmp? ( dev-libs/mpfr )
-        pcre? ( dev-libs/libpcre )
-        xml? ( dev-libs/libxml2 )"
+        pcre? ( dev-libs/libpcre )"
 #       debug? ( dev-libs/dmalloc )
 
 src_configure() {
     econf \
+        --enable-xml2 \
         --with-decimal=$(option gmp && echo "gmp" || echo "mpfr") \
         --with-regex-library=$(option pcre && echo "pcre" || echo "posix") \
         --with-raptor=system \
         $(option_enable debug maintainer-mode) \
         $(option_enable pcre) \
-        $(option_enable xml xml2) \
         --without-dmalloc # $(option_with debug dmalloc)
 }
 

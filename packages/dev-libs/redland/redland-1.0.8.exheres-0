@@ -12,17 +12,16 @@ SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
 LICENSE="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="berkdb sqlite ssl xml" # mysql postgres
+MYOPTIONS="berkdb sqlite ssl" # mysql postgres
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
+        dev-libs/libxml2
         >=dev-libs/rasqal-0.9.16
         berkdb? ( sys-libs/db:= )
-        sqlite? ( dev-db/sqlite:3 )
-        xml? ( dev-libs/libxml2 )
-        !xml? ( dev-libs/expat )"
+        sqlite? ( dev-db/sqlite:3 )"
 
 src_prepare() {
     if option !berkdb; then
@@ -39,7 +38,7 @@ src_configure() {
         --enable-modular \
         --with-raptor=system \
         --with-rasqal=system \
-        --with-xml-parser=$(option xml && echo 'libxml' || echo 'expat') \
+        --with-xml-parser=libxml \
         $(option_with berkdb bdb) \
         $(option_with ssl openssl-digests) \
         $(option_with sqlite) \
