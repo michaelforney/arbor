@@ -8,10 +8,16 @@ SRC_URI="ftp://ftp.alsa-project.org/pub/lib/${P}.tar.bz2"
 LICENSE="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="softfloat"
+MYOPTIONS="midi softfloat"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="softfloat"
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="MEMORY-LEAK"
 
+src_configure() {
+    econf \
+        $(option_enable midi instr) \
+        $(option_enable midi seq) \
+        $(option_enable midi aload) \
+        $(option_enable softfloat)
+}
