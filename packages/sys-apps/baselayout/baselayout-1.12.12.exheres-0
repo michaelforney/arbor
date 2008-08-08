@@ -124,7 +124,8 @@ pkg_postinst() {
                 if [[ ! -e ${ROOT}/etc/init.d/${y} ]]; then
                     die "/etc/init.d/${y} not found"
                 else
-                    ln -sfn ../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/} || \
+                    echo ln -sfn ../../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/}
+                    ln -sfn ../../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/} || \
                         die "Linking ${y} into runlevel ${x##*/} failed"
                 fi
             done
