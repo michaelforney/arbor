@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require autotools
+
 SUMMARY="GNU implementation of the M4 macro processor"
 HOMEPAGE="http://www.gnu.org/software/m4"
 SRC_URI="mirror://gnu/${PN}/${P}.tar.bz2"
@@ -12,5 +14,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-test-failure.patch" )
+AT_M4DIR="m4"
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="BACKLOG"
 
