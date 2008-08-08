@@ -8,12 +8,28 @@ SRC_URI="mirror://gentoo/${P}.tar.bz2"
 LICENSE="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="bash-completion"
 
 DEPENDENCIES="
-build+run:
-    sys-apps/sed
-    >=sys-apps/coreutils-6.10"
+    build+run:
+        sys-apps/sed
+        >=sys-apps/coreutils-6.10"
 
 DEFAULT_SRC_PREPARE_PATCHES=(-p1 "${FILESDIR}"/${PN}-config.patch)
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="doc/*.txt"
+
+src_install() {
+    default
+
+    # Can't use bash-completion.exlib, it rundeps on eselect
+    if optionq bash-completion; then
+        insinto /usr/share/bash-completion
+        newins misc/${PN}.bashcomp ${PN}
+    fi
+}
+
+pkg_postinst() {
+    elog "To enable command-line completion for ${PN}, run:"
+    elog "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
+}
+
