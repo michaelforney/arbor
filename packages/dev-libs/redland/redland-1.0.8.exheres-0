@@ -1,0 +1,58 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'redland-1.0.8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require multilib autotools
+
+SUMMARY="High-level interface for the Resource Description Framework"
+HOMEPAGE="http://librdf.org"
+SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
+
+LICENSE="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="berkdb sqlite ssl xml" # mysql postgres
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        >=dev-libs/rasqal-0.9.16
+        berkdb? ( sys-libs/db:= )
+        sqlite? ( dev-db/sqlite:3 )
+        xml? ( dev-libs/libxml2 )
+        !xml? ( dev-libs/expat )"
+
+src_prepare() {
+    if option !berkdb; then
+        # This test fails without berkdb
+        sed -e 's: rdf_model_test::' -e '/^rdf_model_test:/{g;n;d;}' \
+            -i "${S}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test."
+        eautomake
+    fi
+}
+
+src_configure() {
+    econf \
+        --enable-release \
+        --enable-modular \
+        --with-raptor=system \
+        --with-rasqal=system \
+        --with-xml-parser=$(option xml && echo 'libxml' || echo 'expat') \
+        $(option_with berkdb bdb) \
+        $(option_with ssl openssl-digests) \
+        $(option_with sqlite) \
+        $(option_with sqlite sqlite-version 3) \
+        --without-mysql \
+        --without-postgresql
+        # --with-threads \
+}
+
+src_install() {
+    default
+
+    # [[ option mysql || option sqlite || option postgres ]] || rmdir
+    option !sqlite && rmdir "${D}"/usr/$(get_libdir)/${PN}
+}
+
