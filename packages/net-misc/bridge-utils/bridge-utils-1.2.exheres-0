@@ -17,7 +17,7 @@ DEPENDENCIES="
         sys-kernel/linux-headers
         sys-devel/autoconf"
 
-DEFAULT_SRC_CONFIGURE_PARAMS="--prefix=/ --with-linux-headers=/usr/include --includedir=/usr/include"
+DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ --with-linux-headers=/usr/include --includedir=/usr/include )
 
 src_prepare() {
     eautomake || die "eautomake failed"

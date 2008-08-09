@@ -15,7 +15,7 @@ DEPENDENCIES="build+run:
                 sys-libs/cracklib"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/shadow-4.0.18.1-useradd-usermod.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS="--without-selinux --with-pam --with-libcrack"
+DEFAULT_SRC_CONFIGURE_PARAMS=( --without-selinux --with-pam --with-libcrack )
 
 src_install() {
     # Fix default home directory path

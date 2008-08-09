@@ -28,16 +28,16 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILESDIR}/${P}-long-groupnames.patch"
 )
 
-DEFAULT_SRC_CONFIGURE_PARAMS="
+DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-desrpc \
     --with-libcrypt \
     --enable-shared=no \
     --enable-static=yes \
     --enable-libpam \
     --enable-libcrack
-"
+)
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_prepare() {
     default

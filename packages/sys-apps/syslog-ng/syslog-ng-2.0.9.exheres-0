@@ -22,14 +22,14 @@ DEPENDENCIES="
         dev-util/pkg-config
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS="
+DEFAULT_SRC_CONFIGURE_PARAMS=(
     --sysconfdir=/etc/syslog-ng
     --disable-dependency-tracking
     --enable-dynamic-linking
     --without-libnet
-"
+)
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="ipv6"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 "tcpd tcp-wrapper" )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="
     VERSION
@@ -37,12 +37,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS="
     contrib/syslog-ng.vim
     doc/reference/syslog-ng.txt
 "
-
-src_configure() {
-    DEFAULT_SRC_CONFIGURE_PARAMS+=" $(option_enable tcpd tcp-wrapper)"
-
-    default
-}
 
 src_install() {
     default

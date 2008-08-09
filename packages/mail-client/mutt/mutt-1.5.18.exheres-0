@@ -17,17 +17,18 @@ DEPENDENCIES="
     sys-libs/gdbm
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=" \
-    --with-curses \
-    --sysconfdir=/etc/${PN} \
-    --with-docdir=/usr/share/doc/${P} \
-    --with-regex \
-    --disable-fcntl --enable-flock \
-    --enable-nfs-fix --enable-external-dotlock \
-    --with-homespool=.maildir \
-    --enable-imap --disable-pop --enable-smtp \
-    --enable-hcache --with-gdbm --without-qdbm --without-bdb \
-    --without-gnutls --without-sasl"
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-curses
+    --sysconfdir=/etc/${PN}
+    --with-docdir=/usr/share/doc/${P}
+    --with-regex
+    --disable-fcntl --enable-flock
+    --enable-nfs-fix --enable-external-dotlock
+    --with-homespool=.maildir
+    --enable-imap --disable-pop --enable-smtp
+    --enable-hcache --with-gdbm --without-qdbm --without-bdb
+    --without-gnutls --without-sasl
+)
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES="nls"
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS="idn ssl"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( idn ssl )
