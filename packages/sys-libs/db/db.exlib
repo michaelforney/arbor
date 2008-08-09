@@ -19,7 +19,6 @@ S="${WORKDIR}/${P}/build_unix"
 
 src_configure() {
     # Tests require tcl
-    # ./configure script doesn't respect --docdir
     econf \
         --enable-cxx \
         --disable-java \
@@ -30,6 +29,7 @@ src_configure() {
 src_install() {
     default
 
+    # dist/Makefile.in needs fixing for --docdir
     if option doc; then
         mv "${D}"/usr/docs "${D}"/usr/share/doc/${PF} || die 'Failed to put docs in the correct docdir'
     else
