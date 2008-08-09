@@ -1,31 +1,9 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-MY_P="${P/_/-}"
+require automake
 
-SUMMARY="Tool used to automatically generate Makefile.in files"
-HOMEPAGE="http://www.gnu.org/software/automake"
-SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz"
-
-LICENSE="GPL-2"
-SLOT="1.8"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="slowtests"
-
-DEPENDENCIES="
-    run:
-        sys-devel/automake-wrapper"
-
-S="${WORKDIR}/${MY_P}"
 
 DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/${P}-test-fixes.patch"
-DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=-${SLOT} )
 
-src_install() {
-    default
-    rm "${D}"/usr/bin/*-${SLOT}-*
-}
-
-src_test() {
-    option slowtests && default
-}

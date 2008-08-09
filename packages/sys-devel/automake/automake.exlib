@@ -1,0 +1,31 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require common-metadata versionator
+
+export_exlib_phases src_test
+
+MY_P="${P/_/-}"
+
+SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz"
+
+SLOT="$(get_version_component_range 1-2)"
+MYOPTIONS="slowtests"
+DEPENDENCIES="
+    run:
+        >=sys-devel/automake-wrapper-0.2"
+
+S="${WORKDIR}/${MY_P}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS="--program-suffix=-${SLOT}"
+
+src_test() {
+    option slowtests && default
+}
+
+src_install() {
+    default
+    rm "${D}"/usr/bin/*-${SLOT}-* || die "Rm failed"
+}
+
