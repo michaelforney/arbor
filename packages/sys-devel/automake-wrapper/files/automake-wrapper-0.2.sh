@@ -4,7 +4,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # Automake wrapper v0.1
 
-AUTOMAKE_VERSIONS="1.10:1.10 1.9:1.9.6 1.8:1.8.5 1.7:1.7.9 1.6:1.6.3 1.4:1.4_p6"
+AUTOMAKE_VERSIONS="1.10:1.10 1.9:1.9 1.8:1.8 1.7:1.7 1.6:1.6 1.4:1.4"
 AUTOMAKE_PROGRAM="$(basename $0)"
 
 # Default to latest if WANT_AUTOMAKE isn't set
