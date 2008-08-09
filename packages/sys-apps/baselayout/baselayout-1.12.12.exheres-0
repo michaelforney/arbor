@@ -57,18 +57,18 @@ src_compile() {
 src_install() {
     local x rcscripts_dir=/${libdir}/rcscripts
     for x in /boot /dev{,/pts,/shm} /etc/runlevels /usr{,/local} /var{,/lock}; do
-        dodir "${x}" || die "dodir ${x} failed"
-        keepdir "${x}" || die "keepdir ${x} failed"
+        dodir "${x}"
+        keepdir "${x}"
     done
 
     if [[ ${SYMLINK_LIB} == yes ]]; then
         for x in {,/usr,/usr/local}/lib; do
-            dosym ${libdir} ${x} || die "dosym ${libdir} ${x} failed"
+            dosym ${libdir} ${x}
         done
     fi
 
     insinto /etc
-    doins -r "${S}"/etc/* || die "doins /etc/* failed"
+    doins -r "${S}"/etc/*
     fperms 0640 /etc/sysctl.conf
 
     fperms 0600 /etc/shadow
@@ -78,20 +78,20 @@ src_install() {
     cp -P "${S}"/init.d/* "${D}"/etc/init.d/ || die "doinitd"
 
     insinto /usr/share/baselayout
-    doins "${S}"/rc-lists/* || die "doins rc-lists failed"
+    doins "${S}"/rc-lists/*
 
     into /
-    dosbin "${S}"/sbin/{MAKEDEV,rc,rc-update,runscript.sh,functions.sh,depscan.sh,env-update.sh} || die "dosbin failed"
-    dobin "${S}"/bin/{rc-status,checkpath} || die "dobin failed"
+    dosbin "${S}"/sbin/{MAKEDEV,rc,rc-update,runscript.sh,functions.sh,depscan.sh,env-update.sh}
+    dobin "${S}"/bin/{rc-status,checkpath}
 
     exeinto ${rcscripts_dir}/sh
-    doexe "${S}"/sbin/{rc-services.sh,rc-daemon.sh,rc-help.sh} || die "doexe failed"
+    doexe "${S}"/sbin/{rc-services.sh,rc-daemon.sh,rc-help.sh}
 
     insinto ${rcscripts_dir}/awk
-    doins "${S}"/src/awk/*.awk || die "doins *.awk failed"
+    doins "${S}"/src/awk/*.awk
 
     insinto ${rcscripts_dir}/net
-    doins "${S}"/lib/rcscripts/net/* || die "doins net/* failed"
+    doins "${S}"/lib/rcscripts/net/*
     chown -R root:0 "${D}"${rcscripts_dir}
 
     doman "${S}"/man/*.*
