@@ -9,8 +9,8 @@ HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
 SRC_URI="http://download.oracle.com/berkeley-${PN}/${P}.tar.gz"
 
 LICENSE="as-is"
-SLOT="$(get_version_component_range 1-2)"
-MYOPTIONS=""
+SLOT="0" # $(get_version_component_range 1-2)"
+MYOPTIONS="doc"
 
 DEPENDENCIES=""
 
@@ -18,9 +18,22 @@ ECONF_SOURCE="${S}/dist"
 S="${WORKDIR}/${P}/build_unix"
 
 src_configure() {
+    # Tests require tcl
     # ./configure script doesn't respect --docdir
     econf \
-        --docdir=/usr/share/doc/${PF} \
-        --with-docdir=/usr/share/doc/${PF}
+        --enable-cxx \
+        --disable-java \
+        --disable-tcl \
+        --disable-test
+}
+
+src_install() {
+    default
+
+    if option doc; then
+        mv "${D}"/usr/docs "${D}"/usr/share/doc/${PF} || die 'Failed to put docs in the correct docdir'
+    else
+        rm -r "${D}"/usr/docs || die 'Failed to remove api docs.'
+    fi
 }
 
