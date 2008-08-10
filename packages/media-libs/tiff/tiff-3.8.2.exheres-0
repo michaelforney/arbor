@@ -16,10 +16,5 @@ DEPENDENCIES="
     zlib? ( sys-libs/zlib )
     jpeg? ( media-libs/jpeg )"
 
-src_configure() {
-    econf \
-        $(option_with zlib) \
-        $(option_with jpeg) \
-        $(option_with X x)
-}
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( zlib jpeg "X x" )
 

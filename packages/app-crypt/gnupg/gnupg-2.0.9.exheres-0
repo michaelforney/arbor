@@ -27,17 +27,16 @@ build+run:
 
 DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}"/gnupg-2.0.9-gcc-4.3.patch)
 
-src_configure() {
-    econf \
-        --enable-symcryptrun \
-        --enable-gpg \
-        --enable-gpgsm \
-        --enable-agent \
-        --enable-bzip2 \
-        --disable-ldap \
-        $(option_enable nls) \
-        --without-capabilities
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-symcryptrun
+    --enable-gpg
+    --enable-gpgsm
+    --enable-agent
+    --enable-bzip2
+    --disable-ldap
+    --without-capabilities
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_compile() {
     emake

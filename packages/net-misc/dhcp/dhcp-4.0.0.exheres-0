@@ -14,8 +14,5 @@ DEPENDENCIES="
     build+run:
         sys-apps/net-tools"
 
-src_configure() {
-    econf \
-        $(option_enable ipv6 dhcpv6)
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 dhcpv6 )
 

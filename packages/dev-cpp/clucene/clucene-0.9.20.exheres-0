@@ -22,13 +22,9 @@ DEPENDENCIES=""
 
 S="${WORKDIR}/${MY_P}"
 
-src_configure() {
-    # Make multithreading optional if it causes problems
-    econf \
-        $(option_enable debug) \
-        $(option_enable debug cnddebug) \
-        --enable-multithreading
-}
+# Make multithreading optional if it causes problems
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-multithreading )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug "debug cnddebug" )
 
 src_compile() {
     default

@@ -14,13 +14,8 @@ DEPENDENCIES="
     dev-libs/glib
     sys-apps/eventlog"
 
-src_configure() {
-    econf \
-        --enable-dynamic-linking \
-        $(option_enable ipv6) \
-        $(option_enable tcp-wrappers) \
-        || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-dynamic-linking )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 tcp-wrappers )
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."

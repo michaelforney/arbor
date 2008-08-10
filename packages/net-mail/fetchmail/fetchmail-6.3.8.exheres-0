@@ -24,19 +24,20 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="FEATURES"
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+        --disable-dependency-tracking
+        --enable-RPA
+        --enable-NTLM
+        --enable-SDPS
+        --without-gssapi --without-kerberos5 --without-kerberos --without-hesiod
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ssl )
+
 src_configure() {
     # fetchmailconf.py needs dev-lang/python[tk]
     export PYTHON=:
-
-    econf \
-        --disable-dependency-tracking \
-        --enable-RPA \
-        --enable-NTLM \
-        --enable-SDPS \
-        $(option_enable nls) \
-        $(option_enable ipv6) \
-        $(option_with ssl) \
-        --without-gssapi --without-kerberos5 --without-kerberos --without-hesiod
+    default
 }
 
 src_install() {

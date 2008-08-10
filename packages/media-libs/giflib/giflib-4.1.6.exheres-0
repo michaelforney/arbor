@@ -17,8 +17,7 @@ DEPENDENCIES="
 "
 
 #TODO: when doing media-libs/urt, get patch from Gentoo
-src_configure(){
-
-    #we diable gl by default, since it is the old SGI graphics library
-    econf $(option_enable X x11) $(option_with X) "--disable-gl"
-}
+#we diable gl by default, since it is the old SGI graphics library
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-gl )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "X x11" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( X )

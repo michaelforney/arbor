@@ -18,13 +18,8 @@ build+run:
     gdbm? ( sys-libs/gdbm )
     sqlite? ( dev-db/sqlite:3 )"
 
-src_configure() {
-    econf \
-        --with-apr=/usr \
-        --with-expat=/usr \
-        $(option_with gdbm) \
-        $(option_with sqlite sqlite3)
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-apr=/usr --with-expat=/usr )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gdbm "sqlite sqlite3" )
 
 src_install() {
     emake DESTDIR="${D}" install

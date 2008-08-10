@@ -32,20 +32,21 @@ src_prepare() {
     fi
 }
 
-src_configure() {
-    econf \
-        --enable-release \
-        --enable-modular \
-        --with-raptor=system \
-        --with-rasqal=system \
-        --with-xml-parser=libxml \
-        $(option_with berkdb bdb) \
-        $(option_with ssl openssl-digests) \
-        $(option_with sqlite) \
-        $(option_with sqlite sqlite-version 3) \
-        --without-mysql \
-        --without-postgresql
-        # --with-threads \
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-release
+    --enable-modular
+    --with-raptor=system
+    --with-rasqal=system
+    --with-xml-parser=libxml
+    --without-mysql
+    --without-postgresql
+    # --with-threads
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "berkdb bdb"
+    "ssl openssl-digests"
+    sqlite
+    "sqlite sqlite-version 3"
 }
 
 src_install() {

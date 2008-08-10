@@ -20,16 +20,13 @@ build+run:
     python? ( dev-lang/python )
     ruby? ( dev-lang/ruby )"
 
-src_configure() {
-    econf \
-        $(option_with perl perl5) \
-        $(option_with python python) \
-        $(option_with ruby ruby) \
-        --without-chicken --without-clisp --without-doc --without-guile \
-        --without-java --without-lua --without-mono --without-mzscheme \
-        --without-ocaml --without-octave --without-php --without-pike \
-        --without-R --without-tcl --without-tk
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --without-chicken --without-clisp --without-doc --without-guile
+    --without-java --without-lua --without-mono --without-mzscheme
+    --without-ocaml --without-octave --without-php --without-pike
+    --without-R --without-tcl --without-tk
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "perl perl5" python ruby )
 
 src_install() {
     emake DESTDIR="${D}" install

@@ -63,6 +63,9 @@ src_prepare() {
     eautoreconf
 }
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared --enable-unicode=ucs4 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
+
 src_configure() {
     # dbm module can link to berkdb or gdbm.
     # default to gdbm when both are enabled.
@@ -82,10 +85,7 @@ src_configure() {
     # export CXX so it ends up in /usr/lib/python2.x/config/Makefile
     tc-export CXX
 
-    econf \
-        --enable-shared \
-        --enable-unicode=ucs4 \
-        $(option_enable ipv6)
+    default
 }
 
 src_test() {

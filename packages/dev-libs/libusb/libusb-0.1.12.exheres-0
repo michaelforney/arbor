@@ -25,12 +25,7 @@ src_prepare()
     eautoreconf
 }
 
-src_configure()
-{
-    econf \
-        $(option_enable debug debug all) \
-        $(option_enable doc build-docs)
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug debug all" "doc build-docs" )
 
 src_install()
 {

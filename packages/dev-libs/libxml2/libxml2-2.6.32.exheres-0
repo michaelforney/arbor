@@ -28,14 +28,7 @@ src_prepare() {
         die "Failed to install test tarballs."
 }
 
-src_configure() {
-    econf \
-      $(option_with ipv6) \
-      $(option_with python) \
-      $(option_with readline) \
-      $(option_with readline history) \
-      || die "Configure failed"
-}
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ipv6 python readline "readline history" )
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed"

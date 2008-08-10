@@ -29,12 +29,5 @@ src_prepare() {
     find . -type f -print0 | xargs -0 touch -r configure || die "Can't fix mtimes"
 }
 
-src_configure() {
-    econf \
-        $(option_with fontconfig) \
-        $(option_with png) \
-        $(option_with truetype freetype) \
-        $(option_with jpeg) \
-        $(option_with xpm)
-}
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( fontconfig png "truetype freetype" jpeg xpm )
 

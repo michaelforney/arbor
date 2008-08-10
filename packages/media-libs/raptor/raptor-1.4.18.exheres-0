@@ -22,10 +22,6 @@ DEPENDENCIES="
         dev-libs/libxslt
         unicode? ( dev-libs/glib:2 )"
 
-src_configure() {
-    econf \
-        --with-www=xml \
-        --with-xml-parser=libxml \
-        $(option_enable unicode nfc-check)
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-www=xml --with-xml-parser=libxml )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "unicode nfc-check" )
 

@@ -20,15 +20,16 @@ DEPENDENCIES="
         >=dev-util/pkg-config-0.20
 "
 
-src_configure() {
-    econf --enable-asserts \
-          --with-xml=expat \
-          --disable-doxygen-docs \
-          --disable-xml-docs \
-          --disable-selinux \
-          --disable-tests \
-          --with-dbus-user=messagebus \
-          --with-session-socket-dir=/tmp \
-          --with-system-socket=/var/run/dbus/system_bus_socket \
-          $(option_enable verbose verbose-mode)
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-asserts
+    --with-xml=expat
+    --disable-doxygen-docs
+    --disable-xml-docs
+    --disable-selinux
+    --disable-tests
+    --with-dbus-user=messagebus
+    --with-session-socket-dir=/tmp
+    --with-system-socket=/var/run/dbus/system_bus_socket
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "verbose verbose-mode" )
+

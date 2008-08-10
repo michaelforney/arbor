@@ -54,38 +54,34 @@ pkg_setup()
     enewuser haldaemon -1 -1 /dev/null "haldaemon,plugdev,disk,cdrom,cdrw,floppy,usb"
 }
 
-src_configure()
-{
-    econf --disable-console-kit                 \
-          --disable-policy-kit                  \
-          --disable-acl-management              \
-          --with-backend=linux                  \
-          --with-os-type=exherbo                \
-          --with-pid-file=/var/run/hald.pid     \
-          --with-socket-dir=/var/run            \
-          --with-hwdata=/usr/share/misc         \
-          --enable-umount-helper                \
-          --enable-man-pages                    \
-          --enable-pci                          \
-          --enable-sonypic                      \
-          --with-cpufreq                        \
-          --with-usb-csr                        \
-          --with-keymaps                        \
-          --disable-acpi-ibm                    \
-          --disable-acpi-toshiba                \
-          --disable-dell-backlight              \
-          $(option_enable acpi)                 \
-          $(option_enable acpi acpi-proc)       \
-          --disable-acpi-acpid                  \
-          $(option_enable apm)                  \
-          --disable-pmu                         \
-          --without-omap                        \
-          $(option_enable verbose verbose-mode) \
-          --disable-parted                      \
-          --disable-docbook-docs                \
-          --disable-doxygen-docs                \
-          --docdir=/usr/share/doc/${PF}
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-console-kit
+    --disable-policy-kit
+    --disable-acl-management
+    --with-backend=linux
+    --with-os-type=exherbo
+    --with-pid-file=/var/run/hald.pid
+    --with-socket-dir=/var/run
+    --with-hwdata=/usr/share/misc
+    --enable-umount-helper
+    --enable-man-pages
+    --enable-pci
+    --enable-sonypic
+    --with-cpufreq
+    --with-usb-csr
+    --with-keymaps
+    --disable-acpi-ibm
+    --disable-acpi-toshiba
+    --disable-dell-backlight
+    --disable-acpi-acpid
+    --disable-pmu
+    --without-omap
+    --disable-parted
+    --disable-docbook-docs
+    --disable-doxygen-docs
+    --docdir=/usr/share/doc/${PF}
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acpi "acpi-proc" apm "verbose verbose-mode" )
 
 src_install()
 {

@@ -12,10 +12,8 @@ MYOPTIONS="masquerading ipv6"
 
 DEPENDENCIES=""
 
-src_configure() {
-    econf \
-        $(option_enable masquerading masq) \
-        $(option_enable masquerading nat) \
-        $(option_enable ipv6) \
-        || die "econf failed"
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "masquerading masq"
+    "masquerading nat"
+    ipv6
 }
