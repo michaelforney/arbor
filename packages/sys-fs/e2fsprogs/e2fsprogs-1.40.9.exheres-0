@@ -66,15 +66,13 @@ src_configure() {
         $(option_enable !static dynamic-e2fsck)
 }
 
-src_compile() {
-    # Parallel make sometimes fails
-    emake -j1 COMPILE_ET=compile_et
-}
+# Parallel make sometimes fails
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 COMPILE_ET=compile_et )
 
 src_test() {
     # The test script uses $IMAGE for its own purposes.
     local IMAGE
-    emake -j1 check
+    default
 }
 
 src_install() {

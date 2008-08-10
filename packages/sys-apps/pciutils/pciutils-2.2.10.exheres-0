@@ -30,5 +30,5 @@ src_compile() {
 }
 
 src_install() {
-    make install install-lib DESTDIR="${D}" || die "make install failed"
+    emake -j1 install install-lib DESTDIR="${D}"
 }

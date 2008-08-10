@@ -44,17 +44,17 @@ src_configure() {
         --with-ldopts="${LDFLAGS}"
 }
 
-src_compile() {
-    emake -C lib/ss COMPILE_ET=compile_et
-}
+DEFAULT_SRC_COMPILE_PARAMS=( -C lib/ss COMPILE_ET=compile_et )
 
 src_test() {
     emake -j1 -C lib/ss check
 }
 
+DEFAULT_SRC_INSTALL_PARAMS=( -C lib/ss )
+
 src_install() {
     dodir /usr/share/man/man1
-    emake -C lib/ss DESTDIR="${D}" install
+    default
 
     # Move shared libraries to /lib/, install static libraries to /usr/lib/,
     # and install linker scripts to /usr/lib/.
@@ -62,6 +62,4 @@ src_install() {
     mv "${D}"/usr/$(get_libdir)/*.so* "${D}"/$(get_libdir)/ || die "move .so"
     dolib.a lib/libss.a
     gen_usr_ldscript libss.so
-
-    dodoc README RELEASE-NOTES SUBMITTING-PATCHES
 }

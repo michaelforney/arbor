@@ -15,7 +15,7 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/bzip2-manpage-install.patch")
 
 src_install() {
-    emake install PREFIX=${D} MANPREFIX=${D}/usr/share
+    emake install PREFIX="${D}" MANPREFIX="${D}"/usr/share
 
     # Fix up install paths
     mv "${D}/include" "${D}/usr/"

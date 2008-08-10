@@ -14,21 +14,26 @@ DEPENDENCIES=""
 
 S="${WORKDIR}/e2fsprogs-${PV}"
 
-src_compile() {
-    cd "${S}"
+src_configure() {
     mkdir build
     cd build
     ../configure --enable-elf-shlibs || die "configure failed"
-    emake -C lib/et
+}
+
+DEFAULT_SRC_COMPILE_PARAMS=( -C lib/et )
+
+src_compile() {
+    cd build
+    default
 }
 
 src_test() {
-    cd "${S}/build"
+    cd build
     emake -C lib/et check
 }
 
 src_install() {
-    cd "${S}/build"
+    cd build
     emake -C lib/et DESTDIR="${D}" install
     cd "${S}"
     dodoc README RELEASE-NOTES SUBMITTING-PATCHES

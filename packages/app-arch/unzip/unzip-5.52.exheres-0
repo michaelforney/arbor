@@ -55,6 +55,6 @@ src_compile() {
 }
 
 src_install() {
-    make prefix="${D}/usr" -f unix/Makefile install || die "make install failed"
+    emake -j1 prefix="${D}/usr" -f unix/Makefile install
     dodoc BUGS History* README ToDo
 }

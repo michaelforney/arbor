@@ -32,16 +32,16 @@ src_configure() {
         --with-ldopts="${LDFLAGS}"
 }
 
-src_compile() {
-    emake -C lib/et
-}	
+DEFAULT_SRC_COMPILE_PARAMS=( -C lib/et )
 
 src_test() {
     emake -C lib/et check
 }
 
+DEFAULT_SRC_INSTALL_PARAMS=( -C lib/et )
+
 src_install() {
-    emake -C lib/et DESTDIR="${D}" install
+    default
     sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' "${D}"/usr/bin/compile_et
     dosym et/com_err.h /usr/include/com_err.h
 

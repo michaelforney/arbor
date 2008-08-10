@@ -29,11 +29,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --infodir=/usr/share/info
 )
 
-src_compile() {
-    emake -j1
-}
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 src_test() {
-    option slowtests && default "$@"
+    option slowtests && default
 }
 

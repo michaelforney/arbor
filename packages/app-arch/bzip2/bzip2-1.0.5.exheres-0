@@ -20,8 +20,8 @@ src_compile() {
 }
 
 src_install() {
-    emake install PREFIX=${D} MANPREFIX=${D}/usr/share
-    cp -a libbz2.so.* ${D}/lib
+    emake install PREFIX="${D}" MANPREFIX="${D}"/usr/share
+    cp -a libbz2.so.* "${D}"/lib
 
     # Fix up install paths
     mv "${D}/include" "${D}/usr/"

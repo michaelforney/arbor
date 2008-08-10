@@ -35,8 +35,7 @@ src_compile() {
 
     emake \
         COMPILE_ET=compile_et \
-        MK_CMDS=/usr/bin/mk_cmds \
-        || "Make failed."
+        MK_CMDS=/usr/bin/mk_cmds
 }
 
 src_test() {
@@ -48,7 +47,4 @@ src_test() {
         check
 }
 
-src_install() {
-    emake -C build DESTDIR="${D}" install
-    dodoc README RELEASE-NOTES SUBMITTING-PATCHES
-}
+DEFAULT_SRC_INSTALL_PARAMS=( -C build )

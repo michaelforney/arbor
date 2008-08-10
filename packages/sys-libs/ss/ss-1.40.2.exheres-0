@@ -16,16 +16,21 @@ build+run:
 
 S="${WORKDIR}/e2fsprogs-${PV}"
 
-src_compile() {
-    cd "${S}"
+src_configure() {
     mkdir build
     cd build
     ../configure --enable-elf-shlibs || die "configure failed"
-    emake COMPILE_ET=compile_et -C lib/ss
+}
+
+DEFAULT_SRC_COMPILE_PARAMS=( COMPILE_ET=compile_et -C lib/ss )
+
+src_compile() {
+    cd build
+    default
 }
 
 src_install() {
-    cd "${S}/build"
+    cd build
     dodir /usr/share/man/man1
     emake -C lib/ss DESTDIR="${D}" install
     cd "${S}"

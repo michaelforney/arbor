@@ -55,7 +55,7 @@ src_install() {
 
     if option examples ; then
         pushd examples
-        make clean || die
+        emake -j1 clean
         docinto examples
         dodoc "${S}"/examples/*
         popd

@@ -23,10 +23,8 @@ src_configure() {
         shared threads || die "Configure failed"
 }
 
-src_compile() {
-    # parallel build is broken
-    emake -j1
-}
+# parallel build is broken
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 src_install() {
     # .. and parallel installation is also broken

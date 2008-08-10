@@ -30,9 +30,7 @@ src_configure() {
     LSOF_CC=$(tc-getCC) ./Configure -n linux || die "Configure failed"
 }
 
-src_compile() {
-    emake DEBUG=""
-}
+DEFAULT_SRC_COMPILE_PARAMS=( DEBUG="" )
 
 src_test() {
     cd tests

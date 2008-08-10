@@ -27,9 +27,5 @@ src_prepare() {
     ht_fix_file aclocal.m4 configure
 }
 
-src_install() {
-    # make install is not parallel safe
-    emake -j1 DESTDIR="${D}" install
-    dodoc ANNOUNCE AUTHORS ChangeLog NEWS README THANKS USERS
-}
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( USERS )
 

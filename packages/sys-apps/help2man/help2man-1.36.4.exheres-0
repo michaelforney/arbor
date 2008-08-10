@@ -13,9 +13,3 @@ MYOPTIONS=""
 DEPENDENCIES="
     build:
         dev-perl/Locale-gettext"
-
-src_install() {
-    # Install target isn't parallel safe.
-    make DESTDIR="${D}" install || die "Install failed"
-    dodoc INSTALL NEWS README THANKS
-}

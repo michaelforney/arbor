@@ -30,9 +30,7 @@ src_configure() {
     option ipv6 && sed -i -e 's:HAVE_AFINET6 0:HAVE_AFINET6 1:' config.h
 }
 
-src_compile() {
-    emake -j1
-}
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 src_install() {
     emake -j1 BASEDIR="${D}" install

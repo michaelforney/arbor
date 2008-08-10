@@ -41,9 +41,11 @@ src_configure() {
         || die "configure failed"
 }
 
+DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
+
 src_compile() {
     cd "${OBJDIR}"
-    emake bootstrap
+    default
 }
 
 src_install() {

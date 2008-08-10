@@ -21,9 +21,10 @@ build+run:
 
 #FIXME: app-shellwhat?
 
+DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr )
+
 src_install() {
-    emake install DESTDIR="${D}" prefix="/usr"
-    dodoc AUTHORS ChangeLog FAQ NEWS README
+    default
     insinto /usr/share/doc/${PF}/xml
     doins doc/*.xml
 }
