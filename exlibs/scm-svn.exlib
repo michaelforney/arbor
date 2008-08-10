@@ -97,7 +97,7 @@ scm-svn_do_update() {
             scm-svn_svn -v switch ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
             return
         else
-            scm-svn_svn switch --relocate "$(scm_svn_info URL)" "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+            scm-svn_svn -v switch --relocate "$(scm_svn_info URL)" "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
         fi
     fi
     scm-svn_svn -v update ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
