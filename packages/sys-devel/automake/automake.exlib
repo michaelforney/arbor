@@ -2,13 +2,25 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require common-metadata versionator
+require versionator
 
 export_exlib_phases src_test
 
 MY_P="${P/_/-}"
 
+SUMMARY="Tool used to automatically generate Makefile.in files"
+HOMEPAGE="http://www.gnu.org/software/automake http://sources.redhat.com/automake/"
 SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz"
+
+case ${PN} in
+    1.4*|1.5*|1.6*|1.7*|1.8*|1.9*|1.10)
+        LICENSE="GPL-2"
+        ;;
+    # Newer automake versions are GPL-3 licensed.
+    1.10.1|*)
+        LICENSE="GPL-3"
+        ;;
+esac
 
 SLOT="$(get_version_component_range 1-2)"
 MYOPTIONS="slowtests"
