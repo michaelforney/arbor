@@ -1,7 +1,10 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'gcc.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
+
+require multilib
 
 SUMMARY="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org"
@@ -14,52 +17,58 @@ MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 DEPENDENCIES="
     build:
         sys-devel/make"
+#   build: doc? ( app-doc/doxygen )
 
-OBJDIR="${T}/${CHOST}"
-ECONF_SOURCE="${S}"
+S="${T}/${CHOST}"
+ECONF_SOURCE="${WORKDIR}"/${P}
 
 src_configure() {
-    mkdir "${OBJDIR}"
-    cd "${OBJDIR}"
-
-    LANGS="c++"
+    LANGS=( c++ )
     for i in ada fortran objc obj-c++ java; do
-        option ${i} && LANGS="${LANGS} ${i}"
+        option ${i} && LANGS+=( ${i} )
     done
     LANGS="${LANGS/ /,}"
 
-#    "${S}/configure" \
-    econf \
-        --build=${CHOST} \
-        --host=${CHOST} \
-        --prefix=/usr \
-        --infodir=/usr/share/info \
-        --enable-languages="${LANGS}" \
-        $(option_enable propolice libssp) \
-        $(option_enable nls) \
-        --disable-multilib \
-        || die "configure failed"
+    DEFAULT_SRC_CONFIGURE_PARAMS=(
+        --build=${CHOST}
+        --disable-multilib
+        --enable-languages="${LANGS[@]}"
+    )
+    DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+        "nls" "propolice libssp"
+    )
+
+    default
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
-src_compile() {
-    cd "${OBJDIR}"
-    default
+# We should probably run default_src_test() here but that breaks for a reason I haven't figured out yet.
+src_test() {
+    :
 }
 
 src_install() {
-    cd "${OBJDIR}"
     default
 
-    # Precompile headers
-    # FIXME: Should use gcc version from $D instead of old system gcc
     cd "${D}"
+
+    # Precompile headers, FIXME:
+    # - Should use gcc version from $D instead of old system gcc
+    # - We probably just need to pcecompile /usr/include/c++/4.3.1/x86_64-pc-linux-gnu/bits/stdc++.h
+    #   gcc ./usr/include/c++/${PV}/${CHOST}/bits/stdc++.h
+    # - ./configure --enable-libstdcxx-pch
+
     find . -name *.h -exec gcc {} \; || die "Precompiling headers failed"
     find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
 
-    rmdir "${D}"/usr/lib/gcc/${CHOST}/${PV}/finclude \
+    rmdir "${D}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude \
         || die "Failed to delete empty directory"
+
+    # if option doc; then
+    #     cd "${CTARGET}"/libstdc++-v3
+    #     emake doxygen-man
+    # fi
 }
 
 pkg_postinst() {
