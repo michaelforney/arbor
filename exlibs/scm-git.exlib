@@ -41,7 +41,7 @@ scm-git_do_appraise() {
     if [[ ! -e ${dir} ]]; then
         echo "${dir} does not exist"
         return 1
-    elif ! scm_git-git rev-parse HEAD &>/dev/null; then
+    elif ! scm-git_git rev-parse HEAD &>/dev/null; then
         die "${dir} is not a git checkout"
     fi
 
