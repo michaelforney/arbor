@@ -12,12 +12,6 @@ MYOPTIONS="midi softfloat"
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "midi instr" "midi seq" "midi aload" "softfloat" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="MEMORY-LEAK"
 
-src_configure() {
-    econf \
-        $(option_enable midi instr) \
-        $(option_enable midi seq) \
-        $(option_enable midi aload) \
-        $(option_enable softfloat)
-}
