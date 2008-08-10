@@ -21,20 +21,17 @@ DEPENDENCIES="
     sys-libs/pam
     "
 
-create_group_user()
-{
+create_group_user() {
     enewgroup postfix
     enewgroup postdrop
     enewuser postfix -1 -1 "/var/spool/postfix" postfix
 }
 
-pkg_setup()
-{
+pkg_setup() {
     create_group_user
 }
 
-src_compile()
-{
+src_compile() {
     local ccargs="" auxlibs=""
 
     auxlibs+=" -pthread -lpam"
@@ -55,8 +52,7 @@ src_compile()
     emake
 }
 
-src_install()
-{
+src_install() {
     /bin/sh postfix-install \
         -non-interactive \
         install_root="${D}" \

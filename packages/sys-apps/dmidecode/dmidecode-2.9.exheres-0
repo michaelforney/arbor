@@ -14,8 +14,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_prepare()
-{
+src_prepare() {
     sed -i -e '/^prefix/s:/usr/local:/usr:' \
            -e "/^docdir/s:${PN}:${PF}:"     \
            Makefile || die "failed to correct locations"

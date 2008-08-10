@@ -41,19 +41,16 @@ EGIT_STORE_DIR="${FETCHEDDIR}/git-src"
 #
 : ${EGIT_TREE:=${EGIT_BRANCH}}
 
-git_die()
-{
+git_die() {
     die "git.exlib: $1"
 }
 
-git_cmd()
-{
+git_cmd() {
     echo git "$@" >&2
     GIT_PAGER=cat git "$@" || git_die "$1 failed"
 }
 
-git_fetch()
-{
+git_fetch() {
     [[ -z ${EGIT_REPO_URI} ]] && git_die "EGIT_REPO_URI is empty."
 
     mkdir -p "${S}"
@@ -84,7 +81,6 @@ git_fetch()
     git_cmd checkout -f ${EGIT_TREE}
 }
 
-git_src_unpack()
-{
+git_src_unpack() {
     git_fetch || git_die 'unknown problem in git_fetch'
 }

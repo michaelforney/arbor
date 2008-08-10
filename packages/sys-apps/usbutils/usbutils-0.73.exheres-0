@@ -23,8 +23,7 @@ DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}/usbutils-0.72-update-usbids.patch
                               -p1 "${FILESDIR}/usbutils-0.73-byteorder.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --datadir=/usr/share/misc --enable-usbmodules --disable-zlib )
 
-src_prepare()
-{
+src_prepare() {
     default
 
     sed -i -e 's:/usr/share/usb.ids:/usr/share/misc/usb.ids:' \
@@ -36,8 +35,7 @@ src_prepare()
     eautoreconf
 }
 
-src_install()
-{
+src_install() {
     default
 
     newbin "${FILESDIR}/usbmodules.sh" usbmodules

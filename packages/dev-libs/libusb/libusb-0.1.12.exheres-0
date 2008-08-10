@@ -19,16 +19,14 @@ DEPENDENCIES=""
 # tests are not well encapsulated
 RESTRICT="test"
 
-src_prepare()
-{
+src_prepare() {
     sed -i -e 's:-Werror::' Makefile.am || die "failed to remove -Werror"
     eautoreconf
 }
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug debug all" "doc build-docs" )
 
-src_install()
-{
+src_install() {
     default
 
     if option doc ; then
