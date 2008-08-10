@@ -22,11 +22,12 @@ build+run:
     python? ( dev-lang/python:= )"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}/${P}-user-cflags.patch" )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS="doc/debugging.txt doc/socket.txt"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-inotify )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug debug-api" )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/debugging.txt doc/socket.txt )
 
 src_install() {
     default
