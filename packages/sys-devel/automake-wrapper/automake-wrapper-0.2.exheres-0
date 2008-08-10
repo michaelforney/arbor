@@ -12,9 +12,14 @@ MYTOPIONS=""
 
 DEPENDENCIES=""
 
+src_unpack() {
+    mkdir "${S}"
+    cp -R "${FILESDIR}"/${PV}/* "${S}"
+}
+
 src_install() {
-    mkdir -p "${T}"/usr/bin
-    newbin ${FILESDIR}/${P}.sh /usr/bin/${PN}.sh
+    dodir /usr/bin
+    newbin ${S}/${PN}.sh ${PN}.sh
     for i in aclocal automake; do
         dosym /usr/bin/${PN}.sh /usr/bin/${i}
     done
