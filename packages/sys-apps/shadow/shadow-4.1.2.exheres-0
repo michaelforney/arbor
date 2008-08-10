@@ -13,13 +13,13 @@ SRC_URI="ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-${PV}.tar.bz2"
 LICENSE="|| ( BSD GPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS="nls pam"
 
 DEPENDENCIES="
     build+run:
-        >=sys-libs/pam-1.0.1
         >=sys-libs/cracklib-2.8.3
         nls? ( sys-devel/gettext )
+        pam? ( >=sys-libs/pam-1.0.1 )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -33,15 +33,15 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-libcrypt \
     --enable-shared=no \
     --enable-static=yes \
-    --enable-libpam \
     --enable-libcrack
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'pam libpam' )
 
 src_prepare() {
     default
-    
+
     sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs \
         || die "sed for setting libdir failed"
 }
@@ -71,21 +71,23 @@ src_install() {
     insinto /etc
     insopts -m0644 ; newins etc/login.defs login.defs
 
-    dopamd "${FILESDIR}/pam.d-include/"{su,passwd,shadow}
-    newpamd "${FILESDIR}/login.pamd.2" login
+    if option pam ; then
+        dopamd "${FILESDIR}/pam.d-include/"{su,passwd,shadow}
+        newpamd "${FILESDIR}/login.pamd.2" login
 
-    for x in chage chsh chfn chpasswd newusers user{add,del,mod} group{add,del,mod} ; do
-        newpamd "${FILESDIR}"/pam.d-include/shadow ${x}
-    done
+        for x in chage chsh chfn chpasswd newusers user{add,del,mod} group{add,del,mod} ; do
+            newpamd "${FILESDIR}"/pam.d-include/shadow ${x}
+        done
 
-    # comment out login.defs options that pam hates
-    sed -i -f "${FILESDIR}"/login_defs_pam.sed "${D}"/etc/login.defs
+        # comment out login.defs options that pam hates
+        sed -i -f "${FILESDIR}"/login_defs_pam.sed "${D}"/etc/login.defs
 
-    # remove manpages that pam will install for us
-    # and/or don't apply when using pam
-    find "${D}"/usr/share/man \
-        '(' -name 'limits.5*' -o -name 'suauth.5*' ')' \
-        -exec rm {} \;
+        # remove manpages that pam will install for us
+        # and/or don't apply when using pam
+        find "${D}"/usr/share/man \
+            '(' -name 'limits.5*' -o -name 'suauth.5*' ')' \
+            -exec rm {} \;
+    fi
 
     # Remove manpages that are handled by other packages
     find "${D}"/usr/share/man \
@@ -94,10 +96,10 @@ src_install() {
 
     # Remove empty dirs
     rmdir -p "${D}"/usr/share/man/{de,es,hu,ko,zh_CN,zh_TW}/man5
-    
+
     # Installing the download README makes no sense
     rm README || die "Removing the download README failed"
-    
+
     dodoc doc/{HOWTO,README*,WISHLIST,*.txt}
 }
 
