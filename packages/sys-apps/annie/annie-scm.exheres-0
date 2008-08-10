@@ -1,11 +1,15 @@
 # Copyright 2007 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib git
+require multilib
 
 SUMMARY="Some replacements for programs formerly provided by sysvinit."
 HOMEPAGE="http://www.exherbo.org/"
 SRC_URI=""
+
+SCM_TYPE="git"
+SCM_REPOSITORY="git://git.exherbo.org/${PN}.git"
+require scm
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -13,8 +17,6 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="visibility"
 
 DEPENDENCIES=""
-
-EGIT_REPO_URI="git://git.exherbo.org/${PN}.git"
 
 src_prepare() {
     ./autogen.bash || die "autogen.bash failed"

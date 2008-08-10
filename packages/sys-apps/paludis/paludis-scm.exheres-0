@@ -2,11 +2,15 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-require eutils bash-completion flag-o-matic git
+require eutils bash-completion flag-o-matic
 
 SUMMARY="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
 SRC_URI=""
+
+SCM_TYPE="git"
+SCM_REPOSITORY="git://git.pioto.org/paludis"
+require scm
 
 MYOPTIONS="cran glsa inquisitio pink qa ruby vim-syntax visibility"
 LICENSE="GPL-2 vim-syntax? ( vim )"
@@ -32,8 +36,6 @@ DEPENDENCIES="
         sys-apps/sandbox
     post:
         vim-syntax? ( >=app-editors/vim-runtime-7:* )"
-
-EGIT_REPO_URI="git://git.pioto.org/paludis"
 
 create-paludis-user() {
     enewgroup "paludisbuild"
