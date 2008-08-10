@@ -1,0 +1,113 @@
+# Copyright 2008 David Leverton <dleverton@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+scm-svn_do_dependencies() {
+    if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
+        echo "dev-scm/subversion[ssl]"
+    else
+        echo "dev-scm/subversion"
+    fi
+}
+
+scm-svn_do_check_vars() {
+    [[ -n $(scm_get_var SVN_RAW_URI) ]] \
+        && [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var TAG) ||
+                  -n $(scm_get_var SVN_SUBPATH) ]] \
+        && die "$(scm_var_name SVN_RAW_URI) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name TAG) or $(scm_var_name SVN_SUBPATH)"
+    [[ "$(scm_get_var REVISION)" == *[^0-9]* ]] && die "$(scm_var_name REVISION) must be a non-negative integer"
+    scm_default_check_vars
+}
+
+scm-svn_uri() {
+    if [[ -n $(scm_get_var SVN_RAW_URI) ]]; then
+        scm_get_var REPOSITORY
+        return
+    fi
+
+    local uri="$(scm_get_var REPOSITORY)"
+    uri="${uri%%*(/)}"
+    if [[ -n $(scm_get_var TAG) ]]; then
+        uri+="/tags/$(scm_get_var TAG)"
+    elif [[ -n $(scm_get_var BRANCH) ]]; then
+        uri+="/branches/$(scm_get_var BRANCH)"
+    else
+        uri+="/trunk"
+    fi
+
+    local subpath="$(scm_get_var SVN_SUBPATH)"
+    subpath=${subpath##*(/)}
+    subpath=${subpath%%*(/)}
+    [[ -n ${subpath} ]] && uri+="/${subpath}"
+
+    echo "${uri}"
+}
+
+scm-svn_svn() {
+    if [[ ${1} == -v ]]; then
+        shift
+        echo svn "${@}" >&2
+    fi
+    svn "${@}" || die "svn ${1} failed"
+}
+
+scm-svn_info() {
+    local info="$(LC_ALL=C scm-svn_svn info "$(scm_get_var CHECKOUT_TO)" | sed -ne "s/^${1}: //p")"
+    [[ -n ${info} ]] || die "Could not determine ${1} for $(scm_get_var CHECKOUT_TO)"
+    echo "${info}"
+}
+
+scm-svn_do_appraise() {
+    local dir="$(scm_get_var CHECKOUT_TO)"
+
+    if [[ ! -e ${dir} ]]; then
+        echo "${dir} does not exist"
+        return 1
+    elif [[ ! -d ${dir}/.svn ]]; then
+        die "${dir} is not a svn checkout"
+    fi
+
+    if [[ "$(scm-svn_info URL)" != "$(scm-svn_uri)" ]]; then
+        echo "${dir} is a checkout of $(scm-svn_info URL), but wanted $(scm-svn_uri)"
+
+        return 1
+    fi
+
+    if [[ -n $(scm_get_var REVISION) ]]; then
+        if [[ $(scm_get_var REVISION) -eq $(scm-svn_do_revision) ]]; then
+            return 2
+        else
+            echo "${dir} is a checkout of revision $(scm-svn_do_revision), but wanted $(scm_get_var REVISION)"
+            return 1
+        fi
+    else
+        return 0
+    fi
+}
+
+scm-svn_do_checkout() {
+    local rev=$(scm_get_var REVISION)
+    scm-svn_svn -v checkout ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+}
+
+scm-svn_do_update() {
+    local rev=$(scm_get_var REVISION)
+    if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
+        # let's hope we never have to do both kinds of switch at once....
+        if [[ "$(scm-svn_uri)" == "$(scm-svn_info "Repository Root")"?(/*) ]]; then
+            scm-svn_svn -v switch ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+            return
+        else
+            scm-svn_svn switch --relocate "$(scm_svn_info URL)" "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+        fi
+    fi
+    scm-svn_svn -v update ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
+}
+
+scm-svn_do_revision() {
+    scm-svn_info "Last Changed Rev"
+}
+
+scm-svn_do_unpack() {
+    scm-svn_svn -v export "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+}
+

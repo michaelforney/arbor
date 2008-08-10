@@ -1,0 +1,118 @@
+# Copyright 2008 David Leverton <dleverton@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon git.exlib, which is:
+#    Copyright 2008 Fernando J. Pereda
+#    Based upon 'git.eclass' which is:
+#       Copyright 1999-2007 Gentoo Foundation
+
+scm-git_do_dependencies() {
+    if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
+        echo "dev-scm/git[curl] net-misc/curl[ssl]"
+    elif [[ $(scm_get_var REPOSITORY) == http://* ]]; then
+        echo "dev-scm/git[curl]"
+    else
+        echo "dev-scm/git"
+    fi
+}
+
+scm-git_do_check_vars() {
+    [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var REVISION) ]] \
+        && die "$(scm_var_name BRANCH) must not be set at the same time as $(scm_var_name REVISION)"
+    local rev="$(scm_get_var REVISION)"
+    [[ -n ${rev} ]] && [[ ${rev} == *[^0-9a-zA-Z]* || ${#rev} -ne 40 ]] \
+        && die "$(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
+    [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
+            -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
+    scm_default_check_vars
+}
+
+scm-git_git() {
+    if [[ ${1} == -v ]]; then
+        shift
+        echo git "${@}" >&2
+    fi
+    GIT_PAGER=cat GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" \
+        git "${@}" || die "git ${1} failed"
+}
+
+scm-git_do_appraise() {
+    local dir="$(scm_get_var CHECKOUT_TO)"
+
+    if [[ ! -e ${dir} ]]; then
+        echo "${dir} does not exist"
+        return 1
+    elif ! scm_git-git rev-parse HEAD &>/dev/null; then
+        die "${dir} is not a git checkout"
+    fi
+
+    if [[ -n $(scm_get_var REVISION) ]]; then
+        if [[ $(scm-git_git cat-file -t $(scm_get_var REVISION)) == commit ]]; then
+            return 2
+        elif [[ -n $(scm-git_get cat-file -t $(scm_get_var REVISION)) ]]; then
+            die "$(scm_get_var REVISION) is not a commit in ${dir}"
+        fi
+    fi
+
+    local origin="$(scm-git_git config remote.origin.url)"
+    [[ -n ${origin} ]] || die "could not determine origin URL for ${dir}"
+    if [[ ${origin} != "$(scm_get_var REPOSITORY)" ]]; then
+        echo "${dir} is a clone of ${origin}, but wanted $(scm_get_var REPOSITORY)"
+        return 1
+    fi
+
+    if [[ -n $(scm_get_var TAG) ]]; then
+        if ! has $(scm_get_var TAG) $(scm-git_git tag); then
+            echo "${dir} does not contain the tag $(scm_get_var TAG)"
+            return 1
+        elif [[ $(scm-git_git cat-file -t refs/tags/$(scm_get_var TAG)) == @(commit|tag) ]]; then
+            return 2
+        else
+            die "$(scm_get_var TAG) is not a commit or a tag in ${dir}"
+        fi
+    fi
+
+    if [[ -n $(scm_get_var BRANCH) ]] &&
+        ! has $(scm_get_var BRANCH) $(scm-git_git branch); then
+        echo "${dir} does not contain the branch $(scm_get_var BRANCH)"
+        return 1
+    fi
+
+    return 0
+}
+
+scm-git_do_checkout() {
+    scm-git_git -v clone --bare "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
+    scm-git_git -v config remote.origin.url "$(scm_get_var REPOSITORY)"
+    scm-git_git -v config remote.origin.fetch '+refs/heads/*:refs/heads/*'
+    scm-git_git -v gc --auto
+}
+
+scm-git_do_update() {
+    scm-git_git -v config remote.origin.url "$(scm_get_var REPOSITORY)"
+    scm-git_git -v fetch -f -u origin
+    scm-git_git -v gc --auto
+}
+
+scm-git_ref_or_sha1() {
+    if [[ -n $(scm_get_var REVISION) ]]; then
+        scm_get_var REVISION
+    elif [[ -n $(scm_get_var BRANCH) ]]; then
+        echo refs/heads/$(scm_get_var BRANCH)
+    elif [[ -n $(scm_get_var TAG) ]]; then
+        echo refs/tags/$(scm_get_var TAG)
+    fi
+}
+
+scm-git_do_revision() {
+    scm-git_git rev-parse $(scm-git_ref_or_sha1)
+}
+
+scm-git_do_unpack() {
+    mkdir -p "$(scm_get_var UNPACK_TO)" || die "mkdir failed"
+    scm-git_git -v checkout -f $(scm-git_ref_or_sha1)
+    if [[ -z ${SCM_THIS} ]]; then
+        export GIT_DIR="$(scm_get_var CHECKOUT_TO)"
+        export GIT_WORK_TREE="$(scm_get_var UNPACK_TO)"
+    fi
+}
+

@@ -1,0 +1,156 @@
+# Copyright 2008 David Leverton <dleverton@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon subversion.eclass, which is:
+#    Copyright 1999-2008 Gentoo Foundation
+
+scm_for_each() {
+    local SCM_THIS
+    for SCM_THIS in "" ${SCM_SECONDARY_REPOSITORIES}; do
+        "${@}"
+    done
+}
+
+scm_var_name() {
+    echo SCM${SCM_THIS:+_${SCM_THIS}}_${1}
+}
+
+scm_get_var() {
+    local var=$(scm_var_name ${1})
+    echo "${!var}"
+}
+
+scm_set_var() {
+    eval "$(scm_var_name ${1})=\${2}"
+}
+
+scm_call() {
+    local func=${1} type=$(scm_get_var TYPE)
+    shift
+    if [[ -n $(declare -F scm-${type}_do_${func}) ]]; then
+        scm-${type}_do_${func} "${@}"
+    elif [[ -n $(declare -F scm_default_do_${func}) ]]; then
+        scm_default_${func} "${@}"
+    else
+        die "bug in scm-${type}.exlib: scm-${type}_do_${func} not defined"
+    fi
+}
+
+scm_fetch_one() {
+    local dir="$(scm_get_var CHECKOUT_TO)"
+    addwrite "${dir%/*}"
+    mkdir -p "${dir%/*}" || die "mkdir failed"
+
+    {
+        flock -x 42
+
+        local whynot
+        whynot="$(scm_call appraise)"
+        local status=${?}
+        [[ ${status} -eq 2 ]] && return
+
+        if [[ -n ${SCM_OFFLINE} ]]; then
+            [[ ${status} -eq 1 ]] && die "can't use SCM_OFFLINE because ${whynot}"
+            einfo "not fetching because SCM_OFFLINE is set"
+            return
+        fi
+
+        if [[ -n ${SCM_MIN_UPDATE_DELAY} ]]; then
+            [[ ${SCM_MIN_UPDATE_DELAY} == *([0-9])[1-9]*([0-9]) ]] || die "SCM_MIN_UPDATE_DELAY must be a positive integer"
+            if [[ ${status} -ne 1 && -e "${dir}/.scm.exlib.timestamp" &&
+                    -n "$(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
+                              -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print)" ]]; then
+                einfo "not fetching because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
+                return
+            fi
+        fi
+
+        if [[ -d "${dir}" ]]; then
+            scm_call update
+        else
+            scm_call checkout
+        fi
+
+        whynot="$(scm_call appraise)"
+        [[ ${?} -eq 1 ]] && die "after fetching, ${whynot}"
+
+        touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
+    } 42>"${dir%/*}/.lock-${dir##*/}"
+}
+
+scm_src_fetch_extra() {
+    scm_for_each scm_fetch_one
+}
+
+scm_unpack_one() {
+    local dir="$(scm_get_var CHECKOUT_TO)"
+    mkdir -p "${dir%/*}" || die "mkdir failed"
+
+    {
+        flock -s 42
+
+        local whynot
+        whynot="$(scm_call appraise)"
+        [[ ${?} -eq 1 ]] && die "${whynot}"
+
+        local rev=$(scm_call revision)
+        [[ -n ${rev} ]] || die "could not determine revision"
+        SCM_INFO+=",${SCM_THIS}=${rev}"
+
+        scm_call unpack
+        rm -f "$(scm_get_var "${1}" UNPACK_TO)/.scm.exlib.timestamp"
+    } 42>"${dir%/*}/.lock-${dir##*/}"
+}
+
+scm_src_unpack() {
+    scm_src_fetch_extra
+
+    scm_for_each scm_unpack_one
+    SCM_INFO=${SCM_INFO#,=}
+}
+
+SCM_INFO=
+scm_pkg_scm_info() {
+    echo ${SCM_INFO}
+}
+
+scm_pkg_info() {
+    scm_for_each scm_call info
+}
+
+scm_default_info() {
+    :
+}
+
+scm_do_stuff() {
+    [[ -z $(scm_get_var TYPE) ]] && die "$(scm_var_name TYPE) must be set"
+    require scm-$(scm_get_var TYPE)
+
+    [[ -z $(scm_get_var REPOSITORY) ]] \
+        && die "$(scm_var_name REPOSITORY) must be set"
+    if [[ -z $(scm_get_var UNPACK_TO) ]]; then
+        if [[ -z ${SCM_THIS} ]]; then
+            scm_set_var UNPACK_TO "${WORKDIR}/${P}"
+        else
+            die "$(scm_var_name UNPACK_TO) must be set"
+        fi
+    fi
+    local checkout_to="$(scm_get_var CHECKOUT_TO)"
+    [[ -z ${checkout_to} ]] && checkout_to="${FETCHEDDIR}/scm/${SCM_THIS:-${PN}}"
+    scm_set_var CHECKOUT_TO "${checkout_to%%*(/)}"
+    scm_call check_vars
+
+    DEPENDENCIES+=" $(scm_call dependencies)"
+}
+
+scm_default_check_vars() {
+    [[ -n $(scm_get_var TAG) ]] && \
+        [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var REVISION) ]] \
+        && die "$(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
+}
+
+DEPENDENCIES="build,host: >=sys-apps/util-linux-2.12j"
+scm_for_each scm_do_stuff
+
+#export_exlib_phases src_fetch_extra src_unpack pkg_scm_info pkg_info
+export_exlib_phases src_unpack
+
