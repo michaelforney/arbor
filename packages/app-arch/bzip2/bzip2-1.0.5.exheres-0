@@ -15,8 +15,8 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/bzip2-manpage-install.patch")
 
 src_compile() {
-    emake -f Makefile-libbz2_so || die "Make failed."
-    emake || die "Make failed."
+    emake -f Makefile-libbz2_so
+    emake
 }
 
 src_install() {

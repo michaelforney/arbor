@@ -19,7 +19,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "socks5" "ipv6" )
 src_prepare() {
     sed -i -e 's/"$DESTDIR"/"$(DESTDIR)"/p' \
         -e 's:"$(DESTDIR)$(SYSCONFDIR)"::' \
-        "${S}"/Makefile.in || die "Sed failed."
+        "${S}"/Makefile.in || die "sed failed"
 }
 
 src_install() {

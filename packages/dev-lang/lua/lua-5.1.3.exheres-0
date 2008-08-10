@@ -28,10 +28,10 @@ src_prepare() {
     sed -e "/^INSTALL_TOP/s:= .*:= ${D}/usr:" \
         -e "/^INSTALL/s:lib:$(get_libdir):" \
         -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
-        -i Makefile || die "Sedding Makefile failed."
+        -i Makefile || die "sedding Makefile failed"
     sed -e "/^prefix/s:/.*$:/usr:" \
         -e "s:/lib:/$(get_libdir):" \
-        -i etc/${PN}.pc || die "Sedding etc/${PN}.pc failed"
+        -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
 
     default
 }
@@ -58,9 +58,9 @@ src_test() {
         echo "./src/lua test/${t}.lua"
         case ${t} in
             readonly)
-                ./src/lua test/${t}.lua && die "Test ./src/lua test/${t}.lua failed." ;;
+                ./src/lua test/${t}.lua && die "Test ./src/lua test/${t}.lua failed" ;;
             *)
-                ./src/lua test/${t}.lua || die "Test ./src/lua test/${t}.lua failed." ;;
+                ./src/lua test/${t}.lua || die "Test ./src/lua test/${t}.lua failed" ;;
         esac
     done
 }

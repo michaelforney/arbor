@@ -25,12 +25,12 @@ src_unpack() {
 
 src_prepare() {
     ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ || \
-        die "Failed to install test tarballs."
+        die "Failed to install test tarballs"
 }
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ipv6 python readline "readline history" )
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed"
+    emake DESTDIR="${D}" install
     dodoc AUTHORS ChangeLog Copyright NEWS README README.tests TODO TODO_SCHEMAS
 }

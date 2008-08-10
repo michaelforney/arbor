@@ -37,23 +37,23 @@ src_configure() {
         $(option_enable propolice libssp) \
         $(option_enable nls) \
         --disable-multilib \
-        || die "Configure failed."
+        || die "configure failed"
 }
 
 src_compile() {
     cd "${OBJDIR}"
-    emake bootstrap || die "Make failed."
+    emake bootstrap
 }
 
 src_install() {
     cd "${OBJDIR}"
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
 
     # Precompile headers
     # FIXME: Should use gcc version from $D instead of old system gcc
     cd "${D}"
-    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed."
-    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed."
+    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed"
+    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
 
     rmdir "${D}"/usr/lib/gcc/${CHOST}/${PV}/finclude \
         || die "Failed to delete empty directory"

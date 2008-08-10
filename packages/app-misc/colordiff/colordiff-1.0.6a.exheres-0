@@ -18,10 +18,10 @@ src_compile() {
 }
 
 src_install() {
-    newbin colordiff.pl colordiff || die "failed to install colordiff"
-    newbin cdiff.sh cdiff || die "failed to install cdiff"
+    newbin colordiff.pl colordiff
+    newbin cdiff.sh cdiff
     insinto /etc
-    doins colordiffrc colordiffrc-lightbg || die "failed to install colordiffrc files"
+    doins colordiffrc colordiffrc-lightbg
     dodoc BUGS CHANGES README TODO
     doman colordiff.1
 }

@@ -18,7 +18,7 @@ dopamd() {
         insinto /etc/pam.d
         insopts -m 0644
         doins "$@"
-    ) || die "failed to install $@"
+    )
     cleanpamd "$@"
 }
 
@@ -32,7 +32,7 @@ newpamd() {
         insinto /etc/pam.d
         insopts -m 0644
         newins "$1" "$2"
-    ) || die "failed to install $1 as $2"
+    )
     cleanpamd $2
 }
 
@@ -46,7 +46,7 @@ dopamsecurity() {
         insinto /etc/security/$1
         insopts -m 0644
         doins "${@:2}"
-    ) || die "failed to install ${@:2}"
+    )
 }
 
 # newpamsecurity <section> <old name> <new name>
@@ -59,7 +59,7 @@ newpamsecurity() {
         insinto /etc/security/$1
         insopts -m 0644
         newins "$2" "$3"
-    ) || die "failed to install $2 as $3"
+    )
 }
 
 # getpam_mod_dir
@@ -86,7 +86,7 @@ dopammod() {
     [[ -z $1 ]] && die "dopammod requires at least one argument"
 
     exeinto $(getpam_mod_dir)
-    doexe "$@" || die "failed to install $@"
+    doexe "$@"
 }
 
 # newpammod <old name> <new name>
@@ -97,7 +97,7 @@ newpammod() {
     [[ $# -ne 2 ]] && die "newpammod requires two arguements"
 
     exeinto $(getpam_mod_dir)
-    newexe "$1" "$2" || die "failed to install $1 as $2"
+    newexe "$1" "$2"
 }
 
 # pamd_mimic_system <pamd file> [auth levels]

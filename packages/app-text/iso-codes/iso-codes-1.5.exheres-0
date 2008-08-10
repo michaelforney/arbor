@@ -23,7 +23,7 @@ DEPENDENCIES="
 src_prepare() {
     sed -e 's:(datadir)/pkgconfig:(libdir)/pkgconfig:g' \
         -i "${S}"/Makefile.am \
-    || die "Fixing pc file install location failed."
+    || die "Fixing pc file install location failed"
 
     eautoreconf
 }

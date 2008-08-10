@@ -46,9 +46,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-docdir=/usr/share/doc/${PF} )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_install() {
-    dodoc README* TODO || die "dodoc README failed"
+    dodoc README* TODO
 
-    emake DESTDIR="${D}" install || die "installation failed"
+    emake DESTDIR="${D}" install
 
     # install ispell/aspell compatibility scripts
     exeinto /usr/bin
@@ -59,7 +59,7 @@ src_install() {
         pushd examples
         make clean || die
         docinto examples
-        dodoc "${S}"/examples/* || die "installing examples failed"
+        dodoc "${S}"/examples/*
         popd
     fi
 

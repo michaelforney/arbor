@@ -21,39 +21,36 @@ src_configure() {
 
     mkdir "${S}/narrow"
     cd "${S}/narrow"
-    econf \
-         ${common_conf} \
-        || die "Configure failed."
+    econf ${common_conf}
 
     if option unicode ; then
         mkdir "${S}/wide"
         cd "${S}/wide"
         econf \
             ${common_conf} \
-            $(option_enable unicode widec) \
-            || die "Configure failed."
+            $(option_enable unicode widec)
     fi
 }
 
 src_compile() {
     cd "${S}/narrow"
-    emake || die "Make failed."
+    emake
 
     if option unicode ; then
         cd "${S}/wide"
-        emake || die "Make failed."
+        emake
     fi
 }
 
 src_install() {
     # Install narrow char version
     cd "${S}/narrow"
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
 
     # Install wide char version if unicode is enabled
     if option unicode ; then
         cd "${S}/wide"
-        emake DESTDIR="${D}" install || die "Install failed"
+        emake DESTDIR="${D}" install
     fi
 }
 

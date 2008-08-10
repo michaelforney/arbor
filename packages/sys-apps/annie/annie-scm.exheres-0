@@ -24,11 +24,10 @@ src_configure() {
     econf \
         $(option_enable visibility) \
         --exec-prefix=/ \
-        --libexecdir=/$(get_libdir) \
-        || die "econf failed"
+        --libexecdir=/$(get_libdir)
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "emake install failed"
+    emake DESTDIR="${D}" install
     dodoc AUTHORS ChangeLog NEWS README 
 }

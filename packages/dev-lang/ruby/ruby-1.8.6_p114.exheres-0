@@ -59,16 +59,15 @@ src_configure() {
         --disable-threads \
         --without-tk \
         --with-sitedir=/usr/$(get_libdir)/ruby/site_ruby \
-        $myconf \
-        || die "econf failed"
+        $myconf
 }
 
 src_compile() {
-    emake EXTLDFLAGS="${LDFLAGS}" || die "emake failed"
+    emake EXTLDFLAGS="${LDFLAGS}"
 }
 
 src_test() {
-    emake -j1 test || die "make test failed"
+    emake -j1 test
 }
 
 src_install() {
@@ -83,10 +82,10 @@ src_install() {
 
     export LD_LIBRARY_PATH RUBYLIB
 
-    emake DESTDIR="${D}" install || die "make install failed"
+    emake DESTDIR="${D}" install
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
-    ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run."
+    ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run"
     keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitelibdir']") \
             $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")
 

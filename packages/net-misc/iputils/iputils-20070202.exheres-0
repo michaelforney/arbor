@@ -21,10 +21,10 @@ DEFAULT_SRC_PREPARE_PATCHES=(-p0
     "${FILESDIR}/${P}-no-open-max.patch")
 
 src_compile() {
-    emake || die "Make failed."
+    emake
 # Need docbook for html and man targets to work
-#   emake html || die "Make html failed."
-#   emake man || die "Make man failed."
+#   emake html
+#   emake man
 }
 
 src_install() {

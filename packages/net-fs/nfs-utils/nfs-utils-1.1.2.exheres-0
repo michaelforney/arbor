@@ -69,7 +69,7 @@ src_install() {
 
     # Install some client-side binaries in /sbin
     dodir /sbin
-    mv "${D}"/usr/sbin/rpc.statd "${D}"/sbin/ || die
+    mv "${D}"/usr/sbin/rpc.statd "${D}"/sbin/ || die "mv failed"
 
     insinto /etc
     doins "${FILESDIR}"/exports
@@ -78,7 +78,7 @@ src_install() {
     option nfsv4 && list+="rpc.idmapd"
 
     for f in nfs nfsmount rpc.statd ${list} ; do
-        newinitd "${FILESDIR}"/${f}.initd ${f} || die "doinitd ${f}"
+        newinitd "${FILESDIR}"/${f}.initd ${f}
     done
     newconfd "${FILESDIR}"/nfs.confd nfs
     option nfsv4 && doins utils/idmapd/idmapd.conf

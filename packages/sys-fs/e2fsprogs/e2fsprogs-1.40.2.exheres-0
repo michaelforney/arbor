@@ -24,7 +24,7 @@ src_compile() {
     sed -i -e 's:^\(LIB_SUBDIRS=\)lib/et lib/ss:\1:' Makefile.in
     mkdir build
     cd build
-    ../configure --enable-elf-shlibs || die "Configure failed."
+    ../configure --enable-elf-shlibs || die "configure failed"
 
     # Remove ss and com_err libs as they're is split out
     rm lib/{et,ss}/*
@@ -45,10 +45,10 @@ src_test() {
         IMAGE="" \
         RM=/bin/rm \
         LN=/bin/ln \
-        check || die "Tests failed."
+        check
 }
 
 src_install() {
-    emake -C build DESTDIR="${D}" install || die "Install failed."
+    emake -C build DESTDIR="${D}" install
     dodoc README RELEASE-NOTES SUBMITTING-PATCHES
 }

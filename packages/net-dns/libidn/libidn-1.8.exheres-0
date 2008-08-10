@@ -20,12 +20,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-csharp )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_install() {
-    emake install DESTDIR="${D}" || die
+    emake install DESTDIR="${D}"
     dodoc AUTHORS ChangeLog FAQ NEWS README THANKS TODO
 
     if option doc ; then
         dodir /usr/share/doc/${PF}
         insinto /usr/share/doc/${PF}
-        doins -r doc/reference/html || die
+        doins -r doc/reference/html
     fi
 }

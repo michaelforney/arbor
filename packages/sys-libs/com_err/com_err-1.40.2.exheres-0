@@ -18,18 +18,18 @@ src_compile() {
     cd "${S}"
     mkdir build
     cd build
-    ../configure --enable-elf-shlibs || die "Configure failed."
-    emake -C lib/et || "Make failed."
+    ../configure --enable-elf-shlibs || die "configure failed"
+    emake -C lib/et
 }
 
 src_test() {
     cd "${S}/build"
-    emake -C lib/et check || die "Tests failed."
+    emake -C lib/et check
 }
 
 src_install() {
     cd "${S}/build"
-    emake -C lib/et DESTDIR="${D}" install || die "Install failed."
+    emake -C lib/et DESTDIR="${D}" install
     cd "${S}"
     dodoc README RELEASE-NOTES SUBMITTING-PATCHES
 }

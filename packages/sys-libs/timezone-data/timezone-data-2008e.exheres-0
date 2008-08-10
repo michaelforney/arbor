@@ -17,7 +17,7 @@ src_test() {
     # Don't validate webpages as that requires open{jade+sp} dependencies
     sed -i -e '/^check:/ s/ check_web//' Makefile || die "sed failed"
 
-    emake AWK=awk check || die "Tests failed."
+    emake AWK=awk check
 }
 
 src_install() {

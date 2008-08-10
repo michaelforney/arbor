@@ -19,11 +19,11 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix="-${PV}" )
 
 src_compile() {
-    emake -j1 || die "Make failed."
+    emake -j1
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
 }
 
 src_test() {

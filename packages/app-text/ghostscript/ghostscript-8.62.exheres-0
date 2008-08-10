@@ -37,18 +37,18 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_prepare() {
-    rm -rf ./{expat,jasper,jpeg,libpng,Resource/Font} \
-        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng."
+    rm -r ./{expat,jasper,jpeg,libpng,Resource/Font} \
+        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng"
 
     if option !gtk; then
         sed -e 's:\$(GSSOX)::' \
             -e 's:.*\$(GSSOX_XENAME)$::' \
             -i src/*.mak \
-            || die 'GSSOX sed failed.'
+            || die 'GSSOX sed failed'
     fi
 
     sed -e 's:^\(docdir=\).*$:\1@docdir@:' \
-        -i Makefile.in src/*.mak || die 'docdir sed failed.'
+        -i Makefile.in src/*.mak || die 'docdir sed failed'
 
     autotools_src_prepare
     cd "${S}/ijs"

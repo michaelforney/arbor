@@ -196,7 +196,7 @@ vim_src_configure() {
     # autoconf-2.13 needed for this package -- bug 35319
     # except it seems we actually need 2.5 now -- bug 53777
     WANT_AUTOCONF=2.5 \
-        emake -j1 -C src $confrule || die "make $confrule failed"
+        emake -j1 -C src $confrule
     eend $?
 
     # This should fix a sandbox violation (see bug 24447). The hvc
@@ -341,7 +341,7 @@ vim_src_test() {
     sed -i -e 's,: \$(VIMPROG),: ,' Makefile
 
     # Don't try to do the additional GUI test
-    emake -j1 VIMPROG=${testprog} nongui || die "At least one test failed"
+    emake -j1 VIMPROG=${testprog} nongui
 }
 
 vim_src_install() {
@@ -360,8 +360,7 @@ vim_src_install() {
             DESTDIR="${D}" \
             BINDIR=/usr/bin \
             MANDIR=/usr/share/man \
-            DATADIR=/usr/share \
-            || die "install failed"
+            DATADIR=/usr/share
 
         keepdir /usr/share/vim/vim${VIM_VERSION/./}/keymap
 

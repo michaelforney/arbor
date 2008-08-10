@@ -84,12 +84,12 @@ src_install() {
     # and install linker scripts to /usr/lib/.
     dodir /$(get_libdir)
     mv "${D}"/usr/$(get_libdir)/*.so* "${D}"/$(get_libdir)/
-    dolib.a lib/*.a || die "dolib.a"
+    dolib.a lib/*.a
     rm -f "${D}"/usr/$(get_libdir)/lib{com_err,ss}.a
     local x
     cd "${D}"/$(get_libdir)
     for x in *.so ; do
-        gen_usr_ldscript ${x} || die "gen ldscript ${x}"
+        gen_usr_ldscript ${x}
     done
 
     # move 'useless' stuff to /usr/

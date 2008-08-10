@@ -58,7 +58,7 @@ src_prepare() {
         Makefile.pre.in \
         Modules/Setup.dist \
         Modules/getpath.c \
-        setup.py || die "sed failed to replace EXHERBO_LIBDIR."
+        setup.py || die "sed failed to replace EXHERBO_LIBDIR"
 
     eautoreconf
 }
@@ -95,7 +95,7 @@ src_test() {
     fi
 
     # rerun failed tests in verbose mode (regrtest -w)
-    EXTRATESTOPTS="-w" emake test || die "emake test failed"
+    EXTRATESTOPTS="-w" emake test
 }
 
 pkg_postinst() {

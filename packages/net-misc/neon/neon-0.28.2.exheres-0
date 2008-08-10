@@ -34,11 +34,10 @@ src_configure() {
 
     econf \
         --enable-shared \
-        ${myconf} \
-        || die "Configure failed."
+        ${myconf}
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
     dodoc AUTHORS BUGS ChangeLog* NEWS README THANKS TODO doc
 }

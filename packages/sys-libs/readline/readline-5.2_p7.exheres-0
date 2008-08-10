@@ -28,16 +28,14 @@ DEPENDENCIES="build:
 src_prepare() {
     local i
     for ((i=1; i<=PATCH_LEVEL; i++)); do
-        expatch -p0 "${FETCHEDDIR}/readline52-"$(printf "%03d" ${i}) || die "patching failed."
+        expatch -p0 "${FETCHEDDIR}/readline52-"$(printf "%03d" ${i})
     done
 }
 
 src_configure() {
-    econf \
-        --libdir=/$(get_libdir) \
-        || die "Configure failed."
+    econf --libdir=/$(get_libdir)
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
 }

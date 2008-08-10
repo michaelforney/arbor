@@ -40,11 +40,11 @@ src_compile() {
 
     emake OPTS="${CFLAGS}" \
         CC="$(tc-getCC)" \
-        ${mydefines} || die "emake failed"
+        ${mydefines}
 }
 
 src_install() {
-    emake BASEDIR="${D}" prefix=/usr install || die "emake install failed"
+    emake BASEDIR="${D}" prefix=/usr install
     insinto /etc
     doins whois.conf
     dodoc README

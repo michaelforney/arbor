@@ -93,7 +93,7 @@ src_configure() {
 src_test() {
     option X509 && export SSH_X509TESTS="blob_auth"
 
-    emake -j1 tests || die "make tests failed"
+    emake -j1 tests
 }
 
 src_install() {
@@ -107,9 +107,9 @@ src_install() {
     keepdir /var/run
 
     sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${D}"/etc/ssh/sshd_config \
-        || die "sed for UsePAM failed."
+        || die "sed for UsePAM failed"
     sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
-        "${D}"/etc/ssh/sshd_config || die "sed for passwd auth failed."
+        "${D}"/etc/ssh/sshd_config || die "sed for passwd auth failed"
     newpamd "${FILESDIR}"/sshd.pam_include.1 sshd
 
     doman contrib/ssh-copy-id.1

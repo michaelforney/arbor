@@ -40,9 +40,9 @@ src_install() {
 
     ruby setup.rb $myconf --prefix="${D}" || die "setup.rb failed"
 
-    dosym "gem${ver_stripped}" /usr/bin/gem || die "dosym gem failed"
+    dosym "gem${ver_stripped}" /usr/bin/gem
 
-    dodoc README || die "dodoc README failed"
+    dodoc README
 }
 
 pkg_postinst() {

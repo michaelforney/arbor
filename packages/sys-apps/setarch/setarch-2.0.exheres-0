@@ -15,9 +15,9 @@ DEPENDENCIES=""
 src_unpack() {
     unpack ${A}
     cd "${S}"
-    cp "${FILESDIR}/Makefile" . || die
+    cp "${FILESDIR}/Makefile" . || die "cp Makefile failed"
 }
 
 src_install() {
-    emake install DESTDIR="${D}" || die
+    emake install DESTDIR="${D}"
 }

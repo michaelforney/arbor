@@ -40,10 +40,10 @@ src_install() {
     for x in "${D}"/bin/{gawk,pgawk}; do
         # don't install the same binary twice. instead use symlinks
         # ${x} -> ${x}-${PV} and /usr/bin/${x} -> ../../bin/${x}
-        rm -f "${x}" || die "rm /bin/${x##*/} failed"
+        rm "${x}" || die "rm /bin/${x##*/} failed"
         x=${x##*/}
-        dosym ${x}-${PV} /bin/${x} || die "dosym ${x} failed"
-        dosym ../../bin/${x} /usr/bin/${x} || die "dosym /usr/bin/${x} failed"
+        dosym ${x}-${PV} /bin/${x}
+        dosym ../../bin/${x} /usr/bin/${x}
     done
 
     cd "${WORKDIR}"/filefuncs

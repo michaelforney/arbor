@@ -13,8 +13,8 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
-    dosbin udevstart || die "Install udevstart failed"
+    emake DESTDIR="${D}" install
+    dosbin udevstart
     doman udevstart.8
     dodoc ChangeLog FAQ README RELEASE-NOTES TODO
     dodoc docs/*

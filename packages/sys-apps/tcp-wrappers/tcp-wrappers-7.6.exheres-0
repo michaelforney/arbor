@@ -70,7 +70,7 @@ src_install() {
     newlib.so libwrap.so libwrap.so.0.${PV}
     dosym libwrap.so.0.${PV} /$(get_libdir)/libwrap.so.0
     dosym libwrap.so.0 /$(get_libdir)/libwrap.so
-    gen_usr_ldscript libwrap.so || die "gen_usr_ldscript failed"
+    gen_usr_ldscript libwrap.so
 
     dodoc BLURB CHANGES DISCLAIMER README* "${FILESDIR}"/hosts.allow.example
 }

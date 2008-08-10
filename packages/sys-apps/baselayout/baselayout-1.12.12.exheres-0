@@ -35,7 +35,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 src_prepare() {
     # Use correct path to filefuncs.so on multilib systems
     sed -e "s:/lib/rcscripts:/$(get_libdir)/rcscripts:" \
-        -i "${S}"/src/awk/{cachedepends,genenviron}.awk || die 'Sed failed.'
+        -i "${S}"/src/awk/{cachedepends,genenviron}.awk || die 'sed failed'
 
     default
 }

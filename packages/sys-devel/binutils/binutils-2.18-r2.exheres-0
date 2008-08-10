@@ -42,8 +42,8 @@ EOF
     for f in "${D}"/usr/${CHOST}/bin/* ; do
         target=${f#${D}}
         name=${f##*/}
-        dosym ${target} /usr/bin/${CHOST}-${name} || die "dosym ${target} ${CHOST}-${name} failed."
-        dosym ${target} /usr/bin/${name} || die "dosym ${target} ${name} failed."
+        dosym ${target} /usr/bin/${CHOST}-${name}
+        dosym ${target} /usr/bin/${name}
      done
 }
 

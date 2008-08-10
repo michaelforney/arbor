@@ -17,13 +17,13 @@ DEPENDENCIES=""
 S="${WORKDIR}"
 
 src_unpack() {
-    cp "${FETCHEDDIR}/${A}" "${WORKDIR}" || die "cp failed."
+    cp "${FETCHEDDIR}/${A}" "${WORKDIR}" || die "cp failed"
 }
 
 src_compile() {
-    $(tc-getCC) ${CFLAGS} -o ${PN} ${P}.c || die "compile failed."
+    $(tc-getCC) ${CFLAGS} -o ${PN} ${P}.c || die "compile failed"
 }
 
 src_install() {
-    dobin ${PN} || die "dobin failed."
+    dobin ${PN}
 }

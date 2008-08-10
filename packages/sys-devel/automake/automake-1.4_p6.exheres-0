@@ -24,7 +24,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=-${SLOT} )
 src_prepare() {
     default
     # disable error.test, Gentoo bug #79529
-    sed -i 's:error\.test::' tests/Makefile.am || die "Sed failed to disable error.test"
+    sed -i 's:error\.test::' tests/Makefile.am || die "sed failed to disable error.test"
 }
 
 src_install() {

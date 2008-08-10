@@ -23,10 +23,10 @@ src_install() {
         infodir="${D}/usr/share/info" \
         mandir="${D}/usr/share/man" \
         appresdir="${D}/etc/X11/app-defaults" \
-        install || die "Install failed."
+        install
 
     rmdir "${D}"/usr/share/groff/site-font "${D}"/usr/groff/site-tmac || \
-        die "rmdir failed."
+        die "rmdir failed"
 
     dosym tbl /usr/bin/gtbl
     dosym eqn /usr/bin/geqn

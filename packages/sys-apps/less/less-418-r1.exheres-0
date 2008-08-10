@@ -27,7 +27,7 @@ src_configure() {
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "Install failed."
+    emake DESTDIR="${D}" install
     dodoc INSTALL NEWS README
 
     cd "${WORKDIR}/lesspipe-${LESSPIPE_PV}"

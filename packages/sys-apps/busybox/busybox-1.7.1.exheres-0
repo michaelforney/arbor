@@ -20,12 +20,12 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     )
 
 src_compile() {
-    emake defconfig || die "Failed to make default config."
-    emake || die "Make failed."
+    emake defconfig
+    emake
 
     # Preserve dynamically linked executable
     mv busybox_unstripped{,.dynamic}
-    emake CONFIG_STATIC=y busybox || die "Make static busybox failed."
+    emake CONFIG_STATIC=y busybox
     mv busybox_unstripped bb
     mv busybox_unstripped{.dynamic,}
 }

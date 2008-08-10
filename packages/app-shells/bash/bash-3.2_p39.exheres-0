@@ -38,14 +38,14 @@ src_prepare() {
 }
 
 src_install() {
-    emake DESTDIR="${D}" install || die "install failed."
+    emake DESTDIR="${D}" install
     dodoc README CHANGES AUTHORS NEWS ABOUT-NLS NOTES \
-        doc/{README,FAQ,INTRO} || die "dodoc failed"
+        doc/{README,FAQ,INTRO}
 
-    dosym bash bin/sh || die "dosym bin/sh failed"
+    dosym bash bin/sh
 
     insinto /etc/bash
-    doins "${FILESDIR}/bashrc" || die "doins bashrc failed"
+    doins "${FILESDIR}/bashrc"
 
     keepdir /etc/bash/bashrc.d
 }

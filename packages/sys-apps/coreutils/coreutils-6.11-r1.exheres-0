@@ -24,7 +24,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-install-program=arch --enable-largefile 
 
 src_prepare() {
     expatch "${FILESDIR}"/${P}-disable-tests.patch
-    AT_M4DIR="m4" eautoreconf || die "Eautoreconf failed."
+    AT_M4DIR="m4" eautoreconf
 }
 
 src_install() {
@@ -40,11 +40,11 @@ src_install() {
     dodir /bin
     for binfile in ${binfiles}; do
         mv "${D}"/usr/bin/${binfile} "${D}"/bin/${binfile}
-        dosym /bin/${binfile} /usr/bin/${binfile} || die "Dosym failed."
+        dosym /bin/${binfile} /usr/bin/${binfile}
     done
 
     insinto /etc
-    newins src/dircolors.hin DIR_COLORS || die "newins failed."
+    newins src/dircolors.hin DIR_COLORS
 }
 
 src_test() {

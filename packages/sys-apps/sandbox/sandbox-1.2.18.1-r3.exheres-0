@@ -21,7 +21,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_install() {
-    emake DESTDIR="${D}" install || die "install failed"
+    emake DESTDIR="${D}" install
 
     keepdir /var/log/sandbox
     fowners root:paludisbuild /var/log/sandbox

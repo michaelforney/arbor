@@ -16,10 +16,10 @@ DEPENDENCIES="run:
     net-misc/wget"
 
 src_prepare() {
-    mv "${P}" "${PN}" || die "rename failed."
+    mv "${P}" "${PN}" || die "rename failed"
     expatch -p0 "${FILESDIR}/zlin.patch"
 }
 
 src_install() {
-    dobin "${WORKDIR}/${PN}" || die "Install failed"
+    dobin "${WORKDIR}/${PN}"
 }

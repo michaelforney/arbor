@@ -37,7 +37,7 @@ src_configure() {
         $(option_enable propolice libssp) \
         $(option_enable nls) \
         --disable-multilib \
-        || die "Configure failed."
+        || die "configure failed"
 }
 
 src_compile() {
@@ -52,8 +52,8 @@ src_install() {
     # Precompile headers
     # FIXME: Should use gcc version from $D instead of old system gcc
     cd "${D}"
-    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed."
-    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed."
+    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed"
+    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
 
     rmdir "${D}"/usr/lib/gcc/${CHOST}/${PV}/finclude \
         || die "Failed to delete empty directory"

@@ -14,18 +14,18 @@ DEPENDENCIES=""
 
 src_prepare() {
     # Fix manpath
-    sed -i 's:^MANDIR=.*$:MANDIR=/usr/share/man:' Makefile.org || die "sed failed."
+    sed -i 's:^MANDIR=.*$:MANDIR=/usr/share/man:' Makefile.org || die "sed failed"
 }
 
 src_configure() {
-    ./config --test-sanity || die "Sanity test failed."
+    ./config --test-sanity || die "Sanity test failed"
     ./config --prefix=/usr --openssldir=/etc/ssl \
-        shared threads || die "Configure failed."
+        shared threads || die "Configure failed"
 }
 
 src_compile() {
     # parallel build is broken
-    emake -j1 || die "Make failed."
+    emake -j1
 }
 
 src_install() {

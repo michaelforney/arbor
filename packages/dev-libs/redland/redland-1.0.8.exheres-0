@@ -27,7 +27,7 @@ src_prepare() {
     if option !berkdb; then
         # This test fails without berkdb
         sed -e 's: rdf_model_test::' -e '/^rdf_model_test:/{g;n;d;}' \
-            -i "${S}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test."
+            -i "${S}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test"
         eautomake
     fi
 }

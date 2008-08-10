@@ -52,7 +52,7 @@ aspell-dict_src_configure() {
 # @DESCRIPTION:
 # The aspell-dict src_install function which is exported.
 aspell-dict_src_install() {
-    emake DESTDIR="${D}" install || die "make install failed"
+    emake DESTDIR="${D}" install
 
     for doc in README info ; do
         [[ -s "$doc" ]] && dodoc $doc

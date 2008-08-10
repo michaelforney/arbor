@@ -44,10 +44,10 @@ src_configure() {
 src_test() {
     # This test might fail, depending on your mount options and your
     # file system. Removing.
-    rm "${S}"/Test/C02cond.ztst || die "Removing test failed."
+    rm "${S}"/Test/C02cond.ztst || die "Removing test failed"
     
     # Some tests need a homedir, so we create a pseudo homedir
-    mkdir "${S}"/pseudo-home || die "Creating pseudo-home dir failed."
+    mkdir "${S}"/pseudo-home || die "Creating pseudo-home dir failed"
     HOME="${S}"/pseudo-home
 
     # Some tests need to write to /dev/ptmx, they fail otherwise

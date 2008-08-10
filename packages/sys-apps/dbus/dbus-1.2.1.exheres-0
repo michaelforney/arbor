@@ -26,9 +26,8 @@ build+run:
 #   doc? ( doxygen xmlto )
 
 pkg_setup() {
-    enewgroup messagebus || die "Problem adding messagebus group"
-    enewuser messagebus -1 "-1" -1 messagebus \
-        || die "Problem adding messagebus user"
+    enewgroup messagebus
+    enewuser messagebus -1 "-1" -1 messagebus
 }
 
 src_configure() {

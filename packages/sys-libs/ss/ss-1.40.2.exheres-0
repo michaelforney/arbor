@@ -20,14 +20,14 @@ src_compile() {
     cd "${S}"
     mkdir build
     cd build
-    ../configure --enable-elf-shlibs || die "Configure failed."
-    emake COMPILE_ET=compile_et -C lib/ss || "Make failed."
+    ../configure --enable-elf-shlibs || die "configure failed"
+    emake COMPILE_ET=compile_et -C lib/ss
 }
 
 src_install() {
     cd "${S}/build"
     dodir /usr/share/man/man1
-    emake -C lib/ss DESTDIR="${D}" install || die "Install failed."
+    emake -C lib/ss DESTDIR="${D}" install
     cd "${S}"
     dodoc README RELEASE-NOTES SUBMITTING-PATCHES
 }

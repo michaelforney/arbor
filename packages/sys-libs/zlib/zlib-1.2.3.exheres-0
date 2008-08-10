@@ -18,10 +18,10 @@ src_configure() {
     ./configure \
         --prefix=/usr \
         --shared \
-        || die "Configure failed."
+        || die "configure failed"
 }
 
 src_install() {
-    emake prefix="${D}/usr" install || die "Install failed."
+    emake prefix="${D}/usr" install
     dodoc ChangeLog FAQ README algorithm.txt
 }
