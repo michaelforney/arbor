@@ -1,62 +1,12 @@
-# Copyright 2007 Bryan Østergaard
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="GNU Compiler Collection"
-HOMEPAGE="http://gcc.gnu.org"
-SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}/${P}.tar.bz2"
+require gcc
 
-LICENSE="GPL-2"
-SLOT="${PV}"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 
-DEPENDENCIES="build:
-                sys-devel/make
-              build+run:
-                >=dev-libs/gmp-4.1
-                dev-libs/mpfr"
+DEPENDENCIES="
+    build+run:
+        >=dev-libs/gmp-4.1
+        dev-libs/mpfr"
 
-OBJDIR="${T}/${CHOST}"
-
-src_configure() {
-    mkdir "${OBJDIR}"
-    cd "${OBJDIR}"
-
-    LANGS="c++"
-    for i in ada fortran objc obj-c++ java; do
-        option ${i} && LANGS="${LANGS} ${i}"
-    done
-    LANGS="${LANGS/ /,}"
-
-    "${S}/configure" \
-        --build=${CHOST} \
-        --host=${CHOST} \
-        --prefix=/usr \
-        --infodir=/usr/share/info \
-        --enable-languages="${LANGS}" \
-        $(option_enable propolice libssp) \
-        $(option_enable nls) \
-        --disable-multilib \
-        || die "configure failed"
-}
-
-DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
-
-src_compile() {
-    cd "${OBJDIR}"
-    default
-}
-
-src_install() {
-    cd "${OBJDIR}"
-    default
-
-    # Precompile headers
-    # FIXME: Should use gcc version from $D instead of old system gcc
-    cd "${D}"
-    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed"
-    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
-
-    rmdir "${D}"/usr/lib/gcc/${CHOST}/${PV}/finclude \
-        || die "Failed to delete empty directory"
-}
