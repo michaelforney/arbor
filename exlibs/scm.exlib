@@ -57,11 +57,15 @@ scm_fetch_one() {
         if [[ -n ${SCM_MIN_UPDATE_DELAY} ]]; then
             [[ ${SCM_MIN_UPDATE_DELAY} == *[^0123456789]* || ${SCM_MIN_UPDATE_DELAY} -eq 0 ]] \
                 && die "SCM_MIN_UPDATE_DELAY must be a positive integer"
-            if [[ ${status} -ne 1 && -e "${dir}/.scm.exlib.timestamp" &&
+            if [[ -e "${dir}/.scm.exlib.timestamp" &&
                     -n "$(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
                               -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print)" ]]; then
-                einfo "not fetching because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
-                return
+                if [[ ${status} -ne 1 ]]; then
+                    einfo "not fetching because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
+                    return
+                else
+                    einfo "ignoring SCM_MIN_UPDATE_DELAY because ${whynot}"
+                fi
             fi
         fi
 
