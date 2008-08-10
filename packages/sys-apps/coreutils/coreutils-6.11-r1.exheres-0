@@ -19,13 +19,11 @@ DEPENDENCIES="
     build+run:
         acl? ( sys-apps/acl sys-apps/attr )"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${P}-disable-tests.patch )
+AT_M4DIR=m4
+
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl nls )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-install-program=arch --enable-largefile )
-
-src_prepare() {
-    expatch "${FILESDIR}"/${P}-disable-tests.patch
-    AT_M4DIR="m4" eautoreconf
-}
 
 src_install() {
     default

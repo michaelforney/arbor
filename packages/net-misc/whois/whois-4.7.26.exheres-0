@@ -22,8 +22,10 @@ DEPENDENCIES="
     run+build: idn? ( net-dns/libidn )
     build: dev-lang/perl"
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}"/${PN}-4.7.2-config-file.patch )
+
 src_prepare() {
-    expatch -p0 "${FILESDIR}"/${PN}-4.7.2-config-file.patch
+    default
 
     sed -i -e "s:/usr/bin/install:install:" po/Makefile
     if ! option nls ; then

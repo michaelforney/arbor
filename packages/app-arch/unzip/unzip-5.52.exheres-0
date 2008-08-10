@@ -19,6 +19,12 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0
+        "${FILESDIR}"/${P}-no-exec-stack.patch
+        "${FILESDIR}"/${P}-CVE-2008-0888.patch
+)
+
 src_prepare() {
     sed -i \
         -e 's:-O3:$(CFLAGS) $(CPPFLAGS):' \
@@ -34,8 +40,7 @@ src_prepare() {
 
     append-lfs-flags # https://bugs.gentoo.org/104315
 
-    expatch -p0 "${FILESDIR}"/${P}-no-exec-stack.patch \
-        "${FILESDIR}"/${P}-CVE-2008-0888.patch
+    default
 }
 
 src_compile() {

@@ -20,11 +20,6 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-configure.in.patch"
                               "${FILESDIR}/${P}-root-support.patch"
                               "${FILESDIR}/${P}-automake-fix.patch" )
 
-src_prepare() {
-    default
-    eautoreconf
-}
-
 pkg_postinst() {
     local installer="${ROOT}"/usr/bin/install-catalog
     if [[ ! -x $installer ]] ; then

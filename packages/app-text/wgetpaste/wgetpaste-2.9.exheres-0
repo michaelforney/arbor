@@ -15,9 +15,11 @@ DEPENDENCIES="run:
     sys-apps/sed
     net-misc/wget"
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}/zlin.patch" )
+
 src_prepare() {
     mv "${P}" "${PN}" || die "rename failed"
-    expatch -p0 "${FILESDIR}/zlin.patch"
+    default
 }
 
 src_install() {

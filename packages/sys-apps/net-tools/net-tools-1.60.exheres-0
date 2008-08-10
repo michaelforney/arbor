@@ -13,8 +13,10 @@ MYOPTIONS="ipv6 nls"
 DEPENDENCIES="build:
     nls? ( sys-devel/gettext )"
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILESDIR}/net-tools-syntax.patch" )
+
 src_prepare() {
-    expatch -p1 "${FILESDIR}/net-tools-syntax.patch"
+    default
     cp "${FILESDIR}/config.h" "${S}"
     sed -i \
         -e "/^COPTS = /s~=~= ${CFLAGS} ~" \

@@ -28,6 +28,9 @@ DEPENDENCIES="
 
 S="${WORKDIR}/${MY_P}"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${P}-disable-regenerate-man.patch )
+AT_M4DIR=m4
+
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="doc/txt/*"
 
 src_prepare() {
@@ -37,9 +40,7 @@ src_prepare() {
             sed -e 's|^modules/||')
     done
 
-    expatch "${FILESDIR}"/${P}-disable-regenerate-man.patch
-
-    AT_M4DIR="m4" eautoreconf
+    autotools_src_prepare
 }
 
 src_configure() {
