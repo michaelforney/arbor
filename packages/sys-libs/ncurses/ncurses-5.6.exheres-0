@@ -45,12 +45,12 @@ src_compile() {
 src_install() {
     # Install narrow char version
     cd "${S}/narrow"
-    emake DESTDIR="${D}" install
+    default
 
     # Install wide char version if unicode is enabled
     if option unicode ; then
         cd "${S}/wide"
-        emake DESTDIR="${D}" install
+        default
     fi
 }
 

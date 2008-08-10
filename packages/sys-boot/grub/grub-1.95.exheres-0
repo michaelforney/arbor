@@ -18,14 +18,17 @@ DEPENDENCIES="
         app-arch/lzo"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    DISTLIST "${FILESDIR}"/grub.cfg.example
+)
 
 src_compile() {
     emake -j1
 }
 
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc AUTHORS ChangeLog DISTLIST INSTALL NEWS README THANKS TODO "${FILESDIR}/grub.cfg.example"
+    default
+
     elog "Use grub-install /dev/your-device e.g. sda to install grub onto the"
     elog "device you wish to boot from"
     elog "A sample grub.cfg has been installed into /usr/share/doc/${P}"

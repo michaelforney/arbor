@@ -18,8 +18,7 @@ src_configure() {
 }
 
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc CHANGES CREDITS README
+    default
     cp -r doc/* ${D}/usr/share/doc/${P}/
     rmdir "${D}"/usr/share/locale/{da,fr,sv,tr}/{LC_MESSAGES,}
 }

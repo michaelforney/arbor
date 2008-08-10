@@ -29,8 +29,5 @@ src_prepare() {
 }
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ipv6 python readline "readline history" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="README.tests TODO_SCHEMA"
 
-src_install() {
-    emake DESTDIR="${D}" install
-    dodoc AUTHORS ChangeLog Copyright NEWS README README.tests TODO TODO_SCHEMAS
-}

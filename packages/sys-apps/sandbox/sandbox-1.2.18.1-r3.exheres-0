@@ -21,13 +21,11 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_install() {
-    emake DESTDIR="${D}" install
+    default
 
     keepdir /var/log/sandbox
     fowners root:paludisbuild /var/log/sandbox
     fperms 0770 /var/log/sandbox
-
-    dodoc AUTHORS ChangeLog NEWS README
 }
 
 pkg_preinst() {

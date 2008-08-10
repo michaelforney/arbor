@@ -21,14 +21,6 @@ RESTRICT=test
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-werror )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS="gdb sim"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="CONTRIBUTE"
 
-src_install() {
-	emake DESTDIR="${D}" install
-
-	dodoc README
-	docinto gdb
-	dodoc gdb/CONTRIBUTE gdb/README gdb/MAINTAINERS \
-		gdb/NEWS gdb/ChangeLog gdb/PROBLEMS
-	docinto sim
-	dodoc sim/ChangeLog sim/MAINTAINERS sim/README-HACKING
-}

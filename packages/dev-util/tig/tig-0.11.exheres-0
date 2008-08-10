@@ -20,11 +20,11 @@ build+run:
     sys-libs/ncurses"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libiconv )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.html tig{.1,rc.5}.{html,txt} )
 
 src_install() {
-    emake DESTDIR="${D}" install
+    default
 
     doman tig.1 tigrc.5
-    dodoc BUGS README{,.html} SITES TODO tig{.1,rc.5}.{html,txt}
     dobashcompletion contrib/tig-completion.bash
 }

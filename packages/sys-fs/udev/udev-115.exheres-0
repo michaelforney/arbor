@@ -13,11 +13,11 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_install() {
-    emake DESTDIR="${D}" install
+    default
+
+    dodoc docs/*
     dosbin udevstart
     doman udevstart.8
-    dodoc ChangeLog FAQ README RELEASE-NOTES TODO
-    dodoc docs/*
     cp -r docs/writing_udev_rules "${D}/usr/share/doc/${P}"
     insinto /etc/udev/rules.d/
     doins etc/udev/rules.d/*.rules
@@ -38,3 +38,4 @@ pkg_postinst() {
         mknod ${ROOT}/dev/null c 1 3 || die "mknod /dev/null failed"
     fi
 }
+

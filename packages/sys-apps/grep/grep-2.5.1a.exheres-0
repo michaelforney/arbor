@@ -17,10 +17,5 @@ DEPENDENCIES="build:
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
-
-src_install() {
-    emake DESTDIR="${D}" install
-    dodoc ABOUT-NLS AUTHORS ChangeLog INSTALL NEWS \
-            README README-alpha THANKS TODO
-}
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="README-alpha"
 

@@ -12,8 +12,9 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="MAINT PORTING"
+
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc ChangeLog MAINT PORTING README
+    default
     rmdir "${D}"/usr/share/man/man5
 }

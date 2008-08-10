@@ -82,14 +82,12 @@ src_install() {
 
     export LD_LIBRARY_PATH RUBYLIB
 
-    emake DESTDIR="${D}" install
+    default
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
     ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run"
     keepdir $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitelibdir']") \
             $(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")
-
-    dodoc ChangeLog NEWS README* ToDo
 
     for i in ruby irb erb testrb rdoc ri; do
         dosym /usr/bin/${i}${MY_SUFFIX} /usr/bin/${i}

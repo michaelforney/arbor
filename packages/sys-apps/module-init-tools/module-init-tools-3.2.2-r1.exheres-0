@@ -16,9 +16,10 @@ DEPENDENCIES=""
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="CODING"
 
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc AUTHORS CODING ChangeLog FAQ NEWS README TODO
+    default
     dosym ../bin/lsmod /sbin/lsmod
 }
+

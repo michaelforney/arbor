@@ -18,9 +18,11 @@ DEPENDENCIES=""
 #    $(option_enable doc dot) \
 #    $(option_enable doc doxygen)
 
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="CodingGuideLines.txt"
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS="doc"
+
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc AUTHORS BUGS CodingGuideLines.txt NEWS README THANKS TODO doc/FAQ
+    default
     rmdir "${D}"/usr/share/doc/cppunit # Empty directory
 }
 

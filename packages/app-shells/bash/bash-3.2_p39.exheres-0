@@ -25,6 +25,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin
     --without-installed-readline
     --with-curses )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc"
 
 src_prepare() {
     local i patches
@@ -38,9 +39,7 @@ src_prepare() {
 }
 
 src_install() {
-    emake DESTDIR="${D}" install
-    dodoc README CHANGES AUTHORS NEWS ABOUT-NLS NOTES \
-        doc/{README,FAQ,INTRO}
+    default
 
     dosym bash bin/sh
 

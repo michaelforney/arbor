@@ -16,9 +16,6 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILESDIR}/${P}-fixgcc43.patch"
-    -p0 "${FILESDIR}/${P}-fixfortune.patch")
+    "${FILESDIR}/${P}-fixfortune.patch")
+DEFAULT_SRC_INSTALL_EXTRA_DOCS="BACKLOG"
 
-src_install() {
-    emake DESTDIR="${D}" install
-    dodoc ABOUT-NLS AUTHORS BACKLOG ChangeLog NEWS README THANKS TODO
-}
