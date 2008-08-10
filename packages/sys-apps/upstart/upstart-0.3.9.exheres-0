@@ -14,9 +14,7 @@ DEPENDENCIES=""
 
 WANT_AUTOMAKE="1.10"
 
-src_configure() {
-    econf --exec-prefix="/" || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."

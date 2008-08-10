@@ -30,12 +30,12 @@ src_unpack() {
     mv glibc-ports-${PV} "${S}"/ports || die "Moving glibc-ports-${PV} failed."
 }
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-crypt --with-add-ons )
+
 src_configure() {
     mkdir "${BUILDDIR}"
     cd "${BUILDDIR}"
-    econf \
-        --with-crypt \
-        --with-add-ons
+    default
 }
 
 src_compile() {

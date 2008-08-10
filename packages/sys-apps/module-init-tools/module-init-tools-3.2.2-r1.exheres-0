@@ -15,9 +15,7 @@ DEPENDENCIES=""
 # FIXME: tests are borked
 RESTRICT="test"
 
-src_configure() {
-    econf --exec-prefix=/ || die "econf failed"
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
 
 src_install() {
     emake DESTDIR="${D}" install || die "Install failed."

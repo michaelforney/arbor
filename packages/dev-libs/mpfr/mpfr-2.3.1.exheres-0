@@ -13,9 +13,7 @@ MYOPTIONS=""
 DEPENDENCIES="build+run:
      >=dev-libs/gmp-4.1"
 
-src_configure() {
-    econf --enable-shared || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared )
 
 src_install() {
     emake DESTDIR="${D}" install

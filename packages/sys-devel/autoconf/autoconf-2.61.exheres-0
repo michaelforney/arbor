@@ -16,9 +16,7 @@ DEPENDENCIES="
     run:
         sys-devel/autoconf-wrapper"
 
-src_configure() {
-    econf --program-suffix="-${PV}" || die "Configure failed."
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix="-${PV}" )
 
 src_compile() {
     emake -j1 || die "Make failed."

@@ -17,14 +17,12 @@ DEPENDENCIES=""
 ECONF_SOURCE="${S}/dist"
 S="${WORKDIR}/${P}/build_unix"
 
-src_configure() {
-    # Tests require tcl
-    econf \
-        --enable-cxx \
-        --disable-java \
-        --disable-tcl \
-        --disable-test
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-cxx
+    --disable-java
+    --disable-tcl
+    --disable-test
+)
 
 src_install() {
     default

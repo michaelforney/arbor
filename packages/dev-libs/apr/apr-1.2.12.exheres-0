@@ -13,7 +13,7 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_configure() {
-    default "$@"
+    default
 
     # Make sure we use the system libtool
     sed -i 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${S}"/build/apr_rules.mk || die "sed1 failed"
