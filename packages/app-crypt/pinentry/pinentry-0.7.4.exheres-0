@@ -25,9 +25,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-pinentry-qt
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "gtk pinentry-gtk2" )
-}
 
 src_install() {
     emake DESTDIR="${D}" install
     dodoc AUTHORS ChangeLog NEWS README THANKS TODO || die "dodoc failed"
 }
+
