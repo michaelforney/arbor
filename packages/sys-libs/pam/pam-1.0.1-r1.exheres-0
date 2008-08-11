@@ -31,8 +31,6 @@ S="${WORKDIR}/${MY_P}"
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${P}-disable-regenerate-man.patch )
 AT_M4DIR=m4
 
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( "doc/txt/*" )
-
 src_prepare() {
     mkdir -p doc/txt
     for readme in modules/pam_*/README; do
@@ -67,6 +65,7 @@ src_configure() {
 
 src_install() {
     default
+    dodoc doc/txt/*
 
     # install the base pam configuration
     dopamd "${FILESDIR}"/pam.d/*

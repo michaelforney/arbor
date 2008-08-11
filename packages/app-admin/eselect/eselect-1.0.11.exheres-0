@@ -16,10 +16,10 @@ DEPENDENCIES="
         >=sys-apps/coreutils-6.10"
 
 DEFAULT_SRC_PREPARE_PATCHES=(-p1 "${FILESDIR}"/${PN}-config.patch)
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( "doc/*.txt" )
 
 src_install() {
     default
+    dodoc doc/*.txt
 
     # Can't use bash-completion.exlib, it rundeps on eselect
     if optionq bash-completion; then
