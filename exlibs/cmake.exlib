@@ -73,6 +73,7 @@ ecmake() {
 
     cmakeargs=(
         ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
+        -DCMAKE_NOT_USING_CONFIG_FLAGS=ON
         -DCMAKE_C_COMPILER="$(type -P $(tc-getCC))"
         -DCMAKE_CXX_COMPILER="$(type -P $(tc-getCXX))"
         -DCMAKE_INSTALL_PREFIX="${PREFIX:=/usr}"
