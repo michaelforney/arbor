@@ -27,8 +27,9 @@ scm-git_do_check_vars() {
 }
 
 scm-git_git() {
-    if [[ ${1} == -v ]]; then
+    if [[ ${1} == -q ]]; then
         shift
+    else
         echo git "${@}" >&2
     fi
     GIT_PAGER=cat GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" \
@@ -41,19 +42,19 @@ scm-git_do_appraise() {
     if [[ ! -e ${dir} ]]; then
         echo "${dir} does not exist"
         return 1
-    elif ! scm-git_git rev-parse HEAD &>/dev/null; then
+    elif ! scm-git_git -q rev-parse HEAD &>/dev/null; then
         die "${dir} is not a git checkout"
     fi
 
     if [[ -n $(scm_get_var REVISION) ]]; then
-        if [[ $(scm-git_git cat-file -t $(scm_get_var REVISION)) == commit ]]; then
+        if [[ $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) == commit ]]; then
             return 2
-        elif [[ -n $(scm-git_get cat-file -t $(scm_get_var REVISION)) ]]; then
+        elif [[ -n $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) ]]; then
             die "$(scm_get_var REVISION) is not a commit in ${dir}"
         fi
     fi
 
-    local origin="$(scm-git_git config remote.origin.url)"
+    local origin="$(scm-git_git -q config remote.origin.url)"
     [[ -n ${origin} ]] || die "could not determine origin URL for ${dir}"
     if [[ ${origin} != "$(scm_get_var REPOSITORY)" ]]; then
         echo "${dir} is a clone of ${origin}, but wanted $(scm_get_var REPOSITORY)"
@@ -61,10 +62,10 @@ scm-git_do_appraise() {
     fi
 
     if [[ -n $(scm_get_var TAG) ]]; then
-        if ! has $(scm_get_var TAG) $(scm-git_git tag); then
+        if ! has $(scm_get_var TAG) $(scm-git_git -q tag); then
             echo "${dir} does not contain the tag $(scm_get_var TAG)"
             return 1
-        elif [[ $(scm-git_git cat-file -t refs/tags/$(scm_get_var TAG)) == @(commit|tag) ]]; then
+        elif has $(scm-git_git -q cat-file -t refs/tags/$(scm_get_var TAG)) commit tag; then
             return 2
         else
             die "$(scm_get_var TAG) is not a commit or a tag in ${dir}"
@@ -72,7 +73,7 @@ scm-git_do_appraise() {
     fi
 
     if [[ -n $(scm_get_var BRANCH) ]] &&
-        ! has $(scm_get_var BRANCH) $(scm-git_git branch); then
+        ! has $(scm_get_var BRANCH) $(scm-git_git -q branch); then
         echo "${dir} does not contain the branch $(scm_get_var BRANCH)"
         return 1
     fi
@@ -81,16 +82,16 @@ scm-git_do_appraise() {
 }
 
 scm-git_do_checkout() {
-    scm-git_git -v clone --bare "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
-    scm-git_git -v config remote.origin.url "$(scm_get_var REPOSITORY)"
-    scm-git_git -v config remote.origin.fetch '+refs/heads/*:refs/heads/*'
-    scm-git_git -v gc --auto
+    scm-git_git clone --bare "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
+    scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
+    scm-git_git config remote.origin.fetch '+refs/heads/*:refs/heads/*'
+    scm-git_git gc --auto
 }
 
 scm-git_do_update() {
-    scm-git_git -v config remote.origin.url "$(scm_get_var REPOSITORY)"
-    scm-git_git -v fetch -f -u origin
-    scm-git_git -v gc --auto
+    scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
+    scm-git_git fetch -f -u origin
+    scm-git_git gc --auto
 }
 
 scm-git_ref_or_sha1() {
@@ -104,12 +105,12 @@ scm-git_ref_or_sha1() {
 }
 
 scm-git_do_revision() {
-    scm-git_git rev-parse $(scm-git_ref_or_sha1)
+    scm-git_git -q rev-parse $(scm-git_ref_or_sha1)
 }
 
 scm-git_do_unpack() {
     mkdir -p "$(scm_get_var UNPACK_TO)" || die "mkdir failed"
-    scm-git_git -v checkout -f $(scm-git_ref_or_sha1)
+    scm-git_git checkout -f $(scm-git_ref_or_sha1)
     if [[ -z ${SCM_THIS} ]]; then
         export GIT_DIR="$(scm_get_var CHECKOUT_TO)"
         export GIT_WORK_TREE="$(scm_get_var UNPACK_TO)"
