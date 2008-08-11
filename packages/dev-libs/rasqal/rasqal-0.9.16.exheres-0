@@ -11,7 +11,7 @@ SRC_URI="http://download.librdf.org/source/${P}.tar.gz"
 LICENSE="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="debug gmp pcre"
+MYOPTIONS="gmp pcre"
 
 DEPENDENCIES="
     build:
@@ -32,8 +32,9 @@ src_configure() {
         --with-decimal=$(option gmp && echo "gmp" || echo "mpfr") \
         --with-regex-library=$(option pcre && echo "pcre" || echo "posix") \
         --with-raptor=system \
-        $(option_enable debug maintainer-mode) \
         $(option_enable pcre) \
         --without-dmalloc # $(option_with debug dmalloc)
 }
+
+# Note wrt src_test(): 'roqet -d debug' always fails.
 
