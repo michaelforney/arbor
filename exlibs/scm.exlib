@@ -41,7 +41,7 @@ scm_fetch_one() {
     mkdir -p "${dir%/*}" || die "mkdir failed"
 
     {
-        flock -x 42
+        flock -x 42 || die "flock failed"
 
         local whynot
         whynot="$(scm_call appraise)"
@@ -91,7 +91,7 @@ scm_unpack_one() {
     mkdir -p "${dir%/*}" || die "mkdir failed"
 
     {
-        flock -s 42
+        flock -s 42 || die "flock failed"
 
         local whynot
         whynot="$(scm_call appraise)"
