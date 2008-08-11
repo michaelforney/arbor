@@ -73,11 +73,11 @@ ecmake() {
 
     cmakeargs=(
         ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
-        -DCMAKE_C_COMPILER=$(type -P $(tc-getCC))
-        -DCMAKE_CXX_COMPILER=$(type -P $(tc-getCXX))
-        -DCMAKE_INSTALL_PREFIX=${PREFIX:=/usr}
+        -DCMAKE_C_COMPILER="$(type -P $(tc-getCC))"
+        -DCMAKE_CXX_COMPILER="$(type -P $(tc-getCXX))"
+        -DCMAKE_INSTALL_PREFIX="${PREFIX:=/usr}"
+        -DLIB_INSTALL_DIR="${PREFIX}/${tmp_libdir}"
         -DLIB_SUFFIX=${tmp_libdir/lib}
-        -DLIB_INSTALL_DIR=${PREFIX}/${tmp_libdir}
         -DCMAKE_NO_BUILTIN_CHRPATH:BOOL=ON # Gentoo 224901
     )
 
