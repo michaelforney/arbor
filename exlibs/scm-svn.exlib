@@ -62,10 +62,7 @@ scm-svn_info() {
 scm-svn_do_appraise() {
     local dir="$(scm_get_var CHECKOUT_TO)"
 
-    if [[ ! -e ${dir} ]]; then
-        echo "${dir} does not exist"
-        return 1
-    elif [[ ! -d ${dir}/.svn ]]; then
+    if [[ ! -d ${dir}/.svn ]]; then
         die "${dir} is not a svn checkout"
     fi
 

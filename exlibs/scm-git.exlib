@@ -39,10 +39,7 @@ scm-git_git() {
 scm-git_do_appraise() {
     local dir="$(scm_get_var CHECKOUT_TO)"
 
-    if [[ ! -e ${dir} ]]; then
-        echo "${dir} does not exist"
-        return 1
-    elif ! scm-git_git -q rev-parse HEAD &>/dev/null; then
+    if ! scm-git_git -q rev-parse HEAD &>/dev/null; then
         die "${dir} is not a git checkout"
     fi
 
