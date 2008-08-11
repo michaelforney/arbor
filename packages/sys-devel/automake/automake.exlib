@@ -10,7 +10,11 @@ MY_P="${P/_/-}"
 
 SUMMARY="Tool used to automatically generate Makefile.in files"
 HOMEPAGE="http://www.gnu.org/software/automake http://sources.redhat.com/automake/"
-SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz"
+if ever at_least 1.6.1; then
+    SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.bz2"
+else
+    SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz"
+fi
 
 case ${PN} in
     1.4*|1.5*|1.6*|1.7*|1.8*|1.9*|1.10)
