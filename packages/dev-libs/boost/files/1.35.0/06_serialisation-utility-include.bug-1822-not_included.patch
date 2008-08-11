@@ -1,0 +1,15 @@
+Source: Gentoo (06_serialisation-utility-include.bug-1822-not_included.patch)
+Upstream: ?
+Reason: Fix GCC-4.3* compile.
+
+
+--- a/boost/serialization/utility.hpp.orig	2008-04-28 17:24:36.000000000 +0200
++++ b/boost/serialization/utility.hpp	2008-04-28 17:24:55.000000000 +0200
+@@ -23,6 +23,7 @@
+ #include <boost/type_traits/remove_const.hpp>
+ #include <boost/serialization/nvp.hpp>
+ #include <boost/serialization/is_bitwise_serializable.hpp>
++#include <boost/mpl/and.hpp>
+ 
+ namespace boost { 
+ namespace serialization {

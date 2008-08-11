@@ -1,0 +1,71 @@
+Source: Gentoo (03_spirit-gcc-4.3-fixes.bug-1617-not_included.patch)
+Upstream: ?
+Reason: Fix GCC-4.3* compile.
+
+
+From 5795e44f39b59db1ae55005697ff077cb0229714 Mon Sep 17 00:00:00 2001
+From: Tim Blechmann <tim@klingt.org>
+Date: Sat, 2 Feb 2008 18:17:54 +0100
+Subject: [PATCH] spirit: gcc-4.3 fixes
+
+---
+ boost/spirit/tree/impl/tree_to_xml.ipp   |    1 +
+ libs/spirit/test/mix_and_match_trees.cpp |    6 +++---
+ libs/spirit/test/numerics_tests.cpp      |    1 +
+ 3 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/boost/spirit/tree/impl/tree_to_xml.ipp b/boost/spirit/tree/impl/tree_to_xml.ipp
+index b8084f8..7d1ca3b 100644
+--- a/boost/spirit/tree/impl/tree_to_xml.ipp
++++ b/boost/spirit/tree/impl/tree_to_xml.ipp
+@@ -15,6 +15,7 @@
+ #include <cstdarg>
+ #include <locale>
+ #include <string>
++#include <cstring>
+ 
+ #include <map>
+ #include <iostream>
+diff --git a/libs/spirit/test/mix_and_match_trees.cpp b/libs/spirit/test/mix_and_match_trees.cpp
+index 8a0069a..22232e9 100644
+--- a/libs/spirit/test/mix_and_match_trees.cpp
++++ b/libs/spirit/test/mix_and_match_trees.cpp
+@@ -54,7 +54,7 @@ struct my_grammar : grammar<my_grammar>
+ 
+         typedef rule<ast_scanner> ast_rule;
+         typedef rule<pt_scanner> pt_rule;
+-        typedef rule<Scanner> rule;
++        typedef rule<Scanner> rule_;
+ 
+         definition(my_grammar const & /* self */)
+         {
+@@ -62,12 +62,12 @@ struct my_grammar : grammar<my_grammar>
+             start_ = gen_pt_node_d[ pt_rule_ ];
+         }
+ 
+-        rule const & start() const
++        rule_ const & start() const
+         {
+             return start_;
+         }
+ 
+-        rule start_;
++        rule_ start_;
+         ast_rule ast_rule_;
+         pt_rule pt_rule_;
+     };
+diff --git a/libs/spirit/test/numerics_tests.cpp b/libs/spirit/test/numerics_tests.cpp
+index b27546d..3ee4af3 100644
+--- a/libs/spirit/test/numerics_tests.cpp
++++ b/libs/spirit/test/numerics_tests.cpp
+@@ -11,6 +11,7 @@
+ #include <boost/spirit/actor/assign_actor.hpp>
+ #include <iostream>
+ #include <boost/detail/lightweight_test.hpp>
++#include <climits>
+ 
+ using namespace std;
+ using namespace boost::spirit;
+-- 
+1.5.3.8
+

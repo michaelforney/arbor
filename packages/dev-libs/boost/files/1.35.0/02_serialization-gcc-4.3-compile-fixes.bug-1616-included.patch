@@ -1,0 +1,76 @@
+Source: Gentoo (02_serialization-gcc-4.3-compile-fixes.bug-1616-included.patch)
+Upstream: ?
+Reason: Fix GCC-4.3* compile.
+
+
+From 5196c2d434eab8d9dc75fa2fe2c2870cf4b7d1fe Mon Sep 17 00:00:00 2001
+From: Tim Blechmann <tim@klingt.org>
+Date: Sat, 2 Feb 2008 18:05:42 +0100
+Subject: [PATCH] serialization gcc-4.3 compile fixes
+
+---
+ libs/serialization/test/test_complex.cpp          |    2 ++
+ libs/serialization/test/test_non_default_ctor.cpp |    2 ++
+ libs/serialization/test/test_non_intrusive.cpp    |    2 ++
+ 3 files changed, 6 insertions(+), 0 deletions(-)
+
+diff --git a/libs/serialization/test/test_complex.cpp b/libs/serialization/test/test_complex.cpp
+index 603631d..4623ee3 100644
+--- a/libs/serialization/test/test_complex.cpp
++++ b/libs/serialization/test/test_complex.cpp
+@@ -11,10 +11,12 @@
+ #include <fstream>
+ 
+ #include <cstdio> // remove
++#include <limits>
+ #include <boost/config.hpp>
+ #if defined(BOOST_NO_STDC_NAMESPACE)
+ namespace std{ 
+     using ::remove;
++    using ::numeric_limits;
+ }
+ #endif
+ 
+diff --git a/libs/serialization/test/test_non_default_ctor.cpp b/libs/serialization/test/test_non_default_ctor.cpp
+index 255bd04..0af5ccd 100644
+--- a/libs/serialization/test/test_non_default_ctor.cpp
++++ b/libs/serialization/test/test_non_default_ctor.cpp
+@@ -16,6 +16,7 @@
+ #include <cstdlib> // for rand()
+ #include <cstdio>  // remove()
+ #include <cmath> // for fabs()
++#include <limits>
+ 
+ #include <boost/config.hpp>
+ #if defined(BOOST_NO_STDC_NAMESPACE)
+@@ -23,6 +24,7 @@ namespace std{
+     using ::rand; 
+     using ::fabs; 
+     using ::remove;
++    using ::numeric_limits;
+ }
+ #endif
+ 
+diff --git a/libs/serialization/test/test_non_intrusive.cpp b/libs/serialization/test/test_non_intrusive.cpp
+index 06ef939..a5e2c7f 100644
+--- a/libs/serialization/test/test_non_intrusive.cpp
++++ b/libs/serialization/test/test_non_intrusive.cpp
+@@ -16,6 +16,7 @@
+ #include <cstdlib> // for rand()
+ #include <cstdio>  // remove
+ #include <cmath>   // for fabs()
++#include <limits>
+ 
+ #include <boost/config.hpp>
+ #if defined(BOOST_NO_STDC_NAMESPACE)
+@@ -23,6 +24,7 @@ namespace std{
+     using ::rand;
+     using ::fabs;
+     using ::remove;
++    using ::numeric_limits;
+ }
+ #endif
+ 
+-- 
+1.5.3.8
+
