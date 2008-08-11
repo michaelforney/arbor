@@ -71,21 +71,24 @@ ecmake() {
 
     local cmakeargs tmp_libdir=$(get_libdir)
 
-    cmakeargs="${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
+    cmakeargs=(
+        ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
         -DCMAKE_C_COMPILER=$(type -P $(tc-getCC))
         -DCMAKE_CXX_COMPILER=$(type -P $(tc-getCXX))
         -DCMAKE_INSTALL_PREFIX=${PREFIX:=/usr}
         -DLIB_SUFFIX=${tmp_libdir/lib}
         -DLIB_INSTALL_DIR=${PREFIX}/${tmp_libdir}
-        -DCMAKE_NO_BUILTIN_CHRPATH:BOOL=ON" # Gentoo 224901
+        -DCMAKE_NO_BUILTIN_CHRPATH:BOOL=ON # Gentoo 224901
+    )
+
     if has debug ${MYOPTIONS} && option debug; then
-        cmakeargs+=" -DCMAKE_BUILD_TYPE=Debug"
+        cmakeargs+=( -DCMAKE_BUILD_TYPE=Debug )
     else
-        cmakeargs+=" -DCMAKE_BUILD_TYPE=Release"
+        cmakeargs+=( -DCMAKE_BUILD_TYPE=Release )
     fi
 
-    echo cmake ${cmakeargs} "$@" ${EXTRA_ECONF} "${S}"
-    cmake ${cmakeargs} "$@" ${EXTRA_ECONF} "${S}" || die_unless_nonfatal "Cmake failed" || return 1
+    echo cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${S}"
+    cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${S}" || die_unless_nonfatal "Cmake failed" || return 1
 
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
         popd
