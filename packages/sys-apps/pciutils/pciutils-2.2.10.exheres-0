@@ -23,12 +23,12 @@ src_prepare() {
         Makefile || die "sed failed"
 }
 
+DEFAULT_SRC_COMPILE_PARAMS=( OPT="${CFLAGS} -fPIC" )
+
 src_compile() {
     export ZLIB="no"
     tc-export AR CC RANLIB
-    emake OPT="${CFLAGS} -fPIC"
+    default
 }
 
-src_install() {
-    emake -j1 install install-lib DESTDIR="${D}"
-}
+DEFAULT_SRC_INSTALL_PARAMS=( install-lib )

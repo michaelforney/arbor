@@ -54,7 +54,4 @@ src_compile() {
     emake -f unix/Makefile ${target}
 }
 
-src_install() {
-    emake -j1 prefix="${D}/usr" -f unix/Makefile install
-    dodoc BUGS History* README ToDo
-}
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}/usr" -f unix/Makefile )

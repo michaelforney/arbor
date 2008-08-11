@@ -26,12 +26,10 @@ src_configure() {
 # parallel build is broken
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
+DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_PREFIX="${D}" )
+
 src_install() {
-    # .. and parallel installation is also broken
-    emake -j1 INSTALL_PREFIX="${D}" install
-
+    default
     keepdir /etc/ssl/{certs,private}
-
-    dodoc FAQ INSTALL NEWS PROBLEMS README*
 }
 

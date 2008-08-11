@@ -50,9 +50,7 @@ src_configure() {
         ${myconf}
 }
 
-src_compile() {
-    emake EXTLDFLAGS="${LDFLAGS}"
-}
+DEFAULT_SRC_COMPILE=( EXTLDFLAGS="${LDFLAGS}" )
 
 src_test() {
     emake -j1 test

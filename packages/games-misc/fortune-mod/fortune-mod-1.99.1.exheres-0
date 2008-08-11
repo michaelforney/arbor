@@ -28,7 +28,5 @@ src_configure() {
         Makefile || die "sed Makefile failed"
 }
 
-src_install() {
-    emake prefix="${D}" install
-    dodoc ChangeLog INDEX Notes Offensive README TODO cookie-files
-}
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( INDEX Offensive cookie-files )

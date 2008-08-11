@@ -43,24 +43,26 @@ src_prepare() {
     autotools_src_prepare
 }
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --libdir=/usr/$(get_libdir)
+    --disable-audit
+    --enable-db=no
+    --disable-selinux
+    --enable-securedir=/$(get_libdir)/security
+    --enable-isadir=/$(get_libdir)/security
+    --disable-dependency-tracking
+    --disable-prelude
+    --enable-docdir=/usr/share/doc/${PF}
+    --disable-regenerate-man
+    --enable-cracklib
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+
 src_configure() {
     # Works around an autoconf 2.62 bug; libintl.h is included before
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
     append-flags -D_GNU_SOURCE
-
-    econf \
-        $(option_enable nls) \
-        --libdir=/usr/$(get_libdir) \
-        --disable-audit \
-        --enable-db=no \
-        --disable-selinux \
-        --enable-securedir=/$(get_libdir)/security \
-        --enable-isadir=/$(get_libdir)/security \
-        --disable-dependency-tracking \
-        --disable-prelude \
-        --enable-docdir=/usr/share/doc/${PF} \
-        --disable-regenerate-man \
-        --enable-cracklib
+    default
 }
 
 src_install() {

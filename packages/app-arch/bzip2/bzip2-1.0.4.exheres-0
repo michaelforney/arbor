@@ -14,13 +14,13 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/bzip2-manpage-install.patch")
 
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${D}" MANPREFIX="${D}"/usr/share )
+
 src_install() {
-    emake install PREFIX="${D}" MANPREFIX="${D}"/usr/share
+    default
 
     # Fix up install paths
     mv "${D}/include" "${D}/usr/"
-
-    dodoc CHANGES README README.COMPILATION.PROBLEMS README.XML.STUFF 
 
     # Fix symlinks
     dosym bzgrep /bin/bzegrep

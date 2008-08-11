@@ -21,7 +21,5 @@ src_configure() {
         || die "configure failed"
 }
 
-src_install() {
-    emake prefix="${D}/usr" install
-    dodoc ChangeLog FAQ README algorithm.txt
-}
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}/usr" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )

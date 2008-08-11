@@ -50,9 +50,11 @@ src_test() {
     default
 }
 
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
+
 src_install() {
     cd "${T}/build"
-    emake -j1 DESTDIR="${D}" install
+    default
 
     local mylib=$(get_libdir)
     dodir /usr/${mylib}
@@ -60,7 +62,6 @@ src_install() {
     /usr/${mylib}/libperl.so.1.${PV}
     dosym /usr/${mylib}/libperl.so.1.${PV} /usr/${mylib}/libperl.so.1
     dosym /usr/${mylib}/libperl.so.1 /usr/${mylib}/libperl.so
-    dodoc AUTHORS Changes* INSTALL README
 
     keepdir /usr/${mylib}/perl5/{site,vendor}_perl/${PV}/${CHOST%%-*}
 

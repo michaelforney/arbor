@@ -19,14 +19,14 @@ src_compile() {
     emake
 }
 
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${D}" MANPREFIX="${D}"/usr/share )
+
 src_install() {
-    emake install PREFIX="${D}" MANPREFIX="${D}"/usr/share
+    default
     cp -a libbz2.so.* "${D}"/lib
 
     # Fix up install paths
     mv "${D}/include" "${D}/usr/"
-
-    dodoc CHANGES README README.COMPILATION.PROBLEMS README.XML.STUFF 
 
     # Fix symlinks
     dosym bzgrep /bin/bzegrep

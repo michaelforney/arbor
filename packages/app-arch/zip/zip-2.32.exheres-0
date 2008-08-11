@@ -20,6 +20,4 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_COMPILE_PARAMS=( -f unix/Makefile generic )
 
-src_install() {
-    emake -j1 prefix="${D}/usr" -f unix/Makefile install
-}
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}/usr" -f unix/Makefile )

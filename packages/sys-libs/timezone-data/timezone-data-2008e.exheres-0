@@ -20,18 +20,19 @@ src_test() {
     emake AWK=awk check
 }
 
+DEFAULT_SRC_INSTALL_PARAMS=(
+    TZDIR="${D}/usr/share/zoneinfo"
+    ETCDIR="${D}/usr/bin"
+    MANDIR="${D}/usr/share/man"
+    TOPDIR="${D}"
+)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
+
 src_install() {
     # Fix weird installation paths
     sed -i -e 's:-posix:/posix:' \
            -e 's:-leaps:/leaps:' Makefile || die "sed failed"
 
     dodir /usr/bin
-    emake \
-        TZDIR="${D}/usr/share/zoneinfo" \
-        ETCDIR="${D}/usr/bin" \
-        MANDIR="${D}/usr/share/man" \
-        TOPDIR="${D}" \
-        install
-
-    dodoc README Theory
+    default
 }

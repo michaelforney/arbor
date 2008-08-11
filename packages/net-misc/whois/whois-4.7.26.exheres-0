@@ -45,9 +45,10 @@ src_compile() {
         ${mydefines}
 }
 
+DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${D}" prefix=/usr )
+
 src_install() {
-    emake BASEDIR="${D}" prefix=/usr install
+    default
     insinto /etc
     doins whois.conf
-    dodoc README
 }

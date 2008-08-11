@@ -22,10 +22,9 @@ src_prepare() {
     ./autogen.bash || die "autogen.bash failed"
 }
 
-src_configure() {
-    econf \
-        $(option_enable visibility) \
-        --exec-prefix=/ \
-        --libexecdir=/$(get_libdir)
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --exec-prefix=/
+    --libexecdir=/$(get_libdir)
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( visibility )
 
