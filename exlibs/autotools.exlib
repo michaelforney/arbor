@@ -10,34 +10,16 @@
 
 export_exlib_phases src_prepare
 
-[[ -z ${WANT_AUTOCONF} ]] && WANT_AUTOCONF="latest"
-[[ -z ${WANT_AUTOMAKE} ]] && WANT_AUTOMAKE="latest"
+DEPENDENCIES="build: sys-devel/libtool"
 
-_automake_atom="sys-devel/automake"
-_autoconf_atom="sys-devel/autoconf"
-if [[ -n ${WANT_AUTOMAKE} ]]; then
-    case ${WANT_AUTOMAKE} in
-        none) _automake_atom="" ;;
-        latest) _automake_atom="=sys-devel/automake-1.10*" ;;
-        *) _automake_atom="=sys-devel/automake-${WANT_AUTOMAKE}*" ;;
-    esac
-    [[ ${WANT_AUTOMAKE} == "latest" ]] && WANT_AUTOMAKE="1.10"
-    export WANT_AUTOMAKE
-fi
+[[ ${WANT_AUTOCONF:-latest} == latest ]] && WANT_AUTOCONF="2.5"
+DEPENDENCIES+=" sys-devel/autoconf:${WANT_AUTOCONF}"
 
-if [[ -n ${WANT_AUTOCONF} ]] ; then
-    case ${WANT_AUTOCONF} in
-        2.1) _autoconf_atom="=sys-devel/autoconf-${WANT_AUTOCONF}*" ;;
-        latest | 2.5) _autoconf_atom=">=sys-devel/autoconf-2.59" ;;
-    esac
-    [[ ${WANT_AUTOCONF} == "latest" ]] && WANT_AUTOCONF="2.5"
-    export WANT_AUTOCONF
-fi
+[[ ${WANT_AUTOMAKE:-latest} == latest ]] && WANT_AUTOMAKE="1.10"
+[[ ${WANT_AUTOMAKE} != none ]] \
+    && DEPENDENCIES+=" sys-devel/automake:${WANT_AUTOMAKE}"
 
-DEPENDENCIES="build: ${_automake_atom}
-    ${_autoconf_atom}
-    sys-devel/libtool"
-unset _automake_atom _autoconf_atom
+export WANT_AUTOCONF WANT_AUTOMAKE
 
 # Variables:
 #
