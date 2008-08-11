@@ -5,5 +5,8 @@ require automake
 
 PLATFORMS="~amd64 ~ia64 ~x86"
 
-DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/${P}-test-fixes.patch"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILESDIR}/${P}-test-fixes.patch"
+        "${FILESDIR}/${PN}-1.7.9-texinfo-pdf.patch"
+)
 
