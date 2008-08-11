@@ -12,21 +12,21 @@ SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
 LICENSE="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc perl python ruby"
+MYOPTIONS="doc lua perl python ruby"
 
 DEPENDENCIES="
-build+run:
-    perl? ( dev-lang/perl )
-    python? ( dev-lang/python )
-    ruby? ( dev-lang/ruby )"
+    build+run:
+        lua? ( dev-lang/lua:= )
+        perl? ( dev-lang/perl:= )
+        python? ( dev-lang/python:= )
+        ruby? ( dev-lang/ruby:= )"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --without-chicken --without-clisp --without-doc --without-guile
-    --without-java --without-lua --without-mono --without-mzscheme
-    --without-ocaml --without-octave --without-php --without-pike
-    --without-R --without-tcl --without-tk
+    --without-{chicken,clisp,csharp,guile,java,mono,mzscheme,ocaml,octave,php4,pike,R,tcl,tk}
+    --without-doc
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "perl perl5" python ruby )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lua "perl perl5" python ruby )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( NEW FUTURE )
 
 src_install() {
     default
