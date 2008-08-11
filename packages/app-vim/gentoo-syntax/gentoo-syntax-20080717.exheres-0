@@ -1,0 +1,22 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gentoo-syntax-20080717-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require vim-plugin
+
+SUMMARY="vim plugin: Gentoo Ebuild, Eclass, GLEP, ChangeLog and Portage Files syntax highlighting, filetype and indent settings"
+HOMEPAGE="http://www.gentoo.org/"
+SRC_URI="mirror://gentoo/${P}.tar.bz2"
+
+LICENSE="vim"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+VIM_PLUGIN_HELPFILES="gentoo-syntax"
+VIM_PLUGIN_MESSAGES="filetype"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}"/${P}-metadata-order.patch
+)
+
