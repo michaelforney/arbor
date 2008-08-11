@@ -42,6 +42,9 @@ src_test() {
 
 src_install() {
     default
-    rm "${D}"/usr/bin/*-${SLOT}-* || die "rm failed"
+    local slotslot=( "${D}"/usr/bin/*-${SLOT}-${SLOT} )
+    if [[ -e ${slotslot[0]} ]]; then
+        rm "${slotslot[@]}" || die "rm failed"
+    fi
 }
 
