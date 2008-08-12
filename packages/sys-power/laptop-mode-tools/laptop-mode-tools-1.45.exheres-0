@@ -1,0 +1,28 @@
+# Copyright 2008 Mike Kelly <pioto@exherbo.org>
+# Distributed under the terms of the GPL v2
+
+SUMMARY="a laptop power saving package for Linux system"
+HOMEPAGE="http://samwel.tk/laptop_mode/"
+
+MY_P="${PN}_${PV}"
+
+SRC_URI="http://samwel.tk/laptop_mode/tools/downloads/${MY_P}.tar.gz"
+
+LICENSE=""
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        sys-power/acpid
+"
+
+S="${WORKDIR}/${MY_P}"
+
+src_compile() { :; }
+
+src_install() {
+    DESTDIR="${D}" MAN_D="/usr/share/man" ./install.sh 
+    keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
+}
