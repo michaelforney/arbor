@@ -23,9 +23,9 @@ S="${T}/${CHOST}"
 ECONF_SOURCE="${WORKDIR}"/${P}
 
 src_configure() {
-    LANGS=( c++ )
+    LANGS="c++"
     for i in ada fortran objc obj-c++ java; do
-        option ${i} && LANGS+=( ${i} )
+        option ${i} && LANGS+=" ${i}"
     done
     LANGS="${LANGS/ /,}"
 
