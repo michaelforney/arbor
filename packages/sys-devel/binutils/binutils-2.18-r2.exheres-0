@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="Collection of binary tools including ld and as"
 HOMEPAGE="http://www.gnu.org/software/binutils"
 SRC_URI="mirror://gnu/${PN}/${P}.tar.bz2"
@@ -27,14 +29,14 @@ src_install() {
     cat <<EOF > binutils.env
 TARGET="${CHOST}"
 VER="${PV}"
-LIBPATH="/usr/lib/binutils/${CHOST}-${PV}"
+LIBPATH="/usr/$(get_libdir)/${PN}/${CHOST}-${PV}"
 FAKE_TARGETS="${CHOST}"
 EOF
     newins binutils.env ${CHOST}-${PV}
 
     # Make sure a binutils version is selected for ${CHOST}
-    if [[ ! -e "${D}/etc/env.d/binutils/config-${CHOST}" ]]; then
-        cat <<EOF > "${D}/etc/env.d/binutils/config-${CHOST}"
+    if [[ ! -e "${D}/etc/env.d/${PN}/config-${CHOST}" ]]; then
+        cat <<EOF > "${D}/etc/env.d/${PN}/config-${CHOST}"
 CURRENT="${PV}"
 EOF
     fi
