@@ -16,3 +16,12 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
+src_install() {
+    default
+
+    keepdir /var/lib/alsa
+
+    newinitd "${FILESDIR}/alsasound.initd" alsasound
+    newconfd "${FILESDIR}/alsasound.confd" alsasound
+}
+
