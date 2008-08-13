@@ -92,14 +92,6 @@ ecmake() {
     fi
 }
 
-# Runs ctest with '--extra-verbose' as arguments.
-# ectest() is run by default in cmake_src_test() if ECMAKE_TEST_TYPE is set to 'ctest'.
-ectest() {
-    echo ctest --extra-verbose "$@"
-    ctest --extra-verbose "$@" \
-        || die_unless_nonfatal "Ctest failed" || return 1
-}
-
 # Function for configuring a package. Set ECMAKE_BUILD_TYPE=in-source to make this
 # exlib perform the build in the sources. Otherwise it defaults to
 # out-of-source.
@@ -128,20 +120,9 @@ cmake_src_compile() {
 }
 
 # Function for testing the package. Automatically detects the build dir. Uses
-# default_src_test. Depending on the value of ECMAKE_TEST_TYPE, default_src_test() ('default')
-# or ctest() ('ctest') will be run.
+# default_src_test.
 cmake_src_test() {
-    case ${ECMAKE_TEST_TYPE-default} in
-        default)
-            _cmake_run default_src_test
-            ;;
-        ctest)
-            ectest || die_unless_nonfatal "Test failures encountered." || return 1
-            ;;
-        *)
-            die "Invalid value for ECMAKE_TEST_TYPE, ${ECMAKE_TEST_TYPE}"
-            ;;
-    esac
+    _cmake_run default_src_test
 }
 
 # Function for installing the package. Automatically detects the build dir.
