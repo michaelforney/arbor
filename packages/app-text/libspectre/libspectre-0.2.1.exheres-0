@@ -1,0 +1,42 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'libspectre-0.2.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+
+SUMMARY="libspectre is a small library for rendering Postscript documents."
+HOMEPAGE="http://libspectre.freedesktop.org"
+SRC_URI="http://libspectre.freedesktop.org/releases/${P}.tar.gz"
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="doc"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        x11-libs/cairo
+        doc? ( app-doc/doxygen )
+    run:
+        app-text/ghostscript
+    "
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-testing )
+
+src_compile() {
+    default
+
+#    if option doc; then
+#        emake doc
+#    fi
+}
+
+src_install() {
+    default
+
+#    if option doc; then
+#        emake install-html
+#    fi
+}
+
