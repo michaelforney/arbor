@@ -61,12 +61,12 @@ else
     DEPENDENCIES+="
         build+run:
             !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
-            perl?    ( dev-lang/perl )
-            python?  ( dev-lang/python )"
+            perl?    ( dev-lang/perl:= )
+            python?  ( dev-lang/python:= )
+            ruby?    ( dev-ruby/ruby:= )"
            #cscope?  ( dev-util/cscope )
            #gpm?     ( >=sys-libs/gpm-1.19.3 )
            #acl?     ( kernel_linux? ( sys-apps/acl ) )
-           #ruby?    ( virtual/ruby )
     case ${PN} in
         vim)
         MYOPTIONS+=" vim-pager"
@@ -220,10 +220,10 @@ vim_src_configure() {
                 --disable-gpm \
                 --disable-rubyinterp \
                 $(option_enable perl perlinterp) \
-                $(option_enable python pythoninterp)"
+                $(option_enable python pythoninterp)
+                $(option_enable ruby rubyinterp)"
        #myconf+=" $(option_enable cscope)"
        #myconf+=" $(option_enable gpm)"
-       #myconf+=" $(option_enable ruby rubyinterp)"
    #if [[ "${PN}" == "gvim" ]] ; then
    #    myconf+=" $(option_enable netbeans)"
    #fi
