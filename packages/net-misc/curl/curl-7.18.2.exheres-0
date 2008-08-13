@@ -23,32 +23,23 @@ DEPENDENCIES="
             dev-libs/openssl
         )"
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
+    --disable-{gssapi,ldap,sspi}
+    --without-{gnutls,nss,krb4,libssh2,spnego}
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'idn libidn' 'ssl' )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting
+)
+
 src_configure() {
-    econf \
-        $(option_enable ares) \
-        $(option_enable ipv6) \
-        $(option_with ssl) \
-        $(option ssl && echo '--without-ca-bundle --with-ca-path=/etc/ssl/certs') \
-        $(option_with idn libidn) \
-        --enable-http \
-        --enable-ftp \
-        --enable-gopher \
-        --enable-file \
-        --enable-dict \
-        --enable-manual \
-        --enable-telnet \
-        --enable-nonblocking \
-        --enable-largefile \
-        --enable-maintainer-mode \
-        --disable-sspi \
-        --without-gnutls --without-nss \
-        --without-krb4 --disable-gssapi --disable-ldap \
-        --without-libssh2 --without-spnego
+    option ssl && DEFAULT_SRC_CONFIGURE_PARAMS+=( --without-ca-bundle --with-ca-path=/etc/ssl/certs )
+    default
 }
 
-DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL
-    RESOURCES TheArtOfHttpScripting )
 
 src_install() {
     default
