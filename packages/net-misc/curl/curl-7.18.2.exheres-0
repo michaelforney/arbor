@@ -9,13 +9,14 @@ SRC_URI="http://curl.haxx.se/download/${P}.tar.bz2"
 LICENSE="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="idn ipv6 ssl"
+MYOPTIONS="ares idn ipv6 ssl"
 
 DEPENDENCIES="
     build:
         dev-lang/perl
         sys-apps/diffutils
     build+run:
+        ares? ( net-dns/c-ares )
         idn? ( net-dns/libidn )
         ssl? (
             app-misc/ca-certificates
@@ -24,6 +25,7 @@ DEPENDENCIES="
 
 src_configure() {
     econf \
+        $(option_enable ares) \
         $(option_enable ipv6) \
         $(option_with ssl) \
         $(option ssl && echo '--without-ca-bundle --with-ca-path=/etc/ssl/certs') \
