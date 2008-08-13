@@ -157,9 +157,7 @@ scm_do_stuff() {
 }
 
 scm_default_check_vars() {
-    [[ -n $(scm_get_var TAG) ]] && \
-        [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var REVISION) ]] \
-        && die "$(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
+    :
 }
 
 DEPENDENCIES="build,host: >=sys-apps/util-linux-2.13_pre2"

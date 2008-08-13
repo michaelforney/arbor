@@ -14,10 +14,11 @@ scm-svn_do_check_vars() {
         && [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var TAG) ||
                   -n $(scm_get_var SVN_SUBPATH) ]] \
         && die "$(scm_var_name SVN_RAW_URI) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name TAG) or $(scm_var_name SVN_SUBPATH)"
+    [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var TAG) ]] \
+        && die "$(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
     [[ -n $(scm_get_var REVISION) ]] && \
         [[ "$(scm_get_var REVISION)" == *[^0123456789]* || "$(scm_get_var REVISION)" -eq 0 ]] \
         && die "$(scm_var_name REVISION) must be a positive integer"
-    scm_default_check_vars
 }
 
 scm-svn_uri() {
