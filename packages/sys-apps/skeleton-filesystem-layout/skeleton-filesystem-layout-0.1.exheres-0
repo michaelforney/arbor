@@ -1,0 +1,63 @@
+# Copyright 2008 Markus Rothe <markus@unixforces.net>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="Skeleton filesystem layout"
+HOMEPAGE="http://www.exherbo.org/"
+SRC_URI=""
+
+LICENSE="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+create_root_owned_directory() {
+    if [[ ! -e "$1" ]]; then
+        mkdir -p "$1" || die "mkdir $1 failed"
+        chown root:root "$1" || die "chown root:root $1 failed"
+    fi
+}
+
+pkg_postinst() {
+    libdir="lib"
+    [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
+
+    # create directory structure. for readability leave out /usr and /var
+    # structures and create them separately.
+    for x in /bin /boot /dev{,/pts,/shm} /etc{,/opt} /home /${libdir} /mnt \
+        /opt /proc /root /sbin /sys /tmp; do
+            create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # /usr structure
+    for x in /usr{,/bin,/include,/${libdir},/sbin,/share,/src}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # /usr/local structure
+    for x in /usr/local{,/bin,/etc,/games,/${libdir},/man,/sbin,/share}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # /var structure
+    for x in /var{,/cache,/lib,/local,/lock,/log,/opt,/run,/spool,/tmp}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # create lib -> lib64 symlinks if needed
+    if [[ ${SYMLINK_LIB} == yes ]]; then
+        for x in {,/usr,/usr/local}/lib; do
+            if [[ ! -e "${ROOT}${x}" ]]; then
+                ln -s "${libdir}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+            fi
+        done
+    fi
+
+    chmod 0700 /root
+    chmod 1777 /tmp
+    chmod 1777 /var/lock
+    chmod 1777 /var/tmp
+}
