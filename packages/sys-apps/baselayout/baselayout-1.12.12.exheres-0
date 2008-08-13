@@ -17,6 +17,8 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="" # static || Always build statically
 
 DEPENDENCIES="
+    build+run:
+        sys-apps/skeleton-filesystem-layout
     run:
         >=sys-apps/coreutils-6.11-r1
         >=sys-apps/sysvinit-2.86-r1
@@ -56,16 +58,9 @@ src_compile() {
 
 src_install() {
     local x rcscripts_dir=/${libdir}/rcscripts
-    for x in /boot /dev{,/pts,/shm} /etc/runlevels /usr{,/local} /var{,/lock}; do
-        dodir "${x}"
-        keepdir "${x}"
-    done
 
-    if [[ ${SYMLINK_LIB} == yes ]]; then
-        for x in {,/usr,/usr/local}/lib; do
-            dosym ${libdir} ${x}
-        done
-    fi
+    dodir /etc/runlevels
+    keepdir /etc/runlevels
 
     insinto /etc
     doins -r "${S}"/etc/*
