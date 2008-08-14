@@ -21,12 +21,14 @@ DEPENDENCIES="
 src_install() {
     unset GEM_HOME GEM_PATH RUBYOPT
 
-    site_gem_dir=$(ruby -I./lib/ -rubygems -e 'print Gem.dir')
+    site_gem_dir=$(ruby -rrbconfig -e 'print Config::CONFIG["sitelibdir"].gsub("site_ruby","gems")')
     vendor_gem_dir=${site_gem_dir/gems/vendor_gems}
     ver=$(basename ${site_gem_dir})
     ver_stripped=${ver/./}
 
     keepdir {${site_gem_dir},${vendor_gem_dir}}/{doc,gems,cache,specifications}
+    #Set this to avoid installer upsetting sandbox
+    export GEM_PATH="${D}/${site_gem_dir}"
 
     myconf=""
     if ! option doc; then
