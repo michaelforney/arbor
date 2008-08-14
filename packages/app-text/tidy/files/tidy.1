@@ -1,0 +1,263 @@
+.\" tidy man page for the Tidy Sourceforge project
+.TH tidy 1 "$Date: 2007/02/01 12:25:21 $" "HTML Tidy 6 November 2007" "User commands"
+
+.SH NAME
+\fBtidy\fR - validate, correct, and pretty-print HTML files
+.br
+(version: 6 November 2007)
+.SH SYNOPSIS
+\fBtidy\fR [option ...] [file ...] [option ...] [file ...]
+.SH DESCRIPTION
+Tidy reads HTML, XHTML and XML files and writes cleaned up markup.  For HTML variants, it detects and corrects many common coding errors and strives to produce visually equivalent markup that is both W3C compliant and works on most browsers. A common use of Tidy is to convert plain HTML to XHTML.  For generic XML files, Tidy is limited to correcting basic well-formedness errors and pretty printing.
+.LP
+If no input file is specified, Tidy reads the standard input.  If no output file is specified, Tidy writes the tidied markup to the standard output.  If no error file is specified, Tidy writes messages to the standard error.
+For command line options that expect a numerical argument, a default is assumed if no meaningful value can be found. 
+.SH OPTIONS
+
+.SS File manipulation
+  
+.TP
+\fB-output <file>\fR, \fB-o <file>\fR
+write output to the specified <file>
+(\fIoutput-file: <file>\fR)
+.TP
+\fB-config <file>\fR
+set configuration options from the specified <file>
+
+.TP
+\fB-file <file>\fR, \fB-f <file>\fR
+write errors and warnings to the specified <file>
+(\fIerror-file: <file>\fR)
+.TP
+\fB-modify\fR, \fB-m\fR
+modify the original input files
+(\fIwrite-back: yes\fR)
+.SS Processing directives
+  
+.TP
+\fB-indent\fR, \fB-i\fR
+indent element content
+(\fIindent: auto\fR)
+.TP
+\fB-wrap <column>\fR, \fB-w <column>\fR
+wrap text at the specified <column>. 0 is assumed if <column> is missing. When this option is omitted, the default of the configuration option "wrap" applies.
+(\fIwrap: <column>\fR)
+.TP
+\fB-upper\fR, \fB-u\fR
+force tags to upper case
+(\fIuppercase-tags: yes\fR)
+.TP
+\fB-clean\fR, \fB-c\fR
+replace FONT, NOBR and CENTER tags by CSS
+(\fIclean: yes\fR)
+.TP
+\fB-bare\fR, \fB-b\fR
+strip out smart quotes and em dashes, etc.
+(\fIbare: yes\fR)
+.TP
+\fB-numeric\fR, \fB-n\fR
+output numeric rather than named entities
+(\fInumeric-entities: yes\fR)
+.TP
+\fB-errors\fR, \fB-e\fR
+show only errors and warnings
+(\fImarkup: no\fR)
+.TP
+\fB-quiet\fR, \fB-q\fR
+suppress nonessential output
+(\fIquiet: yes\fR)
+.TP
+\fB-omit\fR
+omit optional end tags
+(\fIhide-endtags: yes\fR)
+.TP
+\fB-xml\fR
+specify the input is well formed XML
+(\fIinput-xml: yes\fR)
+.TP
+\fB-asxml\fR, \fB-asxhtml\fR
+convert HTML to well formed XHTML
+(\fIoutput-xhtml: yes\fR)
+.TP
+\fB-ashtml\fR
+force XHTML to well formed HTML
+(\fIoutput-html: yes\fR)
+.TP
+\fB-access <level>\fR
+do additional accessibility checks (<level> = 0, 1, 2, 3). 0 is assumed if <level> is missing.
+(\fIaccessibility-check: <level>\fR)
+.SS Character encodings
+  
+.TP
+\fB-raw\fR
+output values above 127 without conversion to entities
+
+.TP
+\fB-ascii\fR
+use ISO-8859-1 for input, US-ASCII for output
+
+.TP
+\fB-latin0\fR
+use ISO-8859-15 for input, US-ASCII for output
+
+.TP
+\fB-latin1\fR
+use ISO-8859-1 for both input and output
+
+.TP
+\fB-iso2022\fR
+use ISO-2022 for both input and output
+
+.TP
+\fB-utf8\fR
+use UTF-8 for both input and output
+
+.TP
+\fB-mac\fR
+use MacRoman for input, US-ASCII for output
+
+.TP
+\fB-win1252\fR
+use Windows-1252 for input, US-ASCII for output
+
+.TP
+\fB-ibm858\fR
+use IBM-858 (CP850+Euro) for input, US-ASCII for output
+
+.TP
+\fB-utf16le\fR
+use UTF-16LE for both input and output
+
+.TP
+\fB-utf16be\fR
+use UTF-16BE for both input and output
+
+.TP
+\fB-utf16\fR
+use UTF-16 for both input and output
+
+.TP
+\fB-big5\fR
+use Big5 for both input and output
+
+.TP
+\fB-shiftjis\fR
+use Shift_JIS for both input and output
+
+.TP
+\fB-language <lang>\fR
+set the two-letter language code <lang> (for future use)
+(\fIlanguage: <lang>\fR)
+.SS Miscellaneous
+  
+.TP
+\fB-version\fR, \fB-v\fR
+show the version of Tidy
+
+.TP
+\fB-help\fR, \fB-h\fR, \fB-?\fR
+list the command line options
+
+.TP
+\fB-xml-help\fR
+list the command line options in XML format
+
+.TP
+\fB-help-config\fR
+list all configuration options
+
+.TP
+\fB-xml-config\fR
+list all configuration options in XML format
+
+.TP
+\fB-show-config\fR
+list the current configuration settings
+
+.SH USAGE
+.LP
+Use \fB--\fR\fIoptionX valueX\fR for the detailed configuration option "optionX" with argument "valueX".  See also below under \fBDetailed Configuration Options\fR as to how to conveniently group all such options in a single config file.
+.LP
+Input/Output default to stdin/stdout respectively. Single letter options apart from \fB-f\fR and \fB-o\fR may be combined as in:
+.LP
+.in 1i
+\fBtidy -f errs.txt -imu foo.html\fR
+.LP
+For further info on HTML see \fIhttp://www.w3.org/MarkUp\fR.
+.LP
+For more information about HTML Tidy, visit the project home page at \fIhttp://tidy.sourceforge.net\fR.  Here, you will find links to documentation, mailing lists (with searchable archives) and links to report bugs.
+.SH ENVIRONMENT
+.TP
+.B HTML_TIDY
+Name of the default configuration file.  This should be an absolute path, since you will probably invoke \fBtidy\fR from different directories.  The value of HTML_TIDY will be parsed after the compiled-in default (defined with -DTIDY_CONFIG_FILE), but before any of the files specified using \fB-config\fR.
+.SH "EXIT STATUS"
+.IP 0
+All input files were processed successfully.
+.IP 1
+There were warnings.
+.IP 2
+There were errors.
+
+.SH ______________________________
+.SH "  "
+.SH "DETAILED CONFIGURATION OPTIONS"
+This section describes the Detailed (i.e., "expanded") Options, which may be specified by preceding each option with \fB--\fR at the command line, followed by its desired value, OR by placing the options and values in a configuration file, and telling tidy to read that file with the \fB-config\fR standard option.
+.SH SYNOPSIS
+\fBtidy --\fR\fIoption1 \fRvalue1 \fB--\fIoption2 \fRvalue2 [standard options ...]
+.br
+\fBtidy -config \fIconfig-file \fR[standard options ...]
+.SH WARNING
+The options detailed here do not include the "standard" command-line options (i.e., those preceded by a single '\fB-\fR') described above in the first section of this man page.
+.SH DESCRIPTION
+A list of options for configuring the behavior of Tidy, which can be passed either on the command line, or specified in a configuration file.
+.LP
+A Tidy configuration file is simply a text file, where each option
+is listed on a separate line in the form
+.LP
+.in 1i
+\fBoption1\fR: \fIvalue1\fR
+.br
+\fBoption2\fR: \fIvalue2\fR
+.br
+etc.
+.LP
+The permissible values for a given option depend on the option's \fBType\fR.  There are five types: \fIBoolean\fR, \fIAutoBool\fR, \fIDocType\fR, \fIEnum\fR, and \fIString\fR. Boolean types allow any of \fIyes/no, y/n, true/false, t/f, 1/0\fR.  AutoBools allow \fIauto\fR in addition to the values allowed by Booleans.  Integer types take non-negative integers.  String types generally have no defaults, and you should provide them in non-quoted form (unless you wish the output to contain the literal quotes).
+.LP
+Enum, Encoding, and DocType "types" have a fixed repertoire of items; consult the \fIExample\fR[s] provided below for the option[s] in question.
+.LP
+You only need to provide options and values for those whose defaults you wish to override, although you may wish to include some already-defaulted options and values for the sake of documentation and explicitness.
+.LP
+Here is a sample config file, with at least one example of each of the five Types:
+.LP
+\fI
+    // sample Tidy configuration options
+    output-xhtml: yes
+    add-xml-decl: no
+    doctype: strict
+    char-encoding: ascii
+    indent: auto
+    wrap: 76
+    repeated-attributes: keep-last
+    error-file: errs.txt
+\fR
+.LP
+Below is a summary and brief description of each of the options. They are listed alphabetically within each category.  There are five categories: \fIHTML, XHTML, XML\fR options, \fIDiagnostics\fR options, \fIPretty Print\fR options, \fICharacter Encoding\fR options, and \fIMiscellaneous\fR options.
+.LP
+.SH OPTIONS
+
+.SS HTML, XHTML, XML options:
+  
+.SS Diagnostics options:
+  
+.SS Pretty Print options:
+  
+.SS Character Encoding options:
+  
+.SS Miscellaneous options:
+  
+.SH "SEE ALSO"
+HTML Tidy Project Page at \fIhttp://tidy.sourceforge.net\fR
+.SH AUTHOR
+\fBTidy\fR was written by Dave Raggett <\fIdsr@w3.org\fR>, and is now maintained and developed by the Tidy team at \fIhttp://tidy.sourceforge.net/\fR.  It is released under the \fIMIT Licence\fR.
+.LP
+Generated automatically with HTML Tidy released on 6 November 2007.
