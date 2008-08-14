@@ -22,13 +22,14 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 
 S="${WORKDIR}/e2fsprogs-${PV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-elf-shlibs --with-ldopts="${LDFLAGS}" )
-
 src_configure() {
     export LDCONFIG=/bin/true
     export STRIP=/bin/true
     tc-export CC
-    default
+
+    econf \
+        --enable-elf-shlibs \
+        --with-ldopts="${LDFLAGS}"
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( -C lib/et )

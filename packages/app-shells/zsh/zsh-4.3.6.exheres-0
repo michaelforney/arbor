@@ -20,23 +20,22 @@ DEPENDENCIES="
         caps? ( sys-libs/libcap )
         pcre? ( >=dev-libs/libpcre-3.9 )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --bindir=/bin
-    --libdir=/usr/$(get_libdir)
-    --enable-etcdir=/etc/zsh
-    --enable-fndir=/usr/share/zsh/${PV%_*}/functions
-    --enable-site-fndir=/usr/share/zsh/site-functions
-    --enable-function-subdirs
-    --enable-ldflags="${LDFLAGS}"
-    --with-term-lib="ncursesw ncurses"
-    --with-tcsetpgrp
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "maildir maildir-support"
-    pcre
-    "caps cap"
-    "unicode multibyte"
-)
+src_configure() {
+    econf \
+        --bindir=/bin \
+        --libdir=/usr/$(get_libdir) \
+        --enable-etcdir=/etc/zsh \
+        --enable-fndir=/usr/share/zsh/${PV%_*}/functions \
+        --enable-site-fndir=/usr/share/zsh/site-functions \
+        --enable-function-subdirs \
+        --enable-ldflags="${LDFLAGS}" \
+        --with-term-lib="ncursesw ncurses" \
+        --with-tcsetpgrp \
+        $(option_enable maildir maildir-support) \
+        $(option_enable pcre) \
+        $(option_enable caps cap) \
+        $(option_enable unicode multibyte)
+}
 
 src_test() {
     # This test might fail, depending on your mount options and your

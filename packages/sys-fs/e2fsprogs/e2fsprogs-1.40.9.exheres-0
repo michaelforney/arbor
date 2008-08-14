@@ -49,23 +49,21 @@ src_prepare() {
     ln -s /usr/bin/mk_cmds lib/ss/mk_cmds
 }
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --bindir=/bin
-    --sbindir=/sbin
-    --enable-elf-shlibs
-    --enable-tls
-    --enable-fsck
-    --with-ldopts="${LDFLAGS}"
-    --without-included-gettext
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "!static dynamic-e2fsck" )
-
 src_configure() {
     # Keep the package from doing silly things
     export LDCONFIG=:
-    export CC=$(tc-getCC)
     export STRIP=:
-    default
+    tc-export CC
+
+    econf \
+        --bindir=/bin \
+        --sbindir=/sbin \
+        --enable-elf-shlibs \
+        --enable-tls \
+        --enable-fsck \
+        --with-ldopts="${LDFLAGS}" \
+        --without-included-gettext \
+        $(option_enable !static dynamic-e2fsck)
 }
 
 # Parallel make sometimes fails

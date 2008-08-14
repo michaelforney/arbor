@@ -34,16 +34,14 @@ src_prepare() {
     echo "GROUP ( /usr/$(get_libdir)/libcom_err.so )" > lib/libcom_err.so
 }
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-elf-shlibs
-    --with-ldopts="${LDFLAGS}"
-)
-
 src_configure() {
     export LDCONFIG=/bin/true
     export STRIP=/bin/true
     tc-export CC
-    default
+
+    econf \
+        --enable-elf-shlibs \
+        --with-ldopts="${LDFLAGS}"
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( -C lib/ss COMPILE_ET=compile_et )
