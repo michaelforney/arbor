@@ -19,6 +19,18 @@ DEPENDENCIES=""
 
 S="${WORKDIR}/${PN}-${MY_PV}"
 
+src_prepare() {
+    default
+
+    sed -e 's:../bin/tidy:../console/tidy:' \
+        -i test/testone.sh || die 'Sed fixing testone.sh failed.'
+}
+
+src_test() {
+    cd test
+    ./testall.sh || die 'Test failures encountered'
+}
+
 src_install() {
     default
 
