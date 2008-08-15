@@ -12,7 +12,14 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="static"
 
-DEPENDENCIES="build+run: sys-fs/device-mapper"
+DEPENDENCIES="
+    build+run:
+        dev-libs/libgcrypt
+        dev-libs/libgpg-error
+        dev-libs/popt
+        sys-fs/device-mapper
+        sys-fs/e2fsprogs
+"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( static )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-sbindir=/sbin )
@@ -21,5 +28,5 @@ src_install() {
     default
 
     # make install creates this empty dir for some reason. Nuke it.
-    rmdir "${D}/usr/$(get_libdir)/cryptsetup"
+    rmdir "${D}/usr/$(get_libdir)/${PN}"
 }
