@@ -18,6 +18,6 @@ src_configure() {
     # Make sure we use the system libtool
     sed -i 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${S}"/build/apr_rules.mk || die "sed1 failed"
     sed -i 's,${installbuilddir}/libtool,/usr/bin/libtool,' "${S}"/apr-1-config || die "sed2 failed"
-    rm -f "${S}"/libtool 
+    rm -f "${S}"/libtool
 }
 
