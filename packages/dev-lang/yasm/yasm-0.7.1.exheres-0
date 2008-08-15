@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 #require python
+require autotools
 
 SUMMARY="YASM Modular Assembler Project"
 DESCRIPTION='
@@ -24,8 +25,9 @@ DEPENDENCIES="
     build+run:
         python? (
             dev-lang/python
-            dev-python/pyrex
+            python-dev/pyrex
         )"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${PN}-0.7.1-fPIC-compile-fix.patch" )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls python 'python python-bindings' )
 
