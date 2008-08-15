@@ -73,7 +73,7 @@ src_install() {
 
 pkg_postinst() {
     if [[ ! -e ${ROOT}/usr/bin/cc ]]; then
-        ln -s "${ROOT}"/usr/bin/{,g}cc || echo "Failed to link ${ROOT}/usr/bin/cc to ${ROOT}/usr/bin/gcc."
+        ln -s "${ROOT}"/usr/bin/{g,}cc || echo "Failed to link ${ROOT}/usr/bin/cc to ${ROOT}/usr/bin/gcc."
     fi
 }
 
