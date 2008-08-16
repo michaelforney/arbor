@@ -55,7 +55,7 @@ scm_fetch_one() {
 
         if [[ -n ${SCM_OFFLINE} ]]; then
             [[ ${status} -eq 1 ]] && die "can't use SCM_OFFLINE because ${whynot}"
-            einfo "not fetching because SCM_OFFLINE is set"
+            einfo "Not fetching because SCM_OFFLINE is set"
             return
         fi
 
@@ -66,10 +66,10 @@ scm_fetch_one() {
                     -n "$(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
                               -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print)" ]]; then
                 if [[ ${status} -ne 1 ]]; then
-                    einfo "not fetching because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
+                    einfo "Not fetching because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
                     return
                 else
-                    einfo "ignoring SCM_MIN_UPDATE_DELAY because ${whynot}"
+                    einfo "Ignoring SCM_MIN_UPDATE_DELAY because ${whynot}"
                 fi
             fi
         fi
