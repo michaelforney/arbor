@@ -95,18 +95,18 @@ ecmake() {
 # out-of-source.
 cmake_src_configure() {
     ecmake \
-        ${CMAKE_SRC_CONFIGURE_PARAMS[@]} \
-        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_ENABLES[@]} ; do
-            cmake_enable "${s}"
+        "${CMAKE_SRC_CONFIGURE_PARAMS[@]}" \
+        $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do
+            cmake_enable ${s}
         done ) \
-        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_HAVES[@]} ; do
-            cmake_have "${s}"
+        $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_HAVES[@]}" ; do
+            cmake_have ${s}
         done ) \
-        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_WANTS[@]} ; do
-            cmake_want "${s}"
+        $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_WANTS[@]}" ; do
+            cmake_want ${s}
         done ) \
-        $(for s in ${CMAKE_SRC_CONFIGURE_OPTION_WITHS[@]} ; do
-            cmake_with "${s}"
+        $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do
+            cmake_with ${s}
         done )
 }
 
