@@ -31,7 +31,7 @@ VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL##0}"
 VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL:-0}"
 
 HOMEPAGE="http://www.vim.org/"
-LICENSE="vim"
+LICENCES="vim"
 REMOTE_IDS="freshmeat:vim"
 BUGS_TO="pioto@exherbo.org ciaran.mccreesh@googlemail.com"
 
@@ -91,7 +91,7 @@ else
     esac
 fi
 
-# Used for setting SRC_URI (when ${1} is non-zero) and for outputting the patch names (for src_prepare)
+# Used for setting SOURCES (when ${1} is non-zero) and for outputting the patch names (for src_prepare)
 vim_src_uri_patches() {
     # Upstream provides patches cat'ed and gzipped per hundred, use those to fetch fewer files.
     local i hundreds singles
@@ -108,11 +108,11 @@ vim_src_uri_patches() {
 }
 
 VIM_BASE_URI="${VIM_BASE_URI:-ftp://ftp.vim.org/pub/vim}"
-SRC_URI="${VIM_BASE_URI}/unix/vim-${VIM_VERSION}.tar.bz2
+SOURCES="${VIM_BASE_URI}/unix/vim-${VIM_VERSION}.tar.bz2
     ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-lang.tar.gz
     ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-extra.tar.gz
     ${VIM_EXHERBO_PATCHES_URI:-http://dev.exherbo.org/~pioto/distfiles/vim-${VIM_VERSION}-exherbo-patches.tar.bz2}
-    $(vim_src_uri_patches SRC_URI)"
+    $(vim_src_uri_patches SOURCES)"
 S="${WORKDIR}/vim${VIM_VERSION//.}"
 
 vim_src_prepare() {

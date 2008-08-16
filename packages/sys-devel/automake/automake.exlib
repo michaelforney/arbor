@@ -9,15 +9,15 @@ MY_P="${P/_/-}"
 SUMMARY="Tool used to automatically generate Makefile.in files"
 HOMEPAGE="http://www.gnu.org/software/automake http://sources.redhat.com/automake/"
 if ever at_least 1.6.1; then
-    SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.bz2"
+    SOURCES="mirror://gnu/${PN}/${MY_P}.tar.bz2"
 else
-    SRC_URI="mirror://gnu/${PN}/${MY_P}.tar.gz"
+    SOURCES="mirror://gnu/${PN}/${MY_P}.tar.gz"
 fi
 
 if ever at_least 1.10.1; then
-    LICENSE="GPL-3"
+    LICENCES="GPL-3"
 else
-    LICENSE="GPL-2"
+    LICENCES="GPL-2"
 fi
 SLOT="$(get_version_component_range 1-2)"
 MYOPTIONS="slowtests"
