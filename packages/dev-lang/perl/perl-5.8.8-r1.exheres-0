@@ -66,10 +66,9 @@ src_install() {
 
     keepdir /usr/${mylib}/perl5/{site,vendor}_perl/${PV}/${CHOST%%-*}
 
-    # Install LDPATH env file
     dodir /etc/env.d
-    cat <<-EOF > "${D}"/etc/env.d/05perl
-    LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/"
+    cat <<EOF > "${D}"/etc/env.d/05perl
+LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/"
 EOF
 }
 
