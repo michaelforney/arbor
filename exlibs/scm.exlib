@@ -28,7 +28,7 @@ scm_call() {
     shift
     if [[ -n $(declare -F scm-${type}_do_${func}) ]]; then
         scm-${type}_do_${func} "${@}"
-    elif [[ -n $(declare -F scm_default_do_${func}) ]]; then
+    elif [[ -n $(declare -F scm_default_${func}) ]]; then
         scm_default_${func} "${@}"
     else
         die "bug in scm-${type}.exlib: scm-${type}_do_${func} not defined"
