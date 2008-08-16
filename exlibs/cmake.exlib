@@ -73,16 +73,14 @@ ecmake() {
 
     cmakeargs=(
         ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
-        -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_NOT_USING_CONFIG_FLAGS=ON                   # Respect user's *FLAGS
+        -DCMAKE_BUILD_TYPE=''
         -DCMAKE_C_COMPILER="$(type -P $(tc-getCC))"
         -DCMAKE_CXX_COMPILER="$(type -P $(tc-getCXX))"
         -DCMAKE_INSTALL_PREFIX="${PREFIX:=/usr}"
         -DLIB_INSTALL_DIR="${PREFIX}/${tmp_libdir}"
         -DLIB_SUFFIX=${tmp_libdir/lib}
-        -DCMAKE_NO_BUILTIN_CHRPATH:BOOL=ON                  # Gentoo 224901
+        -DCMAKE_NO_BUILTIN_CHRPATH=ON                       # Gentoo 224901
     )
-
 
     echo cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${S}"
     cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${S}" || die_unless_nonfatal "Cmake failed" || return 1
