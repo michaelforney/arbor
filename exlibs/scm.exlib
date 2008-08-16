@@ -88,7 +88,7 @@ scm_fetch_one() {
         fi
 
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
-    } 42>"${dir%/*}/.lock-${dir##*/}" || die 'locking failed'
+    } 42>"${dir%/*}/.lock-${dir##*/}" || die "opening lock file failed"
 }
 
 scm_src_fetch_extra() {
@@ -116,7 +116,7 @@ scm_unpack_one() {
 
         scm_call unpack
         rm -f "$(scm_get_var "${1}" UNPACK_TO)/.scm.exlib.timestamp"
-    } 42>"${dir%/*}/.lock-${dir##*/}"
+    } 42>"${dir%/*}/.lock-${dir##*/}" || die "opening lock file failed"
 }
 
 scm_src_unpack() {
