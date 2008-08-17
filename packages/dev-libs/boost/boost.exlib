@@ -90,7 +90,7 @@ src_configure() {
     BJAM_OPTIONS=(
         -j${j:-1}                   # Parallel make, note: '-j' without a digit just hangs. FIXME exlibify
         exherbo
-        --user-config=${S}/user-config.jam
+        --user-config="${S}"/user-config.jam
         --layout=system
         --prefix="${D}"/usr
         --toolset=gcc               # FIXME: don't hardcode gcc
@@ -101,7 +101,7 @@ src_configure() {
         $(option expat && echo "-sEXPAT_LIBPATH=/usr/$(get_libdir)")
         --without-mpi               # Dependencies not in arbor.git
     )
-    export BJAM_OPTIONS BOOST_ROOT=${S}
+    export BJAM_OPTIONS BOOST_ROOT="${S}"
 }
 
 src_compile() {
