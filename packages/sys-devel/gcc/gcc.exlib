@@ -62,8 +62,8 @@ src_install() {
     find . -name *.h -exec gcc {} \; || die "Precompiling headers failed"
     find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
 
-    rmdir "${D}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude \
-        || die "Failed to delete empty directory"
+    # Needed for fortan.
+    keepdir "${D}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
 
     # if option doc; then
     #     cd "${CTARGET}"/libstdc++-v3
