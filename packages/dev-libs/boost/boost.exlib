@@ -57,7 +57,8 @@ using gcc : $(gcc-fullversion) : $(tc-getCXX) : <cxxflags>"${CXXFLAGS}" <linkfla
 using python : ${PYVER} : /usr : /usr/include/python${PYVER} : /usr/$(get_libdir)/python${PYVER} ;
 
 EOF
-    echo "Using ${S}/user-config.jam:"
+
+    einfo "Using ${S}/user-config.jam:"
     cat "${S}"/user-config.jam
 }
 
@@ -107,22 +108,20 @@ src_configure() {
 
 src_compile() {
     ebjam
-}
-
-src_test() {
-    option slowtests || return 0
 
     pushd "${S}/tools/regression/build" >/dev/null || die "pushd ${S}/tools/regression/build failed."
     ebjam
     popd >/dev/null || die "popd failed."
+}
 
-    echo -e "\nRunning ${PN} tests, go make some coffee!\n"
-
+src_test() {
+    option slowtests || return 0
     cd "${S}/status"
+    echo "Running ${PN} tests, go make some coffee!"
     
     nonfatal ebjam --dump-tests 2>&1 | tee regress.log || ewarn "'ebjam --dump-tests' returned non-zero exit status: $?"
 
-    "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/process_jam_log --v2 < regress.log \
+    "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/threading-multi/process_jam_log --v2 < "${S}"/status/regress.log \
         || ewarn "Post-processing ./regress.log failed."
     cat > "${S}/status/comment.html" <<-EOF
 <p>Tests are run on an <a href="http://www.exherbo.org">Exherbo</a> system.</p>
@@ -133,17 +132,9 @@ EOF
         --comment "${S}/status/comment.html" \
         "${S}" \
         cs-$(uname).html cs-$(uname)-links.html \
-        || ewarn "Generating the build log html summary page failed (1)"
-                                
+        || ewarn "Generating the build log html summary page failed" 
 
-    "${S}/dist/bin/compiler_status" \
-        --v2 \
-        --comment "${S}/status/comment.html" \
-        "${S}" \
-        cs-$(uname).html cs-$(uname)-links.html \
-        || ewarn "Generating the build log html summary page failed (2)"
-
-    sed -e 's|../boost.png|boost.png|' -i *.html # Cosmetic fix.
+    # sed -e 's|../boost.png|boost.png|' -i *.html # Cosmetic fix.
 }
 
 src_install() {
@@ -154,9 +145,7 @@ src_install() {
         --libdir="${D}"/usr/${libdir} \
         install
 
-    for lib in $(ls -1 "${D}"/usr/${libdir}/libboost_thread-mt.* | sed -e "s:${D}/usr/${libdir}/::") ; do
-        dosym ${lib} "/usr/${libdir}/${lib/-mt/}"
-    done
+    dosym /usr/${libdir}/libboost_thread-mt.so /usr/${libdir}/libboost_thread.so
 
     if option doc; then
         insinto /usr/share/doc/${PF}/html
@@ -170,7 +159,6 @@ src_install() {
     fi
 
     docinto status
-    nonfatal dodoc "${S}"/status/{*.html,regress.log} "${S}"/boost.png \
-        || echo "No cs-*.html found, you probably didn't run src_test(). No cookies for you."
+    nonfatal dodoc "${S}"/status/* "${S}"/boost.png
 }
 
