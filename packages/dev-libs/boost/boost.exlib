@@ -54,7 +54,7 @@ generate_user_config.jam() {
 variant exherbo : release : <optimization>custom <debug-symbols>custom ;
 
 using gcc : $(gcc-fullversion) : $(tc-getCXX) : <cxxflags>"${CXXFLAGS}" <linkflags>"${LDFLAGS}" ;
-using python : ${PYVER} : /usr : /usr/include/python${PYVER} : /usr/lib/python${PYVER} ;
+using python : ${PYVER} : /usr : /usr/include/python${PYVER} : /usr/$(get_libdir)/python${PYVER} ;
 
 EOF
     echo "Using ${S}/user-config.jam:"
