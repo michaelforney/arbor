@@ -1,0 +1,31 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+freedesktop-mime_is_shared_mime_info() {
+    [[ "${CATEGORY}/${PN}" == 'x11-misc/shared-mime-info' ]]
+}
+
+freedesktop-mime_is_shared_mime_info || DEPENDENCIES="build: x11-misc/shared-mime-info"
+
+
+freedesktop-mime_update_mime_database() {
+    if [[ "${ROOT}" == / ]] ; then
+        ebegin "Updating MIME database"
+        /usr/bin/update-mime-database /usr/share/mime
+        eend $?
+    else
+        ewarn 'Not updating mime database because ${ROOT} != /'
+    fi
+}
+
+
+freedesktop-mime_pkg_postinst() {
+    freedesktop-mime_update_mime_database
+}
+
+freedesktop-mime_pkg_postrm() {
+    freedesktop-mime_update_mime_database
+}
+
+export_exlib_phases pkg_postinst pkg_postrm
+
