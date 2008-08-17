@@ -99,6 +99,7 @@ src_configure() {
         threading=single,multi
         $(option expat && echo "-sEXPAT_INCLUDE=/usr/include") 
         $(option expat && echo "-sEXPAT_LIBPATH=/usr/$(get_libdir)")
+        -sICU_PATH=
         --without-mpi               # Dependencies not in arbor.git
     )
     export BJAM_OPTIONS BOOST_ROOT="${S}"
