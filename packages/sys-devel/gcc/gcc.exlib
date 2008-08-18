@@ -63,7 +63,7 @@ src_install() {
     find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
 
     # Needed for fortan.
-    keepdir "${D}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+    keepdir /usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
 
     # if option doc; then
     #     cd "${CTARGET}"/libstdc++-v3
