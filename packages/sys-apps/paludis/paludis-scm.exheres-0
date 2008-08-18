@@ -89,11 +89,12 @@ src_install() {
 }
 
 src_test() {
-    # Work around Portage bugs
-    export PALUDIS_DO_NOTHING_SANDBOXY="portage sucks"
+    # Work around Sandbox bugs
+    export PALUDIS_DO_NOTHING_SANDBOXY="sandbox sucks"
     export BASH_ENV=/dev/null
 
-    default
+    # 'make --dry-run check' fails so don't use default here.
+    emake check
 }
 
 pkg_preinst() {
