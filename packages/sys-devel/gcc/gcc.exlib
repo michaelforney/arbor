@@ -33,6 +33,7 @@ src_configure() {
         --build=${CHOST}
         --disable-multilib
         --enable-languages="${LANGS[@]}"
+        --enable-libstdcxx-pch=yes          # Enable precompiled headers, disable for cross-compiling
     )
     DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
         "nls" "propolice libssp"
@@ -51,18 +52,11 @@ src_test() {
 src_install() {
     default
 
-    cd "${D}"
+    # Precompiled headers, disable for cross-compiling
+    insinto /usr/include/c++/${PV}/${CHOST}/bits
+    doins -r "${WORKDIR}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
-    # Precompile headers, FIXME:
-    # - Should use gcc version from $D instead of old system gcc
-    # - We probably just need to pcecompile /usr/include/c++/4.3.1/x86_64-pc-linux-gnu/bits/stdc++.h
-    #   gcc ./usr/include/c++/${PV}/${CHOST}/bits/stdc++.h
-    # - ./configure --enable-libstdcxx-pch
-
-    find . -name *.h -exec gcc {} \; || die "Precompiling headers failed"
-    find . -name *.hpp -exec gcc {} \; || die "Precompiling headers failed"
-
-    # Needed for fortan.
+    # Needed for Fortan.
     keepdir /usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
 
     # if option doc; then
