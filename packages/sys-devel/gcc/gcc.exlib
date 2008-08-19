@@ -57,7 +57,11 @@ src_install() {
     doins -r "${WORKDIR}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
     # Needed for Fortan.
-    keepdir /usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+    if option fortran; then
+        keepdir /usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+    else
+        rmdir /usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+    fi
 
     # if option doc; then
     #     cd "${CTARGET}"/libstdc++-v3
