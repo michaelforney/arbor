@@ -1,0 +1,31 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools
+
+SUMMARY="A BitTorrent library for unix."
+DESCRIPTION='
+LibTorrent is a BitTorrent library written in C++ for *nix, with a focus on high performance and
+good code. The library differentiates itself from other implementations by transfering directly
+from file pages to the network stack. On high-bandwidth connections it is able to seed at 3 times
+the speed of the official client.
+'
+HOMEPAGE="http://libtorrent.rakshasa.no/"
+SOURCES="${HOMEPAGE}/downloads/${P}.tar.gz"
+
+SLOT="0"
+LICENCES="GPL-2"
+MYOPTIONS="ipv6"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        >=dev-cpp/libsigc++-2"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_PARAMS=(
+    --enable-aligned 
+    --enable-ssl        # Use OpenSSL's SHA1 implementation
+)
+
