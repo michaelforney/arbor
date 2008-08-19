@@ -65,6 +65,17 @@ src_install() {
     # fi
 }
 
+pkg_preinst() {
+    local pch
+    for pch in extc++.h.gch stdc++.h.gch stdtr1c++.h.gch; do
+        if [[ -f ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} ]]; then
+            echo rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch}
+            rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch} \
+                || die "Failed to remove ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} for a dir-over-file-merge."
+        fi
+    done
+}
+
 pkg_postinst() {
     if [[ ! -e ${ROOT}/usr/bin/cc ]]; then
         ln -s "${ROOT}"/usr/bin/{g,}cc || echo "Failed to link ${ROOT}/usr/bin/cc to ${ROOT}/usr/bin/gcc."
