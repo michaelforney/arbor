@@ -3,7 +3,7 @@
 
 SUMMARY="GNU config.guess and config.sub scripts"
 HOMEPAGE="http://savannah.gnu.org/projects/config"
-SOURCES=""
+SOURCES="http://dev.exherbo.org/~ingmar/distfiles/${PN}/${P}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -12,13 +12,10 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_unpack() {
-    tar jxvf "${FILESDIR}/${P}.tar.bz2" || die "Unpack failed"
-}
-
 src_install() {
     dodir /usr/share/${PN}
     insinto /usr/share/${PN}
     doins config.guess config.sub
     dodoc ChangeLog
 }
+
