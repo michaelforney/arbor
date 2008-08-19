@@ -127,6 +127,7 @@ src_test() {
 <p>Tests are run on an <a href="http://www.exherbo.org">Exherbo</a> system.</p>
 EOF
 
+    ewarn 'FIXME: compiler_status'
     "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/compiler_status \
         --v2 \
         --comment "${S}/status/comment.html" \
@@ -159,6 +160,6 @@ src_install() {
     fi
 
     docinto status
-    nonfatal dodoc "${S}"/status/* "${S}"/boost.png
+    nonfatal dodoc  "${S}"/{status/*,regress.log,boost.png}
 }
 
