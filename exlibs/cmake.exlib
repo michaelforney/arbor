@@ -73,6 +73,7 @@ ecmake() {
 
     cmakeargs=(
         ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
+        -DCMAKE_VERBOSE_MAKEFILE=ON
         -DCMAKE_BUILD_TYPE=''
         -DCMAKE_C_COMPILER="$(type -P $(tc-getCC))"
         -DCMAKE_CXX_COMPILER="$(type -P $(tc-getCXX))"
@@ -114,7 +115,7 @@ cmake_src_configure() {
 # dir.  All arguments including CMAKE_SRC_COMPILE_PARAMS are passed to emake.
 # Set VERBOSE to make cmake more verbose.
 cmake_src_compile() {
-    _cmake_run emake ${CMAKE_SRC_COMPILE_PARAMS[@]} ${VERBOSE:+VERBOSE=1} "$@"
+    _cmake_run emake ${CMAKE_SRC_COMPILE_PARAMS[@]} "$@"
 }
 
 # Function for testing the package. Automatically detects the build dir. Uses
