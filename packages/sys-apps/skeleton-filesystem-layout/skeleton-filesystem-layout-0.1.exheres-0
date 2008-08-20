@@ -5,9 +5,9 @@ require multilib
 
 SUMMARY="Skeleton filesystem layout"
 HOMEPAGE="http://www.exherbo.org/"
-SRC_URI=""
+SOURCES=""
 
-LICENSE="GPL-2"
+LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
@@ -21,10 +21,23 @@ create_root_owned_directory() {
     fi
 }
 
+pkg_pretend() {
+    local x libdir="lib"
+    if [[ ${SYMLINK_LIB} == "yes" ]]; then
+        libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
+        for x in {,/usr,/usr/local}/lib; do
+            if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
+                die "${x}: Expected a symlink but found a directory"
+            fi
+        done
+    fi
+}
+
 pkg_postinst() {
     libdir="lib"
     [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
 
+    local x
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
     for x in /bin /boot /dev{,/pts,/shm} /etc{,/opt} /home /${libdir} /mnt \
@@ -43,7 +56,7 @@ pkg_postinst() {
     done
 
     # /var structure
-    for x in /var{,/cache,/lib,/local,/lock,/log,/opt,/run,/spool,/tmp}; do
+    for x in /var{,/cache,/empty,/lib,/local,/lock,/log,/opt,/run,/spool,/tmp}; do
         create_root_owned_directory "${ROOT}${x}"
     done
 
@@ -52,6 +65,8 @@ pkg_postinst() {
         for x in {,/usr,/usr/local}/lib; do
             if [[ ! -e "${ROOT}${x}" ]]; then
                 ln -s "${libdir}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+            elif [[ ! -L "${ROOT}${x}" ]]; then
+                die "${x}: Expected a symlink but found a directory"
             fi
         done
     fi
