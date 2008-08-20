@@ -56,6 +56,15 @@ src_compile() {
         LIBDIR="${libdir}"
 }
 
+pkg_preinst() {
+    # 2008-08-20: safety measure to prevent removal of directories that were part
+    # of CONTENTS in 1.12.12 and below (before sys-apps/skeleton-filesystem-layout)
+    local x
+    for x in /boot /dev{/pts,/shm} /var/lock; do
+        touch "${ROOT}"${x}/.keep_do_not_break_me
+    done
+}
+
 src_install() {
     local x rcscripts_dir=/${libdir}/rcscripts
 
