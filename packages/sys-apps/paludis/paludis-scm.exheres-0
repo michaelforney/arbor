@@ -36,14 +36,14 @@ DEPENDENCIES="
         dev-util/pkg-config
         doc? (
             app-doc/doxygen
+            python? (
+                python-doc/epydoc
+                python-doc/pygments
+            )
             ruby? (
                 dev-ruby/allison
                 dev-ruby/syntax
             )
-        )
-        python? (
-            python-doc/epydoc
-            python-doc/pygments
         )
     run:
         net-misc/wget
@@ -76,6 +76,7 @@ src_configure() {
     repositories=$(echo default unavailable unpackaged $(optionv cran ) | tr -s \  ,)
     econf \
         $(option_enable doc doxygen) \
+        $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
         $(option_enable pink) \
         $(option_enable qa) \
