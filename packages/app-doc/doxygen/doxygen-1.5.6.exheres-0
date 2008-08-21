@@ -1,0 +1,88 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'doxygen-1.5.5.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require toolchain-funcs freedesktop-mime
+
+SUMMARY="Documentation system for C++, C, Java, Objective-C, Python, IDL, and other languages"
+HOMEPAGE="http://www.doxygen.org/"
+SOURCES="ftp://ftp.stack.nl/pub/users/dimitri/${P}.src.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="doc dot" # latex qt3
+
+DEPENDENCIES="
+    build+run:
+        app-text/ghostscript
+        dev-lang/python:=
+        media-libs/libpng
+        dot? (
+            media-gfx/graphviz
+            media-libs/freetype:2
+        )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILESDIR}/${P}-system-libpng.patch" # Remove internal libpng - see Gentoo bug #210237
+)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
+DEFAULT_SRC_INSTALL_PARAMS=( MAN1DIR="share/man/man1" )
+
+src_prepare() {
+    default
+
+    # Respect *FLAGS
+    sed -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
+        -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
+        -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
+        -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
+        -i tmake/lib/linux*/tmake.conf || die "Failed to use user's *FLAGS"
+}
+
+src_configure() {
+    ./configure \
+        --docdir "${D}/usr/share/doc/${PF}" \
+        --prefix "${D}/usr" \
+        --shared \
+        || die "./configure failed."
+}
+
+src_compile() {
+    default
+
+    if option doc; then
+        if option !dot; then
+            sed -e '/HAVE_DOT/s:YES:NO:' \
+                -i {,doc/}Doxyfile || die "Disabling dot failed"
+        fi
+
+        # Disable latex support.
+        cp doc/Doxyfile{,.orig} || die "cp doc/Makefile{,.orig} failed"
+        cp doc/Makefile{,.orig} || die "cp doc/Makefile{,.orig} failed"
+        
+        sed -e '/GENERATE_LATEX/s:YES:NO:' \
+            -i doc/Doxyfile || die "Disabling latex failed"
+
+        sed -e '/@epstopdf/s:^:#DONOTWANT :' \
+            -e '/@cp Makefile.latex/s:^:#DONOTWANT :' \
+            -e '/@sed/s:^:#DONOTWANT :' \
+            -i doc/Makefile || die "Disabling latex failed"
+
+        emake docs
+    fi
+}
+
+src_install() {
+    default
+
+    if option doc; then
+        insinto /usr/share/doc/${PF}
+        doins -r html/*
+    fi
+}
+
