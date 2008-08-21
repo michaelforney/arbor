@@ -15,6 +15,9 @@ export_exlib_phases src_configure src_compile src_test src_install
 if [[ -z ${HOMEPAGE} && -z ${SOURCES} && -n ${MODULE_AUTHOR} ]]; then
     HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
     SOURCES="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}${MODULE_EXTENSION:-.tar.gz}"
+    BUGS_TO="arkanoid@exherbo.org ingmar@exherbo.org"
+    REMOTE_IDS="cpan:${PN//-/::}"
+    UPSTREAM_CHANGELOG="http://search.cpan.org/src/${MODULE_AUTHOR}/${P}/Changes"
 fi
 
 # Default license, for packages licensed under perl's terms.
