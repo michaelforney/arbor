@@ -12,7 +12,7 @@ SCM_TYPE="git"
 SCM_REPOSITORY="git://git.pioto.org/paludis"
 require scm
 
-MYOPTIONS="cran glsa inquisitio pink python qa ruby vim-syntax visibility"
+MYOPTIONS="cran doc glsa inquisitio pink python qa ruby vim-syntax visibility"
 LICENCES="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
@@ -34,6 +34,13 @@ DEPENDENCIES="
         sys-devel/autoconf:2.5
         sys-devel/automake:1.10
         dev-util/pkg-config
+        doc? (
+            app-doc/doxygen
+            ruby? (
+                dev-ruby/allison
+                dev-ruby/syntax
+            )
+        )
         python? (
             python-doc/epydoc
             python-doc/pygments
@@ -68,7 +75,8 @@ src_configure() {
     environments="default"
     repositories=$(echo default unavailable unpackaged $(optionv cran ) | tr -s \  ,)
     econf \
-        --disable-doxygen \
+        $(option_enable doc doxygen) \
+        $(option doc && option ruby && echo '--enable-ruby-doc') \
         $(option_enable pink) \
         $(option_enable qa) \
         $(option_enable ruby) \
