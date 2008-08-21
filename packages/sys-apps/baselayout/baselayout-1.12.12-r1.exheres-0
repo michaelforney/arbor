@@ -1,6 +1,7 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'baselayout-1.12.12.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -32,7 +33,23 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILESDIR}/${P}-runlevels.patch"
     "${FILESDIR}/${P}-paths.patch"
     "${FILESDIR}/${P}-branding.patch"
+    "${FILESDIR}/${P}-update-modules.patch"
 )
+
+pkg_pretend() {
+    if [[ -e "${ROOT}"/etc/modprobe.conf ]]; then
+        eerror "You have a file /etc/modprobe.conf. Please check if you need parts of it"
+        eerror "(put these in a file in /etc/modprobe.d) and remove it. For further"
+        eerror "information see \"man modprobe.conf\"."
+        die "Found /etc/modprobe.conf."
+    fi
+
+    if [[ -e "${ROOT}"/etc/modules.d ]] || [[ -e "${ROOT}"/etc/modules.conf ]]; then
+        eerror "/etc/modules.conf and /etc/modules.d are obsolete, please migrate to"
+        eerror "modprobe.d and remove them. For further information see \"man modprobe.conf\"."
+        die "Found modules.conf or modules.d."
+    fi
+}
 
 src_prepare() {
     # Use correct path to filefuncs.so on multilib systems
@@ -118,11 +135,6 @@ src_install() {
 
     cd "${S}/src"
     emake DESTDIR="${D}" LIBDIR="${libdir}" install
-
-    if ! [[ -f "${ROOT}"/sbin/update-modules ]]; then
-        dosbin "${FILESDIR}"/update-modules
-        doman "${FILESDIR}"/update-modules.8
-    fi
 
     # If /dev/pts already exists in ${ROOT} it might not be writable for us.
     [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${D}"/dev/pts
