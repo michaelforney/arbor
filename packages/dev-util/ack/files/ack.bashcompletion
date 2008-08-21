@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+_ack_supported_types() {
+    if [[ ${1} == --negated ]]; then
+        ack --help type | perl -ne '
+                if( s/^\s*--\[no\]// && s/\s+.*$//) {
+                chomp;
+                print "--$_\n";
+                print "--no-$_\n";
+            };'
+    else
+        ack --help type | perl -ne '
+            if( s/^\s*--\[no\]// && s/\s+.*$//) {
+                chomp;
+                print "$_\n";
+            };'
+    fi
+}
+
+_ack() {
+    local cur prev first
+    local options option_opts option_arg
+
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    first="${COMP_WORDS[1]}"
+
+    options_opts=(
+        -a -c -f -h -H -i -l -L -n -o -Q -u -v -w -1
+        --all --{,no-}color --{,no-}colour --count --{,no}env --flush --{,no-}follow --{,no-}group
+        --help --{,no-}ignore-dir --with-filename --no-filename --ignore-case
+        --files-with{,out}-matches --man --passthru --print0 --literal --{,no}smart-case
+        --sort-files --text --thppt --unrestricted --invert-match --version --word-regexp
+    )
+    options_arg=(
+        -A -B -C -g -G -m
+        --after-context= --before-context= --context= --ignore-dir= --no-ignore-dir=
+        --line= --match --max-count= --output= --pager= --rc= --type --type-add --type-set
+    )
+    options=( ${options_opts[@]} ${options_arg[@]}
+    )
+
+    case "${prev}" in
+        --type) # List filetypes
+            COMPREPLY=($(compgen -W "$(_ack_supported_types)" -- "${cur}"))
+            return 0
+            ;;
+        # '--' ends parsing of ARGV, complete files and directories
+        --)
+            _filedir
+            return 0
+            ;;
+    esac
+
+    case "${cur}" in
+        -*) # Short and long options
+            COMPREPLY=($(compgen -W "${options[@]} $(_ack_supported_types --negated)" -- "${cur}"))
+            return 0
+    esac
+}
+
+complete -o default -F _ack ack
+
+# vim: set tw=100 sw=4 sts=4 et ft=sh :
