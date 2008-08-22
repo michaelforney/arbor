@@ -138,6 +138,8 @@ src_install() {
 
     # If /dev/pts already exists in ${ROOT} it might not be writable for us.
     [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${D}"/dev/pts
+
+    rm -r "${D}"/etc/modules.d || die "rm -r ${D}/etc/modules.d failed"
 }
 
 pkg_postinst() {
