@@ -12,8 +12,8 @@ scm-svn_do_dependencies() {
 scm-svn_do_check_vars() {
     [[ -n $(scm_get_var SVN_RAW_URI) ]] \
         && [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var TAG) ||
-                  -n $(scm_get_var SVN_SUBPATH) ]] \
-        && die "$(scm_var_name SVN_RAW_URI) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name TAG) or $(scm_var_name SVN_SUBPATH)"
+                  -n $(scm_get_var SUBPATH) ]] \
+        && die "$(scm_var_name SVN_RAW_URI) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name TAG) or $(scm_var_name SUBPATH)"
     [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var TAG) ]] \
         && die "for svn, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
     [[ -n $(scm_get_var REVISION) ]] && \
@@ -37,7 +37,7 @@ scm-svn_uri() {
         uri+="/trunk"
     fi
 
-    local subpath="$(scm_get_var SVN_SUBPATH)"
+    local subpath="$(scm_get_var SUBPATH)"
     subpath=${subpath##*(/)}
     subpath=${subpath%%*(/)}
     [[ -n ${subpath} ]] && uri+="/${subpath}"
