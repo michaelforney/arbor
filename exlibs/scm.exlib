@@ -28,8 +28,8 @@ scm_call() {
     shift
     if [[ -n $(declare -F scm-${type}_do_${func}) ]]; then
         scm-${type}_do_${func} "${@}"
-    elif [[ -n $(declare -F scm_default_${func}) ]]; then
-        scm_default_${func} "${@}"
+    elif [[ -n $(declare -F scm_do_${func}) ]]; then
+        scm_do_${func} "${@}"
     else
         die "bug in scm-${type}.exlib: scm-${type}_do_${func} not defined"
     fi
@@ -142,11 +142,11 @@ scm_pkg_info() {
     fi
 }
 
-scm_default_info() {
+scm_do_info() {
     SCM_DEFAULT_INFO_COUNT+=1
 }
 
-scm_do_stuff() {
+scm_global_stuff() {
     [[ -z $(scm_get_var TYPE) ]] && die "$(scm_var_name TYPE) must be set"
     has scm-$(scm_get_var) ${INHERITED} || require scm-$(scm_get_var TYPE)
 
@@ -163,12 +163,12 @@ scm_do_stuff() {
     DEPENDENCIES+=" $(scm_call dependencies)"
 }
 
-scm_default_check_vars() {
+scm_do_check_vars() {
     :
 }
 
 DEPENDENCIES="build,host: >=sys-apps/util-linux-ng-2.13_pre2"
-scm_for_each scm_do_stuff
+scm_for_each scm_global_stuff
 
 if [[ ${PN} == paludis ]]; then # HACK
     export_exlib_phases src_unpack
