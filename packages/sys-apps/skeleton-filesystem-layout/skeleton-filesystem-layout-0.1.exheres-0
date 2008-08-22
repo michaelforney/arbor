@@ -24,7 +24,7 @@ create_root_owned_directory() {
 }
 
 pkg_pretend() {
-    local x libdir="lib"
+    local x
     if [[ ${SYMLINK_LIB} == "yes" ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
@@ -65,7 +65,7 @@ pkg_postinst() {
     if [[ ${SYMLINK_LIB} == yes ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ ! -e "${ROOT}${x}" ]]; then
-                echo "ln -s ${x/lib/${libdir}} ${ROOT}${x}"
+                echo "ln -s ${libdir} ${ROOT}${x}"
                 ln -s "${libdir}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
             elif [[ ! -L "${ROOT}${x}" ]]; then
                 die "${x}: Expected a symlink but found a directory"
