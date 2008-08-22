@@ -27,16 +27,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-testing )
 src_compile() {
     default
 
-#    if option doc; then
-#        emake doc
-#    fi
+    if option doc; then
+        emake doc
+    fi
 }
 
 src_install() {
     default
 
-#    if option doc; then
-#        emake install-html
-#    fi
+    if option doc; then
+        insinto /usr/share/doc/${PF}
+        doins -r "${S}"/doc/html
+    fi
 }
 
