@@ -21,6 +21,7 @@ scm-git_do_check_vars() {
         && die "for git, $(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
     [[ -n $(scm_get_var TAG) || -n $(scm_get_var REVISION) ]] \
         && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name REVISION)"
+    [[ -n $(scm_get_var SUBPATH) ]] && die "for git, $(scm_var_name SUBPATH) must not be set"
     [[ -z $(scm_get_var BRANCH) ]] && scm_set_var BRANCH master
 }
 
