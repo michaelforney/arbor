@@ -15,10 +15,10 @@ scm-svn_do_check_vars() {
                   -n $(scm_get_var SVN_SUBPATH) ]] \
         && die "$(scm_var_name SVN_RAW_URI) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name TAG) or $(scm_var_name SVN_SUBPATH)"
     [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var TAG) ]] \
-        && die "$(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
+        && die "for svn, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
     [[ -n $(scm_get_var REVISION) ]] && \
         [[ "$(scm_get_var REVISION)" == *[^0123456789]* || "$(scm_get_var REVISION)" -eq 0 ]] \
-        && die "$(scm_var_name REVISION) must be a positive integer"
+        && die "for svn, $(scm_var_name REVISION) must be a positive integer"
 }
 
 scm-svn_uri() {
@@ -56,7 +56,7 @@ scm-svn_svn() {
 
 scm-svn_info() {
     local info="$(LC_ALL=C scm-svn_svn -q info "$(scm_get_var CHECKOUT_TO)" | sed -ne "s/^${1}: //p")"
-    [[ -n ${info} ]] || die "Could not determine ${1} for $(scm_get_var CHECKOUT_TO)"
+    [[ -n ${info} ]] || die "could not determine ${1} for $(scm_get_var CHECKOUT_TO)"
     echo "${info}"
 }
 

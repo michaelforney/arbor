@@ -17,15 +17,15 @@ scm-git_do_dependencies() {
 
 scm-git_do_check_vars() {
     [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var REVISION) ]] \
-        && die "$(scm_var_name BRANCH) must not be set at the same time as $(scm_var_name REVISION)"
+        && die "for git, $(scm_var_name BRANCH) must not be set at the same time as $(scm_var_name REVISION)"
     local rev="$(scm_get_var REVISION)"
     [[ -n ${rev} ]] && [[ ${rev} == *[^0123456789abcdefABCDEF]* || ${#rev} -ne 40 ]] \
-        && die "$(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
+        && die "for git, $(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
     [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
             -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
     [[ -n $(scm_get_var TAG) ]] && \
         [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var REVISION) ]] \
-        && die "$(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
+        && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
 }
 
 scm-git_git() {
