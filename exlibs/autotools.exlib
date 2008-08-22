@@ -161,8 +161,8 @@ eautomake() {
 autotools_run_tool() {
     local ret=0
 
-    echo $@
-    $@
+    echo "$@"
+    "$@"
     ret=$?
 
     if [[ ${ret} != 0 && ${NO_FAIL} != 1 ]]; then
