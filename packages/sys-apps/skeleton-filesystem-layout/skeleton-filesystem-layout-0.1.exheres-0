@@ -16,15 +16,16 @@ DEPENDENCIES=""
 
 create_root_owned_directory() {
     if [[ ! -e "$1" ]]; then
-        mkdir -p "$1" || die "mkdir $1 failed"
-        chown root:root "$1" || die "chown root:root $1 failed"
+        echo "mkdir -p ${1}"
+        mkdir -p "${1}" || die "mkdir $1 failed"
+        echo "chown root:root ${1}"
+        chown root:root "${1}" || die "chown root:root $1 failed"
     fi
 }
 
 pkg_pretend() {
     local x libdir="lib"
     if [[ ${SYMLINK_LIB} == "yes" ]]; then
-        libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
         for x in {,/usr,/usr/local}/lib; do
             if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
                 die "${x}: Expected a symlink but found a directory"
@@ -64,6 +65,7 @@ pkg_postinst() {
     if [[ ${SYMLINK_LIB} == yes ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ ! -e "${ROOT}${x}" ]]; then
+                echo "ln -s ${x/lib/${libdir}} ${ROOT}${x}"
                 ln -s "${libdir}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
             elif [[ ! -L "${ROOT}${x}" ]]; then
                 die "${x}: Expected a symlink but found a directory"
