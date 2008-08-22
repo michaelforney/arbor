@@ -16,16 +16,12 @@ scm-git_do_dependencies() {
 }
 
 scm-git_do_check_vars() {
-    [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var REVISION) ]] \
-        && die "for git, $(scm_var_name BRANCH) must not be set at the same time as $(scm_var_name REVISION)"
     local rev="$(scm_get_var REVISION)"
     [[ -n ${rev} ]] && [[ ${rev} == *[^0123456789abcdefABCDEF]* || ${#rev} -ne 40 ]] \
         && die "for git, $(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
-    [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
-            -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
-    [[ -n $(scm_get_var TAG) ]] && \
-        [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var REVISION) ]] \
-        && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
+    [[ -n $(scm_get_var TAG) || -n $(scm_get_var REVISION) ]] \
+        && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name REVISION)"
+    [[ -z $(scm_get_var BRANCH) ]] && scm_set_var BRANCH master
 }
 
 scm-git_git() {
@@ -69,8 +65,7 @@ scm-git_do_appraise() {
         fi
     fi
 
-    if [[ -n $(scm_get_var BRANCH) ]] &&
-        ! has $(scm_get_var BRANCH) $(scm-git_git -q branch); then
+    if ! has $(scm_get_var BRANCH) $(scm-git_git -q branch); then
         echo "${dir} does not contain the branch $(scm_get_var BRANCH)"
         return 1
     fi
@@ -80,24 +75,24 @@ scm-git_do_appraise() {
 
 scm-git_do_checkout() {
     scm-git_git clone --bare "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
-    scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
     scm-git_git config remote.origin.fetch '+refs/heads/*:refs/heads/*'
+    scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
     scm-git_git gc --auto
 }
 
 scm-git_do_update() {
     scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
-    scm-git_git fetch -f -u origin
+    scm-git_git fetch -f -u origin "+$(scm_get_var BRANCH):$(scm_get_var BRANCH)"
     scm-git_git gc --auto
 }
 
 scm-git_ref_or_sha1() {
     if [[ -n $(scm_get_var REVISION) ]]; then
         scm_get_var REVISION
-    elif [[ -n $(scm_get_var BRANCH) ]]; then
-        echo refs/heads/$(scm_get_var BRANCH)
     elif [[ -n $(scm_get_var TAG) ]]; then
         echo refs/tags/$(scm_get_var TAG)
+    elif [[ -n $(scm_get_var BRANCH) ]]; then
+        echo refs/heads/$(scm_get_var BRANCH)
     fi
 }
 
