@@ -76,7 +76,6 @@ scm-git_do_appraise() {
 
 scm-git_do_checkout() {
     scm-git_git clone --bare "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
-    scm-git_git config remote.origin.fetch '+refs/heads/*:refs/heads/*'
     scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
     scm-git_git gc --auto
 }
@@ -92,7 +91,7 @@ scm-git_ref_or_sha1() {
         scm_get_var REVISION
     elif [[ -n $(scm_get_var TAG) ]]; then
         echo refs/tags/$(scm_get_var TAG)
-    elif [[ -n $(scm_get_var BRANCH) ]]; then
+    else
         echo refs/heads/$(scm_get_var BRANCH)
     fi
 }
