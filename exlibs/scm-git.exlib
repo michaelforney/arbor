@@ -86,7 +86,14 @@ scm-git_do_checkout() {
 }
 
 scm-git_do_update() {
-    scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
+    local old_origin="$(scm-git_git -q config remote.origin.url)"
+    [[ -n ${old_origin} ]] || die "could not determine origin URL for $(scm_get_var CHECKOUT_TO)"
+    if [[ ${old_origin} != "$(scm_get_var REPOSITORY)" ]]; then
+        scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
+        scm-git_git branch -D $(scm-git_git -q branch | sed -e 's/^\*/ /' -e '/(.*)/d')
+        scm-git_git tag -d $(scm-git_git -q tag)
+    fi
+
     scm-git_git fetch -f -u origin 'refs/heads/*:refs/heads/*'
     scm-git_git gc --auto
 }
