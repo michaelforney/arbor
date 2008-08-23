@@ -3,11 +3,11 @@
 # Based in part upon 'libevent-1.4.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-MY_P="${P}-stable"
+MY_PNV="${PNV}-stable"
 
 SUMMARY="A library to execute a function when a specific event occurs on a file descriptor"
 HOMEPAGE="http://monkey.org/~provos/libevent/"
-SOURCES="http://monkey.org/~provos/${MY_P}.tar.gz"
+DOWNLOADS="http://monkey.org/~provos/${MY_PNV}.tar.gz"
 
 LICENCES="BSD"
 SLOT="0"
@@ -16,17 +16,17 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/${MY_P}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-test.patch"
+    "${FILES}/${PNV}-test.patch"
 )
 
 src_test() {
     pushd test >/dev/null
     einfo "Running tests"
-    ./test.sh > "${T}"/tests
-    cat "${T}"/tests
-    grep FAILED "${T}"/tests &>/dev/null && die "1 or more tests failed"
+    ./test.sh > "${TEMP}"/tests
+    cat "${TEMP}"/tests
+    grep FAILED "${TEMP}"/tests &>/dev/null && die "1 or more tests failed"
     popd >/dev/null
 }

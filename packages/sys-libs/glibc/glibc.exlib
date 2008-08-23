@@ -4,7 +4,7 @@
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
-SOURCES="mirror://gnu/${PN}/${P}.tar.bz2
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2
     mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2
     mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 
@@ -21,20 +21,20 @@ DEPENDENCIES="
     run:
         sys-libs/timezone-data"
 
-ECONF_SOURCE="${WORKDIR}"/${P}
-S="${T}/build"
+ECONF_SOURCE="${WORKBASE}"/${PNV}
+WORK="${TEMP}/build"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-crypt --with-add-ons --without-gd )
-DEFAULT_SRC_INSTALL_PARAMS=( install_root="${D}" )
+DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
 RESTRICT="test"
 
 src_unpack() {
-    mkdir "${S}"
-    unpack ${A}
+    mkdir "${WORK}"
+    unpack ${ARCHIVES}
 
-    mv ${PN}-libidn-${PV} "${WORKDIR}"/${P}/libidn || die "Moving glibc-libidn-${PV} failed"
-    mv ${PN}-ports-${PV} "${WORKDIR}"/${P}/ports || die "Moving glibc-ports-${PV} failed"
+    mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
+    mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
 }
 
 src_install() {
@@ -42,11 +42,11 @@ src_install() {
     default
 
     # Don't install /etc/{ld.so.cache,localtime}
-    rm "${D}/etc/ld.so.cache" "${D}/etc/localtime" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime"
+    rm "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime"
     # Don't install bundled timezone info
-    rm -r "${D}/usr/share/zoneinfo" || die "Couldn't remove bundled timezone info"
+    rm -r "${IMAGE}/usr/share/zoneinfo" || die "Couldn't remove bundled timezone info"
 
-    cd "${WORKDIR}/${P}"
+    cd "${WORKBASE}/${PNV}"
     insinto /etc
     doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
 }

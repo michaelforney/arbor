@@ -6,7 +6,7 @@ require fixheadtails
 
 SUMMARY="GNU Portable Threads"
 HOMEPAGE="http://www.gnu.org/software/pth/"
-SOURCES="mirror://gnu/${PN}/${P}.tar.gz"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -18,9 +18,9 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${PN}-2.0.7-parallelfix.patch"
-    -p1 "${FILESDIR}/${PN}-2.0.7-ldflags.patch"
-    "${FILESDIR}/${PN}-2.0.7-sigstack.patch" )
+    -p0 "${FILES}/${PN}-2.0.7-parallelfix.patch"
+    -p1 "${FILES}/${PN}-2.0.7-ldflags.patch"
+    "${FILES}/${PN}-2.0.7-sigstack.patch" )
 
 src_prepare() {
     default

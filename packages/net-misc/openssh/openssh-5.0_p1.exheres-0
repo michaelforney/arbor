@@ -6,14 +6,14 @@
 require eutils multilib autotools pam
 
 # Make it more portable between straight releases and _p? releases.
-PARCH=${P/_/}
+PARCH=${PNV/_/}
 
 X509_PATCH="${PARCH}+x509-6.1.1.diff.gz"
 HPN_PATCH="${PARCH}-hpn13v3.diff.gz"
 
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
 HOMEPAGE="http://www.openssh.org/"
-SOURCES="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
+DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
     http://www.sxw.org.uk/computing/patches/${PARCH}-gsskex-20080404.patch
     X509? ( http://roumenpetrov.info/${PN}/x509-6.1.1/${X509_PATCH} )
     hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )"
@@ -39,7 +39,7 @@ DEPENDENCIES="
         sys-kernel/linux-headers
 "
 
-S="${WORKDIR}/${PARCH}"
+WORK="${WORKBASE}/${PARCH}"
 
 src_prepare() {
     sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
@@ -47,9 +47,9 @@ src_prepare() {
 
     if [[ -n ${X509_PATCH} ]] && option X509 ; then
         DEFAULT_SRC_PREPARE_PATCHES+=( 
-            -p1 "${WORKDIR}/${X509_PATCH/.gz}"
-            -p0 "${FILESDIR}/${PN}-4.9_p1-x509-hpn-glue.patch"
-            -p0 "${FILESDIR}/${PN}-4.7_p1-GSSAPI-dns.patch"
+            -p1 "${WORKBASE}/${X509_PATCH/.gz}"
+            -p0 "${FILES}/${PN}-4.9_p1-x509-hpn-glue.patch"
+            -p0 "${FILES}/${PN}-4.7_p1-GSSAPI-dns.patch"
         )
     else
         DEFAULT_SRC_PREPARE_PATCHES+=(
@@ -59,7 +59,7 @@ src_prepare() {
 
     if [[ -n ${HPN_PATCH} ]] && option hpn ; then
         DEFAULT_SRC_PREPARE_PATCHES+=(
-            -p1 "${WORKDIR}/${HPN_PATCH/.gz}"
+            -p1 "${WORKBASE}/${HPN_PATCH/.gz}"
         )
     fi
 
@@ -97,27 +97,27 @@ src_test() {
 }
 
 src_install() {
-    emake install-nokeys DESTDIR="${D}"
+    emake install-nokeys DESTDIR="${IMAGE}"
     fperms 600 /etc/ssh/sshd_config
     dobin contrib/ssh-copy-id
-    newinitd "${FILESDIR}"/sshd.rc6 sshd
-    newconfd "${FILESDIR}"/sshd.confd sshd
+    newinitd "${FILES}"/sshd.rc6 sshd
+    newconfd "${FILES}"/sshd.confd sshd
     keepdir /etc/ssh/ca
     keepdir /etc/skel/.ssh
     keepdir /var/run
 
-    sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${D}"/etc/ssh/sshd_config \
+    sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config \
         || die "sed for UsePAM failed"
     sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
-        "${D}"/etc/ssh/sshd_config || die "sed for passwd auth failed"
-    newpamd "${FILESDIR}"/sshd.pam_include.1 sshd
+        "${IMAGE}"/etc/ssh/sshd_config || die "sed for passwd auth failed"
+    newpamd "${FILES}"/sshd.pam_include.1 sshd
 
     doman contrib/ssh-copy-id.1
     dodoc ChangeLog CREDITS OVERVIEW README* TODO sshd_config
 
     diropts -m 0700
     dodir /etc/skel/.ssh
-    rmdir "${D}"/var{/empty,}
+    rmdir "${IMAGE}"/var{/empty,}
 }
 
 pkg_postinst() {

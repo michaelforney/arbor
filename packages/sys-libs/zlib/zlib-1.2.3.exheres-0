@@ -3,7 +3,7 @@
 
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net"
-SOURCES="http://www.zlib.net/${P}.tar.gz"
+DOWNLOADS="http://www.zlib.net/${PNV}.tar.gz"
 
 LICENCES="as-is"
 SLOT="0"
@@ -12,7 +12,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES="${FILESDIR}/zlib-1.2.1-fPIC.patch"
+DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
 
 src_configure() {
     ./configure \
@@ -21,5 +21,5 @@ src_configure() {
         || die "configure failed"
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}/usr" )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )

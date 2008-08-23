@@ -8,8 +8,8 @@ MY_PV="$(delete_all_version_separators ${PV})"
 SUMMARY="Zip is a compression and file packaging/archive utility."
 HOMEPAGE="http://www.info-zip.org/Zip.html"
 # ftp://ftp.info-zip.org/ has been dead since July. ftp.tex.ac.uk works.
-#SOURCES="ftp://ftp.info-zip.org/pub/infozip/src/zip${MY_PV}.tar.gz"
-SOURCES="ftp://ftp.tex.ac.uk/tex-archive/tools/zip/info-zip/src/zip${MY_PV}.tar.gz"
+#DOWNLOADS="ftp://ftp.info-zip.org/pub/infozip/src/zip${MY_PV}.tar.gz"
+DOWNLOADS="ftp://ftp.tex.ac.uk/tex-archive/tools/zip/info-zip/src/zip${MY_PV}.tar.gz"
 
 LICENCES="Info-ZIP"
 SLOT="0"
@@ -20,4 +20,4 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_COMPILE_PARAMS=( -f unix/Makefile generic )
 
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}/usr" -f unix/Makefile )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )

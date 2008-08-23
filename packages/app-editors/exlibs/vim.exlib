@@ -91,7 +91,7 @@ else
     esac
 fi
 
-# Used for setting SOURCES (when ${1} is non-zero) and for outputting the patch names (for src_prepare)
+# Used for setting DOWNLOADS (when ${1} is non-zero) and for outputting the patch names (for src_prepare)
 vim_src_uri_patches() {
     # Upstream provides patches cat'ed and gzipped per hundred, use those to fetch fewer files.
     local i hundreds singles
@@ -108,12 +108,12 @@ vim_src_uri_patches() {
 }
 
 VIM_BASE_URI="${VIM_BASE_URI:-ftp://ftp.vim.org/pub/vim}"
-SOURCES="${VIM_BASE_URI}/unix/vim-${VIM_VERSION}.tar.bz2
+DOWNLOADS="${VIM_BASE_URI}/unix/vim-${VIM_VERSION}.tar.bz2
     ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-lang.tar.gz
     ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-extra.tar.gz
     ${VIM_EXHERBO_PATCHES_URI:-http://dev.exherbo.org/~pioto/distfiles/vim-${VIM_VERSION}-exherbo-patches.tar.bz2}
-    $(vim_src_uri_patches SOURCES)"
-S="${WORKDIR}/vim${VIM_VERSION//.}"
+    $(vim_src_uri_patches DOWNLOADS)"
+WORK="${WORKBASE}/vim${VIM_VERSION//.}"
 
 vim_src_prepare() {
     # Apply any patches available from vim.org for this version
@@ -122,41 +122,41 @@ vim_src_prepare() {
         patches+=( "${FETCHEDDIR}"/${p} )
     done
     # Another set of patches borrowed from src rpm to fix syntax errors etc.
-    for p in "${WORKDIR}"/patches/*; do
+    for p in "${WORKBASE}"/patches/*; do
         [[ -f "${p}" ]] || continue
         patches+=( "${p}" )
     done
     expatch "${patches[@]}"
 
     # Fixup a script to use awk instead of nawk
-    sed -i '1s|.*|#!/usr/bin/awk -f|' ${S}/runtime/tools/mve.awk \
+    sed -i '1s|.*|#!/usr/bin/awk -f|' ${WORK}/runtime/tools/mve.awk \
         || die "mve.awk sed failed"
 
     # Patch to build with ruby-1.8.0_pre5 and following
-    sed -i 's/defout/stdout/g' ${S}/src/if_ruby.c || die "defout->stdout sed broke"
+    sed -i 's/defout/stdout/g' ${WORK}/src/if_ruby.c || die "defout->stdout sed broke"
 
     # Read vimrc and gvimrc from /etc/vim
-    echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> ${S}/src/feature.h
-    echo '#define SYS_GVIMRC_FILE "/etc/vim/gvimrc"' >> ${S}/src/feature.h
+    echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> ${WORK}/src/feature.h
+    echo '#define SYS_GVIMRC_FILE "/etc/vim/gvimrc"' >> ${WORK}/src/feature.h
 
     # Use exuberant ctags which installs as /usr/bin/exuberant-ctags.
     # Hopefully this pattern won't break for a while at least.
     # This fixes bug 29398 (27 Sep 2003 agriffis)
     #sed -i 's/\<ctags\("\| [-*.]\)/exuberant-&/g' \
-    #   ${S}/runtime/doc/syntax.txt \
-    #   ${S}/runtime/doc/tagsrch.txt \
-    #   ${S}/runtime/doc/usr_29.txt \
-    #   ${S}/runtime/menu.vim \
-    #   ${S}/src/configure.in || die 'exuberant-ctags sed failed'
+    #   ${WORK}/runtime/doc/syntax.txt \
+    #   ${WORK}/runtime/doc/tagsrch.txt \
+    #   ${WORK}/runtime/doc/usr_29.txt \
+    #   ${WORK}/runtime/menu.vim \
+    #   ${WORK}/src/configure.in || die 'exuberant-ctags sed failed'
 
     # Don't be fooled by /usr/include/libc.h.  When found, vim thinks
     # this is NeXT, but it's actually just a file in dev-libs/9libs
     # This fixes bug 43885 (20 Mar 2004 agriffis)
-    #sed -i 's/ libc\.h / /' ${S}/src/configure.in || die 'libc.h sed failed'
+    #sed -i 's/ libc\.h / /' ${WORK}/src/configure.in || die 'libc.h sed failed'
 
     # if we're vim-7 and USE vim-pager, make the manpager.sh script
     if has vim-pager ${MYOPTIONS} && option vim-pager ; then
-        cat <<END > ${S}/runtime/macros/manpager.sh
+        cat <<END > ${WORK}/runtime/macros/manpager.sh
 #!/bin/sh
 tr '\\267' '.' | col -b | \\
         vim \\
@@ -168,9 +168,9 @@ END
     fi
 
     # Try to avoid sandbox problems. Bug #114475.
-    if [[ -d ${S}/src/po ]] ; then
+    if [[ -d ${WORK}/src/po ]] ; then
         sed -e '/-S check.vim/s,..VIM.,ln -s $(VIM) testvim \; ./testvim -X,' \
-            -i "${S}/src/po/Makefile" || die "sed in src/po failed"
+            -i "${WORK}/src/po/Makefile" || die "sed in src/po failed"
     fi
 }
 
@@ -323,7 +323,7 @@ vim_src_test() {
     if [[ "${PN}" == "gvim" ]] ; then
        # Make gvim not try to connect to X. See :help gui-x11-start
        # in vim for how this evil trickery works.
-       ln -s ${S}/src/gvim ${S}/src/testvim
+       ln -s ${WORK}/src/gvim ${WORK}/src/testvim
        testprog="../testvim"
     else
         testprog="../vim"
@@ -331,7 +331,7 @@ vim_src_test() {
 
     # We've got to call make test from within testdir, since the Makefiles
     # don't pass through our VIMPROG argument
-    cd ${S}/src/testdir
+    cd ${WORK}/src/testdir
 
     # Test 49 won't work inside a portage environment
     echo "Test 49 isn't sandbox-friendly, so it will be skipped."
@@ -357,7 +357,7 @@ vim_src_install() {
             installtools \
             install-languages \
             install-icons \
-            DESTDIR="${D}" \
+            DESTDIR="${IMAGE}" \
             BINDIR=/usr/bin \
             MANDIR=/usr/share/man \
             DATADIR=/usr/share
@@ -367,18 +367,18 @@ vim_src_install() {
         # default vimrc is installed by vim-runtime since it applies to
         # both vim and gvim
         insinto /etc/vim/
-        newins ${FILESDIR}/vimrc${VIMRC_FILE_SUFFIX} vimrc
+        newins ${FILES}/vimrc${VIMRC_FILE_SUFFIX} vimrc
 
         if option livecd ; then
             # To save space, install only a subset of the files if we're on a
             # livecd. bug 65144.
             echo "Removing some files for a smaller livecd install ..."
 
-            local vimfiles=${D}/usr/share/vim/vim${VIM_VERSION/.}
+            local vimfiles=${IMAGE}/usr/share/vim/vim${VIM_VERSION/.}
             shopt -s extglob
             rm -fr "${vimfiles}"/{compiler,doc,ftplugin,indent}
             rm -fr "${vimfiles}"/{macros,print,tools,tutor}
-            rm "${D}"/usr/bin/vimtutor
+            rm "${IMAGE}"/usr/bin/vimtutor
 
             local keep_colors="default"
             ignore=$(rm -fr "${vimfiles}"/colors/!(${keep_colors}).vim )
@@ -392,7 +392,7 @@ vim_src_install() {
         # These files might have slight security issues, so we won't
         # install them. See bug #77841. We don't mind if these don't
         # exist.
-        rm -f "${D}"/usr/share/vim/vim${VIM_VERSION/.}/tools/{vimspell.sh,tcltags}
+        rm -f "${IMAGE}"/usr/share/vim/vim${VIM_VERSION/.}/tools/{vimspell.sh,tcltags}
 
     elif [[ "${PN}" == "gvim" ]] ; then
         dobin src/gvim
@@ -423,18 +423,18 @@ vim_src_install() {
     # bash completion script, bug #79018.
     case "${PN}" in
         vim-runtime)
-        dobashcompletion ${FILESDIR}/xxd-completion xxd
+        dobashcompletion ${FILES}/xxd-completion xxd
         ;;
         vim)
-        dobashcompletion ${FILESDIR}/${PN}-completion ${PN}
+        dobashcompletion ${FILES}/${PN}-completion ${PN}
         ;;
     esac
 
     # We shouldn't be installing the ex or view man page symlinks, as they
     # are managed by eselect-vi
-    rm -f "${D}"/usr/share/man/man1/{ex,view}.1
+    rm -f "${IMAGE}"/usr/share/man/man1/{ex,view}.1
     # Same for these /usr/bin symlinks
-    rm -f "${D}"/usr/bin/{ex,view}
+    rm -f "${IMAGE}"/usr/bin/{ex,view}
 }
 
 # Make convenience symlinks, hopefully without stepping on toes.  Some

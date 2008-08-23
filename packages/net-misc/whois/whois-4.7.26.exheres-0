@@ -7,10 +7,10 @@
 
 require toolchain-funcs
 
-MY_P=${P/-/_}
+MY_PNV=${PNV/-/_}
 SUMMARY="improved Whois Client"
 HOMEPAGE="http://www.linux.it/~md/software/"
-SOURCES="mirror://debian/pool/main/w/whois/${MY_P}.tar.gz"
+DOWNLOADS="mirror://debian/pool/main/w/whois/${MY_PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -22,7 +22,7 @@ DEPENDENCIES="
     run+build: idn? ( net-dns/libidn )
     build: dev-lang/perl"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}"/${PN}-4.7.2-config-file.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-4.7.2-config-file.patch )
 
 src_prepare() {
     default
@@ -45,7 +45,7 @@ src_compile() {
         ${mydefines}
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${D}" prefix=/usr )
+DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" prefix=/usr )
 
 src_install() {
     default

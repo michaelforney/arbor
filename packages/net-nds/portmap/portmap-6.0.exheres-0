@@ -7,7 +7,7 @@ require eutils toolchain-funcs
 
 SUMMARY="daemon for implementing remote procedure calls between computer programs"
 HOMEPAGE="http://neil.brown.name/portmap/"
-SOURCES="http://neil.brown.name/portmap/${P}.tgz"
+DOWNLOADS="http://neil.brown.name/portmap/${PNV}.tgz"
 
 LICENCES="UoC"
 SLOT="0"
@@ -19,10 +19,10 @@ DEPENDENCIES="
         tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
 "
 
-S="${WORKDIR}/${PN}_${PV}"
+WORK="${WORKBASE}/${PN}_${PV}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-tcpd.patch"
+    "${FILES}/${PNV}-tcpd.patch"
 )
 
 pkg_setup() {
@@ -44,6 +44,6 @@ src_install() {
     doman *.8
     dodoc BLURBv5 CHANGES README*
 
-    newinitd "${FILESDIR}"/portmap.rc6 portmap
-    newconfd "${FILESDIR}"/portmap.confd portmap
+    newinitd "${FILES}"/portmap.rc6 portmap
+    newconfd "${FILES}"/portmap.confd portmap
 }

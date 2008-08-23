@@ -7,7 +7,7 @@ require flag-o-matic multilib
 
 SUMMARY="Dynamic userspace /dev manager for Linux"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
-SOURCES="mirror://kernel/linux/utils/kernel/hotplug/${P}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -67,16 +67,16 @@ src_compile() {
 src_install() {
     into /
     emake \
-        DESTDIR="${D}" \
+        DESTDIR="${IMAGE}" \
         libudevdir=${udev_helper_dir} \
         EXTRAS="${extras}" \
         install
 
     exeinto "${udev_helper_dir}"
-    newexe "${FILESDIR}"/net-${PV}.sh net.sh
-    newexe "${FILESDIR}"/move_tmp_persistent_rules-${PV}.sh move_tmp_persistent_rules.sh
-    newexe "${FILESDIR}"/write_root_link_rule-${PV} write_root_link_rule
-    newexe "${FILESDIR}"/shell-compat-${PV}.sh shell-compat.sh
+    newexe "${FILES}"/net-${PV}.sh net.sh
+    newexe "${FILES}"/move_tmp_persistent_rules-${PV}.sh move_tmp_persistent_rules.sh
+    newexe "${FILES}"/write_root_link_rule-${PV} write_root_link_rule
+    newexe "${FILES}"/shell-compat-${PV}.sh shell-compat.sh
 
     keepdir "${udev_helper_dir}"/state
     keepdir "${udev_helper_dir}"/devices
@@ -88,18 +88,18 @@ src_install() {
 
     # vol_id library (needed by mount and HAL)
     into /
-    rm "${D}/$(get_libdir)"/libvolume_id.so* 2>/dev/null
+    rm "${IMAGE}/$(get_libdir)"/libvolume_id.so* 2>/dev/null
     dolib extras/volume_id/lib/*.so*
     into /usr
     dolib extras/volume_id/lib/*.a
 
     # handle static linking bug #4411
-    rm -f "${D}/usr/$(get_libdir)/libvolume_id.so"
+    rm -f "${IMAGE}/usr/$(get_libdir)/libvolume_id.so"
     gen_usr_ldscript libvolume_id.so
 
     # Add our stuff to udev.conf
     echo "# If you need to change mount-options, do it in /etc/fstab" \
-    >> "${D}"/etc/udev/udev.conf
+    >> "${IMAGE}"/etc/udev/udev.conf
 
     # Now installing rules
     cd etc/udev
@@ -114,25 +114,25 @@ src_install() {
     then
         doins "packages/40-${ARCH}.rules"
     fi
-    cd "${S}"
+    cd "${WORK}"
 
     # our udev hooks into the rc system
     insinto /$(get_libdir)/rcscripts/addons
-    newins "${FILESDIR}"/udev-start-${PV}.sh udev-start.sh
-    newins "${FILESDIR}"/udev-stop-${PV}.sh udev-stop.sh
+    newins "${FILES}"/udev-start-${PV}.sh udev-start.sh
+    newins "${FILES}"/udev-stop-${PV}.sh udev-stop.sh
 
     # The udev-post init-script
-    newinitd "${FILESDIR}"/udev-postmount-initd-${PV} udev-postmount
+    newinitd "${FILES}"/udev-postmount-initd-${PV} udev-postmount
 
     insinto /etc/modprobe.d
-    newins "${FILESDIR}"/blacklist-${PV} blacklist
-    newins "${FILESDIR}"/pnp-aliases-${PV} pnp-aliases
+    newins "${FILES}"/blacklist-${PV} blacklist
+    newins "${FILES}"/pnp-aliases-${PV} pnp-aliases
 
     # convert /lib/udev to real used dir
     sed_helper_dir \
-        "${D}/$(get_libdir)"/rcscripts/addons/*.sh \
-        "${D}"/etc/init.d/udev* \
-        "${D}"/etc/modprobe.d/*
+        "${IMAGE}/$(get_libdir)"/rcscripts/addons/*.sh \
+        "${IMAGE}"/etc/init.d/udev* \
+        "${IMAGE}"/etc/modprobe.d/*
 
     # documentation
     dodoc ChangeLog FAQ README TODO RELEASE-NOTES
@@ -140,10 +140,10 @@ src_install() {
 
     cd docs/writing_udev_rules
     mv index.html writing_udev_rules.html
-    insinto /usr/share/doc/${PF}/html
+    insinto /usr/share/doc/${PNVR}/html
     doins *.html
 
-    cd "${S}"
+    cd "${WORK}"
 
     newdoc extras/volume_id/README README_volume_id
 
@@ -154,7 +154,7 @@ src_install() {
 pkg_preinst() {
     if [[ -d ${ROOT}/lib/udev-state ]]
     then
-        mv -f "${ROOT}"/lib/udev-state/* "${D}"/lib/udev/state/
+        mv -f "${ROOT}"/lib/udev-state/* "${IMAGE}"/lib/udev/state/
         rm -r "${ROOT}"/lib/udev-state
     fi
 

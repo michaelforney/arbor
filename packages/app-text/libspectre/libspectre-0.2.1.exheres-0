@@ -6,7 +6,7 @@
 
 SUMMARY="libspectre is a small library for rendering Postscript documents."
 HOMEPAGE="http://libspectre.freedesktop.org"
-SOURCES="http://libspectre.freedesktop.org/releases/${P}.tar.gz"
+DOWNLOADS="http://libspectre.freedesktop.org/releases/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -36,8 +36,8 @@ src_install() {
     default
 
     if option doc; then
-        insinto /usr/share/doc/${PF}
-        doins -r "${S}"/doc/html
+        insinto /usr/share/doc/${PNVR}
+        doins -r "${WORK}"/doc/html
     fi
 }
 

@@ -3,7 +3,7 @@
 
 SUMMARY="Timezone data"
 HOMEPAGE="ftp://elsie.nci.nih.gov/pub"
-SOURCES="ftp://elsie.nci.nih.gov/pub/tzcode${PV}.tar.gz
+DOWNLOADS="ftp://elsie.nci.nih.gov/pub/tzcode${PV}.tar.gz
          ftp://elsie.nci.nih.gov/pub/tzdata${PV}.tar.gz"
 
 LICENCES="GPL-2"
@@ -21,10 +21,10 @@ src_test() {
 }
 
 DEFAULT_SRC_INSTALL_PARAMS=(
-    TZDIR="${D}/usr/share/zoneinfo"
-    ETCDIR="${D}/usr/bin"
-    MANDIR="${D}/usr/share/man"
-    TOPDIR="${D}"
+    TZDIR="${IMAGE}/usr/share/zoneinfo"
+    ETCDIR="${IMAGE}/usr/bin"
+    MANDIR="${IMAGE}/usr/share/man"
+    TOPDIR="${IMAGE}"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
 

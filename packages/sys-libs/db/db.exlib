@@ -6,7 +6,7 @@ require multilib versionator
 
 SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
-SOURCES="http://download.oracle.com/berkeley-${PN}/${P}.tar.gz"
+DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PNV}.tar.gz"
 
 LICENCES="as-is"
 SLOT="0" # $(get_version_component_range 1-2)"
@@ -14,8 +14,8 @@ MYOPTIONS="doc"
 
 DEPENDENCIES=""
 
-ECONF_SOURCE="${S}/dist"
-S="${WORKDIR}/${P}/build_unix"
+ECONF_SOURCE="${WORK}/dist"
+WORK="${WORKBASE}/${PNV}/build_unix"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cxx
@@ -29,9 +29,9 @@ src_install() {
 
     # dist/Makefile.in needs fixing for --docdir
     if option doc; then
-        mv "${D}"/usr/docs "${D}"/usr/share/doc/${PF} || die 'Failed to put docs in the correct docdir'
+        mv "${IMAGE}"/usr/docs "${IMAGE}"/usr/share/doc/${PNVR} || die 'Failed to put docs in the correct docdir'
     else
-        rm -r "${D}"/usr/docs || die 'Failed to remove api docs'
+        rm -r "${IMAGE}"/usr/docs || die 'Failed to remove api docs'
     fi
 }
 

@@ -6,12 +6,12 @@
 
 require autotools multilib python toolchain-funcs
 
-MY_P="Python-${PV}"
-S="${WORKDIR}/${MY_P}"
+MY_PNV="Python-${PV}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Python interpreter"
 HOMEPAGE="http://www.python.org"
-SOURCES="http://python.org/ftp/python/${PV}/${MY_P}.tar.bz2
+DOWNLOADS="http://python.org/ftp/python/${PV}/${MY_PNV}.tar.bz2
     http://hawking.nonlogic.org/dist/python-exherbo-patches-${PV}-r2.tar.bz2"
 
 LICENCES="PSF-2.2"
@@ -33,20 +33,20 @@ build+run:
     ssl? ( dev-libs/openssl )
     tk? ( >=dev-lang/tk-8.0 )"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${WORKDIR}/${PV}/01_all_readline.patch"
-    "${WORKDIR}/${PV}/02_all_db4.patch"
-    "${WORKDIR}/${PV}/03_all_py-dontcompile.patch"
-    "${WORKDIR}/${PV}/04_all_disable_modules_and_ssl.patch"
-    "${WORKDIR}/${PV}/05_all_mimetypes_gentoo_apache.patch"
-    "${WORKDIR}/${PV}/06_all_libdir.patch"
-    "${WORKDIR}/${PV}/07_all_dbm_default_gdbm_compat.patch"
-    -p1 "${WORKDIR}/${PV}/08_all_zlib-decompressobj_flush-bad-param.patch"
-    "${WORKDIR}/${PV}/09_all_pystring-size-fix.patch"
-    "${WORKDIR}/${PV}/10_all_threadsafe-fileobjects.patch"
-    "${WORKDIR}/${PV}/11_all_infinite-recursions-fix.patch"
-    -p0 "${WORKDIR}/${PV}/12_all_ctypes-execstack.patch"
-    #"${WORKDIR}/${PV}/13_all_internal-expat.patch"
-    "${WORKDIR}/${PV}/14_all_cflags.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${WORKBASE}/${PV}/01_all_readline.patch"
+    "${WORKBASE}/${PV}/02_all_db4.patch"
+    "${WORKBASE}/${PV}/03_all_py-dontcompile.patch"
+    "${WORKBASE}/${PV}/04_all_disable_modules_and_ssl.patch"
+    "${WORKBASE}/${PV}/05_all_mimetypes_gentoo_apache.patch"
+    "${WORKBASE}/${PV}/06_all_libdir.patch"
+    "${WORKBASE}/${PV}/07_all_dbm_default_gdbm_compat.patch"
+    -p1 "${WORKBASE}/${PV}/08_all_zlib-decompressobj_flush-bad-param.patch"
+    "${WORKBASE}/${PV}/09_all_pystring-size-fix.patch"
+    "${WORKBASE}/${PV}/10_all_threadsafe-fileobjects.patch"
+    "${WORKBASE}/${PV}/11_all_infinite-recursions-fix.patch"
+    -p0 "${WORKBASE}/${PV}/12_all_ctypes-execstack.patch"
+    #"${WORKBASE}/${PV}/13_all_internal-expat.patch"
+    "${WORKBASE}/${PV}/14_all_cflags.patch" )
 
 src_prepare() {
     default

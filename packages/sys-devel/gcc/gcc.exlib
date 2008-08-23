@@ -8,7 +8,7 @@ require multilib
 
 SUMMARY="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org"
-SOURCES="mirror://gnu/${PN}/${P}/${P}.tar.bz2"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="${PV}"
@@ -19,8 +19,8 @@ DEPENDENCIES="
         sys-devel/make"
 #   build: doc? ( app-doc/doxygen )
 
-S="${T}/${CHOST}"
-ECONF_SOURCE="${WORKDIR}"/${P}
+WORK="${TEMP}/${CHOST}"
+ECONF_SOURCE="${WORKBASE}"/${PNV}
 
 src_configure() {
     LANGS="c++"
@@ -54,9 +54,9 @@ src_install() {
 
     # Precompiled headers, disable for cross-compiling
     insinto /usr/include/c++/${PV}/${CHOST}/bits
-    doins -r "${WORKDIR}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
+    doins -r "${WORKBASE}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
-    option fortran || rmdir "${D}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+    option fortran || rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
 
     # if option doc; then
     #     cd "${CTARGET}"/libstdc++-v3

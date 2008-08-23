@@ -4,7 +4,7 @@
 
 SUMMARY="Linux kernel"
 HOMEPAGE="http://www.kernel.org"
-SOURCES="mirror://kernel/linux/kernel/v2.6/linux-${PV}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/kernel/v2.6/linux-${PV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="${PV}"
@@ -15,8 +15,8 @@ DEPENDENCIES=""
 
 src_unpack() {
     dodir /usr/src
-    cd "${D}/usr/src"
-    unpack ${A}
+    cd "${IMAGE}/usr/src"
+    unpack ${ARCHIVES}
 }
 
 src_compile() {

@@ -3,7 +3,7 @@
 
 SUMMARY="Free software emulation of curses using Terminfo formats"
 HOMEPAGE="http://www.gnu.org/software/ncurses"
-SOURCES="mirror://gnu/${PN}/${P}.tar.gz"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
 
 LICENCES="as-is"
 SLOT="0"
@@ -13,19 +13,19 @@ MYOPTIONS="unicode"
 DEPENDENCIES=""
 
 src_configure() {
-    ECONF_SOURCE="${S}"
+    ECONF_SOURCE="${WORK}"
     common_conf="--with-shared \
         --with-normal \
         --without-termcap \
         --libdir=/lib"
 
-    mkdir "${S}/narrow"
-    cd "${S}/narrow"
+    mkdir "${WORK}/narrow"
+    cd "${WORK}/narrow"
     econf ${common_conf}
 
     if option unicode ; then
-        mkdir "${S}/wide"
-        cd "${S}/wide"
+        mkdir "${WORK}/wide"
+        cd "${WORK}/wide"
         econf \
             ${common_conf} \
             $(option_enable unicode widec)
@@ -33,23 +33,23 @@ src_configure() {
 }
 
 src_compile() {
-    cd "${S}/narrow"
+    cd "${WORK}/narrow"
     emake
 
     if option unicode ; then
-        cd "${S}/wide"
+        cd "${WORK}/wide"
         emake
     fi
 }
 
 src_install() {
     # Install narrow char version
-    cd "${S}/narrow"
+    cd "${WORK}/narrow"
     default
 
     # Install wide char version if unicode is enabled
     if option unicode ; then
-        cd "${S}/wide"
+        cd "${WORK}/wide"
         default
     fi
 }

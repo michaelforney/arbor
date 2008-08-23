@@ -5,7 +5,7 @@
 
 SUMMARY="The legendary remote-mail retrieval and forwarding utility"
 HOMEPAGE="http://fetchmail.berlios.de"
-SOURCES="mirror://berlios/${PN}/${P}.tar.bz2"
+DOWNLOADS="mirror://berlios/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2 public-domain"
 SLOT="0"
@@ -19,8 +19,8 @@ DEPENDENCIES="
 #    python? ( dev-lang/python:=[tk] )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-broken-headers.patch"
-    "${FILESDIR}/${P}-null-msg-pointer.patch"
+    "${FILES}/${PNV}-broken-headers.patch"
+    "${FILES}/${PNV}-null-msg-pointer.patch"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 
@@ -43,8 +43,8 @@ src_configure() {
 src_install() {
     default
 
-    dodir /usr/share/doc/${PF}/html
-    insinto /usr/share/doc/${PF}/html
+    dodir /usr/share/doc/${PNVR}/html
+    insinto /usr/share/doc/${PNVR}/html
     doins *.html
 
     docinto contrib

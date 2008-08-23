@@ -3,7 +3,7 @@
 
 SUMMARY="BusyBox provides tiny replacements for many common UNIX utilities"
 HOMEPAGE="http://busybox.net"
-SOURCES="http://busybox.net/downloads/${P}.tar.gz"
+DOWNLOADS="http://busybox.net/downloads/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -16,7 +16,7 @@ DEPENDENCIES="build:
 RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}"/${PN}-1.10.0-tcpudp.patch
+    "${FILES}"/${PN}-1.10.0-tcpudp.patch
     )
 
 src_compile() {
@@ -36,5 +36,5 @@ src_install() {
     dobin bb
 
     dodoc AUTHORS README TODO
-    cp -r examples ${D}/usr/share/doc/${P}
+    cp -r examples ${IMAGE}/usr/share/doc/${PNV}
 }

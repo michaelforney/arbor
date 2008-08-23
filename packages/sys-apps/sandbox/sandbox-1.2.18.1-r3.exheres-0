@@ -4,7 +4,7 @@
 
 SUMMARY="Sandbox gives some security assurance when installing packages"
 HOMEPAGE="http://gentoo.org/"
-SOURCES="mirror://gentoo/${P}.tar.bz2"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -15,9 +15,9 @@ DEPENDENCIES=""
 
 # Gentoo bugs 135745, 196720 respectively.
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${P}-open-normal-fail.patch"
-    -p1 "${FILESDIR}"/${P}-open-cloexec.patch
-        "${FILESDIR}"/${P}-remove-work_dir.patch
+    -p0 "${FILES}/${PNV}-open-normal-fail.patch"
+    -p1 "${FILES}"/${PNV}-open-cloexec.patch
+        "${FILES}"/${PNV}-remove-work_dir.patch
 )
 
 src_install() {
@@ -29,7 +29,7 @@ src_install() {
 }
 
 pkg_preinst() {
-    chown root:paludisbuild "${D}"/var/log/sandbox
-    chmod 0770 "${D}"/var/log/sandbox
+    chown root:paludisbuild "${IMAGE}"/var/log/sandbox
+    chmod 0770 "${IMAGE}"/var/log/sandbox
 }
 

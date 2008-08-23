@@ -6,11 +6,11 @@
 require pam
 
 MY_PV="${PV/_p/p}"
-MY_P="${PN}-${MY_PV}"
+MY_PNV="${PN}-${MY_PV}"
 
 SUMMARY="Sudo allows a system administrator to give certain users the ability to run commands as root while logging all commands and arguments."
 HOMEPAGE="http://www.sudo.ws/"
-SOURCES="ftp://ftp.sudo.ws/pub/${PN}/${MY_P}.tar.gz"
+DOWNLOADS="ftp://ftp.sudo.ws/pub/${PN}/${MY_PNV}.tar.gz"
 
 LICENCES="ISC BSD"
 SLOT="0"
@@ -21,7 +21,7 @@ DEPENDENCIES="
     build+run:
         pam? ( sys-libs/pam )"
 
-S="${WORKDIR}/${MY_P}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--with-env-editor"

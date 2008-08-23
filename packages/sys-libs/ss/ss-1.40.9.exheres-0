@@ -7,7 +7,7 @@ require toolchain-funcs multilib
 
 SUMMARY="Generic Subsystem library (Simple tty UI)"
 HOMEPAGE="http://e2fsprogs.sourceforge.net/"
-SOURCES="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+DOWNLOADS="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -20,10 +20,10 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${P}-makefile.patch"
+    -p0 "${FILES}/${PNV}-makefile.patch"
 )
 
-S="${WORKDIR}/e2fsprogs-${PV}"
+WORK="${WORKBASE}/e2fsprogs-${PV}"
 
 src_prepare() {
     default
@@ -59,7 +59,7 @@ src_install() {
     # Move shared libraries to /lib/, install static libraries to /usr/lib/,
     # and install linker scripts to /usr/lib/.
     dodir /$(get_libdir)
-    mv "${D}"/usr/$(get_libdir)/*.so* "${D}"/$(get_libdir)/ || die "move .so"
+    mv "${IMAGE}"/usr/$(get_libdir)/*.so* "${IMAGE}"/$(get_libdir)/ || die "move .so"
     dolib.a lib/libss.a
     gen_usr_ldscript libss.so
 }

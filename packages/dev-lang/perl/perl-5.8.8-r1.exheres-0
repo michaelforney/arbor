@@ -7,7 +7,7 @@ require multilib
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
-SOURCES="mirror://cpan/src/${P}.tar.bz2"
+DOWNLOADS="mirror://cpan/src/${PNV}.tar.bz2"
 
 LICENCES="|| ( Artistic GPL GPL-2 GPL-3 )"
 SLOT="0"
@@ -18,16 +18,16 @@ DEPENDENCIES="
     build+run:
         dev-perl/Pod-Parser"
 
-DEFAULT_SRC_PREPARE_PATCHES=("${FILESDIR}/perl-gcc-4.2.patch"
-    "${FILESDIR}/perl-asm-page-h.patch"
-    "${FILESDIR}/${PN}-${PVR}-cve.patch"
-    -p0 "${FILESDIR}/${P}-lib64.patch")
+DEFAULT_SRC_PREPARE_PATCHES=("${FILES}/perl-gcc-4.2.patch"
+    "${FILES}/perl-asm-page-h.patch"
+    "${FILES}/${PN}-${PVR}-cve.patch"
+    -p0 "${FILES}/${PNV}-lib64.patch")
 
 src_configure() {
-    mkdir "${T}/build"
-    cd "${T}/build"
+    mkdir "${TEMP}/build"
+    cd "${TEMP}/build"
 
-    sh "${S}/Configure" -des \
+    sh "${WORK}/Configure" -des \
         -Dprefix=/usr \
         -Dvendorprefix=/usr \
         -Dsiteprefix=/usr \
@@ -42,19 +42,19 @@ src_configure() {
 }
 
 src_compile() {
-    cd "${T}/build"
+    cd "${TEMP}/build"
     default
 }
 
 src_test() {
-    cd "${T}/build"
+    cd "${TEMP}/build"
     default
 }
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
 
 src_install() {
-    cd "${T}/build"
+    cd "${TEMP}/build"
     default
 
     local mylib=$(get_libdir)
@@ -67,7 +67,7 @@ src_install() {
     keepdir /usr/${mylib}/perl5/{site,vendor}_perl/${PV}/${CHOST%%-*}
 
     dodir /etc/env.d
-    cat <<EOF > "${D}"/etc/env.d/05perl
+    cat <<EOF > "${IMAGE}"/etc/env.d/05perl
 LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/"
 EOF
 }

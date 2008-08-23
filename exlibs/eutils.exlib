@@ -22,9 +22,9 @@ emktemp() {
     local topdir=$1
 
     if [[ -z ${topdir} ]] ; then
-        [[ -z ${T} ]] \
+        [[ -z ${TEMP} ]] \
             && topdir="/tmp" \
-            || topdir=${T}
+            || topdir=${TEMP}
     fi
 
     if ! type -P mktemp > /dev/null ; then

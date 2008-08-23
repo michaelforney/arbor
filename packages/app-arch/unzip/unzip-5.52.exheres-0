@@ -6,11 +6,11 @@
 require flag-o-matic toolchain-funcs versionator
 
 MY_PV="$(delete_all_version_separators ${PV})"
-MY_P="${PN}${MY_PV}"
+MY_PNV="${PN}${MY_PV}"
 
 SUMMARY="unzipper for pkzip-compressed files"
 HOMEPAGE="http://www.info-zip.org/UnZip.html"
-SOURCES="mirror://sourceforge/infozip/${MY_P}.tar.gz"
+DOWNLOADS="mirror://sourceforge/infozip/${MY_PNV}.tar.gz"
 
 LICENCES="Info-ZIP"
 SLOT="0"
@@ -21,8 +21,8 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0
-        "${FILESDIR}"/${P}-no-exec-stack.patch
-        "${FILESDIR}"/${P}-CVE-2008-0888.patch
+        "${FILES}"/${PNV}-no-exec-stack.patch
+        "${FILES}"/${PNV}-CVE-2008-0888.patch
 )
 
 src_prepare() {
@@ -54,4 +54,4 @@ src_compile() {
     emake -f unix/Makefile ${target}
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}/usr" -f unix/Makefile )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )

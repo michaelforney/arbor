@@ -5,7 +5,7 @@ MY_PV="${PV}cvs"
 
 SUMMARY="Tidy the layout and correct errors in HTML and XML documents"
 HOMEPAGE="http://tidy.sourceforge.net/"
-SOURCES="mirror://debian/pool/main/${PN:0:1}/${PN}/${PN}_${MY_PV}.orig.tar.gz"
+DOWNLOADS="mirror://debian/pool/main/${PN:0:1}/${PN}/${PN}_${MY_PV}.orig.tar.gz"
 # Upstream's idea of a release is "update version.h in CVS":
 #    http://tidy.cvs.sourceforge.net/tidy/tidy/src/version.h?view=log
 # We use the debian source tarball instead.
@@ -17,7 +17,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/${PN}-${MY_PV}"
+WORK="${WORKBASE}/${PN}-${MY_PV}"
 
 src_prepare() {
     default
@@ -34,7 +34,7 @@ src_test() {
 src_install() {
     default
 
-    doman "${FILESDIR}"/${PN}.1
+    doman "${FILES}"/${PN}.1
     # To update the manpage, thanks to debian:
     #   ./console/tidy -xml-help > htmldoc/tidy-help.xml
     #   /usr/bin/xsltproc -o tidy.1 htmldoc/tidy1.xsl htmldoc/tidy-help.xml

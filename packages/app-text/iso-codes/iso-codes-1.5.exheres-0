@@ -7,7 +7,7 @@ require autotools
 
 SUMMARY="Provides the list of country and language names"
 HOMEPAGE="http://alioth.debian.org/projects/pkg-isocodes/"
-SOURCES="ftp://pkg-isocodes.alioth.debian.org/pub/pkg-isocodes/${P}.tar.bz2"
+DOWNLOADS="ftp://pkg-isocodes.alioth.debian.org/pub/pkg-isocodes/${PNV}.tar.bz2"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -22,7 +22,7 @@ DEPENDENCIES="
 
 src_prepare() {
     sed -e 's:(datadir)/pkgconfig:(libdir)/pkgconfig:g' \
-        -i "${S}"/Makefile.am \
+        -i "${WORK}"/Makefile.am \
     || die "Fixing pc file install location failed"
 
     eautoreconf

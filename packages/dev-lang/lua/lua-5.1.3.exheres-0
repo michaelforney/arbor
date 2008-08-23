@@ -7,7 +7,7 @@ require multilib versionator
 
 SUMMARY="An Extensible Extension Language"
 HOMEPAGE="http://www.lua.org/"
-SOURCES="http://www.lua.org/ftp/${P}.tar.gz"
+DOWNLOADS="http://www.lua.org/ftp/${PNV}.tar.gz"
 
 LICENCES="MIT"
 SLOT="0"
@@ -20,12 +20,12 @@ DEPENDENCIES=""
 #   http://article.gmane.org/gmane.comp.lang.lua.general/18519
 #   This is not done upstream for portability.
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${PF#${PN}-}/ )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNVR#${PN}-}/ )
 
 src_prepare() {
     # Doing this here instead of passing relevant options in src_{compile,install} is cleaner
     # Set install paths, don't create empty directories.
-    sed -e "/^INSTALL_TOP/s:= .*:= ${D}/usr:" \
+    sed -e "/^INSTALL_TOP/s:= .*:= ${IMAGE}/usr:" \
         -e "/^INSTALL/s:lib:$(get_libdir):" \
         -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
         -i Makefile || die "sedding Makefile failed"
@@ -74,7 +74,7 @@ src_install() {
     insinto /usr/share/pixmaps
     doins etc/${PN}.ico
 
-    insinto /usr/share/doc/${PF}/html
+    insinto /usr/share/doc/${PNVR}/html
     doins doc/*{css,html,gif,png}
 
     doman doc/*.?

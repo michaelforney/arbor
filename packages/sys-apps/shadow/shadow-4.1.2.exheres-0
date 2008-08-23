@@ -8,7 +8,7 @@ require multilib pam
 SUMMARY="User and group management related utilities"
 HOMEPAGE="http://packages.qa.debian.org/s/shadow.html"
 # The original site http://shadow.pld.org.pl doesn't exist anymore.
-SOURCES="ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-${PV}.tar.bz2"
+DOWNLOADS="ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-${PV}.tar.bz2"
 
 LICENCES="|| ( BSD GPL-2 )"
 SLOT="0"
@@ -23,9 +23,9 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${P}-login.defs.patch"
-    -p0 "${FILESDIR}/${P}-dots-in-usernames.patch"
-    -p0 "${FILESDIR}/${P}-long-groupnames.patch"
+    -p0 "${FILES}/${PNV}-login.defs.patch"
+    -p0 "${FILES}/${PNV}-dots-in-usernames.patch"
+    -p0 "${FILES}/${PNV}-long-groupnames.patch"
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -47,7 +47,7 @@ src_prepare() {
 }
 
 src_install() {
-    emake DESTDIR="${D}" suidperms=4711 install
+    emake DESTDIR="${IMAGE}" suidperms=4711 install
     dosym useradd /usr/sbin/adduser
 
     # Remove libshadow and libmisc; see Gentoo bug 37725 and the following
@@ -55,47 +55,47 @@ src_install() {
     #   Currently, libshadow.a is for internal use only, so if you see
     #   -lshadow in a Makefile of some other package, it is safe to
     #   remove it.
-    rm -f "${D}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la}
+    rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la}
 
     insinto /etc
-    insopts -m0600 ; doins "${FILESDIR}"/securetty
+    insopts -m0600 ; doins "${FILES}"/securetty
 
     # needed for 'adduser -D'
     insinto /etc/default
-    insopts -m0600 ; doins "${FILESDIR}"/useradd
+    insopts -m0600 ; doins "${FILES}"/useradd
 
     # move passwd to / to help recover broken systems. cf. Gentoo bug 64441.
-    mv "${D}"/usr/bin/passwd "${D}"/bin/
+    mv "${IMAGE}"/usr/bin/passwd "${IMAGE}"/bin/
     dosym /bin/passwd /usr/bin/passwd
 
     insinto /etc
     insopts -m0644 ; newins etc/login.defs login.defs
 
     if option pam ; then
-        dopamd "${FILESDIR}/pam.d-include/"{su,passwd,shadow}
-        newpamd "${FILESDIR}/login.pamd.2" login
+        dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
+        newpamd "${FILES}/login.pamd.2" login
 
         for x in chage chsh chfn chpasswd newusers user{add,del,mod} group{add,del,mod} ; do
-            newpamd "${FILESDIR}"/pam.d-include/shadow ${x}
+            newpamd "${FILES}"/pam.d-include/shadow ${x}
         done
 
         # comment out login.defs options that pam hates
-        sed -i -f "${FILESDIR}"/login_defs_pam.sed "${D}"/etc/login.defs
+        sed -i -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs
 
         # remove manpages that pam will install for us
         # and/or don't apply when using pam
-        find "${D}"/usr/share/man \
+        find "${IMAGE}"/usr/share/man \
             '(' -name 'limits.5*' -o -name 'suauth.5*' ')' \
             -exec rm {} \;
     fi
 
     # Remove manpages that are handled by other packages
-    find "${D}"/usr/share/man \
+    find "${IMAGE}"/usr/share/man \
         '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' \
         -exec rm {} \;
 
     # Remove empty dirs
-    rmdir -p "${D}"/usr/share/man/{de,es,hu,ko,zh_CN,zh_TW}/man5
+    rmdir -p "${IMAGE}"/usr/share/man/{de,es,hu,ko,zh_CN,zh_TW}/man5
 
     # Installing the download README makes no sense
     rm README || die "Removing the download README failed"

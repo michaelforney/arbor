@@ -7,7 +7,7 @@ require multilib autotools python
 
 SUMMARY="Open Source Graph Visualization Software"
 HOMEPAGE="http://www.graphviz.org/"
-SOURCES="${HOMEPAGE}/pub/${PN}/ARCHIVE/${P}.tar.gz"
+DOWNLOADS="${HOMEPAGE}/pub/${PN}/ARCHIVE/${PNV}.tar.gz"
 
 LICENCES="CPL-1.0"
 SLOT="0"
@@ -50,9 +50,9 @@ TODO_DEPENDENCIES+="
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --docdir=/usr/share/doc/${PF}
-    --htmldir=/usr/share/doc/${PF}/html
-    --pdfdir=/usr/share/doc/${PF}/pdf
+    --docdir=/usr/share/doc/${PNVR}
+    --htmldir=/usr/share/doc/${PNVR}/html
+    --pdfdir=/usr/share/doc/${PNVR}/pdf
     --enable-ltdl
     --with-fontconfig
     --with-freetype2
@@ -92,7 +92,7 @@ src_prepare() {
     # Update bundled copy of libtool with the system one:
     for atrocious_posix_shellscript in /usr/share/libtool/{config/,}install-sh; do
         if [[ -f ${atrocious_posix_shellscript} ]]; then
-            echo "Updating ${S}/config/install-sh with ${atrocious_posix_shellscript}"
+            echo "Updating ${WORK}/config/install-sh with ${atrocious_posix_shellscript}"
             cp ${atrocious_posix_shellscript} config || die
             continue
         fi
@@ -104,10 +104,10 @@ src_prepare() {
 src_install() {
     default
 
-    mv "${D}"/usr/share/{${PN}/*,doc/${PF}/} || die 'Failed to fix up --docdir.'
-    mv "${D}"/usr/share/doc/${PF}/{doc/*,} || die 'Failed to fix up --docdir.'
+    mv "${IMAGE}"/usr/share/{${PN}/*,doc/${PNVR}/} || die 'Failed to fix up --docdir.'
+    mv "${IMAGE}"/usr/share/doc/${PNVR}/{doc/*,} || die 'Failed to fix up --docdir.'
     # Disabled language bindings leave stray directories, as do other things..
-    rmdir "${D}"/usr/share/doc/${P}/demo/{pathplan_data,}
-    find "${D}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
+    rmdir "${IMAGE}"/usr/share/doc/${PNV}/demo/{pathplan_data,}
+    find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
 }
 

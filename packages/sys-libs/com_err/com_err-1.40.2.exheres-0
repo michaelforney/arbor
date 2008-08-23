@@ -3,7 +3,7 @@
 
 SUMMARY="Common error code library"
 HOMEPAGE="http://e2fsprogs.sourceforge.net"
-SOURCES="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+DOWNLOADS="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
 
 LICENCES="MIT"
 SLOT="0"
@@ -12,7 +12,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/e2fsprogs-${PV}"
+WORK="${WORKBASE}/e2fsprogs-${PV}"
 
 src_configure() {
     mkdir build
@@ -34,7 +34,7 @@ src_test() {
 
 src_install() {
     cd build
-    emake -C lib/et DESTDIR="${D}" install
-    cd "${S}"
+    emake -C lib/et DESTDIR="${IMAGE}" install
+    cd "${WORK}"
     dodoc README RELEASE-NOTES SUBMITTING-PATCHES
 }

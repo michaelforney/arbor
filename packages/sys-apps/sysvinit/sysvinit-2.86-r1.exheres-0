@@ -9,9 +9,9 @@ PATCHTBZ2_VER="1.0"
 
 SUMMARY="System V init system"
 HOMEPAGE="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/"
-SOURCES="ftp://ftp.cistron.nl/pub/people/miquels/software/${P}.tar.gz
-    ftp://sunsite.unc.edu/pub/Linux/system/daemons/init/${P}.tar.gz
-    http://dev.exherbo.org/~philantrop/distfiles/${P}-patches-${PATCHTBZ2_VER}.tar.bz2"
+DOWNLOADS="ftp://ftp.cistron.nl/pub/people/miquels/software/${PNV}.tar.gz
+    ftp://sunsite.unc.edu/pub/Linux/system/daemons/init/${PNV}.tar.gz
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-patches-${PATCHTBZ2_VER}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -26,21 +26,21 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${WORKDIR}/${P}-docs.patch"
-    -p0 "${WORKDIR}/${P}-shutdown-usage.patch"
-    -p0 "${WORKDIR}/${P}-off-by-one.patch"
-    -p1 "${WORKDIR}/${P}-kexec.patch"
-    -p1 "${WORKDIR}/${P}-execl.patch"
-    -p1 "${WORKDIR}/${P}-utmp-64bit.patch"
-    -p1 "${WORKDIR}/${P}-shutdown-single.patch"
-    -p0 "${WORKDIR}/${P}-utmp-smp.patch"
-    -p1 "${WORKDIR}/${P}-build.patch"
+    -p0 "${WORKBASE}/${PNV}-docs.patch"
+    -p0 "${WORKBASE}/${PNV}-shutdown-usage.patch"
+    -p0 "${WORKBASE}/${PNV}-off-by-one.patch"
+    -p1 "${WORKBASE}/${PNV}-kexec.patch"
+    -p1 "${WORKBASE}/${PNV}-execl.patch"
+    -p1 "${WORKBASE}/${PNV}-utmp-64bit.patch"
+    -p1 "${WORKBASE}/${PNV}-shutdown-single.patch"
+    -p0 "${WORKBASE}/${PNV}-utmp-smp.patch"
+    -p1 "${WORKBASE}/${PNV}-build.patch"
 )
 
 src_unpack() {
     default
 
-    cp "${WORKDIR}"/change_console.{c,8} "${S}"/src/ \
+    cp "${WORKBASE}"/change_console.{c,8} "${WORK}"/src/ \
         || die "copying extra sources failed."
 }
 
@@ -52,7 +52,7 @@ src_compile() {
 }
 
 src_install() {
-    emake -C src install ROOT="${D}"
+    emake -C src install ROOT="${IMAGE}"
 
     # Installing "Install", too, because it contains some information beyond
     # simple installation instructions.
@@ -63,9 +63,9 @@ src_install() {
     doman src/change_console.8
 
     insinto /etc
-    doins "${WORKDIR}"/inittab
+    doins "${WORKBASE}"/inittab
 
-    doinitd "${WORKDIR}"/{reboot,shutdown}.sh
+    doinitd "${WORKBASE}"/{reboot,shutdown}.sh
 }
 
 pkg_postinst() {

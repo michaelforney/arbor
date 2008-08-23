@@ -7,7 +7,7 @@ require toolchain-funcs multilib
 
 SUMMARY="Common error code library"
 HOMEPAGE="http://e2fsprogs.sourceforge.net/"
-SOURCES="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+DOWNLOADS="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
 
 LICENCES="MIT"
 SLOT="0"
@@ -17,10 +17,10 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${P}-makefile.patch"
+    -p0 "${FILES}/${PNV}-makefile.patch"
 )
 
-S="${WORKDIR}/e2fsprogs-${PV}"
+WORK="${WORKBASE}/e2fsprogs-${PV}"
 
 src_configure() {
     export LDCONFIG=/bin/true
@@ -42,12 +42,12 @@ DEFAULT_SRC_INSTALL_PARAMS=( -C lib/et )
 
 src_install() {
     default
-    sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' "${D}"/usr/bin/compile_et
+    sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' "${IMAGE}"/usr/bin/compile_et
     dosym et/com_err.h /usr/include/com_err.h
 
     dolib.a lib/libcom_err.a
     dodir /$(get_libdir)
-    mv "${D}"/usr/$(get_libdir)/*$(get_libname)* "${D}"/$(get_libdir)/ \
+    mv "${IMAGE}"/usr/$(get_libdir)/*$(get_libname)* "${IMAGE}"/$(get_libdir)/ \
         || die "move $(get_libname)"
     gen_usr_ldscript libcom_err$(get_libname)
 }

@@ -14,7 +14,7 @@
 #
 # usage: gnuconfig_update [file1 file2 ...]
 # if called without arguments, config.guess and config.sub will be updated.
-# All files in the source tree ($S) with the given name(s) will be replaced
+# All files in the source tree ($WORK) with the given name(s) will be replaced
 # with the newest available versions chosen from the list of locations in
 # gnuconfig_findnewest(), below.
 #
@@ -41,7 +41,7 @@ gnuconfig_update() {
         startdir=$1
         shift
     else
-        startdir=${S}
+        startdir=${WORK}
     fi
 
     if [[ $# -gt 0 ]] ; then

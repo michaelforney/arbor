@@ -4,7 +4,7 @@
 
 SUMMARY="The GLib library of C routines"
 HOMEPAGE="http://www.gnome.org"
-SOURCES="mirror://gnome/sources/${PN}/${PV%.*}/${P}.tar.bz2"
+DOWNLOADS="mirror://gnome/sources/${PN}/${PV%.*}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="2"
@@ -26,5 +26,5 @@ src_install() {
     default
 
     # libiconv provides the character set aliases
-    rm -f "${D}/usr/$(get_libdir)/charset.alias" || die
+    rm -f "${IMAGE}/usr/$(get_libdir)/charset.alias" || die
 }

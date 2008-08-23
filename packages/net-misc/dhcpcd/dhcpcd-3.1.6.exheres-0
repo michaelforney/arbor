@@ -3,7 +3,7 @@
 
 SUMMARY="DHCP client"
 HOMEPAGE="http://dhcpcd.berlios.de"
-SOURCES="mirror://berlios/${PN}/${P}.tar.bz2"
+DOWNLOADS="mirror://berlios/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -14,7 +14,7 @@ DEPENDENCIES=""
 
 src_install() {
     default
-    rmdir "${D}"/var/lib
+    rmdir "${IMAGE}"/var/lib
     dodir /var/run
     keepdir /var/run
 }

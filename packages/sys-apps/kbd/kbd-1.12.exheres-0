@@ -3,7 +3,7 @@
 
 SUMMARY="Keyboard and console utilities"
 HOMEPAGE="http://freshmeat.net/projects/kbd"
-SOURCES="ftp://ftp.win.tue.nl/pub/linux-local/utils/${PN}/${P}.tar.gz"
+DOWNLOADS="ftp://ftp.win.tue.nl/pub/linux-local/utils/${PN}/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -19,6 +19,6 @@ src_configure() {
 
 src_install() {
     default
-    cp -r doc/* ${D}/usr/share/doc/${P}/
-    rmdir "${D}"/usr/share/locale/{da,fr,sv,tr}/{LC_MESSAGES,}
+    cp -r doc/* ${IMAGE}/usr/share/doc/${PNV}/
+    rmdir "${IMAGE}"/usr/share/locale/{da,fr,sv,tr}/{LC_MESSAGES,}
 }

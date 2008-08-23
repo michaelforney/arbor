@@ -3,7 +3,7 @@
 
 SUMMARY="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
-SOURCES="http://www.bzip.org/${PV}/${P}.tar.gz"
+DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -12,21 +12,21 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}/bzip2-manpage-install.patch")
+DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILES}/bzip2-manpage-install.patch")
 
 src_compile() {
     emake -f Makefile-libbz2_so
     emake
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${D}" MANPREFIX="${D}"/usr/share )
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" MANPREFIX="${IMAGE}"/usr/share )
 
 src_install() {
     default
-    cp -a libbz2.so.* "${D}"/lib
+    cp -a libbz2.so.* "${IMAGE}"/lib
 
     # Fix up install paths
-    mv "${D}/include" "${D}/usr/"
+    mv "${IMAGE}/include" "${IMAGE}/usr/"
 
     # Fix symlinks
     dosym bzgrep /bin/bzegrep

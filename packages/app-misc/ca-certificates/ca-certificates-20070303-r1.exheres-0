@@ -6,7 +6,7 @@
 
 SUMMARY="Common CA Certificates PEM files"
 HOMEPAGE="http://www.cacert.org/"
-SOURCES="mirror://debian/pool/main/c/${PN}/${PN}_${PV}_all.deb"
+DOWNLOADS="mirror://debian/pool/main/c/${PN}/${PN}_${PV}_all.deb"
 
 LICENCES="MPL-1.1"
 SLOT="0"
@@ -28,15 +28,15 @@ src_unpack() {
 src_install() {
     dodoc usr/share/doc/ca-certificates/*
 
-    cp -pPR * "${D}"/ || die "Installing data failed"
+    cp -pPR * "${IMAGE}"/ || die "Installing data failed"
 
 	(
-    cd "${D}"/usr/share/ca-certificates
+    cd "${IMAGE}"/usr/share/ca-certificates
     find . -name '*.crt' | sort | cut -b3-
-	) > "${D}"/etc/ca-certificates.conf
+	) > "${IMAGE}"/etc/ca-certificates.conf
 
-    rmdir "${D}"/etc/ssl/{certs/,}
-    rm -rf "${D}"/usr/share/doc/ca-certificates
+    rmdir "${IMAGE}"/etc/ssl/{certs/,}
+    rm -rf "${IMAGE}"/usr/share/doc/ca-certificates
 }
 
 pkg_postinst() {

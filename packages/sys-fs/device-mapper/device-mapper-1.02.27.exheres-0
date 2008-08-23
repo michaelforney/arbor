@@ -6,7 +6,7 @@ require multilib
 
 SUMMARY="Library to support use of LVM2"
 HOMEPAGE="http://sources.redhat.com/dm/"
-SOURCES="ftp://sources.redhat.com/pub/dm/${PN}.${PV}.tgz"
+DOWNLOADS="ftp://sources.redhat.com/pub/dm/${PN}.${PV}.tgz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -15,7 +15,7 @@ MYOPTIONS="dmeventd nls"
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/${PN}.${PV}"
+WORK="${WORKBASE}/${PN}.${PV}"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( dmeventd nls )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-static_link --libdir=/$(get_libdir) )
@@ -24,6 +24,6 @@ src_install() {
     default
 
     insinto /etc/udev/rules.d
-    doins "${FILESDIR}"/64-device-mapper.rules
+    doins "${FILES}"/64-device-mapper.rules
 }
 

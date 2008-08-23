@@ -7,7 +7,7 @@ require toolchain-funcs
 
 SUMMARY="System Utilities Based on Sysfs"
 HOMEPAGE="http://linux-diag.sourceforge.net/Sysfsutils.html"
-SOURCES="mirror://sourceforge/linux-diag/${P}.tar.gz"
+DOWNLOADS="mirror://sourceforge/linux-diag/${PNV}.tar.gz"
 
 # Util is GPL-2, lib is LPGL-2.1
 LICENCES="GPL-2 LGPL-2.1"
@@ -20,10 +20,10 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( docs/libsysfs.txt )
 src_install() {
     default
 
-    rm "${D}"/usr/bin/dlist_test || die "Removing dlist_test failed"
+    rm "${IMAGE}"/usr/bin/dlist_test || die "Removing dlist_test failed"
 
     # Move shared libs to /
     dodir /$(get_libdir)
-    mv "${D}"/usr/$(get_libdir)/lib*.so* "${D}"/$(get_libdir)/ || die "mv failed"
+    mv "${IMAGE}"/usr/$(get_libdir)/lib*.so* "${IMAGE}"/$(get_libdir)/ || die "mv failed"
     gen_usr_ldscript libsysfs.so
 }

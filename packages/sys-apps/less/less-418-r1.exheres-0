@@ -6,7 +6,7 @@ LESSPIPE_PV=1.53
 
 SUMMARY="Popular pager utility"
 HOMEPAGE="http://www.greenwoodsoftware.com/less"
-SOURCES="http://www.greenwoodsoftware.com/${PN}/${P}.tar.gz
+DOWNLOADS="http://www.greenwoodsoftware.com/${PN}/${PNV}.tar.gz
          ftp://ftp.ifh.de/pub/unix/utility/lesspipe-${LESSPIPE_PV}.tar.gz"
 
 LICENCES="GPL-2"
@@ -18,24 +18,24 @@ DEPENDENCIES=""
 
 src_configure() {
     # cant use econf as its not really autotools, just a terrible shell script
-    cd "${WORKDIR}/lesspipe-${LESSPIPE_PV}"
+    cd "${WORKBASE}/lesspipe-${LESSPIPE_PV}"
     ./configure --prefix=/usr --default --nomake || \
         die "failed to configure lesspipe"
 
-    cd "${S}"
+    cd "${WORK}"
     default
 }
 
 src_install() {
     default
 
-    cd "${WORKDIR}/lesspipe-${LESSPIPE_PV}"
+    cd "${WORKBASE}/lesspipe-${LESSPIPE_PV}"
     dobin code2color lesspipe.sh sxw2txt
-    cat << EOF > "${S}/70less"
+    cat << EOF > "${WORK}/70less"
 LESSOPEN="| lesspipe.sh %S"
 LESS="-R -M --shift 5"
 EOF
 
-    doenvd "${S}/70less"
+    doenvd "${WORK}/70less"
     doman lesspipe.1
 }

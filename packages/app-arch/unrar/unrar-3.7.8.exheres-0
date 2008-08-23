@@ -8,7 +8,7 @@ require toolchain-funcs
 MY_PN=${PN}src
 SUMMARY="Uncompress rar files"
 HOMEPAGE="http://www.rarlab.com/rar_add.htm"
-SOURCES="http://www.rarlab.com/rar/${MY_PN}-${PV}.tar.gz"
+DOWNLOADS="http://www.rarlab.com/rar/${MY_PN}-${PV}.tar.gz"
 
 LICENCES="unRAR"
 SLOT="0"
@@ -22,7 +22,7 @@ DEPENDENCIES="
             resolution = manual
         ]]"
 
-S="${WORKDIR}/unrar"
+WORK="${WORKBASE}/unrar"
 
 src_compile() {
 	emake \

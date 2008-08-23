@@ -6,8 +6,8 @@
 
 SUMMARY="A command to eject a disc from the CD-ROM drive"
 HOMEPAGE="http://eject.sourceforge.net/ http://ca.geocities.com/jefftranter@rogers.com/eject.html"
-SOURCES="http://www.ibiblio.org/pub/Linux/utils/disk-management/${P}.tar.gz
-	http://www.pobox.com/~tranter/${P}.tar.gz"
+DOWNLOADS="http://www.ibiblio.org/pub/Linux/utils/disk-management/${PNV}.tar.gz
+	http://www.pobox.com/~tranter/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -16,13 +16,13 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-S=${WORKDIR}/${PN}
+WORK=${WORKBASE}/${PN}
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-	-p0 "${FILESDIR}/${PN}"-2.0.13-xmalloc.patch
-	-p1 "${FILESDIR}/${PN}"-2.1.4-scsi-rdwr.patch
-	-p0 "${FILESDIR}/${PN}"-2.1.5-handle-spaces.patch #151257
-	"${FILESDIR}/${PN}"-2.1.5-man-typo.patch #165248
+	-p0 "${FILES}/${PN}"-2.0.13-xmalloc.patch
+	-p1 "${FILES}/${PN}"-2.1.4-scsi-rdwr.patch
+	-p0 "${FILES}/${PN}"-2.1.5-handle-spaces.patch #151257
+	"${FILES}/${PN}"-2.1.5-man-typo.patch #165248
     )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )

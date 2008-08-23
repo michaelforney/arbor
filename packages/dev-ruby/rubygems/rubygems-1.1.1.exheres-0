@@ -13,7 +13,7 @@ PLATFORMS="~amd64 ~x86"
 SLOT="0"
 MYOPTIONS="doc"
 
-SOURCES="mirror://rubyforge/${PN}/${P}.tgz"
+DOWNLOADS="mirror://rubyforge/${PN}/${PNV}.tgz"
 
 DEPENDENCIES="
     build+run:
@@ -21,7 +21,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/${PN}-1.1.1-setup.patch"
+    -p0 "${FILES}/${PN}-1.1.1-setup.patch"
 )
  
 src_install() {
@@ -30,7 +30,7 @@ src_install() {
     ver_stripped=$(delete_version_separator 1 ${ver})
     unset RUBYOPT
     
-    export GEM_HOME="${D}/usr/$(get_libdir)/ruby/gems/${ver}/"
+    export GEM_HOME="${IMAGE}/usr/$(get_libdir)/ruby/gems/${ver}/"
     keepdir /usr/$(get_libdir)/ruby/gems/${ver}/{doc,gems,cache,specifications}
 
     myconf=""
@@ -38,7 +38,7 @@ src_install() {
         myconf="${myconf} --no-rdoc --no-ri"
     fi
 
-    ruby setup.rb $myconf --prefix="${D}" || die "setup.rb failed"
+    ruby setup.rb $myconf --prefix="${IMAGE}" || die "setup.rb failed"
 
     dosym "gem${ver_stripped}" /usr/bin/gem
 

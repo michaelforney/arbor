@@ -4,7 +4,7 @@
 
 SUMMARY="Generic library support script"
 HOMEPAGE="http://www.gnu.org/software/libtool"
-SOURCES="mirror://gnu/${PN}/${P}.tar.gz"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -20,7 +20,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( docs/PLATFORMS )
 src_install() {
     default
 
-    for f in $(find "${D}" -type f -name config.guess -o -name config.sub); do
+    for f in $(find "${IMAGE}" -type f -name config.guess -o -name config.sub); do
         rm ${f} || die "Couldn't remove ${f}"
         ln -s /usr/share/gnuconfig/${f##*/} "${f}" || die "Updating ${f} failed."
     done

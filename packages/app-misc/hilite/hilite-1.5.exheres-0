@@ -5,7 +5,7 @@ require toolchain-funcs
 
 SUMMARY="Highlights stderr output in red"
 HOMEPAGE="http://sourceforge.net/projects/${PN}"
-SOURCES="mirror://sourceforge/${PN}/${PN}.c -> ${P}.c"
+DOWNLOADS="mirror://sourceforge/${PN}/${PN}.c -> ${PNV}.c"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -14,14 +14,14 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-S="${WORKDIR}"
+WORK="${WORKBASE}"
 
 src_unpack() {
-    cp "${FETCHEDDIR}/${A}" "${WORKDIR}" || die "cp failed"
+    cp "${FETCHEDDIR}/${ARCHIVES}" "${WORKBASE}" || die "cp failed"
 }
 
 src_compile() {
-    $(tc-getCC) ${CFLAGS} -o ${PN} ${P}.c || die "compile failed"
+    $(tc-getCC) ${CFLAGS} -o ${PN} ${PNV}.c || die "compile failed"
 }
 
 src_install() {

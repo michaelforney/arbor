@@ -4,7 +4,7 @@
 
 SUMMARY="GRUB (Grand Unified Boot) bootlader (precompiled version for amd64)"
 HOMEPAGE="http://www.gnu.org/software/grub"
-SOURCES="mirror://gentoo/${P}.tar.bz2"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -13,9 +13,9 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-GRUB_P="grub-0.97-r3"
+GRUB_PNV="grub-0.97-r3"
 
 src_install() {
-    cp -a "${WORKDIR}"/* "${D}"
-    mv "${D}"/usr/share/doc/{${GRUB_P},${P}}
+    cp -a "${WORKBASE}"/* "${IMAGE}"
+    mv "${IMAGE}"/usr/share/doc/{${GRUB_PNV},${PNV}}
 }

@@ -350,16 +350,16 @@ prep_ml_includes() {
         fi
 
         for dir in ${dirs} ; do
-            base=${T}/gentoo-multilib/${dir}/gentoo-multilib
+            base=${TEMP}/gentoo-multilib/${dir}/gentoo-multilib
             mkdir -p "${base}"
             [[ -d ${base}/${ABI} ]] && rm -rf "${base}/${ABI}"
-            mv "${D}/${dir}" "${base}/${ABI}"
+            mv "${IMAGE}/${dir}" "${base}/${ABI}"
         done
 
         if is_final_abi; then
-            base=${T}/gentoo-multilib
+            base=${TEMP}/gentoo-multilib
             pushd "${base}"
-            find . | tar -c -T - -f - | tar -x --no-same-owner -f - -C ${D}
+            find . | tar -c -T - -f - | tar -x --no-same-owner -f - -C ${IMAGE}
             popd
 
             # This 'set' stuff is required by mips profiles to properly pass
@@ -405,7 +405,7 @@ create_ml_includes() {
 
             local dir
             for dir in ${basedirs}; do
-                if [[ -f ${D}/${dir}/${file} ]] ; then
+                if [[ -f ${IMAGE}/${dir}/${file} ]] ; then
                     echo ""
                     local sym=$(create_ml_includes-sym_for_dir ${dir} "$@")
                     if [[ ${sym/=} != "${sym}" ]] ; then
@@ -421,7 +421,7 @@ create_ml_includes() {
             done
 
             #echo "#endif /* __CREATE_ML_INCLUDES_STUB_${name}__ */"
-        ) > "${D}/${dest}/${file}"
+        ) > "${IMAGE}/${dest}/${file}"
     done
 }
 
@@ -500,8 +500,8 @@ create_ml_includes-makedestdirs() {
     local basedir
     for basedir in ${basedirs}; do
         local dir
-        for dir in $(find ${D}/${basedir} -type d); do
-            dodir ${dest}/${dir/${D}\/${basedir}/}
+        for dir in $(find ${IMAGE}/${basedir} -type d); do
+            dodir ${dest}/${dir/${IMAGE}\/${basedir}/}
         done
     done
 }
@@ -510,8 +510,8 @@ create_ml_includes-makedestdirs() {
 create_ml_includes-allfiles() {
     local basedir file
     for basedir in "$@" ; do
-        for file in $(find "${D}"/${basedir} -type f); do
-            echo ${file/${D}\/${basedir}\//}
+        for file in $(find "${IMAGE}"/${basedir} -type f); do
+            echo ${file/${IMAGE}\/${basedir}\//}
         done
     done | sort | uniq
 }

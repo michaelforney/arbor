@@ -7,14 +7,14 @@ require multilib perl-module bash-completion
 SUMMARY="A distributed VCS focused on speed, effectivity and real-world
 usability on large projects."
 HOMEPAGE="http://git.or.cz/"
-SOURCES="mirror://kernel/software/scm/${PN}/${P}.tar.bz2
+DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV}.tar.bz2
     mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV}.tar.bz2
     doc? ( mirror://kernel/software/scm/${PN}/${PN}-htmldocs-${PV}.tar.bz2 )"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="curl doc ipv6 threads webdav" # cgi (gitweb), tk, vim-syntax ("${S}"contrib/vim)
+MYOPTIONS="curl doc ipv6 threads webdav" # cgi (gitweb), tk, vim-syntax ("${WORK}"contrib/vim)
 
 DEPENDENCIES="
 build+run:
@@ -44,8 +44,8 @@ pkg_pretend() {
 }
 
 src_unpack() {
-    unpack ${P}.tar.bz2
-    cd "${S}"
+    unpack ${PNV}.tar.bz2
+    cd "${WORK}"
     unpack ${PN}-manpages-${PV}.tar.bz2
     if option doc; then
         cd Documentation && unpack ${PN}-htmldocs-${PV}.tar.bz2
@@ -64,7 +64,7 @@ src_configure() {
 
 myemake() {
     emake \
-        DESTDIR="${D}" \
+        DESTDIR="${IMAGE}" \
         prefix=/usr \
         CFLAGS="${CFLAGS} -Wall" \
         LDFLAGS="${LDFLAGS}" \
@@ -90,8 +90,8 @@ src_install() {
         docinto ${d}
         dodoc Documentation${d}*.txt
         if option doc; then
-            dodir /usr/share/doc/${PF}/html/
-            insinto /usr/share/doc/${PF}/html/
+            dodir /usr/share/doc/${PNVR}/html/
+            insinto /usr/share/doc/${PNVR}/html/
             doins Documentation${d}*.html
         fi
     done

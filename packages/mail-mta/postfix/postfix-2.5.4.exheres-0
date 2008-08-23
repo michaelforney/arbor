@@ -7,7 +7,7 @@ require eutils multilib toolchain-funcs pam
 
 SUMMARY="Fast, easy to administer and secure mail transport agent."
 HOMEPAGE="http://www.postfix.org"
-SOURCES="ftp://ftp.porcupine.org/mirrors/postfix-release/official/${P}.tar.gz"
+DOWNLOADS="ftp://ftp.porcupine.org/mirrors/postfix-release/official/${PNV}.tar.gz"
 
 LICENCES="IPL-1.0"
 SLOT="0"
@@ -44,8 +44,8 @@ src_compile() {
     ccargs+=' -DUSE_SASL_AUTH'
     ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'$(get_libdir)'/postfix\"'
     ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'
-    ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PF}'/readme\"'
-    ccargs+=' -DDEF_HTML_DIR=\"/usr/share/doc/'${PF}'/html\"'
+    ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PNVR}'/readme\"'
+    ccargs+=' -DDEF_HTML_DIR=\"/usr/share/doc/'${PNVR}'/html\"'
 
     emake CC="$(tc-getCC)" OPT="${CFLAGS}" \
         CCARGS="${ccargs}" AUXLIBS="${auxlibs}" makefiles
@@ -55,9 +55,9 @@ src_compile() {
 src_install() {
     /bin/sh postfix-install \
         -non-interactive \
-        install_root="${D}" \
-        config_directory="/usr/share/doc/${PF}/defaults" \
-        readme_directory="/usr/share/doc/${PF}/readme" \
+        install_root="${IMAGE}" \
+        config_directory="/usr/share/doc/${PNVR}/defaults" \
+        readme_directory="/usr/share/doc/${PNVR}/readme" \
         || die 'postfix-install failed'
     dosym /usr/sbin/sendmail /usr/$(get_libdir)/sendmail
 
@@ -65,7 +65,7 @@ src_install() {
     fowners postfix:postfix /var/lib/postfix/
 
     keepdir /var/spool/postfix
-    rmdir "${D}"/var/spool/postfix/*
+    rmdir "${IMAGE}"/var/spool/postfix/*
     fowners root /var/spool/postfix
 
     fowners root:postdrop /usr/sbin/post{drop,queue}
@@ -74,10 +74,10 @@ src_install() {
     pamd_mimic_system smtp auth account
 
     dodir /etc/postfix
-    cp "${D}"/usr/share/doc/${PF}/defaults/{master.cf,post*-*} "${D}"/etc/postfix/
-    cp "${FILESDIR}"/main.cf.example-0 "${D}"/etc/postfix/main.cf.example
+    cp "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{master.cf,post*-*} "${IMAGE}"/etc/postfix/
+    cp "${FILES}"/main.cf.example-0 "${IMAGE}"/etc/postfix/main.cf.example
 
-    mv "${S}"/examples "${D}"/usr/share/doc/${PF}
+    mv "${WORK}"/examples "${IMAGE}"/usr/share/doc/${PNVR}
 
-    dosym /usr/share/doc/${PF} /usr/share/doc/${PN}
+    dosym /usr/share/doc/${PNVR} /usr/share/doc/${PN}
 }

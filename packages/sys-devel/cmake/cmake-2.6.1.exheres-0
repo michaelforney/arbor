@@ -7,11 +7,11 @@
 require versionator
 
 MY_PV="${PV/rc/RC-}"
-MY_P="${PN}-$(replace_version_separator 3 - ${MY_PV})"
+MY_PNV="${PN}-$(replace_version_separator 3 - ${MY_PV})"
 
 SUMMARY="Cross platform Make"
 HOMEPAGE="http://www.cmake.org/"
-SOURCES="http://www.cmake.org/files/v$(get_version_component_range 1-2)/${MY_P}.tar.gz"
+DOWNLOADS="http://www.cmake.org/files/v$(get_version_component_range 1-2)/${MY_PNV}.tar.gz"
 
 LICENCES="CMake"
 SLOT="0"
@@ -48,7 +48,7 @@ src_configure() {
         --$(option qt4 || echo "no-")qt-gui \
         --system-libs \
         --prefix=/usr \
-        --docdir=/share/doc/${PF} \
+        --docdir=/share/doc/${PNVR} \
         --datadir=/share/${PN} \
         --mandir=/share/man
 }
@@ -58,13 +58,13 @@ src_install() {
 
     if option vim-syntax; then
         insinto /usr/share/vim/vimfiles/syntax
-        doins "${S}"/Docs/cmake-syntax.vim
+        doins "${WORK}"/Docs/cmake-syntax.vim
 
         insinto /usr/share/vim/vimfiles/indent
-        doins "${S}"/Docs/cmake-indent.vim
+        doins "${WORK}"/Docs/cmake-indent.vim
 
         insinto /usr/share/vim/vimfiles/ftdetect
-        doins "${FILESDIR}/${VIMFILE}"
+        doins "${FILES}/${VIMFILE}"
     fi
 }
 

@@ -5,12 +5,12 @@
 
 require multilib toolchain-funcs
 
-MY_P="${P//-/_}"
+MY_PNV="${PNV//-/_}"
 PATCH_VER="1.1"
 SUMMARY="TCP Wrappers"
 HOMEPAGE="ftp://ftp.porcupine.org/pub/security/index.html"
-SOURCES="ftp://ftp.porcupine.org/pub/security/${MY_P}.tar.gz
-	http://dev.exherbo.org/~philantrop/distfiles/${P}-patches-${PATCH_VER}.tar.bz2"
+DOWNLOADS="ftp://ftp.porcupine.org/pub/security/${MY_PNV}.tar.gz
+	http://dev.exherbo.org/~philantrop/distfiles/${PNV}-patches-${PATCH_VER}.tar.bz2"
 
 LICENCES="tcp_wrappers_license"
 SLOT="0"
@@ -19,17 +19,17 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/${MY_P}"
-PATCHDIR="${WORKDIR}/${PV}"
+WORK="${WORKBASE}/${MY_PNV}"
+PATCHDIR="${WORKBASE}/${PV}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${PATCHDIR}/${P}-makefile.patch"
-    "${PATCHDIR}/${P}-shared.patch"
+    "${PATCHDIR}/${PNV}-makefile.patch"
+    "${PATCHDIR}/${PNV}-shared.patch"
     "${PATCHDIR}/generic"
     )
 
 src_prepare() {
-    option ipv6 && DEFAULT_SRC_PREPARE_PATCHES+=( -p2 "${PATCHDIR}/${P}-ipv6-1.14.diff" )
+    option ipv6 && DEFAULT_SRC_PREPARE_PATCHES+=( -p2 "${PATCHDIR}/${PNV}-ipv6-1.14.diff" )
 
     default
 }
@@ -72,5 +72,5 @@ src_install() {
     dosym libwrap.so.0 /$(get_libdir)/libwrap.so
     gen_usr_ldscript libwrap.so
 
-    dodoc BLURB CHANGES DISCLAIMER README* "${FILESDIR}"/hosts.allow.example
+    dodoc BLURB CHANGES DISCLAIMER README* "${FILES}"/hosts.allow.example
 }

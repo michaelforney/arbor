@@ -4,7 +4,7 @@
 
 SUMMARY="GRUB (Grand Unified Boot) bootlader"
 HOMEPAGE="http://www.gnu.org/software/grub"
-SOURCES="ftp://alpha.gnu.org/gnu/grub/${P}.tar.gz"
+DOWNLOADS="ftp://alpha.gnu.org/gnu/grub/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -20,13 +20,13 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ )
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
-    DISTLIST "${FILESDIR}"/grub.cfg.example
+    DISTLIST "${FILES}"/grub.cfg.example
 )
 
 pkg_postinst() {
     elog "Use grub-install /dev/your-device e.g. sda to install grub onto the"
     elog "device you wish to boot from"
-    elog "A sample grub.cfg has been installed into /usr/share/doc/${P}"
+    elog "A sample grub.cfg has been installed into /usr/share/doc/${PNV}"
     elog "Copy this to /boot/grub and edit it to fit your configuration"
 }
 

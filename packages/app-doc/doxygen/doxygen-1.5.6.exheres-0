@@ -7,7 +7,7 @@ require toolchain-funcs freedesktop-mime
 
 SUMMARY="Documentation system for C++, C, Java, Objective-C, Python, IDL, and other languages"
 HOMEPAGE="http://www.doxygen.org/"
-SOURCES="ftp://ftp.stack.nl/pub/users/dimitri/${P}.src.tar.gz"
+DOWNLOADS="ftp://ftp.stack.nl/pub/users/dimitri/${PNV}.src.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -26,7 +26,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-system-libpng.patch" # Remove internal libpng - see Gentoo bug #210237
+    "${FILES}/${PNV}-system-libpng.patch" # Remove internal libpng - see Gentoo bug #210237
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
 DEFAULT_SRC_INSTALL_PARAMS=( MAN1DIR="share/man/man1" )
@@ -46,8 +46,8 @@ src_prepare() {
 
 src_configure() {
     ./configure \
-        --docdir "${D}/usr/share/doc/${PF}" \
-        --prefix "${D}/usr" \
+        --docdir "${IMAGE}/usr/share/doc/${PNVR}" \
+        --prefix "${IMAGE}/usr" \
         --shared \
         || die "./configure failed."
 }
@@ -81,7 +81,7 @@ src_install() {
     default
 
     if option doc; then
-        insinto /usr/share/doc/${PF}
+        insinto /usr/share/doc/${PNVR}
         doins -r html/*
     fi
 }

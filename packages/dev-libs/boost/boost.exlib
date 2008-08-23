@@ -8,11 +8,11 @@
 
 require versionator flag-o-matic multilib toolchain-funcs python ## check_requirements, 1024M disk
 
-MY_P=${PN}_$(replace_all_version_separators '_')
+MY_PNV=${PN}_$(replace_all_version_separators '_')
 
 DESCRIPTION="Boost Libraries for C++"
 HOMEPAGE="http://www.boost.org/"
-SOURCES="mirror://sourceforge/${PN}/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://sourceforge/${PN}/${MY_PNV}.tar.bz2"
 
 LICENCES="freedist Boost-1.0"
 SLOT="0"
@@ -31,7 +31,7 @@ DEPENDENCIES="
         dev-lang/python:=
         expat? ( dev-libs/expat )"
 
-S=${WORKDIR}/${MY_P}
+WORK=${WORKBASE}/${MY_PNV}
 
 ebjam() {
     local arch
@@ -42,15 +42,15 @@ ebjam() {
     esac
 
     # -q: Stop at first error, unless we're called using nonfatal
-    echo "${S}"/tools/jam/src/bin.linux${arch}/bjam $(is_nonfatal || echo "-q") ${BJAM_OPTIONS[@]} "$@"
-    "${S}"/tools/jam/src/bin.linux${arch}/bjam $(is_nonfatal || echo "-q") ${BJAM_OPTIONS[@]} "$@" \
+    echo "${WORK}"/tools/jam/src/bin.linux${arch}/bjam $(is_nonfatal || echo "-q") ${BJAM_OPTIONS[@]} "$@"
+    "${WORK}"/tools/jam/src/bin.linux${arch}/bjam $(is_nonfatal || echo "-q") ${BJAM_OPTIONS[@]} "$@" \
         || die_unless_nonfatal 'ebjam failed.'
 }
 
 generate_user_config.jam() {
     python_version
 
-    cat >"${S}"/user-config.jam <<EOF
+    cat >"${WORK}"/user-config.jam <<EOF
 variant exherbo : release : <optimization>custom <debug-symbols>custom ;
 
 using gcc : $(gcc-fullversion) : $(tc-getCXX) : <cxxflags>"${CXXFLAGS}" <linkflags>"${LDFLAGS}" ;
@@ -58,27 +58,27 @@ using python : ${PYVER} : /usr : /usr/include/python${PYVER} : /usr/$(get_libdir
 
 EOF
 
-    einfo "Using ${S}/user-config.jam:"
-    cat "${S}"/user-config.jam
+    einfo "Using ${WORK}/user-config.jam:"
+    cat "${WORK}"/user-config.jam
 }
 
 src_prepare() {
     default
 
     # Don't strip
-    sed -e "s/-s\b//" -i "${S}"/tools/jam/src/build.jam || die "Sed to remove stripping failed."
+    sed -e "s/-s\b//" -i "${WORK}"/tools/jam/src/build.jam || die "Sed to remove stripping failed."
 
     # <optimization>off forces -O0 on, overriding the user's flags, so we add dummy options "custom",
     # and use those instead, allowing user's *FLAGS to be used.
     sed -e "s/off speed space/& custom/" \
         -e "s/debug-symbols[[:space:]]*: on off/& custom/" \
-        -i "${S}"/tools/build/v2/tools/builtin.jam || die "Sed to control optimisation failed."
+        -i "${WORK}"/tools/build/v2/tools/builtin.jam || die "Sed to control optimisation failed."
 }
 
 src_configure() {
     local j
 
-    pushd "${S}"/tools/jam/src >/dev/null || die "pushd ${S}/tools/jam/src failed"
+    pushd "${WORK}"/tools/jam/src >/dev/null || die "pushd ${WORK}/tools/jam/src failed"
     echo "Building bjam:" CC=$(tc-getCC) ./build.sh gcc
     CC=$(tc-getCC) ./build.sh gcc || die 'Building jam failed.'
     popd >/dev/null || die 'popd failed'
@@ -91,9 +91,9 @@ src_configure() {
     BJAM_OPTIONS=(
         -j${j:-1}                   # Parallel make, note: '-j' without a digit just hangs. FIXME exlibify
         exherbo
-        --user-config="${S}"/user-config.jam
+        --user-config="${WORK}"/user-config.jam
         --layout=system
-        --prefix="${D}"/usr
+        --prefix="${IMAGE}"/usr
         --toolset=gcc               # FIXME: don't hardcode gcc
         link=shared
         runtime-link=shared
@@ -103,35 +103,35 @@ src_configure() {
         -sICU_PATH=
         --without-mpi               # Dependencies not in arbor.git
     )
-    export BJAM_OPTIONS BOOST_ROOT="${S}"
+    export BJAM_OPTIONS BOOST_ROOT="${WORK}"
 }
 
 src_compile() {
     ebjam
 
-    pushd "${S}/tools/regression/build" >/dev/null || die "pushd ${S}/tools/regression/build failed."
+    pushd "${WORK}/tools/regression/build" >/dev/null || die "pushd ${WORK}/tools/regression/build failed."
     ebjam
     popd >/dev/null || die "popd failed."
 }
 
 src_test() {
     option slowtests || return 0
-    cd "${S}/status"
+    cd "${WORK}/status"
     echo "Running ${PN} tests, go make some coffee!"
     
     nonfatal ebjam --dump-tests 2>&1 | tee regress.log || ewarn "'ebjam --dump-tests' returned non-zero exit status: $?"
 
-    "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/threading-multi/process_jam_log --v2 < "${S}"/status/regress.log \
+    "${WORK}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/threading-multi/process_jam_log --v2 < "${WORK}"/status/regress.log \
         || ewarn "Post-processing ./regress.log failed."
-    cat > "${S}/status/comment.html" <<-EOF
+    cat > "${WORK}/status/comment.html" <<-EOF
 <p>Tests are run on an <a href="http://www.exherbo.org">Exherbo</a> system.</p>
 EOF
 
     ewarn 'FIXME: compiler_status'
-    "${S}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/compiler_status \
+    "${WORK}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/compiler_status \
         --v2 \
-        --comment "${S}/status/comment.html" \
-        "${S}" \
+        --comment "${WORK}/status/comment.html" \
+        "${WORK}" \
         cs-$(uname).html cs-$(uname)-links.html \
         || ewarn "Generating the build log html summary page failed" 
 
@@ -142,24 +142,24 @@ src_install() {
     local libdir=$(get_libdir)
 
     ebjam \
-        --include-dir="${D}"/usr/include \
-        --libdir="${D}"/usr/${libdir} \
+        --include-dir="${IMAGE}"/usr/include \
+        --libdir="${IMAGE}"/usr/${libdir} \
         install
 
     dosym /usr/${libdir}/libboost_thread-mt.so /usr/${libdir}/libboost_thread.so
 
     if option doc; then
-        insinto /usr/share/doc/${PF}/html
+        insinto /usr/share/doc/${PNVR}/html
         doins -r doc more people wiki
 
         find libs -iname test -o -iname src -print0 | xargs -0 rm -r \
             || die "Couldn't clean out ./libs/."
         doins -r libs
 
-        dosym /usr/include/${PN} /usr/share/doc/${PF}/html/${PN}
+        dosym /usr/include/${PN} /usr/share/doc/${PNVR}/html/${PN}
     fi
 
     docinto status
-    nonfatal dodoc  "${S}"/{status/*,regress.log,boost.png}
+    nonfatal dodoc  "${WORK}"/{status/*,regress.log,boost.png}
 }
 

@@ -11,7 +11,7 @@ PLATFORMS="~amd64 ~x86"
 SLOT="0"
 MYOPTIONS="doc"
 
-SOURCES="mirror://rubyforge/${PN}/${P}.tgz"
+DOWNLOADS="mirror://rubyforge/${PN}/${PNV}.tgz"
 
 DEPENDENCIES="
     build+run:
@@ -28,21 +28,21 @@ src_install() {
 
     keepdir {${site_gem_dir},${vendor_gem_dir}}/{doc,gems,cache,specifications}
     #Set this to avoid installer upsetting sandbox
-    export GEM_PATH="${D}/${site_gem_dir}"
+    export GEM_PATH="${IMAGE}/${site_gem_dir}"
 
     myconf=""
     if ! option doc; then
         myconf+="--no-rdoc --no-ri"
     fi
 
-    ruby setup.rb ${myconf} --vendor --destdir="${D}" || die "setup.rb failed"
+    ruby setup.rb ${myconf} --vendor --destdir="${IMAGE}" || die "setup.rb failed"
 
     dosym "gem${ver_stripped}" /usr/bin/gem
 
     dodoc README doc/release_notes/rel_1_2_0.rdoc
 
     dodir /etc/env.d
-    echo "GEM_PATH=\"${site_gem_dir}:${vendor_gem_dir}\"" > ${D}/etc/env.d/10rubygems
+    echo "GEM_PATH=\"${site_gem_dir}:${vendor_gem_dir}\"" > ${IMAGE}/etc/env.d/10rubygems
 }
 
 pkg_postinst() {

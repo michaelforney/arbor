@@ -7,7 +7,7 @@ require autotools
 
 SUMMARY="USB enumeration utilities"
 HOMEPAGE="http://linux-usb.sourceforge.net/"
-SOURCES="mirror://sourceforge/linux-usb/${P}.tar.gz"
+DOWNLOADS="mirror://sourceforge/linux-usb/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -19,8 +19,8 @@ DEPENDENCIES="
         dev-libs/libusb
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILESDIR}/usbutils-0.72-update-usbids.patch"
-                              -p1 "${FILESDIR}/usbutils-0.73-byteorder.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/usbutils-0.72-update-usbids.patch"
+                              -p1 "${FILES}/usbutils-0.73-byteorder.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --datadir=/usr/share/misc --enable-usbmodules --disable-zlib )
 
 src_prepare() {
@@ -38,6 +38,6 @@ src_prepare() {
 src_install() {
     default
 
-    newbin "${FILESDIR}/usbmodules.sh" usbmodules
+    newbin "${FILES}/usbmodules.sh" usbmodules
     dosbin update-usbids
 }

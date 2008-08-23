@@ -7,7 +7,7 @@ require eutils autotools
 
 SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
 HOMEPAGE="http://dbus.freedesktop.org/"
-SOURCES="http://dbus.freedesktop.org/releases/${PN}/${P}.tar.gz"
+DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
@@ -59,13 +59,13 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 src_install() {
     default
 
-    newinitd "${FILESDIR}"/dbus.init-1.0 dbus
+    newinitd "${FILES}"/dbus.init-1.0 dbus
 
     # dbus X session script (Gentoo bug #77504)
     # turns out to only work for GDM. has been merged into other desktop
     # (kdm and such scripts)
     exeinto /etc/X11/xinit/xinitrc.d/
-    doexe "${FILESDIR}"/30-dbus
+    doexe "${FILES}"/30-dbus
 
     keepdir \
         /etc/dbus-1/session.d/ \

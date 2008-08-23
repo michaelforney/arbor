@@ -16,7 +16,7 @@ libsigc++ is used by gtkmm to wrap the GTK+ signal system. It does not
 depend on GTK or gtkmm.
 '
 HOMEPAGE="http://libsigc.sourceforge.net/"
-SOURCES="mirror://gnome/sources/${PN}/$(get_version_component_range 1-2)/${P}.tar.bz2"
+DOWNLOADS="mirror://gnome/sources/${PN}/$(get_version_component_range 1-2)/${PNV}.tar.bz2"
 
 LICENCES="LGPL-2.1"
 SLOT="$(get_major_version)"
@@ -24,14 +24,14 @@ MYOPTIONS="doc"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --docdir /usr/share/doc/${PF} )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --docdir /usr/share/doc/${PNVR} )
 
 src_install() {
     default
 
     if option !doc; then
-        # FIXME, install apidox to /usr/share/doc/${PF}, don't disable building them if option !doc.
-        rm -r "${D}"/usr/share/doc/${PN/++}-2.0/ || die 'Failed to remove apidox.'
+        # FIXME, install apidox to /usr/share/doc/${PNVR}, don't disable building them if option !doc.
+        rm -r "${IMAGE}"/usr/share/doc/${PN/++}-2.0/ || die 'Failed to remove apidox.'
     fi
 }
 

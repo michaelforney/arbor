@@ -3,11 +3,11 @@
 
 require eutils
 
-NTP_P="${P/_/}"
+NTP_PNV="${PNV/_/}"
 
 SUMMARY="OpenNTPD is a free implementation of the Network Time Protocol"
 HOMEPAGE="http://www.openntpd.org/"
-SOURCES="ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/${NTP_P}.tar.gz"
+DOWNLOADS="ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/${NTP_PNV}.tar.gz"
 
 LICENCES=""
 SLOT="0"
@@ -22,7 +22,7 @@ DEPENDENCIES="
 NTP_USER="ntp"
 NTP_GROUP="${NTP_USER}"
 
-S="${WORKDIR}/${NTP_P}"
+WORK="${WORKBASE}/${NTP_PNV}"
 
 create-ntp-user() {
     enewgroup "${NTP_GROUP}"
@@ -38,7 +38,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "!ssl builtin-arc4random" )
 
 src_install() {
     default
-    rmdir "${D}"/var{/empty,}
+    rmdir "${IMAGE}"/var{/empty,}
 }
 
 pkg_postinst() {

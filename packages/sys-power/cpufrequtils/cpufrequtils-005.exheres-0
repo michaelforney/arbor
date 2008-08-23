@@ -7,7 +7,7 @@ require toolchain-funcs
 
 SUMMARY="Userspace utilities for the Linux kernel cpufreq subsystem"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufrequtils.html"
-SOURCES="mirror://kernel/linux/utils/kernel/cpufreq/${P}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/utils/kernel/cpufreq/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -26,6 +26,6 @@ src_compile() {
 }
 
 src_install() {
-    emake DESTDIR="${D}" mandir=/usr/share/man libdir=/usr/$(get_libdir) \
+    emake DESTDIR="${IMAGE}" mandir=/usr/share/man libdir=/usr/$(get_libdir) \
         NLS=$(option nls && echo true || echo false) install
 }

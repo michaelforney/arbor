@@ -3,7 +3,7 @@
 
 SUMMARY="Tar archiver"
 HOMEPAGE="http://www.gnu.org/software/tar/"
-SOURCES="mirror://gnu/${PN}/${P}.tar.bz2"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -18,6 +18,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
 src_install() {
     default
-    rmdir "${D}"/usr/sbin || die "rmdir failed"
+    rmdir "${IMAGE}"/usr/sbin || die "rmdir failed"
 }
 

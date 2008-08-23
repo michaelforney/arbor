@@ -5,12 +5,12 @@
 
 require sgml-catalog
 
-MY_P=${P/-stylesheets/}
-S=${WORKDIR}/${MY_P}
+MY_PNV=${PNV/-stylesheets/}
+WORK=${WORKBASE}/${MY_PNV}
 
 SUMMARY="DSSSL Stylesheets for DocBook."
 HOMEPAGE="http://wiki.docbook.org/topic/DocBookDssslStylesheets"
-SOURCES="mirror://sourceforge/docbook/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://sourceforge/docbook/${MY_PNV}.tar.bz2"
 
 LICENCES="as-is"
 SLOT="0"
@@ -26,14 +26,14 @@ SGML_CATALOGS=(
 /etc/sgml/dsssl-docbook-stylesheets.cat" )
 
 src_prepare() {
-    cp "${FILESDIR}"/${P}-Makefile Makefile
+    cp "${FILES}"/${PNV}-Makefile Makefile
 }
 
 src_install() {
     #FIXME: CRAP!
     emake \
-    BINDIR="${D}/usr/bin" \
-    DESTDIR="${D}/usr/share/sgml/docbook/dsssl-stylesheets-${PV}" \
+    BINDIR="${IMAGE}/usr/bin" \
+    DESTDIR="${IMAGE}/usr/share/sgml/docbook/dsssl-stylesheets-${PV}" \
     install
 
     dodir /usr/share/sgml/stylesheets/dsssl/

@@ -7,7 +7,7 @@ require multilib autotools
 
 SUMMARY="High-level interface for the Resource Description Framework"
 HOMEPAGE="http://librdf.org"
-SOURCES="http://download.librdf.org/source/${P}.tar.gz"
+DOWNLOADS="http://download.librdf.org/source/${PNV}.tar.gz"
 
 LICENCES="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
@@ -28,7 +28,7 @@ src_prepare() {
     if option !berkdb; then
         # This test fails without berkdb
         sed -e 's: rdf_model_test::' -e '/^rdf_model_test:/{g;n;d;}' \
-            -i "${S}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test"
+            -i "${WORK}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test"
         eautomake # eautoreconf needs dev-util/gtk-doc
     fi
 }
@@ -52,6 +52,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 src_install() {
     default
 
-    rmdir "${D}"/usr/$(get_libdir)/${PN}
+    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}
 }
 

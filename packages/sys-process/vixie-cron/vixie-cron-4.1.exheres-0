@@ -9,8 +9,8 @@ PATCH_VER="1.0"
 
 HOMEPAGE="ftp://ftp.isc.org/isc/cron/"
 SUMMARY="Paul Vixie's cron daemon, a fully featured crond implementation"
-SOURCES="mirror://gentoo/${P}.tar.bz2
-    http://dev.exherbo.org/~philantrop/distfiles/${P}-exherbo-${PATCH_VER}.tar.bz2"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-exherbo-${PATCH_VER}.tar.bz2"
 
 LICENCES="as-is"
 SLOT="0"
@@ -28,13 +28,13 @@ pkg_setup() {
 }
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${WORKDIR}/${P}-gentoo-r4.patch"
-    -p0 "${WORKDIR}/${P}-crontab.5.patch"
-    -p0 "${WORKDIR}/${P}-commandline.patch"
-    -p1 "${WORKDIR}/${P}-basename.patch"
-    -p1 "${WORKDIR}/${P}-setuid_check.patch"
-    -p0 "${WORKDIR}/${P}-hardlink.patch"
-    -p1 "${WORKDIR}/${P}-pam.patch"
+    -p1 "${WORKBASE}/${PNV}-gentoo-r4.patch"
+    -p0 "${WORKBASE}/${PNV}-crontab.5.patch"
+    -p0 "${WORKBASE}/${PNV}-commandline.patch"
+    -p1 "${WORKBASE}/${PNV}-basename.patch"
+    -p1 "${WORKBASE}/${PNV}-setuid_check.patch"
+    -p0 "${WORKBASE}/${PNV}-hardlink.patch"
+    -p1 "${WORKBASE}/${PNV}-pam.patch"
 )
 
 src_prepare() {
@@ -45,7 +45,7 @@ src_prepare() {
 }
 
 src_install() {
-    newsbin "${WORKDIR}"/vixie-cron-4.1-run-crons run-crons
+    newsbin "${WORKBASE}"/vixie-cron-4.1-run-crons run-crons
 
     diropts -m0750; keepdir /etc/cron.{hourly,daily,weekly,monthly}
     diropts -m0750 -o root -g cron; keepdir /var/spool/cron
@@ -62,13 +62,13 @@ src_install() {
 
     # /etc stuff
     insinto /etc
-    newins "${FILESDIR}"/crontab-${PV} crontab
-    newins "${WORKDIR}"/${P}-cron.deny cron.deny
+    newins "${FILES}"/crontab-${PV} crontab
+    newins "${WORKBASE}"/${PNV}-cron.deny cron.deny
 
     keepdir /etc/cron.d
-    newinitd "${FILESDIR}"/vixie-cron.rc6 vixie-cron
+    newinitd "${FILES}"/vixie-cron.rc6 vixie-cron
 
-    newpamd "${FILESDIR}"/pamd.compatible cron
+    newpamd "${FILES}"/pamd.compatible cron
 
     # doc stuff
     doman crontab.1 crontab.5 cron.8

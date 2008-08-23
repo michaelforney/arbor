@@ -3,7 +3,7 @@
 
 SUMMARY="Filesystem utilities for use with ext2 and ext3 filesystems"
 HOMEPAGE="http://e2fsprogs.sourceforge.net"
-SOURCES="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
+DOWNLOADS="mirror://sourceforge/e2fsprogs/e2fsprogs-${PV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -17,10 +17,10 @@ DEPENDENCIES="build:
                 sys-libs/com_err
                 sys-libs/ss"
 
-S="${WORKDIR}/e2fsprogs-${PV}"
+WORK="${WORKBASE}/e2fsprogs-${PV}"
 
 src_compile() {
-    cd "${S}"
+    cd "${WORK}"
     sed -i -e 's:^\(LIB_SUBDIRS=\)lib/et lib/ss:\1:' Makefile.in
     mkdir build
     cd build
@@ -39,7 +39,7 @@ src_compile() {
 }
 
 src_test() {
-    cd "${S}/build"
+    cd "${WORK}/build"
     emake -j1 \
         IMAGE="" \
         RM=/bin/rm \

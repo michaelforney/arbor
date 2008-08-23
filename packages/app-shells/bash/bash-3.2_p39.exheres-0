@@ -1,16 +1,16 @@
 # Copyright 2007-2008 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-PATCH_LEVEL=${P##*_p}
+PATCH_LEVEL=${PNV##*_p}
 
-MY_P=${P%_p*}
-S="${WORKDIR}/${MY_P}"
+MY_PNV=${PNV%_p*}
+WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Bash shell"
 HOMEPAGE="http://www.gnu.org/software/bash"
-SOURCES="mirror://gnu/bash/${MY_P}.tar.gz
+DOWNLOADS="mirror://gnu/bash/${MY_PNV}.tar.gz
         $(for ((i=1; i<=PATCH_LEVEL; i++)); do
-            printf "mirror://gnu/bash/${MY_P}-patches/bash32-%03d\n" ${i}
+            printf "mirror://gnu/bash/${MY_PNV}-patches/bash32-%03d\n" ${i}
         done)"
 
 LICENCES="GPL-2"
@@ -33,7 +33,7 @@ src_prepare() {
     for ((i=1; i<=PATCH_LEVEL; i++)); do
         patches+=("${FETCHEDDIR}/bash32-$(printf "%03d" ${i})")
     done
-    patches+=(-p1 "${FILESDIR}/${MY_P}-config.diff")
+    patches+=(-p1 "${FILES}/${MY_PNV}-config.diff")
 
     expatch "${patches[@]}"
 }
@@ -44,7 +44,7 @@ src_install() {
     dosym bash bin/sh
 
     insinto /etc/bash
-    doins "${FILESDIR}/bashrc"
+    doins "${FILES}/bashrc"
 
     keepdir /etc/bash/bashrc.d
 }

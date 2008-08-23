@@ -17,7 +17,7 @@ DEPENDENCIES="
         >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
         >=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION}
     )"
-SOURCES="mirror://gentoo/${P}.tar.bz2"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2"
 
 export_exlib_phases src_install pkg_postinst pkg_postrm
 
@@ -25,7 +25,7 @@ vim-plugin_src_install() {
     local f
 
     # Install non-vim-help-docs
-    cd ${S}
+    cd ${WORK}
     for f in *; do
         [[ -f "${f}" ]] || continue
         if [[ "${f}" = *.html ]]; then
@@ -37,12 +37,12 @@ vim-plugin_src_install() {
     done
 
     # Install remainder of plugin
-    cd ${WORKDIR}
+    cd ${WORKBASE}
     dodir /usr/share/vim
-    mv ${S} ${D}/usr/share/vim/vimfiles
+    mv ${WORK} ${IMAGE}/usr/share/vim/vimfiles
 
     # Fix remaining bad permissions
-    chmod -R -x+X ${D}/usr/share/vim/vimfiles/ || die "chmod failed"
+    chmod -R -x+X ${IMAGE}/usr/share/vim/vimfiles/ || die "chmod failed"
 }
 
 vim-plugin_pkg_postinst() {

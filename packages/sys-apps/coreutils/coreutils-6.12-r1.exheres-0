@@ -5,7 +5,7 @@ require autotools
 
 SUMMARY="Core file, shell and text utilities expected to be on any system."
 HOMEPAGE="http://www.gnu.org/software/coreutils/"
-SOURCES="mirror://gnu/${PN}/${P}.tar.gz"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -19,7 +19,7 @@ DEPENDENCIES="
     build+run:
         acl? ( sys-apps/acl sys-apps/attr )"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${P}-disable-tests.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-disable-tests.patch )
 AT_M4DIR=m4
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl nls )
@@ -37,7 +37,7 @@ src_install() {
 
     dodir /bin
     for binfile in ${binfiles}; do
-        mv "${D}"/usr/bin/${binfile} "${D}"/bin/${binfile}
+        mv "${IMAGE}"/usr/bin/${binfile} "${IMAGE}"/bin/${binfile}
         dosym /bin/${binfile} /usr/bin/${binfile}
     done
 

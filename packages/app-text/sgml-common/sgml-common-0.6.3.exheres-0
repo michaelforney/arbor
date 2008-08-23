@@ -7,7 +7,7 @@ require autotools
 
 SUMMARY="Base ISO character entities and utilities for SGML"
 HOMEPAGE="http://www.iso.ch/cate/3524030.html"
-SOURCES="mirror://kde/devel/docbook/SOURCES/${P}.tgz"
+DOWNLOADS="mirror://kde/devel/docbook/DOWNLOADS/${PNV}.tgz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -16,9 +16,9 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}/${P}-configure.in.patch"
-                              "${FILESDIR}/${P}-root-support.patch"
-                              "${FILESDIR}/${P}-automake-fix.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-configure.in.patch"
+                              "${FILES}/${PNV}-root-support.patch"
+                              "${FILES}/${PNV}-automake-fix.patch" )
 
 pkg_postinst() {
     local installer="${ROOT}"/usr/bin/install-catalog
@@ -36,23 +36,23 @@ pkg_postinst() {
 }
 
 pkg_prerm() {
-    cp "${ROOT}"/usr/bin/install-catalog "${T}"
+    cp "${ROOT}"/usr/bin/install-catalog "${TEMP}"
 }
 
 pkg_postrm() {
-    if [[ ! -x  ${T}/install-catalog ]] ; then
+    if [[ ! -x  ${TEMP}/install-catalog ]] ; then
         return
     fi
 
     einfo "Removing Catalogs..."
     if [[ -e ${ROOT}/etc/sgml/sgml-ent.cat ]] ; then
-        "${T}"/install-catalog --remove \
+        "${TEMP}"/install-catalog --remove \
         /etc/sgml/sgml-ent.cat \
         /usr/share/sgml/sgml-iso-entities-8879.1986/catalog
     fi
 
     if [[ -e ${ROOT}/etc/sgml/sgml-docbook.cat ]] ; then
-        "${T}"/install-catalog --remove \
+        "${TEMP}"/install-catalog --remove \
         /etc/sgml/sgml-docbook.cat \
         /etc/sgml/sgml-ent.cat
     fi

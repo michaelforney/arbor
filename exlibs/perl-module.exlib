@@ -12,12 +12,12 @@
 export_exlib_phases src_configure src_compile src_test src_install
 
 
-if [[ -z ${HOMEPAGE} && -z ${SOURCES} && -n ${MODULE_AUTHOR} ]]; then
+if [[ -z ${HOMEPAGE} && -z ${DOWNLOADS} && -n ${MODULE_AUTHOR} ]]; then
     HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
-    SOURCES="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${P}${MODULE_EXTENSION:-.tar.gz}"
+    DOWNLOADS="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${PNV}${MODULE_EXTENSION:-.tar.gz}"
     BUGS_TO="arkanoid@exherbo.org ingmar@exherbo.org"
     REMOTE_IDS="cpan:${PN//-/::}"
-    UPSTREAM_CHANGELOG="http://search.cpan.org/src/${MODULE_AUTHOR}/${P}/Changes"
+    UPSTREAM_CHANGELOG="http://search.cpan.org/src/${MODULE_AUTHOR}/${PNV}/Changes"
 fi
 
 # Default license, for packages licensed under perl's terms.
@@ -50,11 +50,11 @@ perl-module_src_configure() {
 
     if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
         einfo "Using Module::Build"
-        perl Build.PL ${myconf} --installdirs=vendor --destdir="${D}" --libdoc= <<< ${pm_echovar} \
+        perl Build.PL ${myconf} --installdirs=vendor --destdir="${IMAGE}" --libdoc= <<< ${pm_echovar} \
             || die "Unable to build!"
     elif [[ -f Makefile.PL && ! ${PN} == "module-build" ]]; then
         einfo "Using ExtUtils::MakeMaker"
-        perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${D}" <<< ${pm_echovar} \
+        perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" <<< ${pm_echovar} \
             || die "Unable to build!"
     fi
 
@@ -87,26 +87,26 @@ perl-module_src_install() {
     if [[ -f Makefile ]]; then
         default
     elif [[ -f Build ]]; then
-        perl "${S}/Build" install
+        perl "${WORK}/Build" install
         default
     fi
 
 
     einfo "Cleaning out stray man files"
     local file stat
-    find "${D}" -type f -name "*.3pm*" | while read file
+    find "${IMAGE}" -type f -name "*.3pm*" | while read file
     do
         rm -f "${file}"
     done
-    find "${D}"/usr/share/man -depth -type d -print0 2>/dev/null | xargs -0 -r rmdir
+    find "${IMAGE}"/usr/share/man -depth -type d -print0 2>/dev/null | xargs -0 -r rmdir
 
     fixlocalpod
 
-    find "${D}" -type f | grep -v '.so' | while read file
+    find "${IMAGE}" -type f | grep -v '.so' | while read file
     do
         stat=$(file "${file}" | grep -i " text")
         if [[ -n "${stat}" ]]; then
-            sed -i -e "s:${D}:/:g" "${file}"
+            sed -i -e "s:${IMAGE}:/:g" "${file}"
         fi
     done
 }
@@ -126,8 +126,8 @@ perlinfo() {
     VENDOR_ARCH=${installvendorarch}
 
     if [[ "${PREFER_BUILDPL}" == "yes" ]]; then
-        if [[ ! -f ${S}/Makefile.PL ]] || [[ ${PN} == "module-build" ]]; then
-            if [[ -f ${S}/Build.PL ]]; then
+        if [[ ! -f ${WORK}/Makefile.PL ]] || [[ ${PN} == "module-build" ]]; then
+            if [[ -f ${WORK}/Build.PL ]]; then
                 if [[ ${PN} == "module-build" ]]; then
                     # A bootstrapping if you will
                     BUILDER_VER="1"
@@ -142,7 +142,7 @@ perlinfo() {
 fixlocalpod() {
     perlinfo
 
-    for perldir in "${D}${ARCH_LIB}" "${D}${SITE_LIB}" "${D}${VENDOR_LIB}"; do
+    for perldir in "${IMAGE}${ARCH_LIB}" "${IMAGE}${SITE_LIB}" "${IMAGE}${VENDOR_LIB}"; do
         if [[ -f ${perldir}/perllocal.pod ]]; then
             rm -f "${perldir}/perllocal.pod"
             # Don't leave empty directories behind.

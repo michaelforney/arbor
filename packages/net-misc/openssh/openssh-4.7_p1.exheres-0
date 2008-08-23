@@ -4,12 +4,12 @@
 require versionator
 
 MY_PV="$(delete_version_separator _ ${PV})"
-MY_P="${PN}-${MY_PV}"
-S="${WORKDIR}/${MY_P}"
+MY_PNV="${PN}-${MY_PV}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
 HOMEPAGE="http://openssh.org"
-SOURCES="ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${MY_P}.tar.gz"
+DOWNLOADS="ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${MY_PNV}.tar.gz"
 
 LICENCES="BSD"
 SLOT="0"
@@ -30,7 +30,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( pam skey tcp-wrappers ssl-engine )
 
 src_install() {
     default
-    rmdir "${D}"/var{/empty,}
+    rmdir "${IMAGE}"/var{/empty,}
 }
 
 pkg_postinst() {

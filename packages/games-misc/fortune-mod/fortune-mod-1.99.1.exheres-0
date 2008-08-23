@@ -5,7 +5,7 @@
 
 SUMMARY="Get your fortune today"
 HOMEPAGE="None"
-SOURCES="http://dev.exherbo.org/~arkanoid/distfiles/${P}.tar.gz"
+DOWNLOADS="http://dev.exherbo.org/~arkanoid/distfiles/${PNV}.tar.gz"
 
 LICENCES="BSD"
 SLOT="0"
@@ -16,8 +16,8 @@ DEPENDENCIES="build+run:
     app-text/recode"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-gentoo.patch"
-    -p0 "${FILESDIR}/01_all_fortune_all-fix.patch")
+    "${FILES}/${PNV}-gentoo.patch"
+    -p0 "${FILES}/01_all_fortune_all-fix.patch")
 
 src_configure() {
     sed -i \
@@ -28,5 +28,5 @@ src_configure() {
         Makefile || die "sed Makefile failed"
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${D}" )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( INDEX Offensive cookie-files )

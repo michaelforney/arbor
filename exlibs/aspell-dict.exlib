@@ -27,12 +27,12 @@ SPELL_LANG=${PN/aspell-/}
 MY_PV=$(replace_version_separator $(get_last_version_component_index) '-' $PV)
 
 # With APOSTFIX=6 aspell-en-6.0.0 becomes aspell6-en-6.0-0
-MY_P=aspell${ASPOSTFIX}-${SPELL_LANG}-${MY_PV}
-S="${WORKDIR}/${MY_P}"
+MY_PNV=aspell${ASPOSTFIX}-${SPELL_LANG}-${MY_PV}
+WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="${ASPELL_DESC} language dictionary for aspell"
 HOMEPAGE="http://aspell.net"
-SOURCES="mirror://gnu/aspell/dict/${SPELL_LANG}/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://gnu/aspell/dict/${SPELL_LANG}/${MY_PNV}.tar.bz2"
 
 MYOPTIONS=""
 

@@ -10,7 +10,7 @@ require flag-o-matic multilib toolchain-funcs
 
 SUMMARY="Filesystem baselayout and init scripts"
 HOMEPAGE="http://www.gentoo.org/"
-SOURCES="mirror://gentoo/${P}.tar.bz2"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -30,10 +30,10 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-runlevels.patch"
-    "${FILESDIR}/${P}-paths.patch"
-    "${FILESDIR}/${P}-branding.patch"
-    "${FILESDIR}/${P}-update-modules.patch"
+    "${FILES}/${PNV}-runlevels.patch"
+    "${FILES}/${PNV}-paths.patch"
+    "${FILES}/${PNV}-branding.patch"
+    "${FILES}/${PNV}-update-modules.patch"
 )
 
 pkg_pretend() {
@@ -54,7 +54,7 @@ pkg_pretend() {
 src_prepare() {
     # Use correct path to filefuncs.so on multilib systems
     sed -e "s:/lib/rcscripts:/$(get_libdir)/rcscripts:" \
-        -i "${S}"/src/awk/{cachedepends,genenviron}.awk || die 'sed failed'
+        -i "${WORK}"/src/awk/{cachedepends,genenviron}.awk || die 'sed failed'
 
     default
 }
@@ -65,7 +65,7 @@ src_compile() {
     libdir="lib"
     [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
 
-    cd "${S}/src"
+    cd "${WORK}/src"
     emake \
         CC="$(tc-getCC)" \
         LD="$(tc-getCC) ${LDFLAGS}" \
@@ -98,34 +98,34 @@ src_install() {
     keepdir /etc/runlevels
 
     insinto /etc
-    doins -r "${S}"/etc/*
+    doins -r "${WORK}"/etc/*
     fperms 0640 /etc/sysctl.conf
 
     fperms 0600 /etc/shadow
 
     dodir /etc/init.d
     # doinitd doesnt respect symlinks
-    cp -P "${S}"/init.d/* "${D}"/etc/init.d/ || die "doinitd"
+    cp -P "${WORK}"/init.d/* "${IMAGE}"/etc/init.d/ || die "doinitd"
 
     insinto /usr/share/baselayout
-    doins "${S}"/rc-lists/*
+    doins "${WORK}"/rc-lists/*
 
     into /
-    dosbin "${S}"/sbin/{MAKEDEV,rc,rc-update,runscript.sh,functions.sh,depscan.sh,env-update.sh}
-    dobin "${S}"/bin/{rc-status,checkpath}
+    dosbin "${WORK}"/sbin/{MAKEDEV,rc,rc-update,runscript.sh,functions.sh,depscan.sh,env-update.sh}
+    dobin "${WORK}"/bin/{rc-status,checkpath}
 
     exeinto ${rcscripts_dir}/sh
-    doexe "${S}"/sbin/{rc-services.sh,rc-daemon.sh,rc-help.sh}
+    doexe "${WORK}"/sbin/{rc-services.sh,rc-daemon.sh,rc-help.sh}
 
     insinto ${rcscripts_dir}/awk
-    doins "${S}"/src/awk/*.awk
+    doins "${WORK}"/src/awk/*.awk
 
     insinto ${rcscripts_dir}/net
-    doins "${S}"/lib/rcscripts/net/*
-    chown -R root:0 "${D}"${rcscripts_dir}
+    doins "${WORK}"/lib/rcscripts/net/*
+    chown -R root:0 "${IMAGE}"${rcscripts_dir}
 
-    doman "${S}"/man/*.*
-    dodoc "${S}"/ChangeLog
+    doman "${WORK}"/man/*.*
+    dodoc "${WORK}"/ChangeLog
 
     # Compat symlinks between /etc/init.d and /sbin
     # (some stuff have hardcoded paths)
@@ -133,13 +133,13 @@ src_install() {
     dosym ../../sbin/runscript.sh /etc/init.d/runscript.sh
     dosym ../../sbin/functions.sh /etc/init.d/functions.sh
 
-    cd "${S}/src"
-    emake DESTDIR="${D}" LIBDIR="${libdir}" install
+    cd "${WORK}/src"
+    emake DESTDIR="${IMAGE}" LIBDIR="${libdir}" install
 
     # If /dev/pts already exists in ${ROOT} it might not be writable for us.
-    [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${D}"/dev/pts
+    [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${IMAGE}"/dev/pts
 
-    rm -r "${D}"/etc/modules.d || die "rm -r ${D}/etc/modules.d failed"
+    rm -r "${IMAGE}"/etc/modules.d || die "rm -r ${IMAGE}/etc/modules.d failed"
 }
 
 pkg_postinst() {

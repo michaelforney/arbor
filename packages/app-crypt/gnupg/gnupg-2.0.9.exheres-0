@@ -4,7 +4,7 @@
 
 SUMMARY="The GNU Privacy Guard, a GPL pgp replacement"
 HOMEPAGE="http://www.gnupg.org/"
-SOURCES="mirror://gnupg/gnupg/${P}.tar.bz2"
+DOWNLOADS="mirror://gnupg/gnupg/${PNV}.tar.bz2"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -25,7 +25,7 @@ DEPENDENCIES="
         dev-libs/pth
         net-misc/curl"
 
-DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILESDIR}"/gnupg-2.0.9-gcc-4.3.patch)
+DEFAULT_SRC_PREPARE_PATCHES=(-p0 "${FILES}"/gnupg-2.0.9-gcc-4.3.patch)
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-symcryptrun
     --enable-gpg
@@ -52,7 +52,7 @@ src_install() {
     done
 
     if option doc; then
-        insinto /usr/share/doc/${PF}/html
+        insinto /usr/share/doc/${PNVR}/html
         doins doc/*.{jpg,png} doc/gnupg.html/*
     fi
 }

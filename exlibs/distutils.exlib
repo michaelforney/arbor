@@ -50,9 +50,9 @@ distutils_src_install() {
     [ -n "${pylibdir}" ] && dodir "${pylibdir}"
 
     if has_version ">=dev-lang/python-2.3"; then
-        ${python} setup.py install --root=${D} --no-compile "$@" || die
+        ${python} setup.py install --root=${IMAGE} --no-compile "$@" || die
     else
-        ${python} setup.py install --root=${D} "$@" || die
+        ${python} setup.py install --root=${IMAGE} "$@" || die
     fi
 
     DDOCS="CHANGELOG KNOWN_BUGS MAINTAINERS PKG-INFO CONTRIBUTORS TODO NEWS"

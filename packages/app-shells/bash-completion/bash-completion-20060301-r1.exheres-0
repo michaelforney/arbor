@@ -5,7 +5,7 @@
 
 SUMMARY="Programmable Completion for bash"
 HOMEPAGE="http://www.caliban.org/bash/index.shtml#completion"
-SOURCES="http://www.caliban.org/files/bash/${P}.tar.bz2"
+DOWNLOADS="http://www.caliban.org/files/bash/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -17,9 +17,9 @@ run:
     app-admin/eselect
     >=app-shells/bash-3.2_p19"
 
-S="${WORKDIR}/${PN/-/_}"
+WORK="${WORKBASE}/${PN/-/_}"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${PV} )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PV} )
 
 src_install() {
     # split /etc/bash_completion into three parts:
@@ -27,16 +27,16 @@ src_install() {
     # 2. /usr/share/bash-completion/default -- eselectable
     # 3. /usr/share/bash-completion/.post   -- hidden from eselect
     dodir /usr/share/bash-completion
-    awk -v D="$D" '
+    awk -v IMAGE="$IMAGE" '
         BEGIN { out=".pre" }
         /^# A lot of the following one-liners/ { out="base" }
         /^# source completion directory/ { out="" }
         /^unset -f have/ { out=".post" }
-        out != "" { print > D"/usr/share/bash-completion/"out }' \
+        out != "" { print > IMAGE"/usr/share/bash-completion/"out }' \
         bash_completion || die "failed to split bash_completion"
 
     exeinto /etc/bash/bashrc.d
-    doexe ${FILESDIR}/bash-completion.sh
+    doexe ${FILES}/bash-completion.sh
 
     # dev-scm/subversion provides an extremely superior completion
     insinto /usr/share/bash-completion

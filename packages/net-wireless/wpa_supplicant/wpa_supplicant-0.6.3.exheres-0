@@ -7,7 +7,7 @@ require toolchain-funcs
 
 SUMMARY="IEEE 802.1X/WPA supplicant for secure wireless transfers"
 HOMEPAGE="http://hostap.epitest.fi/wpa_supplicant/"
-SOURCES="http://hostap.epitest.fi/releases/${P}.tar.gz"
+DOWNLOADS="http://hostap.epitest.fi/releases/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -24,7 +24,7 @@ DEPENDENCIES="
         dev-libs/openssl
 "
 
-S="${WORKDIR}/${P}/${PN}"
+WORK="${WORKBASE}/${PNV}/${PN}"
 
 src_prepare() {
     echo "CC = $(tc-getCC)" > .config
@@ -78,9 +78,9 @@ src_install() {
     dosym /usr/bin/wpa_cli /bin/wpa_cli
 
     exeinto /etc/wpa_supplicant
-    doexe "${FILESDIR}/wpa_cli.sh"
+    doexe "${FILES}/wpa_cli.sh"
     insinto /etc/wpa_supplicant
-    doins "${FILESDIR}/wpa_supplicant.conf"
+    doins "${FILES}/wpa_supplicant.conf"
 
     dodoc wpa_supplicant.conf
 

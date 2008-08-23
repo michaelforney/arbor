@@ -7,7 +7,7 @@ require multilib autotools
 
 SUMMARY="XSLT libraries and tools"
 HOMEPAGE="http://www.xmlsoft.org/XSLT/"
-SOURCES="ftp://xmlsoft.org/${PN}/${P}.tar.gz"
+DOWNLOADS="ftp://xmlsoft.org/${PN}/${PNV}.tar.gz"
 
 LICENCES="MIT"
 SLOT="0"
@@ -22,8 +22,8 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILESDIR}/libxslt.m4-${PN}-1.1.8.patch"
-    -p3 "${FILESDIR}/${PN}-1.1.23-parallel-install.patch"
+    -p0 "${FILES}/libxslt.m4-${PN}-1.1.8.patch"
+    -p3 "${FILES}/${PN}-1.1.23-parallel-install.patch"
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
@@ -31,8 +31,8 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 src_prepare() {
     default
 
-    # sed Makefile to fix bug Gentoo #99382 so that html gets installed in ${PF}
-    sed -i -e "s:libxslt-\$(VERSION):${PF}:" doc/Makefile.am
+    # sed Makefile to fix bug Gentoo #99382 so that html gets installed in ${PNVR}
+    sed -i -e "s:libxslt-\$(VERSION):${PNVR}:" doc/Makefile.am
 
     # Be warned: eautoreconf breaks tests
     eautomake
@@ -53,6 +53,6 @@ src_install() {
     keepdir /usr/$(get_libdir)/libxslt-plugins
 
     if ! option examples; then
-        rm -rf "${D}/usr/share/doc/${PN}-python-${PV}/examples"
+        rm -rf "${IMAGE}/usr/share/doc/${PN}-python-${PV}/examples"
     fi
 }

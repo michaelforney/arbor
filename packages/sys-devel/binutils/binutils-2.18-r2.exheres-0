@@ -5,7 +5,7 @@ require multilib
 
 SUMMARY="Collection of binary tools including ld and as"
 HOMEPAGE="http://www.gnu.org/software/binutils"
-SOURCES="mirror://gnu/${PN}/${P}.tar.bz2"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -15,7 +15,7 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/76_all_use-new-ld-dtags.patch"
+    "${FILES}/76_all_use-new-ld-dtags.patch"
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --host=${CHOST} )
 
@@ -23,7 +23,7 @@ src_install() {
     default
 
     # Construct env.d/binutils configuration
-    mkdir -p "${D}/etc/env.d/binutils"
+    mkdir -p "${IMAGE}/etc/env.d/binutils"
 
     insinto /etc/env.d/binutils
     cat <<EOF > binutils.env
@@ -35,14 +35,14 @@ EOF
     newins binutils.env ${CHOST}-${PV}
 
     # Make sure a binutils version is selected for ${CHOST}
-    if [[ ! -e "${D}/etc/env.d/${PN}/config-${CHOST}" ]]; then
-        cat <<EOF > "${D}/etc/env.d/${PN}/config-${CHOST}"
+    if [[ ! -e "${IMAGE}/etc/env.d/${PN}/config-${CHOST}" ]]; then
+        cat <<EOF > "${IMAGE}/etc/env.d/${PN}/config-${CHOST}"
 CURRENT="${PV}"
 EOF
     fi
 
-    for f in "${D}"/usr/${CHOST}/bin/* ; do
-        target=${f#${D}}
+    for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
+        target=${f#${IMAGE}}
         name=${f##*/}
         dosym ${target} /usr/bin/${CHOST}-${name}
         dosym ${target} /usr/bin/${name}

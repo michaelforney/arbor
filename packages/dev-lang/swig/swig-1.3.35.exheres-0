@@ -7,7 +7,7 @@ RESTRICT="test"
 
 SUMMARY="Simplified Wrapper and Interface Generator"
 HOMEPAGE="http://www.swig.org/"
-SOURCES="mirror://sourceforge/${PN}/${P}.tar.gz"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
 
 LICENCES="as-is"
 SLOT="0"
@@ -32,8 +32,8 @@ src_install() {
     default
 
     if option doc; then
-        dodir /usr/share/doc/${PF}
-        insinto /usr/share/doc/${PF}
+        dodir /usr/share/doc/${PNVR}
+        insinto /usr/share/doc/${PNVR}
         doins -r Doc/{Devel,Manual}
     fi
 }

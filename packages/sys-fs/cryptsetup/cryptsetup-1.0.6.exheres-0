@@ -5,7 +5,7 @@ require autotools multilib
 
 SUMMARY="Userland utilities for dm-crypt"
 HOMEPAGE="http://code.google.com/p/cryptsetup"
-SOURCES="http://cryptsetup.googlecode.com/files/${P}.tar.bz2"
+DOWNLOADS="http://cryptsetup.googlecode.com/files/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -28,5 +28,5 @@ src_install() {
     default
 
     # make install creates this empty dir for some reason. Nuke it.
-    rmdir "${D}/usr/$(get_libdir)/${PN}"
+    rmdir "${IMAGE}/usr/$(get_libdir)/${PN}"
 }

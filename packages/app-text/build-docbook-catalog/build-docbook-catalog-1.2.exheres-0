@@ -5,7 +5,7 @@
 
 SUMMARY="DocBook XML catalog auto-updater"
 HOMEPAGE=""
-SOURCES="mirror://gentoo/${P}.bz2"
+DOWNLOADS="mirror://gentoo/${PNV}.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -14,10 +14,10 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-SRC_PREPARE_DEFAULT_PATCHES=( -p0 "${FILESDIR}/${P}-root.patch" )
+SRC_PREPARE_DEFAULT_PATCHES=( -p0 "${FILES}/${PNV}-root.patch" )
 
-S=${WORKDIR}
+WORK=${WORKBASE}
 
 src_install() {
-    newbin ${P} ${PN}
+    newbin ${PNV} ${PN}
 }

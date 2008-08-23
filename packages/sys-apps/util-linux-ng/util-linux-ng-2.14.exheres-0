@@ -2,11 +2,11 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-MY_P="${P/_/-}"
+MY_PNV="${PNV/_/-}"
 
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/${PN}/"
-SOURCES="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${MY_PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -23,7 +23,7 @@ DEPENDENCIES="
         nls? ( >=sys-devel/gettext-0.14.1 )
 "
 
-S="${WORKDIR}/${MY_P}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )

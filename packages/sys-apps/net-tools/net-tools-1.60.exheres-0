@@ -3,7 +3,7 @@
 
 SUMMARY="Collection of Basic Networking Tools"
 HOMEPAGE="http://www.tazenda.demon.co.uk/phil/net-tools/"
-SOURCES="http://www.tazenda.demon.co.uk/phil/${PN}/${P}.tar.bz2"
+DOWNLOADS="http://www.tazenda.demon.co.uk/phil/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -13,11 +13,11 @@ MYOPTIONS="ipv6 nls"
 DEPENDENCIES="build:
     nls? ( sys-devel/gettext )"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILESDIR}/net-tools-syntax.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/net-tools-syntax.patch" )
 
 src_prepare() {
     default
-    cp "${FILESDIR}/config.h" "${S}"
+    cp "${FILES}/config.h" "${WORK}"
     sed -i \
         -e "/^COPTS = /s~=~= ${CFLAGS} ~" \
         -e "/^LOPTS = /s~=~= ${LDFLAGS} ~" \
@@ -32,5 +32,5 @@ src_configure() {
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
-DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${D}" )
+DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" )
 

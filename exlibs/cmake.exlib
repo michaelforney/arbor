@@ -17,7 +17,7 @@ DEPENDENCIES="
 
 export_exlib_phases src_configure src_compile src_test src_install
 
-ECMAKE_BUILD_DIR="${WORKDIR}"/${PN}_build
+ECMAKE_BUILD_DIR="${WORKBASE}"/${PN}_build
 
 # Similar to option_enable for cmake. A few examples:
 #   `cmake_enable Foo`     -> foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
@@ -83,8 +83,8 @@ ecmake() {
         -DCMAKE_NO_BUILTIN_CHRPATH=ON                       # Gentoo 224901
     )
 
-    echo cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${S}"
-    cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${S}" || die_unless_nonfatal "Cmake failed" || return 1
+    echo cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${WORK}"
+    cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${WORK}" || die_unless_nonfatal "Cmake failed" || return 1
 
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
         popd
@@ -126,8 +126,8 @@ cmake_src_test() {
 # Function for installing the package. Automatically detects the build dir.
 # Uses default_src_install.
 cmake_src_install() {
-    # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${S}.
-    DEFAULT_SRC_INSTALL_EXTRA_PREFIXES+=( "${S}/" )
+    # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
+    DEFAULT_SRC_INSTALL_EXTRA_PREFIXES+=( "${WORK}/" )
     _cmake_run default_src_install
 }
 

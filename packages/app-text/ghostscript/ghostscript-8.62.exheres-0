@@ -7,7 +7,7 @@ require autotools multilib
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://ghostscript.com"
-SOURCES="mirror://sourceforge/${PN}/${P}.tar.bz2"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -33,7 +33,7 @@ DEPENDENCIES="
         x11-fonts/ghostscript-fonts-std"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}"/${P}-fPIC.patch
+    "${FILES}"/${PNV}-fPIC.patch
 )
 
 src_prepare() {
@@ -51,13 +51,13 @@ src_prepare() {
         -i Makefile.in src/*.mak || die 'docdir sed failed'
 
     autotools_src_prepare
-    cd "${S}/ijs"
+    cd "${WORK}/ijs"
     eautoreconf
 }
 
 src_configure() {
     econf \
-        --docdir=/usr/share/doc/${PF} \
+        --docdir=/usr/share/doc/${PNVR} \
         --with-fontpath=/usr/share/fonts/default/ghostscript \
         --disable-compile-inits \
         --enable-dynamic \
@@ -70,7 +70,7 @@ src_configure() {
         $(option_with X x) \
         --without-jasper
 
-    cd "${S}/ijs"
+    cd "${WORK}/ijs"
     econf
 }
 
@@ -78,18 +78,18 @@ src_compile() {
     # Parallel make is broken
     emake -j1 so all
 
-    cd "${S}/ijs"
+    cd "${WORK}/ijs"
     emake
 }
 
 src_install() {
-    emake DESTDIR="${D}" install-so install
+    emake DESTDIR="${IMAGE}" install-so install
 
-    cd "${S}/ijs"
+    cd "${WORK}/ijs"
     default
 
     if option !X && option !gtk; then
-        rmdir "${D}"/usr/$(get_libdir)/${PN}{/${PV},}
+        rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}{/${PV},}
     fi
 }
 

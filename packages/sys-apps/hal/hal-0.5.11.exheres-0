@@ -9,8 +9,8 @@ PATCH_VERSION="1"
 
 SUMMARY="Hardware Abstraction Layer"
 HOMEPAGE="http://hal.freedesktop.org/"
-SOURCES="http://hal.freedesktop.org/releases/${P}.tar.bz2
-         http://dev.gentoo.org/~compnerd/files/${PN}/${P}-gentoo-patches-${PATCH_VERSION}.tar.bz2"
+DOWNLOADS="http://hal.freedesktop.org/releases/${PNV}.tar.bz2
+         http://dev.gentoo.org/~compnerd/files/${PN}/${PNV}-gentoo-patches-${PATCH_VERSION}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -44,7 +44,7 @@ DEPENDENCIES="
 # tests for HAL *NEVER* actually work/ed
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${WORKDIR}/${P}-patches/" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${WORKBASE}/${PNV}-patches/" )
 
 pkg_setup() {
     enewgroup haldaemon
@@ -78,7 +78,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-parted
     --disable-docbook-docs
     --disable-doxygen-docs
-    --docdir=/usr/share/doc/${PF}
+    --docdir=/usr/share/doc/${PNVR}
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acpi "acpi acpi-proc" apm "verbose verbose-mode" )
 
@@ -87,33 +87,33 @@ src_install()
     default
 
     # Empty directories
-    rmdir "${D}"/usr/share/hal/fdi/{information,preprobe,policy}/20thirdparty \
-          "${D}"/usr/share/hal/fdi/information/{10freedesktop,}               \
-          "${D}"/usr/share/hal/fdi/preprobe/{10osvendor,}                     \
+    rmdir "${IMAGE}"/usr/share/hal/fdi/{information,preprobe,policy}/20thirdparty \
+          "${IMAGE}"/usr/share/hal/fdi/information/{10freedesktop,}               \
+          "${IMAGE}"/usr/share/hal/fdi/preprobe/{10osvendor,}                     \
     || die "failed to cleanup empty directories"
 
     # useless directories
-    find "${D}"/var/run -depth -type d -print0 2> /dev/null | xargs -0 -r rmdir
+    find "${IMAGE}"/var/run -depth -type d -print0 2> /dev/null | xargs -0 -r rmdir
 
     # hal unmount helper for unclean unmounts
     exeinto /lib/udev
-    newexe "${FILESDIR}/hal-unmount.dev" hal_unmount
+    newexe "${FILES}/hal-unmount.dev" hal_unmount
 
     # initscript
-    newinitd "${FILESDIR}/0.5.11-hald.rc" hald
+    newinitd "${FILES}/0.5.11-hald.rc" hald
 
     # configuration
-    cp "${FILESDIR}/0.5.11-hald.conf" "${WORKDIR}/"
+    cp "${FILES}/0.5.11-hald.conf" "${WORKBASE}/"
 
     if option verbose ; then
         sed -e 's:HALD_VERBOSE="no":HALD_VERBOSE="yes":' \
-            -i "${WORKDIR}/0.5.11-hald.conf" || die "sed failed"
+            -i "${WORKBASE}/0.5.11-hald.conf" || die "sed failed"
     fi
 
-    newconfd "${WORKDIR}/0.5.11-hald.conf" hald
+    newconfd "${WORKBASE}/0.5.11-hald.conf" hald
 
-    dodoc "${WORKDIR}/hal-config-examples/"*.fdi
-    dobin "${WORKDIR}/hal-config-examples/migrate-xorg-to-fdi.py"
+    dodoc "${WORKBASE}/hal-config-examples/"*.fdi
+    dobin "${WORKBASE}/hal-config-examples/migrate-xorg-to-fdi.py"
 
     # create and keep /media to prevent DE mounters from colliding
     keepdir /media

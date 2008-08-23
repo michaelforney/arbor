@@ -8,13 +8,13 @@ require flag-o-matic multilib versionator
 SUMMARY="An object-oriented scripting language"
 HOMEPAGE="http://www.ruby-lang.org/"
 
-MY_P="${PN}-$(replace_version_separator 3 '-')"
-S=${WORKDIR}/${MY_P}
+MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+WORK=${WORKBASE}/${MY_PNV}
 
 SLOT=$(get_version_component_range 1-2)
 MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
 
-SOURCES="mirror://ruby/${SLOT}/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
 LICENCES="|| ( Ruby GPL-2 )"
 PLATFORMS="~amd64 ~x86"
@@ -60,11 +60,11 @@ src_test() {
 
 src_install() {
     unset RUBYOPT
-    D_LIBDIR="${D}/usr/$(get_libdir)"
+    D_LIBDIR="${IMAGE}/usr/$(get_libdir)"
     LD_LIBRARY_PATH="${D_LIBDIR}"
-    RUBYLIB="${S}:${D_LIBDIR}/ruby/${SLOT}"
+    RUBYLIB="${WORK}:${D_LIBDIR}/ruby/${SLOT}"
 
-    for dir in $(find "${S}/ext" -type d) ; do
+    for dir in $(find "${WORK}/ext" -type d) ; do
         RUBYLIB="${RUBYLIB}:${dir}"
     done
 
@@ -84,7 +84,7 @@ src_install() {
     dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1
 
     if option examples; then
-        insinto /usr/share/doc/${PF}
+        insinto /usr/share/doc/${PNVR}
         doins -r sample
     fi
 }

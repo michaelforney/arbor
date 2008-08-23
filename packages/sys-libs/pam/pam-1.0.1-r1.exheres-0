@@ -6,11 +6,11 @@
 require autotools multilib flag-o-matic pam
 
 MY_PN="Linux-PAM"
-MY_P="${MY_PN}-${PV}"
+MY_PNV="${MY_PN}-${PV}"
 
 HOMEPAGE="http://www.kernel.org/pub/linux/libs/pam/"
 SUMMARY="Linux-PAM provides Pluggable Authentication Modules"
-SOURCES="mirror://kernel/linux/libs/pam/library/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/libs/pam/library/${MY_PNV}.tar.bz2"
 
 LICENCES="|| ( GPL-2 BSD )"
 SLOT="0"
@@ -26,9 +26,9 @@ DEPENDENCIES="
         >=sys-libs/cracklib-2.8.3
 "
 
-S="${WORKDIR}/${MY_P}"
+WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILESDIR}"/${P}-disable-regenerate-man.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-disable-regenerate-man.patch )
 AT_M4DIR=m4
 
 src_prepare() {
@@ -50,7 +50,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-isadir=/$(get_libdir)/security
     --disable-dependency-tracking
     --disable-prelude
-    --enable-docdir=/usr/share/doc/${PF}
+    --enable-docdir=/usr/share/doc/${PNVR}
     --disable-regenerate-man
     --enable-cracklib
 )
@@ -68,7 +68,7 @@ src_install() {
     dodoc doc/txt/*
 
     # install the base pam configuration
-    dopamd "${FILESDIR}"/pam.d/*
+    dopamd "${FILES}"/pam.d/*
 
     keepdir /etc/security/limits.d
     keepdir /etc/security/namespace.d
@@ -77,11 +77,11 @@ src_install() {
     fperms u+s /sbin/unix_chkpwd
 
     dodir /$(get_libdir)
-    mv "${D}/usr/$(get_libdir)/libpam.so"* "${D}/$(get_libdir)/"
-    mv "${D}/usr/$(get_libdir)/libpamc.so"* "${D}/$(get_libdir)/"
-    mv "${D}/usr/$(get_libdir)/libpam_misc.so"* "${D}/$(get_libdir)/"
+    mv "${IMAGE}/usr/$(get_libdir)/libpam.so"* "${IMAGE}/$(get_libdir)/"
+    mv "${IMAGE}/usr/$(get_libdir)/libpamc.so"* "${IMAGE}/$(get_libdir)/"
+    mv "${IMAGE}/usr/$(get_libdir)/libpam_misc.so"* "${IMAGE}/$(get_libdir)/"
     gen_usr_ldscript libpam.so libpamc.so libpam_misc.so
 
-    rm "${D}"/usr/share/man/man8/pam_userdb.8*
-    rm -rf "${D}"/var
+    rm "${IMAGE}"/usr/share/man/man8/pam_userdb.8*
+    rm -rf "${IMAGE}"/var
 }

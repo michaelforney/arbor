@@ -1,12 +1,12 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-MY_P="${PN}-s${PV}"
-S="${WORKDIR}/${MY_P}"
+MY_PNV="${PN}-s${PV}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Small useful utilities for networking"
 HOMEPAGE="http://www.skbuff.net/iputils/"
-SOURCES="http://www.skbuff.net/${PN}/${MY_P}.tar.bz2"
+DOWNLOADS="http://www.skbuff.net/${PN}/${MY_PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -16,9 +16,9 @@ MYOPTIONS="ipv6"
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(-p0
-    "${FILESDIR}/${P}-linux-headers-types.patch"
-    "${FILESDIR}/${P}-kernel-ifaddr.patch"
-    "${FILESDIR}/${P}-no-open-max.patch")
+    "${FILES}/${PNV}-linux-headers-types.patch"
+    "${FILES}/${PNV}-kernel-ifaddr.patch"
+    "${FILES}/${PNV}-no-open-max.patch")
 
 src_compile() {
     default

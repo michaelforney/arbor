@@ -3,7 +3,7 @@
 
 SUMMARY="Apache portable runtime library"
 HOMEPAGE="http://apr.apache.org/"
-SOURCES="mirror://apache/apr/${P}.tar.bz2"
+DOWNLOADS="mirror://apache/apr/${PNV}.tar.bz2"
 
 LICENCES="Apache"
 SLOT="0"
@@ -16,8 +16,8 @@ src_configure() {
     default
 
     # Make sure we use the system libtool
-    sed -i 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${S}"/build/apr_rules.mk || die "sed1 failed"
-    sed -i 's,${installbuilddir}/libtool,/usr/bin/libtool,' "${S}"/apr-1-config || die "sed2 failed"
-    rm -f "${S}"/libtool
+    sed -i 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${WORK}"/build/apr_rules.mk || die "sed1 failed"
+    sed -i 's,${installbuilddir}/libtool,/usr/bin/libtool,' "${WORK}"/apr-1-config || die "sed2 failed"
+    rm -f "${WORK}"/libtool
 }
 

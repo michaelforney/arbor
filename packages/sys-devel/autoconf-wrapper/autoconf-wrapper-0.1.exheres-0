@@ -3,7 +3,7 @@
 
 SUMMARY="Wrapper script for autoconf versions"
 HOMEPAGE="http://www.exherbo.org"
-SOURCES=""
+DOWNLOADS=""
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -13,8 +13,8 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_install() {
-    mkdir -p "${T}"/usr/bin
-    newbin ${FILESDIR}/autoconf-wrapper-${PV}.sh /usr/bin/autoconf-wrapper.sh
+    mkdir -p "${TEMP}"/usr/bin
+    newbin ${FILES}/autoconf-wrapper-${PV}.sh /usr/bin/autoconf-wrapper.sh
     for i in autoconf autoheader autom4te autoreconf \
         autoscan autoupdate ifnames; do
         dosym /usr/bin/autoconf-wrapper.sh /usr/bin/${i}

@@ -3,7 +3,7 @@
 
 SUMMARY="Wrapper script for automake versions"
 HOMEPAGE="http://www.exherbo.org"
-SOURCES=""
+DOWNLOADS=""
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -13,13 +13,13 @@ MYTOPIONS=""
 DEPENDENCIES=""
 
 src_unpack() {
-    mkdir "${S}"
-    cp -R "${FILESDIR}"/${PV}/* "${S}"
+    mkdir "${WORK}"
+    cp -R "${FILES}"/${PV}/* "${WORK}"
 }
 
 src_install() {
     dodir /usr/bin
-    newbin ${S}/${PN}.sh ${PN}.sh
+    newbin ${WORK}/${PN}.sh ${PN}.sh
     for i in aclocal automake; do
         dosym /usr/bin/${PN}.sh /usr/bin/${i}
     done

@@ -7,7 +7,7 @@ require eutils multilib
 
 SUMMARY="NFS client and server daemons"
 HOMEPAGE="http://nfs.sourceforge.net/"
-SOURCES="mirror://sourceforge/nfs/${P}.tar.gz"
+DOWNLOADS="mirror://sourceforge/nfs/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -29,9 +29,9 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${P}-rpcgen-ioctl.patch"
-    "${FILESDIR}/${P}-mount-eacces.patch"
-    "${FILESDIR}/${P}-cpp_path.patch"
+    "${FILES}/${PNV}-rpcgen-ioctl.patch"
+    "${FILES}/${PNV}-mount-eacces.patch"
+    "${FILES}/${PNV}-cpp_path.patch"
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -64,28 +64,28 @@ src_install() {
     # versions somewhere safe...  more info in pkg_postinst
     dodir /usr/$(get_libdir)/nfs
     keepdir /var/lib/nfs/{sm,sm.bak}
-    mv "${D}"/var/lib/nfs/* "${D}"/usr/$(get_libdir)/nfs
+    mv "${IMAGE}"/var/lib/nfs/* "${IMAGE}"/usr/$(get_libdir)/nfs
     keepdir /var/lib/nfs
 
     # Install some client-side binaries in /sbin
     dodir /sbin
-    mv "${D}"/usr/sbin/rpc.statd "${D}"/sbin/ || die "mv failed"
+    mv "${IMAGE}"/usr/sbin/rpc.statd "${IMAGE}"/sbin/ || die "mv failed"
 
     insinto /etc
-    doins "${FILESDIR}"/exports
+    doins "${FILES}"/exports
 
     local f list=""
     option nfsv4 && list+="rpc.idmapd"
 
     for f in nfs nfsmount rpc.statd ${list} ; do
-        newinitd "${FILESDIR}"/${f}.initd ${f}
+        newinitd "${FILES}"/${f}.initd ${f}
     done
-    newconfd "${FILESDIR}"/nfs.confd nfs
+    newconfd "${FILES}"/nfs.confd nfs
     option nfsv4 && doins utils/idmapd/idmapd.conf
 }
 
 pkg_preinst() {
-    [[ -s ${ROOT}/etc/exports ]] && rm -f "${D}"/etc/exports
+    [[ -s ${ROOT}/etc/exports ]] && rm -f "${IMAGE}"/etc/exports
 }
 
 pkg_postinst() {

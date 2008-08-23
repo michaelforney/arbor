@@ -3,11 +3,11 @@
 # Based in part upon 'docbook-xsl-stylesheets-1.73.2.ebuild' from Gentoo, which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-MY_P="${P/-stylesheets}"
+MY_PNV="${PNV/-stylesheets}"
 
 SUMMARY="XSL Stylesheets for Docbook"
 HOMEPAGE="http://wiki.docbook.org/topic/DocBookXslStylesheets"
-SOURCES="mirror://sourceforge/docbook/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://sourceforge/docbook/${MY_PNV}.tar.bz2"
 
 LICENCES="BSD"
 SLOT="0"
@@ -21,7 +21,7 @@ run:
     dev-libs/libxml2
 "
 
-S=${WORKDIR}/${MY_P}
+WORK=${WORKBASE}/${MY_PNV}
 
 src_install() {
     insinto /usr/share/sgml/docbook/xsl-stylesheets
@@ -29,7 +29,7 @@ src_install() {
     local i
     for sheet in */ ; do
         i=$(basename $sheet)
-        pushd "${S}"/${i} >/dev/null
+        pushd "${WORK}"/${i} >/dev/null
         for doc in ChangeLog README; do
             if [ -e "$doc" ]; then
                 mv ${doc} ${doc}.${i}
@@ -38,7 +38,7 @@ src_install() {
             fi
         done
 
-        doins -r "${S}"/${i}
+        doins -r "${WORK}"/${i}
         popd > /dev/null
     done
 

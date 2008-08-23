@@ -3,7 +3,7 @@
 
 SUMMARY="Linux kernel headers"
 HOMEPAGE="http://www.kernel.org"
-SOURCES="mirror://kernel/linux/kernel/v2.6/linux-${PV}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/kernel/v2.6/linux-${PV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -12,11 +12,11 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/linux-${PV}"
+WORK="${WORKBASE}/linux-${PV}"
 
 # FIXME: Need to sanitize headers at some point
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}"/${P}-includefix.patch
+    "${FILES}"/${PNV}-includefix.patch
     )
 
 
@@ -36,5 +36,5 @@ src_compile() {
 }
 
 src_install() {
-    emake INSTALL_HDR_PATH="${D}/usr" headers_install
+    emake INSTALL_HDR_PATH="${IMAGE}/usr" headers_install
 }

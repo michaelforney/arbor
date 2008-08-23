@@ -8,13 +8,13 @@ require autotools flag-o-matic multilib versionator
 SUMMARY="An object-oriented scripting language"
 HOMEPAGE="http://www.ruby-lang.org/"
 
-MY_P="${PN}-$(replace_version_separator 3 '-')"
-S=${WORKDIR}/${MY_P}
+MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+WORK=${WORKBASE}/${MY_PNV}
 
 SLOT=$(get_version_component_range 1-2)
 MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
 
-SOURCES="ftp://ftp.ruby-lang.org/pub/ruby/${SLOT}/${MY_P}.tar.bz2"
+DOWNLOADS="ftp://ftp.ruby-lang.org/pub/ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
 LICENCES="|| ( Ruby GPL-2 )"
 PLATFORMS="~amd64 ~x86"
@@ -28,7 +28,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p2 "${FILESDIR}/${PN}-1.8.6_p111-r13657.patch"
+    -p2 "${FILES}/${PN}-1.8.6_p111-r13657.patch"
 )
 
 src_prepare() {
@@ -72,11 +72,11 @@ src_test() {
 
 src_install() {
     unset RUBYOPT
-    D_LIBDIR="${D}/usr/$(get_libdir)"
+    D_LIBDIR="${IMAGE}/usr/$(get_libdir)"
     LD_LIBRARY_PATH="${D_LIBDIR}"
-    RUBYLIB="${S}:${D_LIBDIR}/ruby/${SLOT}"
+    RUBYLIB="${WORK}:${D_LIBDIR}/ruby/${SLOT}"
 
-    for dir in $(find "${S}/ext" -type d) ; do
+    for dir in $(find "${WORK}/ext" -type d) ; do
         RUBYLIB="${RUBYLIB}:${dir}"
     done
 
@@ -94,12 +94,12 @@ src_install() {
     done
 
     if option doc; then
-        emake DESTDIR="${D}" install-doc
+        emake DESTDIR="${IMAGE}" install-doc
     fi
 
     if option examples; then
-        dodir /usr/share/doc/${PF}
-        cp -dpPR sample "${D}/usr/share/doc/${PF}"
+        dodir /usr/share/doc/${PNVR}
+        cp -dpPR sample "${IMAGE}/usr/share/doc/${PNVR}"
     fi
 }
 

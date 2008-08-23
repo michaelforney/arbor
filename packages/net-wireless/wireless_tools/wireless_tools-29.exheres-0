@@ -5,12 +5,12 @@
 
 require multilib toolchain-funcs
 
-MY_P="${PN}.${PV}"
-S="${WORKDIR}/${MY_P}"
+MY_PNV="${PN}.${PV}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Wireless Tools for Linux"
 HOMEPAGE="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html"
-SOURCES="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/${MY_P}.tar.gz"
+DOWNLOADS="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/${MY_PNV}.tar.gz"
 
 
 LICENCES="GPL-2"
@@ -23,7 +23,7 @@ DEPENDENCIES="
         >=sys-fs/udev-120
 "
 
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=${D}/usr )
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=${IMAGE}/usr )
 
 src_prepare() {
     sed -i \

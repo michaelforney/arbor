@@ -180,9 +180,7 @@ scm_global_stuff() {
 
     [[ -z $(scm_get_var REPOSITORY) ]] \
         && die "$(scm_var_name REPOSITORY) must be set"
-    if ! [[ ${PN} == paludis && -z ${WORKDIR} ]]; then # HACK
-        [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKDIR}/${SCM_THIS:-${P}}"
-    fi
+    [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKBASE}/${SCM_THIS:-${PNV}}"
     local checkout_to="$(scm_get_var CHECKOUT_TO)"
     [[ -z ${checkout_to} ]] && checkout_to="${FETCHEDDIR}/scm/${SCM_THIS:-${PN}}"
     scm_set_var CHECKOUT_TO "${checkout_to%%*(/)}"
@@ -198,10 +196,6 @@ scm_do_check_vars() {
 DEPENDENCIES="build,host: >=sys-apps/util-linux-ng-2.13_pre2"
 scm_for_each scm_global_stuff
 
-if [[ ${PN} == paludis ]]; then # HACK
-    export_exlib_phases src_unpack
-else
-    #export_exlib_phases src_fetch_extra src_unpack pkg_scm_info pkg_info
-    export_exlib_phases src_unpack pkg_info
-fi
+#export_exlib_phases src_fetch_extra src_unpack pkg_scm_info pkg_info
+export_exlib_phases src_unpack pkg_info
 

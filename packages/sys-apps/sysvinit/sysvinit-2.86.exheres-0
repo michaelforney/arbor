@@ -4,7 +4,7 @@
 
 SUMMARY="SYSV init system"
 HOMEPAGE="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/"
-SOURCES="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/${P}.tar.gz"
+DOWNLOADS="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -16,12 +16,12 @@ DEPENDENCIES="
         !sys-apps/upstart
 "
 
-S="${WORKDIR}/${P}/src"
+WORK="${WORKBASE}/${PNV}/src"
 
 src_install() {
     dodir /bin /sbin /usr/bin /usr/include \
         /usr/share/man/man1 /usr/share/man/man5 /usr/share/man/man8
-    emake ROOT="${D}" install
+    emake ROOT="${IMAGE}" install
 
     cd ..
     dodoc doc/*

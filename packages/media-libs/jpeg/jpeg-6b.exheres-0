@@ -3,7 +3,7 @@
 
 SUMMARY="Library for JPEG image compression"
 HOMEPAGE="http://www.ijg.org/"
-SOURCES="http://www.ijg.org/files/${PN}src.v${PV}.tar.gz"
+DOWNLOADS="http://www.ijg.org/files/${PN}src.v${PV}.tar.gz"
 
 LICENCES="IJG MIT GPL GPL-2"
 SLOT="0"
@@ -13,9 +13,9 @@ MYOPTIONS="static"
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILESDIR}/${PN}-Makefile.patch"
-    "${FILESDIR}/${PN}-jpeglib.h_c++.patch"
-    "${FILESDIR}/${PN}-rdppm.patch")
+    "${FILES}/${PN}-Makefile.patch"
+    "${FILES}/${PN}-jpeglib.h_c++.patch"
+    "${FILES}/${PN}-rdppm.patch")
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( static )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared )
