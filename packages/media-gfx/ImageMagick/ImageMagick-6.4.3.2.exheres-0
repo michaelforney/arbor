@@ -1,0 +1,69 @@
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="ImageMagick is a software suite to manipulate a variety of image
+formats"
+DESCRIPTION="ImageMagick is a software suite to create, edit, and compose bitmap
+images. It can read, convert and write images in a variety of formats (over 100)
+including DPX, EXR, GIF, JPEG, JPEG-2000, PDF, PhotoCD, PNG, Postscript, SVG,
+and TIFF. Use ImageMagick to translate, flip, mirror, rotate, scale, shear and
+transform images, adjust image colors, apply various special effects, or draw
+text, lines, polygons, ellipses and Bézier curves."
+HOMEPAGE="http://imagemagick.org"
+MY_P=${P/%.2/-2}
+SOURCES="ftp://imagemagick.org/pub/${PN}/${MY_P}.tar.bz2"
+S="${WORKDIR}/${P%.*}"
+
+LICENCES="ImageMagick"
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="X fontconfig freetype ghostscript graphviz jpeg lcms perl png svg tiff xml"
+RESTRICT="test"
+
+DEPENDENCIES="
+    build:
+        X? ( x11-proto/xextproto )
+    build+run:
+        X? (
+            x11-libs/libICE
+            x11-libs/libSM
+            x11-libs/libX11
+            x11-libs/libXt
+            x11-libs/libXext
+        )
+        fontconfig? ( media-libs/fontconfig )
+        freetype? ( media-libs/freetype:2 )
+        ghostscript? ( app-text/ghostscript )
+        graphviz? ( media-gfx/graphviz )
+        jpeg? ( media-libs/jpeg )
+        lcms? ( media-libs/lcms )
+        perl? ( dev-lang/perl:= )
+        png? ( media-libs/libpng )
+        svg? (
+            gnome-libs/rsvg
+            dev-libs/cairo[svg]
+        )
+        tiff? ( media-libs/tiff )
+        xml? ( dev-libs/libxml2 )"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--enable-cipher"
+    "--enable-hdri"
+    "--without-included-ltdl"
+    "--with-zlib"
+    "--with-bzlib"
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "X x"
+    fontconfig
+    freetype
+    "ghostscript gslib"
+    "graphviz gvc"
+    jpeg
+    lcms
+    perl
+    png
+    "svg rsvg"
+    tiff
+    xml
+)
