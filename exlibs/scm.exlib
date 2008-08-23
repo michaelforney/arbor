@@ -96,6 +96,7 @@ scm_fetch_one() {
         fi
 
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
+        :
     } 42>"${lock}" || die "opening lock file failed"
 }
 
@@ -124,6 +125,7 @@ scm_unpack_one() {
 
         scm_call unpack
         rm -f "$(scm_get_var "${1}" UNPACK_TO)/.scm.exlib.timestamp"
+        :
     } 42>"${lock}" || die "opening lock file failed"
 }
 
@@ -135,9 +137,19 @@ scm_src_unpack() {
 }
 
 scm_scminfo_one() {
-    local rev=$(scm_call revision)
-    [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
-    SCM_INFO+=",${SCM_THIS}=${rev}"
+    local dir="$(scm_get_var CHECKOUT_TO)"
+    local lock=${dir%/*}/.lock-${dir##*/}
+
+    local SANDBOX_WRITE=${SANDBOX_WRITE}
+    addwrite "${lock}"
+
+    {
+        flock -s 42 || die "flock failed"
+        local rev=$(scm_call revision)
+        [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
+        SCM_INFO+=",${SCM_THIS}=${rev}"
+        :
+    } 42>"${lock}" || die "opening lock file failed"
 }
 
 scm_pkg_scm_info() {
