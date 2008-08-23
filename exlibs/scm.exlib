@@ -122,10 +122,6 @@ scm_unpack_one() {
             die "${dir} does not exist"
         fi
 
-        local rev=$(scm_call revision)
-        [[ -n ${rev} ]] || die "could not determine revision"
-        SCM_INFO+=",${SCM_THIS}=${rev}"
-
         scm_call unpack
         rm -f "$(scm_get_var "${1}" UNPACK_TO)/.scm.exlib.timestamp"
     } 42>"${lock}" || die "opening lock file failed"
@@ -135,16 +131,24 @@ scm_src_unpack() {
     scm_src_fetch_extra
 
     scm_for_each scm_unpack_one
-    SCM_INFO=${SCM_INFO#,=}
+    SCM_IS_BUILT=1
 }
 
-SCM_INFO=
+scm_scminfo_one() {
+    local rev=$(scm_call revision)
+    [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
+    SCM_INFO+=",${SCM_THIS}=${rev}"
+}
+
 scm_pkg_scm_info() {
-    echo ${SCM_INFO}
+    local SCM_INFO=""
+    scm_for_each scm_scminfo_one
+    echo ${SCM_INFO#,=}
 }
 
+SCM_IS_BUILT=
 scm_pkg_info() {
-    if [[ -n ${SCM_INFO} ]]; then
+    if [[ -n ${SCM_IS_BUILT} ]]; then
         local -i SCM_DEFAULT_INFO_COUNT
         local -a secondaries=( ${SCM_SECONDARY_REPOSITORIES} )
         scm_for_each scm_call info
