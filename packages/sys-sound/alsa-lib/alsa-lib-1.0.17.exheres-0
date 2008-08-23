@@ -6,7 +6,7 @@ require autotools
 
 SUMMARY="ALSA library"
 HOMEPAGE="http://www.alsa-project.org"
-SOURCES="ftp://ftp.alsa-project.org/pub/lib/${P}.tar.bz2"
+DOWNLOADS="ftp://ftp.alsa-project.org/pub/lib/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -22,7 +22,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MEMORY-LEAK )
 
 src_prepare() {
     if ! option midi; then
-        expatch "${FILESDIR}/${PN}-fix-midi-tests.patch"
+        expatch "${FILES}/${PN}-fix-midi-tests.patch"
         WANT_AUTOMAKE=1.9 eautoreconf
     fi
 }

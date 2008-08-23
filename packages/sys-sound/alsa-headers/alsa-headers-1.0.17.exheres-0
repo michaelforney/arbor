@@ -4,11 +4,11 @@
 #    Copyright 1999-2008 Gentoo Foundation
 
 MY_PN="${PN/headers/driver}"
-MY_P="${MY_PN}-${PV}"
+MY_PNV="${MY_PN}-${PV}"
 
 SUMMARY="Headers for ALSA Kernel modules"
 HOMEPAGE="http://www.alsa-project.org/"
-SOURCES="mirror://alsaproject/driver/${MY_P}.tar.bz2"
+DOWNLOADS="mirror://alsaproject/driver/${MY_PNV}.tar.bz2"
 
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
@@ -17,7 +17,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-S="${WORKDIR}/${MY_P}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 RESTRICT="test"
 
@@ -30,7 +30,7 @@ src_compile() {
 }
 
 src_install() {
-    cd "${S}/alsa-kernel/include"
+    cd "${WORK}/alsa-kernel/include"
 
     insinto /usr/include/sound
     doins *.h
