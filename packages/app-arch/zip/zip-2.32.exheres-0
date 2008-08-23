@@ -18,6 +18,13 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_COMPILE_PARAMS=( -f unix/Makefile generic )
+ECONF_SOURCE="${WORK}/unix/"
 
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )
+src_compile() {
+    emake -f unix/Makefile generic
+}
+
+src_install() {
+    emake -j1 prefix="${IMAGE}/usr" -f unix/Makefile install
+}
+
