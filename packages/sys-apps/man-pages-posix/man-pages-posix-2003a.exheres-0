@@ -1,0 +1,23 @@
+# Copyright 2008 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="POSIX man-pages (0p, 1p, 3p)"
+HOMEPAGE="http://www.kernel.org/doc/man-pages/"
+DOWNLOADS="http://www.kernel.org/pub/linux/docs/man-pages/${PN}/${PN}-${PV/a/-a}.tar.bz2"
+
+LICENCES=""
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        sys-apps/man"
+
+WORK="${WORKBASE}/${PN}-${PV/a/-a}"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ${PNV}.Announce )
+
+src_compile() {
+    :
+}
+
