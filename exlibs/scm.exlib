@@ -37,8 +37,16 @@ scm_call() {
 
 scm_fetch_one() {
     local dir="$(scm_get_var CHECKOUT_TO)"
-    addwrite "${dir%/*}"
-    mkdir -p "${dir%/*}" || die "mkdir failed"
+    local lock=${dir%/*}/.lock-${dir##*/}
+
+    (
+        addwrite "${dir%/*}"
+        mkdir -p "${dir%/*}" || die "mkdir failed"
+    )
+
+    local SANDBOX_WRITE=${SANDBOX_WRITE}
+    addwrite "${dir}"
+    addwrite "${lock}"
 
     {
         flock -x 42 || die "flock failed"
@@ -88,7 +96,7 @@ scm_fetch_one() {
         fi
 
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
-    } 42>"${dir%/*}/.lock-${dir##*/}" || die "opening lock file failed"
+    } 42>"${lock}" || die "opening lock file failed"
 }
 
 scm_src_fetch_extra() {
@@ -97,7 +105,11 @@ scm_src_fetch_extra() {
 
 scm_unpack_one() {
     local dir="$(scm_get_var CHECKOUT_TO)"
-    mkdir -p "${dir%/*}" || die "mkdir failed"
+    local lock=${dir%/*}/.lock-${dir##*/}
+
+    local SANDBOX_WRITE=${SANDBOX_WRITE}
+    addwrite "${dir}"
+    addwrite "${lock}"
 
     {
         flock -s 42 || die "flock failed"
@@ -116,7 +128,7 @@ scm_unpack_one() {
 
         scm_call unpack
         rm -f "$(scm_get_var "${1}" UNPACK_TO)/.scm.exlib.timestamp"
-    } 42>"${dir%/*}/.lock-${dir##*/}" || die "opening lock file failed"
+    } 42>"${lock}" || die "opening lock file failed"
 }
 
 scm_src_unpack() {
