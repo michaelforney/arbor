@@ -38,6 +38,15 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     doc/reference/syslog-ng.txt
 )
 
+src_test() {
+    if ! has_version dev-lang/python; then
+        ewarn 'dev-lang/python is required to run tests'
+        return 0
+    fi
+
+    default
+}
+
 src_install() {
     default
 
