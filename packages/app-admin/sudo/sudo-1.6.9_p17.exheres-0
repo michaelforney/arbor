@@ -5,16 +5,17 @@
 
 require pam
 
-MY_PV="${PV/_p/p}"
-MY_PNV="${PN}-${MY_PV}"
+MY_PNV="${PNV/_p/p}"
 
-SUMMARY="Sudo allows a system administrator to give certain users the ability to run commands as root while logging all commands and arguments."
+SUMMARY="Allows users to run programs with the security privileges of another user."
+DESCRIPTION="Allows a system administrator to delegate authority to give certain users (or groups of users) the ability to run some (or all) commands as root or another user while providing an audit trail of the commands and their arguments. "
 HOMEPAGE="http://www.sudo.ws/"
 DOWNLOADS="ftp://ftp.sudo.ws/pub/${PN}/${MY_PNV}.tar.gz"
-
 LICENCES="ISC BSD"
+
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
+
 MYOPTIONS="pam"
 
 DEPENDENCIES="
@@ -29,6 +30,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--with-all-insults"
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
+
+#OPTIONS is a var in the makefile
+DEFAULT_SRC_COMPILE_PARAMS="OPTIONS="
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( TROUBLESHOOTING UPGRADE )
 
