@@ -104,6 +104,28 @@ scm_src_fetch_extra() {
     scm_for_each scm_fetch_one
 }
 
+scm_scminfo_one() {
+    local dir="$(scm_get_var CHECKOUT_TO)"
+    local lock=${dir%/*}/.lock-${dir##*/}
+
+    local SANDBOX_WRITE=${SANDBOX_WRITE}
+    addwrite "${lock}"
+
+    {
+        flock -s 42 || die "flock failed"
+        local rev=$(scm_call revision)
+        [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
+        SCM_INFO+=",${SCM_THIS}=${rev}"
+        :
+    } 42>"${lock}" || die "opening lock file failed"
+}
+
+scm_pkg_scm_info() {
+    local SCM_INFO=""
+    scm_for_each scm_scminfo_one
+    echo ${SCM_INFO#,=}
+}
+
 scm_unpack_one() {
     local dir="$(scm_get_var CHECKOUT_TO)"
     local lock=${dir%/*}/.lock-${dir##*/}
@@ -134,28 +156,6 @@ scm_src_unpack() {
 
     scm_for_each scm_unpack_one
     SCM_IS_BUILT=1
-}
-
-scm_scminfo_one() {
-    local dir="$(scm_get_var CHECKOUT_TO)"
-    local lock=${dir%/*}/.lock-${dir##*/}
-
-    local SANDBOX_WRITE=${SANDBOX_WRITE}
-    addwrite "${lock}"
-
-    {
-        flock -s 42 || die "flock failed"
-        local rev=$(scm_call revision)
-        [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
-        SCM_INFO+=",${SCM_THIS}=${rev}"
-        :
-    } 42>"${lock}" || die "opening lock file failed"
-}
-
-scm_pkg_scm_info() {
-    local SCM_INFO=""
-    scm_for_each scm_scminfo_one
-    echo ${SCM_INFO#,=}
 }
 
 SCM_IS_BUILT=
@@ -196,6 +196,6 @@ scm_do_check_vars() {
 DEPENDENCIES="build,host: >=sys-apps/util-linux-ng-2.13_pre2"
 scm_for_each scm_global_stuff
 
-#export_exlib_phases src_fetch_extra src_unpack pkg_scm_info pkg_info
+#export_exlib_phases src_fetch_extra pkg_scm_info src_unpack pkg_info
 export_exlib_phases src_unpack pkg_info
 
