@@ -10,15 +10,53 @@ DOWNLOADS="ftp://ftp.ifh.de/pub/unix/utility/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="perl"
 
 DEPENDENCIES="
     build:
         app-arch/unzip [[ note = [ Used for one test ] ]]
+        dev-lang/perl
+    build+run:
+        sys-apps/file
     run:
-        sys-apps/less"
+        sys-apps/less
+        perl? ( dev-lang/perl )
+
+    post,suggested:
+        app-arch/bzip2
+        app-arch/cabextract
+        app-arch/gzip
+        app-arch/lzma-utils
+        app-arch/tar
+        app-arch/unrar
+        app-arch/unzip
+        app-crypt/gnupg
+        app-text/poppler
+        dev-lang/perl [[ note = [ For pod2html and Storable+Data::Dumper ] ]]
+        media-gfx/ImageMagick
+        sys-apps/groff
+        sys-devel/binutils [[ note = [ For ar, nm, strings ] ]]
+        sys-libs/glibc [[ note = [ For iconv ] ]]"
+# XXX no exheres yet:
+#   antiword
+#   cdrtools
+#   dpkg
+#   dvi2tty (in texlive, and also separate)
+#   html2text
+#   id3v2
+#   lsbom
+#   mtools
+#   o3tohtml+utf8tolatin1
+#   p7zip
+#   plutil
+#   pstotext
+#   rpm2cpio (+cpio)
+#   unrtf
 
 src_configure() {
+    if ! option perl; then
+        sed -i -e "/ifsyntax/s/'y'/'n'/" configure || die "sed failed"
+    fi
     # Can't use econf as its not really autotools, just a terrible perl script
     ./configure --prefix="${IMAGE}"/usr --yes || \
         die "failed to configure lesspipe"
@@ -35,6 +73,13 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( english.txt )
 src_install() {
     dodir /usr/share/man/man1 # Makefile won't install man page otherwise
     default
+
+    if ! option perl; then
+        rm "${IMAGE}"/usr/bin/code2color || die "rm failed"
+    fi
+    # This is only used in an #elif branch, but we don't take any of
+    # those due to the --yes option to configure
+    rm "${IMAGE}"/usr/bin/sxw2txt || die "rm failed"
 
     cat << EOF > "${TEMP}/70less"
 LESSOPEN="| lesspipe.sh %s"
