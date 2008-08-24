@@ -138,6 +138,10 @@ scm_unpack_one() {
 
     scm_call unpack
     rm -f "$(scm_get_var UNPACK_TO)/.scm.exlib.timestamp"
+
+    local rev=$(scm_call revision)
+    [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
+    scm_set_var ACTUAL_REVISION "${rev}"
 }
 
 scm_src_unpack() {
