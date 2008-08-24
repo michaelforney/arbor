@@ -41,6 +41,7 @@ scm_call() {
 }
 
 scm_access_checkout() {
+    [[ ${#} -ge 1 ]] || die "scm_access_checkout needs at least one argument"
     local dir="$(scm_get_var CHECKOUT_TO)"
     local lock=${dir%/*}/.lock-${dir##*/}
 
@@ -55,7 +56,7 @@ scm_access_checkout() {
 
     {
         flock -x 42 || die "flock failed"
-        "$@"
+        "${@}"
         local status=${?}
         :
     } 42>"${lock}" || die "opening lock file failed"
