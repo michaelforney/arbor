@@ -20,7 +20,7 @@ DEPENDENCIES="
 
 src_configure() {
     # Can't use econf as its not really autotools, just a terrible perl script
-    ./configure --prefix=/usr --default --nomake || \
+    ./configure --prefix="${IMAGE}"/usr --default || \
         die "failed to configure lesspipe"
 }
 
@@ -29,14 +29,17 @@ src_compile() {
     :
 }
 
+# german.txt is outdated, and everyone speaks English anyway :-P
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( english.txt )
+
 src_install() {
-    dobin code2color lesspipe.sh sxw2txt
+    dodir /usr/share/man/man1 # Makefile won't install man page otherwise
+    default
+
     cat << EOF > "${TEMP}/70less"
 LESSOPEN="| lesspipe.sh %s"
 LESS="-R -M --shift 5"
 EOF
-
     doenvd "${TEMP}/70less"
-    doman lesspipe.1
 }
 
