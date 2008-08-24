@@ -55,8 +55,9 @@ scm-svn_svn() {
 }
 
 scm-svn_info() {
-    local info="$(LC_ALL=C scm-svn_svn -q info "$(scm_get_var CHECKOUT_TO)" | sed -ne "s/^${1}: //p")"
-    [[ -n ${info} ]] || die "could not determine ${1} for $(scm_get_var CHECKOUT_TO)"
+    local what="${2:-$(scm_get_var CHECKOUT_TO)}"
+    local info="$(LC_ALL=C scm-svn_svn -q info "${what}" | sed -ne "s/^${1}: //p")"
+    [[ -n ${info} ]] || die "could not determine ${1} for ${what}"
     echo "${info}"
 }
 
@@ -95,17 +96,18 @@ scm-svn_do_checkout() {
 }
 
 scm-svn_do_update() {
+    if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
+        local oldroot="$(scm-svn_info "Repository Root")"
+        local newroot="$(scm-svn_info "Repository Root" "$(scm-svn_uri)")"
+        [[ ${newroot} != ${oldroot} ]] && scm-svn_svn switch --relocate "${oldroot}" "${newroot}" "$(scm_get_var CHECKOUT_TO)"
+    fi
+
     local rev=$(scm_get_var REVISION)
     if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
-        # let's hope we never have to do both kinds of switch at once....
-        if [[ "$(scm-svn_uri)" == "$(scm-svn_info "Repository Root")"?(/*) ]]; then
-            scm-svn_svn switch ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
-            return
-        else
-            scm-svn_svn switch --relocate "$(scm_svn_info URL)" "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
-        fi
+        scm-svn_svn switch ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+    else
+        scm-svn_svn update ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
     fi
-    scm-svn_svn update ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
 }
 
 scm-svn_do_revision() {
