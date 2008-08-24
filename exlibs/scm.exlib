@@ -46,9 +46,9 @@ scm_access_checkout() {
     local lock=${dir%/*}/.lock-${dir##*/}
 
     (
-        addwrite "${dir%/*}"
-        mkdir -p "${dir%/*}" || die "mkdir failed"
-    )
+        addwrite /
+        mkdir -p "${dir%/*}"
+    ) || die "mkdir failed"
 
     local SANDBOX_WRITE=${SANDBOX_WRITE}
     addwrite "${dir}"
