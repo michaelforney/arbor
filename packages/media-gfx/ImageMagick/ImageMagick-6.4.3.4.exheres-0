@@ -17,7 +17,7 @@ DOWNLOADS="ftp://ftp.imagemagick.org/pub/${PN}/${PN}-${PV%.*}-${PV##*.}.tar.bz2"
 LICENCES="ImageMagick"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="X bzip2 cxx fontconfig graphviz jpeg lcms perl png svg tiff truetype xml zlib"
+MYOPTIONS="X bzip2 cxx fontconfig fpx graphviz jpeg lcms perl png svg tiff truetype xml zlib"
 
 DEPENDENCIES="
     build+run:
@@ -30,6 +30,7 @@ DEPENDENCIES="
             )
         bzip2? ( app-arch/bzip2 )
         fontconfig? ( media-libs/fontconfig )
+        fpx? ( media-libs/fpx )
         graphviz? ( media-gfx/graphviz )
         jpeg? ( >=media-libs/jpeg-6b )
         lcms? ( media-libs/lcms )
@@ -49,7 +50,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--disable-openmp'
 '--with-modules' '--enable-hdri' '--with-gslib' )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus'
-'fontconfig' 'graphviz gvc' 'jpeg' 'lcms' 'perl' 'png' 'svg rsvg' 'tiff'
+'fontconfig' 'fpx' 'graphviz gvc' 'jpeg' 'lcms' 'perl' 'png' 'svg rsvg' 'tiff'
 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
 'xml' 'zlib' )
 
