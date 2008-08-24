@@ -84,8 +84,9 @@ pkg_preinst() {
     if [[ ${SYMLINK_LIB} == yes ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -L ${ROOT}${x} ]]; then
-                target=$(readlink "${ROOT}${x}")
-                ln -sf "${target}" "${ROOT}${x}"
+                target=$(readlink "${ROOT}${x}") || die "rewriting ${ROOT}${x} failed"
+                rm "${ROOT}${x}" || die "rm ${ROOT}${x} failed"
+                ln -s "${target}" "${ROOT}${x}" || die "ln -s ${target} ${ROOT}${x} failed"
             fi
         done
     fi
