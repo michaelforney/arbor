@@ -17,20 +17,7 @@ TARGET_LIB = $(TARGET).so.$(MAJORVER).$(MINORVER)
 
 LIBDIR = lib
 
-# Gentoo specific cruft, you like it dont ya idiot
-ifdef D
-DESTDIR = $(D)
-endif
-ifdef S
-AWKINCDIR = $(S)
-endif
-
-DOIT = yes
-ifeq ($(USERLAND),Darwin)
-DOIT = no
-endif
-
-ifeq ($(DOIT),yes)
+DESTDIR = 
 
 all: $(TARGET_LIB)
 
@@ -49,9 +36,3 @@ install: $(TARGET_LIB)
 clean:
 	rm -f $(TARGET)
 	rm -f *.o *~ core
-
-else
-
-all install clean:
-
-endif

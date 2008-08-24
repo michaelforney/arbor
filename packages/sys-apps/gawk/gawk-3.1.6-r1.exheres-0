@@ -25,11 +25,11 @@ src_prepare() {
     cp -R "${FILES}"/filefuncs "${WORKBASE}" || die "cp filefuncs failed"
 }
 
-src_configure() {
+src_compile() {
     default
 
     cd "${WORKBASE}"/filefuncs
-    emake
+    nonfatal emake AWKINCDIR="${WORK}" || die "filefuncs emake failed"
 }
 
 src_install() {
@@ -47,6 +47,6 @@ src_install() {
     done
 
     cd "${WORKBASE}"/filefuncs
-    emake DESTDIR="${IMAGE}" LIBDIR=$(get_libdir) install
+    nonfatal emake DESTDIR="${IMAGE}" LIBDIR=$(get_libdir) install || die "filefuncs emake install failed"
 }
 
