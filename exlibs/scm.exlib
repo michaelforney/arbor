@@ -55,8 +55,12 @@ scm_access_checkout() {
 
     {
         flock -x 42 || die "flock failed"
-        "$@" || :
+        "$@"
+        local status=${?}
+        :
     } 42>"${lock}" || die "opening lock file failed"
+
+    return ${status}
 }
 
 scm_fetch_one() {
