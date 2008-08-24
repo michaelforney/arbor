@@ -5,18 +5,22 @@
 
 require flag-o-matic multilib versionator
 
+MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+SLOT=$(get_version_component_range 1-2)
+
 SUMMARY="An object-oriented scripting language"
+DESCRIPTION="A dynamic, open source programming language with a focus on
+simplicity and productivity. It has an elegant syntax that is natural to
+read and easy to write."
 HOMEPAGE="http://www.ruby-lang.org/"
 
-MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
+LICENCES="|| ( Ruby GPL-2 )"
+
 WORK=${WORKBASE}/${MY_PNV}
 
-SLOT=$(get_version_component_range 1-2)
 MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
 
-DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
-
-LICENCES="|| ( Ruby GPL-2 )"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
 
@@ -26,6 +30,8 @@ DEPENDENCIES="
         gdbm? ( sys-libs/gdbm )
         ssl? ( dev-libs/openssl )
 "
+
+DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
 
 src_configure() {
     filter-flags -fomit-frame-pointer
@@ -48,14 +54,6 @@ src_configure() {
         --disable-threads \
         --without-tk \
         ${myconf}
-}
-
-src_compile() {
-    emake EXTLDFLAGS="${LDFLAGS}"
-}
-
-src_test() {
-    emake -j1 test
 }
 
 src_install() {
