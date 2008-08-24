@@ -5,6 +5,7 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 WANT_AUTOCONF="2.5"
+WANT_AUTOMAKE="none"
 require bash-completion autotools perl-module python
 
 SUMMARY="Popular version control system"
@@ -16,6 +17,8 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="debug nls perl python ruby slowtests ssl"
 
+RESTRICT="!slowtests? ( test )"
+
 DEPENDENCIES="
 build:
     nls? ( sys-devel/gettext )
@@ -24,7 +27,7 @@ build:
     ruby? ( dev-lang/swig[ruby] )
 build+run:
     dev-libs/apr-util
-    >=net-misc/neon-0.26.4[ssl?]
+    net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2][ssl?]
     perl? ( dev-lang/perl )
     python? ( dev-lang/python )
     ruby? ( dev-lang/ruby )
@@ -32,7 +35,6 @@ run:
     perl? ( dev-perl/URI )"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-perl-vendor.patch"
-    "${FILES}/${PNV}-neon-0.28.patch"
     "${FILES}/${PN}-perl-ccopts.patch" )
 
 src_configure() {
@@ -52,10 +54,6 @@ src_compile() {
     option perl && emake swig-pl
     option python && emake swig-py
     option ruby && emake swig-rb
-}
-
-src_test() {
-    option slowtests && default
 }
 
 src_install() {
