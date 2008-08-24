@@ -3,9 +3,9 @@
 
 scm-svn_do_dependencies() {
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
-        echo "dev-scm/subversion[ssl]"
+        echo ">=dev-scm/subversion-1.5.0_alpha1[ssl]"
     else
-        echo "dev-scm/subversion"
+        echo ">=dev-scm/subversion-1.5.0_alpha1"
     fi
 }
 
@@ -92,7 +92,7 @@ scm-svn_do_appraise() {
 
 scm-svn_do_checkout() {
     local rev=$(scm_get_var REVISION)
-    scm-svn_svn checkout ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+    scm-svn_svn checkout --ignore-externals ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
 }
 
 scm-svn_do_update() {
@@ -104,9 +104,9 @@ scm-svn_do_update() {
 
     local rev=$(scm_get_var REVISION)
     if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
-        scm-svn_svn switch ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+        scm-svn_svn switch --ignore-externals ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
     else
-        scm-svn_svn update ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
+        scm-svn_svn update --ignore-externals ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
     fi
 }
 
@@ -115,6 +115,6 @@ scm-svn_do_revision() {
 }
 
 scm-svn_do_unpack() {
-    scm-svn_svn export "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+    scm-svn_svn export --ignore-externals "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
 }
 
