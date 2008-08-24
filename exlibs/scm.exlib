@@ -46,7 +46,7 @@ scm_access_checkout() {
     local lock=${dir%/*}/.lock-${dir##*/}
 
     (
-        addwrite /
+        addwrite "${FETCHEDDIR}/scm"
         mkdir -p "${dir%/*}"
     ) || die "mkdir failed"
 
