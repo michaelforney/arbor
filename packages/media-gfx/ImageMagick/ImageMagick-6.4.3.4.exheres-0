@@ -54,10 +54,3 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus'
 'xml' 'zlib' )
 
 WORK="${WORKBASE}/${PNV%.*}"
-
-src_configure() {
-    default
-
-    sed -i -e 's:DOCUMENTATION_PATH=".*":DOCUMENTATION_PATH="/usr/share/doc/${PNVR}":g' \
-        "${WORK}/configure" || die
-}
