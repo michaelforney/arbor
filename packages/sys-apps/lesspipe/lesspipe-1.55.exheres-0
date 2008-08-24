@@ -17,9 +17,14 @@ DEPENDENCIES="
         sys-apps/less"
 
 src_configure() {
-    # cant use econf as its not really autotools, just a terrible shell script
+    # Can't use econf as its not really autotools, just a terrible perl script
     ./configure --prefix=/usr --default --nomake || \
         die "failed to configure lesspipe"
+}
+
+src_compile() {
+    # Don't run ./configure twice
+    :
 }
 
 src_install() {
