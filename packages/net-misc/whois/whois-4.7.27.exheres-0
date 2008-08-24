@@ -22,12 +22,12 @@ DEPENDENCIES="
     run+build: idn? ( net-dns/libidn )
     build: dev-lang/perl"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-4.7.2-config-file.patch )
-
 src_prepare() {
     default
 
-    sed -i -e "s:/usr/bin/install:install:" po/Makefile
+    sed -i -e "s:/usr/bin/install:install:" po/Makefile || die "sed po/Makefile failed"
+    #Makefile calls po/Makefile install-po
+    echo "install-pos: install" >> po/Makefile || die "echo >> po/Makefile failed"
     if ! option nls ; then
         sed -i -e '/ENABLE_NLS/s:define:undef:' config.h
         sed -i -e "s:cd po.*::" Makefile
@@ -35,9 +35,9 @@ src_prepare() {
 }
 
 src_compile() {
-    local mydefines
+    local mydefines="CONFIG_FILE=/etc/whois.conf "
     if option idn ; then
-        mydefines=HAVE_LIBIDN=1
+        mydefines+="HAVE_LIBIDN=1"
     fi
 
     emake OPTS="${CFLAGS}" \
