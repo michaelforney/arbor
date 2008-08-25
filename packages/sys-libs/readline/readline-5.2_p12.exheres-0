@@ -8,20 +8,29 @@ PATCH_LEVEL=${PNV##*_p}
 MY_PNV=${PNV%_p*}
 WORK="${WORKBASE}/${MY_PNV}"
 
-SUMMARY="Bash shell"
-HOMEPAGE="http://tiswww.case.edu/php/chet/readline/rltop.html"
+SUMMARY="GNU command line editing and history library."
+DESCRIPTION="
+The GNU Readline library provides a set of functions for use by applications that allow users to
+edit command lines as they are typed in. Both Emacs and vi editing modes are available.
+The Readline library includes additional functions to maintain a list of previously-entered command
+lines, to recall and perhaps reedit those lines, and perform csh-like history expansion on previous
+commands.
+"
 DOWNLOADS="mirror://gnu/${PN}/${MY_PNV}.tar.gz
-        $(for ((i=1; i<=PATCH_LEVEL; i++)); do
-            printf "ftp://ftp.cwru.edu/pub/bash/${MY_PNV}-patches/readline52-%03d\n" ${i}
-        done)"
+    $(for ((i=1; i<=PATCH_LEVEL; i++)); do
+        printf "ftp://ftp.cwru.edu/pub/bash/${MY_PNV}-patches/readline52-%03d\n" ${i}
+    done)"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="nls"
 
-DEPENDENCIES="build+run:
-                sys-libs/ncurses"
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/$(get_libdir) )
 
 src_prepare() {
     local i patches=(-p0)
@@ -31,4 +40,3 @@ src_prepare() {
     expatch "${patches[@]}"
 }
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/$(get_libdir) )
