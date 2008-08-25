@@ -65,7 +65,8 @@ scm-svn_do_appraise() {
     local dir="$(scm_get_var CHECKOUT_TO)"
 
     if [[ ! -d ${dir}/.svn ]]; then
-        die "${dir} is not a svn checkout"
+        echo "${dir} is not a svn checkout"
+        return 3
     fi
 
     if [[ "$(scm-svn_info URL)" != "$(scm-svn_uri)" ]]; then
