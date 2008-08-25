@@ -1,0 +1,55 @@
+# Copyright 2008 David Leverton <dleverton@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="Tool for automating interactive applications"
+HOMEPAGE="http://expect.nist.gov/"
+DOWNLOADS="http://expect.nist.gov/src/${PNV}.tar.bz2"
+
+# from ${HOMEPAGE}
+DESCRIPTION="Expect is a tool for automating interactive applications
+such as telnet, ftp, passwd, fsck, rlogin, tip, etc. Expect really
+makes this stuff trivial. Expect is also useful for testing these same
+applications. And by adding Tk, you can also wrap interactive
+applications in X11 GUIs.
+
+Expect can make easy all sorts of tasks that are prohibitively
+difficult with anything else. You will find that Expect is an
+absolutely invaluable tool - using it, you will be able to automate
+tasks that you've never even thought of before - and you'll be able to
+do this automation quickly and easily."
+
+# Some of the test files are GPL-2.  Some files refer to something
+# called "license.terms", but it doesn't seem to exist....
+LICENCES="public-domain GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="examples tk"
+
+DEPENDENCIES="
+    build+run:
+        dev-lang/tcl
+        tk? ( dev-tcl/tk )"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+    --with-tcl=/usr/$(get_libdir)
+    --with-tk=/usr/$(get_libdir)
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tk x" )
+
+src_test() {
+    # both!
+    emake -j1 check
+    emake -j1 test
+}
+
+src_install() {
+    default
+    if option examples; then
+        docinto examples
+        dodoc example/*
+    fi
+}
+
