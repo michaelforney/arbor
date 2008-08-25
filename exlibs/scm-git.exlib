@@ -51,8 +51,7 @@ scm-git_do_appraise() {
         if [[ $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) == commit ]]; then
             return 2
         elif [[ -n $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) ]]; then
-            echo "$(scm_get_var REVISION) is not a commit in ${dir}"
-            return 3
+            die "$(scm_get_var REVISION) is not a commit in ${dir}"
         fi
     fi
 
@@ -70,8 +69,7 @@ scm-git_do_appraise() {
         elif has $(scm-git_git -q cat-file -t refs/tags/$(scm_get_var TAG)) commit tag; then
             return 2
         else
-            echo "$(scm_get_var TAG) is not a commit or a tag in ${dir}"
-            return 3
+            die "$(scm_get_var TAG) is not a commit or a tag in ${dir}"
         fi
     fi
 
