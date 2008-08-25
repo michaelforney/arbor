@@ -33,7 +33,7 @@ scm-git_git() {
     if [[ ${1} == -q ]]; then
         shift
     else
-        echo git "${@}"
+        echo GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" git "${@}"
     fi
     GIT_PAGER=cat GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" \
         git "${@}" || die "git ${1} failed"
