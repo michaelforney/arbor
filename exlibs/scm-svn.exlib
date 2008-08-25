@@ -97,17 +97,29 @@ scm-svn_do_checkout() {
 }
 
 scm-svn_do_update() {
+    local dir="$(scm_get_var CHECKOUT_TO)"
+
     if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
         local oldroot="$(scm-svn_info "Repository Root")"
         local newroot="$(scm-svn_info "Repository Root" "$(scm-svn_uri)")"
-        [[ ${newroot} != ${oldroot} ]] && scm-svn_svn switch --relocate "${oldroot}" "${newroot}" "$(scm_get_var CHECKOUT_TO)"
+        if [[ ${newroot} != ${oldroot} ]]; then
+            if [[ $(scm-svn_info "Repository UUID") != $(scm-svn_info "Repository UUID" "$(scm-svn_uri)") ]]; then
+                echo rm -rf "${dir}"
+                rm -rf "${dir}"
+                [[ -d "${dir}" ]] && die "rm failed"
+                scm-svn_do_checkout
+                return
+            fi
+
+            scm-svn_svn switch --relocate "${oldroot}" "${newroot}" "${dir}"
+        fi
     fi
 
     local rev=$(scm_get_var REVISION)
     if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
-        scm-svn_svn switch --ignore-externals ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+        scm-svn_svn switch --ignore-externals ${rev:+-r${rev}} "$(scm-svn_uri)" "${dir}"
     else
-        scm-svn_svn update --ignore-externals ${rev:+-r${rev}} "$(scm_get_var CHECKOUT_TO)"
+        scm-svn_svn update --ignore-externals ${rev:+-r${rev}} "${dir}"
     fi
 }
 
