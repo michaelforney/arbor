@@ -6,13 +6,13 @@
 require autotools multilib
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
-HOMEPAGE="http://ghostscript.com"
+HOMEPAGE="http://ghostscript.com/awki"
 DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="cups gtk X" # djvu jpeg2k
+MYOPTIONS="cairo cups gtk X" # djvu jpeg2k
 
 DEPENDENCIES="
     build:
@@ -23,7 +23,8 @@ DEPENDENCIES="
         media-libs/jpeg
         media-libs/libpng
         media-libs/tiff
-        cups? ( fixme/cups )
+        cairo? ( x11-libs/cairo )
+        cups? ( net-print/cups )
         gtk? ( x11-libs/gtk+:2 )
         X? (
             x11-libs/libXext
@@ -33,11 +34,12 @@ DEPENDENCIES="
         x11-fonts/ghostscript-fonts-std"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-fPIC.patch
+    "${FILES}"/${PNV}-cairo-automagic-dependency.patch
 )
 
+
 src_prepare() {
-    rm -r ./{expat,jasper,jpeg,libpng,Resource/Font} \
+    rm -r ./{expat,jasper,jpeg,libpng,Resource/Font,zlib} \
         || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng"
 
     if option !gtk; then
@@ -65,6 +67,7 @@ src_configure() {
         --with-drivers=ALL \
         --with-ijs \
         --with-jbig2dec \
+        $(option_enable cairo) \
         $(option_enable cups) \
         $(option_enable gtk) \
         $(option_with X x) \
