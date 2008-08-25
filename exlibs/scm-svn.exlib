@@ -17,7 +17,7 @@ scm-svn_do_check_vars() {
     [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var TAG) ]] \
         && die "for svn, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
     [[ -n $(scm_get_var REVISION) ]] && \
-        [[ "$(scm_get_var REVISION)" == *[^0123456789]* || "$(scm_get_var REVISION)" -eq 0 ]] \
+        [[ "$(scm_get_var REVISION)" == *[^[:digit:]]* || "$(scm_get_var REVISION)" -eq 0 ]] \
         && die "for svn, $(scm_var_name REVISION) must be a positive integer"
 }
 
@@ -56,7 +56,7 @@ scm-svn_svn() {
 
 scm-svn_info() {
     local what="${2:-$(scm_get_var CHECKOUT_TO)}"
-    local info="$(LC_ALL=C scm-svn_svn -q info "${what}" | sed -ne "s/^${1}: //p")"
+    local info="$(scm-svn_svn -q info "${what}" | sed -ne "s/^${1}: //p")"
     [[ -n ${info} ]] || die "could not determine ${1} for ${what}"
     echo "${info}"
 }

@@ -84,7 +84,7 @@ scm_fetch_one() {
     fi
 
     if [[ -n ${SCM_MIN_UPDATE_DELAY} ]]; then
-        [[ ${SCM_MIN_UPDATE_DELAY} == *[^0123456789]* || ${SCM_MIN_UPDATE_DELAY} -eq 0 ]] \
+        [[ ${SCM_MIN_UPDATE_DELAY} == *[^[:digit:]]* || ${SCM_MIN_UPDATE_DELAY} -eq 0 ]] \
             && die "SCM_MIN_UPDATE_DELAY must be a positive integer"
         if [[ -e "${dir}/.scm.exlib.timestamp" &&
                 -n "$(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
