@@ -1,6 +1,11 @@
 # Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+if [[ -z ${SCM_TYPE} ]]; then
+    SCM_TYPE="svn"
+    require scm
+fi
+
 scm-svn_do_dependencies() {
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo ">=dev-scm/subversion-1.5.0_alpha1[ssl]"

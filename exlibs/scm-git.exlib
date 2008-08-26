@@ -5,6 +5,11 @@
 #    Based upon 'git.eclass' which is:
 #       Copyright 1999-2007 Gentoo Foundation
 
+if [[ -z ${SCM_TYPE} ]]; then
+    SCM_TYPE="git"
+    require scm
+fi
+
 scm-git_do_dependencies() {
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "dev-scm/git[curl] net-misc/curl[ssl]"
