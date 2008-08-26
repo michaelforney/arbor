@@ -186,7 +186,8 @@ scm_global_stuff() {
         && die "$(scm_var_name REPOSITORY) must be set"
     [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKBASE}/${SCM_THIS:-${PNV}}"
     local checkout_to="$(scm_get_var CHECKOUT_TO)"
-    [[ -z ${checkout_to} ]] && checkout_to="${FETCHEDDIR}/scm/${SCM_THIS:-${PN}}"
+    [[ -z ${checkout_to} ]] && checkout_to=${SCM_THIS:-${PN}}
+    [[ ${checkout_to} == /* ]] || checkout_to=${FETCHEDDIR}/scm/${checkout_to}
     scm_set_var CHECKOUT_TO "${checkout_to%%*(/)}"
     scm_call check_vars
 
