@@ -25,25 +25,25 @@ MYOPTIONS="bzip2 jpeg ssl tiff X zlib"
 # (not required in text mode), so let's add libpng for X? and fbcon?
 
 # TODO:
-#	gpm? ( sys-libs/gpm )
-#	fbcon? ( >=media-libs/libpng-1.2.1
-#		>=media-libs/jpeg-6b
-#		sys-libs/gpm )
-#	directfb? ( dev-libs/DirectFB )
-#	sdl? ( >=media-libs/libsdl-1.2.0 )
-#	svga? ( >=media-libs/svgalib-1.4.3
-#	png? ( >=media-libs/libpng-1.2.1 )
+#   gpm? ( sys-libs/gpm )
+#   fbcon? ( >=media-libs/libpng-1.2.1
+#       >=media-libs/jpeg-6b
+#       sys-libs/gpm )
+#   directfb? ( dev-libs/DirectFB )
+#   sdl? ( >=media-libs/libsdl-1.2.0 )
+#   svga? ( >=media-libs/svgalib-1.4.3
+#   png? ( >=media-libs/libpng-1.2.1 )
 
 DEPENDENCIES="
 build+run:
     ssl? ( >=dev-libs/openssl-0.9.6c )
-	X? ( x11-libs/libXext
+    X? ( x11-libs/libXext
         >=media-libs/libpng-1.2.1
         jpeg? ( >=media-libs/jpeg-6b )
-	    tiff? ( >=media-libs/tiff-3.5.7 ) )
-	sys-libs/ncurses
+        tiff? ( >=media-libs/tiff-3.5.7 ) )
+    sys-libs/ncurses
 build:
-    dev-util/pkg-config    
+    dev-util/pkg-config
 "
 
 # Gentoo bug #131440
@@ -67,21 +67,21 @@ src_prepare() {
 
     # Upstream configure produced by broken autoconf-2.13. See Gentoo bugs
     # #131440 and #103483#c23
-	eautoconf 
+    eautoconf
 }
 
 src_install() {
     default
 
-	# Only install links icon if X driver was compiled in ...
+    # Only install links icon if X driver was compiled in ...
     if option X ; then
         insinto /usr/share/pixmaps
         doins graphics/links.xpm
     fi
 
     insinto /usr/share/doc/${PNVR}
-	doins -r doc/links_cal
+    doins -r doc/links_cal
 
-	# Install a compatibility symlink links2:
-	dosym links /usr/bin/links2
+    # Install a compatibility symlink links2:
+    dosym links /usr/bin/links2
 }
