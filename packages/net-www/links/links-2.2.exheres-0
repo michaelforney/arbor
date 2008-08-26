@@ -3,10 +3,7 @@
 # Based in part upon 'links-2.2.ebuild', which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-WANT_AUTOCONF=latest
-WANT_AUTOMAKE=none
-
-require common-metadata toolchain-funcs autotools
+require common-metadata
 
 # To handle pre-versions ...
 MY_PNV="${PNV/_/}"
@@ -46,9 +43,6 @@ build:
     dev-util/pkg-config
 "
 
-# Gentoo bug #131440
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/configure-LANG.patch" ) 
-
 # svga svgalib
 # directfb
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
@@ -61,14 +55,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "X graphics" )
 DEFAULT_SRC_CONFIGURE_PARAMS="--without-fb"
 DEFAULT_SRC_INSTALL_EXTRA_DOCS="BRAILLE_HOWTO KEYS SITES"
-
-src_prepare() {
-    default
-
-    # Upstream configure produced by broken autoconf-2.13. See Gentoo bugs
-    # #131440 and #103483#c23
-    eautoconf
-}
 
 src_install() {
     default
