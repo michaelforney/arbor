@@ -80,7 +80,6 @@ ecmake() {
         -DCMAKE_INSTALL_PREFIX="${PREFIX:=/usr}"
         -DLIB_INSTALL_DIR="${PREFIX}/${tmp_libdir}"
         -DLIB_SUFFIX=${tmp_libdir/lib}
-        -DCMAKE_NO_BUILTIN_CHRPATH=ON                       # Gentoo 224901
     )
 
     echo cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${WORK}"
