@@ -56,6 +56,11 @@ src_configure() {
         ${myconf}
 }
 
+src_test() {
+    # TERM="dumb" for test_readline.rb
+    emake -j1 check TERM="dumb"
+}
+
 src_install() {
     unset RUBYOPT
     D_LIBDIR="${IMAGE}/usr/$(get_libdir)"
