@@ -56,7 +56,7 @@ scm-svn_svn() {
     else
         echo svn "${@}"
     fi
-    svn "${@}" || die "svn ${1} failed"
+    svn "${@}" || die_unless_nonfatal "svn ${1} failed"
 }
 
 scm-svn_info() {
