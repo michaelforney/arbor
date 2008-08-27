@@ -35,13 +35,16 @@ scm-git_do_check_vars() {
 }
 
 scm-git_git() {
+    local echo=echo
     if [[ ${1} == -q ]]; then
         shift
-    else
-        echo GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" git "${@}"
+        echo=:
     fi
-    GIT_PAGER=cat GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" \
-        git "${@}" || die_unless_nonfatal "git ${1} failed"
+
+    local vars=( GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" )
+
+    ${echo} "${vars[@]}" git "${@}"
+    env GIT_PAGER=cat "${vars[@]}" git "${@}" || die_unless_nonfatal "git ${1} failed"
 }
 
 scm-git_do_appraise() {
