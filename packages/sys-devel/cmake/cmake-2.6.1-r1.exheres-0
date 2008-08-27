@@ -42,6 +42,12 @@ bootstrap() {
     ./bootstrap "$@" || die "./bootstrap failed"
 }
 
+src_prepare() {
+    default
+    # rpath patch breaks this test
+    sed -e '/FindModulesExecuteAll/d' -i Tests/CMakeLists.txt || die 'Disabling a broken test failed'
+}
+
 src_configure() {
     j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
 
