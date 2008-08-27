@@ -14,7 +14,7 @@ DOWNLOADS="mirror://debian/pool/main/w/whois/${MY_PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="idn nls"
 RESTRICT="test" # Gentoo bug #59327
 
@@ -29,8 +29,8 @@ src_prepare() {
     #Makefile calls po/Makefile install-po
     echo "install-pos: install" >> po/Makefile || die "echo >> po/Makefile failed"
     if ! option nls ; then
-        sed -i -e '/ENABLE_NLS/s:define:undef:' config.h
-        sed -i -e "s:cd po.*::" Makefile
+        sed -i -e '/ENABLE_NLS/s:define:undef:' config.h || die "sed config.h failed"
+        sed -i -e "s:cd po.*::" Makefile || die "sed Makefile failed"
     fi
 }
 
