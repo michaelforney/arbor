@@ -2,6 +2,8 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2
@@ -40,6 +42,9 @@ src_unpack() {
 src_install() {
     export LANGUAGE=C LC_ALL=C
     default
+
+    # localedef fails if /usr/lib/locale does not exist
+    keepdir /usr/$(get_libdir)/locale
 
     # Don't install /etc/{ld.so.cache,localtime}
     rm "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime"
