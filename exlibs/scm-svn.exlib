@@ -51,12 +51,22 @@ scm-svn_uri() {
 }
 
 scm-svn_svn() {
+    local echo=echo
     if [[ ${1} == -q ]]; then
         shift
-    else
-        echo svn "${@}"
+        echo=:
     fi
-    svn "${@}" || die_unless_nonfatal "svn ${1} failed"
+
+    local cmd=${1} extra=( --non-interactive )
+    shift
+    case ${cmd} in
+        checkout|co|export|status|stat|st|switch|sw|update|up)
+            extra+=( --ignore-externals )
+            ;;
+    esac
+
+    ${echo} svn "${cmd}" "${extra[@]}" "${@}"
+    svn "${cmd}" "${extra[@]}" "${@}" || die_unless_nonfatal "svn ${cmd} failed"
 }
 
 scm-svn_info() {
@@ -98,7 +108,7 @@ scm-svn_do_appraise() {
 
 scm-svn_do_checkout() {
     local rev=$(scm_get_var REVISION)
-    scm-svn_svn checkout --ignore-externals ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+    scm-svn_svn checkout ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
 }
 
 scm-svn_do_update() {
@@ -122,9 +132,9 @@ scm-svn_do_update() {
 
     local rev=$(scm_get_var REVISION)
     if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
-        scm-svn_svn switch --ignore-externals ${rev:+-r${rev}} "$(scm-svn_uri)" "${dir}"
+        scm-svn_svn switch ${rev:+-r${rev}} "$(scm-svn_uri)" "${dir}"
     else
-        scm-svn_svn update --ignore-externals ${rev:+-r${rev}} "${dir}"
+        scm-svn_svn update ${rev:+-r${rev}} "${dir}"
     fi
 }
 
@@ -133,6 +143,6 @@ scm-svn_do_revision() {
 }
 
 scm-svn_do_unpack() {
-    scm-svn_svn export --ignore-externals "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+    scm-svn_svn export "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
 }
 
