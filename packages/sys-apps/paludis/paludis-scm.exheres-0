@@ -1,6 +1,5 @@
-# Copyright 1999-2007 Ciaran McCreesh
+# Copyright 1999-2008 Ciaran McCreesh
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
 
 require eutils bash-completion flag-o-matic
 
@@ -17,22 +16,10 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 
 DEPENDENCIES="
-    build+run:
-        >=app-admin/eselect-1.0.2
-        >=app-admin/eselect-news-20071201
-        >=app-shells/bash-3
-        qa? ( dev-libs/pcre++ >=dev-libs/libxml2-2.6 app-crypt/gnupg )
-        inquisitio? ( dev-libs/pcre++ )
-        glsa? ( >=dev-libs/libxml2-2.6 )
-        python? (
-            dev-lang/python:=
-            dev-libs/boost
-        )
-        ruby? ( dev-lang/ruby )
     build:
+        dev-util/pkg-config
         sys-devel/autoconf:2.5
         sys-devel/automake:1.10
-        dev-util/pkg-config
         doc? (
             app-doc/doxygen
             python? (
@@ -44,6 +31,22 @@ DEPENDENCIES="
                 dev-ruby/syntax
             )
         )
+    build+run:
+        >=app-admin/eselect-1.0.2
+        >=app-admin/eselect-news-20071201
+        >=app-shells/bash-3
+        glsa? ( >=dev-libs/libxml2-2.6 )
+        inquisitio? ( dev-libs/pcre++ )
+        python? (
+            dev-lang/python:=
+            dev-libs/boost
+        )
+        qa? (
+            app-crypt/gnupg
+            >=dev-libs/libxml2-2.6
+            dev-libs/pcre++
+        )
+        ruby? ( dev-lang/ruby )
     run:
         net-misc/wget
         net-misc/rsync
@@ -77,10 +80,10 @@ src_configure() {
         $(option_enable doc doxygen) \
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
+        $(option_enable glsa) \
         $(option_enable pink) \
         $(option_enable qa) \
         $(option_enable ruby) \
-        $(option_enable glsa) \
         $(option_enable python) \
         $(option_enable vim-syntax vim ) \
         $(option_enable visibility ) \
@@ -90,6 +93,15 @@ src_configure() {
         --with-environments=${environments} \
         --with-repositories=${repositories} \
         --with-default-distribution=exherbo
+}
+
+src_test() {
+    # Work around Sandbox bugs
+    export PALUDIS_DO_NOTHING_SANDBOXY="sandbox sucks"
+    export BASH_ENV=/dev/null
+
+    # 'make --dry-run check' fails so don't use default here.
+    emake check
 }
 
 src_install() {
@@ -102,15 +114,6 @@ src_install() {
     for bashcomp in ${bashcompletions}; do
         BASH_COMPLETION_NAME="${bashcomp}" dobashcompletion bash-completion/"${bashcomp}"
     done
-}
-
-src_test() {
-    # Work around Sandbox bugs
-    export PALUDIS_DO_NOTHING_SANDBOXY="sandbox sucks"
-    export BASH_ENV=/dev/null
-
-    # 'make --dry-run check' fails so don't use default here.
-    emake check
 }
 
 pkg_preinst() {
