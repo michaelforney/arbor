@@ -11,7 +11,7 @@ DOWNLOADS="ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/${NTP_PNV}.tar.gz"
 
 LICENCES=""
 SLOT="0"
-PLATFORMS="~x86"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ssl"
 
 DEPENDENCIES="
@@ -21,6 +21,9 @@ DEPENDENCIES="
 
 NTP_USER="ntp"
 NTP_GROUP="${NTP_USER}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-privsep-user=ntp )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "!ssl builtin-arc4random" )
 
 WORK="${WORKBASE}/${NTP_PNV}"
 
@@ -33,14 +36,8 @@ pkg_setup() {
     create-ntp-user
 }
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-privsep-user=ntp )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "!ssl builtin-arc4random" )
-
 src_install() {
     default
     rmdir "${IMAGE}"/var{/empty,}
 }
 
-pkg_postinst() {
-    [[ ! -d "${ROOT}/var/empty" ]] && mkdir "${ROOT}/var/empty"
-}
