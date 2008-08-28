@@ -69,17 +69,16 @@ else
            #acl?     ( kernel_linux? ( sys-apps/acl ) )
     case ${PN} in
         vim)
-        MYOPTIONS+=" vim-pager"
-       #MYOPTIONS+=" vim-pager vim-with-x"
-       #DEPENDENCIES+="
-       #    build:
-       #        vim-with-x? (
-       #        x11-libs/libXt
-       #        x11-libs/libX11
-       #        x11-libs/libSM
-       #        x11-proto/xproto )
-       #    run:
-       #        vim-with-x? ( x11-libs/libXt )"
+        MYOPTIONS+=" vim-pager vim-with-x"
+        DEPENDENCIES+="
+            build:
+                vim-with-x? (
+                    x11-libs/libXt
+                    x11-libs/libX11
+                    x11-libs/libSM
+                    x11-proto/xproto )
+            run:
+                vim-with-x? ( x11-libs/libXt )"
         ;;
        #gvim)
        #MYOPTIONS+=" gnome gtk motif"
@@ -239,8 +238,7 @@ vim_src_configure() {
             vim)
             # don't test USE=X here ... see bug #19115
             # but need to provide a way to link against X ... see bug #20093
-           #myconf+=" --enable-gui=no $(option_with vim-with-x x)"
-            myconf+=" --enable-gui=no"
+            myconf+=" --enable-gui=no $(option_with vim-with-x x)"
             ;;
             gvim)
             myconf+=" --with-vim-name=gvim \
