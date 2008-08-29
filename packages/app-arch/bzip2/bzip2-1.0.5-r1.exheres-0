@@ -1,0 +1,66 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="Freely available, patent free, high-quality data compressor"
+HOMEPAGE="http://www.bzip.org"
+DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
+
+LICENCES="BSD"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" LIBDIR=$(get_libdir) MANPREFIX="${IMAGE}"/usr/share )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
+
+src_prepare() {
+    default
+
+    sed -e '/^CFLAGS/s/=/+=/' \
+        -e '/^CFLAGS/s/-O.//' \
+        -e '/^CFLAGS/s/-g//' \
+        -i Makefile Makefile-libbz2_so || die 'Sed for CFLAGS failed'
+
+    sed -e "s:1\.0\.4:${PV}:" \
+        -i bzip2.1 bzip2.txt Makefile-libbz2_so manual.{html,ps,xml} || die 'Sed for broken versioning failed'
+
+    sed -e 's:$(PREFIX)/lib:$(PREFIX)/$(LIBDIR):g' \
+        -e 's:$(PREFIX)/include:$(PREFIX)/usr/include:g' \
+        -e 's:$(PREFIX)/man:$(PREFIX)/usr/share/man:g' \
+        -i Makefile || die 'Sed for manpath failed'
+}
+
+src_compile() {
+    emake -f Makefile-libbz2_so
+    emake
+}
+
+
+src_install() {
+    default
+    
+    # Install shared libraries to /$(get_libdir)
+    into /
+    dolib.so libbz2.so.${PV}
+    for v in libbz2.so{,.{${PV%%.*},${PV%.*}}} ; do
+        dosym libbz2.so.${PV} /$(get_libdir)/${v}
+    done
+
+    # Linker script in /usr/$(get_libdir)
+    gen_usr_ldscript libbz2.so
+
+    # Static archive goes in /usr/$(get_libdir)
+    dodir /usr/$(get_libdir)
+    mv "${IMAGE}"/{,usr/}$(get_libdir)/libbz2.a || die 'Moving static archive to /usr failed'
+
+    # Fix symlinks linking to ${IMAGE}
+    dosym bzgrep /bin/bzegrep
+    dosym bzgrep /bin/bzfgrep
+    dosym bzmore /bin/bzless
+    dosym bzdiff /bin/bzcmp
+}
+
