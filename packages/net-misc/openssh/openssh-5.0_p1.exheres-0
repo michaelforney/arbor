@@ -21,7 +21,7 @@ DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
 LICENCES="BSD"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="hpn tcpd X X509"
+MYOPTIONS="hpn pam tcpd X X509"
 
 # Unfortunately, the tests need to be run as root.
 RESTRICT="userpriv"
@@ -31,7 +31,7 @@ DEPENDENCIES="
         sys-apps/shadow
         >=dev-libs/openssl-0.9.8f
         >=sys-libs/zlib-1.2.3
-        >=sys-libs/pam-0.78
+        pam? ( >=sys-libs/pam-0.78 )
         tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
         X? ( x11-apps/xauth )
     build:
@@ -40,6 +40,15 @@ DEPENDENCIES="
 "
 
 WORK="${WORKBASE}/${PARCH}"
+
+create-sshd-user() {
+    enewgroup sshd 22
+    enewuser sshd 22 -1 /var/empty sshd
+}
+
+pkg_setup() {
+    create-sshd-user
+}
 
 src_prepare() {
     sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
@@ -86,13 +95,12 @@ src_configure() {
         --without-ldap \
         --without-libedit \
         --without-kerberos5 \
-        --with-pam \
+        $(option_with pam) \
         $(option_enable tcpd tcp-wrappers)
 }
 
 src_test() {
     option X509 && export SSH_X509TESTS="blob_auth"
-
     emake -j1 tests
 }
 
@@ -106,11 +114,13 @@ src_install() {
     keepdir /etc/skel/.ssh
     keepdir /var/run
 
-    sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config \
-        || die "sed for UsePAM failed"
-    sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
-        "${IMAGE}"/etc/ssh/sshd_config || die "sed for passwd auth failed"
-    newpamd "${FILES}"/sshd.pam_include.1 sshd
+    if option pam ; then
+        sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config \
+            || die "sed for UsePAM failed"
+        sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
+            "${IMAGE}"/etc/ssh/sshd_config || die "sed for passwd auth failed"
+        newpamd "${FILES}"/sshd.pam_include.1 sshd
+    fi
 
     doman contrib/ssh-copy-id.1
     dodoc ChangeLog CREDITS OVERVIEW README* TODO sshd_config
