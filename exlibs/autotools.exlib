@@ -13,7 +13,8 @@ export_exlib_phases src_prepare
 DEPENDENCIES="build: sys-devel/libtool"
 
 [[ ${WANT_AUTOCONF:-latest} == latest ]] && WANT_AUTOCONF="2.5"
-DEPENDENCIES+=" sys-devel/autoconf:${WANT_AUTOCONF}"
+[[ ${WANT_AUTOCONF} != none ]] \
+    && DEPENDENCIES+=" sys-devel/autoconf:${WANT_AUTOCONF}"
 
 [[ ${WANT_AUTOMAKE:-latest} == latest ]] && WANT_AUTOMAKE="1.10"
 [[ ${WANT_AUTOMAKE} != none ]] \
