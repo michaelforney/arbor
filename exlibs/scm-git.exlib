@@ -11,12 +11,13 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-git_do_dependencies() {
+    local git="dev-scm/git"
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
-        echo "dev-scm/git[curl] net-misc/curl[ssl]"
+        echo "${git}[curl] net-misc/curl[ssl]"
     elif [[ $(scm_get_var REPOSITORY) == http://* ]]; then
-        echo "dev-scm/git[curl]"
+        echo "${git}[curl]"
     else
-        echo "dev-scm/git"
+        echo "${git}"
     fi
 }
 

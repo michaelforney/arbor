@@ -7,10 +7,11 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-svn_do_dependencies() {
+    local svn=">=dev-scm/subversion-1.5.0_alpha1"
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
-        echo ">=dev-scm/subversion-1.5.0_alpha1[ssl]"
+        echo "${svn}[ssl]"
     else
-        echo ">=dev-scm/subversion-1.5.0_alpha1"
+        echo "${svn}"
     fi
 }
 
