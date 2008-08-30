@@ -3,7 +3,7 @@
 # Based in part upon 'dbus-1.2.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require eutils autotools
+require eutils
 
 SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
 HOMEPAGE="http://dbus.freedesktop.org/"
@@ -12,18 +12,21 @@ DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug expat"
+MYOPTIONS="debug doc" # X
 
 RESTRICT="test" # 1 of 3 tests fails for me
 
 DEPENDENCIES="
-build:
-    dev-util/pkg-config
-    sys-devel/gettext
-build+run:
-    expat? ( dev-libs/expat )
-    !expat? ( >=dev-libs/libxml2-2.6.0 )"
-#   doc? ( doxygen xmlto )
+    build:
+        dev-util/pkg-config
+        sys-devel/gettext
+        doc? ( app-doc/doxygen )
+    build+run:
+        >=dev-libs/expat-1.95.8"
+#           app-text/xmlto
+
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 
 pkg_setup() {
     enewgroup messagebus
@@ -31,30 +34,35 @@ pkg_setup() {
 }
 
 src_configure() {
+    # Testing code (--enable-asserts --enable-tests) disabled since
+    # 1. building with tests support creates an insecure (sic upstream), non-production use library
+    # 2. tests fail
     econf \
+        $(option_enable debug asserts) \
         $(option_enable debug verbose-mode) \
-        --with-xml=$(optionv expat || echo libxml) \
+        $(option_enable doc doxygen-docs) \
+        --with-xml=expat \
         --with-dbus-user=messagebus \
         --localstatedir=/var \
         --with-system-socket=/var/run/dbus/system_bus_socket \
         --with-session-socket-dir=/tmp \
-        --enable-asserts \
         --enable-inotify \
-        --enable-tests \
-        --disable-doxygen-docs \
+        --disable-tests \
         --disable-xml-docs \
         --disable-libaudit \
         --disable-selinux
-#        $(option_enable doc doxygen-docs) \
-#        $(option_enable doc xml-docs) \
+}
+
+src_compile() {
+    # Get backtraces from applications
+    append-flags -rdynamic
+
+    default
 }
 
 src_test() {
     DBUS_VERBOSE=1 default
 }
-
-DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 
 src_install() {
     default
@@ -75,4 +83,10 @@ src_install() {
         /usr/share/dbus-1/system-services \
         /var/lib/dbus \
         /var/run/dbus
+
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/html/
+        doins -r doc/*.html
+    fi
 }
+
