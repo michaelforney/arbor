@@ -2,12 +2,12 @@
 # Distributed under the terms of the GNU General Public License v2
 
 if [[ -z ${SCM_TYPE} ]]; then
-    SCM_TYPE="svn"
+    SCM_TYPE=svn
     require scm
 fi
 
 scm-svn_do_dependencies() {
-    local svn=">=dev-scm/subversion-1.5.0_alpha1"
+    local svn='>=dev-scm/subversion-1.5.0_alpha1'
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "${svn} net-misc/neon[ssl]"
     else
@@ -33,20 +33,20 @@ scm-svn_uri() {
         return
     fi
 
-    local uri="$(scm_get_var REPOSITORY)"
-    uri="${uri%%*(/)}"
+    local uri=$(scm_get_var REPOSITORY)
+    uri=${uri%%*(/)}
     if [[ -n $(scm_get_var TAG) ]]; then
-        uri+="/tags/$(scm_get_var TAG)"
+        uri+=/tags/$(scm_get_var TAG)
     elif [[ -n $(scm_get_var BRANCH) ]]; then
-        uri+="/branches/$(scm_get_var BRANCH)"
+        uri+=/branches/$(scm_get_var BRANCH)
     else
-        uri+="/trunk"
+        uri+=/trunk
     fi
 
-    local subpath="$(scm_get_var SUBPATH)"
+    local subpath=$(scm_get_var SUBPATH)
     subpath=${subpath##*(/)}
     subpath=${subpath%%*(/)}
-    [[ -n ${subpath} ]] && uri+="/${subpath}"
+    [[ -n ${subpath} ]] && uri+=/${subpath}
 
     echo "${uri}"
 }
@@ -71,21 +71,21 @@ scm-svn_svn() {
 }
 
 scm-svn_info() {
-    local what="${2:-$(scm_get_var CHECKOUT_TO)}"
-    local info="$(scm-svn_svn -q info "${what}" | sed -ne "s/^${1}: //p")"
+    local what=${2:-$(scm_get_var CHECKOUT_TO)}
+    local info=$(scm-svn_svn -q info "${what}" | sed -ne "s/^${1}: //p")
     [[ -n ${info} ]] || die "could not determine ${1} for ${what}"
     echo "${info}"
 }
 
 scm-svn_do_appraise() {
-    local dir="$(scm_get_var CHECKOUT_TO)"
+    local dir=$(scm_get_var CHECKOUT_TO)
 
     if [[ ! -d ${dir}/.svn ]]; then
         echo "${dir} is not a svn checkout"
         return 3
     fi
 
-    if [[ "$(scm-svn_info URL)" != "$(scm-svn_uri)" ]]; then
+    if [[ $(scm-svn_info URL) != $(scm-svn_uri) ]]; then
         echo "${dir} is a checkout of $(scm-svn_info URL), but wanted $(scm-svn_uri)"
 
         return 1
@@ -113,13 +113,13 @@ scm-svn_do_checkout() {
 }
 
 scm-svn_do_update() {
-    local dir="$(scm_get_var CHECKOUT_TO)"
+    local dir=$(scm_get_var CHECKOUT_TO)
 
-    if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
-        local oldroot="$(scm-svn_info "Repository Root")"
-        local newroot="$(scm-svn_info "Repository Root" "$(scm-svn_uri)")"
+    if [[ $(scm-svn_uri) != $(scm-svn_info URL) ]]; then
+        local oldroot=$(scm-svn_info 'Repository Root')
+        local newroot=$(scm-svn_info 'Repository Root' "$(scm-svn_uri)")
         if [[ ${newroot} != ${oldroot} ]]; then
-            if [[ $(scm-svn_info "Repository UUID") != $(scm-svn_info "Repository UUID" "$(scm-svn_uri)") ]]; then
+            if [[ $(scm-svn_info 'Repository UUID') != $(scm-svn_info 'Repository UUID' "$(scm-svn_uri)") ]]; then
                 echo rm -rf "${dir}"
                 rm -rf "${dir}"
                 [[ -d "${dir}" ]] && die "rm failed"
@@ -132,7 +132,7 @@ scm-svn_do_update() {
     fi
 
     local rev=$(scm_get_var REVISION)
-    if [[ "$(scm-svn_uri)" != "$(scm-svn_info URL)" ]]; then
+    if [[ $(scm-svn_uri) != $(scm-svn_info URL) ]]; then
         scm-svn_svn switch ${rev:+-r${rev}} "$(scm-svn_uri)" "${dir}"
     else
         scm-svn_svn update ${rev:+-r${rev}} "${dir}"
@@ -140,7 +140,7 @@ scm-svn_do_update() {
 }
 
 scm-svn_do_revision() {
-    scm-svn_info "Last Changed Rev"
+    scm-svn_info 'Last Changed Rev'
 }
 
 scm-svn_do_unpack() {

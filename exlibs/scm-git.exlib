@@ -6,12 +6,12 @@
 #       Copyright 1999-2007 Gentoo Foundation
 
 if [[ -z ${SCM_TYPE} ]]; then
-    SCM_TYPE="git"
+    SCM_TYPE=git
     require scm
 fi
 
 scm-git_do_dependencies() {
-    local git="dev-scm/git"
+    local git=dev-scm/git
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "${git}[curl] net-misc/curl[ssl]"
     elif [[ $(scm_get_var REPOSITORY) == http://* ]]; then
@@ -29,7 +29,7 @@ scm-git_do_check_vars() {
         && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
     [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
             -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
-    local rev="$(scm_get_var REVISION)"
+    local rev=$(scm_get_var REVISION)
     [[ -n ${rev} ]] && [[ ${rev} == *[^[:xdigit:]]* || ${#rev} -ne 40 ]] \
         && die "for git, $(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
     [[ -n $(scm_get_var SUBPATH) ]] && die "for git, $(scm_var_name SUBPATH) must not be set"
@@ -49,7 +49,7 @@ scm-git_git() {
 }
 
 scm-git_do_appraise() {
-    local dir="$(scm_get_var CHECKOUT_TO)"
+    local dir=$(scm_get_var CHECKOUT_TO)
 
     if ! nonfatal scm-git_git -q rev-parse HEAD &>/dev/null; then
         echo "${dir} is not a git checkout"
@@ -67,9 +67,9 @@ scm-git_do_appraise() {
         fi
     fi
 
-    local origin="$(scm-git_git -q config remote.origin.url)"
+    local origin=$(scm-git_git -q config remote.origin.url)
     [[ -n ${origin} ]] || die "could not determine origin URL for ${dir}"
-    if [[ ${origin} != "$(scm_get_var REPOSITORY)" ]]; then
+    if [[ ${origin} != $(scm_get_var REPOSITORY) ]]; then
         echo "${dir} is a clone of ${origin}, but wanted $(scm_get_var REPOSITORY)"
         return 1
     fi
@@ -101,9 +101,9 @@ scm-git_do_checkout() {
 }
 
 scm-git_do_update() {
-    local old_origin="$(scm-git_git -q config remote.origin.url)"
+    local old_origin=$(scm-git_git -q config remote.origin.url)
     [[ -n ${old_origin} ]] || die "could not determine origin URL for $(scm_get_var CHECKOUT_TO)"
-    if [[ ${old_origin} != "$(scm_get_var REPOSITORY)" ]]; then
+    if [[ ${old_origin} != $(scm_get_var REPOSITORY) ]]; then
         scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
         scm-git_git branch -D $(scm-git_git -q branch | sed -e 's/^\*/ /' -e '/(.*)/d')
         scm-git_git tag -d $(scm-git_git -q tag)
@@ -131,8 +131,8 @@ scm-git_do_unpack() {
     mkdir -p "$(scm_get_var UNPACK_TO)" || die "mkdir failed"
     scm-git_git checkout -f $(scm-git_ref_or_sha1)
     if [[ -z ${SCM_THIS} ]]; then
-        export GIT_DIR="$(scm_get_var CHECKOUT_TO)"
-        export GIT_WORK_TREE="$(scm_get_var UNPACK_TO)"
+        export GIT_DIR=$(scm_get_var CHECKOUT_TO)
+        export GIT_WORK_TREE=$(scm_get_var UNPACK_TO)
     fi
 }
 

@@ -42,7 +42,7 @@ scm_call() {
 
 scm_access_checkout() {
     [[ ${#} -ge 1 ]] || die "scm_access_checkout needs at least one argument"
-    local dir="$(scm_get_var CHECKOUT_TO)"
+    local dir=$(scm_get_var CHECKOUT_TO)
     local lock=${dir%/*}/.lock-${dir##*/}
 
     (
@@ -65,11 +65,11 @@ scm_access_checkout() {
 }
 
 scm_fetch_one() {
-    local dir="$(scm_get_var CHECKOUT_TO)"
+    local dir=$(scm_get_var CHECKOUT_TO)
 
     local whynot status
     if [[ -d ${dir} ]]; then
-        whynot="$(scm_call appraise)"
+        whynot=$(scm_call appraise)
         status=${?}
         if [[ ${status} -eq 2 ]]; then
             einfo "Not fetching ${SCM_THIS:-primary repository} because the existing checkout is perfect"
@@ -89,9 +89,9 @@ scm_fetch_one() {
     if [[ -n ${SCM_MIN_UPDATE_DELAY} ]]; then
         [[ ${SCM_MIN_UPDATE_DELAY} == *[^[:digit:]]* || ${SCM_MIN_UPDATE_DELAY} -eq 0 ]] \
             && die "SCM_MIN_UPDATE_DELAY must be a positive integer"
-        if [[ -e "${dir}/.scm.exlib.timestamp" &&
-                -n "$(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
-                          -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print)" ]]; then
+        if [[ -e ${dir}/.scm.exlib.timestamp &&
+                -n $(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
+                          -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print) ]]; then
             if [[ ${status} -eq 0 ]]; then
                 einfo "Not fetching ${SCM_THIS:-primary repository} because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
                 return
@@ -114,7 +114,7 @@ scm_fetch_one() {
     fi
 
     if [[ -d ${dir} ]]; then
-        whynot="$(scm_call appraise)"
+        whynot=$(scm_call appraise)
         [[ ${?} -eq 1 || ${?} -eq 3 ]] && die "${whynot}"
     else
         die "${dir} does not exist"
@@ -130,21 +130,21 @@ scm_src_fetch_extra() {
 scm_scminfo_one() {
     local rev=$(scm_call revision)
     [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
-    SCM_INFO+=",${SCM_THIS}=${rev}"
+    SCM_INFO+=,${SCM_THIS}=${rev}
 }
 
 scm_pkg_scm_info() {
-    local SCM_INFO=""
+    local SCM_INFO=
     scm_for_each scm_access_checkout scm_scminfo_one
     echo ${SCM_INFO#,=}
 }
 
 scm_unpack_one() {
-    local dir="$(scm_get_var CHECKOUT_TO)"
+    local dir=$(scm_get_var CHECKOUT_TO)
 
     local whynot
     if [[ -d ${dir} ]]; then
-        whynot="$(scm_call appraise)"
+        whynot=$(scm_call appraise)
         [[ ${?} -eq 1 || ${?} -eq 3 ]] && die "${whynot}"
     else
         die "${dir} does not exist"
@@ -188,7 +188,7 @@ scm_global_stuff() {
     [[ -z $(scm_get_var REPOSITORY) ]] \
         && die "$(scm_var_name REPOSITORY) must be set"
     [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKBASE}/${SCM_THIS:-${PNV}}"
-    local checkout_to="$(scm_get_var CHECKOUT_TO)"
+    local checkout_to=$(scm_get_var CHECKOUT_TO)
     [[ -z ${checkout_to} ]] && checkout_to=${SCM_THIS:-${PN}}
     [[ ${checkout_to} == /* ]] || checkout_to=${FETCHEDDIR}/scm/${checkout_to}
     scm_set_var CHECKOUT_TO "${checkout_to%%*(/)}"
