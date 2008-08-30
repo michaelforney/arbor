@@ -9,7 +9,7 @@ fi
 scm-svn_do_dependencies() {
     local svn=">=dev-scm/subversion-1.5.0_alpha1"
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
-        echo "${svn}[ssl]"
+        echo "${svn} net-misc/neon[ssl]"
     else
         echo "${svn}"
     fi

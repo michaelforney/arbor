@@ -15,7 +15,7 @@ DOWNLOADS="http://subversion.tigris.org/downloads/${PNV}.tar.bz2"
 LICENCES="Apache-1.1"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="nls perl python ruby slowtests ssl"
+MYOPTIONS="nls perl python ruby slowtests"
 
 RESTRICT="!slowtests? ( test )"
 
@@ -28,12 +28,14 @@ DEPENDENCIES="
         slowtests? ( >=dev-lang/python-2.2 )
     build+run:
         dev-libs/apr-util
-        net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2|~0.28.3][ssl?]
+        net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2|~0.28.3]
         perl? ( dev-lang/perl:= )
         python? ( dev-lang/python:= )
         ruby? ( dev-lang/ruby:= )
     run:
-        perl? ( dev-perl/URI )"
+        perl? ( dev-perl/URI )
+    post,suggested:
+        net-misc/neon[ssl] [[ description = [ Enables support for https:// URIs ] ]]"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-perl-vendor.patch"
     "${FILES}/${PN}-perl-ccopts.patch" )
