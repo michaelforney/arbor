@@ -1,7 +1,6 @@
 # Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-
 SUMMARY="neon is an HTTP and WebDAV client library"
 HOMEPAGE="http://www.webdav.org/neon/"
 DOWNLOADS="http://www.webdav.org/neon/${PNV}.tar.gz"
@@ -12,7 +11,10 @@ PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="expat ssl"
 
 DEPENDENCIES="
+    build:
+        >=dev-util/pkg-config-0.18
     run,build:
+        sys-libs/zlib
         ssl? ( dev-libs/openssl )
         !expat? ( dev-libs/libxml2 )
         expat? ( dev-libs/expat )"
