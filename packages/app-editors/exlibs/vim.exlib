@@ -56,16 +56,16 @@ MYOPTIONS="nls"
 if [[ ${PN} == vim-runtime ]]; then
     MYOPTIONS+=" livecd"
 else
-    MYOPTIONS+=" minimal perl python ruby"
-   #MYOPTIONS+=" cscope gpm"
+    MYOPTIONS+=" gpm minimal perl python ruby"
+   #MYOPTIONS+=" cscope"
     DEPENDENCIES+="
         build+run:
+            gpm?     ( >=sys-libs/gpm-1.19.3 )
             !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
             perl?    ( dev-lang/perl:= )
             python?  ( dev-lang/python:= )
             ruby?    ( dev-lang/ruby:= )"
            #cscope?  ( dev-util/cscope )
-           #gpm?     ( >=sys-libs/gpm-1.19.3 )
            #acl?     ( kernel_linux? ( sys-apps/acl ) )
     case ${PN} in
         vim)
@@ -216,13 +216,12 @@ vim_src_configure() {
     else
         myconf="--with-features=huge \
                 --enable-multibyte \
-                --disable-gpm \
                 --disable-rubyinterp \
+                $(option_enable gpm)
                 $(option_enable perl perlinterp) \
                 $(option_enable python pythoninterp)
                 $(option_enable ruby rubyinterp)"
        #myconf+=" $(option_enable cscope)"
-       #myconf+=" $(option_enable gpm)"
    #if [[ "${PN}" == "gvim" ]] ; then
    #    myconf+=" $(option_enable netbeans)"
    #fi
