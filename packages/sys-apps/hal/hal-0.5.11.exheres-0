@@ -3,7 +3,7 @@
 # Based in part on 'hal-0.5.11-r1.ebuild' from Gentoo which is:
 #    Copyright 1999-2008 Gentoo Foundation
 
-require eutils
+require eutils multilib
 
 PATCH_VERSION="1"
 
@@ -82,8 +82,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acpi "acpi acpi-proc" apm "verbose verbose-mode" )
 
-src_install()
-{
+src_install() {
     default
 
     # Empty directories
@@ -96,7 +95,7 @@ src_install()
     find "${IMAGE}"/var/run -depth -type d -print0 2> /dev/null | xargs -0 -r rmdir
 
     # hal unmount helper for unclean unmounts
-    exeinto /lib/udev
+    exeinto /$(get_libdir)/udev
     newexe "${FILES}/hal-unmount.dev" hal_unmount
 
     # initscript
