@@ -24,6 +24,10 @@ ECMAKE_BUILD_DIR="${WORKBASE}"/${PN}_build
 #   `cmake_enable FOO`     -> foo ? -DENABLE_FOO=ON : -DENABLE_FOO=OFF
 #   `cmake_enable foo Bar` -> foo ? -DENABLE_Bar=ON : -DENABLE_Bar=OFF
 #   `cmake_enable Foo Foo` -> Foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
+cmake_build() {
+    _cmake_option BUILD "$@"
+}
+
 cmake_enable() {
     _cmake_option ENABLE "$@"
 }
@@ -48,6 +52,7 @@ cmake_with() {
 # rather than Release. It also respects the following variables similarly to
 # default_src_configure and econf:
 #    CMAKE_SRC_CONFIGURE_PARAMS
+#    CMAKE_SRC_CONFIGURE_OPTION_BUILDS
 #    CMAKE_SRC_CONFIGURE_OPTION_ENABLES
 #    CMAKE_SRC_CONFIGURE_OPTION_HAVES
 #    CMAKE_SRC_CONFIGURE_OPTION_WANTS
@@ -96,6 +101,9 @@ ecmake() {
 cmake_src_configure() {
     ecmake \
         "${CMAKE_SRC_CONFIGURE_PARAMS[@]}" \
+        $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_BUILDS[@]}" ; do
+            cmake_build ${s}
+        done ) \
         $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do
             cmake_enable ${s}
         done ) \
