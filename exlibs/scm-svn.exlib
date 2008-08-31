@@ -63,11 +63,7 @@ scm-svn_svn() {
 
     local cmd=${1} extra=( --non-interactive )
     shift
-    case ${cmd} in
-        checkout|co|export|status|stat|st|switch|sw|update|up)
-            extra+=( --ignore-externals )
-            ;;
-    esac
+    has "${cmd}" checkout co export status stat st switch sw update up && extra+=( --ignore-externals )
 
     ${echo} svn "${cmd}" "${extra[@]}" "${@}"
     svn "${cmd}" "${extra[@]}" "${@}" || die_unless_nonfatal "svn ${cmd} failed"
