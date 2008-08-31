@@ -1,0 +1,35 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+
+SUMMARY="A tool to display dialog boxes from a shell"
+HOMEPAGE="http://invisible-island.net/dialog/dialog.html"
+UPSTREAM_CHANGELOG="http://invisible-island.net/dialog/CHANGES"
+REMOTE_IDS="freshmeat:dialog"
+DOWNLOADS="ftp://invisible-island.net/${PN}/${PNV/_p/-}.tgz"
+
+LICENCES="GPL"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="examples nls unicode"
+
+DEPENDENCIES="
+    build:
+        nls? ( sys-devel/gettext )
+    build+run:
+        sys-libs/ncurses[unicode?]"
+
+WORK="${WORKBASE}/${PNV/_p/-}"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls 'unicode widec' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'unicode ncursesw' )
+
+src_install() {
+    default
+
+    if option examples; then
+        insinto /usr/share/doc/${PNVR}/examples
+        doins -r samples/*
+    fi
+}
+
