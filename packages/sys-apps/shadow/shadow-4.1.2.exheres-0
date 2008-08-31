@@ -107,10 +107,10 @@ pkg_postinst() {
     # Enable shadow groups (we need ROOT=/ here, as grpconv only
     # operate on / ...).
     if [[ ${ROOT} == / && ! -f /etc/gshadow ]] ; then
-        if grpck -r &>/dev/null; then
+        if grpck -r ; then
             grpconv
         else
-            ewarn "Running 'grpck' returned errors. Please run it by hand, and then"
+            ewarn "Running 'grpck -r' returned errors. Please run it by hand, and then"
             ewarn "run 'grpconv' afterwards."
         fi
     fi
