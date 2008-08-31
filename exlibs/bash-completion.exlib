@@ -1,14 +1,7 @@
-# Copyright 1999-2005 Gentoo Foundation
+# Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/bash-completion.eclass,v 1.16 2005/07/31 12:38:22 ka0ttic Exp $
-#
-# Simple eclass that provides an interface for installing
-# contributed (ie not included in bash-completion proper)
-# bash-completion scripts.
-#
-# Author: Aaron Walker <ka0ttic@gentoo.org>
-
-export_exlib_phases pkg_postinst
+# Based in part upon bash-completion.eclass, which is:
+#    Copyright 1999-2005 Gentoo Foundation
 
 MYOPTIONS="bash-completion"
 
@@ -19,29 +12,22 @@ DEPENDENCIES="
             app-shells/bash-completion
         )"
 
-# dobashcompletion <file> <new file>
-#   First arg, <file>, is required and is the location of the bash-completion
-# script to install.  If the variable BASH_COMPLETION_NAME is set in the
-# ebuild, dobashcompletion will install <file> as
-# /usr/share/bash-completion/$BASH_COMPLETION_NAME. If it is not set,
-# dobashcompletion will check if a second arg ($2) was passed, installing as
-# the specified name.  Failing both these checks, dobashcompletion will
-# install the file as /usr/share/bash-completion/${PN}.
-
 dobashcompletion() {
-    [[ -z "$1" ]] && die "usage: dobashcompletion <file> <new file>"
-    [[ -z "${BASH_COMPLETION_NAME}" ]] && BASH_COMPLETION_NAME="${2:-${PN}}"
-
-    if optionq bash-completion ; then
+    [[ -z "$1" ]] && die "usage: dobashcompletion <file> [ <installed name> ]"
+    if option bash-completion; then
         insinto /usr/share/bash-completion
-        newins "$1" "${BASH_COMPLETION_NAME}"
+        newins "${1}" "${2:-${PN}}"
     fi
 }
 
-bash-completion_pkg_postinst() {
-    if optionq bash-completion ; then
-        elog "To enable command-line completion for ${PN}, run:"
-        elog "  eselect bashcomp enable ${BASH_COMPLETION_NAME:-${PN}}"
-    fi
+bash-completion_src_install() {
+    default
+
+    local c
+    for c in "${BASH_COMPLETIONS[@]}"; do
+        dobashcompletion ${c}
+    done
 }
+
+export_exlib_phases src_install
 
