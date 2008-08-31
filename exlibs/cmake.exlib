@@ -77,14 +77,14 @@ ecmake() {
     local cmakeargs tmp_libdir=$(get_libdir)
 
     cmakeargs=(
-        ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE=OFF}
-        -DCMAKE_VERBOSE_MAKEFILE=ON
-        -DCMAKE_BUILD_TYPE=''
-        -DCMAKE_C_COMPILER="$(type -P $(tc-getCC))"
-        -DCMAKE_CXX_COMPILER="$(type -P $(tc-getCXX))"
-        -DCMAKE_INSTALL_PREFIX="${PREFIX:=/usr}"
-        -DLIB_INSTALL_DIR="${PREFIX}/${tmp_libdir}"
-        -DLIB_SUFFIX=${tmp_libdir/lib}
+        ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE:BOOL=TRUE}
+        -DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE
+        -DCMAKE_BUILD_TYPE:STRING='Release'
+        -DCMAKE_C_COMPILER:PATH="$(type -P $(tc-getCC))"
+        -DCMAKE_CXX_COMPILER:PATH="$(type -P $(tc-getCXX))"
+        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX:=/usr}"
+        -DLIB_INSTALL_DIR:PATH="${PREFIX}/${tmp_libdir}"
+        -DLIB_SUFFIX:STRING=${tmp_libdir/lib}
     )
 
     echo cmake ${cmakeargs[@]} "$@" ${EXTRA_ECONF} "${WORK}"
@@ -149,7 +149,7 @@ _cmake_option() {
     else
         flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
     fi
-    echo "-D${1}_${3:-${2}}=$(option ${flag} && echo ON || echo OFF)"
+    echo "-D${1}_${3:-${2}}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
 }
 
 # Used to enter the correct build dir and run a command in
