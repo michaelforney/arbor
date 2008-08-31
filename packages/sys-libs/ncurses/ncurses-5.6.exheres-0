@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="Free software emulation of curses using Terminfo formats"
 HOMEPAGE="http://www.gnu.org/software/ncurses"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
@@ -12,44 +14,39 @@ MYOPTIONS="unicode"
 
 DEPENDENCIES=""
 
+ECONF_SOURCE="${WORK}"
+WORK_WIDE="${WORK}/wide"
+WORK="${WORK}/narrow/"
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-shared --with-normal --without-termcap --libdir=/$(get_libdir) )
+
 src_configure() {
-    ECONF_SOURCE="${WORK}"
-    common_conf="--with-shared \
-        --with-normal \
-        --without-termcap \
-        --libdir=/lib"
+    mkdir "${WORK}" "${WORK_WIDE}" || die "Creating ${WORK}, ${WORK_WIDE} failed"
+    cd "${WORK}" || die "cd ${WORK} failed"
+    default
 
-    mkdir "${WORK}/narrow"
-    cd "${WORK}/narrow"
-    econf ${common_conf}
-
-    if option unicode ; then
-        mkdir "${WORK}/wide"
-        cd "${WORK}/wide"
-        econf \
-            ${common_conf} \
-            $(option_enable unicode widec)
+    if option unicode; then
+        cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
+        DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'unicode widec' )
+        default
     fi
 }
 
 src_compile() {
-    cd "${WORK}/narrow"
-    emake
+    default
 
     if option unicode ; then
-        cd "${WORK}/wide"
-        emake
+        cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
+        default
     fi
 }
 
 src_install() {
     # Install narrow char version
-    cd "${WORK}/narrow"
     default
 
     # Install wide char version if unicode is enabled
     if option unicode ; then
-        cd "${WORK}/wide"
+        cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
         default
     fi
 }
