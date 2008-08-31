@@ -4,7 +4,9 @@
 # Inspired from Gentoo's ccache-2.4-r7.ebuild which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-SUMMARY="compiler cache"
+require multilib
+
+SUMMARY="Compiler cache"
 HOMEPAGE="http://ccache.samba.org/"
 DOWNLOADS="http://samba.org/ftp/ccache/${PNV}.tar.gz"
 
@@ -21,10 +23,11 @@ src_install() {
     insinto /usr/share/doc/$PNVR/html
     doins web/*.html
 
-    dodir /usr/lib/ccache/bin
-    insinto /usr/lib/ccache/bin
+    dodir /usr/$(get_libdir)/ccache/bin
+    insinto /usr/$(get_libdir)/ccache/bin
     local f
     for f in {${CHOST}-,}{gcc,g++,c++}; do
-        dosym /usr/bin/ccache /usr/lib/ccache/bin/${f}
+        dosym /usr/bin/ccache /usr/$(get_libdir)/ccache/bin/${f}
     done
 }
+
