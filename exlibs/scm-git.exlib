@@ -16,6 +16,11 @@ scm-git_do_dependencies() {
         echo "${git}[curl] net-misc/curl[ssl]"
     elif [[ $(scm_get_var REPOSITORY) == http://* ]]; then
         echo "${git}[curl]"
+    elif [[ $(scm_get_var REPOSITORY) == rsync://* ]]; then
+        echo "${git} net-misc/rsync"
+    elif [[ $(scm_get_var REPOSITORY) == ssh://* ]] ||
+            [[ $(scm_get_var REPOSITORY) != *://* && $(scm_get_var REPOSITORY) == *:* ]]; then
+        echo "${git} net-misc/openssh"
     else
         echo "${git}"
     fi
