@@ -1,0 +1,46 @@
+# Copyright 2008 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gems.eclass' from Gentoo, which is:
+#     Copyright 1999-2005 Gentoo Foundation
+#
+# Purpose: Install rubygems packages
+
+if [[ -z ${DOWNLOADS} ]]; then
+    DOWNLOADS="http://gems.rubyforge.org/gems/${PNV}.gem"
+    REMOTE_IDS="rubyforge:${PN}"
+fi
+
+HOMEPAGE="http://${PN}.rubyforge.org"
+
+MYOPTIONS="doc"
+DEPENDENCIES="
+    >=dev-ruby/rubygems-1.2.0
+"
+export_exlib_phases src_install
+
+gem_src_install() {
+    unset GEM_HOME GEM_PATH RUBYOPT
+
+    site_gem_dir=$(ruby -rubygems -e 'print Gem.dir')
+    vendor_gem_dir=${site_gem_dir/gems/vendor_gems}
+
+    export GEM_HOME="${vendor_gem_dir}"
+
+    myconf=""
+    if ! option doc; then
+        myconf+="--no-ri --no-rdoc"
+    fi
+
+    gem install "${FETCHEDDIR}"/${PNV}.gem \
+        --local ${myconf} \
+        --install-dir "${IMAGE}"/${vendor_gem_dir} || die "gem install failed"
+
+    if [[ -d ${IMAGE}/${vendor_gem_dir}/bin ]]; then
+        exeinto /usr/bin
+        for exe in ${IMAGE}/${vendor_gem_dir}/bin/* ; do
+            doexe "${exe}"
+        done
+    fi
+
+    keepdir ${vendor_gem_dir}/{doc,gems,cache,specifications}
+}
