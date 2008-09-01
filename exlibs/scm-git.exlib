@@ -38,6 +38,8 @@ scm-git_do_check_vars() {
     [[ -n ${rev} ]] && [[ ${rev} == *[^[:xdigit:]]* || ${#rev} -ne 40 ]] \
         && die "for git, $(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
     [[ -n $(scm_get_var SUBPATH) ]] && die "for git, $(scm_var_name SUBPATH) must not be set"
+
+    scm_trim_slashes REPOSITORY -scheme -trailing
 }
 
 scm-git_git() {

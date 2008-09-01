@@ -28,6 +28,11 @@ scm-svn_do_check_vars() {
     [[ -n $(scm_get_var REVISION) ]] && \
         [[ "$(scm_get_var REVISION)" == *[^[:digit:]]* || "$(scm_get_var REVISION)" -eq 0 ]] \
         && die "for svn, $(scm_var_name REVISION) must be a positive integer"
+
+    scm_trim_slashes REPOSITORY -scheme -trailing
+    scm_trim_slashes BRANCH  -leading -trailing
+    scm_trim_slashes TAG     -leading -trailing
+    scm_trim_slashes SUBPATH -leading -trailing
 }
 
 scm-svn_uri() {
@@ -37,7 +42,6 @@ scm-svn_uri() {
     fi
 
     local uri=$(scm_get_var REPOSITORY)
-    uri=${uri%%*(/)}
     if [[ -n $(scm_get_var TAG) ]]; then
         uri+=/tags/$(scm_get_var TAG)
     elif [[ -n $(scm_get_var BRANCH) ]]; then
@@ -46,10 +50,7 @@ scm-svn_uri() {
         uri+=/trunk
     fi
 
-    local subpath=$(scm_get_var SUBPATH)
-    subpath=${subpath##*(/)}
-    subpath=${subpath%%*(/)}
-    [[ -n ${subpath} ]] && uri+=/${subpath}
+    [[ -n $(scm_get_var SUBPATH) ]] && uri+=/$(scm_get_var SUBPATH)
 
     echo "${uri}"
 }

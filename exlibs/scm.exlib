@@ -181,24 +181,61 @@ scm_do_info() {
     SCM_DEFAULT_INFO_COUNT+=1
 }
 
+scm_trim_slashes() {
+    [[ ${#} -ge 1 ]] || die "scm_trim_slashes needs at least one argument"
+
+    local var=${1}
+    local value=$(scm_get_var ${var})
+    shift
+
+    local scheme= leading= trailing=
+    while [[ ${#} -gt 0 ]]; do
+        case ${1} in
+            -scheme)   scheme=1   ;;
+            -leading)  leading=1  ;;
+            -trailing) trailing=1 ;;
+            *) die "scm_trim_slashes: unrecognised option ${1}"
+        esac
+        shift
+    done
+
+    if [[ -n ${value} ]]; then
+        local myscheme=
+        if [[ -n ${scheme} ]]; then
+            myscheme=${value%%://*}://
+            value=${value#*//}
+        fi
+
+        value=${value//+(\/)/\/}
+        [[ -n ${leading}  ]] && value=${value#/}
+        [[ -n ${trailing} ]] && value=${value%/}
+        scm_set_var ${var} "${myscheme}${value}"
+    fi
+}
+
+scm_do_check_vars() {
+    :
+}
+
 scm_global_stuff() {
     [[ -z $(scm_get_var TYPE) ]] && die "$(scm_var_name TYPE) must be set"
     has scm-$(scm_get_var TYPE) ${INHERITED} || require scm-$(scm_get_var TYPE)
 
     [[ -z $(scm_get_var REPOSITORY) ]] \
         && die "$(scm_var_name REPOSITORY) must be set"
-    [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKBASE}/${SCM_THIS:-${PNV}}"
+
     local checkout_to=$(scm_get_var CHECKOUT_TO)
     [[ -z ${checkout_to} ]] && checkout_to=${SCM_THIS:-${PN}}
     [[ ${checkout_to} == /* ]] || checkout_to=${FETCHEDDIR}/scm/${checkout_to}
-    scm_set_var CHECKOUT_TO "${checkout_to%%*(/)}"
+    scm_set_var CHECKOUT_TO "${checkout_to}"
+    scm_trim_slashes CHECKOUT_TO -trailing
+
+    [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKBASE}/${SCM_THIS:-${PNV}}"
+    scm_trim_slashes UNPACK_TO -trailing
+
     scm_call check_vars
 
     DEPENDENCIES+=" $(scm_call dependencies)"
-}
-
-scm_do_check_vars() {
-    :
 }
 
 DEPENDENCIES="build,host: >=sys-apps/util-linux-ng-2.13_pre2"
