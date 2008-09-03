@@ -205,7 +205,7 @@ scm_trim_slashes() {
         local myscheme=
         if [[ -n ${scheme} && ${value} == *://* ]]; then
             myscheme=${value%%://*}://
-            value=${value#*//}
+            value=${value#*://}
         fi
 
         value=${value//+(\/)/\/}
