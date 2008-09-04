@@ -37,6 +37,10 @@ cmake_have() {
     _cmake_option HAVE "$@"
 }
 
+cmake_option() {
+    _cmake_option '' "${@}"
+}
+
 # Similar to cmake_enable but using WANT instead of ENABLE.
 cmake_want() {
     _cmake_option WANT "$@"
@@ -55,6 +59,7 @@ cmake_with() {
 #    CMAKE_SRC_CONFIGURE_OPTION_BUILDS
 #    CMAKE_SRC_CONFIGURE_OPTION_ENABLES
 #    CMAKE_SRC_CONFIGURE_OPTION_HAVES
+#    CMAKE_SRC_CONFIGURE_OPTIONS
 #    CMAKE_SRC_CONFIGURE_OPTION_WANTS
 #    CMAKE_SRC_CONFIGURE_OPTION_WITHS
 #    EXTRA_ECONF
@@ -110,6 +115,9 @@ cmake_src_configure() {
         $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_HAVES[@]}" ; do
             cmake_have ${s}
         done ) \
+        $(for s in "${CMAKE_SRC_CONFIGURE_OPTIONS[@]}" ; do
+            cmake_option ${s}
+        done ) \
         $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_WANTS[@]}" ; do
             cmake_want ${s}
         done ) \
@@ -149,7 +157,7 @@ _cmake_option() {
     else
         flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
     fi
-    echo "-D${1}_${3:-${2}}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
+    echo "-D${1}${1:+_}${3:-${2}}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
 }
 
 # Used to enter the correct build dir and run a command in
