@@ -22,7 +22,7 @@ DOWNLOADS="http://ftp.andrew.cmu.edu/pub/cyrus-mail/${PNV}.tar.gz"
 
 LICENCES="cyrus-sasl"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ssl"
 
 DEPENDENCIES="
@@ -60,6 +60,9 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "ssl des"
 )
 
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( saslauthd )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LDAP_SASLAUTHD )
+
 src_prepare()
 {
     default
@@ -77,18 +80,16 @@ src_compile()
 
 src_install()
 {
-    emake -j1 DESTDIR="${IMAGE}" install
+    default
+
     dodir /var/lib/sasl2 /etc/sasl2
     keepdir /var/lib/sasl2 /etc/sasl2
 
-    dodoc AUTHORS ChangeLog NEWS README doc/TODO doc/*.txt
+    dodoc doc/{TODO,*.txt}
     newdoc pwcheck/README README.pwcheck
 
     docinto html
     dodoc doc/*.html
-
-    docinto saslauthd
-    dodoc saslauthd/{AUTHORS,ChangeLog,LDAP_SASLAUTHD,NEWS,README}
 
     pamd_mimic_system saslauthd auth account session
 }
