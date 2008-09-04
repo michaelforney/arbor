@@ -1,0 +1,156 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon exim-4.69-r1.ebuild from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require eutils fixheadtails multilib
+
+SUMMARY="A highly configurable, drop-in replacement for sendmail"
+HOMEPAGE="http://www.exim.org"
+REMOTE_IDS="freshmeat:${PN}"
+DOWNLOADS="ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PNV}.tar.bz2
+    ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PN}-texinfo-${PV}.tar.bz2
+    http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}-internal-pcre.patch.bz2
+    doc? ( ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PN}-html-${PV}.tar.bz2 )"
+
+LICENCES="GPL-2"
+SLOT="0"
+# XXX X? for eximon
+MYOPTIONS="dnsdb doc dovecot-sasl embedded-perl ipv6 lmtp mbx nis pam sasl ssl tcpd"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/pcre
+        >=sys-libs/db-4:=
+        pam? ( sys-libs/pam )
+        embedded-perl? ( dev-lang/perl:= )
+        sasl? ( dev-libs/cyrus-sasl )
+        ssl? ( dev-libs/openssl )
+        tcpd? ( sys-apps/tcp-wrappers )
+"
+# TODO Eximon
+EXIMON="
+    build:
+        X? ( x11-proto/xproto )
+    build+run:
+        X? (
+            x11-libs/libX11
+            x11-libs/libXaw
+            x11-libs/libXmu
+            x11-libs/libXt
+        )
+"
+#       sqlite? ( dev-db/sqlite:3 )
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    # Use maildir by default
+    "${FILES}"/${PNV}-maildir.patch
+    # No internal pcre, see http://bugs.exim.org/show_bug.cgi?id=657
+    "${FETCHEDDIR}"/${PNV}-internal-pcre.patch.bz2
+    "${FILES}"/${PNV}-parallel-make.patch
+    "${FILES}"/${PNV}-exherbo-defaults.patch
+)
+DEFAULT_SRC_COMPILE_PARAMS=( build=Exim-Exherbo )
+
+pkg_setup() {
+    enewgroup mail 12
+    enewuser mail 8 -1 /var/spool/mail mail
+    enewuser postmaster 14 -1 /var/spool/mail
+}
+
+src_prepare() {
+    mv "${WORKBASE}"/${PN}-texinfo-${PV}/doc/*.texinfo "${WORK}"/doc/ || die "Failed to move .texinfo files"
+
+    default
+
+    ht_fix_file scripts/Configure-config.h
+
+    cp "${WORK}/src/EDITME" Local/Makefile || die "Couldn't copy to Local/Makefile"
+    # XXX option X && cp ../exim_monitor/EDITME eximon.conf || die "Couldn't copy eximon.conf"
+
+    echo "CFLAGS += ${CFLAGS}" >> Local/Makefile || die "Using user's CFLAGS failed"
+    echo "LFLAGS += ${LDFLAGS}" >> Local/Makefile || die "Using user's LDFLAGS failed"
+
+    sed -e 's/^buildname=.*/buildname=Exim-Exherbo/g' -i Makefile || die "Configuring build dir failed"
+
+    uncomment_if_option_enabled() {
+        option ${1} && ! sed -e "/${2}/s/^#[[:space:]]*//" -i Local/Makefile && die "Sed for option ${1} failed"
+    }
+
+    uncomment_if_option_enabled dnsdb   LOOKUP_DNSDB=yes
+    uncomment_if_option_enabled dovecot-sasl AUTH_DOVECOT=yes
+    uncomment_if_option_enabled lmtp    TRANSPORT_LMTP=yes
+    uncomment_if_option_enabled mbx     SUPPORT_MBX=yes
+    uncomment_if_option_enabled nis     LOOKUP_NIS=yes
+    uncomment_if_option_enabled nis     LOOKUP_NISPLUS=yes
+    uncomment_if_option_enabled pam     SUPPORT_PAM=yes
+    uncomment_if_option_enabled embedded-perl EXIM_PERL=perl.o
+    uncomment_if_option_enabled sasl    AUTH_CYRUS_SASL=yes
+    # XXX Verify whether the path used in "${FILES}"/${PNV}-exherbo-defaults.patch
+    uncomment_if_option_enabled sasl    CYRUS_SASLAUTHD_SOCKET=
+    uncomment_if_option_enabled ssl     SUPPORT_TLS=yes
+    uncomment_if_option_enabled ssl     TLS_LIBS=-lssl
+    uncomment_if_option_enabled tcpd    USE_TCP_WRAPPERS=yes
+    # XXX uncomment_if_option_enabled X       EXIM_MONITOR=eximon.bin
+
+    if option ipv6; then
+cat <<EOF >> Local/Makefile
+# Enable ipv6
+HAVE_IPV6=YES
+IPV6_USE_INET_PTON=yes
+EOF
+    fi
+
+    local extralibs=
+    option pam && extralibs+="-lpam "
+    option sasl && extralibs+="-lsasl2 "
+    option tcpd && extralibs+="-lwrap "
+
+    if [[ -n ${extralibs} ]]; then
+cat <<EOF >> Local/Makefile
+# Support for pam, sasl, tcpd, ..
+EXTRALIBS=${extralibs}
+EOF
+    fi
+
+    # TODO ldap mysql postgresql sqlite
+
+    # TODO exiscan{,-acl}: mail-mta/exim exiscan-acl (integrated in exim by default, kill options)
+
+    # TODO When there's a properly slotted sys-libs/db:
+    #   INCLUDE=-I/usr/include/db1
+    #   DBMLIB=-ldb1
+}
+
+src_install() {
+    # For the mail aliases file, the buildsystem doesn't create this
+    dodir /etc/mail
+
+    # scripts/exim_install runs the exim binary we just build.
+    # When exim runs, it recreates the spooldir, if it doesn't exist, which causes access violations.
+    # There doesn't seem to be a clean way to not run exim, or to make exim not do that, so addpredict will have to do..
+    addpredict /var/spool/exim
+    default
+
+    dosym exim /usr/sbin/sendmail
+    dodir /usr/$(get_libdir)
+    dosym exim /usr/$(get_libdir)/sendmail
+
+    dodoc "${WORK}"/doc/*
+    doman "${WORK}/doc/${PN}.8"
+
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/
+        doins -r "${WORKBASE}/${PN}-html-${PV}/doc/html"
+    fi
+
+    newinitd "${FILES}"/${PN}.rc exim
+    newconfd "${FILES}"/${PN}.confd exim
+
+    diropts "-m0750"
+    dodir /var/log/${PN} /var/spool/${PN}
+    keepdir /var/log/${PN} /var/spool/${PN}
+    fowners -R mail:mail /var/log/${PN} /var/spool/${PN}
+}
+

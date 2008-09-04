@@ -1,0 +1,27 @@
+From 7340bb8b8bc04c546665851a7c0f922f8fd9f2f2 Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Thu, 4 Sep 2008 06:16:51 +0200
+Subject: [PATCH] Use maildir by default.
+
+---
+ src/configure.default |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/src/configure.default b/src/configure.default
+index e0bb93e..9aa1c5e 100644
+--- a/src/configure.default
++++ b/src/configure.default
+@@ -639,7 +639,9 @@ remote_smtp:
+ 
+ local_delivery:
+   driver = appendfile
+-  file = /var/mail/$local_part
++  # file = /var/mail/$local_part
++  directory = /home/$local_part/.maildir
++  maildir_format
+   delivery_date_add
+   envelope_to_add
+   return_path_add
+-- 
+1.6.0.1
+
