@@ -3,28 +3,29 @@
 # Based in part upon 'sqlite-3.5.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-RESTRICT="test" # Tests need dev-lang/tcl
-
 require versionator flag-o-matic
 
 SUMMARY="An embedded SQL database engine"
 HOMEPAGE="http://www.sqlite.org/"
-DOWNLOADS="http://www.sqlite.org/${PNV}.tar.gz"
-##    doc? ( http://www.sqlite.org/${PN}_docs_$(replace_all_version_separators _).zip )
+DOWNLOADS="http://www.sqlite.org/${PNV}.tar.gz
+    doc? ( http://www.sqlite.org/${PN}_docs_$(replace_all_version_separators _).zip )"
 
 LICENCES="as-is"
 SLOT="3"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug soundex" ## doc tcl
+MYOPTIONS="debug doc soundex tcl"
 
-DEPENDENCIES="" ## build: doc ? ( app-arch/unzip )
+DEPENDENCIES="
+    build:
+        doc? ( app-arch/unzip )
+    build+run:
+        tcl? ( dev-lang/tcl:= ) [[ description = [ The testsuite uses tcl ] ]]"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
---enable-threadsafe --enable-cross-thread-connections
---disable-tcl
-## --enable-tempstore
-)
+RESTRICT="!tcl? ( test )"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug tcl )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threadsafe --enable-cross-thread-connections )
+DEFAULT_SRC_INSTALL_PARAMS=( TCLLIBDIR="/usr/$(get_libdir)" )
 
 src_configure() {
     option soundex && append-flags -DSQLITE_SOUNDEX=1
@@ -36,5 +37,9 @@ src_install() {
 
     newbin lemon lemon-${SLOT}
     doman sqlite3.1
+
+    insinto /usr/share/doc/${PNVR}/html
+    # 3.6.2: option doc && doins -r "${WORKBASE}"/${PN}_docs_$(replace_all_version_separators _)/
+    option doc && doins -r "${WORKBASE}"/${PN}-docs-${PV}/
 }
 
