@@ -1,0 +1,72 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'clamav-0.93.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require eutils common-metadata
+
+PLATFORMS="~amd64"
+MYOPTIONS="ipv6 unrar"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/gmp"
+#    build: dev-libs/check [[ description = [ Necessary to run the testsuite ] ]]
+#           dev-util/valgrind
+
+# 
+RESTRICT="test"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( unrar ipv6 )
+DEFAULT_SRC_CONFIGURE_PARAMS=( 
+    --enable-check --disable-tests-install
+    --enable-bzip2
+    --enable-lzma
+    --enable-clamuko        # On-access scanning
+    --enable-digsig
+    --enable-id-check       # Use id utility instead of /etc/passwd parsing (Gentoo #72540)
+    --enable-nls
+    --with-dbdir=/var/lib/clamav
+    --with-iconv
+    --disable-experimental
+    --disable-milter
+)
+
+pkg_setup() {
+    enewgroup clamav
+    enewuser clamav -1 -1 /dev/null clamav
+}
+
+src_install() {
+    default
+
+    # Install /etc/logrotate.d/clamavd ?
+    newconfd "${FILES}"/clamd.conf clamd
+    newinitd "${FILES}"/clamd.rc clamd
+
+    dodir /var/{log,run}/${PN}
+    keepdir /var/{log,run}/${PN}
+    fowners clamav:clamav /var/{log,run}/${PN}
+
+    # XXX Use patches
+    # Set up some default configs
+    sed -e "s:^\(Example\):\# \1:" \
+        -e "s:.*\(PidFile\) .*:\1 /var/run/clamav/clamd.pid:" \
+        -e "s:.*\(LocalSocket\) .*:\1 /var/run/clamav/clamd.sock:" \
+        -e "s:.*\(User\) .*:\1 clamav:" \
+        -e "s:^\#\(LogFile\) .*:\1 /var/log/clamav/clamd.log:" \
+        -e "s:^\#\(LogTime\).*:\1 yes:" \
+        -e "s:^\#\(AllowSupplementaryGroups\).*:\1 yes:" \
+        -i "${IMAGE}"/etc/clamd.conf
+
+    # Do the same for /etc/freshclam.conf
+    sed -e "s:^\(Example\):\# \1:" \
+        -e "s:.*\(PidFile\) .*:\1 /var/run/clamav/freshclam.pid:" \
+        -e "s:.*\(DatabaseOwner\) .*:\1 clamav:" \
+        -e "s:^\#\(UpdateLogFile\) .*:\1 /var/log/clamav/freshclam.log:" \
+        -e "s:^\#\(NotifyClamd\).*:\1 /etc/clamd.conf:" \
+        -e "s:^\#\(ScriptedUpdates\).*:\1 yes:" \
+        -e "s:^\#\(AllowSupplementaryGroups\).*:\1 yes:" \
+        -i "${IMAGE}"/etc/freshclam.conf
+}
+
