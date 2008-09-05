@@ -92,10 +92,10 @@ scm-svn_do_appraise() {
     fi
 
     if [[ -n $(scm_get_var REVISION) ]]; then
-        if [[ $(scm_get_var REVISION) -eq $(scm-svn_do_revision) ]]; then
+        if [[ $(scm_get_var REVISION) -eq $(scm-svn_info Revision) ]]; then
             return 2
         else
-            echo "${dir} is a checkout of revision $(scm-svn_do_revision), but wanted $(scm_get_var REVISION)"
+            echo "${dir} is a checkout of revision $(scm-svn_info Revision), but wanted $(scm_get_var REVISION)"
             return 1
         fi
     fi
