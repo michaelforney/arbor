@@ -15,11 +15,11 @@ DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="pam"
 
 DEPENDENCIES="
     build+run:
-       sys-libs/pam
+       pam? ( sys-libs/pam )
 "
 
 pkg_setup() {
@@ -34,11 +34,13 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${WORKBASE}/${PNV}-basename.patch"
     -p1 "${WORKBASE}/${PNV}-setuid_check.patch"
     -p0 "${WORKBASE}/${PNV}-hardlink.patch"
-    -p1 "${WORKBASE}/${PNV}-pam.patch"
 )
 
 src_prepare() {
+    option pam && DEFAULT_SRC_PREPARE_PATCHES+=( -p1 "${WORKBASE}/${PNV}-pam.patch" )
+
     default
+    
     sed -i -e "s:gcc \(-Wall.*\):$(tc-getCC) \1 ${CFLAGS}:" \
         -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile \
         || die "sed Makefile failed"
@@ -68,7 +70,7 @@ src_install() {
     keepdir /etc/cron.d
     newinitd "${FILES}"/vixie-cron.rc6 vixie-cron
 
-    newpamd "${FILES}"/pamd.compatible cron
+    option pam && newpamd "${FILES}"/pamd.compatible cron
 
     # doc stuff
     doman crontab.1 crontab.5 cron.8
