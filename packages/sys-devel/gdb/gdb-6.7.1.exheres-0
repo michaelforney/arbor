@@ -5,16 +5,18 @@
 
 SUMMARY="The GNU Project Debugger"
 HOMEPAGE="http://sourceware.org/gdb/"
-DOWNLOADS="ftp://sourceware.org/pub/gdb/releases/${PNV}.tar.bz2"
+DOWNLOADS="mirror://sourceware/gdb/releases/${PNV}.tar.bz2"
 
 LICENCES="GPL-2 LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS="nls"
 
-DEPENDENCIES="build+run:
-                >=sys-libs/ncurses-5.2
-				nls? ( sys-devel/gettext )"
+DEPENDENCIES="
+    build+run:
+        >=sys-libs/ncurses-5.2
+		nls? ( sys-devel/gettext )"
+
 # We have no tcl, hence no dejagnu and therefore tests fail..
 RESTRICT=test
 #test? ( dev-util/dejagnu )
