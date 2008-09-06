@@ -137,6 +137,9 @@ src_install() {
     cd "${WORK}/src"
     emake DESTDIR="${IMAGE}" LIBDIR="${libdir}" install
 
+    sed -e 's:/bin/nano:/usr/bin/vim:' \
+        -i "${IMAGE}"/etc/profile || die 'Failed to make EDITOR default to vim'
+
     # If /dev/pts already exists in ${ROOT} it might not be writable for us.
     [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${IMAGE}"/dev/pts
 
