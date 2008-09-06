@@ -281,7 +281,23 @@ version_compare() {
     die "version_compare sucks, use ever at_least"
 }
 
+# Returns its parameters sorted, highest version last. We're using a quadratic
+# algorithm for simplicity, so don't call it with more than a few dozen items.
 version_sort() {
-    die "version_sort sucks, reimplement using ever at_least if you really need it"
+    local left=0 idx lowest_idx tmp items=()
+    items=( $@ )
+    while (( ${left} < ${#items[@]} )); do
+        lowest_idx=${left}
+        (( idx = lowest_idx + 1 ))
+        while (( ${idx} < ${#items[@]} )); do
+            ever at_least "${items[idx]}" "${items[lowest_idx]}" && lowest_idx=${idx}
+            (( idx += 1 ))
+        done
+        tmp=${items[lowest_idx]}
+        items[lowest_idx]=${items[left]}
+        items[left]=${tmp}
+        (( left+=1 ))
+    done
+    echo ${items[@]}
 }
 
