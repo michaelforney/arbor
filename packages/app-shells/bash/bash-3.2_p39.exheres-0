@@ -46,5 +46,17 @@ src_install() {
     insinto /etc/bash
     doins "${FILES}/bashrc"
 
+    dodir /etc/skel
+    cat <<'EOF' > "${IMAGE}"/etc/skel/.bashrc
+# Don't run anything here unless we have an interactive shell.
+if [[ $- != *i* ]] ; then
+    return
+fi
+EOF
+    cat <<'EOF' > "${IMAGE}"/etc/skel/.bash_profile
+# Source ~/.bashrc for login shells as recommended by bash upstream
+[[ -f ~/.bashrc ]] && source ~/.bashrc
+EOF
+
     keepdir /etc/bash/bashrc.d
 }
