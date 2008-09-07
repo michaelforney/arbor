@@ -11,7 +11,7 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-git_do_dependencies() {
-    local git=dev-scm/git
+    local git='>=dev-scm/git-1.6.0'
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "${git}[curl] net-misc/curl[ssl]"
     elif [[ $(scm_get_var REPOSITORY) == http://* ]]; then
@@ -136,7 +136,8 @@ scm-git_do_revision() {
 }
 
 scm-git_do_unpack() {
-    scm-git_git clone -s -n "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+    scm-git_git clone -s --mirror "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"/.git
+    scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git config --unset core.bare
     scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git --work-tree="$(scm_get_var UNPACK_TO)" checkout -f $(scm-git_ref_or_sha1)
 }
 
