@@ -1,26 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="Extensible M4 macro package producing configure scripts"
-HOMEPAGE="http://www.gnu.org/software/autoconf"
-DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
+require ${PN}
 
-LICENCES="GPL-2"
 SLOT="2.5"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS="slowtests"
-
-DEPENDENCIES="
-    build:
-        sys-apps/help2man
-    run:
-        sys-devel/autoconf-wrapper"
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix="-${PV}" )
-
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-
-src_test() {
-    option slowtests && default
-}
 
