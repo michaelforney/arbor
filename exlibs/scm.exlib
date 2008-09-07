@@ -139,6 +139,11 @@ scm_pkg_scm_info() {
     echo ${SCM_INFO#,=}
 }
 
+scm_do_unpack() {
+    echo cp -pPR "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+    cp -pPR "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)" || die "cp failed"
+}
+
 scm_unpack_one() {
     local whynot
     if [[ -d $(scm_get_var CHECKOUT_TO) ]]; then
