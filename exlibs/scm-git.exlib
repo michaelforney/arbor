@@ -49,7 +49,8 @@ scm-git_git() {
         echo=:
     fi
 
-    local vars=( GIT_DIR="$(scm_get_var CHECKOUT_TO)" GIT_WORK_TREE="$(scm_get_var UNPACK_TO)" )
+    local vars=( )
+    [[ ${1} == clone ]] || vars=( GIT_DIR="$(scm_get_var CHECKOUT_TO)" )
 
     ${echo} "${vars[@]}" git "${@}"
     env GIT_PAGER=cat "${vars[@]}" git "${@}" || die_unless_nonfatal "git ${1} failed"
