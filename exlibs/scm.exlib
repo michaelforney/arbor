@@ -140,18 +140,23 @@ scm_pkg_scm_info() {
 }
 
 scm_unpack_one() {
-    local dir=$(scm_get_var CHECKOUT_TO)
-
     local whynot
-    if [[ -d ${dir} ]]; then
+    if [[ -d $(scm_get_var CHECKOUT_TO) ]]; then
         whynot=$(scm_call appraise)
         [[ ${?} -eq 1 || ${?} -eq 3 ]] && die "${whynot}"
     else
-        die "${dir} does not exist"
+        die "$(scm_get_var CHECKOUT_TO) does not exist"
+    fi
+
+    local dir=$(scm_get_var UNPACK_TO)
+    if [[ -d ${dir} ]]; then
+	rmdir "${dir}" || die "rmdir failed"
+    else
+	mkdir -p "${dir%/*}" || die mkdir "failed"
     fi
 
     scm_call unpack
-    rm -f "$(scm_get_var UNPACK_TO)/.scm.exlib.timestamp"
+    rm -f "${dir}/.scm.exlib.timestamp"
 
     local rev=$(scm_call revision)
     [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
