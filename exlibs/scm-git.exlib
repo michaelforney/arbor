@@ -49,11 +49,16 @@ scm-git_git() {
         echo=:
     fi
 
-    local vars=( )
-    [[ ${1} == clone ]] || vars=( GIT_DIR="$(scm_get_var CHECKOUT_TO)" )
+    local need_git_dir=yes global=( )
+    while [[ ${#} -gt 0 && ${1} == -* ]]; do
+        global=( "${global[@]}" "${1}" )
+        [[ ${1} == --git-dir=* ]] && need_git_dir=
+        shift
+    done
+    [[ ${1} != clone && -n ${need_git_dir} ]] && global=( "${global[@]}" --git-dir="$(scm_get_var CHECKOUT_TO)" )
 
-    ${echo} "${vars[@]}" git "${@}"
-    env GIT_PAGER=cat "${vars[@]}" git "${@}" || die_unless_nonfatal "git $(while [[ ${#} -gt 0 && ${1} == -* ]]; do shift; done; echo "${1}") failed"
+    ${echo} git "${global[@]}" "${@}"
+    GIT_PAGER=cat git "${global[@]}" "${@}" || die "git ${1} failed"
 }
 
 scm-git_do_appraise() {
