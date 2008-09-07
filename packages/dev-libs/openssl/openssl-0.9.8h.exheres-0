@@ -8,7 +8,7 @@ DOWNLOADS="http://www.openssl.org/source/${PNV}.tar.gz"
 LICENCES="BSD"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="platform:ppc64"
 
 DEPENDENCIES=""
 
@@ -19,8 +19,15 @@ src_prepare() {
 
 src_configure() {
     ./config --test-sanity || die "Sanity test failed"
-    ./config --prefix=/usr --openssldir=/etc/ssl \
-        shared threads || die "Configure failed"
+
+    # ppc64 needs to be configured manually with Configure instead of config.
+    if option platform:ppc64; then
+        ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl \
+            shared threads || die "Configure failed"
+    else
+        ./config --prefix=/usr --openssldir=/etc/ssl \
+            shared threads || die "Configure failed"
+    fi
 }
 
 # parallel build is broken
