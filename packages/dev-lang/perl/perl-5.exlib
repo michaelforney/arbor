@@ -5,9 +5,9 @@
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib
+require multilib versionator
 
-export_exlib_phases src_configure src_compile src_test src_install
+export_exlib_phases src_prepare src_configure src_install
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
@@ -18,7 +18,7 @@ UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${PN}/pod/${PN}${PV//.}delta.pod
 UPSTREAM_DOCUMENTATION=
 
 LICENCES="|| ( Artistic GPL GPL-2 GPL-3 )"
-SLOT="${PV}"
+SLOT="$(get_version_component_range 1-2)"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -27,58 +27,72 @@ DEPENDENCIES="
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
 
-perl-5_src_configure() {
-    mkdir "${TEMP}/build"
-    cd "${TEMP}/build"
+# WORK="${TEMP}/build"
+WORK="${WORKBASE}/build"
 
-    sh "${WORK}/Configure" \
+perl-5_src_prepare() {
+    cd "${WORKBASE}/${PNV}"
+    default
+    mkdir ${WORK}
+}
+
+perl-5_src_configure() {
+    # Binaries are installed to /usr/bin/, with ${PV} appended
+    # Alternatives manages executables in /usr/bin/
+    # Libraries go into /usr/$(get_libdir)/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/, which is appended to LDPATH
+    # `man 1` are installed with a version
+
+    # -Dfoo = define foo, -Ufoo = undefine foo.
+    
+    sh "${WORKBASE}/${PNV}/Configure" \
         -des \
         -Dcf_by='Exherbo' \
         -Dprefix=/usr \
         -Dvendorprefix=/usr \
         -Dsiteprefix=/usr \
         -Doptimize="${CFLAGS}" \
-        -Duselargefiles \
         -Darchname=${CHOST%%-*} \
-        -Duseshrplib \
         -Dlibperl="libperl.so.1.${PV}" \
-        -Dinstallusrbinperl \
+        -Uinstallusrbinperl= \
+        -Duseshrplib \
         -Dmksymlinks \
+        -Duselargefiles \
+        ${PERL5_CONFIGURE_PARAMS[@]} \
         || die "Configure failed"
 }
 
-perl-5_src_compile() {
-    cd "${TEMP}/build"
-    default
-}
-
-perl-5_src_test() {
-    cd "${TEMP}/build"
-    default
-}
-
 perl-5_src_install() {
-    cd "${TEMP}/build"
     default
 
-    # Rename perl.1 man-page after the binary we'll install
-    # Discard the other man-pages, use perldoc
-    cp "${IMAGE}"/usr/share/man/man1/${PN}.1 "${TEMP}/${PN}${PV}.1"
-    rm -r "${IMAGE}"/usr/share/man/ || die "Couldn't remove man-pages"
-    doman "${TEMP}/${PN}${PV}.1"
+    # Library symlinks
+    local perllibdir=/usr/$(get_libdir)/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/
+    dosym ${perllibdir}/libperl.so.1{.${PV},}
+    dosym ${perllibdir}/libperl.so{.1,}
 
-    local mylib=$(get_libdir)
-    dodir /usr/${mylib}
-    dosym /usr/${mylib}/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} \
-    /usr/${mylib}/libperl.so.1.${PV}
-    dosym /usr/${mylib}/libperl.so.1.${PV} /usr/${mylib}/libperl.so.1
-    dosym /usr/${mylib}/libperl.so.1 /usr/${mylib}/libperl.so
+    # We only want /usr/bin/perl5.8.8, not /usr/bin/perl (without the dash, standard across distros)
+    # with -Uinstallusrbinperl this shouldn't even get installed, but it does happen anyway, for some reason..
+    if [[ -x "${IMAGE}"/usr/bin/${PN} ]]; then
+        rm "${IMAGE}"/usr/bin/${PN} || die "Couldn't remove /usr/bin/${PN}"
+    fi
 
-    keepdir /usr/${mylib}/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}
+    # Version executables
+    for executable in "${IMAGE}"/usr/bin/*; do
+        if [[ ${executable##*/} != *${PV} ]]; then
+            mv "${executable}" "${executable}-${PV}" || die "Failed to version ${executable/${IMAGE}}"
+        fi
+    done
+
+    # Version man1 manpages, discard man3 manpages (use perldoc)
+    rm -r "${IMAGE}"/usr/share/man/man3 || die "Couldn't remove man 3 manpages"
+    for manpage in "${IMAGE}"/usr/share/man/man1/*.1; do
+        mv "${manpage}" "${manpage/.1/-${PV}.1}" || die "Failed to version ${manpage/${IMAGE}}"
+    done
+
+    keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}
 
     dodir /etc/env.d/${PN}
     cat <<EOF > "${IMAGE}"/etc/env.d/${PN}/${PV}
-LDPATH="/usr/${mylib}/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/"
+LDPATH="${perllibdir}"
 EOF
 }
 
