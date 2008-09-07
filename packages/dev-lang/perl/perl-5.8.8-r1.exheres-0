@@ -1,74 +1,21 @@
 # Copyright 2007, 2008 Bryan Østergaard & Anders Ossowicki
+# Copyright 2008 Anders Ossowicki
+# Copyright 2008 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib
+require "${PN}-${PV%%.*}"
 
-SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
-HOMEPAGE="http://www.perl.org"
+UPSTREAM_RELEASE_NOTES="http://dev.perl.org/${PN}${PV%%.*}/news/2006/${PNV}.html"
 DOWNLOADS="mirror://cpan/src/${PNV}.tar.bz2"
 
-LICENCES="|| ( Artistic GPL GPL-2 GPL-3 )"
-SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
-MYOPTIONS=""
 
-DEPENDENCIES="
-    build+run:
-        dev-perl/Pod-Parser"
-
-DEFAULT_SRC_PREPARE_PATCHES=("${FILES}/perl-gcc-4.2.patch"
-    "${FILES}/perl-asm-page-h.patch"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PN}-gcc-4.2.patch"
+    "${FILES}/${PN}-asm-page-h.patch"
     "${FILES}/${PN}-${PVR}-cve.patch"
-    -p0 "${FILES}/${PNV}-lib64.patch")
-
-src_configure() {
-    mkdir "${TEMP}/build"
-    cd "${TEMP}/build"
-
-    sh "${WORK}/Configure" -des \
-        -Dprefix=/usr \
-        -Dvendorprefix=/usr \
-        -Dsiteprefix=/usr \
-        -Doptimize="${CFLAGS}" \
-        -Duselargefiles \
-        -Darchname=${CHOST%%-*} \
-        -Duseshrplib \
-        -Dlibperl="libperl.so.1.${PV}" \
-        -Dinstallusrbinperl \
-        -Dmksymlinks \
-        || die "Configure failed"
-}
-
-src_compile() {
-    cd "${TEMP}/build"
-    default
-}
-
-src_test() {
-    cd "${TEMP}/build"
-    default
-}
-
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
-
-src_install() {
-    cd "${TEMP}/build"
-    default
-
-    local mylib=$(get_libdir)
-    dodir /usr/${mylib}
-    dosym /usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} \
-    /usr/${mylib}/libperl.so.1.${PV}
-    dosym /usr/${mylib}/libperl.so.1.${PV} /usr/${mylib}/libperl.so.1
-    dosym /usr/${mylib}/libperl.so.1 /usr/${mylib}/libperl.so
-
-    keepdir /usr/${mylib}/perl5/{site,vendor}_perl/${PV}/${CHOST%%-*}
-
-    dodir /etc/env.d
-    cat <<EOF > "${IMAGE}"/etc/env.d/05perl
-LDPATH="/usr/${mylib}/perl5/${PV}/${CHOST%%-*}/CORE/"
-EOF
-}
+    -p0 "${FILES}/${PNV}-lib64.patch"
+)
 

@@ -1,0 +1,78 @@
+# Copyright 2007, 2008 Bryan Østergaard
+# Copyright 2008 Anders Ossowicki
+# Copyright 2008 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require multilib
+
+export_exlib_phases src_configure src_compile src_test src_install
+
+SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
+HOMEPAGE="http://www.perl.org"
+
+REMOTE_IDS="cpan:${PN} freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${PN}/pod/${PN}${PV//.}delta.pod"
+UPSTREAM_DOCUMENTATION=
+
+LICENCES="|| ( Artistic GPL GPL-2 GPL-3 )"
+SLOT="${PV}"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-perl/Pod-Parser"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
+
+perl-5_src_configure() {
+    mkdir "${TEMP}/build"
+    cd "${TEMP}/build"
+
+    sh "${WORK}/Configure" \
+        -des \
+        -Dcf_by='Exherbo' \
+        -Dprefix=/usr \
+        -Dvendorprefix=/usr \
+        -Dsiteprefix=/usr \
+        -Doptimize="${CFLAGS}" \
+        -Duselargefiles \
+        -Darchname=${CHOST%%-*} \
+        -Duseshrplib \
+        -Dlibperl="libperl.so.1.${PV}" \
+        -Dinstallusrbinperl \
+        -Dmksymlinks \
+        || die "Configure failed"
+}
+
+perl-5_src_compile() {
+    cd "${TEMP}/build"
+    default
+}
+
+perl-5_src_test() {
+    cd "${TEMP}/build"
+    default
+}
+
+perl-5_src_install() {
+    cd "${TEMP}/build"
+    default
+
+    local mylib=$(get_libdir)
+    dodir /usr/${mylib}
+    dosym /usr/${mylib}/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} \
+    /usr/${mylib}/libperl.so.1.${PV}
+    dosym /usr/${mylib}/libperl.so.1.${PV} /usr/${mylib}/libperl.so.1
+    dosym /usr/${mylib}/libperl.so.1 /usr/${mylib}/libperl.so
+
+    keepdir /usr/${mylib}/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}
+
+    dodir /etc/env.d/${PN}
+    cat <<EOF > "${IMAGE}"/etc/env.d/${PN}/${PV}
+LDPATH="/usr/${mylib}/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/"
+EOF
+}
+
