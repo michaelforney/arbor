@@ -68,7 +68,7 @@ pkg_postinst() {
     done
 
     # /usr/local structure
-    for x in usr/local{,/bin,/etc,/${libdir},/man,/sbin,/share}; do
+    for x in usr/local{,/bin,/etc,/${libdir},/man,/sbin,/share{,/man}}; do
         create_root_owned_directory "${ROOT}${x}"
     done
 
