@@ -1,0 +1,20 @@
+# Copyright (c) 2008 Markus Rothe <markus@unixforces.net>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Static yaboot ppc boot loader for machines with open firmware"
+HOMEPAGE="http://penguinppc.org/projects/yaboot/"
+DOWNLOADS="mirror://gentoo/${PNV}.tbz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~ppc64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_install() {
+    # don't blow away the user's old conf file
+    mv "${WORKBASE}/etc/yaboot.conf" "${WORKBASE}/etc/yaboot.conf.unconfigured" \
+        || die "mv failed"
+    cp -a "${WORKBASE}"/* "${IMAGE}" || die "cp failed"
+}
