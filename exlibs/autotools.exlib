@@ -174,7 +174,7 @@ _elibtoolize() {
     lttest="$(autotools_check_macro "AC_PROG_LIBTOOL")$(autotools_check_macro "AM_PROG_LIBTOOL")"
     [[ -n ${lttest} ]] || return 0
 
-    [[ -f Makefile.am ]] && opts="--automake"
+    [[ -f Makefile.am || -f GNUmakefile.am ]] && opts="--automake"
 
     [[ "${USERLAND}" == "Darwin" ]] && LIBTOOLIZE="glibtoolize"
     autotools_run_tool ${LIBTOOLIZE:-libtoolize} "$@" ${opts}
@@ -206,9 +206,9 @@ eautomake() {
     autotools_select_versions
     local extra_opts
 
-    [[ -f Makefile.am ]] || return 0
+    [[ -f Makefile.am || -f GNUmakefile.am ]] || return 0
 
-    if [[ -z ${FROM_EAUTORECONF} && -f Makefile.in ]]; then
+    if [[ -z ${FROM_EAUTORECONF} && ( -f Makefile.in || -f GNUMakefile.in ) ]]; then
         local used_automake installed_automake
 
         installed_automake=$(automake --version | head -n 1 | \
