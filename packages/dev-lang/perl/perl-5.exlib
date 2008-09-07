@@ -61,6 +61,12 @@ perl-5_src_install() {
     cd "${TEMP}/build"
     default
 
+    # Rename perl.1 man-page after the binary we'll install
+    # Discard the other man-pages, use perldoc
+    cp "${IMAGE}"/usr/share/man/man1/${PN}.1 "${TEMP}/${PN}${PV}.1"
+    rm -r "${IMAGE}"/usr/share/man/ || die "Couldn't remove man-pages"
+    doman "${TEMP}/${PN}${PV}.1"
+
     local mylib=$(get_libdir)
     dodir /usr/${mylib}
     dosym /usr/${mylib}/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/libperl.so.1.${PV} \
