@@ -1,4 +1,4 @@
-# Copyright 2007 Bryan Østergaard
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Man page reader"
@@ -12,9 +12,12 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     run:
-        sys-apps/groff"
+        >=sys-apps/groff-1.19.2
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/man-1.6f-unicode.patch" )
 
 src_configure() {
-    ./configure -default
+    ./configure -default -confdir=/etc || die "configure failed"
 }
 
