@@ -20,6 +20,13 @@ DEPENDENCIES=""
 
 ECONF_SOURCE="${WORK}/unix/"
 
+src_prepare() {
+    sed -i \
+        -e 's:MANDIR = $(prefix):&/share:' \
+        unix/Makefile \
+        || die "sed unix/Makefile failed"
+}
+
 src_compile() {
     emake -f unix/Makefile generic
 }
