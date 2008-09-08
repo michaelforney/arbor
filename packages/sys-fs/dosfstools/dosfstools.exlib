@@ -1,0 +1,42 @@
+# Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
+
+SUMMARY="Utilities to create and check MS-DOS filesystems under Linux"
+HOMEPAGE="ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/${PN}"
+DOWNLOADS="ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/${PN}/${PNV}.src.tar.gz"
+DESCRIPTION="MS-DOS filesystem programs mkdosfs, mkfs.msdos,vfat and the related fsck programs"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES+=(
+    -p0
+        "${FILES}/${PNV}-verify-double-count-fix.patch"
+        "${FILES}/${PNV}-fat32size.patch"
+)
+DEFAULT_SRC_COMPILE_PARAMS=( CC=$(tc-getCC) )
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( mkdosfs dosfsck )
+
+src_prepare() {
+    default
+
+    sed -i \
+        -e 's:^OPTFLAGS = -O2 -fomit-frame-pointer :OPTFLAGS = :' \
+        -e 's:^MANDIR = $(PREFIX)/usr:&/share:' \
+        -e 's:^CFLAGS = :CFLAGS += :' \
+        Makefile || die "sed Makefile failed"
+}
+
+src_install() {
+    default
+
+    dodir /usr/sbin
+    mv "${IMAGE}"/sbin/*fsck* "${IMAGE}"/usr/sbin 
+}
+
