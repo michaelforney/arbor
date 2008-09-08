@@ -172,7 +172,6 @@ scm_src_unpack() {
     scm_src_fetch_extra
 
     scm_for_each scm_access_checkout scm_unpack_one
-    SCM_IS_BUILT=1
 }
 
 scm_do_info() {
@@ -180,7 +179,7 @@ scm_do_info() {
 }
 
 scm_pkg_info() {
-    if [[ -n ${SCM_IS_BUILT} ]]; then
+    if [[ -n ${SCM_ACTUAL_REVISION} ]]; then
         local output=$(scm_for_each scm_call info)
         if [[ -n ${output} ]]; then
             echo "${output}"
