@@ -1,0 +1,18 @@
+Source: upstream CVS
+Upstream: duh
+Reason: prevent strings in the set of "redirects we've already seen"
+        from being overwritten later.  Aside from being wrong, this
+        causes the client-20 test to fail, although curiously enough,
+        only under sandbox.
+
+--- src/client.c	2005/12/07 20:04:49	1.437
++++ src/client.c	2005/12/08 00:53:08	1.438
+@@ -612,7 +612,7 @@
+     else
+     {
+ 	if (!redirects) redirects = getlist();
+-	push_string (redirects, args);
++	push_string (redirects, xstrdup (args));
+     }
+ 
+     if (referred_since_last_redirect)
