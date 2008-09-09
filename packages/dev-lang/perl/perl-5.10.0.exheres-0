@@ -1,0 +1,25 @@
+# Copyright 2007, 2008 Bryan Østergaard & Anders Ossowicki
+# Copyright 2008 Anders Ossowicki
+# Copyright 2008 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require multilib "${PN}-${PV%%.*}"
+
+UPSTREAM_RELEASE_NOTES="http://dev.perl.org/${PN}${PV%%.*}/news/2007/${PNV}.html"
+DOWNLOADS="mirror://cpan/src/${PNV}.tar.gz"
+
+PLATFORMS="~amd64 ~ia64 ~x86"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PNV}-libdir.patch"
+)
+PERL5_CONFIGURE_PARAMS=( -Dexherbo_libdir=$(get_libdir) )
+
+src_install() {
+    perl-5_src_install
+    tree ${IMAGE}
+    die
+}
+
