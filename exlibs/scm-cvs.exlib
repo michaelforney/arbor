@@ -154,7 +154,7 @@ scm-cvs_do_update() {
 
 scm-cvs_revision_list() {
     ( cd "$(scm_get_var CHECKOUT_TO)" && find . -path '*/CVS/Entries' -exec grep -H ^/ '{}' + ) \
-        | sed -e 's,^\(.*\)/CVS/Entries:/\([^/]\+\)/\([^/]\+\)/[^/]\+/[^/]*/[^/]*$,\1/\2: \3,' | sort
+        | sed -e 's,^\(.*\)/CVS/Entries:/\([^/]\+\)/\([^/]\+\)/[^/]\+/[^/]*/[^/]*$,\1/\2: \3,' -e 's,^./,,' | sort
 }
 
 scm-cvs_do_revision() {
