@@ -4,8 +4,9 @@
 # Based in part upon 'subversion-1.4.6-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-WANT_AUTOCONF="2.5"
-WANT_AUTOMAKE="none"
+SUPPORTED_AUTOCONF="2.5"
+SUPPORTED_AUTOMAKE="none" # Doesn't use automake
+
 require bash-completion autotools perl-module python
 
 SUMMARY="Popular version control system"
@@ -40,6 +41,11 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-perl-vendor.patch"
     "${FILES}/${PN}-perl-ccopts.patch" )
+
+src_prepare() {
+    default
+    eautoconf # Doesn't use automake
+}
 
 src_configure() {
     if option perl || option python || option ruby; then
