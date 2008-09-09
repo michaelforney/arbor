@@ -37,6 +37,9 @@ vim-plugin_src_install() {
     done
 
     # Install remainder of plugin
+
+    rm -rf ${WORK}/.git* || die "Couln't remove git things"
+
     cd ${WORKBASE}
     dodir /usr/share/vim
     mv ${WORK} ${IMAGE}/usr/share/vim/vimfiles
