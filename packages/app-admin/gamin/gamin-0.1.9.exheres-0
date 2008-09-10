@@ -40,14 +40,14 @@ src_install() {
 pkg_postinst() {
     if option python; then
         python_version
-		python_mod_optimize "${ROOT}"/usr/$(get_libdir)/python${PYVER}/site-packages
+        python_mod_optimize "${ROOT}"/usr/$(get_libdir)/python${PYVER}/site-packages
     fi
 }
 
 pkg_postrm() {
     if option python; then
         python_version
-		python_mod_cleanup /usr/$(get_libdir)/python${PYVER}/site-packages
+        python_mod_cleanup /usr/$(get_libdir)/python${PYVER}/site-packages
     fi
 }
 
