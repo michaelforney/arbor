@@ -248,8 +248,12 @@ scm_global_stuff() {
     DEPENDENCIES+=" $(scm_call dependencies)"
 }
 
-DEPENDENCIES="build,host: >=sys-apps/util-linux-ng-2.13_pre2"
-scm_for_each scm_global_stuff
+scm_finalise() {
+    DEPENDENCIES+="( build,host,required: >=sys-apps/util-linux-ng-2.13_pre2"
+    scm_for_each scm_global_stuff
+    DEPENDENCIES+=" )"
+}
+[[ -n ${SCM_TYPE} ]] && scm_finalise
 
 #export_exlib_phases src_fetch_extra pkg_scm_info src_unpack pkg_info
 export_exlib_phases src_unpack pkg_info
