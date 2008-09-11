@@ -1,0 +1,10 @@
+# Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require "${PN}"
+
+PLATFORMS="~amd64"
+DEFAULT_SRC_PREPARE_PATCHES+=(
+    -p0 "${FILES}/${PNV}-https-webinterface.patch"
+    -p1 "${FILES}/${PNV}-configure.patch"
+)

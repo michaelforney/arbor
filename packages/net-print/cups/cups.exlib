@@ -1,0 +1,155 @@
+# Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'cups-1.3.8-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools multilib pam
+
+SUMMARY="Common UNIX Printing System"
+HOMEPAGE="http://www.cups.org"
+DOWNLOADS="ftp://ftp.easysw.com/pub/${PN}/${PV}/${PNV}-source.tar.bz2"
+DESCRIPTION="CUPS provides a portable printing layer for UNIX®-based operating systems"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS="dbus debug jpeg pam perl png python ssl static tiff threads xinetd"
+
+LANGS="da de es et fi fr he id it ja ko nl no pl pt_BR pt ru sv zh zh_TW"
+
+for lang in ${LANGS}; do
+    MYOPTIONS+=" linguas:${lang}"
+    optionq "linguas:${lang}" && CUPSLANGS="${lang} ${CUPSLANGS}"
+done
+
+[[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
+
+# TODO:
+# options: acl avahi/zeroconf java kerberos ldap php slp X
+# features: maybe ppds?
+# testing: that x86 / lib64 issue (see gentoo ebuild)
+# probably better slotting to avoid rebuilding
+
+DEPENDENCIES="
+    build+run:
+        dbus? ( sys-apps/dbus )
+        jpeg? ( media-libs/jpeg )
+        pam? ( sys-libs/pam )
+        perl? ( dev-lang/perl )
+        png? ( media-libs/libpng )
+        python? ( dev-lang/python )
+        ssl? ( dev-libs/openssl )
+        tiff? ( media-libs/tiff )
+    post:
+        xinetd? ( sys-apps/xinetd )
+        app-text/ghostscript[cups]
+"
+
+UPSTREAM_DOCUMENTATION="http://www.cups.org/documentation.php"
+UPSTREAM_RELEASE_NOTES="http://www.cups.org/documentation.php/whatsnew.html"
+REMOTE_IDS="freshmeat:cups"
+
+# interactive testsuite
+RESTRICT="test"
+
+SUPPORTED_AUTOMAKE=( 1.10 )
+SUPPORTED_AUTOCONF=( 2.5 )
+
+DEFAULT_SRC_PREPARE_PATCHES+=(
+    "${FILES}/${PN}-backend-https.patch"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=(
+    'debug mallinfo'
+    jpeg pam png ssl static tiff threads # acl 'kerberos glssapi' ldap slp
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
+    perl python # java php
+)
+
+DEFAULT_SRC_CONFIGURE_PARAMS+=(
+    --disable-libpaper # doesn't really add anything afaics
+    --enable-pdftops # see below
+    --with-cups-user=lp
+    --with-cups-group=lp
+    --disable-{gnutls,cdsassl} # only one SSL implementation
+    --libdir=/usr/$(get_libdir)
+    --localstatedir=/var
+    --with-languages="${CUPSLANGS}"
+    DSOFLAGS="${LDFLAGS}"
+)
+
+DEFAULT_SRC_INSTALL_PARAMS+=(
+    BUILDROOT="${IMAGE}"
+)
+
+src_prepare() {
+    autotools_src_prepare
+
+    if optionq xinetd ; then
+        sed -i \
+            -e "s:^{:{\n\tdisable = yes:" \
+            init/cups-lpd.in \
+            || die "sed init/cups-lpd.in failed"
+    fi
+
+    # Fix hardcoded SERVERBIN and DOCROOT paths and don't gzip manpages on linux
+    sed -e "s:\(\s*CUPS_SERVERBIN=\"\$exec_prefix\)/lib/:\1/$(get_libdir)/:" \
+        -e "s:\(\s*CUPS_DOCROOT=\"\$datadir/doc/\).*:\1${PNVR}\":" \
+        -e "/MAN[0-9]EXT=/s:\.gz::g" \
+        -i configure || die "sed configure failed"
+}
+
+src_configure() {
+    # --without-xinetd is broken and installs files to '/no'
+    option xinetd && DEFAULT_SRC_CONFIGURE_OPTIONS_WITHS+=( 'xinetd /etc/xinetd.d' )
+
+    default
+
+     # that's basically how Gentoo does it but using libexec instead of get_libdir()
+     # we already did the sed in configure so no need for it here
+     sed -i \
+         -e 's:^\(OPTIM.*\)\(-Os -g\):\1:' \
+         Makedefs || die "sed Makedefs failed"
+#        -e "s:^\(SERVERBIN\).*:\1 = \"\$(BUILDROOT)/usr/$(get_libdir)/cups\":"
+
+#    sed -i \
+#        -e "s:^\(cups_serverbin=\).*:\1/usr/$(get_libdir)/cups:" cups-config \
+#        || die "sed cups-config failed"
+
+#    sed -i \
+#        -e "s:^\(#define CUPS_SERVERBIN\).*:\1 \"/usr/$(get_libdir)/cups\":" config.h \
+#        || die "sed config.h failed"
+}
+
+src_install() {
+    default
+
+    keepdir /usr/lib64/cups/driver /usr/share/cups/profiles /var/cache/cups/rss \
+            /var/run/cups/certs /var/log/cups /var/spool/cups/tmp /etc/cups/interfaces \
+            /etc/cups/ppd /etc/cups/ssl /usr/share/locale
+
+    rm -r ${IMAGE}/etc/{rc{0,2,3,5},init}.d/
+
+    local neededservices=
+    optionq dbus && neededservices+=" dbus"
+
+    newinitd "${FILES}/cups.init.d" cupsd
+
+    [[ -n "${neededservices}" ]] && neededservices="need${neededservices}"
+
+    sed -i \
+        -e "s:@neededservices@:${neededservices}:" \
+        "${IMAGE}"/etc/init.d/cupsd || die "sed cupsd failed"
+
+    optionq pam && pamd_mimic_system cups auth account
+
+    # Gentoo provides it's own pdftops filter in ${FILES} which requires perl
+    # at runtime and i couldn't find what's wrong with the cups one, so let's see
+    # where this takes us :P
+#    exeinto "/usr/$(get_libdir)/cups/filter"
+#    newexe "${FILES}"/pdftops-1.20.gentoo pdftops
+
+    echo "ServerName localhost" >> "${IMAGE}"/etc/cups/client.conf
+}
+
