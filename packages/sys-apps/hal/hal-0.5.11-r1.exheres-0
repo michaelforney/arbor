@@ -3,14 +3,14 @@
 # Based in part on 'hal-0.5.11-r1.ebuild' from Gentoo which is:
 #    Copyright 1999-2008 Gentoo Foundation
 
-require eutils multilib
+require eutils multilib autotools
 
-PATCH_VERSION="1"
+PATCH_VERSION="3"
 
 SUMMARY="Hardware Abstraction Layer"
 HOMEPAGE="http://hal.freedesktop.org/"
 DOWNLOADS="http://hal.freedesktop.org/releases/${PNV}.tar.bz2
-         http://dev.gentoo.org/~compnerd/files/${PN}/${PNV}-gentoo-patches-${PATCH_VERSION}.tar.bz2"
+           http://dev.exherbo.org/~compnerd/files/${PN}/${PNV}-exherbo-patches-${PATCH_VERSION}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -19,7 +19,7 @@ MYOPTIONS="acpi apm verbose"
 
 DEPENDENCIES="
     build+run:
-        >=sys-fs/udev-112
+        >=sys-fs/udev-117
         >=sys-apps/dbus-1.0
         >=dev-libs/glib-2.14
         >=dev-util/gperf-3.0.3
