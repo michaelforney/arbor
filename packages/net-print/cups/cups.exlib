@@ -102,7 +102,7 @@ src_prepare() {
 
 src_configure() {
     # --without-xinetd is broken and installs files to '/no'
-    option xinetd && DEFAULT_SRC_CONFIGURE_OPTIONS_WITHS+=( 'xinetd /etc/xinetd.d' )
+    option xinetd && DEFAULT_SRC_CONFIGURE_PARAMS+=( '--with-xinetd=/etc/xinetd.d' )
 
     default
 
