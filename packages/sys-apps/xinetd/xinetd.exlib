@@ -1,0 +1,62 @@
+# Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="${PN} is a super-server daemon and a safe replacement for inetd"
+HOMEPAGE="http://www.${PN}.org"
+DOWNLOADS="http://www.${PN}.org/${PNV}.tar.gz"
+DESCRIPTION="${PN} listens on specific ports to launch programs configured for that port"
+
+LICENCES="BSD"
+SLOT="0"
+MYOPTIONS="perl tcpd"
+
+DEPENDENCIES="
+    build+run:
+        tcpd? ( sys-apps/tcp-wrappers )
+    run:
+        perl? ( dev-lang/perl )
+"
+
+UPSTREAM_RELEASE_NOTES="http://www.xinetd.org/#changes"
+REMOTE_IDS="freshmeat:xinetd"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS+=(
+    AUDIT
+)
+
+DEFAULT_SRC_CONFIGURE_WITHS+=(
+    'tcpd libwrap'
+)
+
+DEFAULT_SRC_CONFIGURE_PARAMS+=(
+    --with-loadavg
+)
+
+src_prepare() {
+    default
+
+    sed -i \
+        -e "s:^\(DAEMONDIR = \):\1${IMAGE}:" \
+        -e "s:^\(MANDIR = \):\1${IMAGE}:" \
+        -e 's:$(BINDIR)::' \
+        Makefile.in || die "sed Makefile.in (1) failed"
+
+    if optionq perl ; then
+        sed -i -e 's:.*xconv.pl.*::' Makefile.in || die "sed Makefile.in (2) failed"
+    fi
+
+    sed -i \
+        -e 's:^#\(\s*only_from\s*=\):\1 localhost:' contrib/xinetd.conf \
+        || die "sed contrib/xinetd.conf failed"
+}
+
+src_install() {
+    default
+
+    newconfd "${FILES}/xinetd.conf.d" xinetd
+    newinitd "${FILES}/xinetd.init.d" xinetd
+
+    insinto /etc
+    doins -r "${WORK}"/contrib/xinetd.d
+    doins "${WORK}"/contrib/xinetd.conf
+}
