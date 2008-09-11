@@ -1,0 +1,15 @@
+Source: http://www.mail-archive.com/pld-cvs-commit@lists.pld-linux.org/msg143016.html
+Upstream: yes, http://sourceforge.net/tracker/index.php?func=detail&aid=2105276&group_id=1674&atid=301674
+Reason: while running aclocal (1.10.1):
+  configure.in:167: error: m4_require: circular dependency of AC_LANG_COMPILER(C++)
+
+--- libusb-0.1.12/configure.in.orig	2008-09-11 10:13:06.000000000 +0200
++++ libusb-0.1.12/configure.in	2008-09-11 10:13:17.000000000 +0200
+@@ -149,6 +149,7 @@
+ fi
+ 
+ # Checks for programs.
++AC_PROG_CXX
+ AC_LANG_CPLUSPLUS
+ AC_PROG_CC
+ AM_PROG_CC_C_O

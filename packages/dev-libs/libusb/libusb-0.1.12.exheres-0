@@ -26,7 +26,10 @@ DEPENDENCIES="
 # tests are not well encapsulated
 RESTRICT="test"
 
+DEFAULT_SRC_PREPARE_PATCHES=("${FILES}/${PNV}-circular-dependency-cxx.patch")
+
 src_prepare() {
+    default
     sed -i -e 's:-Werror::' Makefile.am || die "failed to remove -Werror"
     eautoreconf
 }
