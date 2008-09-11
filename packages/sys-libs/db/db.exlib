@@ -10,12 +10,16 @@ DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PNV}.tar.gz"
 
 LICENCES="as-is"
 SLOT="0" # $(get_version_component_range 1-2)"
-MYOPTIONS="doc"
+MYOPTIONS="doc compat185"
 
 DEPENDENCIES=""
 
 ECONF_SOURCE="${WORK}/dist"
 WORK="${WORKBASE}/${PNV}/build_unix"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    compat185
+)
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cxx
