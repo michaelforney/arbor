@@ -14,31 +14,31 @@ DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV}.tar.bz2
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="curl doc ipv6 threads webdav" # cgi (gitweb), tk, vim-syntax ("${WORK}"contrib/vim)
+MYOPTIONS="curl doc ipv6 threads vim-syntax webdav" # cgi (gitweb), tk
 
 DEPENDENCIES="
-build+run:
-    dev-lang/perl:=
-    dev-libs/openssl
-    sys-libs/zlib
-    curl? ( net-misc/curl )
-    webdav? ( dev-libs/expat )
-run:
-    dev-perl/Error
-post,suggested:
-    dev-scm/subversion[perl]  [[ description = [ Dependency for git-svn ] ]]
-    dev-perl/libwww-perl      [[ description = [ Dependency for git-svn ] ]]
-    dev-perl/TermReadKey      [[ description = [ Dependency for git-svn ] ]]
-    dev-perl/Authen-SASL   [[ description = [ Dependency for git-send-email ] ]]
-    dev-perl/Net-SMTP-SSL  [[ description = [ Dependency for git-send-email ] ]]
-    virtual/mta            [[ description = [ Dependency for git-send-email ] ]]
-    net-misc/openssh           [[ description = [ Enables support for ssh:// URIs ] ]]
-    net-misc/rsync             [[ description = [ Enables support for rsync:// URIs ] ]]
-    curl? ( net-misc/curl[ssl] [[ description = [ Enables support for https:// URIs ] ]] )
+    build+run:
+        dev-lang/perl:=
+        dev-libs/openssl
+        sys-libs/zlib
+        curl? ( net-misc/curl )
+        webdav? ( dev-libs/expat )
+    run:
+        dev-perl/Error
+    post,suggested:
+        dev-scm/cvsps               [[ description = [ Dependency for 'git cvsimport' ] ]]
+        dev-scm/subversion[perl]    [[ description = [ Dependency for 'git svn' ] ]]
+        dev-perl/libwww-perl        [[ description = [ Dependency for 'git svn' ] ]]
+        dev-perl/TermReadKey        [[ description = [ Dependency for 'git svn' ] ]]
+        dev-perl/Authen-SASL        [[ description = [ Dependency for 'git send-email' ] ]]
+        dev-perl/Net-SMTP-SSL       [[ description = [ Dependency for 'git send-email' ] ]]
+        virtual/mta                 [[ description = [ Dependency for 'git send-email' ] ]]
+        net-misc/openssh            [[ description = [ Enables support for ssh:// URIs ] ]]
+        net-misc/rsync              [[ description = [ Enables support for rsync:// URIs ] ]]
+        curl? ( net-misc/curl[ssl]  [[ description = [ Enables support for https:// URIs ] ]] )
 "
 
 #   tk? ( dev-lang/tk )
-#   cvs: ( dev-scm/cvsps dev-perl/DBI dev-perl/DBI-SQLite )
 
 pkg_pretend() {
     if ! option curl && option webdav; then
@@ -69,12 +69,15 @@ myemake() {
     emake \
         DESTDIR="${IMAGE}" \
         prefix=/usr \
+        INSTALLSITELIB=${VENDOR_LIB} \
         CFLAGS="${CFLAGS} -Wall" \
         LDFLAGS="${LDFLAGS}" \
-        ${myoptions} "${@}"
+        ${myoptions} \
+        "${@}"
 }
 
 src_compile() {
+    perlinfo
     myemake all
 }
 
@@ -101,6 +104,13 @@ src_install() {
     docinto /
 
     dobashcompletion contrib/completion/git-completion.bash
+
+    if option vim-syntax; then
+        insinto /usr/share/vim/vimfiles/syntax/
+        doins "${WORK}"/contrib/vim/syntax/gitcommit.vim
+        insinto /usr/share/vim/vimfiles/doc/
+        newins "${WORK}"/contrib/vim/README gitcommit.txt
+    fi
 
     fixlocalpod
 
