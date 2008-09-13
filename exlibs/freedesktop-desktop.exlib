@@ -1,6 +1,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+export_exlib_phases pkg_postinst pkg_postrm
+
 freedesktop-mime_is_desktop_file_utils() {
     [[ "${CATEGORY}/${PN}" == 'dev-util/desktop-file-utils' ]]
 }
@@ -18,14 +20,12 @@ freedesktop-mime_update_desktop_database() {
     fi
 }
 
-
-freedesktop-mime_pkg_postinst() {
+freedesktop-desktop_pkg_postrm() {
     freedesktop-mime_update_desktop_database
 }
 
-freedesktop-mime_pkg_postrm() {
+freedesktop-desktop_pkg_postinst() {
     freedesktop-mime_update_desktop_database
 }
 
-export_exlib_phases pkg_postinst pkg_postrm
 
