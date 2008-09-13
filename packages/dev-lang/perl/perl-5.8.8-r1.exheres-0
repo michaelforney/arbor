@@ -19,9 +19,3 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/${PNV}-lib64.patch"
 )
 
-pkg_postinst() {
-    if [[ ! -x "${ROOT}"/usr/bin/perl ]]; then
-        ln -s "${ROOT}"/usr/bin/perl{${PV},} || ewarn "You'll love this: I couldn't create a /usr/bin/${PN}"
-    fi
-}
-

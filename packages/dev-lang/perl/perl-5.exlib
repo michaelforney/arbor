@@ -7,7 +7,7 @@
 
 require multilib versionator
 
-export_exlib_phases src_prepare src_configure src_install
+export_exlib_phases src_prepare src_configure src_install pkg_postinst
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
@@ -94,5 +94,18 @@ perl-5_src_install() {
     cat <<EOF > "${IMAGE}"/etc/env.d/${PN}/${PV}
 LDPATH="${perllibdir}"
 EOF
+
+    # Save a list of what executables & man-pages we're installing
+    cd "${IMAGE}"
+    PERL5_ALTERNATIVES_FILES+=( ./usr/bin/*${PV} ./usr/share/man/man1/*${PV}.1 )
+}
+
+perl-5_pkg_postinst() {
+    local f target
+    for f in "${PERL5_ALTERNATIVES_FILES[@]#.\/}"; do
+        [[ ${f/-${PV}} == ${f} ]] && target=${ROOT}${f/${PV}} || target=${ROOT}${f/-${PV}}
+        echo ln -sf ${f##*/} "${target}"
+        ln -sf ${f##*/} "${target}" || ewarn "Couldn't create ${target}"
+    done
 }
 
