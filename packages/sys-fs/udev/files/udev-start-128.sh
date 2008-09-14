@@ -115,21 +115,21 @@ populate_dev()
 
 	ebegin "Populating /dev with existing devices through uevents"
 	if yesno "${rc_coldplug}"; then
-		udevtrigger
+		udevadm trigger
 	else
 		# Do not run any init-scripts, Bug #206518
 		udevadm control --env do_not_run_plug_service=1
 
 		# only create device nodes
-		udevtrigger --attr-match=dev
+		udevadm trigger --attr-match=dev
 
 		# run persistent-net stuff, bug 191466
-		udevtrigger --subsystem-match=net
+		udevadm trigger --subsystem-match=net
 	fi
 	eend $?
 
 	ebegin "Waiting for uevents to be processed"
-	udevsettle --timeout=60
+	udevadm settle --timeout=60
 	eend $?
 
 	udevadm control --env do_not_run_plug_service=
