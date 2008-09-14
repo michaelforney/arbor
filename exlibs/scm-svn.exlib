@@ -185,12 +185,19 @@ scm-svn_check_externals() {
                     local that=${externals[${idx}]##*:}
                     if [[ -n ${that} ]]; then
                         local got
+
                         got=$(SCM_THIS=${that} scm_get_var UNPACK_TO)
-                        [[ ${got} == ${fulldir} ]] || die "SCM_${that}_UNPACK_TO is ${got}, but wanted ${fulldir}"
+                        [[ ${got} == ${fulldir} ]] \
+                            || die "$(SCM_THIS=${that} scm_var_name UNPACK_TO) is ${got}, but wanted ${fulldir}"
+
                         got=$(SCM_THIS=${that} scm-svn_uri)
-                        [[ ${got} == ${uri} ]] || die "svn URI for ${that} is ${got}, but wanted ${uri}"
+                        [[ ${got} == ${uri} ]] \
+                            || die "svn URI for ${that} is ${got}, but wanted ${uri}"
+
                         got=$(SCM_THIS=${that} scm_get_var REVISION)
-                        [[ ${got} == ${revision} ]] || die "SCM_${that}_REVISION is ${got:-unset}, but wanted ${revision:-unset}"
+                        [[ ${got} == ${revision} ]] \
+                            || die "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}"
+
                     fi
                     unset externals[${idx}]
                     continue 2
