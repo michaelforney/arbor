@@ -3,19 +3,12 @@
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require flag-o-matic multilib versionator
+require common-metadata flag-o-matic multilib versionator
 
 MY_PNV="${PN}-$(replace_version_separator 3 '-')"
 SLOT=$(get_version_component_range 1-2)
 
-SUMMARY="An object-oriented scripting language"
-DESCRIPTION="A dynamic, open source programming language with a focus on
-simplicity and productivity. It has an elegant syntax that is natural to
-read and easy to write."
-HOMEPAGE="http://www.ruby-lang.org/"
-
 DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
-LICENCES="|| ( Ruby GPL-2 )"
 
 WORK=${WORKBASE}/${MY_PNV}
 
@@ -30,6 +23,8 @@ DEPENDENCIES="
         gdbm? ( sys-libs/gdbm )
         ssl? ( dev-libs/openssl )
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-rexml-limit-entity-expansion.patch)
 
 DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
 
@@ -57,6 +52,8 @@ src_configure() {
 }
 
 src_test() {
+    # These tests are currently broken with ruby uninstalled
+    rm -rf test/{soap,wdsl} test/webrick/test_{filehandler,cgi}.rb || die "rm broken tests failed"
     # TERM="dumb" for test_readline.rb
     emake -j1 check TERM="dumb"
 }
