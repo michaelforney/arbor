@@ -12,7 +12,10 @@ MYOPTIONS="nls"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES="${FILES}/${PNV}-parallel-make.patch"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-parallel-make.patch
+    "${FILES}"/${PNV}-man-unicode-dashes.patch
+)
 
 src_install() {
     dodir /usr/bin
