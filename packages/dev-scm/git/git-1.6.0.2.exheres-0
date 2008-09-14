@@ -61,6 +61,8 @@ myemake() {
     emake \
         DESTDIR="${IMAGE}" \
         prefix=/usr \
+        gitexecdir=/usr/$(get_libdir)/${PN} \
+        template_dir=/usr/share/${PN}/templates \
         INSTALLSITELIB=${VENDOR_LIB} \
         CFLAGS="${CFLAGS} -Wall" \
         LDFLAGS="${LDFLAGS}" \
