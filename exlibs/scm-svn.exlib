@@ -19,6 +19,7 @@ scm-svn_do_dependencies() {
 }
 
 scm-svn_do_check_vars() {
+    [[ $(scm_get_var REPOSITORY) == +([^/])://* ]] || die "$(scm_var_name REPOSITORY) must have a URI scheme"
     [[ -n $(scm_get_var SVN_RAW_URI) ]] \
         && [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var TAG) ||
                   -n $(scm_get_var SUBPATH) ]] \
@@ -33,6 +34,21 @@ scm-svn_do_check_vars() {
     scm_modify_var BRANCH     scm_trim_slashes -leading -trailing
     scm_modify_var TAG        scm_trim_slashes -leading -trailing
     scm_modify_var SUBPATH    scm_trim_slashes -leading -trailing
+
+    local externals=( $(scm_get_var SVN_EXTERNALS) ) idx
+    if [[ -n ${externals[@]} ]]; then
+        for idx in ${!externals[@]}; do
+            [[ ${externals[${idx}]} == ?*:* ]] || die "$(scm_var_name SVN_EXTERNALS) entry ${externals[${idx}]} is malformed"
+            local that=${externals[${idx}]##*:}
+            externals[${idx}]=$(scm_trim_slashes -leading -trailing "${externals[${idx}]%:*}"):${that}
+            if [[ -n ${that} ]]; then
+                has ${that} ${SCM_SECONDARY_REPOSITORIES} || die "$(scm_var_name SVN_EXTERNALS) references non-existent repository ${that}"
+                local othertype=$(SCM_THIS=${that} scm_get_var TYPE)
+                [[ ${othertype:-${SCM_TYPE}} == svn ]] || die "$(scm_var_name SVN_EXTERNALS) references non-svn repository ${that}"
+            fi
+        done
+        scm_set_var SVN_EXTERNALS "${externals[*]}"
+    fi
 }
 
 scm-svn_uri() {
@@ -107,9 +123,95 @@ scm-svn_do_appraise() {
     fi
 }
 
+scm-svn_check_externals() {
+    local externals=( $(scm_get_var SVN_EXTERNALS) ) idx
+
+    local extbase part1 part2 part3 part4 revision uri dir fulldir
+    while read -r extbase; do
+        while read -r part1 part2 part3 part4; do
+            [[ -z ${part1} || ${part1} == \#* ]] && continue
+
+            if [[ ${part1} == -r ]]; then
+                uri=${part3}
+                dir=${part4}
+                revision=${part2}
+            elif [[ ${part1} == -r* ]]; then
+                uri=${part2}
+                dir=${part3}
+                revision=${part1#-r}
+            elif [[ ${part2} == -r ]]; then
+                uri=${part4}
+                dir=${part1}
+                revision=${part3}
+            elif [[ ${part2} == -r* ]]; then
+                uri=${part3}
+                dir=${part1}
+                revision=${part2#-r}
+            elif [[ ${part2} == +([^/])://* && ${part1} != +([^/])://* ]]; then
+                uri=${part2}
+                dir=${part1}
+                revision=
+            else
+                uri=${part1}
+                dir=${part2}
+                if [[ ${uri} == *@+([[:digit:]]) ]]; then
+                    revision=${uri##*@}
+                    uri=${uri%@*}
+                else
+                    revision=
+                fi
+            fi
+
+            local myuri=$(scm-svn_uri)
+            if [[ ${uri} == ^/* ]]; then
+                uri=$(scm-svn_info 'Repository Root')${uri#^}
+            elif [[ ${uri} == //* ]]; then
+                uri=${myuri%%://*}:${uri}
+            elif [[ ${uri} == /* ]]; then
+                local sansscheme=${myuri#*://}
+                uri=${myuri%%://*}://${sansscheme%%/*}${uri}
+            elif [[ ${uri} != +([^/])://* ]]; then
+                local relative=${extbase}/${uri}
+                uri=${myuri}/${relative#./}
+            fi
+            uri=$(scm_trim_slashes -scheme -trailing "${uri}")
+
+            dir=${extbase}/$(scm_trim_slashes -trailing "${dir}")
+            dir=${dir#./}
+            fulldir=$(scm_get_var UNPACK_TO)/${dir}
+
+            for idx in ${!externals[@]}; do
+                if [[ ${externals[${idx}]} == ${dir}:* ]]; then
+                    local that=${externals[${idx}]##*:}
+                    if [[ -n ${that} ]]; then
+                        local got
+                        got=$(SCM_THIS=${that} scm_get_var UNPACK_TO)
+                        [[ ${got} == ${fulldir} ]] || die "SCM_${that}_UNPACK_TO is ${got}, but wanted ${fulldir}"
+                        got=$(SCM_THIS=${that} scm-svn_uri)
+                        [[ ${got} == ${uri} ]] || die "svn URI for ${that} is ${got}, but wanted ${uri}"
+                        got=$(SCM_THIS=${that} scm_get_var REVISION)
+                        [[ ${got} == ${revision} ]] || die "SCM_${that}_REVISION is ${got:-unset}, but wanted ${revision:-unset}"
+                    fi
+                    unset externals[${idx}]
+                    continue 2
+                fi
+            done
+
+            die "no repository declared for svn external ${dir} in ${SCM_THIS:-primary repository}"
+        done <<<"$(scm-svn_svn -q propget --strict svn:externals "$(scm_get_var CHECKOUT_TO)/${extbase}")"
+    done <<<"$(cd "$(scm_get_var CHECKOUT_TO)" && find . -name .svn -prune -or -type d -print)"
+
+    if [[ -n ${!externals[@]} ]]; then
+        for idx in ${!externals[@]}; do
+            die "${externals[${idx}]%:*} is not a svn external in ${SCM_THIS:-primary repository}"
+        done
+    fi
+}
+
 scm-svn_do_checkout() {
     local rev=$(scm_get_var REVISION)
     scm-svn_svn checkout ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+    scm-svn_check_externals
 }
 
 scm-svn_do_update() {
@@ -137,6 +239,7 @@ scm-svn_do_update() {
     else
         scm-svn_svn update ${rev:+-r${rev}} "${dir}"
     fi
+    scm-svn_check_externals
 }
 
 scm-svn_do_revision() {
