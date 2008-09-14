@@ -3,7 +3,7 @@ Upstream: no
 Reason: needed for multilib support (removes hardcoded lib)
 --- Configure.orig	2006-02-03 16:15:00.000000000 -0500
 +++ Configure	2006-02-03 16:25:04.000000000 -0500
-@@ -1256,17 +1256,24 @@ locincpth="$locincpth /opt/gnu/include /
+@@ -1256,17 +1256,25 @@ locincpth="$locincpth /opt/gnu/include /
  : no include file wanted by default
  inclwanted=''
  
@@ -11,6 +11,7 @@ Reason: needed for multilib support (removes hardcoded lib)
 +: Should be */lib64 on x86-64, sparc64, ppc64
 +case `arch` in
 +  x86_64) lib='lib64';;
++  ppc64) lib='lib64';;
 +  *) lib='lib';;
 +esac
 +  
