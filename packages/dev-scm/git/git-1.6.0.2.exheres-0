@@ -18,6 +18,7 @@ DEPENDENCIES="
         dev-perl/Error
     post,suggested:
         dev-scm/cvsps               [[ description = [ Dependency for 'git cvsimport' ] ]]
+        dev-lang/python             [[ description = [ Dependency for 'git p4' ] ]]
         dev-scm/subversion[perl]    [[ description = [ Dependency for 'git svn' ] ]]
         dev-perl/libwww-perl        [[ description = [ Dependency for 'git svn' ] ]]
         dev-perl/TermReadKey        [[ description = [ Dependency for 'git svn' ] ]]
@@ -102,6 +103,9 @@ src_install() {
         insinto /usr/share/vim/vimfiles/doc/
         newins "${WORK}"/contrib/vim/README gitcommit.txt
     fi
+
+    dobin contrib/fast-import/git-p4
+    dodoc contrib/fast-import/git-p4.txt
 
     fixlocalpod
 
