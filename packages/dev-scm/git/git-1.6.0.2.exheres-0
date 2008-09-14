@@ -106,12 +106,12 @@ src_install() {
         newins "${WORK}"/contrib/vim/README gitcommit.txt
     fi
 
-    exeinto /usr/libexec/${PN}-core
+    exeinto /usr/libexec/${PN}
     doexe contrib/fast-import/git-p4
     dodoc contrib/fast-import/git-p4.txt
 
     fixlocalpod
 
-    keepdir /usr/share/git-core/templates/branches
+    keepdir /usr/share/${PN}/templates/branches
 }
 
