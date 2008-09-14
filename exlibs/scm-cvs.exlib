@@ -25,8 +25,8 @@ scm-cvs_do_check_vars() {
         && die "for cvs, $(scm_var_name REVISION) must be in the form YYYY.MM.DD.hh.mm.ss"
     [[ -z $(scm_get_var SUBPATH) ]] && scm_set_var SUBPATH "${SCM_THIS:-${PN}}"
 
-    scm_trim_slashes REPOSITORY -trailing
-    scm_trim_slashes SUBPATH -leading -trailing
+    scm_modify_var REPOSITORY scm_trim_slashes -trailing
+    scm_modify_var SUBPATH    scm_trim_slashes -leading -trailing
 }
 
 scm-cvs_cvs() {

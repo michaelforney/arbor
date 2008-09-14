@@ -27,6 +27,13 @@ scm_set_var() {
     eval "$(scm_var_name ${1})=\${2}"
 }
 
+scm_modify_var() {
+    [[ ${#} -ge 2 ]] || die "scm_modify_var needs at least two arguments"
+    local var=${1}
+    shift
+    scm_set_var ${var} "$("${@}" "$(scm_get_var ${var})")"
+}
+
 scm_call() {
     [[ ${#} -ge 1 ]] || die "scm_call needs at least one argument"
     local func=${1} type=$(scm_get_var TYPE)
@@ -192,35 +199,31 @@ scm_pkg_info() {
 }
 
 scm_trim_slashes() {
-    [[ ${#} -ge 1 ]] || die "scm_trim_slashes needs at least one argument"
-
-    local var=${1}
-    local value=$(scm_get_var ${var})
-    shift
-
     local scheme= leading= trailing=
-    while [[ ${#} -gt 0 ]]; do
+    while [[ ${#} -gt 0 && ${1} == -* ]]; do
         case ${1} in
             -scheme)   scheme=1   ;;
             -leading)  leading=1  ;;
             -trailing) trailing=1 ;;
-            *) die "scm_trim_slashes: unrecognised option ${1}"
+            *) die "scm_trim_slashes: unrecognised switch ${1}"
         esac
         shift
     done
 
-    if [[ -n ${value} ]]; then
-        local myscheme=
-        if [[ -n ${scheme} && ${value} == *://* ]]; then
-            myscheme=${value%%://*}://
-            value=${value#*://}
-        fi
+    [[ ${#} -eq 1 ]] || die "scm_trim_slashes needs exactly one argument besides switches"
+    local value=${1}
 
-        value=${value//+(\/)/\/}
-        [[ -n ${leading}  ]] && value=${value#/}
-        [[ -n ${trailing} ]] && value=${value%/}
-        scm_set_var ${var} "${myscheme}${value}"
+    local myscheme=
+    if [[ -n ${scheme} && ${value} == *://* ]]; then
+        myscheme=${value%%://*}://
+        value=${value#*://}
     fi
+
+    value=${value//+(\/)/\/}
+    [[ -n ${leading}  ]] && value=${value#/}
+    [[ -n ${trailing} ]] && value=${value%/}
+
+    echo "${myscheme}${value}"
 }
 
 scm_do_check_vars() {
@@ -243,11 +246,11 @@ scm_global_stuff() {
     local checkout_to=$(scm_get_var CHECKOUT_TO)
     [[ -z ${checkout_to} ]] && checkout_to=${SCM_THIS:-${PN}}
     [[ ${checkout_to} == /* ]] || checkout_to=${FETCHEDDIR}/scm/${checkout_to}
-    scm_set_var CHECKOUT_TO "${checkout_to}"
-    scm_trim_slashes CHECKOUT_TO -trailing
+    scm_set_var CHECKOUT_TO "$(scm_trim_slashes -trailing "${checkout_to}")"
 
-    [[ -z $(scm_get_var UNPACK_TO) ]] && scm_set_var UNPACK_TO "${WORKBASE}/${SCM_THIS:-${PNV}}"
-    scm_trim_slashes UNPACK_TO -trailing
+    local unpack_to=$(scm_get_var UNPACK_TO)
+    [[ -z ${unpack_to} ]] && unpack_to=${WORKBASE}/${SCM_THIS:-${PNV}}
+    scm_set_var UNPACK_TO "$(scm_trim_slashes -trailing "${unpack_to}")"
 
     scm_call check_vars
 
