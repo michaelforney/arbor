@@ -41,6 +41,12 @@ src_install() {
 
     dodoc README doc/release_notes/rel_1_2_0.rdoc
 
+
+    # still need to set env var until this is fixed
+    # http://rubyforge.org/tracker/index.php?func=detail&aid=21853&group_id=126&atid=575
+    dodir /etc/env.d
+    echo "GEM_PATH=\"${site_gem_dir}:${vendor_gem_dir}\"" > ${IMAGE}/etc/env.d/10rubygems
+
     cat <<END > ${IMAGE}/etc/gemrc
 # vim: set ft=yaml sw=2 sts=2 et :
 # set gempath so user can see vendor_gem and install to normal gem
