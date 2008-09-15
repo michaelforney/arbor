@@ -38,7 +38,7 @@ then
 	grep -v ^\\.udev >"${devices_real}"
 
 	# Figure out what udev created
-	udevinfo --export-db | sed -ne 's,^[SN]: \(.*\),\1,p' >"${devices_udev}"
+	udevadm info --export-db | sed -ne 's,^[SN]: \(.*\),\1,p' >"${devices_udev}"
 	# These ones we also do not want in there
 	for x in MAKEDEV core fd initctl pts shm stderr stdin stdout root; do
 		echo "${x}" >> "${devices_udev}"
