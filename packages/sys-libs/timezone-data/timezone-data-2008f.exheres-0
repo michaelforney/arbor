@@ -3,7 +3,7 @@
 
 SUMMARY="Timezone data"
 HOMEPAGE="ftp://elsie.nci.nih.gov/pub"
-DOWNLOADS="ftp://elsie.nci.nih.gov/pub/tzcode${PV}.tar.gz
+DOWNLOADS="ftp://elsie.nci.nih.gov/pub/tzcode${PV/f/e}.tar.gz
          ftp://elsie.nci.nih.gov/pub/tzdata${PV}.tar.gz"
 
 LICENCES="GPL-2"
@@ -13,13 +13,6 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-src_test() {
-    # Don't validate webpages as that requires open{jade+sp} dependencies
-    sed -i -e '/^check:/ s/ check_web//' Makefile || die "sed failed"
-
-    emake AWK=awk check
-}
-
 DEFAULT_SRC_INSTALL_PARAMS=(
     TZDIR="${IMAGE}/usr/share/zoneinfo"
     ETCDIR="${IMAGE}/usr/bin"
@@ -27,6 +20,13 @@ DEFAULT_SRC_INSTALL_PARAMS=(
     TOPDIR="${IMAGE}"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
+
+src_test() {
+    # Don't validate webpages as that requires open{jade+sp} dependencies
+    sed -i -e '/^check:/ s/ check_web//' Makefile || die "sed failed"
+
+    emake AWK=awk check
+}
 
 src_install() {
     # Fix weird installation paths
@@ -36,3 +36,4 @@ src_install() {
     dodir /usr/bin
     default
 }
+
