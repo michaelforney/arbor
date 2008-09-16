@@ -13,10 +13,10 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_install() {
-    mkdir -p "${TEMP}"/usr/bin
-    newbin ${FILES}/autoconf-wrapper-${PV}.sh /usr/bin/autoconf-wrapper.sh
+    newbin "${FILES}"/${PNV}.sh ${PN}.sh
+    local i
     for i in autoconf autoheader autom4te autoreconf \
         autoscan autoupdate ifnames; do
-        dosym /usr/bin/autoconf-wrapper.sh /usr/bin/${i}
+        dosym ${PN}.sh /usr/bin/${i}
     done
 }
