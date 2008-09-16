@@ -7,12 +7,15 @@
 # Automake wrapper v0.2 -- http://www.exherbo.org
 
 # Keep versions sorted highest to lowest.
-AUTOMAKE_VERSIONS=( 1.10 1.9 1.8 1.7 1.6 1.5 1.4 )
+AUTOMAKE_VERSIONS="1.10 1.9 1.8 1.7 1.6 1.5 1.4"
 AUTOMAKE_PROGRAM="$(basename $0)"
 
-# Default to latest if WANT_AUTOMAKE isn't set
+# Default to latest available if WANT_AUTOMAKE isn't set
 if [[ -z ${WANT_AUTOMAKE} || ${WANT_AUTOMAKE} == latest ]]; then
-    WANT_AUTOMAKE=${AUTOMAKE_VERSIONS[0]}
+    for v in ${AUTOMAKE_VERSIONS}; do
+        [[ -x /usr/bin/${AUTOMAKE_PROGRAM}-${v} ]] && WANT_AUTOMAKE=${v} && break
+    done
+    unset v
 fi
 
 if [[ -x /usr/bin/${AUTOMAKE_PROGRAM}-${WANT_AUTOMAKE} ]]; then
@@ -25,5 +28,5 @@ if [[ -z ${TARGET} ]]; then
 fi
 
 # Execute program
-${TARGET} $@
+${TARGET} "$@"
 
