@@ -27,9 +27,9 @@ src_prepare() {
     #basic setup
     echo "CONFIG_CTRL_IFACE=y" >> .config
     echo "CONFIG_BACKEND=file" >> .config
-    
+
     #auth methods
-    
+
     echo "CONFIG_EAP_GTC=y"         >> .config
     echo "CONFIG_EAP_MD5=y"         >> .config
     echo "CONFIG_EAP_OTP=y"         >> .config
@@ -87,5 +87,7 @@ src_install() {
     if option dbus; then
         insinto /etc/dbus-1/system.d
         newins dbus-wpa_supplicant.conf wpa_supplicant.conf
+        insinto /usr/share/dbus-1/system-services
+        newins dbus-wpa_supplicant.service "fi.epitest.hostap.WPASupplicant.service"
     fi
 }
