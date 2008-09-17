@@ -19,12 +19,12 @@ DEPENDENCIES="
         sys-libs/ncurses"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libiconv )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.html tig{.1,rc.5}.{html,txt} )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ${PN}{.1,rc.5}.{html,txt} )
 
 src_install() {
     default
 
-    doman tig.1 tigrc.5
-    dobashcompletion contrib/tig-completion.bash
+    doman ${PN}.1 ${PN}rc.5
+    dobashcompletion contrib/${PN}-completion.bash
 }
 
