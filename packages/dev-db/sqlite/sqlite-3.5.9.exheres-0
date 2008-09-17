@@ -38,8 +38,10 @@ src_install() {
     newbin lemon lemon-${SLOT}
     doman sqlite3.1
 
-    insinto /usr/share/doc/${PNVR}/html
-    # 3.6.2: option doc && doins -r "${WORKBASE}"/${PN}_docs_$(replace_all_version_separators _)/
-    option doc && doins -r "${WORKBASE}"/${PN}-docs-${PV}/
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/html
+        # 3.6.2: option doc && doins -r "${WORKBASE}"/${PN}_docs_$(replace_all_version_separators _)/
+        doins -r "${WORKBASE}"/${PN}-docs-${PV}/
+    fi
 }
 
