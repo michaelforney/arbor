@@ -1,0 +1,44 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'nail-11.25-r3.ebuild' from Gentoo, which is:
+#       Copyright 1999-2007 Gentoo Foundation
+
+SUMMARY="mailx (previously known as nail) is a MUA for Unix systems." 
+HOMEPAGE="http://heirloom.sourceforge.net/${PN}.html"
+DOWNLOADS="mirror://sourceforge/heirloom/${PNV}.tar.bz2"
+REMOTE_IDS="freshmeat:mailx"
+LICENCES="BSD"
+
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/openssl
+"
+
+DEFAULT_SRC_COMPILE_PARAMS=(
+    "PREFIX=/usr"
+    "MAILRC=/etc/mailxrc"
+    "MAILSPOOL=/var/spool/mail"
+    "SENDMAIL=/usr/sbin/sendmail"
+    "UCBINSTALL=$(type -p install)"
+)
+
+DEFAULT_SRC_INSTALL_PARAMS=( "${DEFAULT_SRC_COMPILE_PARAMS[@]}" )
+
+src_prepare() {
+    default
+
+    # Do not strip the binary
+    sed -i -e 's:STRIP = strip:STRIP = /usr/bin/true:' Makefile \
+        || "sed to avoid stripping failed." 
+}
+
+src_install() {
+    default
+
+    insinto /etc
+    newins nail.rc mailxrc
+}
