@@ -1,0 +1,26 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+
+SUMMARY="Create, destroy, resize, check, copy partitions and file systems"
+HOMEPAGE="http://www.gnu.org/software/parted"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="nls device-mapper"
+
+DEPENDENCIES="
+    build:
+        nls? ( sys-devel/gettext )
+    build+run:
+        sys-fs/e2fsprogs
+        sys-libs/ncurses
+        sys-libs/readline
+        device-mapper? ( sys-fs/device-mapper )"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-Werror --with-readline )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( device-mapper nls )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/{API,FAT,USER.jp} )
+
