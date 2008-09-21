@@ -20,7 +20,7 @@
 # These variable specify which vimrc files from the files/ dir will be installed.
 
 #require vim/doc flag-o-matic fdo-mime bash-completion
-require versionator vim-doc flag-o-matic bash-completion
+require versionator vim-doc flag-o-matic bash-completion alternatives
 
 export_exlib_phases src_prepare src_configure src_compile src_test src_install pkg_postinst pkg_postrm
 
@@ -38,7 +38,6 @@ BUGS_TO="pioto@exherbo.org ciaran.mccreesh@googlemail.com"
 ### DEPENDENCIES and MYOPTIONS
 DEPENDENCIES="
     build+run:
-        >=app-admin/eselect-vi-1.1
         nls? ( sys-devel/gettext )"
 # ctags dependency allows help tags to be rebuilt properly, along
 # with detection of exuberant-ctags by configure.
@@ -56,6 +55,8 @@ MYOPTIONS="nls"
 if [[ ${PN} == vim-runtime ]]; then
     MYOPTIONS+=" livecd"
 else
+    ALTERNATIVES_PROVIDED=( "vi:${PN}" )
+
     MYOPTIONS+=" gpm minimal perl python ruby"
    #MYOPTIONS+=" cscope"
     DEPENDENCIES+="
@@ -428,10 +429,19 @@ vim_src_install() {
     esac
 
     # We shouldn't be installing the ex or view man page symlinks, as they
-    # are managed by eselect-vi
+    # are managed by eclectic
     rm -f "${IMAGE}"/usr/share/man/man1/{ex,view}.1
     # Same for these /usr/bin symlinks
     rm -f "${IMAGE}"/usr/bin/{ex,view}
+
+    if [[ "${PN}" != 'vim-runtime' ]] ; then
+        alternatives_for 'vi' "${PN}" 'vi' '/usr/bin/vi' '${PN}'
+        alternatives_for 'vi' "${PN}" 'vi_man' '/usr/share/man/man1/vi.1' 'vim.1'
+        alternatives_for 'vi' "${PN}" 'ex' '/usr/bin/ex' '${PN}'
+        alternatives_for 'vi' "${PN}" 'ex_man' '/usr/share/man/man1/ex.1' 'vim.1'
+        alternatives_for 'vi' "${PN}" 'view' '/usr/bin/view' '${PN}'
+        alternatives_for 'vi' "${PN}" 'view_man' '/usr/share/man/man1/view.1' 'vim.1'
+    fi
 }
 
 # Make convenience symlinks, hopefully without stepping on toes.  Some
@@ -440,8 +450,6 @@ vim_src_install() {
 update_vim_symlinks() {
     local f syms
     syms="vimdiff rvim rview"
-    einfo "Calling eselect vi update..."
-    eselect vi update --if-unset
 
     # Make or remove convenience symlink, vim -> gvim
     if [[ -f ${ROOT}/usr/bin/gvim ]]; then
@@ -516,6 +524,8 @@ vim_pkg_postrm() {
 
     # Make convenience symlinks
     update_vim_symlinks
+
+    alternatives_pkg_postrm
 
     # Update fdo mime stuff, bug #78394
     #if [[ "${PN}" == "gvim" ]] ; then
