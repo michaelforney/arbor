@@ -8,6 +8,11 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
+DEPENDENCIES="
+    build:
+        sys-devel/autoconf:2.5
+        sys-devel/automake:1.9"
+
 src_prepare() {
     default
     ./autogen.bash || die "autogen.bash failed"
