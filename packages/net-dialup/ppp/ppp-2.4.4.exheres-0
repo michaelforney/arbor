@@ -1,0 +1,249 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ppp-2.4.4-r21.ebuild' from Gentoo, which is:
+#       Copyright 1999-2008 Gentoo Foundation
+
+require multilib toolchain-funcs pam
+
+PATCH_VER="20080922"
+SCRIPT_VER="20080922"
+
+SUMMARY="An implementation of the Point-to-Point Protocol (PPP)"
+DESCRIPTION="
+ppp (Paul's PPP Package) is an open source package which implements the 
+Point-to-Point Protocol (PPP) on Linux and Solaris systems.
+"
+REMOTE_IDS="freshmeat:pppd"
+UPSTREAM_CHANGELOG="http://www.samba.org/ppp/README.html"
+UPSTREAM_DOCUMENTATION="http://www.samba.org/ppp/documentation.html"
+BUGS_TO="philantrop@exherbo.org"
+
+HOMEPAGE="http://www.samba.org/ppp"
+DOWNLOADS="ftp://ftp.samba.org/pub/ppp/${PNV}.tar.gz
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-patches-${PATCH_VER}.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-scripts-${SCRIPT_VER}.tar.bz2
+    dhcp? ( http://www.netservers.co.uk/gpl/ppp-dhcpc.tgz )"
+
+LICENCES="BSD GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="activefilter atm dhcp eap-tls ipv6 pam radius"
+
+DEPENDENCIES="
+    build+run:
+        activefilter? ( >=dev-libs/libpcap-0.9.8 )
+        atm? ( net-dialup/linux-atm )
+        pam? ( sys-libs/pam )
+        eap-tls? ( net-misc/curl >=dev-libs/openssl-0.9.7 )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${WORKBASE}/patch/make-vars.patch"
+    -p1 "${WORKBASE}/patch/mpls.patch"
+    -p1 "${WORKBASE}/patch/killaddr-smarter.patch"
+    -p1 "${WORKBASE}/patch/wait-children.patch"
+    -p1 "${WORKBASE}/patch/maxoctets-2Glimit.patch"
+    -p1 "${WORKBASE}/patch/defaultgateway.patch"
+    -p1 "${WORKBASE}/patch/mschapv2-initialize-response.patch"
+    -p1 "${WORKBASE}/patch/linkpidfile.patch"
+    -p1 "${WORKBASE}/patch/qa-fixes.patch"
+    -p1 "${WORKBASE}/patch/kill-pg.patch"
+    -p1 "${WORKBASE}/patch/auth-fail.patch"
+    -p1 "${WORKBASE}/patch/defaultmetric.patch"
+    -p1 "${WORKBASE}/patch/dev-ppp.patch"
+    -p1 "${WORKBASE}/patch/gtk2.patch"
+    -p1 "${WORKBASE}/patch/pppoe-lcp-timeout.patch"
+    -p1 "${WORKBASE}/patch/passwordfd-read-early.patch"
+    -p1 "${WORKBASE}/patch/pppd-usepeerwins.patch"
+)
+
+DEFAULT_SRC_COMPILE_PARAMS=(
+    COPTS="${CFLAGS} -D_GNU_SOURCE"
+)
+
+src_prepare() {
+    default
+
+    option eap-tls && {
+        # see http://eaptls.spe.net/index.html for more info
+        einfo "Enabling EAP-TLS support"
+        expatch -p1 "${WORKBASE}"/patch/eaptls-0.7-gentoo.patch
+    }
+
+    option atm && {
+        einfo "Enabling PPPoATM support"
+        sed -i "s/^#HAVE_LIBATM=yes/HAVE_LIBATM=yes/" pppd/plugins/pppoatm/Makefile.linux
+    }
+
+    option activefilter || {
+        einfo "Disabling active filter"
+        sed -i "s/^FILTER=y/#FILTER=y/" pppd/Makefile.linux
+    }
+
+    option pam && {
+        einfo "Enabling PAM"
+        sed -i "s/^#USE_PAM=y/USE_PAM=y/" pppd/Makefile.linux
+    }
+
+    option ipv6 && {
+        einfo "Enabling IPv6"
+        sed -i "s/#HAVE_INET6/HAVE_INET6/" pppd/Makefile.linux
+    }
+
+    einfo "Enabling CBCP"
+    sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux
+
+    option dhcp && {
+        # copy the ppp-dhcp plugin files
+        einfo "Copying ppp-dhcp plugin files..."
+        tar -xzf "${FETCHEDDIR}/ppp-dhcpc.tgz" -C pppd/plugins/ \
+            && sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux \
+            || die "ppp-dhcp plugin addition failed"
+        expatch -p1 "${WORKBASE}/patch/dhcp-make-vars.patch"
+        expatch -p1 "${WORKBASE}/patch/dhcp-sys_error_to_strerror.patch"
+    }
+
+    # Set correct libdir
+    sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8}
+
+    option radius && {
+        # set the right paths in radiusclient.conf
+        sed -i -e "s:/usr/local/etc:/etc:" \
+            -e "s:/usr/local/sbin:/usr/sbin:" pppd/plugins/radius/etc/radiusclient.conf
+
+        # set config dir to /etc/ppp/radius
+        sed -i -e "s:/etc/radiusclient:/etc/ppp/radius:g" \
+            pppd/plugins/radius/{*.8,*.c,*.h} \
+            pppd/plugins/radius/etc/*
+    }
+}
+
+src_configure() {
+    export CC="$(tc-getCC)"
+    export AR="$(tc-getAR)"
+    
+    default
+}
+
+src_test() {
+    :
+# From the Makefile:
+#   # no tests yet, one day...
+#   installcheck:
+#           true
+}
+
+src_install() {
+    local i
+    for i in chat pppd pppdump pppstats
+    do
+        doman ${i}/${i}.8
+        dosbin ${i}/${i}
+    done
+    fperms u+s-w /usr/sbin/pppd
+
+    # Install pppd header files
+    pushd pppd
+    emake -j1 INSTROOT="${IMAGE}" install-devel || die "emake install-devel failed"
+    popd
+
+    dosbin pppd/plugins/rp-pppoe/pppoe-discovery
+
+    keepdir /etc/ppp/peers
+    insinto /etc/ppp
+    insopts -m0600
+    newins etc.ppp/pap-secrets pap-secrets.example
+    newins etc.ppp/chap-secrets chap-secrets.example
+
+    insopts -m0644
+    doins etc.ppp/options
+
+    exeinto /etc/ppp
+    for i in ip-up ip-down ; do
+        doexe "${WORKBASE}"/scripts/${i}
+        insinto /etc/ppp/${i}.d
+        option ipv6 && dosym ${i} /etc/ppp/${i/ip/ipv6}
+        doins "${WORKBASE}"/scripts/${i}.d/*
+    done
+
+    pamd_mimic_system ppp auth account session
+
+    local PLUGINS_DIR=/usr/$(get_libdir)/pppd/$(awk -F '"' '/VERSION/ {print $2}' pppd/patchlevel.h)
+    # closing " for syntax coloring
+
+    insinto "${PLUGINS_DIR}"
+    insopts -m0755
+    doins pppd/plugins/minconn.so
+    doins pppd/plugins/passprompt.so
+    doins pppd/plugins/passwordfd.so
+    doins pppd/plugins/winbind.so
+    doins pppd/plugins/rp-pppoe/rp-pppoe.so
+
+    if option atm; then
+        doins pppd/plugins/pppoatm/pppoatm.so
+    fi
+
+    if option dhcp; then
+        doins pppd/plugins/dhcp/dhcpc.so
+    fi
+
+    if option radius; then
+        doins pppd/plugins/radius/radius.so
+        doins pppd/plugins/radius/radattr.so
+        doins pppd/plugins/radius/radrealms.so
+
+        insinto /etc/ppp/radius
+        insopts -m0644
+        doins pppd/plugins/radius/etc/{dictionary*,issue,port-id-map,radiusclient.conf,realms,servers}
+
+        doman pppd/plugins/radius/pppd-radius.8
+        doman pppd/plugins/radius/pppd-radattr.8
+    fi
+
+    insinto /etc/modprobe.d
+    insopts -m0644
+    newins "${FILES}"/modules.ppp ppp
+
+    dodoc FAQ PLUGINS README* SETUP
+    dodoc "${FILES}"/README.mpls
+    cp -pPR {contrib,scripts} "${IMAGE}/usr/share/doc/${PNVR}/" \
+        || die "copying contrib and scripts failed."
+
+    dosbin scripts/pon
+    dosbin scripts/poff
+    dosbin scripts/plog
+    doman scripts/pon.1
+}
+
+pkg_postinst() {
+    echo
+    elog "You should make sure you've enabled the following options (or a subset"
+    elog "thereof) in your kernel. The options are listed in descending order of"
+    elog "importance."
+    echo 
+    elog "CONFIG_PPP            (REQUIRED)"
+    if option activefilter ; then
+        elog "CONFIG_PPP_FILTER     (REQUIRED by activefilter)"
+    fi
+    if option atm ; then
+        elog "CONFIG_PPPOATM        (REQUIRED by pppoatm plugin)"
+    fi
+    elog "CONFIG_PPP_ASYNC      (Recommended)"
+    elog "CONFIG_PPP_DEFLATE    (Recommended)"
+    elog "CONFIG_PPP_BSDCOMP    (Recommended)"
+    elog "CONFIG_PPPOE          (Optional, needed by rp-pppoe plugin)"
+    elog "CONFIG_PPP_SYNC_TTY   (Optional, used by the sync option)"
+    elog "CONFIG_PPP_MPPE       (Optional, mostly used by PPTP links)"
+
+    if [ ! -e "${ROOT}/dev/.udev" ] && [ ! -e "${ROOT}/dev/ppp" ]; then
+        mknod "${ROOT}/dev/ppp" c 108 0
+    fi
+
+    # lib name has changed
+    sed -i -e "s:^pppoe.so:rp-pppoe.so:" "${ROOT}/etc/ppp/options"
+
+    echo
+    elog "Pon, poff and plog scripts have been supplied for experienced users."
+    elog "Users needing particular scripts (ssh,rsh,etc.) should check out the"
+    elog "/usr/share/doc/${PNVR}/scripts directory."
+}
