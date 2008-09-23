@@ -130,9 +130,9 @@ scm-git_ref_or_sha1() {
     if [[ -n $(scm_get_var REVISION) ]]; then
         scm_get_var REVISION
     elif [[ -n $(scm_get_var TAG) ]]; then
-        echo refs/tags/$(scm_get_var TAG)
+        scm_get_var TAG
     else
-        echo refs/heads/$(scm_get_var BRANCH)
+        scm_get_var BRANCH
     fi
 }
 
@@ -143,6 +143,6 @@ scm-git_do_revision() {
 scm-git_do_unpack() {
     scm-git_git clone -s --mirror "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"/.git
     scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git config --unset core.bare
-    scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git --work-tree="$(scm_get_var UNPACK_TO)" checkout -f $(scm-git_ref_or_sha1)
+    scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git --work-tree="$(scm_get_var UNPACK_TO)" checkout -f $(scm-git_ref_or_sha1) --
 }
 
