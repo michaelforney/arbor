@@ -1,0 +1,116 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools toolchain-funcs versionator # elisp
+
+SUMMARY="The only Operating System that doesn't come with a real editor"
+HOMEPAGE="http://www.gnu.org/software/${PN}/"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
+
+LICENCES="GPL-3"
+SLOT="$(get_major_version)"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="gif gtk jpeg png spell tiff X xpm"
+
+DEPENDENCIES="
+    build:
+        X? ( gtk? ( dev-util/pkg-config ) )
+    build+run:
+        net-libs/liblockfile
+        spell? ( app-text/aspell )
+        X? (
+            x11-libs/libXmu
+            x11-libs/libXt
+            x11-data/xbitmaps
+            gif? ( media-libs/libgif )
+            gtk? ( x11-libs/gtk+:2 )
+            jpeg? ( media-libs/jpeg )
+            png? ( media-libs/libpng )
+            tiff? ( media-libs/tiff )
+            xpm? ( x11-libs/libXpm )
+        )"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PNV}-vcdiff-tmp-race.patch"
+    "${FILES}/${PNV}-fast-lock.patch"
+)
+
+pkg_pretend() {
+    if ! option X; then
+        if option gif || option gtk || option jpeg || option png || option tiff || option xpm; then
+            die 'Any of OPTION="gif gtk jpeg png tiff xpm" need OPTION="X" enabled.'
+        fi
+    fi
+}
+
+src_prepare() {
+    default
+
+    sed -e '/ALSA_MODULES=/s/alsa/DONOTWANT/' \
+        -i configure.in || die 'Sed to fix alsa automagic dep failed.'
+    sed -e 's/[[:space:]]gzip/ DONOTWANT/' \
+        -i configure.in || die 'Sed to disable .el compression failed.'
+    sed -e 's:-lungif:-lgif:' \
+        -i configure* src/Makefile* || die 'Sed to link to giflib failed.'
+
+    eautoreconf
+}
+
+src_configure() {
+    econf \
+        --program-suffix=-emacs-${SLOT} \
+        --infodir=/usr/share/info/emacs-${SLOT} \
+        --without-sound \
+        $(option_with X x) \
+        $(option gtk && echo '--with-x-toolkit=gtk' || echo '--with-x-toolkit=no') \
+        $(option_with gtk toolkit-scroll-bars) \
+        $(option_with gif) \
+        $(option_with jpeg) \
+        $(option_with png) \
+        $(option_with xpm)
+}
+
+src_compile() {
+    emake CC="$(tc-getCC)"
+
+    pushd lisp/ && emake recompile && popd
+    pushd src/ && emake versionclean && popd
+
+    # Recompile the *.el sources
+    emake CC="$(tc-getCC)"
+
+    dodir /var/lib/games/${PN}/{snake,tetris}-scores \
+        /usr/share/${PN}/site-lisp
+    keepdir /var/lib/games/${PN}/{snake,tetris}-scores \
+        /usr/share/${PN}/site-lisp
+}
+
+src_install() {
+    default
+
+    # Slotting..
+    rm "${IMAGE}/usr/bin/${PN}-${PN}-${SLOT}" \
+        || die 'Failed to remove duplicate emacs binary'
+    mv "${IMAGE}"/usr/bin/{${PNV}-,}${PN}-${SLOT} \
+        || die 'Failed to rename emacs binary'
+
+    local i m
+    for m in "${IMAGE}"/usr/share/man/man?/*; do
+        mv "${m}" "${m%.1}-emacs-${SLOT}.1" || die "mv man ${m} failed"
+    done
+    for i in "${IMAGE}"/usr/share/info/${PN}-${SLOT}/*; do
+        mv "${i}" "${i}.info" || die "mv info ${i} failed"
+    done
+}
+
+# XXX elisp-site-regen
+pkg_postinst() {
+    [[ -f "${ROOT}"/usr/bin/${PN} ]] || ln -s /usr/bin/${PN}-${SLOT} /usr/bin/${PN}
+}
+
+pkg_postrm() {
+    has_version ${CATEGORY}/${PN} || rm "${ROOT}"/usr/bin/${PN}
+}
+
