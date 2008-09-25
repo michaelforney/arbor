@@ -15,7 +15,10 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="dmeventd nls"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    run:
+        >=sys-fs/udev-127
+"
 
 WORK="${WORKBASE}/${PN}.${PV}"
 
@@ -25,7 +28,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-static_link --libdir=/$(get_libdir) )
 src_install() {
     default
 
-    insinto /etc/udev/rules.d
+    insinto /$(get_libdir)/udev/rules.d
     doins "${FILES}"/64-device-mapper.rules
 }
 
