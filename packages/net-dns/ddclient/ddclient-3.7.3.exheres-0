@@ -40,18 +40,14 @@ src_install() {
     default
     dodoc sample*
 
-    dosbin ${PN} || die "dosbin failed"
+    dosbin ${PN}
 
     newinitd "${FILES}"/${PN}.initd ${PN}
     newconfd "${FILES}"/${PN}.confd ${PN}
     keepdir /var/{cache,run}/${PN}
+    fowners ${PN}:${PN} /var/{cache,run}/${PN}
 
     insinto /etc/${PN}
     insopts -m 0640 -o root -g ${PN}
     newins sample-etc_${PN}.conf ${PN}.conf.sample
-}
-
-pkg_postinst() {
-    # ensure the directories are owned by the user:group for this pkg
-    chown ${PN}:${PN} /var/{cache,run}/${PN}
 }
