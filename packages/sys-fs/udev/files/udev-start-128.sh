@@ -171,7 +171,7 @@ check_persistent_net()
 	# from the input, like "uniq -d" does, but uniq
 	# is installed into /usr/bin and not available at boot.
 	dups=$(
-	RULES_FILE='/etc/udev/rules.d/70-persistent-net.rules'
+	RULES_FILE='/lib/udev/rules.d/70-persistent-net.rules'
 	. /lib/udev/rule_generator.functions
 	find_all_rules 'NAME=' '.*' | \
 	tr ' ' '\n' | \

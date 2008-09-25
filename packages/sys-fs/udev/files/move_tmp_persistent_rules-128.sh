@@ -14,8 +14,8 @@ store_persistent_rules() {
 		[ "$dest" = '*' ] && break
 		type=${dest##70-persistent-}
 		type=${type%%.rules}
-		ebegin "Saving udev persistent ${type} rules to /etc/udev/rules.d"
-		cat "$file" >> /etc/udev/rules.d/"$dest" && rm -f "$file"
+		ebegin "Saving udev persistent ${type} rules to /lib/udev/rules.d"
+		cat "$file" >> /lib/udev/rules.d/"$dest" && rm -f "$file"
 		eend $? "Failed moving persistent rules!"
 	done
 }

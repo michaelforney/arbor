@@ -36,6 +36,12 @@ src_prepare() {
         $(find "${WORK}" -name 'Makefile*')                         \
     || die
 
+    sed -i -e "s:/etc/udev/:/$(get_libdir)/udev/:"                  \
+        "${WORK}/extras/rule_generator/write_net_rules"             \
+        "${WORK}/extras/rule_generator/write_cd_rules"              \
+        "${WORK}/rules/gentoo/90-network.rules"                     \
+    || die
+
     sed -i -e 's:-version-info:-version-number:' \
         "${WORK}/extras/volume_id/lib/Makefile.am" || die
 
