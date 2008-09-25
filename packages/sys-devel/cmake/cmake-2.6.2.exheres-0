@@ -13,6 +13,9 @@ SUMMARY="Cross platform Make"
 HOMEPAGE="http://www.cmake.org/"
 DOWNLOADS="http://www.cmake.org/files/v$(get_version_component_range 1-2)/${MY_PNV}.tar.gz"
 
+UPSTREAM_CHANGELOG="http://www.cmake.org/files/v$(get_version_component_range 1-2)/CMakeChangeLog-${PV}"
+REMOTE_IDS="freshmeat:${PN}"
+
 LICENCES="CMake"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -33,19 +36,11 @@ DEPENDENCIES="
         )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-rpath.patch" )
-
 VIMFILE="${PN}.vim"
 
 bootstrap() {
     echo ./bootstrap "$@"
     ./bootstrap "$@" || die "./bootstrap failed"
-}
-
-src_prepare() {
-    default
-    # rpath patch breaks this test
-    sed -e '/FindModulesExecuteAll/d' -i Tests/CMakeLists.txt || die 'Disabling a broken test failed'
 }
 
 src_configure() {
