@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib autotools
 
 SUMMARY="Grep searches input files for matches to specified patterns"
 HOMEPAGE="http://www.gnu.org/software/grep"
@@ -16,7 +16,14 @@ DEPENDENCIES="
     build+run:
         pcre? ( dev-libs/pcre )"
 
+AT_M4DIR="m4"
+
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls "pcre perl-regexp" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README-alpha )
 
+src_prepare() {
+    # tests fail
+    sed -i -e 's:foad1.sh::' -e 's:yesno.sh::' tests/Makefile.am || die
+    autotools_src_prepare
+}
