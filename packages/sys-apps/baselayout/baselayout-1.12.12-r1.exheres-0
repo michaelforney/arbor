@@ -144,6 +144,7 @@ src_install() {
     [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${IMAGE}"/dev/pts
 
     rm -r "${IMAGE}"/etc/modules.d || die "rm -r ${IMAGE}/etc/modules.d failed"
+    rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4 || die "rm ${IMAGE}/etc/modules.autoload.d/kernel-2.4 failed"
 }
 
 pkg_postinst() {
