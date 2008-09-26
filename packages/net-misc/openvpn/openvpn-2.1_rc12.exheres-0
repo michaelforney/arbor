@@ -1,0 +1,98 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'openvpn-2.1_rc9.ebuild' from Gentoo, which is:
+#       Copyright 1999-2008 Gentoo Foundation
+
+require common-metadata eutils multilib
+
+UPSTREAM_CHANGELOG="http://${PN}.net/index.php/documentation/change-log/changelog-21.html"
+UPSTREAM_RELEASE_NOTES="http://${PN}.net/index.php/documentation/release-notes.html"
+UPSTREAM_DOCUMENTATION="http://${PN}.net/index.php/documentation/manuals/${PN}-21.html"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="examples iproute2 pam passwordsave pkcs11 threads"
+
+DEPENDENCIES="
+    build+run:
+        >=app-arch/lzo-2.02
+        >=dev-libs/openssl-0.9.8
+        pam? ( >=sys-libs/pam-1.0.1 )
+        pkcs11? ( >=dev-libs/pkcs11-helper-1.06 )
+    run:
+        iproute2? ( sys-apps/iproute2 )
+        !iproute2? ( sys-apps/net-tools )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--enable-ssl"
+    "--enable-crypto"
+    "--disable-dependency-tracking"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "passwordsave password-save"
+    "threads pthread"
+    iproute2
+    pkcs11
+)
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    "PORTS"
+)
+
+compile_plugin() {
+    local plugdir=${1:-"plugin does not exist"}
+    if pushd plugin/"${plugdir}" >/dev/null 2>&1 ; then
+        emake || die "making plugin ${plugdir} failed"
+    else
+        die "compile_plugin: ${plugdir}"
+    fi
+    popd >/dev/null 2>&1
+}
+
+src_compile() {
+    default
+
+    option pam && compile_plugin auth-pam
+    compile_plugin down-root
+}
+
+src_install() {
+    default
+
+    rmdir "${IMAGE}"/usr/share/doc/${PN}
+    keepdir /etc/openvpn
+
+    # Install some helper scripts
+    exeinto /etc/openvpn
+    doexe "${FILES}/up.sh"
+    doexe "${FILES}/down.sh"
+
+    # Install the init script and config file
+    newinitd "${FILES}/${PN}-2.1.init" openvpn
+    newconfd "${FILES}/${PN}-2.1.conf" openvpn
+
+    # install examples, controlled by the respective useflag
+    if option examples ; then
+        insinto /usr/share/doc/${PNVR}/examples
+        doins -r sample-{config-files,keys,scripts} contrib
+    fi
+
+    # Install plugins and easy-rsa
+    pushd easy-rsa/2.0 >/dev/null 2>&1 
+    emake -j1 install "DESTDIR=${IMAGE}/usr/share/${PN}/easy-rsa" \
+        || die "installing easy-rsa failed."
+    popd
+
+    exeinto "/usr/$(get_libdir)/${PN}"
+    doexe plugin/*/*.so
+
+    dodoc "${FILES}"/README.Exherbo
+}
+
+pkg_postinst() {
+    enewgroup openvpn
+    enewuser openvpn "" "" "" openvpn
+}
