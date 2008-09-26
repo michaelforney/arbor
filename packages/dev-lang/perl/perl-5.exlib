@@ -5,9 +5,9 @@
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib versionator
+require multilib versionator alternatives
 
-export_exlib_phases src_prepare src_configure src_install pkg_postinst
+export_exlib_phases src_prepare src_configure src_install
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
@@ -99,15 +99,12 @@ EOF
 
     # Save a list of what executables & man-pages we're installing
     cd "${IMAGE}"
-    PERL5_ALTERNATIVES_FILES+=( ./usr/bin/*${PV} ./usr/share/man/man1/*${PV}.1 )
-}
-
-perl-5_pkg_postinst() {
-    local f target
-    for f in "${PERL5_ALTERNATIVES_FILES[@]#.\/}"; do
-        [[ ${f/-${PV}} == ${f} ]] && target=${ROOT}${f/${PV}} || target=${ROOT}${f/-${PV}}
-        echo ln -sf ${f##*/} "${target}"
-        ln -sf ${f##*/} "${target}" || ewarn "Couldn't create ${target}"
+    local unique src target alternatives=()
+    for src in usr/bin/*${PV} usr/share/man/man1/*${PV}.1; do
+        [[ ${src/-${PV}} == ${src} ]] && target=${src/${PV}} || target=${src/-${PV}}
+        unique=${target##*/}
+        [[ ${unique} == *.1 ]] && unique=man_${unique%.1}
+        alternatives+=( ${unique} /${target} ${src##*/} )
     done
+    alternatives_for ${PN} ${SLOT} "${alternatives[@]}"
 }
-
