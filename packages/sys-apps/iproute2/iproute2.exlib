@@ -25,7 +25,7 @@ DEPENDENCIES="
     build:
         sys-kernel/linux-headers
     build+run:
-        berkdb? ( sys-libs/db:=[compat185] ) [[ description = [ needed for arpd ] ]]
+        berkdb? ( sys-libs/db:= )
 "
 
 DEFAULT_SRC_COMPILE_PARAMS+=(
@@ -41,11 +41,6 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
 )
 
 src_prepare() {
-    # arpd.c requires db_185.h
-    if optionq berkdb ; then
-        sed -i '/^TARGETS=/s: arpd : :' misc/Makefile || die "sed misc/makefile failed"
-    fi
-
     # use system headers
     rm -r include/linux include/netinet || die "failed to remove system headers"
 
