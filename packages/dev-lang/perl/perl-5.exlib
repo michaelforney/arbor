@@ -33,7 +33,7 @@ WORK="${WORKBASE}/build"
 perl-5_src_prepare() {
     cd "${WORKBASE}/${PNV}"
     default
-    mkdir ${WORK}
+    mkdir "${WORK}" || die "mkdir failed"
 }
 
 perl-5_src_configure() {
@@ -57,7 +57,7 @@ perl-5_src_configure() {
         -Duseshrplib \
         -Dmksymlinks \
         -Duselargefiles \
-        ${PERL5_CONFIGURE_PARAMS[@]} \
+        "${PERL5_CONFIGURE_PARAMS[@]}" \
         || die "Configure failed"
 }
 
@@ -71,11 +71,12 @@ perl-5_src_install() {
 
     # We only want /usr/bin/perl5.8.8, not /usr/bin/perl (without the dash, standard across distros)
     # with -Uinstallusrbinperl this shouldn't even get installed, but it does happen anyway, for some reason..
-    if [[ -x "${IMAGE}"/usr/bin/${PN} ]]; then
+    if [[ -f "${IMAGE}"/usr/bin/${PN} ]]; then
         rm "${IMAGE}"/usr/bin/${PN} || die "Couldn't remove /usr/bin/${PN}"
     fi
 
     # Version executables
+    local executable
     for executable in "${IMAGE}"/usr/bin/*; do
         if [[ ${executable##*/} != *${PV} ]]; then
             mv "${executable}" "${executable}-${PV}" || die "Failed to version ${executable/${IMAGE}}"
@@ -84,6 +85,7 @@ perl-5_src_install() {
 
     # Version man1 manpages, discard man3 manpages (use perldoc)
     rm -r "${IMAGE}"/usr/share/man/man3 || die "Couldn't remove man 3 manpages"
+    local manpage
     for manpage in "${IMAGE}"/usr/share/man/man1/*.1; do
         mv "${manpage}" "${manpage/.1/-${PV}.1}" || die "Failed to version ${manpage/${IMAGE}}"
     done
