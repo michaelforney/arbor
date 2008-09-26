@@ -1,9 +1,13 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="ISC DHCP server and client"
 HOMEPAGE="http://www.isc.org/sw/dhcp/"
 DOWNLOADS="http://ftp.isc.org/isc/dhcp/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:ISC DHCP"
 
 LICENCES="ISC"
 SLOT="0"
@@ -15,4 +19,5 @@ DEPENDENCIES="
         sys-apps/net-tools"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'ipv6 dhcpv6' )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --sbindir=/sbin )
 
