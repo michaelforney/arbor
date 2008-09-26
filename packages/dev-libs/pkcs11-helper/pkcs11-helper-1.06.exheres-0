@@ -1,0 +1,51 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'pkcs11-helper-1.06.ebuild' from Gentoo, which is:
+#       Copyright 1999-2008 Gentoo Foundation
+
+SUMMARY="PKCS#11 helper library"
+DESCRIPTION="
+pkcs11-helper is a library that simplifies the interaction with PKCS#11
+providers for end-user applications using a simple API and optional OpenSSL
+engine.
+"
+HOMEPAGE="http://www.opensc-project.org/pkcs11-helper"
+DOWNLOADS="http://www.opensc-project.org/files/${PN}/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+UPSTREAM_CHANGELOG="http://www.opensc-project.org/${PN}/browser/trunk/ChangeLog"
+
+LICENCES="|| ( BSD GPL-2 )"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="doc gnutls"
+# FIXME: add nss once we have it.
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        >=dev-libs/openssl-0.9.8
+        doc? ( >=app-doc/doxygen-1.4.7 )
+        gnutls? ( >=dev-libs/gnutls-2.5.4 )
+"
+# FIXME: add dev-libs/nss once we have it.
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--docdir=/usr/share/doc/${PNVR}"
+    "--disable-crypto-engine-nss"
+    "--disable-dependency-tracking"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "doc"
+    "gnutls crypto-engine-gnutls"
+)
+# FIXME: add nss once we have it.
+
+src_install() {
+    default
+
+    option doc || rmdir "${IMAGE}"/usr/share/doc/${PNVR}/api
+    rm "${IMAGE}"/usr/share/doc/${PNVR}/COPYING* || die "failed to remove cruft"
+}
