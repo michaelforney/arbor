@@ -21,6 +21,9 @@ alternatives_for() {
     local x dupl alternative=${1} provider=${2} unique src target
     shift 2
 
+    has "${alternative}:${provider}" "${ALTERNATIVES_PROVIDED[@]}" || \
+        ALTERNATIVES_PROVIDED+=( "${alternative}:${provider}" )
+
     [[ -d "${IMAGE}${ALTERNATIVES_DIR}/${alternative}" ]] || dodir "${ALTERNATIVES_DIR}/${alternative}"
 
     while (( $# >= 3 )); do
