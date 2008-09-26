@@ -1,24 +1,34 @@
 # Copyright 2008 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( 1.9 )
+
 SCM_REPOSITORY="git://git.exherbo.org/eclectic.git"
-require scm-git
+require autotools bash-completion scm-git
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="doc"
 
 DEPENDENCIES="
     build:
-        sys-devel/autoconf:2.5
-        sys-devel/automake:1.9"
+        doc? ( python-doc/docutils )"
+
+BASH_COMPLETIONS=( misc/${PN}.bashcomp )
 
 src_prepare() {
     default
     ./autogen.bash || die "autogen.bash failed"
 }
 
-src_install() {
+src_compile() {
     default
-    keepdir "/etc/env.d/alternatives"
+    option doc && emake html
+}
+
+src_install() {
+    bash-completion_src_install
+    dodoc doc/*.txt
+    option doc && dodoc doc/*.html
 }
