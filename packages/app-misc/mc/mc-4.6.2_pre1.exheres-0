@@ -1,0 +1,96 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'mc-4.6.2_pre1.ebuild' from Gentoo, which is:
+#       Copyright 1999-2008 Gentoo Foundation
+
+require versionator flag-o-matic
+
+MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+
+SUMMARY="GNU Midnight Commander is a s-lang based file manager."
+DESCRIPTION="
+GNU Midnight Commander is a text-mode full-screen file manager. It uses a two panel
+interface and a subshell for command execution. It includes an internal editor
+with syntax highlighting and an internal viewer with support for binary files.
+Also included is Virtual Filesystem (VFS), that allows files on remote systems
+(e.g. FTP servers) and files inside archives to be manipulated like real files. 
+"
+HOMEPAGE="http://www.gnu.org/software/mc"
+DOWNLOADS="mirror://gnu/${PN}mc/${MY_PNV}.tar.gz
+    http://dev.exherbo.org/~philantrop/distfiles/${MY_PNV}-patches-2.tbz2"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:midnightcommander"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="gpm nls X"
+# FIXME: samba can be added if requested.
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        nls? ( sys-devel/gettext )
+    build+run:
+        >=dev-libs/glib-2
+        >=sys-libs/slang-2.1.3
+        sys-fs/e2fsprogs
+        gpm? ( sys-libs/gpm )
+        X? ( x11-libs/libX11
+            x11-libs/libICE
+            x11-libs/libXau
+            x11-libs/libXdmcp
+            x11-libs/libSM )
+    post,suggested:
+        app-arch/zip
+        app-arch/unzip
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${WORKBASE}"/patches
+)
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-background
+    --enable-charset
+    --enable-extcharset
+    --enable-largefile
+    --enable-netcode
+    --disable-dependency-tracking
+    --with-edit
+    --with-ext2undel
+    --with-mmap
+    --with-screen=slang
+    --with-vfs
+    --without-mcfs
+    --without-samba
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    nls
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "gpm gpm-mouse"
+    "X x"
+)
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+src_prepare() {
+    default
+
+    # Prevent lazy bindings in cons.saver binary for bug #135009
+    sed -i -e "s:^\(cons_saver_LDADD = .*\):\1 $(bindnow-flags):" \
+        src/Makefile.in || die "sed to prevent lazy bindings failed."
+}
+
+src_install() {
+    default
+
+    # Install cons.saver setuid to make it actually work
+    fperms u+s /usr/libexec/mc/cons.saver
+
+    find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
+}
