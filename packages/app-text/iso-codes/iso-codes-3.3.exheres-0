@@ -3,8 +3,6 @@
 # Based in part upon 'iso-codes-1.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools
-
 SUMMARY="Provides the list of country and language names"
 HOMEPAGE="http://alioth.debian.org/projects/pkg-isocodes/"
 DOWNLOADS="ftp://pkg-isocodes.alioth.debian.org/pub/pkg-isocodes/${PNV}.tar.bz2"
@@ -19,11 +17,3 @@ DEPENDENCIES="
           sys-devel/gettext
         >=dev-lang/python-2.3
 "
-
-src_prepare() {
-    sed -e 's:(datadir)/pkgconfig:(libdir)/pkgconfig:g' \
-        -i "${WORK}"/Makefile.am \
-    || die "Fixing pc file install location failed"
-
-    eautoreconf
-}
