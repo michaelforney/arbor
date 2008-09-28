@@ -1,0 +1,86 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'tinyca-2.0.7.5.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+MY_PNV="${PN}${PV/./-}"
+
+SUMMARY="Simple Perl/Tk GUI to manage a small certification authority"
+DESCRIPTION="
+TinyCA is a simple GUI written in Perl-Gtk to manage a small certification
+authority. It works as a frontend to OpenSSL. TinyCA lets you manage x509
+certificates. It is possible to export data in PEM or DER format for use with
+servers, as PKCS#12 for use with clients, or as S/MIME certificates for use with
+email programs. It is also possible to import your own PKCS#10 requests and
+generate certificates from them. It also lets you create and manage SubCAs for
+more complex setups. The most important certificate extensions can be configured
+with the graphical frontend.
+"
+HOMEPAGE="http://tinyca.sm-zone.net/"
+DOWNLOADS="http://tinyca.sm-zone.net/${MY_PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="http://tinyca.sm-zone.net/CHANGES"
+
+LICENCES="Artistic"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+LANGS="cs de es fr sv"
+
+for x in ${LANGS}; do 
+    MYOPTIONS+=" linguas:${x}"
+done
+
+DEPENDENCIES="
+    run:
+        >=dev-libs/openssl-0.9.7e
+        dev-perl/Locale-gettext
+        >=dev-perl/MIME-Base64-3.07
+        >=dev-perl/Gtk2-Perl-1.200
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-compositefix.patch
+)
+
+DEFAULT_SRC_COMPILE_PARAMS=(
+    "-C po"
+)
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+src_prepare() {
+    sed -i -e 's:./lib:/usr/share/tinyca/lib:g' \
+    	-e 's:./templates:/usr/share/tinyca/templates:g' \
+    	-e 's:./locale:/usr/share/locale:g' "${WORK}/tinyca2"
+}
+
+locale_install() {
+    dodir /usr/share/locale/$@/LC_MESSAGES/
+    insinto /usr/share/locale/$@/LC_MESSAGES/
+    doins locale/$@/LC_MESSAGES/tinyca2.mo
+}
+
+src_install() {
+    default
+
+    exeinto /usr/bin
+    newexe tinyca2 tinyca
+    insinto /usr/share/tinyca/lib
+    doins lib/*.pm
+    insinto /usr/share/tinyca/lib/GUI
+    doins lib/GUI/*.pm
+    insinto /usr/share/tinyca/templates
+    doins templates/*
+
+    insinto /usr/share/
+    local l
+    for l in ${LANGS}; do
+    	if [ "$l" != "en" ]; then
+    		option linguas:$l && locale_install $l
+    	fi
+    done
+}
