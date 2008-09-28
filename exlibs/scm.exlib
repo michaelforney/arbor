@@ -131,7 +131,7 @@ scm_fetch_one() {
 }
 
 scm_src_fetch_extra() {
-    scm_for_each scm_access_checkout scm_fetch_one
+    scm_{for_each,access_checkout,fetch_one}
 }
 
 scm_scminfo_one() {
@@ -142,7 +142,7 @@ scm_scminfo_one() {
 
 scm_pkg_scm_info() {
     local SCM_INFO=
-    scm_for_each scm_access_checkout scm_scminfo_one
+    scm_{for_each,access_checkout,scminfo_one}
     echo ${SCM_INFO#,=}
 }
 
@@ -178,7 +178,7 @@ scm_unpack_one() {
 scm_src_unpack() {
     scm_src_fetch_extra
 
-    scm_for_each scm_access_checkout scm_unpack_one
+    scm_{for_each,access_checkout,unpack_one}
 }
 
 scm_do_info() {
@@ -187,7 +187,7 @@ scm_do_info() {
 
 scm_pkg_info() {
     if [[ -n ${SCM_ACTUAL_REVISION} ]]; then
-        local output=$(scm_for_each scm_call info)
+        local output=$(scm_{for_each,call} info)
         if [[ -n ${output} ]]; then
             echo "${output}"
         else
@@ -259,7 +259,7 @@ scm_global_stuff() {
 
 scm_finalise() {
     DEPENDENCIES+="( build,host,required: >=sys-apps/util-linux-ng-2.13_pre2"
-    scm_for_each scm_global_stuff
+    scm_{for_each,global_stuff}
     DEPENDENCIES+=" )"
 }
 [[ -n ${SCM_TYPE} ]] && scm_finalise
