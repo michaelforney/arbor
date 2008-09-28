@@ -1,0 +1,37 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gtk2-perl-1.200.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require perl-module
+
+MY_PNV=${PNV/-Perl}
+
+SUMMARY="Perl bindings for GTK2"
+DOWNLOADS="mirror://cpan/authors/id/T/TS/TSCH/${MY_PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:gtk2-perl sourceforge:gtk2-perl"
+
+UPSTREAM_CHANGELOG="http://sourceforge.net/project/shownotes.php?release_id=627577&group_id=64773"
+UPSTREAM_RELEASE_NOTES=${UPSTREAM_CHANGELOG}
+UPSTREAM_DOCUMENTATION="http://gtk2-perl.sourceforge.net/doc/ [[ lang = en ]]"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+# Tests require X access.
+RESTRICT="test"
+
+DEPENDENCIES="
+    build:
+        >=dev-perl/ExtUtils-Depends-0.301
+        >=dev-perl/ExtUtils-PkgConfig-1.11
+        >=dev-perl/Glib-Perl-1.200
+        dev-perl/Cairo
+    build+run:
+        >=x11-libs/gtk+-2
+"
+
+WORK="${WORKBASE}/${MY_PNV}"
