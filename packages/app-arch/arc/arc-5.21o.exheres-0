@@ -1,0 +1,61 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
+
+SUMMARY="Tool to manage archives in the .arc format"
+DESCRIPTION="
+This is a port of SEA arc which is a general archive and file compression utility,
+used to maintain a compressed archive of files. It creates, modifies, and extracts
+from .arc files using the old Crunch, Squash, and Squeeze compression methods for
+each file within the archive, based on whichever method yields the smallest result.
+Arc runs on most Unix/POSIX systems as well as mainframes and other microcomputers.
+ARC is an old format that's rarely used nowadays but you may still encounter .arc
+format archives, e. g. in FidoNet.
+"
+HOMEPAGE="http://arc.sourceforge.net"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tgz"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="sourceforge:${PN} freshmeat:sea_${PN}"
+
+UPSTREAM_DOCUMENTATION="http://sourceforge.net/docman/?group_id=93691 [[ lang = en ]]"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PNV}-version.patch
+)
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    Arc521.doc
+    Arcinfo
+)
+
+src_prepare() {
+    # Fixing the version
+    sed -i -e 's:\(VERSION =\).*:\1 5.21o:' Makefile \
+        || die "version sed failed."
+    # Respect the user's flags
+    sed -i -e "s:^\(OPT = \).*:\1 ${CFLAGS} ${LDFLAGS}:" Makefile \
+        || die "flags sed failed."
+    # Set the compiler
+    sed -i -e "s:^\(CC = \).*:\1 $(tc-getCC):" Makefile \
+        || die "cc sed failed."
+    # Add a fake install target
+    echo -e "\ninstall:\n" >> Makefile
+    
+    default
+}
+
+src_install() {
+    default
+
+    dobin arc marc
+    doman arc.1
+}
