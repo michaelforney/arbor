@@ -162,9 +162,9 @@ scm_unpack_one() {
 
     local dir=$(scm_get_var UNPACK_TO)
     if [[ -d ${dir} ]]; then
-    rmdir "${dir}" || die "rmdir failed"
+        rmdir "${dir}" || die "rmdir failed"
     else
-    mkdir -p "${dir%/*}" || die mkdir "failed"
+        mkdir -p "${dir%/*}" || die mkdir "failed"
     fi
 
     scm_call unpack
