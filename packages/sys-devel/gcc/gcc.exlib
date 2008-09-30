@@ -4,16 +4,14 @@
 # Based in part upon 'gcc.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib versionator
-
-MJMI_V="$(get_version_component_range 1-2)"
+require multilib versionator alternatives
 
 SUMMARY="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org/"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
-SLOT="${PV}"
+SLOT="$(get_version_component_range 1-2)"
 MYOPTIONS="ada fortran objc obj-c++ nls propolice"
 
 REMOTE_IDS="freshmeat:${PN}"
@@ -30,7 +28,7 @@ DEPENDENCIES="
 
 if ever at_least 4.3; then
     MYOPTIONS+=" java"
-    DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${MJMI_V}.jar )"
+    DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${SLOT}.jar )"
     DEPENDENCIES+="
         build+run:
             >=dev-libs/gmp-4.1
@@ -47,8 +45,8 @@ ECONF_SOURCE="${WORKBASE}"/${PNV}
 
 src_unpack() {
     if ever at_least 4.3 && option java ; then
-        unpack --if-compressed ${ARCHIVES//ecj-${MJMI_V}.jar}
-        cp "${FETCHEDDIR}"/ecj-${MJMI_V}.jar "${WORKBASE}"/${PNV}/ecj.jar \
+        unpack --if-compressed ${ARCHIVES//ecj-${SLOT}.jar}
+        cp "${FETCHEDDIR}"/ecj-${SLOT}.jar "${WORKBASE}"/${PNV}/ecj.jar \
             || die "copying ecj.jar failed."
     else
         default
@@ -68,6 +66,7 @@ src_configure() {
         --disable-multilib \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=yes \
+        --program-suffix=-${SLOT} \
         $(option_enable nls) \
         $(option_enable propolice libssp)
 }
@@ -77,20 +76,109 @@ DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 src_install() {
     default
 
+    local libdir=$(get_libdir)
+
     # Precompiled headers, disable for cross-compiling
     insinto /usr/include/c++/${PV}/${CHOST}/bits
     doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
-
-    option fortran || rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
 
     # if option doc; then
     #     cd "${CTARGET}"/libstdc++-v3
     #     emake doxygen-man
     # fi
+
+    # nuke empty dir if applicable
+    option fortran || rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+
+    ### slots handling
+    pushd "${IMAGE}" || die "Could not enter IMAGE"
+
+    local x bn ext alternatives=( "${PN}" "${SLOT}" "$(delete_all_version_separators "${SLOT}")" )
+
+    # binaries - slotted properly by upstream, manage with alternatives
+    for x in usr/bin/*-${SLOT}; do
+        bn=$(basename "${x}" -${SLOT})
+        alternatives+=( bin_${bn} /usr/bin/${bn} ${bn}-${SLOT} )
+    done
+    alternatives+=( bin_cc /usr/bin/cc gcc )
+
+    # libraries
+    for x in usr/${libdir}/*.* usr/${libdir}/debug/usr/${libdir}/*.*; do
+        if [[ -L ${x} ]]; then
+            # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
+            echo rm "${x}"
+            rm "${x}" || die "rm /${x} failed"
+            removed+=( "/${x}" ) # just a sanity check
+        elif [[ -f ${x} ]]; then
+            bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
+            ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
+            case "${x##*/}" in
+                # always use newest available so version and create so symlinks
+                libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
+                    # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
+                    # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
+                    # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
+                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                    so_symlinks+=( "${x}" )
+                    ;;
+                # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
+                libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
+                    # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                    so_symlinks+=( "${x}" )
+                    ;;
+                # always use newest available version
+                *.a|*.la|*.spec|*.security|*.properties)
+                    # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
+                    # symlinks+=( usr/lib/libstdc++-4.3.la )
+                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                    ;;
+            esac
+        fi
+    done
+
+    # info pages
+    for x in usr/share/info/*.info; do
+        bn=$(basename "${x}" .info)
+        mv usr/share/info/${bn}{,-${SLOT}}.info || die "mv /${x} failed"
+        alternatives+=( info_${bn} /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
+    done
+
+    # man pages
+    for x in usr/share/man/man1/*-${SLOT}.1; do
+        bn=$(basename "${x}" -${SLOT}.1)
+        alternatives+=( man1_${bn} /usr/share/man/man1/${bn}.1 ${bn}-${SLOT}.1 )
+    done
+    for x in usr/share/man/man7/*; do
+        bn=$(basename "${x}" .7)
+        mv "${x%.7}"{,-${SLOT}}.7 || die "mv /${x} failed"
+        alternatives+=( man7_${bn} /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
+    done
+
+    # locales
+    for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
+        bn=$(basename "${x}" .mo)
+        mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
+        alternatives+=( locale_${x} /${x} ${bn}-${SLOT}.mo )
+    done
+
+    # java
+    if option java; then
+        for x in usr/${libdir}/security/classpath.security; do
+            mv "${x}"{,-${SLOT}} || die "mv /${x} failed"
+            alternatives+=( classpath_security /${x} ${x##*/}-${SLOT} )
+        done
+    fi
+
+    alternatives_for "${alternatives[@]}"
+    popd
 }
 
 pkg_preinst() {
-    local pch
+    local pch x y
     for pch in extc++.h.gch stdc++.h.gch stdtr1c++.h.gch; do
         if [[ -f ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} ]]; then
             echo rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch}
@@ -98,11 +186,56 @@ pkg_preinst() {
                 || die "Failed to remove ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} for a dir-over-file-merge"
         fi
     done
-}
 
-pkg_postinst() {
-    if [[ ! -e ${ROOT}/usr/bin/cc ]]; then
-        ln -s gcc "${ROOT}"/usr/bin/cc || ewarn "Failed to link '${ROOT}/usr/bin/cc' to 'gcc'"
+    # ease migration to proper slotting (i.e. prevent paludis from breaking before pkg_postinst, which would fix it)
+    if [[ -f ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 ]]; then
+        touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 || die "touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 failed"
     fi
 }
 
+generate_symlinks() {
+    local newest=${1} source=${2} target=${3}
+    if [[ -n ${newest} && -e ${target} ]]; then
+        # remove existing file if there is no newer version
+        echo rm "${target}"
+        rm "${target}" || eerror "rm ${target} failed"
+    fi
+    if [[ ! -e ${target} ]]; then
+        # create symlink if it is missing or dangling
+        echo ln -fs "${source}" "${target}"
+        ln -fs "${source}" "${target}" || eerror "Creating ${target} symlink failed"
+    fi
+}
+
+pkg_postinst() {
+    alternatives_pkg_postinst
+
+    local x y newest
+
+    # upgrade existing, valid so symlinks only if there isn't a newer version installed
+    newest=$(best_version ${CATEGORY}/${PN})
+    if [[ ${newest%%:*} == ${CATEGORY}/${PNVR} ]]; then
+        newest=true
+    else
+        newest=
+    fi
+
+    # generate symlinks for libraries that were manually slotted in src_install, e.g.: libffi.so.4.0.1 -> libffi-4.3.so.4.0.1
+    for x in "${symlinks[@]}"; do
+        generate_symlinks "${newest}" "${x##*/}" "${ROOT}${x/-${SLOT}}"
+    done
+
+    for x in "${so_symlinks[@]}"; do
+        y=${x}
+        # generate so symlinks, e.g.: libffi.so -> libffi.so.4 -> libffi.so.4.0 -> libffi.so.4.0.1
+        while [[ ${y} == */*.so.* ]]; do
+            generate_symlinks "${newest}" "${y##*/}" "${ROOT}${y%.*}"
+            y=${y%.*}
+        done
+    done
+
+    # get notification if symlinks were removed during src_install that wasn't handled above in pkg_postinst
+    for x in "${removed[@]}"; do
+        [[ ! -e ${ROOT}${x} ]] && eerror "/${x} was removed and never recreated"
+    done
+}
