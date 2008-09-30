@@ -4,7 +4,7 @@
 # Based in part upon 'gcc.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib
+require multilib versionator
 
 SUMMARY="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org/"
@@ -15,7 +15,7 @@ SLOT="${PV}"
 MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 
 REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-$(get_version_component_range 1-2)/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 
 DEPENDENCIES="
