@@ -18,7 +18,7 @@ DEPENDENCIES="
 # alternatives_for alternative provider unique source target [ unique source target [...]]
 alternatives_for() {
     (( $# >= 5 )) && (( ($#-2)%3 == 0)) || die "${FUNCNAME} requires exactly 2+N*3 arguments where N>0"
-    local x dupl alternative=${1} provider=${2} unique src target
+    local x dupl alternative=${1} provider=${2} unique src target ret=0
     shift 2
 
     has "${alternative}:${provider}" "${ALTERNATIVES_PROVIDED[@]}" || \
@@ -28,7 +28,10 @@ alternatives_for() {
 
     while (( $# >= 3 )); do
         unique=${1}; src=${2}; target=${3}
-        [[ ${unique} == *([[:alnum:]_]) ]] || die "Illegal unique='${unique}', only alphanumeric characters and _ are legal"
+        if [[ ${unique} != *([[:alnum:]_]) ]]; then
+            eerror "Illegal unique='${unique}', only alphanumeric characters and _ are legal"
+            ((ret++))
+        fi
         echo "PATH_${unique}='${src}'"
         echo "TARGET_${unique}='${target}'"
         shift 3
@@ -41,6 +44,7 @@ alternatives_for() {
         dupl=$(echo "${dupl}" | sed -e 's/^PATH_//' -e 's/^TARGET_//' | sort | uniq)
         die "Duplicate unique identifiers detected: '"${dupl}"'"
     fi
+    [[ ${ret} -eq 0 ]] || die "Illegal uniques detected"
 }
 
 export_exlib_phases pkg_postinst pkg_postrm
