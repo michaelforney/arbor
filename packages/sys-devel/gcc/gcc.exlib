@@ -88,7 +88,9 @@ src_install() {
     # fi
 
     # nuke empty dir if applicable
-    option fortran || rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
+    if option !fortran && ever at_least 4.2; then
+        rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${PV}/finclude || die "rmdir finclude failed"
+    fi
 
     ### slots handling
     pushd "${IMAGE}" || die "Could not enter IMAGE"
