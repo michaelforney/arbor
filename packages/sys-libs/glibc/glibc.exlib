@@ -6,9 +6,14 @@ require multilib
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
-DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2
-    mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2
-    mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
+if ever at_least 2.8; then
+    DOWNLOADS="http://dev.exherbo.org/~kloeri/distfiles/${PNV}.tar.bz2
+               http://dev.exherbo.org/~kloeri/distfiles/${PN}-ports-${PV}.tar.bz2"
+else
+    DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2
+        mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2
+        mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
+fi
 
 LICENCES="LGPL-2"
 SLOT="0"
@@ -35,7 +40,9 @@ src_unpack() {
     mkdir "${WORK}"
     unpack ${ARCHIVES}
 
-    mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
+    if !ever at_least 2.8; then
+        mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
+    fi
     mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
 }
 
