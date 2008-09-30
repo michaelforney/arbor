@@ -5,12 +5,5 @@ require gcc
 
 PLATFORMS="~amd64 ~ia64 ~x86"
 
-DEPENDENCIES="
-    build+run:
-        fortran? (
-            >=dev-libs/gmp-4.1
-            dev-libs/mpfr
-        )"
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-ICE-fix.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PNV}-ICE-fix.patch" )
 

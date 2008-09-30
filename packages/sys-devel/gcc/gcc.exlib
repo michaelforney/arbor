@@ -7,39 +7,52 @@
 require multilib
 
 SUMMARY="GNU Compiler Collection"
-HOMEPAGE="http://gcc.gnu.org"
+HOMEPAGE="http://gcc.gnu.org/"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="${PV}"
 MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
+UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
+
 DEPENDENCIES="
     build:
         sys-devel/make"
 #   build: doc? ( app-doc/doxygen )
 
-WORK="${TEMP}/${CHOST}"
+if ever at_least 4.3; then
+    DEPENDENCIES+="
+        build+run:
+            >=dev-libs/gmp-4.1
+            >=dev-libs/mpfr-2.3"
+else
+    DEPENDENCIES+="
+        build+run:
+            fortran? ( >=dev-libs/gmp-4.1
+                       >=dev-libs/mpfr-2.3 )"
+fi
+
+WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 
 src_configure() {
-    LANGS="c++"
+    mkdir "${WORK}" && cd "${WORK}" || die "mkdir failed"
+
+    local i LANGS="c++"
     for i in ada fortran objc obj-c++ java; do
-        option ${i} && LANGS+=" ${i}"
+        option ${i} && LANGS+=",${i}"
     done
-    LANGS="${LANGS/ /,}"
 
-    DEFAULT_SRC_CONFIGURE_PARAMS=(
-        --build=${CHOST}
-        --disable-multilib
-        --enable-languages="${LANGS[@]}"
-        --enable-libstdcxx-pch=yes          # Enable precompiled headers, disable for cross-compiling
-    )
-    DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-        "nls" "propolice libssp"
-    )
-
-    default
+    # Enable precompiled headers, disable for cross-compiling
+    econf \
+        --disable-multilib \
+        --enable-languages="${LANGS}" \
+        --enable-libstdcxx-pch=yes \
+        $(option_enable nls) \
+        $(option_enable propolice libssp)
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
@@ -54,7 +67,7 @@ src_install() {
 
     # Precompiled headers, disable for cross-compiling
     insinto /usr/include/c++/${PV}/${CHOST}/bits
-    doins -r "${WORKBASE}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
+    doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
     option fortran || rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/${CHOST}/${PV}/finclude
 
