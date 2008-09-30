@@ -27,7 +27,13 @@ alternatives_for() {
     [[ -d "${IMAGE}${ALTERNATIVES_DIR}/${alternative}" ]] || dodir "${ALTERNATIVES_DIR}/${alternative}"
 
     while (( $# >= 3 )); do
+        # unique is used in bash variable names and hence can only contain alphanumeric characters and _
+        # handle dash, dot, plus and slash because they are so common in paths
         unique=${1}; src=${2}; target=${3}
+        unique=${unique//-/_dash_}
+        unique=${unique//./_dot_}
+        unique=${unique//+/_plus_}
+        unique=${unique//\//_slash_}
         if [[ ${unique} != *([[:alnum:]_]) ]]; then
             eerror "Illegal unique='${unique}', only alphanumeric characters and _ are legal"
             ((ret++))
