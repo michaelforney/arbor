@@ -1,0 +1,75 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'lm_sensors-3.0.2.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require toolchain-funcs multilib
+
+SUMMARY="Hardware Monitoring user-space utilities"
+HOMEPAGE="http://www.lm-sensors.org/"
+DOWNLOADS="http://dl.lm-sensors.org/lm-sensors/releases/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS="sensord"
+
+DEPENDENCIES="
+    build+run:
+        sensord? ( net-analyzer/rrdtool )
+    run:
+        dev-lang/perl"
+#        virtual/logger"
+
+src_compile() {
+    emake CC="$(tc-getCC)"
+}
+
+DEFAULT_SRC_INSTALL_PARAMS=( 
+    PREFIX=/usr 
+    MANDIR=/usr/share/man
+    LIBDIR=/usr/$(get_libdir)
+)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( 
+    doc/donations 
+    doc/fancontrol.txt
+    doc/fan-divisors 
+    doc/progs 
+    doc/temperature-sensors 
+    doc/vid
+)
+
+src_prepare() {
+    expatch "${FILES}"/${PN}-sensors-detect.patch
+
+    if option sensord; then
+        sed -e 's:^# \(PROG_EXTRA\):\1:' \
+            -i "${WORK}"/Makefile \
+            || die "Activating sensord failed"
+    fi
+}
+
+src_install() {
+    default
+
+    newinitd "${FILES}"/lm_sensors-init.d lm_sensors
+    newinitd "${FILES}"/fancontrol-init.d fancontrol
+
+    if option sensord; then
+        newconfd "${FILES}"/sensord-conf.d sensord
+        newinitd "${FILES}"/sensord-init.d sensord
+    fi
+
+    docinto chips
+    dodoc doc/chips/*
+
+    docinto developers
+    dodoc doc/developers/applications
+}
+
+pkg_postinst() {
+    einfo "Be warned, that the sensor probing may freeze your system."
+    einfo "Use sensors-detect with care!"
+    ewarn "Make sure to read the documentation before using lm_sensors"
+    ewarn "on IBM/Lenovo ThinkPads."
+}
+
