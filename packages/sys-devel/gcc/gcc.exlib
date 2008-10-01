@@ -12,11 +12,13 @@ DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="$(get_version_component_range 1-2)"
-MYOPTIONS="ada fortran objc obj-c++ nls propolice"
+
+MYOPTIONS="ada doc fortran objc obj-c++ nls propolice"
 
 REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${MJMI_V}/"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
 
 # tests require autogen and dejagnu which haven't been packaged yet
 RESTRICT="test"
@@ -24,17 +26,20 @@ RESTRICT="test"
 DEPENDENCIES="
     build:
         sys-devel/make"
-#   build: doc? ( app-doc/doxygen )
 
 if ever at_least 4.3; then
     MYOPTIONS+=" java"
     DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${SLOT}.jar )"
     DEPENDENCIES+="
+        build:
+            doc? ( >=app-doc/doxygen-1.5.1 )
         build+run:
             >=dev-libs/gmp-4.1
             >=dev-libs/mpfr-2.3"
 else
     DEPENDENCIES+="
+        build:
+            doc? ( >=app-doc/doxygen-1.3.9 )
         build+run:
             fortran? ( >=dev-libs/gmp-4.1
                        >=dev-libs/mpfr-2.3 )"
@@ -82,10 +87,19 @@ src_install() {
     insinto /usr/include/c++/${PV}/${CHOST}/bits
     doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
-    # if option doc; then
-    #     cd "${CTARGET}"/libstdc++-v3
-    #     emake doxygen-man
-    # fi
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/html
+        if ever at_least 4.3; then
+            pushd "${WORK}"/${CHOST}/libstdc++-v3/doc || die "Cound not enter libstdc++-v3/doc"
+            emake doc-html-doxygen
+            doins -r doxygen/html/*
+        else
+            pushd "${WORK}"/${CHOST}/libstdc++-v3 || die "Cound not enter libstdc++-v3"
+            emake doxygen
+            doins -r docs/doxygen/html_user/*
+        fi
+        popd
+    fi
 
     # nuke empty dir if applicable
     if option !fortran && ever at_least 4.2; then
