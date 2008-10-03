@@ -27,7 +27,7 @@ scm-svn_do_check_vars() {
     [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var TAG) ]] \
         && die "for svn, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
     [[ -n $(scm_get_var REVISION) ]] && \
-        [[ "$(scm_get_var REVISION)" == *[^[:digit:]]* || "$(scm_get_var REVISION)" -eq 0 ]] \
+        [[ $(scm_get_var REVISION) == *[^[:digit:]]* || $(scm_get_var REVISION) -eq 0 ]] \
         && die "for svn, $(scm_var_name REVISION) must be a positive integer"
 
     scm_modify_var REPOSITORY scm_trim_slashes -scheme  -trailing
