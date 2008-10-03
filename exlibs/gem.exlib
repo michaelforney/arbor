@@ -32,8 +32,7 @@ gem_src_install() {
         myconf+="--no-ri --no-rdoc"
     fi
 
-    gem install "${FETCHEDDIR}"/${PNV}.gem \
-        --local ${myconf} || die "gem install failed"
+    gem install "${GEM_FILENAME:-${FETCHEDDIR}/${PNV}.gem}" --local ${myconf} || die "gem install failed"
 
     if [[ -d ${IMAGE}/${vendor_gem_dir}/bin ]]; then
         exeinto /usr/bin
