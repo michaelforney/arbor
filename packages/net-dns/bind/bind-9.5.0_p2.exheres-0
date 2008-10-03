@@ -1,0 +1,84 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils versionator toolchain-funcs flag-o-matic
+
+MY_PV=${PV/_p/-P}
+MY_PNV=${PN}-${MY_PV}
+
+SUMMARY="Berkeley Internet Name Domain"
+DESCRIPTION="
+The Berkeley Internet Name Domain (BIND) implements an Internet name server for Unix operating systems. BIND consists of a server (or \`daemon') called \`named' and a resolver library.
+A name server is a network service that enables clients to name resources or objects and share this information with other objects in the network.
+"
+HOMEPAGE="http://www.isc.org/index.pl?/sw/bind/view/?release=${MY_PV}"
+DOWNLOADS="ftp://ftp.isc.org/isc/${PN}${PV%%.*}/${MY_PV}/${MY_PNV}.tar.gz"
+
+UPSTREAM_DOCUMENTATION="
+http://www.isc.org/index.pl?/sw/bind/FAQ.php            [[ note = [ FAQ ] ]]
+http://www.isc.org/index.pl?/sw/bind/arm95/index.php    [[ note = [ Administrator reference manual ] ]]
+"
+UPSTREAM_RELEASE_NOTES="http://www.isc.org/index.pl?/sw/${PN}/view/?release=${MY_PV}#RELEASE"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="idn ipv6 ssl" # kerberos
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libxml2
+        idn? ( net-dns/idnkit )
+        ssl? ( dev-libs/openssl )"
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+# Parallel make is not supported upstream
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+
+pkg_setup() {
+    tc-export AR CC LD
+
+    enewgroup named 40
+    enewuser named 40 -1 /etc/bind named
+
+    # Fix ipv6 with glibc-2.8. Gentoo #227333
+    # This is done in lib/bind/configure.in, not sure if that's enough to fix this bug
+    append-flags -D_GNU_SOURCE
+}
+
+src_configure() {
+    myoption() {
+        if option ${2}; then
+            echo "--${1}-${3:-$(optionfmt ${2} )}=yes"
+        else
+            echo "--${1}-${3:-$(optionfmt ${2} )}=no"
+        fi
+    }
+
+    # --enable-isc-spnego: Bundled kerberos parts
+    # --enable-{linux-cps,threads}: Need to figure out its interaction with other option before enabling threads
+    econf \
+        --sysconfdir=/etc/${PN} \
+        --enable-linux-caps=no \
+        --enable-threads=no \
+        --enable-isc-spnego=no \
+        --with-dlz-filesystem=no \
+        --with-gssapi=no \
+        --with-libtool=yes \
+        --with-libxml2=yes \
+        $(myoption enable ipv6) \
+        $(myoption with idn) \
+        $(myoption with ssl openssl)
+
+}
+
+src_install() {
+    default
+
+    keepdir /etc/${PN} /var/${PN}/{pri,sec}
+    rmdir "${IMAGE}"/var/lib/{run/,}
+
+    # init script
+}
+
