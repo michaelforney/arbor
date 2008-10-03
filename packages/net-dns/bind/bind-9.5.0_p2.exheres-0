@@ -1,7 +1,8 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils versionator toolchain-funcs flag-o-matic
+require eutils toolchain-funcs flag-o-matic
 
 MY_PV=${PV/_p/-P}
 MY_PNV=${PN}-${MY_PV}
@@ -12,7 +13,8 @@ The Berkeley Internet Name Domain (BIND) implements an Internet name server for 
 A name server is a network service that enables clients to name resources or objects and share this information with other objects in the network.
 "
 HOMEPAGE="http://www.isc.org/index.pl?/sw/bind/view/?release=${MY_PV}"
-DOWNLOADS="ftp://ftp.isc.org/isc/${PN}${PV%%.*}/${MY_PV}/${MY_PNV}.tar.gz"
+DOWNLOADS="ftp://ftp.isc.org/isc/${PN}${PV%%.*}/${MY_PV}/${MY_PNV}.tar.gz
+    ftp://ftp.internic.net/domain/named.cache"
 
 UPSTREAM_DOCUMENTATION="
 http://www.isc.org/index.pl?/sw/bind/FAQ.php            [[ note = [ FAQ ] ]]
@@ -36,6 +38,10 @@ WORK="${WORKBASE}/${MY_PNV}"
 # Parallel make is not supported upstream
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    KNOWN-DEFECTS
+)
+
 pkg_setup() {
     tc-export AR CC LD
 
@@ -57,12 +63,16 @@ src_configure() {
     }
 
     # --enable-isc-spnego: Bundled kerberos parts
-    # --enable-{linux-cps,threads}: Need to figure out its interaction with other option before enabling threads
+    # --enable-{linux-caps,threads}: Need to figure out its interaction with 
+    # other option before enabling threads
     econf \
         --sysconfdir=/etc/${PN} \
         --enable-linux-caps=no \
         --enable-threads=no \
         --enable-isc-spnego=no \
+        --enable-largefile=yes \
+        --enable-libbind=yes \
+        --with-randomdev=/dev/urandom \
         --with-dlz-filesystem=no \
         --with-gssapi=no \
         --with-libtool=yes \
@@ -70,15 +80,54 @@ src_configure() {
         $(myoption enable ipv6) \
         $(myoption with idn) \
         $(myoption with ssl openssl)
-
 }
 
 src_install() {
     default
 
-    keepdir /etc/${PN} /var/${PN}/{pri,sec}
-    rmdir "${IMAGE}"/var/lib/{run/,}
+    keepdir /etc/${PN} /var/${PN}/{pri,sec} /var/run/named
+    fowners named:named /var/${PN}/{pri,sec} /var/run/named 
 
-    # init script
+    # Install a basic configuration.
+    insinto /etc/${PN}
+    doins "${FILES}"/named.conf
+
+    # html documentation and a sample with everything bind can do.
+    dodoc "${WORK}"/bin/named/named.conf.html
+    newins "${WORK}"/bin/tests/named.conf named.conf.complex_sample
+
+    # Install the Administrator Reference Manual (ARM)
+    docinto Administrator_Reference_Manual
+    dodoc doc/arm/*
+
+    docinto misc
+    dodoc doc/misc/*
+
+    # Creating a CONFIG_PROTECT file for /var/bind
+cat <<EOF >> "${TEMP}"/bind-config_protect
+CONFIG_PROTECT="/var/bind"
+EOF
+
+    # Installing CONFIG_PROTECT and init file as well as confd file.
+    newenvd "${TEMP}"/bind-config_protect 30bind
+    newinitd "${FILES}"/named.init named
+    newconfd "${FILES}"/named.confd named
+
+    # Install standard zones and root cache.
+    insinto /var/bind
+    doins "${FETCHEDDIR}"/named.cache
+    insinto /var/bind/pri
+    doins "${FILES}"/{127,localhost}.zone
+
+    rmdir "${IMAGE}"/var/lib/{run/,}
 }
 
+pkg_postinst() {
+    if [[ ! -f /etc/bind/rndc.key ]]; then
+        if [[ -c /dev/urandom ]]; then
+            /usr/sbin/rndc-confgen -r /dev/urandom -a -u named
+        else
+            /usr/sbin/rndc-confgen -a -u named
+        fi
+    fi
+}
