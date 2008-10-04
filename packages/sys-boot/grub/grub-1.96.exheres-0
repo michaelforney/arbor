@@ -23,6 +23,11 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     DISTLIST "${FILES}"/grub.cfg.example
 )
 
+src_install() {
+    default
+    rmdir "${IMAGE}"/usr/share/grub || die "rmdir /usr/share/grub failed"
+}
+
 pkg_postinst() {
     elog "Use grub-install /dev/your-device e.g. sda to install grub onto the"
     elog "device you wish to boot from"
