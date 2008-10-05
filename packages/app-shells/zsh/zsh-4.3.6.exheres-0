@@ -60,7 +60,8 @@ src_install() {
 
     dodir /etc/zsh
     insinto /etc/zsh
-    doins "${FILES}"/zshenv
+    doins "${FILES}"/{zshenv,zshrc}
+    keepdir /etc/zsh/site-functions
 
     keepdir /usr/share/zsh/site-functions
     insinto /usr/share/${PN}/
