@@ -1,0 +1,62 @@
+# Copyright 2008 Thomas Anderson
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ntp-4.2.4_p4.ebuild' which is:
+#   Copyright 1999-2008 Gentoo Foundation
+
+require common-metadata eutils multilib toolchain-funcs
+
+SLOT="0"
+
+MYOPTIONS="caps debug ipv6 parse-clocks ssl"
+
+DEPENDENCIES="
+    build+run:
+        >=sys-libs/ncurses-5.2
+        >=sys-libs/readline-4.1
+        ssl? ( dev-libs/openssl )
+        caps? ( sys-libs/libcap )"
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+DEFAULT_SRC_CONFIGURE_ENABLES=( "caps linuxcaps" "parse-clocks" "ipv6" "debug debugging" "ssl crypto" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( WHERE-TO-START )
+
+pkg_setup() {
+    enewgroup ntp 123
+    enewuser ntp 123 -1 -1 ntp
+}
+
+src_install() {
+    default
+
+    dodir /usr/sbin
+    mv "${IMAGE}"/usr/bin/{ntpd,ntpdate} "${IMAGE}"/usr/sbin/ || die "move to sbin"
+
+    doman "${WORKBASE}"/man/*.[58]
+    insinto /usr/share/doc/${PNVR}/html/
+    doins -r html/
+
+    insinto /usr/share/ntp
+    doins "${FILES}"/ntp.conf
+    doins -r scripts/*
+    fperms -R go-wx /usr/share/ntp
+    find "${IMAGE}"/usr/share/ntp \
+        '(' \
+        -name '*.in' -o \
+        -name 'Makefile*' -o \
+        -name support \
+        ')' \
+        -exec rm -r {} \;
+
+    keepdir /var/lib/ntp
+    fowners ntp:ntp /var/lib/ntp
+
+    newinitd "${FILES}"/ntpd.initd ntpd
+    newconfd "${FILES}"/ntpd.confd ntpd
+
+    find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
+}
+
+pkg_postinst() {
+    elog "You can find an example ${PN}.conf in /usr/share/ntp/"
+}
