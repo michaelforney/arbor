@@ -83,6 +83,11 @@ src_configure() {
     option tk       || disable="${disable} _tkinter"
     export PYTHON_DISABLE_MODULES="${disable}"
 
+    # Gentoo #228905
+    if [[ "$(gcc-major-version)" -ge 4 ]] ; then
+        append-flags "-fwrapv"
+    fi
+
     export OPT="${CFLAGS}"
 
     # export CXX so it ends up in /usr/lib/python2.x/config/Makefile
