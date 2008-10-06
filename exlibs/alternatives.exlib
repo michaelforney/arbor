@@ -15,16 +15,42 @@ DEPENDENCIES="
     build+run:
         app-admin/eclectic"
 
-# alternatives_for alternative provider unique source target [ unique source target [...]]
+# alternatives_for alternative provider importance unique source target [ unique source target [...]]
 alternatives_for() {
-    (( $# >= 5 )) && (( ($#-2)%3 == 0)) || die "${FUNCNAME} requires exactly 2+N*3 arguments where N>0"
-    local x dupl alternative=${1} provider=${2} unique src target ret=0
-    shift 2
+    (( $# >= 6 )) && (( $#%3 == 0)) || die "${FUNCNAME} requires exactly N*3 arguments where N>1"
+    local x dupl alternative=${1} provider=${2} importance=${3} index unique src target ret=0
+    shift 3
 
-    has "${alternative}:${provider}" "${ALTERNATIVES_PROVIDED[@]}" || \
-        ALTERNATIVES_PROVIDED+=( "${alternative}:${provider}" )
+    # make sure importance is a signed integer
+    if [[ ${importance} != ?(-)+([[:digit:]]) ]]; then
+        eerror "Non-integer importance (${importance}) dectected"
+        ((ret++))
+    fi
 
     [[ -d "${IMAGE}${ALTERNATIVES_DIR}/${alternative}" ]] || dodir "${ALTERNATIVES_DIR}/${alternative}"
+
+    # keep track of provided alternatives for use in pkg_post{rm,inst}. keep a mapping between importance and
+    # provided alternatives and make sure the former is set to only one value
+    if ! has "${alternative}:${provider}" "${ALTERNATIVES_PROVIDED[@]}"; then
+        index=${#ALTERNATIVES_PROVIDED[@]}
+        ALTERNATIVES_PROVIDED+=( "${alternative}:${provider}" )
+        ALTERNATIVES_IMPORTANCE[index]=${importance}
+        echo "IMPORTANCE=${importance}" >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
+    else
+        for((index=0;index<${#ALTERNATIVES_PROVIDED[@]};index++)); do
+            if [[ ${alternative}:${provider} == ${ALTERNATIVES_PROVIDED[index]} ]]; then
+                if [[ -n ${ALTERNATIVES_IMPORTANCE[index]} ]]; then
+                    if [[ ${ALTERNATIVES_IMPORTANCE[index]} != ${importance} ]]; then
+                        eerror "Differing importance (${ALTERNATIVES_IMPORTANCE[index]} != ${importance}) detected"
+                        ((ret++))
+                    fi
+                else
+                    ALTERNATIVES_IMPORTANCE[index]=${importance}
+                    echo "IMPORTANCE=${importance}" >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
+                fi
+            fi
+        done
+    fi
 
     while (( $# >= 3 )); do
         # unique is used in bash variable names and hence can only contain alphanumeric characters and _
@@ -35,7 +61,7 @@ alternatives_for() {
         unique=${unique//+/_plus_}
         unique=${unique//\//_slash_}
         if [[ ${unique} != *([[:alnum:]_]) ]]; then
-            eerror "Illegal unique='${unique}', only alphanumeric characters and _ are legal"
+            eerror "Illegal unique (${unique}) detected, only alphanumeric characters and _ are legal"
             ((ret++))
         fi
         echo "PATH_${unique}='${src}'"
@@ -48,9 +74,9 @@ alternatives_for() {
         "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}" | sort | uniq -d)
     if [[ -n ${dupl} ]]; then
         dupl=$(echo "${dupl}" | sed -e 's/^PATH_//' -e 's/^TARGET_//' | sort | uniq)
-        die "Duplicate unique identifiers detected: '"${dupl}"'"
+        eerror "Duplicate unique identifiers detected: '"${dupl}"'"
     fi
-    [[ ${ret} -eq 0 ]] || die "Illegal uniques detected"
+    [[ ${ret} -eq 0 ]] || die "Errors detected for ${provider}, provided for ${alternative}"
 }
 
 export_exlib_phases pkg_postinst pkg_postrm
