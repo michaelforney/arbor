@@ -20,6 +20,9 @@ REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${MJMI_V}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 
+# tests require autogen and dejagnu which haven't been packaged yet
+RESTRICT="test"
+
 DEPENDENCIES="
     build:
         sys-devel/make"
@@ -70,11 +73,6 @@ src_configure() {
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
-
-# We should probably run default_src_test() here but that breaks for a reason I haven't figured out yet.
-src_test() {
-    :
-}
 
 src_install() {
     default
