@@ -1,0 +1,33 @@
+From 73c1d859a70a57367a233c8b8c90cfc574dd861f Mon Sep 17 00:00:00 2001
+From: Saleem Abdulrasool <compnerd@compnerd.org>
+Date: Sun, 5 Oct 2008 17:56:11 -0700
+Subject: [PATCH] allow keymaps to be validated
+
+only check if the map'ed value is valid if there is a value.  This prevented
+30-keymap-module-sony-laptop.fdi from being validated.
+---
+ tools/keymap-check.sh |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/tools/keymap-check.sh b/tools/keymap-check.sh
+index a05e029..0978d36 100755
+--- a/tools/keymap-check.sh
++++ b/tools/keymap-check.sh
+@@ -20,9 +20,11 @@ get_line ()
+ 	cat "$1" | sed -ne '/<!--/ { :c; /-->/! { N; b c; }; /-->/s/<!--.*-->//g }; /^  *$/!p;' | grep "input.keymap.data" | while read line
+ 	do
+ 		data=`echo "${line}" | cut -d":" -f2 | cut -d"<" -f1`
+-		found=`isin $data`
+-		if [ "$found" = "0" ]; then
+-			echo "$data "
++		if [ -n "${data}" ] ; then
++			found=`isin $data`
++			if [ "$found" = "0" ]; then
++				echo "$data "
++			fi
+ 		fi
+ 	done
+ }
+-- 
+1.6.0.2
+
