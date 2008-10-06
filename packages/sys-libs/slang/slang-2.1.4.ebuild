@@ -20,7 +20,7 @@ UPSTREAM_DOCUMENTATION="http://www.s-lang.org/docs.html"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="pcre png"
 
 DEPENDENCIES="
