@@ -3,21 +3,15 @@
 # Based in part upon 'aspell-0.60.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
+require options
+
 SUMMARY="A Free and Open Source spell checker designed to eventually replace Ispell"
 HOMEPAGE="http://aspell.net/"
-DOWNLOADS="mirror://gnu/aspell/${PNV}.tar.gz"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
 
 LICENCES="LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-
-option_expands() {
-    local prefix=${1} option
-    shift
-    for option in "${@}"; do
-        MYOPTIONS+=" ${prefix}:${option}"
-    done
-}
 
 option_expand_dependencies() {
     local prefix=${1} option
@@ -27,12 +21,10 @@ option_expand_dependencies() {
     done
 }
 
-MYOPTIONS="examples nls doc"
-
 # there's plenty of these to add
-MY_LINGUAS="en"
+MY_LINGUAS="de en nl"
 
-option_expands linguas ${MY_LINGUAS}
+MYOPTIONS="doc examples nls $(option_expand linguas ${MY_LINGUAS})"
 
 DEPENDENCIES="
     build+run:
