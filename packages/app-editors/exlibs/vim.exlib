@@ -437,12 +437,14 @@ vim_src_install() {
     rm -f "${IMAGE}"/usr/bin/{ex,view}
 
     if [[ "${PN}" != 'vim-runtime' ]] ; then
-        alternatives_for 'vi' "${PN}" 'vi' '/usr/bin/vi' "${PN}"
-        alternatives_for 'vi' "${PN}" 'vi_man' '/usr/share/man/man1/vi.1' 'vim.1'
-        alternatives_for 'vi' "${PN}" 'ex' '/usr/bin/ex' "${PN}"
-        alternatives_for 'vi' "${PN}" 'ex_man' '/usr/share/man/man1/ex.1' 'vim.1'
-        alternatives_for 'vi' "${PN}" 'view' '/usr/bin/view' "${PN}"
-        alternatives_for 'vi' "${PN}" 'view_man' '/usr/share/man/man1/view.1' 'vim.1'
+        local importance
+        [[ ${PN} == vim ]] && importance=10 || importance=5
+        alternatives_for 'vi' "${PN}" "${importance}" 'vi' '/usr/bin/vi' "${PN}"
+        alternatives_for 'vi' "${PN}" "${importance}" 'vi_man' '/usr/share/man/man1/vi.1' 'vim.1'
+        alternatives_for 'vi' "${PN}" "${importance}" 'ex' '/usr/bin/ex' "${PN}"
+        alternatives_for 'vi' "${PN}" "${importance}" 'ex_man' '/usr/share/man/man1/ex.1' 'vim.1'
+        alternatives_for 'vi' "${PN}" "${importance}" 'view' '/usr/bin/view' "${PN}"
+        alternatives_for 'vi' "${PN}" "${importance}" 'view_man' '/usr/share/man/man1/view.1' 'vim.1'
     fi
 }
 
