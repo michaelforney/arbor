@@ -6,19 +6,16 @@
 
 require multilib versionator
 
-MJMI_V="$(get_version_component_range 1-2)"
-
 SUMMARY="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org/"
-DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2
-    java? ( ftp://sourceware.org/pub/java/ecj-${MJMI_V}.jar )"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="${PV}"
 MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
 
 REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${MJMI_V}/"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-$(get_version_component_range 1-2)/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 
 DEPENDENCIES="
@@ -41,14 +38,6 @@ fi
 WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 
-src_unpack() {
-    default
-    
-    if option java; then
-        cp "${FETCHEDDIR}"/ecj-${MJMI_V}.jar "${WORK}"/
-    fi
-}
-
 src_configure() {
     mkdir "${WORK}" && cd "${WORK}" || die "mkdir failed"
 
@@ -68,7 +57,7 @@ src_configure() {
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
-# default_src_test() needs autogen, dejagnu.
+# We should probably run default_src_test() here but that breaks for a reason I haven't figured out yet.
 src_test() {
     :
 }
