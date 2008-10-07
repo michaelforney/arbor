@@ -62,9 +62,10 @@ src_configure() {
     mkdir "${WORK}" && cd "${WORK}" || die "mkdir failed"
 
     local i LANGS="c++"
-    for i in ada fortran objc obj-c++ java; do
+    for i in ada fortran objc obj-c++; do
         option ${i} && LANGS+=",${i}"
     done
+    ever at_least 4.3 && option java && LANGS+=",java"
 
     # Enable precompiled headers, disable for cross-compiling
     econf \
@@ -175,17 +176,22 @@ src_install() {
     done
 
     # locales
-    for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
-        bn=$(basename "${x}" .mo)
-        mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
-        alternatives+=( locale_${x} /${x} ${bn}-${SLOT}.mo )
-    done
+    if option nls; then
+        for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
+            bn=$(basename "${x}" .mo)
+            mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
+            alternatives+=( locale_${x} /${x} ${bn}-${SLOT}.mo )
+        done
+    fi
 
     # java
-    if option java; then
-        for x in usr/${libdir}/security/classpath.security; do
-            mv "${x}"{,-${SLOT}} || die "mv /${x} failed"
-            alternatives+=( classpath_security /${x} ${x##*/}-${SLOT} )
+    if ever at_least 4.3 && option java; then
+        for x in usr/${libdir}/security/classpath.security usr/share/java/ecj.jar; do
+            bn=$(basename "${x}")
+            ext=${bn#*.}
+            echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+            mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+            alternatives+=( classpath_security /${x} ${bn}-${SLOT}.${ext} )
         done
     fi
 
