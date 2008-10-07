@@ -6,16 +6,18 @@
 
 require multilib versionator
 
+MJMI_V="$(get_version_component_range 1-2)"
+
 SUMMARY="GNU Compiler Collection"
 HOMEPAGE="http://gcc.gnu.org/"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="${PV}"
-MYOPTIONS="ada fortran java objc obj-c++ nls propolice"
+MYOPTIONS="ada fortran objc obj-c++ nls propolice"
 
 REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-$(get_version_component_range 1-2)/"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${MJMI_V}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 
 DEPENDENCIES="
@@ -24,6 +26,8 @@ DEPENDENCIES="
 #   build: doc? ( app-doc/doxygen )
 
 if ever at_least 4.3; then
+    MYOPTIONS+=" java"
+    DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${MJMI_V}.jar )"
     DEPENDENCIES+="
         build+run:
             >=dev-libs/gmp-4.1
@@ -37,6 +41,16 @@ fi
 
 WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}"/${PNV}
+
+src_unpack() {
+    if ever at_least 4.3 && option java ; then
+        unpack --if-compressed ${ARCHIVES//ecj-${MJMI_V}.jar}
+        cp "${FETCHEDDIR}"/ecj-${MJMI_V}.jar "${WORKBASE}"/${PNV}/ecj.jar \
+            || die "copying ecj.jar failed."
+    else
+        default
+    fi
+}
 
 src_configure() {
     mkdir "${WORK}" && cd "${WORK}" || die "mkdir failed"
