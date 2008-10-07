@@ -98,7 +98,7 @@ perl-module_src_install() {
     do
         rm -f "${file}"
     done
-    find "${IMAGE}"/usr/share/man -depth -type d -print0 2>/dev/null | xargs -0 -r rmdir
+    find "${IMAGE}"/usr/share/man -depth -type d -empty -delete
 
     fixlocalpod
 
