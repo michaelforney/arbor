@@ -46,6 +46,10 @@ DEPENDENCIES="
         X? ( x11-proto/xextproto )
 "
 
+WORK="${WORKBASE}/${PNV%.*}"
+
+RESTRICT="test"
+
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--disable-openmp'
 '--without-included-ltdl' '--with-quantum-depth=16' '--with-threads'
 '--with-modules' '--enable-hdri' '--with-gslib' )
@@ -54,5 +58,3 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus'
 'fontconfig' 'fpx' 'graphviz gvc' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
 'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
 'xml' 'zlib' )
-
-WORK="${WORKBASE}/${PNV%.*}"
