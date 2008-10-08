@@ -7,13 +7,8 @@
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
 
-require multilib autotools
+require udev autotools
 
-SUMMARY="Dynamic userspace /dev manager for Linux"
-HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
-DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
-
-LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
@@ -89,16 +84,4 @@ src_install() {
     keepdir "/etc/udev/rules.d"
     keepdir "/$(get_libdir)/udev/state"
     keepdir "/$(get_libdir)/udev/devices"
-}
-
-pkg_postinst() {
-    if [[ ${ROOT} == / ]] ; then
-        if [[ -n $(pidof udevd) ]] ; then
-            killall -15 udevd &>/dev/null
-            sleep 1
-            killall -9 udevd &>/dev/null
-        fi
-
-        /sbin/udevd --daemon
-    fi
 }
