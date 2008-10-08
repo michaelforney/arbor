@@ -191,7 +191,7 @@ src_install() {
             ext=${bn#*.}
             echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
             mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-            alternatives+=( classpath_security /${x} ${bn}-${SLOT}.${ext} )
+            alternatives+=( classpath_security /${x} ${bn%.${ext}}-${SLOT}.${ext} )
         done
     fi
 
