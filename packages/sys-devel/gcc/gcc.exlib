@@ -1,5 +1,6 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'gcc.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -129,7 +130,7 @@ src_install() {
         elif [[ -f ${x} ]]; then
             bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
             ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
-            case "${x##*/}" in
+            case "${bn}" in
                 # always use newest available so version and create so symlinks
                 libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
                     # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
@@ -234,9 +235,10 @@ pkg_postinst() {
 
     local x y newest
 
-    # upgrade existing, valid so symlinks only if there isn't a newer version installed
+    # upgrade existing, valid symlinks only if there isn't a newer version installed
     newest=$(best_version ${CATEGORY}/${PN})
-    if [[ ${newest%%:*} == ${CATEGORY}/${PNVR} ]]; then
+    newest=${newest#${CATEGORY}/${PN}-}
+    if ever at_least ${newest%%:*}; then
         newest=true
     else
         newest=
