@@ -1,0 +1,1023 @@
+From a37b6a23347f09c70e695281816af226d06bd5e5 Mon Sep 17 00:00:00 2001
+From: Saleem Abdulrasool <compnerd@compnerd.org>
+Date: Sat, 4 Oct 2008 21:49:21 -0700
+Subject: [PATCH] support for installing to /lib and /lib64
+
+Allow installation into /lib64 for isolation in multi-lib systems
+---
+ Makefile.am.inc                          |    1 +
+ extras/ata_id/Makefile.am                |    2 +-
+ extras/cdrom_id/Makefile.am              |    4 +-
+ extras/collect/Makefile.am               |    2 +-
+ extras/edd_id/Makefile.am                |    4 +-
+ extras/firmware/Makefile.am              |    2 +-
+ extras/floppy/Makefile.am                |    2 +-
+ extras/fstab_import/Makefile.am          |    4 +-
+ extras/path_id/Makefile.am               |    2 +-
+ extras/rule_generator/Makefile.am        |   14 +++-
+ extras/rule_generator/write_cd_rules     |  110 ---------------------------
+ extras/rule_generator/write_cd_rules.in  |  110 +++++++++++++++++++++++++++
+ extras/rule_generator/write_net_rules    |  122 ------------------------------
+ extras/rule_generator/write_net_rules.in |  122 ++++++++++++++++++++++++++++++
+ extras/scsi_id/Makefile.am               |    2 +-
+ extras/usb_id/Makefile.am                |    2 +-
+ extras/volume_id/Makefile.am             |    2 +-
+ rules/Makefile.am                        |   10 ++-
+ rules/rules.d/50-udev-default.rules      |  110 ---------------------------
+ rules/rules.d/50-udev-default.rules.in   |  110 +++++++++++++++++++++++++++
+ udev/udev_rules.c                        |    4 +-
+ udev/udev_rules_parse.c                  |    6 +-
+ 22 files changed, 381 insertions(+), 366 deletions(-)
+ delete mode 100644 extras/rule_generator/write_cd_rules
+ create mode 100644 extras/rule_generator/write_cd_rules.in
+ delete mode 100644 extras/rule_generator/write_net_rules
+ create mode 100644 extras/rule_generator/write_net_rules.in
+ delete mode 100644 rules/rules.d/50-udev-default.rules
+ create mode 100644 rules/rules.d/50-udev-default.rules.in
+
+diff --git a/Makefile.am.inc b/Makefile.am.inc
+index 7ecd55d..c09b396 100644
+--- a/Makefile.am.inc
++++ b/Makefile.am.inc
+@@ -2,6 +2,7 @@ AM_CPPFLAGS = \
+ 	-include $(top_builddir)/config.h \
+ 	-DSYSCONFDIR=\""$(sysconfdir)"\" \
+ 	-DUDEV_PREFIX=\""$(udev_prefix)"\" \
++	-DLIBDIR=\""$(libdir_name)"\" \
+ 	-D_LIBUDEV_COMPILATION
+ 
+ AM_CFLAGS =
+diff --git a/extras/ata_id/Makefile.am b/extras/ata_id/Makefile.am
+index 34ded29..272d384 100644
+--- a/extras/ata_id/Makefile.am
++++ b/extras/ata_id/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	ata_id
+ 
+diff --git a/extras/cdrom_id/Makefile.am b/extras/cdrom_id/Makefile.am
+index f8c4bbf..eb2b434 100644
+--- a/extras/cdrom_id/Makefile.am
++++ b/extras/cdrom_id/Makefile.am
+@@ -1,10 +1,10 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	cdrom_id
+ 
+-udevrulesdir = $(udev_prefix)/lib/udev/rules.d
++udevrulesdir = $(udev_prefix)/$(libdir_name)/udev/rules.d
+ dist_udevrules_DATA = \
+ 	60-cdrom_id.rules
+ 
+diff --git a/extras/collect/Makefile.am b/extras/collect/Makefile.am
+index 60315dd..ce49da2 100644
+--- a/extras/collect/Makefile.am
++++ b/extras/collect/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	collect
+ 
+diff --git a/extras/edd_id/Makefile.am b/extras/edd_id/Makefile.am
+index 67199fd..afd4373 100644
+--- a/extras/edd_id/Makefile.am
++++ b/extras/edd_id/Makefile.am
+@@ -1,10 +1,10 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	edd_id
+ 
+-udevrulesdir = $(udev_prefix)/lib/udev/rules.d
++udevrulesdir = $(udev_prefix)/$(libdir_name)/udev/rules.d
+ dist_udevrules_DATA = \
+ 	61-persistent-storage-edd.rules
+ 
+diff --git a/extras/firmware/Makefile.am b/extras/firmware/Makefile.am
+index 78b28f6..593f0d3 100644
+--- a/extras/firmware/Makefile.am
++++ b/extras/firmware/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ dist_udevhome_SCRIPTS = \
+ 	firmware.sh
+ 
+diff --git a/extras/floppy/Makefile.am b/extras/floppy/Makefile.am
+index 357129e..37606ec 100644
+--- a/extras/floppy/Makefile.am
++++ b/extras/floppy/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	create_floppy_devices
+ 
+diff --git a/extras/fstab_import/Makefile.am b/extras/fstab_import/Makefile.am
+index c120478..63d684d 100644
+--- a/extras/fstab_import/Makefile.am
++++ b/extras/fstab_import/Makefile.am
+@@ -1,10 +1,10 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	fstab_import
+ 
+-udevrulesdir = $(udev_prefix)/lib/udev/rules.d
++udevrulesdir = $(udev_prefix)/$(libdir_name)/udev/rules.d
+ dist_udevrules_DATA = \
+ 	79-fstab_import.rules
+ 
+diff --git a/extras/path_id/Makefile.am b/extras/path_id/Makefile.am
+index b85b747..15f5086 100644
+--- a/extras/path_id/Makefile.am
++++ b/extras/path_id/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ dist_udevhome_SCRIPTS = \
+ 	path_id
+ 
+diff --git a/extras/rule_generator/Makefile.am b/extras/rule_generator/Makefile.am
+index 8981912..03f002c 100644
+--- a/extras/rule_generator/Makefile.am
++++ b/extras/rule_generator/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ dist_udevhome_SCRIPTS = \
+ 	write_cd_rules \
+ 	write_net_rules
+@@ -8,7 +8,7 @@ dist_udevhome_SCRIPTS = \
+ dist_udevhome_DATA = \
+ 	rule_generator.functions
+ 
+-udevrulesdir = $(udev_prefix)/lib/udev/rules.d
++udevrulesdir = $(udev_prefix)/$(libdir_name)/udev/rules.d
+ dist_udevrules_DATA = \
+ 	75-cd-aliases-generator.rules \
+ 	75-persistent-net-generator.rules
+@@ -16,3 +16,13 @@ dist_udevrules_DATA = \
+ distclean-local:
+ 	rm -f Makefile.in
+ 
++write_cd_rules: write_cd_rules.in
++	$(SED) -e "s:@@libdir@@:$(libdir_name):g" < $< > $@
++
++write_net_rules: write_net_rules.in
++	$(SED) -e "s:@@libdir@@:$(libdir_name):g" < $< > $@
++
++CLEANFILES = write_cd_rules write_net_rules
++
++EXTRA_DIST = write_cd_rules.in write_net_rules.in
++
+diff --git a/extras/rule_generator/write_cd_rules b/extras/rule_generator/write_cd_rules
+deleted file mode 100644
+index d74b201..0000000
+--- a/extras/rule_generator/write_cd_rules
++++ /dev/null
+@@ -1,110 +0,0 @@
+-#!/bin/sh -e
+-
+-# This script is run if an optical drive lacks a rule for persistent naming.
+-#
+-# It adds symlinks for optical drives based on the device class determined
+-# by cdrom_id and used ID_PATH to identify the device.
+-#
+-# (C) 2006 Marco d'Itri <md@Linux.IT>
+-#
+-# This program is free software; you can redistribute it and/or modify it
+-# under the terms of the GNU General Public License as published by the
+-# Free Software Foundation version 2 of the License.
+-
+-RULES_FILE="/etc/udev/rules.d/70-persistent-cd.rules"
+-
+-. /lib/udev/rule_generator.functions
+-
+-find_next_available() {
+-	raw_find_next_available "$(find_all_rules 'SYMLINK+=' "$1")"
+-}
+-
+-write_rule() {
+-	local match="$1"
+-	local link="$2"
+-	local comment="$3"
+-
+-	{
+-	if [ "$PRINT_HEADER" ]; then
+-		PRINT_HEADER=
+-		echo "# This file was automatically generated by the $0"
+-		echo "# program, probably run by the cd-aliases-generator.rules rules file."
+-		echo "#"
+-		echo "# You can modify it, as long as you keep each rule on a single line"
+-		echo "# and set the \$GENERATED variable."
+-		echo ""
+-	fi
+-
+-	[ "$comment" ] && echo "# $comment"
+-	echo "$match, SYMLINK+=\"$link\", ENV{GENERATED}=\"1\""
+-	} >> $RULES_FILE
+-	SYMLINKS="$SYMLINKS $link"
+-}
+-
+-if [ -z "$DEVPATH" ]; then
+-	echo "Missing \$DEVPATH." >&2
+-	exit 1
+-fi
+-if [ -z "$ID_CDROM" ]; then
+-	echo "$DEVPATH is not a CD reader." >&2
+-	exit 1
+-fi
+-
+-if [ "$1" ]; then
+-	METHOD="$1"
+-else
+-	METHOD='by-path'
+-fi
+-
+-case "$METHOD" in
+-	by-path)
+-	if [ -z "$ID_PATH" ]; then
+-		echo "$DEVPATH not supported by path_id. by-id may work." >&2
+-		exit 1
+-	fi
+-	RULE="ENV{ID_PATH}==\"$ID_PATH\""
+-	;;
+-
+-	by-id)
+-	if [ "$ID_SERIAL" ]; then
+-		RULE="ENV{ID_SERIAL}==\"$ID_SERIAL\""
+-	elif [ "$ID_MODEL" -a "$ID_REVISION" ]; then
+-		RULE="ENV{ID_MODEL}==\"$ID_MODEL\", ENV{ID_REVISION}==\"$ID_REVISION\""
+-	else
+-		echo "$DEVPATH not supported by ata_id. by-path may work." >&2
+-		exit 1
+-	fi
+-	;;
+-
+-	*)
+-	echo "Invalid argument (must be either by-path or by-id)." >&2
+-	exit 1
+-	;;
+-esac
+-
+-# Prevent concurrent processes from modifying the file at the same time.
+-lock_rules_file
+-
+-# Check if the rules file is writeable.
+-choose_rules_file
+-
+-link_num=$(find_next_available 'cdrom[0-9]*')
+-
+-match="ENV{ID_CDROM}==\"?*\", $RULE"
+-
+-comment="$ID_MODEL ($ID_PATH)"
+-
+-	write_rule "$match" "cdrom$link_num" "$comment"
+-[ "$ID_CDROM_CD_R" -o "$ID_CDROM_CD_RW" ] && \
+-	write_rule "$match" "cdrw$link_num"
+-[ "$ID_CDROM_DVD" ] && \
+-	write_rule "$match" "dvd$link_num"
+-[ "$ID_CDROM_DVD_R" -o "$ID_CDROM_DVD_RW" -o "$ID_CDROM_DVD_RAM" ] && \
+-	write_rule "$match" "dvdrw$link_num"
+-
+-unlock_rules_file
+-
+-echo $SYMLINKS
+-
+-exit 0
+-
+diff --git a/extras/rule_generator/write_cd_rules.in b/extras/rule_generator/write_cd_rules.in
+new file mode 100644
+index 0000000..b4278e5
+--- /dev/null
++++ b/extras/rule_generator/write_cd_rules.in
+@@ -0,0 +1,110 @@
++#!/bin/sh -e
++
++# This script is run if an optical drive lacks a rule for persistent naming.
++#
++# It adds symlinks for optical drives based on the device class determined
++# by cdrom_id and used ID_PATH to identify the device.
++#
++# (C) 2006 Marco d'Itri <md@Linux.IT>
++#
++# This program is free software; you can redistribute it and/or modify it
++# under the terms of the GNU General Public License as published by the
++# Free Software Foundation version 2 of the License.
++
++RULES_FILE="/etc/udev/rules.d/70-persistent-cd.rules"
++
++. /@@libdir@@/udev/rule_generator.functions
++
++find_next_available() {
++	raw_find_next_available "$(find_all_rules 'SYMLINK+=' "$1")"
++}
++
++write_rule() {
++	local match="$1"
++	local link="$2"
++	local comment="$3"
++
++	{
++	if [ "$PRINT_HEADER" ]; then
++		PRINT_HEADER=
++		echo "# This file was automatically generated by the $0"
++		echo "# program, probably run by the cd-aliases-generator.rules rules file."
++		echo "#"
++		echo "# You can modify it, as long as you keep each rule on a single line"
++		echo "# and set the \$GENERATED variable."
++		echo ""
++	fi
++
++	[ "$comment" ] && echo "# $comment"
++	echo "$match, SYMLINK+=\"$link\", ENV{GENERATED}=\"1\""
++	} >> $RULES_FILE
++	SYMLINKS="$SYMLINKS $link"
++}
++
++if [ -z "$DEVPATH" ]; then
++	echo "Missing \$DEVPATH." >&2
++	exit 1
++fi
++if [ -z "$ID_CDROM" ]; then
++	echo "$DEVPATH is not a CD reader." >&2
++	exit 1
++fi
++
++if [ "$1" ]; then
++	METHOD="$1"
++else
++	METHOD='by-path'
++fi
++
++case "$METHOD" in
++	by-path)
++	if [ -z "$ID_PATH" ]; then
++		echo "$DEVPATH not supported by path_id. by-id may work." >&2
++		exit 1
++	fi
++	RULE="ENV{ID_PATH}==\"$ID_PATH\""
++	;;
++
++	by-id)
++	if [ "$ID_SERIAL" ]; then
++		RULE="ENV{ID_SERIAL}==\"$ID_SERIAL\""
++	elif [ "$ID_MODEL" -a "$ID_REVISION" ]; then
++		RULE="ENV{ID_MODEL}==\"$ID_MODEL\", ENV{ID_REVISION}==\"$ID_REVISION\""
++	else
++		echo "$DEVPATH not supported by ata_id. by-path may work." >&2
++		exit 1
++	fi
++	;;
++
++	*)
++	echo "Invalid argument (must be either by-path or by-id)." >&2
++	exit 1
++	;;
++esac
++
++# Prevent concurrent processes from modifying the file at the same time.
++lock_rules_file
++
++# Check if the rules file is writeable.
++choose_rules_file
++
++link_num=$(find_next_available 'cdrom[0-9]*')
++
++match="ENV{ID_CDROM}==\"?*\", $RULE"
++
++comment="$ID_MODEL ($ID_PATH)"
++
++	write_rule "$match" "cdrom$link_num" "$comment"
++[ "$ID_CDROM_CD_R" -o "$ID_CDROM_CD_RW" ] && \
++	write_rule "$match" "cdrw$link_num"
++[ "$ID_CDROM_DVD" ] && \
++	write_rule "$match" "dvd$link_num"
++[ "$ID_CDROM_DVD_R" -o "$ID_CDROM_DVD_RW" -o "$ID_CDROM_DVD_RAM" ] && \
++	write_rule "$match" "dvdrw$link_num"
++
++unlock_rules_file
++
++echo $SYMLINKS
++
++exit 0
++
+diff --git a/extras/rule_generator/write_net_rules b/extras/rule_generator/write_net_rules
+deleted file mode 100644
+index d1086f0..0000000
+--- a/extras/rule_generator/write_net_rules
++++ /dev/null
+@@ -1,122 +0,0 @@
+-#!/bin/sh -e
+-#
+-# Copyright (C) 2006 Marco d'Itri <md@Linux.IT>
+-# Copyright (C) 2007 Kay Sievers <kay.sievers@vrfy.org>
+-#
+-# This program is free software; you can redistribute it and/or modify it
+-# under the terms of the GNU General Public License as published by the
+-# Free Software Foundation version 2 of the License.
+-#
+-# This script is run to create persistent network device naming rules
+-# based on properties of the device.
+-# If the interface needs to be renamed, INTERFACE_NEW=<name> will be printed
+-# on stdout to allow udev to IMPORT it.
+-
+-# variables used to communicate:
+-#   MATCHADDR             MAC address used for the match
+-#   MATCHID               bus_id used for the match
+-#   MATCHDEVID            dev_id used for the match
+-#   MATCHDRV              driver name used for the match
+-#   MATCHIFTYPE           interface type match
+-#   COMMENT               comment to add to the generated rule
+-#   INTERFACE_NAME        requested name supplied by external tool
+-#   INTERFACE_NEW         new interface name returned by rule writer
+-
+-RULES_FILE='/etc/udev/rules.d/70-persistent-net.rules'
+-
+-. /lib/udev/rule_generator.functions
+-
+-interface_name_taken() {
+-	local value="$(find_all_rules 'NAME=' $INTERFACE)"
+-	if [ "$value" ]; then
+-		return 0
+-	else
+-		return 1
+-	fi
+-}
+-
+-find_next_available() {
+-	raw_find_next_available "$(find_all_rules 'NAME=' "$1")"
+-}
+-
+-write_rule() {
+-	local match="$1"
+-	local name="$2"
+-	local comment="$3"
+-
+-	{
+-	if [ "$PRINT_HEADER" ]; then
+-		PRINT_HEADER=
+-		echo "# This file was automatically generated by the $0"
+-		echo "# program run by the persistent-net-generator.rules rules file."
+-		echo "#"
+-		echo "# You can modify it, as long as you keep each rule on a single line."
+-	fi
+-
+-	echo ""
+-	[ "$comment" ] && echo "# $comment"
+-	echo "SUBSYSTEM==\"net\", ACTION==\"add\"$match, NAME=\"$name\""
+-	} >> $RULES_FILE
+-}
+-
+-if [ -z "$INTERFACE" ]; then
+-	echo "missing \$INTERFACE" >&2
+-	exit 1
+-fi
+-
+-# Prevent concurrent processes from modifying the file at the same time.
+-lock_rules_file
+-
+-# Check if the rules file is writeable.
+-choose_rules_file
+-
+-# the DRIVERS key is needed to not match bridges and VLAN sub-interfaces
+-if [ "$MATCHADDR" ]; then
+-	match="$match, DRIVERS==\"?*\", ATTR{address}==\"$MATCHADDR\""
+-fi
+-
+-if [ "$MATCHDRV" ]; then
+-	match="$match, DRIVERS==\"$MATCHDRV\""
+-fi
+-
+-if [ "$MATCHDEVID" ]; then
+-	match="$match, ATTR{dev_id}==\"$MATCHDEVID\""
+-fi
+-
+-if [ "$MATCHID" ]; then
+-	match="$match, KERNELS==\"$MATCHID\""
+-fi
+-
+-if [ "$MATCHIFTYPE" ]; then
+-	match="$match, ATTR{type}==\"$MATCHIFTYPE\""
+-fi
+-
+-if [ -z "$match" ]; then
+-	echo "missing valid match" >&2
+-	unlock_rules_file
+-	exit 1
+-fi
+-
+-basename=${INTERFACE%%[0-9]*}
+-match="$match, KERNEL==\"$basename*\""
+-
+-if [ "$INTERFACE_NAME" ]; then
+-	# external tools may request a custom name
+-	COMMENT="$COMMENT (custom name provided by external tool)"
+-	if [ "$INTERFACE_NAME" != "$INTERFACE" ]; then
+-		INTERFACE=$INTERFACE_NAME;
+-		echo "INTERFACE_NEW=$INTERFACE"
+-	fi
+-else
+-	# if a rule using the current name already exists, find a new name
+-	if interface_name_taken; then
+-		INTERFACE="$basename$(find_next_available "$basename[0-9]*")"
+-		echo "INTERFACE_NEW=$INTERFACE"
+-	fi
+-fi
+-
+-write_rule "$match" "$INTERFACE" "$COMMENT"
+-
+-unlock_rules_file
+-
+-exit 0
+diff --git a/extras/rule_generator/write_net_rules.in b/extras/rule_generator/write_net_rules.in
+new file mode 100644
+index 0000000..1b3b194
+--- /dev/null
++++ b/extras/rule_generator/write_net_rules.in
+@@ -0,0 +1,122 @@
++#!/bin/sh -e
++#
++# Copyright (C) 2006 Marco d'Itri <md@Linux.IT>
++# Copyright (C) 2007 Kay Sievers <kay.sievers@vrfy.org>
++#
++# This program is free software; you can redistribute it and/or modify it
++# under the terms of the GNU General Public License as published by the
++# Free Software Foundation version 2 of the License.
++#
++# This script is run to create persistent network device naming rules
++# based on properties of the device.
++# If the interface needs to be renamed, INTERFACE_NEW=<name> will be printed
++# on stdout to allow udev to IMPORT it.
++
++# variables used to communicate:
++#   MATCHADDR             MAC address used for the match
++#   MATCHID               bus_id used for the match
++#   MATCHDEVID            dev_id used for the match
++#   MATCHDRV              driver name used for the match
++#   MATCHIFTYPE           interface type match
++#   COMMENT               comment to add to the generated rule
++#   INTERFACE_NAME        requested name supplied by external tool
++#   INTERFACE_NEW         new interface name returned by rule writer
++
++RULES_FILE='/etc/udev/rules.d/70-persistent-net.rules'
++
++. /@@libdir@@/udev/rule_generator.functions
++
++interface_name_taken() {
++	local value="$(find_all_rules 'NAME=' $INTERFACE)"
++	if [ "$value" ]; then
++		return 0
++	else
++		return 1
++	fi
++}
++
++find_next_available() {
++	raw_find_next_available "$(find_all_rules 'NAME=' "$1")"
++}
++
++write_rule() {
++	local match="$1"
++	local name="$2"
++	local comment="$3"
++
++	{
++	if [ "$PRINT_HEADER" ]; then
++		PRINT_HEADER=
++		echo "# This file was automatically generated by the $0"
++		echo "# program run by the persistent-net-generator.rules rules file."
++		echo "#"
++		echo "# You can modify it, as long as you keep each rule on a single line."
++	fi
++
++	echo ""
++	[ "$comment" ] && echo "# $comment"
++	echo "SUBSYSTEM==\"net\", ACTION==\"add\"$match, NAME=\"$name\""
++	} >> $RULES_FILE
++}
++
++if [ -z "$INTERFACE" ]; then
++	echo "missing \$INTERFACE" >&2
++	exit 1
++fi
++
++# Prevent concurrent processes from modifying the file at the same time.
++lock_rules_file
++
++# Check if the rules file is writeable.
++choose_rules_file
++
++# the DRIVERS key is needed to not match bridges and VLAN sub-interfaces
++if [ "$MATCHADDR" ]; then
++	match="$match, DRIVERS==\"?*\", ATTR{address}==\"$MATCHADDR\""
++fi
++
++if [ "$MATCHDRV" ]; then
++	match="$match, DRIVERS==\"$MATCHDRV\""
++fi
++
++if [ "$MATCHDEVID" ]; then
++	match="$match, ATTR{dev_id}==\"$MATCHDEVID\""
++fi
++
++if [ "$MATCHID" ]; then
++	match="$match, KERNELS==\"$MATCHID\""
++fi
++
++if [ "$MATCHIFTYPE" ]; then
++	match="$match, ATTR{type}==\"$MATCHIFTYPE\""
++fi
++
++if [ -z "$match" ]; then
++	echo "missing valid match" >&2
++	unlock_rules_file
++	exit 1
++fi
++
++basename=${INTERFACE%%[0-9]*}
++match="$match, KERNEL==\"$basename*\""
++
++if [ "$INTERFACE_NAME" ]; then
++	# external tools may request a custom name
++	COMMENT="$COMMENT (custom name provided by external tool)"
++	if [ "$INTERFACE_NAME" != "$INTERFACE" ]; then
++		INTERFACE=$INTERFACE_NAME;
++		echo "INTERFACE_NEW=$INTERFACE"
++	fi
++else
++	# if a rule using the current name already exists, find a new name
++	if interface_name_taken; then
++		INTERFACE="$basename$(find_next_available "$basename[0-9]*")"
++		echo "INTERFACE_NEW=$INTERFACE"
++	fi
++fi
++
++write_rule "$match" "$INTERFACE" "$COMMENT"
++
++unlock_rules_file
++
++exit 0
+diff --git a/extras/scsi_id/Makefile.am b/extras/scsi_id/Makefile.am
+index e6798ee..e8534c3 100644
+--- a/extras/scsi_id/Makefile.am
++++ b/extras/scsi_id/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	scsi_id
+ 
+diff --git a/extras/usb_id/Makefile.am b/extras/usb_id/Makefile.am
+index c54d83e..cf9b569 100644
+--- a/extras/usb_id/Makefile.am
++++ b/extras/usb_id/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	usb_id
+ 
+diff --git a/extras/volume_id/Makefile.am b/extras/volume_id/Makefile.am
+index 5b68e43..9737598 100644
+--- a/extras/volume_id/Makefile.am
++++ b/extras/volume_id/Makefile.am
+@@ -3,7 +3,7 @@ include $(top_srcdir)/Makefile.am.inc
+ SUBDIRS = \
+ 	lib
+ 
+-udevhomedir = $(udev_prefix)/lib/udev
++udevhomedir = $(udev_prefix)/$(libdir_name)/udev
+ udevhome_PROGRAMS = \
+ 	vol_id
+ 
+diff --git a/rules/Makefile.am b/rules/Makefile.am
+index af09338..ed527cf 100644
+--- a/rules/Makefile.am
++++ b/rules/Makefile.am
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/Makefile.am.inc
+ 
+-udevrulesdir = $(udev_prefix)/lib/udev/rules.d
++udevrulesdir = $(udev_prefix)/$(libdir_name)/udev/rules.d
+ dist_udevrules_DATA = \
+ 	rules.d/50-udev-default.rules \
+ 	rules.d/60-persistent-storage.rules \
+@@ -17,8 +17,12 @@ EXTRA_DIST = \
+ 	packages \
+ 	redhat \
+ 	suse \
+-	gentoo
+-
++	gentoo \
++	rules.d/50-udev-default.rules.in
+ 
+ distclean-local:
+ 	rm -f Makefile.in
++
++rules.d/50-udev-default.rules: rules.d/50-udev-default.rules.in
++	$(SED) -e "s:@@libdir@@:$(libdir_name):g" < $< > $@
++
+diff --git a/rules/rules.d/50-udev-default.rules b/rules/rules.d/50-udev-default.rules
+deleted file mode 100644
+index b41718c..0000000
+--- a/rules/rules.d/50-udev-default.rules
++++ /dev/null
+@@ -1,110 +0,0 @@
+-# do not edit this file, it will be overwritten on update
+-
+-SUBSYSTEM=="block", SYMLINK+="block/%M:%m"
+-SUBSYSTEM!="block", SYMLINK+="char/%M:%m"
+-
+-KERNEL=="pty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
+-KERNEL=="tty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
+-KERNEL=="ptmx",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
+-KERNEL=="tty",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
+-KERNEL=="tty[0-9]*",		GROUP="tty", MODE="0620", OPTIONS+="last_rule"
+-KERNEL=="vcs|vcs[0-9]*|vcsa|vcsa[0-9]*", GROUP="tty", OPTIONS+="last_rule"
+-KERNEL=="console",		MODE="0600", OPTIONS+="last_rule"
+-
+-# serial
+-KERNEL=="tty[A-Z]*|pppox*|ircomm*|noz*", GROUP="uucp"
+-KERNEL=="ppp",			MODE="0600", OPTIONS+="ignore_remove"
+-KERNEL=="mwave",		NAME="modems/mwave", GROUP="uucp"
+-KERNEL=="hvc*|hvsi*",		GROUP="uucp"
+-KERNEL=="lirc0",		SYMLINK+="lirc"
+-
+-# mem
+-KERNEL=="null|zero|full|random|urandom", MODE="0666"
+-KERNEL=="null",			SYMLINK+="XOR"
+-KERNEL=="mem|kmem|port|nvram",	GROUP="kmem", MODE="0640"
+-KERNEL=="ram0",			SYMLINK+="ramdisk"
+-KERNEL=="ram1",			SYMLINK+="ram"
+-
+-# input
+-KERNEL=="mouse*|mice|event*",	NAME="input/%k", MODE="0640"
+-KERNEL=="ts[0-9]*|uinput",	NAME="input/%k", MODE="0600"
+-KERNEL=="js[0-9]*",		NAME="input/%k", MODE="0644", SYMLINK+="%k"
+-
+-# video4linux
+-KERNEL=="vbi0",			SYMLINK+="vbi"
+-KERNEL=="radio0",		SYMLINK+="radio"
+-KERNEL=="video0",		SYMLINK+="video"
+-
+-# graphics
+-KERNEL=="agpgart",		MODE="0600"
+-KERNEL=="card[0-9]*",		NAME="dri/%k", MODE="0666"
+-KERNEL=="fb0",			SYMLINK+="fb"
+-
+-# DVB video
+-SUBSYSTEM=="dvb", PROGRAM="/bin/sh -c 'K=%k; K=$${K#dvb}; printf dvb/adapter%%i/%%s $${K%%%%.*} $${K#*.}'", NAME="%c"
+-
+-# Firewire
+-KERNEL=="dv1394*",		SYMLINK+="dv1394/%n"
+-KERNEL=="video1394*",		NAME="video1394/%n"
+-
+-# firmware class requests
+-SUBSYSTEM=="firmware", ACTION=="add", RUN+="firmware.sh"
+-
+-# libusb device nodes
+-SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", NAME="bus/usb/$env{BUSNUM}/$env{DEVNUM}", MODE="0644"
+-
+-# printer
+-KERNEL=="parport[0-9]*",	GROUP="lp"
+-SUBSYSTEM=="printer",		KERNEL=="lp*", GROUP="lp"
+-SUBSYSTEM=="usb",		KERNEL=="lp*", NAME="usb/%k", SYMLINK+="usb%k", GROUP="lp"
+-KERNEL=="lp[0-9]*",		GROUP="lp", SYMLINK+="par%n"
+-KERNEL=="irlpt[0-9]*",		GROUP="lp"
+-
+-# block, tapes, block-releated
+-SUBSYSTEM=="block", GROUP="disk"
+-SUBSYSTEM=="block", KERNEL=="sr[0-9]*", SYMLINK+="scd%n"
+-SUBSYSTEM=="scsi", KERNEL=="[0-9]*:[0-9]*", ACTION=="add", ATTR{type}=="0|7|14", ATTR{timeout}="60"
+-SUBSYSTEM=="scsi", KERNEL=="[0-9]*:[0-9]*", ACTION=="add", ATTR{type}=="1", ATTR{timeout}="900"
+-KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="floppy", OPTIONS+="all_partitions"
+-KERNEL=="fd[0-9]",		GROUP="floppy"
+-KERNEL=="fd[0-9]", ACTION=="add", ATTRS{cmos}=="?*", RUN+="create_floppy_devices -c -t $attr{cmos} -m %M -M 0640 -G floppy $root/%k"
+-KERNEL=="sch[0-9]*",		GROUP="disk"
+-KERNEL=="sg[0-9]*",		ATTRS{type}!="3|6", GROUP="disk", MODE="0640"
+-KERNEL=="ht[0-9]*|nht[0-9]*",	GROUP="disk"
+-KERNEL=="pg[0-9]*",		GROUP="disk"
+-KERNEL=="pt[0-9]*|npt[0-9]*",	GROUP="disk"
+-KERNEL=="qft[0-9]*|nqft[0-9]*|zqft[0-9]*|nzqft[0-9]*|rawqft[0-9]*|nrawqft[0-9]*", GROUP="disk"
+-KERNEL=="rawctl",		NAME="raw/%k", GROUP="disk"
+-SUBSYSTEM=="raw", KERNEL=="raw[0-9]*", NAME="raw/%k", GROUP="disk"
+-KERNEL=="pktcdvd[0-9]*",	NAME="pktcdvd/%k"
+-KERNEL=="pktcdvd",		NAME="pktcdvd/control"
+-KERNEL=="qft0",			SYMLINK+="ftape"
+-SUBSYSTEM=="bsg",		NAME="bsg/%k"
+-SUBSYSTEM=="aoe",		NAME="etherd/%k", GROUP="disk"
+-
+-# network
+-KERNEL=="tun",			NAME="net/%k", MODE="0666", OPTIONS+="ignore_remove"
+-
+-# CPU
+-KERNEL=="cpu[0-9]*",		NAME="cpu/%n/cpuid"
+-KERNEL=="msr[0-9]*",		NAME="cpu/%n/msr"
+-KERNEL=="microcode",		NAME="cpu/microcode", MODE="0600"
+-
+-# miscellaneous
+-KERNEL=="fuse",			MODE="0666"
+-KERNEL=="rtc|rtc0",		MODE="0644"
+-KERNEL=="rtc0",			SYMLINK+="rtc"
+-KERNEL=="auer[0-9]*",		NAME="usb/%k"
+-KERNEL=="hw_random",		NAME="hwrng", SYMLINK+="%k"
+-KERNEL=="mmtimer",		MODE="0644"
+-KERNEL=="rflash[0-9]*",		MODE="0400"
+-KERNEL=="rrom[0-9]*",		MODE="0400"
+-KERNEL=="sbpcd0",		SYMLINK+="sbpcd"
+-KERNEL=="slram[0-9]*", 		SYMLINK+="xpram%n"
+-KERNEL=="sxctl",		NAME="specialix_sxctl", SYMLINK+="%k"
+-KERNEL=="rioctl",		NAME="specialix_rioctl", SYMLINK+="%k"
+-KERNEL=="iowarrior[0-9]*",	NAME="usb/%k"
+-
+-# do not delete static device nodes
+-ACTION=="remove", NAME=="?*", TEST=="/lib/udev/devices/$name", OPTIONS+="ignore_remove"
+-
+diff --git a/rules/rules.d/50-udev-default.rules.in b/rules/rules.d/50-udev-default.rules.in
+new file mode 100644
+index 0000000..7e608b2
+--- /dev/null
++++ b/rules/rules.d/50-udev-default.rules.in
+@@ -0,0 +1,110 @@
++# do not edit this file, it will be overwritten on update
++
++SUBSYSTEM=="block", SYMLINK+="block/%M:%m"
++SUBSYSTEM!="block", SYMLINK+="char/%M:%m"
++
++KERNEL=="pty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
++KERNEL=="tty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
++KERNEL=="ptmx",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
++KERNEL=="tty",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
++KERNEL=="tty[0-9]*",		GROUP="tty", MODE="0620", OPTIONS+="last_rule"
++KERNEL=="vcs|vcs[0-9]*|vcsa|vcsa[0-9]*", GROUP="tty", OPTIONS+="last_rule"
++KERNEL=="console",		MODE="0600", OPTIONS+="last_rule"
++
++# serial
++KERNEL=="tty[A-Z]*|pppox*|ircomm*|noz*", GROUP="uucp"
++KERNEL=="ppp",			MODE="0600", OPTIONS+="ignore_remove"
++KERNEL=="mwave",		NAME="modems/mwave", GROUP="uucp"
++KERNEL=="hvc*|hvsi*",		GROUP="uucp"
++KERNEL=="lirc0",		SYMLINK+="lirc"
++
++# mem
++KERNEL=="null|zero|full|random|urandom", MODE="0666"
++KERNEL=="null",			SYMLINK+="XOR"
++KERNEL=="mem|kmem|port|nvram",	GROUP="kmem", MODE="0640"
++KERNEL=="ram0",			SYMLINK+="ramdisk"
++KERNEL=="ram1",			SYMLINK+="ram"
++
++# input
++KERNEL=="mouse*|mice|event*",	NAME="input/%k", MODE="0640"
++KERNEL=="ts[0-9]*|uinput",	NAME="input/%k", MODE="0600"
++KERNEL=="js[0-9]*",		NAME="input/%k", MODE="0644", SYMLINK+="%k"
++
++# video4linux
++KERNEL=="vbi0",			SYMLINK+="vbi"
++KERNEL=="radio0",		SYMLINK+="radio"
++KERNEL=="video0",		SYMLINK+="video"
++
++# graphics
++KERNEL=="agpgart",		MODE="0600"
++KERNEL=="card[0-9]*",		NAME="dri/%k", MODE="0666"
++KERNEL=="fb0",			SYMLINK+="fb"
++
++# DVB video
++SUBSYSTEM=="dvb", PROGRAM="/bin/sh -c 'K=%k; K=$${K#dvb}; printf dvb/adapter%%i/%%s $${K%%%%.*} $${K#*.}'", NAME="%c"
++
++# Firewire
++KERNEL=="dv1394*",		SYMLINK+="dv1394/%n"
++KERNEL=="video1394*",		NAME="video1394/%n"
++
++# firmware class requests
++SUBSYSTEM=="firmware", ACTION=="add", RUN+="firmware.sh"
++
++# libusb device nodes
++SUBSYSTEM=="usb", ACTION=="add", ENV{DEVTYPE}=="usb_device", NAME="bus/usb/$env{BUSNUM}/$env{DEVNUM}", MODE="0644"
++
++# printer
++KERNEL=="parport[0-9]*",	GROUP="lp"
++SUBSYSTEM=="printer",		KERNEL=="lp*", GROUP="lp"
++SUBSYSTEM=="usb",		KERNEL=="lp*", NAME="usb/%k", SYMLINK+="usb%k", GROUP="lp"
++KERNEL=="lp[0-9]*",		GROUP="lp", SYMLINK+="par%n"
++KERNEL=="irlpt[0-9]*",		GROUP="lp"
++
++# block, tapes, block-releated
++SUBSYSTEM=="block", GROUP="disk"
++SUBSYSTEM=="block", KERNEL=="sr[0-9]*", SYMLINK+="scd%n"
++SUBSYSTEM=="scsi", KERNEL=="[0-9]*:[0-9]*", ACTION=="add", ATTR{type}=="0|7|14", ATTR{timeout}="60"
++SUBSYSTEM=="scsi", KERNEL=="[0-9]*:[0-9]*", ACTION=="add", ATTR{type}=="1", ATTR{timeout}="900"
++KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="floppy", OPTIONS+="all_partitions"
++KERNEL=="fd[0-9]",		GROUP="floppy"
++KERNEL=="fd[0-9]", ACTION=="add", ATTRS{cmos}=="?*", RUN+="create_floppy_devices -c -t $attr{cmos} -m %M -M 0640 -G floppy $root/%k"
++KERNEL=="sch[0-9]*",		GROUP="disk"
++KERNEL=="sg[0-9]*",		ATTRS{type}!="3|6", GROUP="disk", MODE="0640"
++KERNEL=="ht[0-9]*|nht[0-9]*",	GROUP="disk"
++KERNEL=="pg[0-9]*",		GROUP="disk"
++KERNEL=="pt[0-9]*|npt[0-9]*",	GROUP="disk"
++KERNEL=="qft[0-9]*|nqft[0-9]*|zqft[0-9]*|nzqft[0-9]*|rawqft[0-9]*|nrawqft[0-9]*", GROUP="disk"
++KERNEL=="rawctl",		NAME="raw/%k", GROUP="disk"
++SUBSYSTEM=="raw", KERNEL=="raw[0-9]*", NAME="raw/%k", GROUP="disk"
++KERNEL=="pktcdvd[0-9]*",	NAME="pktcdvd/%k"
++KERNEL=="pktcdvd",		NAME="pktcdvd/control"
++KERNEL=="qft0",			SYMLINK+="ftape"
++SUBSYSTEM=="bsg",		NAME="bsg/%k"
++SUBSYSTEM=="aoe",		NAME="etherd/%k", GROUP="disk"
++
++# network
++KERNEL=="tun",			NAME="net/%k", MODE="0666", OPTIONS+="ignore_remove"
++
++# CPU
++KERNEL=="cpu[0-9]*",		NAME="cpu/%n/cpuid"
++KERNEL=="msr[0-9]*",		NAME="cpu/%n/msr"
++KERNEL=="microcode",		NAME="cpu/microcode", MODE="0600"
++
++# miscellaneous
++KERNEL=="fuse",			MODE="0666"
++KERNEL=="rtc|rtc0",		MODE="0644"
++KERNEL=="rtc0",			SYMLINK+="rtc"
++KERNEL=="auer[0-9]*",		NAME="usb/%k"
++KERNEL=="hw_random",		NAME="hwrng", SYMLINK+="%k"
++KERNEL=="mmtimer",		MODE="0644"
++KERNEL=="rflash[0-9]*",		MODE="0400"
++KERNEL=="rrom[0-9]*",		MODE="0400"
++KERNEL=="sbpcd0",		SYMLINK+="sbpcd"
++KERNEL=="slram[0-9]*", 		SYMLINK+="xpram%n"
++KERNEL=="sxctl",		NAME="specialix_sxctl", SYMLINK+="%k"
++KERNEL=="rioctl",		NAME="specialix_rioctl", SYMLINK+="%k"
++KERNEL=="iowarrior[0-9]*",	NAME="usb/%k"
++
++# do not delete static device nodes
++ACTION=="remove", NAME=="?*", TEST=="/@@libdir@@/udev/devices/$name", OPTIONS+="ignore_remove"
++
+diff --git a/udev/udev_rules.c b/udev/udev_rules.c
+index d06f536..851597e 100644
+--- a/udev/udev_rules.c
++++ b/udev/udev_rules.c
+@@ -170,9 +170,9 @@ static int run_program(struct udev *udev, const char *command, const char *subsy
+ 		}
+ 	}
+ 
+-	/* allow programs in /lib/udev called without the path */
++	/* allow programs in /lib{,64}/udev called without the path */
+ 	if (strchr(argv[0], '/') == NULL) {
+-		util_strlcpy(program, UDEV_PREFIX "/lib/udev/", sizeof(program));
++		util_strlcpy(program, UDEV_PREFIX "/" LIBDIR "/udev/", sizeof(program));
+ 		util_strlcat(program, argv[0], sizeof(program));
+ 		argv[0] = program;
+ 	}
+diff --git a/udev/udev_rules_parse.c b/udev/udev_rules_parse.c
+index c42bd08..6fadc7b 100644
+--- a/udev/udev_rules_parse.c
++++ b/udev/udev_rules_parse.c
+@@ -462,9 +462,9 @@ static int add_to_rules(struct udev_rules *rules, char *line, const char *filena
+ 				if (pos)
+ 					pos[0] = '\0';
+ 
+-				/* allow programs in /lib/udev called without the path */
++				/* allow programs in /lib{,64}/udev called without the path */
+ 				if (strchr(file, '/') == NULL) {
+-					util_strlcpy(file, UDEV_PREFIX "/lib/udev/", sizeof(file));
++					util_strlcpy(file, UDEV_PREFIX "/" LIBDIR "/udev/", sizeof(file));
+ 					util_strlcat(file, value, sizeof(file));
+ 					pos = strchr(file, ' ');
+ 					if (pos)
+@@ -792,7 +792,7 @@ int udev_rules_init(struct udev *udev, struct udev_rules *rules, int resolve_nam
+ 		add_matching_files(udev, &sort_list, filename, ".rules");
+ 
+ 		/* read default rules */
+-		add_matching_files(udev, &sort_list, UDEV_PREFIX "/lib/udev/rules.d", ".rules");
++		add_matching_files(udev, &sort_list, UDEV_PREFIX "/" LIBDIR "/udev/rules.d", ".rules");
+ 
+ 		/* sort all rules files by basename into list of files */
+ 		list_for_each_entry_safe(sort_loop, sort_tmp, &sort_list, node) {
+-- 
+1.6.0.2
+

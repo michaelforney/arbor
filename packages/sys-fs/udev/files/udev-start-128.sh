@@ -100,6 +100,10 @@ root_link()
 
 start_udevd()
 {
+	# load unix domain sockets if built as module, Bug #221253
+	if [ -e /proc/modules ] ; then
+		modprobe -q unix 2>/dev/null
+	fi
 	ebegin "Starting udevd"
 	start-stop-daemon --start --exec /sbin/udevd -- --daemon
 	eend $?
@@ -171,7 +175,7 @@ check_persistent_net()
 	# from the input, like "uniq -d" does, but uniq
 	# is installed into /usr/bin and not available at boot.
 	dups=$(
-	RULES_FILE='/lib/udev/rules.d/70-persistent-net.rules'
+	RULES_FILE='/etc/udev/rules.d/70-persistent-net.rules'
 	. /lib/udev/rule_generator.functions
 	find_all_rules 'NAME=' '.*' | \
 	tr ' ' '\n' | \
