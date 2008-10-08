@@ -1,0 +1,19 @@
+# Copyright 2008 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+VIM_PLUGIN_VIM_VERSION="7.0"
+require common-metadata vim-plugin
+
+DOWNLOADS="http://www.vim.org/scripts/download_script.php?src_id=8598 -> ${PNV}.vim"
+
+SLOT="0"
+PLATFORMS="~x86"
+
+WORK="${WORKBASE}"
+
+src_unpack() {
+    cd "${WORK}"
+    mkdir plugin/
+    cp "${FETCHEDDIR}/${PNV}.vim" "plugin/${PN}.vim"
+}
+
