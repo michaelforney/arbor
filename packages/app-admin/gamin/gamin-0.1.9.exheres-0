@@ -6,7 +6,7 @@
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10)
 
-require multilib python autotools
+require multilib python autotools flag-o-matic
 
 SUMMARY="A library providing the File Alteration Monitor API"
 HOMEPAGE="http://www.gnome.org/~veillard/gamin/"
@@ -31,6 +31,13 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug debug-api" )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/debugging.txt doc/socket.txt )
+
+src_configure() {
+    # Fix compilation with >=glibc-2.8, Gentoo #225403
+    append-flags "-D_GNU_SOURCE"
+
+    default
+}
 
 src_install() {
     default
