@@ -25,27 +25,27 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/sendmail-delivered_hdr.patch"
 )
 
-COMMON_SENDMAIL_INSTALL_PARAMS="
-    DESTDIR=${IMAGE} \
-    LIBDIR=/usr/$(get_libdir) \
-    SHAREDLIBDIR=/usr/$(get_libdir) \
-    MANROOT=/usr/share/man/man \
-    SBINOWN=root \
-    SBINGRP=root \
-    UBINOWN=root \
-    UBINGRP=root \
-    MANOWN=root \
-    MANGRP=root \
-    INCOWN=root \
-    INCGRP=root \
-    LIBOWN=root \
-    LIBGRP=root \
-    GBINOWN=root \
-    GBINGRP=root \
-    MSPQOWN=root \
-    CFOWN=root \
+COMMON_SENDMAIL_INSTALL_PARAMS=(
+    DESTDIR="${IMAGE}"
+    LIBDIR=/usr/$(get_libdir)
+    SHAREDLIBDIR=/usr/$(get_libdir)
+    MANROOT=/usr/share/man/man
+    SBINOWN=root
+    SBINGRP=root
+    UBINOWN=root
+    UBINGRP=root
+    MANOWN=root
+    MANGRP=root
+    INCOWN=root
+    INCGRP=root
+    LIBOWN=root
+    LIBGRP=root
+    GBINOWN=root
+    GBINGRP=root
+    MSPQOWN=root
+    CFOWN=root
     CFGRP=root
-"
+)
 
 pkg_setup() {
     enewgroup mail 12
@@ -124,18 +124,18 @@ src_install() {
 
     for dir in libsmutil sendmail mailstats praliases smrsh makemap vacation editmap
     do
-        emake -j1 ${COMMON_SENDMAIL_INSTALL_PARAMS} install -C ${OBJDIR}/${dir} \
+        emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/${dir} \
             || die "main installation failed"
     done
 
     for dir in rmail mail.local
     do
-        emake -j1 ${COMMON_SENDMAIL_INSTALL_PARAMS} force-install -C ${OBJDIR}/${dir} \
+        emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" force-install -C ${OBJDIR}/${dir} \
             || die "rmail installation failed"
     done
 
     dodir /usr/include/libmilter
-    emake -j1 ${COMMON_SENDMAIL_INSTALL_PARAMS} install -C ${OBJDIR}/libmilter \
+    emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/libmilter \
             || die "libmilter installation failed"
 
     fowners root:smmsp /usr/sbin/sendmail
