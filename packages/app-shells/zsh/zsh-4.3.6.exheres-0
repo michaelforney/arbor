@@ -7,18 +7,27 @@ require multilib
 
 SUMMARY="UNIX Shell similar to the Korn shell"
 HOMEPAGE="http://www.zsh.org/"
-DOWNLOADS="ftp://ftp.zsh.org/pub/${PNV}.tar.bz2"
+DOWNLOADS="ftp://ftp.zsh.org/pub/${PNV}.tar.bz2
+    doc? ( mirror://debian/pool/main/${PN:0:1}/${PN}/${PN}-doc_${PV}-7_all.deb )"
 
 LICENCES="ZSH"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="caps maildir pcre unicode"
+MYOPTIONS="caps doc maildir pcre unicode"
 
 DEPENDENCIES="
     build+run:
         >=sys-libs/ncurses-5.1
         caps? ( sys-libs/libcap )
         pcre? ( >=dev-libs/pcre-3.9 )"
+
+DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
+
+src_unpack() {
+    default
+    unpack ./data.tar.gz
+}
 
 src_configure() {
     econf \
@@ -52,9 +61,6 @@ src_test() {
     default
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
-
 src_install() {
     default
 
@@ -69,4 +75,5 @@ src_install() {
 
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/StartupFiles
+    doins -r "${WORKBASE}"/usr/share/doc/${PN}-doc/{${PN}.pdf,html/}
 }
