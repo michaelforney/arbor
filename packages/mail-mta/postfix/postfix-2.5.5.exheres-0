@@ -3,7 +3,7 @@
 # Based in part upon 'postfix-2.5.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require eutils multilib toolchain-funcs pam
+require eutils multilib toolchain-funcs pam alternatives
 
 SUMMARY="Fast, easy to administer and secure mail transport agent."
 HOMEPAGE="http://www.postfix.org"
@@ -15,8 +15,6 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ssl"
 
 DEPENDENCIES="
-    !mail-mta/exim
-    !mail-mta/sendmail
     dev-libs/pcre
     sys-libs/db:=
     ssl? ( dev-libs/openssl )
@@ -61,7 +59,24 @@ src_install() {
         config_directory="/usr/share/doc/${PNVR}/defaults" \
         readme_directory="/usr/share/doc/${PNVR}/readme" \
         || die 'postfix-install failed'
-    dosym /usr/sbin/sendmail /usr/$(get_libdir)/sendmail
+
+    echo /usr/sbin/{,${PN}.}sendmail
+    mv "${IMAGE}"/usr/sbin/{,${PN}.}sendmail || die "mv /usr/sbin/sendmail failed"
+    echo rm /usr/bin/{mailq,newaliases}
+    rm "${IMAGE}"/usr/bin/{mailq,newaliases} || die "rm /usr/bin/{mailq,newaliases} failed"
+    rmdir "${IMAGE}"/usr/bin || die "rmdir /usr/bin failed"
+
+    alternatives_for mta ${PN} 9 sbin_sendmail /usr/sbin/sendmail ${PN}.sendmail
+    alternatives_for mta ${PN} 9 lib_sendmail /usr/$(get_libdir)/sendmail ../sbin/sendmail
+    alternatives_for mta ${PN} 9 mailq /usr/bin/mailq ../sbin/sendmail
+    alternatives_for mta ${PN} 9 newaliases /usr/bin/newaliases ../sbin/sendmail
+
+    local manpage
+    for manpage in man1/{mailq.1,newaliases.1} man5/aliases.5; do
+        echo mv /usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/}
+        mv "${IMAGE}"/usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/} || die "mv ${manpage} failed"
+        alternatives_for mta ${PN} 9 man_${manpage##*/} /usr/share/man/${manpage} ${PN}.${manpage##*/}
+    done
 
     keepdir /var/lib/postfix
     fowners postfix:postfix /var/lib/postfix/

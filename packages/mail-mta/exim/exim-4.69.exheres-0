@@ -3,7 +3,7 @@
 # Based in part upon exim-4.69-r1.ebuild from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require eutils fixheadtails multilib
+require eutils fixheadtails multilib alternatives
 
 SUMMARY="A highly configurable, drop-in replacement for sendmail"
 HOMEPAGE="http://www.exim.org"
@@ -21,8 +21,6 @@ PLATFORMS="~amd64 ~x86"
 
 DEPENDENCIES="
     build+run:
-        !mail-mta/postfix
-        !mail-mta/sendmail
         dev-libs/pcre
         >=sys-libs/db-4:=
         pam? ( sys-libs/pam )
@@ -135,7 +133,9 @@ src_install() {
     addpredict /var/spool/exim
     default
 
-    dosym exim /usr/sbin/sendmail
+    alternatives_for mta ${PN} 10 sendmail /usr/sbin/sendmail ${PN}
+    mv "${IMAGE}"/etc/mail/{,${PN}.}aliases || die "mv /etc/mail/aliases failed"
+    alternatives_for mta ${PN} 10 aliases /etc/mail/aliases ${PN}.aliases
 
     dodoc "${WORK}"/doc/*
     doman "${WORK}/doc/${PN}.8"
