@@ -101,7 +101,13 @@ src_test() {
     export BASH_ENV=/dev/null
 
     # 'make --dry-run check' fails so don't use default here.
-    emake check
+    if ! emake check ; then
+        eerror "Tests failed. Looking for files for you to add to your bug report..."
+        find . -type f -name '*.epicfail' -or -name '*.log' | while read a ; do
+            eerror "    $a"
+        done
+        die "Make check failed"
+    fi
 }
 
 src_install() {
