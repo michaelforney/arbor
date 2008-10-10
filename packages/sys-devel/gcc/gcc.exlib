@@ -238,7 +238,7 @@ pkg_postinst() {
     # upgrade existing, valid symlinks only if there isn't a newer version installed
     newest=$(best_version ${CATEGORY}/${PN})
     newest=${newest#${CATEGORY}/${PN}-}
-    if ever at_least ${newest%%:*}; then
+    if [[ -z ${newest%%:*} ]] || ever at_least ${newest%%:*}; then
         newest=true
     else
         newest=
