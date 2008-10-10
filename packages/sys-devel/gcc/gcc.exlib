@@ -52,7 +52,7 @@ ECONF_SOURCE="${WORKBASE}"/${PNV}
 src_unpack() {
     if ever at_least 4.3 && option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${SLOT}.jar}
-        cp "${FETCHEDDIR}"/ecj-${SLOT}.jar "${WORKBASE}"/${PNV}/ecj.jar \
+        cp "${FETCHEDDIR}"/ecj-${SLOT}.jar "${ECONF_SOURCE}"/ecj.jar \
             || die "copying ecj.jar failed."
     else
         default
@@ -60,7 +60,7 @@ src_unpack() {
 }
 
 src_configure() {
-    mkdir "${WORK}" && cd "${WORK}" || die "mkdir failed"
+    mkdir "${WORK}" && cd "${WORK}" || die "mkdir ${WORK} failed"
 
     local i LANGS="c++"
     for i in ada fortran objc obj-c++; do
@@ -261,5 +261,27 @@ pkg_postinst() {
     # get notification if symlinks were removed during src_install that wasn't handled above in pkg_postinst
     for x in "${removed[@]}"; do
         [[ ! -e ${ROOT}${x} ]] && eerror "/${x} was removed and never recreated"
+    done
+}
+
+pkg_postrm() {
+    alternatives_pkg_postrm
+
+    local x
+    for x in "${symlinks[@]}"; do
+        if [[ -L ${ROOT}${x/-${SLOT}} && ! -e ${ROOT}${x/-${SLOT}} ]]; then
+            echo rm "${ROOT}${x/-${SLOT}}"
+            rm "${ROOT}${x/-${SLOT}}" || eerror "Failed to clean up dangling symlink"
+        fi
+    done
+
+    for x in "${so_symlinks[@]%.*}"; do
+        while [[ ${x} == */*.so* ]]; do
+            if [[ -L ${ROOT}${x} && ! -e ${ROOT}${x} ]]; then
+                echo rm "${ROOT}${x}"
+                rm "${ROOT}${x}" || eerror "Failed to clean up dangling symlink"
+            fi
+            x=${x%.*}
+        done
     done
 }
