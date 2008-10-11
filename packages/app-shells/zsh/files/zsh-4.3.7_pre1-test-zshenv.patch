@@ -1,0 +1,27 @@
+Upstream: Yes
+
+From 0c30fd1fbb9e77ee36eeb31d01bd3f736069b6a0 Mon Sep 17 00:00:00 2001
+From: pws <tailor@alioth.debian.org>
+Date: Fri, 10 Oct 2008 17:01:16 +0000
+Subject: [PATCH] users/13323: new test wasnt robust about ignoring /etc/zshenv
+
+---
+ Test/E02xtrace.ztst |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/Test/E02xtrace.ztst b/Test/E02xtrace.ztst
+index 05969b6..a0c2e96 100644
+--- a/Test/E02xtrace.ztst
++++ b/Test/E02xtrace.ztst
+@@ -98,7 +98,8 @@
+  :
+  fn
+  ' >fnfile
+- $ZTST_testdir/../Src/zsh -fx ./fnfile
++ $ZTST_testdir/../Src/zsh -fx ./fnfile 2>errfile
++ grep '\./fnfile' errfile 1>&2
+ 0:Trace output with sourcefile and line number.
+ >This is fn.
+ ?+./fnfile:1> PS4='+%x:%I> ' 
+-- 
+1.6.0.2
