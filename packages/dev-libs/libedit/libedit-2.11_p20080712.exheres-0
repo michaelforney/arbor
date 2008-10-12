@@ -1,0 +1,24 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PV=${PV#*_p}-${PV%_p*}
+
+SUMMARY="The editline library provides generic line editing and history functions"
+HOMEPAGE="http://www.thrysoee.dk/editline/ http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/${PN}/"
+DOWNLOADS="http://www.thrysoee.dk/editline/${PN}-${MY_PV}.tar.gz"
+
+UPSTREAM_CHANGELOG=""
+
+LICENCES="BSD"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="debug"
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses"
+
+WORK=${WORKBASE}/${PN}-${MY_PV}
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
+
