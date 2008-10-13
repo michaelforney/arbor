@@ -142,7 +142,7 @@ cmake_src_test() {
 # Uses default_src_install.
 cmake_src_install() {
     # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
-    DEFAULT_SRC_INSTALL_EXTRA_PREFIXES+=( "${WORK}/" )
+    [[ -d ${ECMAKE_BUILD_DIR} ]] && DEFAULT_SRC_INSTALL_EXTRA_PREFIXES+=( "${WORK}/" )
     _cmake_run default_src_install
 }
 
@@ -157,7 +157,7 @@ _cmake_option() {
     else
         flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
     fi
-    echo "-D${1}${1:+_}${3:-${2}}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
+    echo "-D${1}${1:+_}$(optionfmt ${3:-${2}}):BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
 }
 
 # Used to enter the correct build dir and run a command in
