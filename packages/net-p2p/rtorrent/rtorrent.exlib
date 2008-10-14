@@ -34,10 +34,6 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 'xmlrpc xmlrpc-c' )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/${PN}.rc )
 
-SUPPORTED_AUTOCONF=( 2.5 )
-SUPPORTED_AUTOMAKE=( 1.10 )
-AT_M4DIR="scripts"
-
 pkg_setup() {
     # Known broken on x86: http://libtorrent.rakshasa.no/wiki/LibTorrentKnownIssues
     option platform:x86 && filter-flags -fomit-frame-pointer
