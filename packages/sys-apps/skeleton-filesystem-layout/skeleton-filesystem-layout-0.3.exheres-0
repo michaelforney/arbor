@@ -15,12 +15,14 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 create_root_owned_directory() {
-    if [[ ! -e "$1" ]]; then
+    if [[ ! -e "${1}" ]]; then
         echo "mkdir -p ${1}"
-        mkdir -p "${1}" || die "mkdir $1 failed"
-        echo "chown root:root ${1}"
-        chown root:root "${1}" || die "chown root:root $1 failed"
+        mkdir -p "${1}" || die "mkdir ${1} failed"
     fi
+    echo "chown root:root ${1}"
+    chown root:root "${1}" || die "chown root:root ${1} failed"
+    echo "chmod ${2:-0755} ${1}"
+    chmod ${2:-0755} "${1}" || die "chmod ${2:-0755} ${1} failed"
 }
 
 create_device_node() {
@@ -54,7 +56,7 @@ pkg_postinst() {
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
     for x in bin boot dev{,/pts,/shm} etc{,/opt} home ${libdir} mnt \
-        opt proc root sbin sys tmp; do
+        opt proc sbin sys; do
             create_root_owned_directory "${ROOT}${x}"
     done
 
@@ -73,8 +75,14 @@ pkg_postinst() {
     done
 
     # /var structure
-    for x in var{,/cache,/empty,/lib,/local,/lock,/log,/run,/spool,/tmp}; do
+    for x in var{,/cache,/empty,/lib,/local,/lock,/log,/run,/spool}; do
         create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # directories with special permissions
+    create_root_owned_directory "${ROOT}root" 0700
+    for x in var/{lock,tmp} tmp; do
+        create_root_owned_directory "${ROOT}${x}" 1777
     done
 
     # create lib -> lib64 symlinks if needed
@@ -88,9 +96,4 @@ pkg_postinst() {
             fi
         done
     fi
-
-    echo "chmod 0700 ${ROOT}root"
-    chmod 0700 "${ROOT}/root"
-    echo "chmod 1777 ${ROOT}{var/,}tmp ${ROOT}var/lock"
-    chmod 1777 "${ROOT}"{var/,}tmp "${ROOT}var/lock"
 }
