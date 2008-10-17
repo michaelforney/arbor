@@ -101,7 +101,7 @@ src_test() {
     export BASH_ENV=/dev/null
 
     # 'make --dry-run check' fails so don't use default here.
-    if ! emake check ; then
+    if ! nonfatal emake check ; then
         eerror "Tests failed. Looking for files for you to add to your bug report..."
         find "${WORK}" -type f -name '*.epicfail' -or -name '*.log' | while read a ; do
             eerror "    $a"
