@@ -11,9 +11,12 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="run:
-    sys-apps/sed
-    net-misc/wget"
+DEPENDENCIES="
+    run:
+        sys-apps/sed
+        net-misc/wget
+    post,suggested:
+        x11-utils/xclip"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/zlin.patch" )
 
