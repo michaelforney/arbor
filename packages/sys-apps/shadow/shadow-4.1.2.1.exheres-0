@@ -1,0 +1,114 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'shadow-4.1.2-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require multilib pam
+
+SUMMARY="User and group management related utilities"
+HOMEPAGE="http://packages.qa.debian.org/s/shadow.html"
+# The original site http://shadow.pld.org.pl doesn't exist anymore.
+DOWNLOADS="ftp://pkg-shadow.alioth.debian.org/pub/pkg-shadow/shadow-${PV}.tar.bz2"
+
+LICENCES="|| ( BSD GPL-2 )"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS="nls pam"
+
+DEPENDENCIES="
+    build+run:
+        >=sys-libs/cracklib-2.8.3
+        nls? ( sys-devel/gettext )
+        pam? ( >=sys-libs/pam-1.0.1 )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILES}/${PN}-4.1.2-login.defs.patch"
+        "${FILES}/${PN}-4.1.2-dots-in-usernames.patch"
+        "${FILES}/${PN}-4.1.2-long-groupnames.patch"
+)
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-desrpc
+    --with-libcrypt
+    --enable-shared=no
+    --enable-static=yes
+    --enable-libcrack
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'pam libpam' )
+DEFAULT_SRC_INSTALL_PARAMS=( suidperms=4711 )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
+
+src_prepare() {
+    default
+
+    sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs \
+        || die "sed for setting libdir failed"
+}
+
+src_install() {
+    default
+    dosym useradd /usr/sbin/adduser
+
+    # Remove libshadow and libmisc; see Gentoo bug 37725 and the following
+    # comment from shadow's README.linux:
+    #   Currently, libshadow.a is for internal use only, so if you see
+    #   -lshadow in a Makefile of some other package, it is safe to
+    #   remove it.
+    rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la}
+
+    insinto /etc
+    insopts -m0600 ; doins "${FILES}"/securetty
+
+    # needed for 'adduser -D'
+    insinto /etc/default
+    insopts -m0600 ; doins "${FILES}"/useradd
+
+    # move passwd to / to help recover broken systems. cf. Gentoo bug 64441.
+    mv "${IMAGE}"/usr/bin/passwd "${IMAGE}"/bin/
+    dosym /bin/passwd /usr/bin/passwd
+
+    insinto /etc
+    insopts -m0644 ; newins etc/login.defs login.defs
+
+    if option pam ; then
+        dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
+        newpamd "${FILES}/login.pamd.2" login
+
+        for x in chage chsh chfn chpasswd newusers user{add,del,mod} group{add,del,mod} ; do
+            newpamd "${FILES}"/pam.d-include/shadow ${x}
+        done
+
+        # comment out login.defs options that pam hates
+        sed -i -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs
+
+        # remove manpages that pam will install for us
+        # and/or don't apply when using pam
+        find "${IMAGE}"/usr/share/man \
+            '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete \
+            || die "rm manpages that don't apply when using pam failed"
+    fi
+
+    # Remove manpages that are handled by other packages
+    find "${IMAGE}"/usr/share/man \
+        '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete \
+        || die "rm manpages that collide with other packages failed"
+
+    find "${IMAGE}" -type d -empty -delete
+}
+
+pkg_postinst() {
+    # Enable shadow groups (we need ROOT=/ here, as grpconv only
+    # operate on / ...).
+    if [[ ${ROOT} == / && ! -f /etc/gshadow ]] ; then
+        if grpck -r ; then
+            grpconv
+        else
+            ewarn "Running 'grpck -r' returned errors. Please run it by hand, and then"
+            ewarn "run 'grpconv' afterwards."
+        fi
+    fi
+}
