@@ -157,7 +157,7 @@ _cmake_option() {
     else
         flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
     fi
-    echo "-D${1}${1:+_}$(optionfmt ${3:-${2}}):BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
+    echo "-D${1:+${1}_}${3:-$(optionfmt ${2})}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
 }
 
 # Used to enter the correct build dir and run a command in
