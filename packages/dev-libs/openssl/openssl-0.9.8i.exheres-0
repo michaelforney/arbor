@@ -12,7 +12,12 @@ MYOPTIONS="platform:ppc64"
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p1
+    "${FILES}"/openssl-0.9.8i-CFLAGS.patch
+)
+
 src_prepare() {
+    default
     # Fix manpath
     sed -i 's:^MANDIR=.*$:MANDIR=/usr/share/man:' Makefile.org || die "sed failed"
 }
