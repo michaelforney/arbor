@@ -1,0 +1,18 @@
+Source: dleverton
+Upstream: no
+Reason: fix tests with glibc 2.8 (an error message changed slightly)
+
+--- cvs-1.12.13/src/sanity.sh~	2005-09-22 21:34:06.000000000 +0100
++++ cvs-1.12.13/src/sanity.sh	2008-10-21 17:36:11.000000000 +0100
+@@ -3328,9 +3328,9 @@
+ 	  # lib/getopt.c will use POSIX when __posixly_correct
+ 	  # otherwise the other, so accept both of them. -- mdb
+ 	  dotest_fail basicb-21 "${testcvs} -q admin -H" \
+-"admin: invalid option -- H
++"admin: invalid option -- '\?H'\?
+ ${CPROG} \[admin aborted\]: specify ${CPROG} -H admin for usage information" \
+-"admin: illegal option -- H
++"admin: illegal option -- '\?H'\?
+ ${CPROG} \[admin aborted\]: specify ${CPROG} -H admin for usage information"
+ 	  cd ..
+ 	  rmdir 1
