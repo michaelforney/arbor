@@ -25,8 +25,6 @@ DEPENDENCIES="
 
 WORK=${WORKBASE}/${MY_PNV}
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-test-zshenv.patch )
-
 DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
 
@@ -42,16 +40,16 @@ src_configure() {
         --enable-ldflags="${LDFLAGS}" \
         --with-term-lib="ncursesw ncurses" \
         --with-tcsetpgrp \
+        $(option_enable caps cap) \
         $(option_enable maildir maildir-support) \
         $(option_enable pcre) \
-        $(option_enable caps cap) \
         $(option_enable unicode multibyte)
 }
 
 src_test() {
-    # This test might fail, depending on your mount options and your
-    # file system. Removing.
+    # This test might fail, depending on your mount options and your file system.
     rm "${WORK}"/Test/C02cond.ztst || die "Removing test failed"
+
     # This test starts a zsh process which in turn sources /etc/profile.env through /etc/zsh/zshenv,
     # which gets locales from the user env, which make this test fail. Reported upstream.
     rm "${WORK}"/Test/Y02compmatch.ztst || die "Removing tests failed"
