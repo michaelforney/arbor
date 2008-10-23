@@ -65,7 +65,7 @@ src_compile() {
     libdir="lib"
     [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
 
-    cd "${WORK}/src"
+    cd "${WORK}/src" || die "Could not enter src/"
     emake \
         CC="$(tc-getCC)" \
         LD="$(tc-getCC) ${LDFLAGS}" \
@@ -78,7 +78,7 @@ pkg_preinst() {
     # of CONTENTS in 1.12.12 and below (before sys-apps/skeleton-filesystem-layout)
     local x target
     for x in /boot /dev/shm /var/lock; do
-        touch "${ROOT}"${x}/.keep_do_not_break_me
+        touch "${ROOT}"${x}/.keep_do_not_break_me || die "Could not touch ${x}/.keep_do_not_break_me"
     done
 
     if [[ ${SYMLINK_LIB} == yes ]]; then
@@ -140,8 +140,7 @@ src_install() {
     sed -e 's:/bin/nano:/usr/bin/vim:' \
         -i "${IMAGE}"/etc/profile || die 'Failed to make EDITOR default to vim'
 
-    # If /dev/pts already exists in ${ROOT} it might not be writable for us.
-    [[ -d "${ROOT}"/dev/pts ]] && rm -rf "${IMAGE}"/dev/pts
+    rm -rf "${IMAGE}"/dev/pts || die "rm /dev/pts failed"
 
     rm -r "${IMAGE}"/etc/modules.d || die "rm -r ${IMAGE}/etc/modules.d failed"
     rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4 || die "rm ${IMAGE}/etc/modules.autoload.d/kernel-2.4 failed"
