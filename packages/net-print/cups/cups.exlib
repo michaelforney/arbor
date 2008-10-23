@@ -21,15 +21,12 @@ LANGS="da de es et fi fr he id it ja ko nl no pl pt_BR pt ru sv zh zh_TW"
 
 for lang in ${LANGS}; do
     MYOPTIONS+=" linguas:${lang}"
-    option "linguas:${lang}" && CUPSLANGS="${lang} ${CUPSLANGS}"
 done
 
-[[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
 
 # TODO:
-# options: acl avahi/zeroconf java kerberos ldap php slp X
+# options: acl avahi/zeroconf java kerberos ldap php slp
 # features: maybe ppds?
-# testing: that x86 / lib64 issue (see gentoo ebuild)
 # probably better slotting to avoid rebuilding
 
 DEPENDENCIES="
@@ -80,7 +77,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS+=(
     --with-system-groups=lpadmin
     --libdir="/usr/$(get_libdir)"
     --localstatedir=/var
-    --with-languages="${CUPSLANGS}"
     --with-docdir="/usr/share/doc/${PNVR}/handbook"
     DSOFLAGS="${LDFLAGS}"
 )
@@ -92,6 +88,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=(
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
     perl python # java php
+    'xinetd xinetd /etc/xinetd.d'
 )
 
 DEFAULT_SRC_INSTALL_PARAMS+=(
@@ -133,9 +130,13 @@ src_prepare() {
 }
 
 src_configure() {
-    # --without-xinetd is broken and installs files to '/no'
-    option xinetd && \
-        DEFAULT_SRC_CONFIGURE_PARAMS+=( --with-xinetd=/etc/xinetd.d )
+    for lang in ${LANGS}; do
+        option "linguas:${lang}" && CUPSLANGS="${lang} ${CUPSLANGS}"
+    done
+
+    [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
+
+    DEFAULT_SRC_CONFIGURE_PARAMS+=( --with-languages="${CUPSLANGS}" )
 
     default
 }
@@ -150,9 +151,6 @@ src_install() {
     keepdir /etc/cups/{interfaces,ppd,ssl}
 
     rm -r "${IMAGE}/etc"/{rc{0,2,3,5},init}.d
-
-    # cups installs the xinetd script if /etc/xinetd.d exists
-    option xinetd || rm -rf "${IMAGE}/etc/xinetd.d"
 
     # provide our own pam script
     if option pam ; then

@@ -1,0 +1,17 @@
+Upstream: Yes (fixed in svn)
+Reason: cups installs xinetd files into /no when configured with --without-xinetd
+Source: Daniel Mierswa <impulze@impulze.org>
+
+http://www.cups.org/str.php?L2970
+
+--- ./config-scripts/cups-directories.m4.bak	2008-10-10 16:32:32.000000000 +0200
++++ ./config-scripts/cups-directories.m4	2008-10-10 16:41:52.000000000 +0200
+@@ -225,6 +225,8 @@
+ 			break
+ 		fi
+ 	done
++elif test "$XINETD" = no; then
++	XINETD=""
+ fi
+ 
+ AC_SUBST(XINETD)
