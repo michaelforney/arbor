@@ -8,7 +8,7 @@ DOWNLOADS="http://pm-utils.freedesktop.org/releases/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="alsa debug networkmanager ntp video_driver:intel video_driver:radeon"
+MYOPTIONS="alsa debug networkmanager ntp video_drivers: intel radeon"
 
 DEPENDENCIES="
     build:
@@ -20,8 +20,8 @@ DEPENDENCIES="
         alsa? ( sys-sound/alsa-utils )
         networkmanager? ( net/NetworkManager )
         ntp? ( net/ntp )
-        !video_driver:intel? ( sys-apps/vbetool )
-        video_driver:radeon? ( app-laptop/radeontool )
+        !video_drivers:intel? ( sys-apps/vbetool )
+        video_drivers:radeon? ( app-laptop/radeontool )
 "
 
 src_install() {
