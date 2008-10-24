@@ -88,13 +88,11 @@ scm-git_do_appraise() {
     fi
 
     if [[ -n $(scm_get_var TAG) ]]; then
-        if ! has $(scm_get_var TAG) $(scm-git_git -q tag); then
-            echo "${dir} does not contain the tag $(scm_get_var TAG)"
-            return 1
-        elif has $(scm-git_git -q cat-file -t refs/tags/$(scm_get_var TAG)) commit tag; then
+        if has $(scm_get_var TAG) $(scm-git_git -q tag); then
             return 2
         else
-            die "$(scm_get_var TAG) is not a commit or a tag in ${dir}"
+            echo "${dir} does not contain the tag $(scm_get_var TAG)"
+            return 1
         fi
     fi
 
