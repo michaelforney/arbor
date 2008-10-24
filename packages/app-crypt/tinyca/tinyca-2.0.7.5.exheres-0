@@ -26,7 +26,7 @@ UPSTREAM_CHANGELOG="http://tinyca.sm-zone.net/CHANGES"
 
 LICENCES="Artistic"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 LANGS="cs de es fr sv"
 
@@ -54,8 +54,8 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
     sed -i -e 's:./lib:/usr/share/tinyca/lib:g' \
-    	-e 's:./templates:/usr/share/tinyca/templates:g' \
-    	-e 's:./locale:/usr/share/locale:g' "${WORK}/tinyca2"
+        -e 's:./templates:/usr/share/tinyca/templates:g' \
+        -e 's:./locale:/usr/share/locale:g' "${WORK}/tinyca2"
 }
 
 locale_install() {
@@ -79,8 +79,8 @@ src_install() {
     insinto /usr/share/
     local l
     for l in ${LANGS}; do
-    	if [ "$l" != "en" ]; then
-    		option linguas:$l && locale_install $l
-    	fi
+        if [ "$l" != "en" ]; then
+            option linguas:$l && locale_install $l
+        fi
     done
 }
