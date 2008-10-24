@@ -70,13 +70,13 @@ scm-git_do_appraise() {
     fi
 
     if [[ -n $(scm_get_var REVISION) ]]; then
-        if [[ $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) == commit ]]; then
-            return 2
-        elif [[ -n $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) ]]; then
-            die "$(scm_get_var REVISION) is not a commit in ${dir}"
-        else
+        if [[ -z $(nonfatal scm-git_git -q cat-file -t $(scm_get_var REVISION) 2>/dev/null) ]]; then
             echo "$(scm_get_var REVISION) is not present in ${dir}"
             return 1
+        elif [[ $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) == commit ]]; then
+            return 2
+        else
+            die "$(scm_get_var REVISION) is not a commit in ${dir}"
         fi
     fi
 
