@@ -38,16 +38,14 @@ src_prepare() {
 src_install() {
     default
 
-cat <<'EOF' > procmailrc
-# Use maildir-style mailbox in user's home directory
-DEFAULT=$HOME/.maildir/
-EOF
-
     dodir /var/spool/${PN}/
     keepdir /var/spool/${PN}/
 
     insinto /etc
-    doins procmailrc
+    hereins procmailrc <<'EOF'
+# Use maildir-style mailbox in user's home directory
+DEFAULT=$HOME/.maildir/
+EOF
 
     insinto /usr/share/doc/${PNVR}/examples
     doins "${WORK}"/examples/{{1,2,3}procmailrc,{1,2,3}rmail,advanced,dirname,forward,mailstat}

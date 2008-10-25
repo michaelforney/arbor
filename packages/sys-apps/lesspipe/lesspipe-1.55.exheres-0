@@ -81,10 +81,9 @@ src_install() {
     # those due to the --yes option to configure
     rm "${IMAGE}"/usr/bin/sxw2txt || die "rm failed"
 
-    cat << EOF > "${TEMP}/70less"
+    hereenvd 70less <<EOF
 LESSOPEN="| lesspipe.sh %s"
 LESS="-R -M --shift 5"
 EOF
-    doenvd "${TEMP}/70less"
 }
 

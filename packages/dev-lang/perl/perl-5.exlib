@@ -92,8 +92,8 @@ perl-5_src_install() {
 
     keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}
 
-    dodir /etc/env.d/${PN}
-    cat <<EOF > "${IMAGE}"/etc/env.d/${PN}/${PV}
+    insinto /etc/env.d/${PN}
+    hereins ${PV} <<EOF
 LDPATH="${perllibdir}"
 EOF
 

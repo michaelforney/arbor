@@ -25,8 +25,8 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( pam )
 src_install() {
     default
 
-    dodir /etc
-    cat <<'EOF' > "${IMAGE}"/etc/screenrc
+    insinto /etc
+    hereins screenrc <<'EOF'
 # Do not use xterm's alternative window buffer, it breaks scrollback (see Gentoo bug #61195)
   termcapinfo xterm|xterms|xs ti@:te=\E[2J
 EOF

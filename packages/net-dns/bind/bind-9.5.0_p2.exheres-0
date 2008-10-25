@@ -105,16 +105,14 @@ src_install() {
     dodoc doc/misc/*
 
     # Creating a CONFIG_PROTECT file for /var/bind
-cat <<EOF >> "${TEMP}"/bind-config_protect
+    hereenvd 30bind <<EOF
 CONFIG_PROTECT="/var/bind"
 EOF
-
-    # Installing CONFIG_PROTECT and init file as well as confd file.
-    newenvd "${TEMP}"/bind-config_protect 30bind
+    # Installing init file as well as confd file
     newinitd "${FILES}"/named.init named
     newconfd "${FILES}"/named.confd named
 
-    # Install standard zones and root cache.
+    # Install standard zones and root cache
     insinto /var/bind
     doins "${FETCHEDDIR}"/named.cache
     insinto /var/bind/pri
