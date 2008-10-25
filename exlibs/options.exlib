@@ -14,14 +14,6 @@ option_expand() {
     done
 }
 
-# Print all enabled suboptions found in MYOPTIONS
-# Usage: enabled_suboptions ${prefix}
-enabled_suboptions() {
-    for o in ${MYOPTIONS}; do
-        [[ ${o} == ${1}:* ]] && option ${o} && echo ${o#${1}:}
-    done
-}
-
 # Check option dependencies.
 # Usage: option_check_dependencies ${opt} ${of} ${message} ${dependencies}
 check_option_dependencies() {
