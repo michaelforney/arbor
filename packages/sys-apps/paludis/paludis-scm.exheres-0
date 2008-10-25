@@ -10,7 +10,7 @@ DOWNLOADS=""
 SCM_REPOSITORY="git://git.pioto.org/paludis"
 require scm-git
 
-MYOPTIONS="cran doc glsa inquisitio pink python qa ruby vim-syntax visibility"
+MYOPTIONS="cran doc glsa inquisitio pink python qa ruby vim-syntax"
 LICENCES="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
@@ -86,8 +86,8 @@ src_configure() {
         $(option_enable ruby) \
         $(option_enable python) \
         $(option_enable vim-syntax vim ) \
-        $(option_enable visibility ) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
+        --enable-visibility \
         --enable-sandbox \
         --with-clients=${clients} \
         --with-environments=${environments} \
