@@ -77,6 +77,7 @@ __python_version_extract() {
 }
 
 python_version() {
+    [[ -n "${PYVER}" ]] && return 0
     local tmpstr
     python=${python:-/usr/bin/python}
     tmpstr="$(${python} -V 2>&1 )"
