@@ -112,11 +112,8 @@ python_tkinter_exists() {
 #     fi
 #
 python_mod_exists() {
-    [ -z "$1" ] && die "${FUNCTION} requires an argument!"
-    if ! python -c "import $1" >/dev/null 2>&1; then
-        return 1
-    fi
-    return 0
+    [[ "$1" ]] && die "${FUNCNAME} requires an argument!"
+    python -c "import $1" >/dev/null 2>&1
 }
 
 #
