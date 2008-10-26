@@ -91,7 +91,7 @@ python_version() {
 #     support.  If not, prints an error message and dies.
 #
 python_tkinter_exists() {
-    if ! python -c "import Tkinter" >/dev/null 2>&1; then
+    if ! python -B -c "import Tkinter" >/dev/null 2>&1; then
         eerror "You need to recompile python with Tkinter support."
         eerror "Try adding: 'dev-lang/python tk'"
         eerror "in to /etc/portage/package.use"
@@ -113,7 +113,7 @@ python_tkinter_exists() {
 #
 python_mod_exists() {
     [[ "$1" ]] && die "${FUNCNAME} requires an argument!"
-    python -c "import $1" >/dev/null 2>&1
+    python -B -c "import $1" >/dev/null 2>&1
 }
 
 #
