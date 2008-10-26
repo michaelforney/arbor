@@ -44,7 +44,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-fPIC.patch
 )
 
-
 src_prepare() {
     rm -r ./{expat,jasper,jpeg,libpng,Resource/Font,zlib} \
         || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng"
@@ -93,7 +92,7 @@ src_compile() {
 }
 
 src_install() {
-    emake DESTDIR="${IMAGE}" install-so install
+    emake -j1 DESTDIR="${IMAGE}" install-so install
 
     cd "${WORK}/ijs"
     default
