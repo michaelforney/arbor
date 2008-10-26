@@ -15,10 +15,10 @@ WORK="${WORKBASE}/${MY_PNV}"
 SUMMARY="Python interpreter"
 HOMEPAGE="http://www.python.org"
 DOWNLOADS="http://python.org/ftp/python/${PV}/${MY_PNV}.tar.bz2
-    http://hawking.nonlogic.org/dist/python-exherbo-patches-${PV}-r2.tar.bz2"
+    http://hawking.nonlogic.org/dist/python-exherbo-patches-${PV}-r1.tar.bz2"
 
 LICENCES="PSF-2.2"
-SLOT="2.5"
+SLOT="2.6"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="berkdb gdbm examples ipv6 ncurses readline sqlite ssl tk"
 
@@ -36,20 +36,7 @@ build+run:
     ssl? ( dev-libs/openssl )
     tk? ( >=dev-lang/tk-8.0 )"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${WORKBASE}/${PV}/01_all_readline.patch"
-    "${WORKBASE}/${PV}/02_all_db4.patch"
-    "${WORKBASE}/${PV}/03_all_py-dontcompile.patch"
-    "${WORKBASE}/${PV}/04_all_disable_modules_and_ssl.patch"
-    "${WORKBASE}/${PV}/05_all_mimetypes_gentoo_apache.patch"
-    "${WORKBASE}/${PV}/06_all_libdir.patch"
-    "${WORKBASE}/${PV}/07_all_dbm_default_gdbm_compat.patch"
-    -p1 "${WORKBASE}/${PV}/08_all_zlib-decompressobj_flush-bad-param.patch"
-    "${WORKBASE}/${PV}/09_all_pystring-size-fix.patch"
-    "${WORKBASE}/${PV}/10_all_threadsafe-fileobjects.patch"
-    "${WORKBASE}/${PV}/11_all_infinite-recursions-fix.patch"
-    -p0 "${WORKBASE}/${PV}/12_all_ctypes-execstack.patch"
-    #"${WORKBASE}/${PV}/13_all_internal-expat.patch"
-    "${WORKBASE}/${PV}/14_all_cflags.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${WORKBASE}/${PV}/" )
 
 src_prepare() {
     default
@@ -96,11 +83,15 @@ src_configure() {
     default
 }
 
+src_install() {
+    default
+
+    # Installs empty directory.
+    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}${PV}/lib-old
+}
+
 src_test() {
-    # PYTHON_DONTCOMPILE shouldn't be set here.
-    if [[ -n "${PYTHON_DONTCOMPILE}" ]]; then
-        unset PYTHON_DONTCOMPILE
-    fi
+    python_enable_pyc
 
     # rerun failed tests in verbose mode (regrtest -w)
     EXTRATESTOPTS="-w" emake test
