@@ -24,7 +24,8 @@ option_expand_dependencies() {
 # there's plenty of these to add
 MY_LINGUAS="de en nl"
 
-MYOPTIONS="doc examples nls $(option_expand linguas ${MY_LINGUAS})"
+MYOPTIONS="doc examples nls
+linguas: ${MY_LINGUAS}"
 
 DEPENDENCIES="
     build+run:
