@@ -84,6 +84,17 @@ python_version() {
     __python_version_extract $PYVER_ALL
 }
 
+# Run without arguments, returns the python library directory.
+python_get_libdir() {
+    python_version
+    echo -n "/usr/$(get_libdir)/python${PYVER}"
+}
+
+# Run without arguments, returns the python site-packages directory.
+python_get_sitedir() {
+    echo -n "$(python_get_libdir)/site-packages"
+}
+
 #
 # name:   python_tkinter_exists
 # desc:   run without arguments, checks if python was compiled with Tkinter
