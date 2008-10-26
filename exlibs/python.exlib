@@ -162,12 +162,46 @@ python_mod_compile() {
 #     if supplied with arguments, it will recompile all modules recursively
 #     in the supplied directory
 # exam:
-#     python_mod_optimize ${ROOT}usr/share/codegen
+#     python_mod_optimize /usr/share/codegen
 #
 python_mod_optimize() {
-    local myroot
+    local myroot mydirs=() myfiles=() myopts=()
+
+    # Check if phase is pkg_postinst()
+    [[ ${EBUILD_PHASE} != postinst ]] &&\
+        die "${FUNCNAME} should only be run in pkg_postinst()"
+
     # strip trailing slash
     myroot="${ROOT%/}"
+
+    # respect ROOT and options passed to compileall.py
+    while (($#)); do
+        case $1 in
+            -l|-f|-q)
+                myopts+=("$1")
+                ;;
+            -d|-x)
+                myopts+=("$1" "$2")
+                shift
+                ;;
+            -*)
+                ewarn "${FUNCNAME}: Ignoring compile option $1"
+                ;;
+            *)
+                if [[ -d "${myroot}"/$1 ]]; then
+                    mydirs+=("${myroot}/$1")
+                elif [[ -f "${myroot}"/$1 ]]; then
+                    # Files are passed to python_mod_compile which is ROOT-aware
+                    myfiles+=("$1")
+                elif [[ -e "${myroot}/$1" ]]; then
+                    ewarn "${myroot}/$1 is not a file or directory!"
+                else
+                    ewarn "${myroot}/$1 doesn't exist!"
+                fi
+                ;;
+        esac
+        shift
+    done
 
     # allow compiling for older python versions
     if [ -n "${PYTHON_OVERRIDE_PYVER}" ]; then
@@ -176,16 +210,23 @@ python_mod_optimize() {
         python_version
     fi
 
-    # set opts
-    if [ "${PYVER}" = "2.2" ]; then
-        compileopts=""
-    else
-        compileopts="-q"
-    fi
+    # set additional opts
+    myopts+=(-q)
 
     ebegin "Byte compiling python modules for python-${PYVER} .."
-    python${PYVER} ${myroot}/usr/$(get_libdir)/python${PYVER}/compileall.py ${compileopts} $@
-    python${PYVER} -O ${myroot}/usr/$(get_libdir)/python${PYVER}/compileall.py ${compileopts} $@
+    if ((${#mydirs[@]})); then
+        python${PYVER} \
+            "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
+            "${myopts[@]}" "${mydirs[@]}"
+        python${PYVER} -O \
+            "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
+            "${myopts[@]}" "${mydirs[@]}"
+    fi
+
+    if ((${#myfiles[@]})); then
+        python_mod_compile "${myfiles[@]}"
+    fi
+
     eend $?
 }
 
