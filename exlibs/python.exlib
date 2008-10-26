@@ -121,23 +121,35 @@ python_mod_exists() {
 # desc:   given a filename, it will pre-compile the module's .pyc and .pyo.
 #     should only be run in pkg_postinst()
 # exam:
-#     python_mod_compile ${ROOT}usr/lib/python2.3/site-packages/pygoogle.py
+#     python_mod_compile /usr/lib/python2.3/site-packages/pygoogle.py
 #
 python_mod_compile() {
+    local f myroot myfiles=()
+
+    # Check if phase is pkg_postinst()
+    [[ ${EBUILD_PHASE} != postinst ]] &&\
+        die "${FUNCNAME} should only be run in pkg_postinst()"
+
     # allow compiling for older python versions
-    if [ -n "${PYTHON_OVERRIDE_PYVER}" ]; then
+    if [[ -n "${PYTHON_OVERRIDE_PYVER}" ]]; then
         PYVER=${PYTHON_OVERRIDE_PYVER}
     else
         python_version
     fi
 
-    if [ -f "$1" ]; then
-        python${PYVER} -c "import py_compile; py_compile.compile('${1}')" || \
-            ewarn "Failed to compile ${1}"
-        python${PYVER} -O -c "import py_compile; py_compile.compile('${1}')" || \
-            ewarn "Failed to compile ${1}"
+    # strip trailing slash
+    myroot="${ROOT%/}"
+
+    # respect ROOT
+    for f in "$@"; do
+        [[ -f "${myroot}/${f}" ]] && myfiles+=("${myroot}/${f}")
+    done
+
+    if ((${#myfiles[@]})); then
+        python${PYVER} ${myroot}/usr/$(get_libdir)/python${PYVER}/py_compile.py "${myfiles[@]}"
+        python${PYVER} -O ${myroot}/usr/$(get_libdir)/python${PYVER}/py_compile.py "${myfiles[@]}"
     else
-        ewarn "Unable to find ${1}"
+        ewarn "No files to compile!"
     fi
 }
 
