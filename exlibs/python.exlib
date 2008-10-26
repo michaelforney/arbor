@@ -70,7 +70,7 @@ __python_version_extract() {
     verstr=$1
     export PYVER_MAJOR=${verstr:0:1}
     export PYVER_MINOR=${verstr:2:1}
-    if [ "${verstr:3}x" = ".x" ]; then
+    if [[ ${verstr:3:1} == . ]]; then
         export PYVER_MICRO=${verstr:4}
     fi
     export PYVER="${PYVER_MAJOR}.${PYVER_MINOR}"
