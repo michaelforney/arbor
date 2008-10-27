@@ -40,7 +40,7 @@ src_install() {
     default
     rmdir "${IMAGE}"/var{/empty,}
 
-    newinitd "${FILES}/${PN}.rc"
-    newconfd "${FILES}/${PN}.conf.d"
+    newinitd "${FILES}/${PN}.rc" ${PN}
+    newconfd "${FILES}/${PN}.conf.d" ${PN}
 }
 
