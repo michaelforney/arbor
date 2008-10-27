@@ -39,5 +39,8 @@ pkg_setup() {
 src_install() {
     default
     rmdir "${IMAGE}"/var{/empty,}
+
+    newinitd "${FILES}/${PN}.rc"
+    newconfd "${FILES}/${PN}.conf.d"
 }
 
