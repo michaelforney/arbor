@@ -194,6 +194,7 @@ src_install() {
             mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
             alternatives+=( classpath_security /${x} ${bn%.${ext}}-${SLOT}.${ext} )
         done
+        alternatives+=( libgcj_tools /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
     fi
 
     alternatives_for "${alternatives[@]}"
