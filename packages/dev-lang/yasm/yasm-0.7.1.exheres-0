@@ -1,11 +1,10 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-#require python
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
 
-require autotools
+require python autotools
 
 SUMMARY="YASM Modular Assembler Project"
 DESCRIPTION='
@@ -27,7 +26,7 @@ DEPENDENCIES="
         nls? ( sys-devel/gettext )
     build+run:
         python? (
-            dev-lang/python
+            dev-lang/python:=
             python-dev/pyrex
         )"
 

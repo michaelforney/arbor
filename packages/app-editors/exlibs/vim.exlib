@@ -22,7 +22,7 @@
 #require vim/doc flag-o-matic fdo-mime bash-completion
 require versionator vim-doc flag-o-matic
 
-[[ "${PN}" != 'vim-runtime' ]] && require alternatives
+[[ "${PN}" != 'vim-runtime' ]] && require alternatives python
 [[ "${PN}" != 'gvim' ]] && require bash-completion
 
 export_exlib_phases src_prepare src_configure src_compile src_test src_install pkg_postinst pkg_postrm
@@ -66,7 +66,7 @@ else
             gpm?     ( >=sys-libs/gpm-1.19.3 )
             !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
             perl?    ( dev-lang/perl )
-            python?  ( dev-lang/python )
+            python?  ( dev-lang/python:= )
             ruby?    ( dev-lang/ruby )"
            #cscope?  ( dev-util/cscope )
            #acl?     ( kernel_linux? ( sys-apps/acl ) )
