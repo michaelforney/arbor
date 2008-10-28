@@ -14,27 +14,30 @@ DOWNLOADS="mirror://sourceforge/docbook/${MY_PNV}.tar.bz2"
 
 LICENCES="as-is"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="run: app-text/sgml-common"
 
 SGML_CATALOGS=(
-"/etc/sgml/dsssl-docbook-stylesheets.cat
+"/etc/sgml/dsssl-docbook-stylesheets.cat \
 /usr/share/sgml/docbook/dsssl-stylesheets-${PV}/catalog"
-"/etc/sgml/sgml-docbook.cat
+"/etc/sgml/sgml-docbook.cat \
 /etc/sgml/dsssl-docbook-stylesheets.cat" )
 
 src_prepare() {
-    cp "${FILES}"/${PNV}-Makefile Makefile
+    cp "${FILES}"/${PNV}-Makefile Makefile || die "cp failed"
 }
+
+DEFAULT_SRC_INSTALL_PARAMS=(
+    BINDIR="${IMAGE}/usr/bin"
+    DESTDIR="${IMAGE}/usr/share/sgml/docbook/dsssl-stylesheets-${PV}"
+)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( WhatsNew )
 
 src_install() {
     #FIXME: CRAP!
-    emake \
-    BINDIR="${IMAGE}/usr/bin" \
-    DESTDIR="${IMAGE}/usr/share/sgml/docbook/dsssl-stylesheets-${PV}" \
-    install
+    default
 
     dodir /usr/share/sgml/stylesheets/dsssl/
 
@@ -49,6 +52,4 @@ src_install() {
         dosym /usr/share/sgml/docbook/dsssl-stylesheets-${PV} \
             /usr/share/sgml/stylesheets/dsssl/docbook
     fi
-
-    dodoc BUGS ChangeLog README RELEASE-NOTES.txt WhatsNew
 }
