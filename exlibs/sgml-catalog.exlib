@@ -12,18 +12,14 @@ build:
 # suggested/recommended? app-text/sgmltools-lite
 
 sgml-catalog_cat_doinstall() {
-    #debug-print function $FUNCNAME $*
     /usr/bin/install-catalog --add $1 $2 &>/dev/null
 }
 
 sgml-catalog_cat_doremove() {
-    #debug-print function $FUNCNAME $*
     /usr/bin/install-catalog --remove $1 $2 &>/dev/null
 }
 
 sgml-catalog_pkg_postinst() {
-    #debug-print function $FUNCNAME $*
-
     for (( i = 0 ; i < ${#SGML_CATALOGS[@]} ; i++ )) ; do
         entry=${SGML_CATALOGS[$i]}
         arg1=${entry/ */}
@@ -43,8 +39,6 @@ sgml-catalog_pkg_prerm() {
 }
 
 sgml-catalog_pkg_postrm() {
-    #debug-print function $FUNCNAME $*
-
     for (( i = 0 ; i < ${#SGML_CATALOGS[@]} ; i++ )) ; do
         entry=${SGML_CATALOGS[$i]}
         arg1=${entry/ */}
