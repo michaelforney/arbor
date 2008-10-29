@@ -3,14 +3,12 @@
 # Based in part upon 'zsh-4.3.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-MY_PV=${PV/7_pre/6-dev-}
-MY_PNV=${PN}-${MY_PV}
 require multilib
 
 SUMMARY="UNIX Shell similar to the Korn shell"
 HOMEPAGE="http://www.zsh.org/"
-DOWNLOADS="ftp://ftp.zsh.org/pub/development/${MY_PNV}.tar.gz
-    doc? ( ftp://ftp.zsh.org/pub/development/${MY_PNV}-doc.tar.gz )"
+DOWNLOADS="ftp://ftp.zsh.org/pub/${PNV}.tar.gz
+    doc? ( ftp://ftp.zsh.org/pub/${PNV}-doc.tar.gz )"
 
 LICENCES="ZSH"
 SLOT="0"
@@ -22,8 +20,6 @@ DEPENDENCIES="
         >=sys-libs/ncurses-5.1
         caps? ( sys-libs/libcap )
         pcre? ( >=dev-libs/pcre-3.9 )"
-
-WORK=${WORKBASE}/${MY_PNV}
 
 DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
