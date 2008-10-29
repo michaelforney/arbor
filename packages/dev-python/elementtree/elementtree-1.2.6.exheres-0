@@ -18,3 +18,7 @@ MYOPTIONS=""
 DEPENDENCIES="
     build+run:
         dev-lang/python:="
+
+src_test() {
+    python selftest.py || die "tests failed"
+}
