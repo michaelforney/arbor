@@ -122,7 +122,7 @@ python_tkinter_exists() {
 #     fi
 #
 python_mod_exists() {
-    [[ "$1" ]] && die "${FUNCNAME} requires an argument!"
+    [[ "$1" ]] || die "${FUNCNAME} requires an argument!"
     python -B -c "import $1" >/dev/null 2>&1
 }
 
