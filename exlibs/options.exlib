@@ -95,7 +95,11 @@ option_dependencies() {
                 ${nested} && die "error parsing OPTION_DEPENDENCIES at '${1}', nested option dependencies are not supported"
                 opt=${1%?}
                 [[ -n ${opt#!} ]] || die "error parsing OPTION_DEPENDENCIES at '${1}'"
-                has ${opt#!} ${MYOPTIONS} || die "OPTION_DEPENDENCIES contains '${1}' but ${opt#!} is not in MYOPTIONS"
+                if [[ ${opt#!} == *:* ]]; then
+                    has ${opt#*:} ${MYOPTIONS} || die "OPTION_DEPENDENCIES contains '${1}' but ${opt#*:} is not in MYOPTIONS"
+                else
+                    has ${opt#!} ${MYOPTIONS} || die "OPTION_DEPENDENCIES contains '${1}' but ${opt#!} is not in MYOPTIONS"
+                fi
                 ;;
             "(")
                 ${nested} && die "error parsing OPTION_DEPENDENCIES at '${1}', nested blocks are not supported"
@@ -125,7 +129,11 @@ option_dependencies() {
             *)
                 ${nested} || die "error parsing OPTION_DEPENDENCIES at '${1}', options are only valid inside blocks"
                 [[ -n ${1#!} ]] || die "error parsing OPTION_DEPENDENCIES at '${1}'"
-                has ${1#!} ${MYOPTIONS} || die "OPTION_DEPENDENCIES contains '${1}' but ${1#!} is not in MYOPTIONS"
+                if [[ ${1#!} == *:* ]]; then
+                    has ${1#*:} ${MYOPTIONS} || die "OPTION_DEPENDENCIES contains '${1}' but ${1#*:} is not in MYOPTIONS"
+                else
+                    has ${1#!} ${MYOPTIONS} || die "OPTION_DEPENDENCIES contains '${1}' but ${1#!} is not in MYOPTIONS"
+                fi
                 dep+=" ${1}"
                 [[ ${of} == unset ]] && of=all
                 ;;
