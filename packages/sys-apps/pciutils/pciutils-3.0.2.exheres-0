@@ -3,7 +3,7 @@
 # Based in part upon 'pciutils-2.2.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs
+require multilib toolchain-funcs
 
 SUMMARY="a collection of programs for inspecting and manipulating configuration of PCI devices"
 HOMEPAGE="http://mj.ucw.cz/pciutils.shtml"
@@ -16,17 +16,21 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-3.0.0-locale-happiness.patch" )
+DEFAULT_SRC_INSTALL_PARAMS=( install-lib )
+
 src_prepare() {
-    sed -i \
-        -e 's,^PREFIX=.*,PREFIX=/usr,' \
-        -e 's,^IDSDIR=.*,IDSDIR=$(SHAREDIR)/misc,' \
-        Makefile || die "sed failed"
+    default
+    sed -i -e '/^PREFIX=/cPREFIX=/usr' \
+           -e "/^LIBDIR=/cLIBDIR=/usr/$(get_libdir)" \
+           -e '/^IDSDIR=/cIDSDIR=/usr/share/misc' \
+           -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
+           Makefile || die "failed to update makefile"
 }
 
 src_compile() {
-    export ZLIB="no"
     tc-export AR CC RANLIB
-    emake OPT="${CFLAGS} -fPIC"
+    emake ZLIB="no" DNS="no" \
+          OPT="${CFLAGS} -fPIC" STRIP=""
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( install-lib )
