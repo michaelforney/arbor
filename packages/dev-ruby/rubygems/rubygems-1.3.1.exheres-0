@@ -1,0 +1,58 @@
+# Copyright 2007,2008 Richard Brown
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'rubygems-1.0.1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require versionator
+
+SUMMARY="Centralised Ruby extension management"
+HOMEPAGE="http://rubyforge.org/projects/rubygems/"
+LICENCES="|| ( Ruby GPL-2 )"
+
+PLATFORMS="~amd64 ~x86"
+SLOT="0"
+MYOPTIONS="doc"
+
+DOWNLOADS="mirror://rubyforge/${PN}/${PNV}.tgz"
+
+DEPENDENCIES="
+    build+run:
+        >=dev-lang/ruby-1.8.7
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.3.0-setup.patch )
+
+src_install() {
+    unset GEM_HOME GEM_PATH RUBYOPT
+
+    vendor_dir=$(ruby -rrbconfig -e 'print Config::CONFIG["vendorlibdir"]')
+    vendor_gem_dir=${vendor_dir/vendor_ruby/vendor_gems}
+    site_gem_dir=${vendor_dir/vendor_ruby/gems}
+    ver=$(basename ${site_gem_dir})
+    ver_stripped=${ver/./}
+
+    keepdir {${site_gem_dir},${vendor_gem_dir}}/{doc,gems,cache,specifications}
+    #Set this to avoid installer upsetting sandbox
+    export GEM_PATH="${IMAGE}/${site_gem_dir}"
+
+    myconf=""
+    if ! option doc; then
+        myconf+="--no-rdoc --no-ri"
+    fi
+
+    ruby setup.rb ${myconf} --vendor --destdir="${IMAGE}" || die "setup.rb failed"
+
+    dosym "gem${ver_stripped}" /usr/bin/gem
+
+    dodoc README doc/release_notes/rel_$(replace_all_version_separators '_').rdoc
+
+    insinto ${vendor_dir}/rubygems/defaults/
+    doins "${FILES}"/operating_system.rb
+}
+
+pkg_postinst() {
+    if [[ -e ${site_gem_dir}/source_cache ]]; then
+        rm ${site_gem_dir}/source_cache || die "unable to remove src_cache"
+    fi
+}
+
