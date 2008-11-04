@@ -15,7 +15,8 @@ DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
 LICENCES="GPL-3"
 SLOT="$(get_major_version)"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="gif gtk jpeg png spell tiff X xpm"
+MYOPTIONS="gif gtk jpeg png spell tiff X xpm
+    ( gif gtk jpeg png tiff xpm ) [[ requires = X ]]"
 
 DEPENDENCIES="
     build:
@@ -39,14 +40,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-vcdiff-tmp-race.patch"
     "${FILES}/${PNV}-fast-lock.patch"
 )
-
-pkg_pretend() {
-    if ! option X; then
-        if option gif || option gtk || option jpeg || option png || option tiff || option xpm; then
-            die 'Any of OPTION="gif gtk jpeg png tiff xpm" need OPTION="X" enabled.'
-        fi
-    fi
-}
 
 src_prepare() {
     default

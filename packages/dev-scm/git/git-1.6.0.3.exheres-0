@@ -5,7 +5,8 @@
 require multilib perl-module bash-completion common-metadata
 
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="curl doc ipv6 threads vim-syntax webdav" # tk
+MYOPTIONS="curl doc ipv6 threads vim-syntax webdav
+    webdav [[ requires = curl ]]" # tk
 
 DEPENDENCIES="
     build+run:
@@ -31,12 +32,6 @@ DEPENDENCIES="
 "
 
 #   tk? ( dev-lang/tk )
-
-pkg_pretend() {
-    if ! option curl && option webdav; then
-        die 'OPTION="webdav" needs the "curl" option'
-    fi
-}
 
 src_unpack() {
     unpack ${PNV}.tar.bz2
