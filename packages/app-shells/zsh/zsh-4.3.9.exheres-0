@@ -25,6 +25,9 @@ DEPENDENCIES="
 
 DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/0001-26006-remove-dependence-on-system-error-message.patch
+)
 
 src_configure() {
     econf \
