@@ -30,7 +30,7 @@ src_install() {
         appresdir="${IMAGE}/etc/X11/app-defaults" \
         install
 
-    rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/groff/site-tmac || \
+    rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/$(get_libdir)/groff/site-tmac || \
         die "rmdir failed"
 
     dosym tbl /usr/bin/gtbl
