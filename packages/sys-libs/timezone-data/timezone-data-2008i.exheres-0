@@ -3,10 +3,13 @@
 
 require multilib
 
+TZCODE_PV="${PV%i}h"
+TZDATA_PV="${PV}"
+
 SUMMARY="Timezone data"
 HOMEPAGE="ftp://elsie.nci.nih.gov/pub"
-DOWNLOADS="ftp://elsie.nci.nih.gov/pub/tzcode${PV}.tar.gz
-    ftp://elsie.nci.nih.gov/pub/tzdata${PV}.tar.gz"
+DOWNLOADS="ftp://elsie.nci.nih.gov/pub/tzcode${TZCODE_PV}.tar.gz
+           ftp://elsie.nci.nih.gov/pub/tzdata${TZDATA_PV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -18,7 +21,7 @@ DEPENDENCIES=""
 DEFAULT_SRC_COMPILE_PARAMS=(
     CFLAGS="${CFLAGS}"
     TZDIR="/usr/share/zoneinfo"
-)   
+)
 DEFAULT_SRC_INSTALL_PARAMS=(
     TZDIR="${IMAGE}/usr/share/zoneinfo"
     ETCDIR="${IMAGE}/usr/bin"
