@@ -40,7 +40,7 @@ src_unpack() {
     mkdir "${WORK}"
     unpack ${ARCHIVES}
 
-    if !ever at_least 2.8; then
+    if ! ever at_least 2.8; then
         mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
     fi
     mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
