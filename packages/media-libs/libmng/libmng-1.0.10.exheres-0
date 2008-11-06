@@ -10,7 +10,7 @@ SUMMARY="The Multitiple Network Graphics reference library"
 HOMEPAGE="http://www.libmng.com/"
 DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
 
-LICENCES="AS-IS"
+LICENCES="libmng"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="lcms jpeg"
@@ -26,7 +26,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.examples doc/{${PN}.txt,doc.readme} )
 src_prepare() {
     #upstream does not handle autotools anymore
     #moved to unmaintained - we use it anyway
-    cp makefiles/configure.in makefiles/Makefile.am .
+    cp makefiles/configure.in makefiles/Makefile.am . || die "cp failed"
     eautoreconf
 }
 
