@@ -18,13 +18,6 @@ DEPENDENCIES="
     post,suggested:
         x11-utils/xclip"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/zlin.patch" )
-
-src_prepare() {
-    mv "${PNV}" "${PN}" || die "rename failed"
-    default
-}
-
 src_install() {
-    dobin "${WORKBASE}/${PN}"
+    newbin "${WORKBASE}"/${PNV} ${PN}
 }
