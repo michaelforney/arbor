@@ -97,4 +97,6 @@ src_install() {
     mv "${WORK}"/examples "${IMAGE}"/usr/share/doc/${PNVR}
 
     dosym /usr/share/doc/${PNVR} /usr/share/doc/${PN}
+
+    newinitd "${FILES}"/postfix.init.d-0 postfix
 }

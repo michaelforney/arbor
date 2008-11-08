@@ -1,0 +1,28 @@
+#!/sbin/runscript
+# Copyright 2008 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+opts="reload"
+depend() {
+    need net
+}
+
+start() {
+    ebegin "Starting postfix"
+    postfix start
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping postfix"
+    postfix stop
+    eend $?
+}
+
+reload() {
+    ebegin "Reloading postfix"
+    postfix reload
+    eend $?
+}
+
+# vim: set et sw=4 sts=4 :
