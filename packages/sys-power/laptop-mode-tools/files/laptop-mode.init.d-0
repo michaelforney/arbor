@@ -1,0 +1,20 @@
+#!/sbin/runscript
+# Copyright 2008 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+start() {
+    ebegin "Enabling laptop-mode"
+    mkdir -p /var/run/laptop-mode-tools \
+        && touch /var/run/laptop-mode-tools/enabled \
+        && /usr/sbin/laptop_mode auto
+    eend $?
+}
+
+stop() {
+    ebegin "Disabling laptop-mode"
+    rm -f /var/run/laptop-mode-tools/enabled
+    /usr/sbin/laptop_mode stop
+    eend $?
+}
+
+# vim: set et sw=4 sts=4 :

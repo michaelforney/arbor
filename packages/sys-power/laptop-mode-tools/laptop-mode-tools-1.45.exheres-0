@@ -1,14 +1,20 @@
-# Copyright 2008 Mike Kelly <pioto@exherbo.org>
+# Copyright 2008 Mike Kelly
 # Distributed under the terms of the GPL v2
-
-SUMMARY="a laptop power saving package for Linux system"
-HOMEPAGE="http://samwel.tk/laptop_mode/"
 
 MY_PNV="${PN}_${PV}"
 
+SUMMARY="a laptop power saving package for Linux systems"
+DESCRIPTION="
+Laptop mode is a kernel \"mode\" that allows you to extend the battery
+life of your laptop. It does this by making disk write activity
+\"bursty\", so that only reads of uncached data result in a disk spinup.
+It causes a significant improvement in battery life (for usage patterns
+that allow it).
+"
+HOMEPAGE="http://samwel.tk/laptop_mode/"
 DOWNLOADS="http://samwel.tk/laptop_mode/tools/downloads/${MY_PNV}.tar.gz"
 
-LICENCES=""
+LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
@@ -18,6 +24,12 @@ DEPENDENCIES="
         sys-power/acpid
 "
 
+BUGS_TO="pioto@exherbo.org"
+
+REMOTE_IDS="freshmeat:laptop-mode-tools"
+
+UPSTREAM_RELEASE_NOTES="http://samwel.tk/laptop_mode/changelog"
+
 WORK="${WORKBASE}/${MY_PNV}"
 
 src_compile() { :; }
@@ -25,4 +37,8 @@ src_compile() { :; }
 src_install() {
     DESTDIR="${IMAGE}" MAN_D="/usr/share/man" ./install.sh 
     keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
+
+    rm "${IMAGE}"/etc/init.d/laptop-mode
+    newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
 }
+
