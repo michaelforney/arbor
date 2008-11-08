@@ -4,7 +4,7 @@
 
 opts="reload"
 depend() {
-    need net
+    [[ -n "$(grep -v '^#' /etc/postfix/master.cf  |egrep '\binet\b')" ]] && need net
 }
 
 start() {
