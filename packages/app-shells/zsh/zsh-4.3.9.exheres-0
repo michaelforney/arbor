@@ -11,16 +11,17 @@ DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2 ftp://ftp.zsh.org/pub/${PNV
     doc? ( mirror://sourceforge/${PN}/${PNV}-doc.tar.bz2 ftp://ftp.zsh.org/pub/${PNV}-doc.tar.bz2 )"
 
 LICENCES="ZSH
-    GPL-2 [[ note = [ Hard-enabling gdbm means that the binary is covered by the GPL-2 ] ]]"
+    gdbm? ( GPL-2 [[ note = [ Enabling gdbm means that the binary is covered by the GPL-2 ] ]] )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="caps doc maildir pcre unicode"
+MYOPTIONS="caps doc maildir pcre unicode
+    gdbm [[ description = [ Build gdbm bindings, allowing one to use a gdbm database like a zsh hash ] ]]"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/gdbm
-        >=sys-libs/ncurses-5.1
+      >=sys-libs/ncurses-5.1
         caps? ( sys-libs/libcap )
+        gdbm? ( sys-libs/gdbm )
         pcre? ( >=dev-libs/pcre-3.9 )"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
@@ -37,11 +38,11 @@ src_configure() {
         --enable-etcdir=/etc/zsh \
         --enable-fndir=/usr/share/zsh/${PV%_*}/functions \
         --enable-site-fndir=/usr/share/zsh/site-functions \
-        --enable-gdbm \
         --enable-function-subdirs \
         --enable-ldflags="${LDFLAGS}" \
         --with-term-lib="ncursesw ncurses" \
         --with-tcsetpgrp \
+        $(option_enable gdbm) \
         $(option_enable caps cap) \
         $(option_enable maildir maildir-support) \
         $(option_enable pcre) \
