@@ -1,0 +1,30 @@
+#!/sbin/runscript
+# Copyright 2008 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+opts="reload"
+
+start() {
+    local acpid_opts
+    if [[ "${ACPID_LOG}" == y* ]] ; then
+        acpid_opts+=" --logevents"
+    fi
+
+    ebegin "Starting acpid"
+    start-stop-daemon --start --exec /usr/sbin/acpid -- ${acpid_opts}
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping acpid"
+    start-stop-daemon --stop --exec /usr/sbin/acpid && rm /var/run/acpid.socket
+    eend $?
+}
+
+reload() {
+    ebegin "Reloading acpid"
+    start-stop-daemon --stop --oknodo --signal HUP --exec /usr/sbin/acpid
+    eend $?
+}
+
+# vim: set et sw=4 sts=4 :
