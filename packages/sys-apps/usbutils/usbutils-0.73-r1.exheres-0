@@ -19,12 +19,13 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        dev-libs/libusb
+        >=dev-libs/libusb-0.1.8
+    run,post:
+          sys-apps/usbutils-data
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/usbutils-0.72-update-usbids.patch"
-                              -p1 "${FILES}/usbutils-0.73-byteorder.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --datadir=/usr/share/misc --enable-usbmodules --disable-zlib )
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/usbutils-0.73-byteorder.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --datadir=/usr/share/misc --disable-zlib )
 
 src_prepare() {
     default
@@ -32,15 +33,14 @@ src_prepare() {
     sed -i -e 's:/usr/share/usb.ids:/usr/share/misc/usb.ids:' \
         lsusb.8 || die "failed to update man page"
 
-    sed -e '/^DEST=/s:=usb.ids:=/usr/share/misc/usb.ids:' \
-        update-usbids.sh > update-usbids || die "failed to fix location"
-
     eautoreconf
 }
 
 src_install() {
     default
 
-    newbin "${FILES}/usbmodules.sh" usbmodules
-    dosbin update-usbids
+    # this is provided by usbutils-data
+    rm -f "${IMAGE}/usr/share/misc/usb.ids" || die "unable to remove usb.ids"
+    rmdir "${IMAGE}/usr/share/misc/" || die "unable to remove /usr/share/misc"
 }
+
