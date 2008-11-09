@@ -1,0 +1,26 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="PCI ID data pciutils"
+HOMEPAGE="http://pciids.sourceforge.net/"
+DOWNLOADS=""
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        net-misc/wget
+"
+
+src_unpack() {
+    wget http://pciids.sourceforge.net/v2.2/pci.ids
+}
+
+src_install() {
+    insinto /usr/share/misc
+    doins pci.ids
+}
+
