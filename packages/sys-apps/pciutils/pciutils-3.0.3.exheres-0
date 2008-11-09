@@ -14,9 +14,11 @@ SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    run,post:
+        sys-apps/pciutils-data
+"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-3.0.0-locale-happiness.patch" )
 DEFAULT_SRC_INSTALL_PARAMS=( install-lib )
 
 src_prepare() {
@@ -32,5 +34,17 @@ src_compile() {
     tc-export AR CC RANLIB
     emake ZLIB="no" DNS="no" \
           OPT="${CFLAGS} -fPIC" STRIP=""
+}
+
+src_install() {
+    default
+
+    # provided by pciutils-data
+    rm -f "${IMAGE}/usr/share/misc/pci.ids" || die "unable to remove pci.ids"
+    rmdir "${IMAGE}/usr/share/misc" || die "unable to remove /usr/share/misc"
+
+    # not needed
+    rm -f "${IMAGE}/usr/sbin/update-pciids" || die "unable to remove update-pciids"
+    rm -f "${IMAGE}/usr/share/man/man8/update-pciids.8" || die "unable to remove update-pciids manpage"
 }
 
