@@ -4,17 +4,8 @@
 # Based in part upon 'imagemagick-6.4.2.0.ebuild' from Gentoo Linux, which is:
 #    Copyright 1999-2008 Gentoo Foundation
 
-SUMMARY="Software suite to manipulate a variety of image formats"
-DESCRIPTION="ImageMagick is a software suite to create, edit, and compose bitmap
-images. It can read, convert and write images in a variety of formats (over 100)
-including DPX, EXR, GIF, JPEG, JPEG-2000, PDF, PhotoCD, PNG, Postscript, SVG,
-and TIFF. Use ImageMagick to translate, flip, mirror, rotate, scale, shear and
-transform images, adjust image colors, apply various special effects, or draw
-text, lines, polygons, ellipses and Bézier curves."
-HOMEPAGE="http://www.imagemagick.org/"
-DOWNLOADS="ftp://ftp.imagemagick.org/pub/${PN}/${PN}-${PV%.*}-${PV##*.}.tar.bz2"
+require ImageMagick
 
-LICENCES="ImageMagick"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="X bzip2 cxx fontconfig fpx graphviz jpeg openexr lcms perl png svg tiff truetype xml zlib"
@@ -58,3 +49,4 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus'
 'fontconfig' 'fpx' 'graphviz gvc' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
 'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
 'xml' 'zlib' )
+
