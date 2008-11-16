@@ -134,16 +134,16 @@ scm_src_fetch_extra() {
     scm_{for_each,access_checkout,fetch_one}
 }
 
-scm_scminfo_one() {
+scm_scmrevision_one() {
     local rev=$(scm_call revision)
     [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
-    SCM_INFO+=,${SCM_THIS}=${rev}
+    SCM_PKG_SCM_REVISION_RESULT+=,${SCM_THIS}=${rev}
 }
 
-scm_pkg_scm_info() {
-    local SCM_INFO=
-    scm_{for_each,access_checkout,scminfo_one}
-    echo ${SCM_INFO#,=}
+scm_pkg_scm_revision() {
+    local SCM_PKG_SCM_REVISION_RESULT=
+    scm_{for_each,access_checkout,scmrevision_one}
+    echo ${SCM_PKG_SCM_REVISION_RESULT#,=}
 }
 
 scm_do_unpack() {
@@ -264,6 +264,6 @@ scm_finalise() {
 }
 [[ -n ${SCM_TYPE} ]] && scm_finalise
 
-#export_exlib_phases src_fetch_extra pkg_scm_info src_unpack pkg_info
+#export_exlib_phases src_fetch_extra pkg_scm_revision src_unpack pkg_info
 export_exlib_phases src_unpack pkg_info
 
