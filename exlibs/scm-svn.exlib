@@ -124,6 +124,7 @@ scm-svn_do_appraise() {
 }
 
 scm-svn_check_externals() {
+    local errors=( )
     local externals=( $(scm_get_var SVN_EXTERNALS) ) idx
 
     local extbase part1 part2 part3 part4 revision uri dir fulldir
@@ -188,15 +189,15 @@ scm-svn_check_externals() {
 
                         got=$(SCM_THIS=${that} scm_get_var UNPACK_TO)
                         [[ ${got} == ${fulldir} ]] \
-                            || die "$(SCM_THIS=${that} scm_var_name UNPACK_TO) is ${got}, but wanted ${fulldir}"
+                            || errors+=( "$(SCM_THIS=${that} scm_var_name UNPACK_TO) is ${got}, but wanted ${fulldir}" )
 
                         got=$(SCM_THIS=${that} scm-svn_uri)
                         [[ ${got} == ${uri} ]] \
-                            || die "svn URI for ${that} is ${got}, but wanted ${uri}"
+                            || errors+=( "svn URI for ${that} is ${got}, but wanted ${uri}" )x
 
                         got=$(SCM_THIS=${that} scm_get_var REVISION)
                         [[ ${got} == ${revision} ]] \
-                            || die "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}"
+                            || errors+=( "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}" )
 
                     fi
                     unset externals[${idx}]
@@ -204,14 +205,22 @@ scm-svn_check_externals() {
                 fi
             done
 
-            die "no repository declared for svn external ${dir} in ${SCM_THIS:-primary repository}"
+            errors+=( "no repository declared for svn external ${dir}" )
         done <<<"$(scm-svn_svn -q propget --strict svn:externals "$(scm_get_var CHECKOUT_TO)/${extbase}")"
     done <<<"$(cd "$(scm_get_var CHECKOUT_TO)" && find . -name .svn -prune -or -type d -print)"
 
     if [[ -n ${!externals[@]} ]]; then
         for idx in ${!externals[@]}; do
-            die "${externals[${idx}]%:*} is not a svn external in ${SCM_THIS:-primary repository}"
+            errors+=( "${externals[${idx}]%:*} does not match any svn external" )
         done
+    fi
+
+    if [[ ${#errors[@]} -gt 0 ]]; then
+        local error
+        for error in "${errors[@]}"; do
+            eerror "${error}"
+        done
+        die "$(scm_var_name SVN_EXTERNALS) is not compatible with actual svn externals declarations in the repository"
     fi
 }
 
