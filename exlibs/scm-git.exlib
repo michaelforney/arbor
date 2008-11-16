@@ -88,7 +88,7 @@ scm-git_do_appraise() {
     fi
 
     if [[ -n $(scm_get_var TAG) ]]; then
-        if has $(scm_get_var TAG) $(scm-git_git -q tag); then
+        if [[ -n $(scm-git_git -q for-each-ref "refs/tags/$(scm_get_var TAG)") ]]; then
             return 2
         else
             echo "${dir} does not contain the tag $(scm_get_var TAG)"
@@ -96,8 +96,7 @@ scm-git_do_appraise() {
         fi
     fi
 
-    if [[ -n $(scm_get_var BRANCH) ]] &&
-        ! has $(scm_get_var BRANCH) $(scm-git_git -q branch); then
+    if [[ -n $(scm_get_var BRANCH) && -z $(scm-git_git -q for-each-ref "refs/heads/$(scm_get_var BRANCH)") ]]; then
         echo "${dir} does not contain the branch $(scm_get_var BRANCH)"
         return 1
     fi
@@ -139,7 +138,7 @@ scm-git_do_unpack() {
     scm-git_git clone -s -n "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
     scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git --work-tree="$(scm_get_var UNPACK_TO)" checkout -f $(
         if [[ -n $(scm_get_var BRANCH) ]]; then
-            has $(scm_get_var BRANCH) $(scm-git_git -q --git-dir="$(scm_get_var UNPACK_TO)"/.git branch) \
+            [[ -n $(scm-git_git -q --git-dir="$(scm_get_var UNPACK_TO)"/.git for-each-ref "refs/heads/$(scm_get_var BRANCH)") ]] \
                 || echo -b $(scm_get_var BRANCH) refs/remotes/origin/$(scm_get_var BRANCH)
         elif [[ -n $(scm_get_var TAG) ]]; then
             echo refs/tags/$(scm_get_var TAG)
