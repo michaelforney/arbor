@@ -52,10 +52,19 @@ scm_access_checkout() {
     local dir=$(scm_get_var CHECKOUT_TO)
     local lock=${dir%/*}/.lock-${dir##*/}
 
-    (
-        addwrite "${FETCHEDDIR}/scm"
-        mkdir -p "${dir%/*}"
-    ) || die "mkdir failed"
+    local dir_base=${dir%/*}
+    if [[ ! -d ${dir_base} ]]; then
+        local dir_addwrite=${dir_base}
+        local dir_search=${dir_addwrite%/*}
+        while [[ ! -d ${dir_search} ]]; do
+            dir_addwrite=${dir_search}
+            dir_search=${dir_search%/*}
+        done
+        (
+            addwrite "${dir_addwrite}"
+            mkdir -p "${dir_base}"
+        ) || die "mkdir failed"
+    fi
 
     local SANDBOX_WRITE=${SANDBOX_WRITE}
     addwrite "${dir}"
