@@ -10,7 +10,7 @@ DOWNLOADS=""
 SCM_REPOSITORY="git://git.pioto.org/paludis"
 require scm-git
 
-MYOPTIONS="cran doc glsa inquisitio pink python qa ruby vim-syntax"
+MYOPTIONS="cran doc inquisitio pink python qa ruby vim-syntax xml"
 LICENCES="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
@@ -35,7 +35,6 @@ DEPENDENCIES="
         >=app-admin/eselect-1.0.2
         >=app-admin/eselect-news-20071201
         >=app-shells/bash-3
-        glsa? ( >=dev-libs/libxml2-2.6 )
         inquisitio? ( dev-libs/pcre++ )
         python? (
             dev-lang/python:=
@@ -47,6 +46,7 @@ DEPENDENCIES="
             dev-libs/pcre++
         )
         ruby? ( dev-lang/ruby )
+        xml? ( >=dev-libs/libxml2-2.6 )
     run:
         net-misc/wget
         net-misc/rsync
@@ -80,12 +80,12 @@ src_configure() {
         $(option_enable doc doxygen) \
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
-        $(option_enable glsa) \
         $(option_enable pink) \
         $(option_enable qa) \
         $(option_enable ruby) \
         $(option_enable python) \
         $(option_enable vim-syntax vim ) \
+        $(option_enable xml) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-visibility \
         --enable-sandbox \
