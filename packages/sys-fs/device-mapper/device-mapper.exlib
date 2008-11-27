@@ -1,0 +1,24 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Library to support use of LVM2"
+HOMEPAGE="http://sources.redhat.com/lvm2/"
+DOWNLOADS="ftp://sources.redhat.com/pub/lvm2/LVM2.${LVM2_PV}.tgz"
+
+LICENCES="GPL-2"
+
+UPSTREAM_RELEASE_NOTES="ftp://sources.redhat.com/pub/dm/WHATS_NEW"
+
+WORK="${WORKBASE}/LVM2.${LVM2_PV}"
+
+src_compile() {
+    emake device-mapper
+}
+
+src_install() {
+    emake DESTDIR="${IMAGE}" install_device-mapper
+
+    insinto /$(get_libdir)/udev/rules.d
+    doins "${FILES}"/64-device-mapper.rules
+}
+
