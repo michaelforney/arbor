@@ -23,21 +23,24 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILES}/${PNV}-login.defs.patch"
-    -p0 "${FILES}/${PNV}-dots-in-usernames.patch"
-    -p0 "${FILES}/${PNV}-long-groupnames.patch"
+    -p0 "${FILES}/${PN}-4.1.2-login.defs.patch"
+        "${FILES}/${PN}-4.1.2-dots-in-usernames.patch"
+        "${FILES}/${PN}-4.1.2-long-groupnames.patch"
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-desrpc \
-    --with-libcrypt \
-    --enable-shared=no \
-    --enable-static=yes \
+    --disable-desrpc
+    --with-libcrypt
+    --enable-shared=no
+    --enable-static=yes
     --enable-libcrack
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'pam libpam' )
+DEFAULT_SRC_INSTALL_PARAMS=( suidperms=4711 )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 
 src_prepare() {
     default
@@ -47,7 +50,7 @@ src_prepare() {
 }
 
 src_install() {
-    emake DESTDIR="${IMAGE}" suidperms=4711 install
+    default
     dosym useradd /usr/sbin/adduser
 
     # Remove libshadow and libmisc; see Gentoo bug 37725 and the following
@@ -85,22 +88,16 @@ src_install() {
         # remove manpages that pam will install for us
         # and/or don't apply when using pam
         find "${IMAGE}"/usr/share/man \
-            '(' -name 'limits.5*' -o -name 'suauth.5*' ')' \
-            -exec rm {} \;
+            '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete \
+            || die "rm manpages that don't apply when using pam failed"
     fi
 
     # Remove manpages that are handled by other packages
     find "${IMAGE}"/usr/share/man \
-        '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' \
-        -exec rm {} \;
+        '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete \
+        || die "rm manpages that collide with other packages failed"
 
-    # Remove empty dirs
-    rmdir -p "${IMAGE}"/usr/share/man/{de,es,hu,ko,zh_CN,zh_TW}/man5
-
-    # Installing the download README makes no sense
-    rm README || die "Removing the download README failed"
-
-    dodoc doc/{HOWTO,README*,WISHLIST,*.txt}
+    find "${IMAGE}" -type d -empty -delete
 }
 
 pkg_postinst() {
