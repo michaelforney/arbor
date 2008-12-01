@@ -1,0 +1,27 @@
+Author: Saleem Abdulrasool <compnerd@compnerd.org>
+Reason: Needed for dhcpcd 4.x with baselayout 1.x
+Upstream: No
+================================================================================
+--- baselayout-1.12.12/lib/rcscripts/net/dhcpcd.sh	2007-10-23 15:59:26.000000000 -0700
++++ baselayout-1.12.12/lib/rcscripts/net/dhcpcd.sh	2008-11-30 17:42:41.000000000 -0800
+@@ -73,9 +73,17 @@
+ 	d="dhcp_${ifvar}"
+ 	d=" ${!d} "
+ 	[[ ${d} == "  " ]] && d=" ${dhcp} "
+-	[[ ${d} == *" nodns "* ]] && opts="${opts} -R"
+-	[[ ${d} == *" nontp "* ]] && opts="${opts} -N"
+-	[[ ${d} == *" nonis "* ]] && opts="${opts} -Y"
++
++	if dhcpcd --version | grep -q 'dhcpcd 4.' ; then
++		[[ ${d} == *" nodns "* ]] && opts="${opts} -C resolv.conf"
++		[[ ${d} == *" nontp "* ]] && opts="${opts} -C ntp.conf"
++		[[ ${d} == *" nonis "* ]] && opts="${opts} -C yp.conf"
++	else
++		[[ ${d} == *" nodns "* ]] && opts="${opts} -R"
++		[[ ${d} == *" nontp "* ]] && opts="${opts} -N"
++		[[ ${d} == *" nonis "* ]] && opts="${opts} -Y"
++	fi
++
+ 	[[ ${d} == *" nogateway "* ]] && opts="${opts} -G"
+ 	if [[ ${d} == *" nosendhost "* ]] ; then
+ 		opts="${opts} -h ''"
