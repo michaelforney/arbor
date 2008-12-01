@@ -17,3 +17,9 @@ DEPENDENCIES="
         >=dev-libs/libgpg-error-1.4"
 
 RESTRICT="test" # interactive
+
+src_install() {
+    default
+    rmdir "${IMAGE}/usr/libexec" || die "failed to prune empty directories"
+}
+
