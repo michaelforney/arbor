@@ -15,23 +15,23 @@ UPSTREAM_CHANGELOG="${HOMEPAGE}/wiki/Changelog"
 
 SLOT="0"
 LICENCES="GPL-2"
-MYOPTIONS="ipv6 xmlrpc platform: x86"
+MYOPTIONS="debug ipv6 xmlrpc platform: x86"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        >=dev-cpp/libsigc++-2
-        >=net-p2p/libtorrent-0.12.2[ipv6?]
-        >=net-misc/curl-7.12.2
+      >=dev-cpp/libsigc++-2.0:2
+      >=net-p2p/libtorrent-0.12.4[ipv6?]
+      >=net-misc/curl-7.15.4
         sys-libs/ncurses[unicode]
         xmlrpc? ( dev-libs/xmlrpc-c )
     post,suggested:
-        >=net-misc/curl-7.12.2[ares] [[ description = [
+        net-misc/curl[ares] [[ description = [
             RTorrent will block on hostname lookup during tracker requests and http downloads,
             unless you build net-misc/curl with ares support. ] ]]"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 'xmlrpc xmlrpc-c' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug ipv6 'xmlrpc xmlrpc-c' )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/${PN}.rc )
 
 pkg_setup() {
