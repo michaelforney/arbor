@@ -1,0 +1,32 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY=""
+DESCRIPTION="
+"
+HOMEPAGE="http://fy.chalmers.se/~appro/linux/DVD+RW/"
+DOWNLOADS="${HOMEPAGE}/tools/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        || (
+            app-cdr/cdrtools
+            app-cdr/cdrkit
+        )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-INT_MAX.patch" )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( index.html )
+
+src_prepare() {
+    default
+    sed -e '/^CX*FLAGS/s/-O2//' \
+        -i Makefile.m4 || die "Removing '-O2' from Makefile.m4 flags failed"
+}
+
