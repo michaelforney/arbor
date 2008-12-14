@@ -11,7 +11,7 @@ DOWNLOADS="http://www.balabit.com/downloads/files/${PN}/sources/stable/src/${PNV
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="ipv6 tcpd"
+MYOPTIONS="ipv6 tcpd vim-syntax"
 
 DEPENDENCIES="
     build+run:
@@ -20,6 +20,8 @@ DEPENDENCIES="
         tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
     build:
         dev-util/pkg-config
+    post:
+        vim-syntax? ( >=app-editors/vim-runtime-7:* )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -33,7 +35,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 "tcpd tcp-wrapper" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     VERSION
     contrib/syslog-ng.conf.doc
-    contrib/syslog-ng.vim
     doc/reference/syslog-ng.txt
 )
 
@@ -49,6 +50,11 @@ src_test() {
 src_install() {
     default
 
+    if option vim-syntax ; then
+        insinto /usr/share/vim/vimfiles/syntax/
+        doins "${WORK}/contrib/syslog-ng.vim"
+    fi
+
     # Install default configuration
     insinto /etc/syslog-ng
     doins doc/examples/syslog-ng.conf.sample
@@ -56,3 +62,4 @@ src_install() {
     newinitd "${FILES}/syslog-ng.rc6" syslog-ng
     newconfd "${FILES}/syslog-ng.confd" syslog-ng
 }
+
