@@ -5,3 +5,8 @@ require automake
 
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 
+src_test() {
+    export VERBOSE=YesPlease # instspc.test fails
+    automake_src_test
+}
+
