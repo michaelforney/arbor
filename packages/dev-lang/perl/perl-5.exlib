@@ -107,7 +107,7 @@ perl-5_src_install() {
     rm -r "${IMAGE}"/usr/share/man/man3 || die "Couldn't remove man 3 manpages"
     local manpage
     for manpage in "${IMAGE}"/usr/share/man/man1/*.1; do
-        mv "${manpage}" "${manpage/.1/-${PV}.1}" || die "Failed to version ${manpage/${IMAGE}}"
+        mv "${manpage}" "${manpage/%.1/-${PV}.1}" || die "Failed to version ${manpage/${IMAGE}}"
     done
 
     keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}-linux
