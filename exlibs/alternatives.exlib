@@ -70,10 +70,9 @@ alternatives_for() {
     done >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
 
     # sanity check for unique identifiers
-    dupl=$(while read line; do echo ${line%%=*}; done < \
-        "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}" | sort | uniq -d)
+    dupl=$(sed -e 's/=.*$//' "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}" | sort | uniq -d)
     if [[ -n ${dupl} ]]; then
-        dupl=$(echo "${dupl}" | sed -e 's/^PATH_//' -e 's/^TARGET_//' | sort | uniq)
+        dupl=$(echo "${dupl}" | sed -e 's/^PATH_//' -e 's/^TARGET_//' | uniq)
         eerror "Duplicate unique identifiers detected: '"${dupl}"'"
     fi
     [[ ${ret} -eq 0 ]] || die "Errors detected for ${provider}, provided for ${alternative}"
