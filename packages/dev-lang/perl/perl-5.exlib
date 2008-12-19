@@ -1,13 +1,14 @@
 # Copyright 2007, 2008 Bryan Østergaard
 # Copyright 2008 Anders Ossowicki
 # Copyright 2008 Ingmar Vanhassel
+# Copyright 2008 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
 require multilib versionator alternatives
 
-export_exlib_phases src_prepare src_configure src_install
+export_exlib_phases src_prepare src_configure src_test src_install
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
@@ -39,10 +40,14 @@ perl-5_src_prepare() {
 perl-5_src_configure() {
     # Binaries are installed to /usr/bin/, with ${PV} appended
     # Alternatives manages executables in /usr/bin/
-    # Libraries go into /usr/$(get_libdir)/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/, which is appended to LDPATH
+    # Libraries go into /usr/$(get_libdir)/${PN}${PV%%.*}/${PV}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
     # `man 1` are installed with a version
 
     # -Dfoo = define foo, -Ufoo = undefine foo.
+
+    # This probably needs some further work... but should be okay for
+    # now. At least parrot breaks if we don't have -$osname in $archname
+    local archname="${CHOST%%-*}-linux"
     
     sh "${WORKBASE}/${PNV}/Configure" \
         -des \
@@ -51,8 +56,14 @@ perl-5_src_configure() {
         -Dvendorprefix=/usr \
         -Dsiteprefix=/usr \
         -Doptimize="${CFLAGS}" \
-        -Darchname=${CHOST%%-*} \
+        -Darchname="${CHOST%%-*}-linux" \
         -Dlibperl="libperl.so.1.${PV}" \
+        -Dprivlib="/usr/$(get_libdir)/perl5/${PV}" \
+        -Darchlib="/usr/$(get_libdir)/perl5/${PV}/$archname" \
+        -Dsitelib="/usr/$(get_libdir)/perl5/site_perl/${PV}" \
+        -Dsitearch="/usr/$(get_libdir)/perl5/site_perl/${PV}/$archname" \
+        -Dvendorlib="/usr/$(get_libdir)/perl5/vendor_perl/${PV}" \
+        -Dvendorarch="/usr/$(get_libdir)/perl5/vendor_perl/${PV}/$archname" \
         -Uinstallusrbinperl= \
         -Duseshrplib \
         -Dmksymlinks \
@@ -61,11 +72,20 @@ perl-5_src_configure() {
         || die "Configure failed"
 }
 
+perl-5_src_test() {
+    # This is necessary for the ExtUtils::Embed tests
+    echo ln -s libperl.so.1{.${PV},}
+    ln -s libperl.so.1{.${PV},}
+    echo ln -s libperl.so{.1,}
+    ln -s libperl.so{.1,}
+    default
+}
+
 perl-5_src_install() {
     default
 
     # Library symlinks
-    local perllibdir=/usr/$(get_libdir)/${PN}${PV%%.*}/${PV}/${CHOST%%-*}/CORE/
+    local perllibdir="/usr/$(get_libdir)/${PN}${PV%%.*}/${PV}/${CHOST%%-*}-linux/CORE/"
     dosym ${perllibdir}/libperl.so.1{.${PV},}
     dosym ${perllibdir}/libperl.so{.1,}
 
@@ -90,7 +110,7 @@ perl-5_src_install() {
         mv "${manpage}" "${manpage/.1/-${PV}.1}" || die "Failed to version ${manpage/${IMAGE}}"
     done
 
-    keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}
+    keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}-linux
 
     insinto /etc/env.d/${PN}
     hereins ${PV} <<EOF
