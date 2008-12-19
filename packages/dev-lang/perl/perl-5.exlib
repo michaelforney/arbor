@@ -98,6 +98,10 @@ perl-5_src_install() {
     # Version executables
     local executable
     for executable in "${IMAGE}"/usr/bin/*; do
+        if egrep -q '^#!/usr/bin/perl( +.*)?$' "${executable}"; then
+            sed -i "/^#!\/usr\/bin\/perl/s/perl/perl${PV}/" "${executable}" \
+                || die "shebang sed failed for ${executable}"
+        fi
         if [[ ${executable##*/} != *${PV} ]]; then
             mv "${executable}" "${executable}-${PV}" || die "Failed to version ${executable/${IMAGE}}"
         fi
