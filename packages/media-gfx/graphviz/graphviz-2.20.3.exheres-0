@@ -114,3 +114,7 @@ src_install() {
     find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
 }
 
+pkg_postinst() {
+    dot -c
+}
+
