@@ -1,0 +1,48 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'convertlit-1.8-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+MY_P="clit${PV//./}"
+
+SUMMARY="Convert LIT allows you to convert Microsoft Reader format eBooks into the OEBPS format"
+DESCRIPTION="
+Using Convert LIT you can convert your LIT-formt eBooks into the OEBPS format.
+More importantly, though, you can effectively remove the DRM5 protection to use
+your eBooks more freely. Of course, you must only use this for eBooks you legally
+own.
+"
+HOMEPAGE="http://www.${PN}.com/"
+DOWNLOADS="http://www.{PN}.com/${MY_P}src.zip"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        app-arch/unzip
+    build+run:
+        >=dev-libs/libtommath-0.41
+"
+
+S=${WORKBASE}
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-respectflags.patch )
+
+src_compile() {
+    pushd lib
+    emake
+    popd
+    pushd ${MY_P}
+    emake
+    popd
+}
+
+src_install() {
+    dobin ${MY_P}/clit
+    default
+}
