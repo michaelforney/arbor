@@ -1,0 +1,35 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'libtommath-0.41.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require multilib
+
+SUMMARY="Highly optimized and portable routines for integer based number theoretic applications"
+DESCRIPTION="
+LibTomMath provides highly optimized and portable routines for a vast majority of
+integer based number theoretic applications (including public key cryptography).
+LibTomMath is not a cryptographic toolkit itself but it can be used to write one.
+"
+HOMEPAGE="http://math.libtomcrypt.com"
+DOWNLOADS="http://dev.exherbo.org/distfiles/ltm-${PV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="public-domain"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-LDFLAGS.patch )
+
+src_compile() {
+    emake -f makefile.shared IGNORE_SPEED=1
+}
+
+src_install() {
+    make -f makefile.shared install DESTDIR="${IMAGE}" LIBPATH="/usr/$(get_libdir)"
+    dodoc changes.txt
+}
