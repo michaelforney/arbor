@@ -5,7 +5,7 @@
 require multilib perl-module bash-completion common-metadata
 
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="curl doc ipv6 threads vim-syntax webdav
+MYOPTIONS="curl doc ipv6 threads webdav
     webdav [[ requires = curl ]]" # tk
 
 DEPENDENCIES="
@@ -93,13 +93,6 @@ src_install() {
     docinto /
 
     dobashcompletion contrib/completion/git-completion.bash
-
-    if option vim-syntax; then
-        insinto /usr/share/vim/vimfiles/syntax/
-        doins "${WORK}"/contrib/vim/syntax/gitcommit.vim
-        insinto /usr/share/vim/vimfiles/doc/
-        newins "${WORK}"/contrib/vim/README gitcommit.txt
-    fi
 
     exeinto /usr/libexec/${PN}
     doexe contrib/fast-import/git-p4
