@@ -37,12 +37,6 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PNV}-cflags.patch )
 
-src_prepare() {
-    default
-
-    eautoreconf
-}
-
 src_configure() {
     local xmllibs=$(pkg-config --libs libxml-2.0)
     local xsltlibs=$(pkg-config --libs libxslt libexslt)
