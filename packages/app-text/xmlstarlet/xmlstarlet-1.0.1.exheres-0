@@ -1,0 +1,57 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( 1.10 )
+
+require autotools
+
+SUMMARY="Command line tools to transform, query, validate, and edit XML documents"
+DESCRIPTION="
+XMLStarlet is a set of command line XML utilities which can be used to transform,
+query, validate, and edit XML documents and files using a simple set of shell
+commands, similar to the way it is done for plain text files using grep/sed/awk/
+tr/diff/patch.
+"
+HOMEPAGE="http://xmlstar.sourceforge.net/"
+DOWNLOADS="mirror://sourceforge/xmlstar/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN} sourceforge:xmlstar"
+
+UPSTREAM_RELEASE_NOTES="http://sourceforge.net/forum/forum.php?forum_id=453900"
+UPSTREAM_DOCUMENTATION="http://xmlstar.sourceforge.net/docs.php [[ lang = en ]]"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        dev-libs/libxml2
+        dev-libs/libxslt
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PNV}-cflags.patch )
+
+src_prepare() {
+    default
+
+    eautoreconf
+}
+
+src_configure() {
+    local xmllibs=$(pkg-config --libs libxml-2.0)
+    local xsltlibs=$(pkg-config --libs libxslt libexslt)
+
+    LIBXML_LIBS="${xmllibs}" LIBXSLT_LIBS="${xsltlibs}" econf
+}
+
+src_install() {
+    default
+
+    mv "${IMAGE}"/usr/bin/xml "${IMAGE}"/usr/bin/xmlstarlet
+}
