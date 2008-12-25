@@ -10,17 +10,16 @@ DOWNLOADS="mirror://berlios/${PN}/${PNV}.tar.bz2"
 LICENCES="GPL-2 public-domain"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="ipv6 nls ssl"
+MYOPTIONS="ipv6 nls python ssl"
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )"
-#build+run:
-#    python? ( dev-lang/python:=[tk] )
+        nls? ( sys-devel/gettext )
+    build+run:
+        python? ( dev-lang/python:=[tk] )"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-broken-headers.patch"
-    "${FILES}/${PNV}-null-msg-pointer.patch"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 
