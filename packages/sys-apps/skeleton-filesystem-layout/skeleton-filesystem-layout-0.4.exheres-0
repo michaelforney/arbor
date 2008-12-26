@@ -37,6 +37,13 @@ create_device_node() {
     chmod ${perms} "${ROOT}dev/${node}" || die "chmod /dev/${node} failed"
 }
 
+src_install() {
+    insinto /etc
+    hereins exherbo-release <<EOF
+Exherbo unreleased development version -- Get off our lawn!
+EOF
+}
+
 pkg_pretend() {
     local x
     if [[ ${SYMLINK_LIB} == "yes" ]]; then
