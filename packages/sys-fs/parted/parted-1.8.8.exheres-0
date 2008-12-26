@@ -1,6 +1,7 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
 
 SUMMARY="Create, destroy, resize, check, copy partitions and file systems"
 HOMEPAGE="http://www.gnu.org/software/parted"
@@ -20,7 +21,12 @@ DEPENDENCIES="
         sys-libs/readline
         device-mapper? ( sys-fs/device-mapper )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-Werror --with-readline )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-Werror "--with-readline=/$(get_libdir)" )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( device-mapper nls )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/{API,FAT,USER.jp} )
+
+src_test() {
+    sed -i 's/test_expect_failure/test_expect_success/g' "${WORK}/tests/t3100-resize-ext2-partion.sh" || die 'sed failed'
+    default
+}
 
