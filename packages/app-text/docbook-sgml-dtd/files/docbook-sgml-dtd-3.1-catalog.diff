@@ -1,6 +1,16 @@
-Source: imported from Gentoo
-Upstream: ?
-Reason: ?
+Source: Imported from Gentoo, Leonardo Boshell <leonardop@gentoo.org>
+Upstream: No, won't happen
+Reason: 
+
+  Modified patches to use DTDDECL instead of SGMLDECL.
+  Using SGMLDECL in a multi-catalog setup like ours is very problematic
+  Since the first of those entries take precedence regardless of the type of
+  document being processed. Current tools (opensp) can handle DTDDECL, which
+  is a much better solution.
+
+(excerpts from original commit message, 11 Jul 2005
+  gentoo/app-text/docbook-sgml-dtd/ChangeLog)
+
 --- a/docbook.cat
 +++ b/docbook.cat
 @@ -35,29 +35,6 @@
