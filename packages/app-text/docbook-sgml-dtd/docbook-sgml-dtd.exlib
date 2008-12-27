@@ -1,0 +1,45 @@
+# Copyright 2008 Santiago M. Mola
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'docbook-sgml-dtd-3.1-r3.ebuild', which is:
+#   Copyright 1999-2007 Gentoo Foundation
+
+require sgml-catalog versionator
+
+PV2=$(get_version_component_range 1-2)
+if ever at_least 4.2; then
+    MY_PN="docbook"
+else
+    MY_PN="docbk"
+fi
+
+SUMMARY="Docbook SGML DTD ${PV2}"
+HOMEPAGE="http://www.docbook.org/sgml/"
+DOWNLOADS="http://www.oasis-open.org/docbook/sgml/${PV}/${MY_PN}$(delete_all_version_separators ${PV2}).zip"
+
+LICENCES="X11"
+SLOT="${PV2}"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        >=app-arch/unzip-5.41
+    run:
+        app-text/sgml-common"
+
+WORK=${WORKBASE}
+
+SGML_CATALOGS=(
+    "/etc/sgml/sgml-docbook-${PV}.cat /usr/share/sgml/docbook/sgml-dtd-${PV}/catalog"
+    "/etc/sgml/sgml-docbook-${PV}.cat /etc/sgml/sgml-docbook.cat"
+)
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-catalog.diff" )
+
+src_install () {
+    insinto /usr/share/sgml/docbook/sgml-dtd-${PV}
+    doins *.dcl *.dtd *.mod
+    newins docbook.cat catalog
+
+    dodoc *.txt
+}
+
