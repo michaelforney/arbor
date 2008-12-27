@@ -4,7 +4,7 @@ Upstream: No
 ================================================================================
 --- baselayout-1.12.12/lib/rcscripts/net/dhcpcd.sh	2007-10-23 15:59:26.000000000 -0700
 +++ baselayout-1.12.12/lib/rcscripts/net/dhcpcd.sh	2008-11-30 17:42:41.000000000 -0800
-@@ -73,9 +73,17 @@
+@@ -73,9 +73,18 @@
  	d="dhcp_${ifvar}"
  	d=" ${!d} "
  	[[ ${d} == "  " ]] && d=" ${dhcp} "
@@ -16,6 +16,7 @@ Upstream: No
 +		[[ ${d} == *" nodns "* ]] && opts="${opts} -C resolv.conf"
 +		[[ ${d} == *" nontp "* ]] && opts="${opts} -C ntp.conf"
 +		[[ ${d} == *" nonis "* ]] && opts="${opts} -C yp.conf"
++		opts="${opts} -q"
 +	else
 +		[[ ${d} == *" nodns "* ]] && opts="${opts} -R"
 +		[[ ${d} == *" nontp "* ]] && opts="${opts} -N"
