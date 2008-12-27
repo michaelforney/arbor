@@ -6,15 +6,15 @@
 require sgml-catalog versionator
 
 PV2=$(get_version_component_range 1-2)
-if ever at_least 4.2; then
-    MY_PN="docbook"
-else
-    MY_PN="docbk"
-fi
 
 SUMMARY="Docbook SGML DTD ${PV2}"
 HOMEPAGE="http://www.docbook.org/sgml/"
-DOWNLOADS="http://www.oasis-open.org/docbook/sgml/${PV}/${MY_PN}$(delete_all_version_separators ${PV2}).zip"
+DOWNLOADS="http://www.oasis-open.org/docbook/sgml/${PV}/"
+if ever at_least 4.2; then
+    DOWNLOADS+=docbook-${PV}.zip
+else
+    DOWNLOADS+=docbk${PV//.}.zip
+fi
 
 LICENCES="X11"
 SLOT="${PV2}"
