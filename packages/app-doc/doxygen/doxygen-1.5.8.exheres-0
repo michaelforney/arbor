@@ -1,7 +1,11 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'doxygen-1.5.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
+
+# FIXME: Add optional support for doxywizard (qt4), buildsystem needs /lots/ of fixing for that
+# QMAKE4_EXLIB_QT_DEPENDENCY=NoThanks
+# require qmake4
 
 require toolchain-funcs freedesktop-mime
 
@@ -15,12 +19,14 @@ UPSTREAM_RELEASE_NOTES="http://www.stack.nl/~dimitri/doxygen/changelog.html"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc dot" # latex qt3
+MYOPTIONS="doc dot examples" # latex qt4
 
 DEPENDENCIES="
     build:
-        doc? ( dev-lang/python:*
-            app-arch/unzip )
+        doc? (
+            dev-lang/python:*
+            app-arch/unzip
+        )
     build+run:
         app-text/ghostscript
         media-libs/libpng
@@ -29,6 +35,7 @@ DEPENDENCIES="
             media-libs/freetype:2
         )
 "
+#       qt4? ( >=x11-libs/qt-4.3:4 )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-system-libpng.patch" # Remove internal libpng - see Gentoo bug #210237
@@ -47,14 +54,21 @@ src_prepare() {
         -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
         -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
         -i tmake/lib/linux*/tmake.conf || die "Failed to use user's *FLAGS"
+
+    # FIXME: Install path issues with the doxywizard binary
+    # option qt4 && eqmake4 addon/doxywizard/doxywizard.pro
 }
 
 src_configure() {
+    # option qt4 && export QTDIR=/usr
+    #   $(option_with qt4 doxywizard) \
+
     ./configure \
         --docdir /usr/share/doc/${PNVR} \
         --prefix /usr \
         --shared \
-        || die "./configure failed."
+        $(option_with examples doxyapp) ||
+        die "./configure failed."
 }
 
 src_compile() {
@@ -71,7 +85,7 @@ src_compile() {
         # Disable latex support.
         cp doc/Doxyfile{,.orig} || die "cp doc/Makefile{,.orig} failed"
         cp doc/Makefile{,.orig} || die "cp doc/Makefile{,.orig} failed"
-        
+
         sed -e '/GENERATE_LATEX/s:YES:NO:' \
             -i doc/Doxyfile || die "Disabling latex failed"
 
