@@ -13,13 +13,13 @@ your eBooks more freely. Of course, you must only use this for eBooks you legall
 own.
 "
 HOMEPAGE="http://www.${PN}.com/"
-DOWNLOADS="http://www.{PN}.com/${MY_P}src.zip"
+DOWNLOADS="http://www.${PN}.com/${MY_P}src.zip"
 
 BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -29,15 +29,15 @@ DEPENDENCIES="
         >=dev-libs/libtommath-0.41
 "
 
-S=${WORKBASE}
+WORK=${WORKBASE}
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-respectflags.patch )
 
 src_compile() {
-    pushd lib
+    pushd lib || die "Could not enter lib dir"
     emake
     popd
-    pushd ${MY_P}
+    pushd ${MY_P} || die "Could not enter ${MY_P} dir"
     emake
     popd
 }
@@ -46,3 +46,4 @@ src_install() {
     dobin ${MY_P}/clit
     default
 }
+

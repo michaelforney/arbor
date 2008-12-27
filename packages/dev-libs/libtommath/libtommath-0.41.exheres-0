@@ -12,24 +12,19 @@ integer based number theoretic applications (including public key cryptography).
 LibTomMath is not a cryptographic toolkit itself but it can be used to write one.
 "
 HOMEPAGE="http://math.libtomcrypt.com"
-DOWNLOADS="http://dev.exherbo.org/distfiles/ltm-${PV}.tar.bz2"
+DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/ltm-${PV}.tar.bz2"
 
 BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="public-domain"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-LDFLAGS.patch )
+DEFAULT_SRC_COMPILE_PARAMS=( -f makefile.shared IGNORE_SPEED=1 )
+DEFAULT_SRC_INSTALL_PARAMS=( -f makefile.shared DESTDIR="${IMAGE}" LIBPATH="/usr/$(get_libdir)" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( changes.txt )
 
-src_compile() {
-    emake -f makefile.shared IGNORE_SPEED=1
-}
-
-src_install() {
-    make -f makefile.shared install DESTDIR="${IMAGE}" LIBPATH="/usr/$(get_libdir)"
-    dodoc changes.txt
-}
