@@ -1,7 +1,7 @@
 # Copyright 1999-2008 Ciaran McCreesh
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils bash-completion flag-o-matic
+require eutils bash-completion flag-o-matic zsh-completion
 
 SUMMARY="paludis, the other package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
@@ -122,6 +122,12 @@ src_install() {
         $(optionq qa && echo qualudis) paludis reconcilio"
     for bashcomp in ${bashcompletions}; do
         dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
+    done
+
+    for zshcomp in _adjutrix _cave _importare _paludis{,_packages} _reconcilio \
+        $(option inquisitio && echo '_inquisitio') # $(option qa && echo '_qualudis')
+    do
+        dozshcompletion "${WORK}/zsh-completion/${zshcomp}"
     done
 }
 
