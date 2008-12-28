@@ -5,8 +5,8 @@
 require multilib perl-module bash-completion common-metadata
 
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="curl doc ipv6 threads webdav
-    webdav [[ requires = curl ]]" # tk
+MYOPTIONS="curl doc ipv6 threads tk webdav
+    webdav [[ requires = curl ]]"
 
 DEPENDENCIES="
     build+run:
@@ -14,6 +14,10 @@ DEPENDENCIES="
         dev-libs/openssl
         sys-libs/zlib
         curl? ( net-misc/curl )
+        tk? (
+          >=dev-lang/tcl-8.4
+          >=dev-lang/tk-8.4
+        )
         webdav? ( dev-libs/expat )
     run:
         dev-perl/Error
@@ -31,8 +35,6 @@ DEPENDENCIES="
         curl? ( net-misc/curl[ssl]  [[ description = [ Enables support for https:// URIs ] ]] )
 "
 
-#   tk? ( dev-lang/tk )
-
 src_unpack() {
     unpack ${PNV}.tar.bz2
     cd "${WORK}"
@@ -44,12 +46,11 @@ src_unpack() {
 
 # No option: mozsha1/ppcsha1
 src_configure() {
-    myoptions+=" NO_TCLTK=YesPlease"
     option curl || myoptions+=" NO_CURL=YesPlease"
     option ipv6 || myoptions+=" NO_IPV6=YesPlease"
     option threads && myoptions+=" THREADED_DELTA_SEARCH=YesPlease"
+    option tk || myoptions+=" NO_TCLTK=YesPlease"
     option webdav || myoptions+=" NO_EXPAT=YesPlease"
-#   option tk || myoptions+=" NO_TCLTK=YesPlease"
 }
 
 myemake() {
