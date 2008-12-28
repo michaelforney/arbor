@@ -1,0 +1,105 @@
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'calibre-0.4.77.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+NEED_PYTHON=2.5:=
+
+require distutils
+# eutils fdo-mime
+
+SUMMARY="Calibre is an eBook library management application."
+DESCRIPTION="
+Formerly known as libprs500, Calibre is a e-book library management application.
+It is free, open source and cross-platform in design and works on Linux, OSX and
+Windows. Calibre is meant to be a complete e-library solution and thus includes,
+library management, format conversion, news-feeds-to-ebook conversion as well as
+e-book reader sync features.
+"
+HOMEPAGE="http://${PN}.kovidgoyal.net/"
+DOWNLOADS="http://${PN}.kovidgoyal.net/downloads/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+
+UPSTREAM_CHANGELOG="http://${PN}.kovidgoyal.net/wiki/Changelog"
+UPSTREAM_DOCUMENTATION="http://${PN}.kovidgoyal.net/user_manual/ [[ lang = en ]]"
+
+LICENCES="GPL-3"
+PLATFORMS="~amd64"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-python/setuptools
+    run:
+        >=dev-python/Imaging-1.1.6
+        >=dev-libs/libusb-0.1.12
+        >=dev-python/PyQt4-4.4.2
+        >=dev-python/mechanize-0.1.8
+        >=media-gfx/ImageMagick-6.3.5
+        >=x11-apps/xdg-utils-1.0.2
+        >=dev-python/dbus-python-0.82.2
+        >=dev-python/lxml-2.0.5
+        >=dev-python/BeautifulSoup-3.0.5
+        >=sys-apps/help2man-1.36.4
+        >=sys-apps/hal-0.5.11
+"
+
+_RDEPEND="
+    >=dev-python/fonttools-2.0_beta1
+    >=app-text/unrtf-0.20.1
+    >=app-text/convertlit-1.8
+    dev-python/ttfquery
+    dev-python/genshi"
+
+_DEPEND="${RDEPEND}
+    >=gnome-base/librsvg-2.0.0
+    "
+
+_src_compile() {
+    emake || die "pre-build failed"
+    distutils_src_compile
+}
+
+_src_install() {
+    distutils_src_install
+
+    # Create directory before running the postinst script
+    # otherwise it will bail out.
+    dodir /usr/share/icons/hicolor
+    dodir /etc/xdg/menus
+    dodir /usr/share/applications
+    dodir /usr/share/desktop-directories
+    dodir /usr/share/applnk
+    dodir /usr/share/mime/packages
+
+    # Bypass the default kde-config output, and force it to
+    # tell xdg-mime to use a different path.
+    cat - > "${TEMP}/kde-config" <<EOF
+#!/bin/bash
+
+case \$1:\$2 in
+    --version:) echo -e "Qt: 3.3.8\nKDE: 3.5.8\nkde-config: 1.0" ;;
+    --path:mime) echo "${IMAGE}/usr/share/mimelnk/" ;;
+esac
+EOF
+
+    chmod +x "${TEMP}/kde-config"
+
+    PATH="${TEMP}:${PATH}" KDEDIRS="${IMAGE}/usr" XDG_DATA_DIRS="${D}/usr/share" DESTDIR="${D}" PYTHONPATH="${WORK}/build/lib" \
+        python "${WORK}"/src/${PN}/linux.py \
+        --use-destdir --do-not-reload-udev-hal \
+        --group-file="${ROOT}"/etc/group --dont-check-root \
+        || die "post-installation failed."
+
+    rm -r "${IMAGE}"/usr/share/applications/{mimeinfo.cache,defaults.list} \
+        "${IMAGE}"/usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,magic,aliases,{generic-,}icons} \
+        "${IMAGE}"/usr/share/applnk
+}
+
+_pkg_postinst() {
+    fdo-mime_desktop_database_update
+    fdo-mime_mime_database_update
+    distutils_pkg_postinst
+}
