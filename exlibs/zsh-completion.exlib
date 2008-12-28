@@ -1,0 +1,27 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+#
+# Based in part upon bash-completion.exlib, which is:
+#   Copyright 1999-2005 Gentoo Foundation
+#   Copyright 2008 David Leverton <dleverton@exherbo.org>
+#   Distributed under the terms of the GNU General Public License v2
+#   Based in part upon bash-completion.eclass:
+#       Author: Aaron Walker <ka0ttic@gentoo.org>
+
+MYOPTIONS="zsh-completion"
+
+dozshcompletion() {
+    [[ -z ${1} ]] && die "usage: dozshcompletion <file> [ <installed name> ]"
+    if option zsh-completion; then
+        insinto /usr/share/zsh/site-functions
+        newins "${1}" "${2:-${1##*/}}"
+    fi
+}
+
+install-zsh-completions() {
+    local c
+    for c in "${ZSH_COMPLETIONS[@]}"; do
+        dozshcompletion ${c}
+    done
+}
+
