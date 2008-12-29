@@ -35,8 +35,8 @@ scm-git_do_check_vars() {
     [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
             -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
     local rev=$(scm_get_var REVISION)
-    [[ -n ${rev} ]] && [[ ${rev} == *[^[:xdigit:]]* || ${#rev} -ne 40 ]] \
-        && die "for git, $(scm_var_name REVISION) must be a 40-character hexadecimal SHA-1 sum"
+    [[ -n ${rev} ]] && [[ ${rev} == *[^0-9a-f]* || ${#rev} -ne 40 ]] \
+        && die "for git, $(scm_var_name REVISION) must be a 40-character lowercase hexadecimal SHA-1 sum"
     [[ -n $(scm_get_var SUBPATH) ]] && die "for git, $(scm_var_name SUBPATH) must not be set"
 
     scm_modify_var REPOSITORY scm_trim_slashes -scheme -trailing
