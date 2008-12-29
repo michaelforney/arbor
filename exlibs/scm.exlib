@@ -92,6 +92,11 @@ scm_access_checkout() {
     return ${status}
 }
 
+scm_check_timestamp() {
+    [[ -e ${1}/${2} && -n $(find "${1}" -maxdepth 1 -name "${2}" \
+        -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print) ]]
+}
+
 scm_fetch_one() {
     local dir=$(scm_get_var CHECKOUT_TO)
 
@@ -117,9 +122,8 @@ scm_fetch_one() {
     if [[ -n ${SCM_MIN_UPDATE_DELAY} ]]; then
         [[ ${SCM_MIN_UPDATE_DELAY} == *[^[:digit:]]* || ${SCM_MIN_UPDATE_DELAY} -eq 0 ]] \
             && die "SCM_MIN_UPDATE_DELAY must be a positive integer"
-        if [[ -e ${dir}/.scm.exlib.timestamp &&
-                -n $(find "${dir}" -maxdepth 1 -name .scm.exlib.timestamp \
-                          -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print) ]]; then
+        if scm_check_timestamp "${dir}" .scm.exlib.timestamp ||
+                { [[ -n $(scm_get_var BRANCH) ]] && scm_check_timestamp "${dir}" .scm.exlib.timestamp."$(scm_get_var BRANCH)"; }; then
             if [[ ${status} -eq 0 ]]; then
                 einfo "Not fetching ${SCM_THIS:-primary repository} because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
                 return
@@ -148,7 +152,13 @@ scm_fetch_one() {
         die "${dir} does not exist"
     fi
 
-    touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
+    local fetched
+    scm_get_array FETCHED_BRANCHES fetched
+    if [[ ${#fetched[@]} -gt 0 ]]; then
+        touch "${fetched[@]/#/${dir}/.scm.exlib.timestamp.}" || die "touch failed"
+    else
+        touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
+    fi
 }
 
 scm_src_fetch_extra() {
@@ -189,7 +199,7 @@ scm_unpack_one() {
     fi
 
     scm_call unpack
-    rm -f "${dir}/.scm.exlib.timestamp"
+    rm -f "${dir}/.scm.exlib.timestamp"{,.*}
 
     local rev=$(scm_call revision)
     [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
