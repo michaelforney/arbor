@@ -4,13 +4,11 @@
 #     Copyright 1999-2008 Gentoo Foundation
 
 NEED_PYTHON=2.5:=
+require distutils freedesktop-desktop freedesktop-mime multilib
 
-require distutils
-# eutils fdo-mime
-
-SUMMARY="Calibre is an eBook library management application."
+SUMMARY="Calibre is *the* eBook library management application."
 DESCRIPTION="
-Formerly known as libprs500, Calibre is a e-book library management application.
+Formerly known as libprs500, Calibre is an e-book library management application.
 It is free, open source and cross-platform in design and works on Linux, OSX and
 Windows. Calibre is meant to be a complete e-library solution and thus includes,
 library management, format conversion, news-feeds-to-ebook conversion as well as
@@ -32,7 +30,8 @@ MYOPTIONS=""
 DEPENDENCIES="
     build:
         dev-python/setuptools
-    run:
+    build+run:
+        dev-lang/python[sqlite]
         >=dev-python/Imaging-1.1.6
         >=dev-libs/libusb-0.1.12
         >=dev-python/PyQt4-4.4.2
@@ -44,6 +43,9 @@ DEPENDENCIES="
         >=dev-python/BeautifulSoup-3.0.5
         >=sys-apps/help2man-1.36.4
         >=sys-apps/hal-0.5.11
+    post,suggested:
+        app-arch/unrar [[ description = [ for unpacking compressed ebooks ] ]]
+        app-arch/unzip [[ description = [ for unpacking compressed ebooks ] ]]
 "
 
 _RDEPEND="
@@ -57,49 +59,50 @@ _DEPEND="${RDEPEND}
     >=gnome-base/librsvg-2.0.0
     "
 
-_src_compile() {
-    emake || die "pre-build failed"
-    distutils_src_compile
+src_prepare() {
+    # Removing the post_install call. We'll do that stuff in src_install.
+    sed -i -e "/if 'install'/,/subprocess.check_call/d" \
+        setup.py || die "couldn't remove post_install call"
+    # For help2man to succeed, we need to tell it the path to the tools.
+    sed -i -e "s:\('help2man',\) \(prog\):\1 \'PYTHONPATH=\"${IMAGE}$(python_get_sitedir)\" \' + \'${IMAGE}usr/bin/\' + \2:" \
+        src/calibre/linux.py || die "sed'ing in the IMAGE path failed" 
 }
 
-_src_install() {
+src_install() {
+    pushd "${WORK}"/build
+    ln -s lib\.* lib
+    popd
     distutils_src_install
 
-    # Create directory before running the postinst script
-    # otherwise it will bail out.
-    dodir /usr/share/icons/hicolor
+    # We have to create these directories before running the post_install
+    # script because xdg-* needs to see them even if it doesn't use them...
     dodir /etc/xdg/menus
     dodir /usr/share/applications
-    dodir /usr/share/desktop-directories
     dodir /usr/share/applnk
+    dodir /usr/share/desktop-directories
+    dodir /usr/share/icons/hicolor
     dodir /usr/share/mime/packages
 
-    # Bypass the default kde-config output, and force it to
-    # tell xdg-mime to use a different path.
-    cat - > "${TEMP}/kde-config" <<EOF
-#!/bin/bash
-
-case \$1:\$2 in
-    --version:) echo -e "Qt: 3.3.8\nKDE: 3.5.8\nkde-config: 1.0" ;;
-    --path:mime) echo "${IMAGE}/usr/share/mimelnk/" ;;
-esac
-EOF
-
-    chmod +x "${TEMP}/kde-config"
-
-    PATH="${TEMP}:${PATH}" KDEDIRS="${IMAGE}/usr" XDG_DATA_DIRS="${D}/usr/share" DESTDIR="${D}" PYTHONPATH="${WORK}/build/lib" \
-        python "${WORK}"/src/${PN}/linux.py \
+    KDEDIRS="${IMAGE}/usr" \
+    XDG_DATA_DIRS="${IMAGE}/usr/share" \
+    DESTDIR="${IMAGE}" \
+    PYTHONPATH="${WORK}/build/lib" \
+    python "${WORK}"/src/${PN}/linux.py \
         --use-destdir --do-not-reload-udev-hal \
         --group-file="${ROOT}"/etc/group --dont-check-root \
         || die "post-installation failed."
 
-    rm -r "${IMAGE}"/usr/share/applications/{mimeinfo.cache,defaults.list} \
-        "${IMAGE}"/usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,magic,aliases,{generic-,}icons} \
-        "${IMAGE}"/usr/share/applnk
+    # Removing junk.
+    rm -r "${IMAGE}"usr/share/applications/{defaults.list,mimeinfo.cache} \
+        "${IMAGE}"usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
+        "${IMAGE}"tmp \
+        "${IMAGE}"/usr/share/{applnk,desktop-directories} \
+        "${IMAGE}"/etc/xdg \
+        || die "removing junk failed"
 }
 
-_pkg_postinst() {
-    fdo-mime_desktop_database_update
-    fdo-mime_mime_database_update
+pkg_postinst() {
+    freedesktop-mime_update_desktop_database
+    freedesktop-mime_update_mime_database
     distutils_pkg_postinst
 }
