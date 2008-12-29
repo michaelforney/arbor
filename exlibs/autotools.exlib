@@ -202,6 +202,18 @@ eautoconf() {
     autotools_run_tool autoconf "$@"
 }
 
+eautotest() {
+    autotools_select_versions
+    if [[ ! -f testsuite.at ]] ; then
+        echo
+        eerror "No testsuite.at present in ${PWD##*/}!"
+        echo
+        die "No testsuite.at present in ${PWD##*/}!"
+    fi
+
+    autotools_run_tool autom4te -l Autotest -o testsuite testsuite.at "$@"
+}
+
 eautomake() {
     autotools_select_versions
     local extra_opts
