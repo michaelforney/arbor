@@ -82,12 +82,20 @@ scm_access_checkout() {
     addwrite "${dir}"
     addwrite "${lock}"
 
-    {
-        flock -x 42 || die "flock failed"
-        "${@}"
-        local status=${?}
-        :
-    } 42>"${lock}" || die "opening lock file failed"
+    local fd
+    for fd in {3..9}; do
+        [[ -e /dev/fd/${fd} ]] || break
+    done
+    [[ -e /dev/fd/${fd} ]] && die "can't find free file descriptor"
+
+    eval "
+        {
+            flock -x \${fd} || die \"flock failed\"
+            \"\${@}\"
+            local status=\${?}
+            :
+        } ${fd}>\"\${lock}\" || die \"opening lock file failed\"
+    "
 
     return ${status}
 }
