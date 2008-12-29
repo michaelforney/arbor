@@ -13,7 +13,7 @@ DOWNLOADS="http://www.rarlab.com/rar/${MY_PN}-${PV}.tar.gz"
 LICENCES="unRAR"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="platform: amd64"
 
 DEPENDENCIES="
     build+run:
@@ -22,17 +22,29 @@ DEPENDENCIES="
             resolution = manual
         ]]"
 
-WORK="${WORKBASE}/unrar"
+WORK="${WORKBASE}"/unrar
 
 src_compile() {
-    emake \
-        -f makefile.unix \
-        CXXFLAGS="${CXXFLAGS}" \
-        CXX="$(tc-getCXX)" \
-        STRIP="true"
+    export CXXFLAGS="${CXXFLAGS}"
+    export CXX="$(tc-getCXX)"
+    export STRIP="true"
+
+    emake -f makefile.unix unrar
+    mv unrar "${TEMP}"
+    emake -f makefile.unix clean
+
+    if option platform:amd64 ; then
+        export CXXFLAGS+=" -fPIC"
+    fi
+    emake -f makefile.unix lib
+    mv "${TEMP}"/unrar unrar
 }
 
 src_install() {
     dobin unrar
+    dolib libunrar.so
+    dodir /usr/include/unrar
+    insinto /usr/include/unrar
+    doins dll.hpp
     dodoc readme.txt
 }
