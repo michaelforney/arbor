@@ -1,6 +1,10 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( none )
+require autotools
+
 SUMMARY="Tar archiver"
 HOMEPAGE="http://www.gnu.org/software/tar/"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2"
@@ -10,10 +14,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="nls"
 
-DEPENDENCIES="
-     build:
-        sys-devel/autoconf:2.5
-"
+DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/tar-1.21-fix-testsuite.patch
@@ -22,7 +23,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 src_prepare() {
     default
     cd tests
-    WANT_AUTOCONF=2.5 autom4te -l Autotest testsuite.at >testsuite || die "autom4te failed"
+    eautotest
 }
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
