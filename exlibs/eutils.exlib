@@ -11,41 +11,6 @@
 
 require multilib
 
-# Cheap replacement for when debianutils (and thus mktemp)
-# does not exist on the users system
-# vapier@gentoo.org
-#
-# Takes just 1 optional parameter (the directory to create tmpfile in)
-emktemp() {
-    local exe="touch"
-    [[ $1 == -d ]] && exe="mkdir" && shift
-    local topdir=$1
-
-    if [[ -z ${topdir} ]] ; then
-        [[ -z ${TEMP} ]] \
-            && topdir="/tmp" \
-            || topdir=${TEMP}
-    fi
-
-    if ! type -P mktemp > /dev/null ; then
-        # system lacks `mktemp` so we have to fake it
-        local tmp=/
-        while [[ -e ${tmp} ]] ; do
-            tmp=${topdir}/tmp.${RANDOM}.${RANDOM}.${RANDOM}
-        done
-        ${exe} "${tmp}" || ${exe} -p "${tmp}"
-        echo "${tmp}"
-    else
-        # the args here will give slightly wierd names on BSD,
-        # but should produce a usable file on all userlands
-        if [[ ${exe} == "touch" ]] ; then
-            TMPDIR="${topdir}" mktemp -t tmp.XXXXXXXXXX
-        else
-            TMPDIR="${topdir}" mktemp -dt tmp.XXXXXXXXXX
-        fi
-    fi
-}
-
 # Small wrapper for getent (Linux), nidump (Mac OS X),
 # and pw (FreeBSD) used in enewuser()/enewgroup()
 # Joe Jezak <josejx@gmail.com> and usata@gentoo.org
