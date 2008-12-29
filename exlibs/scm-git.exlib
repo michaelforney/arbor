@@ -27,11 +27,8 @@ scm-git_do_dependencies() {
 }
 
 scm-git_do_check_vars() {
-    [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var REVISION) ]] \
-        && die "for git, $(scm_var_name BRANCH) must not be set at the same time as $(scm_var_name REVISION)"
-    [[ -n $(scm_get_var TAG) ]] && \
-        [[ -n $(scm_get_var BRANCH) || -n $(scm_get_var REVISION) ]] \
-        && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name REVISION)"
+    [[ -n $(scm_get_var TAG) && -n $(scm_get_var REVISION) ]] \
+        && die "for git, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name REVISION)"
     [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
             -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
     local rev=$(scm_get_var REVISION)
@@ -119,31 +116,33 @@ scm-git_do_update() {
         scm-git_git tag -d $(scm-git_git -q tag)
     fi
 
-    scm-git_git fetch -f -u origin 'refs/heads/*:refs/heads/*'
+    local branch=$(scm_get_var BRANCH)
+    scm-git_git fetch -f -u origin "refs/heads/${branch:-*}:refs/heads/${branch:-*}"
     scm-git_git gc --auto
+    [[ -n ${branch} ]] && scm_set_array FETCHED_BRANCHES "${branch}"
 }
 
 scm-git_do_revision() {
     scm-git_git -q rev-parse $(
-        if [[ -n $(scm_get_var BRANCH) ]]; then
-            echo refs/heads/$(scm_get_var BRANCH)
-        elif [[ -n $(scm_get_var TAG) ]]; then
+        if [[ -n $(scm_get_var TAG) ]]; then
             echo refs/tags/$(scm_get_var TAG)
-        else
+        elif [[ -n $(scm_get_var REVISION) ]]; then
             scm_get_var REVISION
+        else
+            echo refs/heads/$(scm_get_var BRANCH)
         fi)
 }
 
 scm-git_do_unpack() {
     scm-git_git clone -s -n "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
     scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git --work-tree="$(scm_get_var UNPACK_TO)" checkout -f $(
-        if [[ -n $(scm_get_var BRANCH) ]]; then
+        if [[ -n $(scm_get_var TAG) ]]; then
+            echo refs/tags/$(scm_get_var TAG)
+        elif [[ -n $(scm_get_var REVISION) ]]; then
+            scm_get_var REVISION
+        else
             [[ -n $(scm-git_git -q --git-dir="$(scm_get_var UNPACK_TO)"/.git for-each-ref "refs/heads/$(scm_get_var BRANCH)") ]] \
                 || echo -b $(scm_get_var BRANCH) refs/remotes/origin/$(scm_get_var BRANCH)
-        elif [[ -n $(scm_get_var TAG) ]]; then
-            echo refs/tags/$(scm_get_var TAG)
-        else
-            scm_get_var REVISION
         fi) --
 }
 
