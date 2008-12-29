@@ -43,6 +43,14 @@ bootstrap() {
     ./bootstrap "$@" || die "./bootstrap failed"
 }
 
+src_prepare() {
+    default
+    if option qt4; then
+        sed -e '/Icon/ s/\.png//' \
+            -i Source/QtDialog/CMake.desktop || die "sed to fix .desktop file failed."
+    fi
+}
+
 src_configure() {
     j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
 
