@@ -1,0 +1,35 @@
+DESCRIPTION="
+Firewall Builder is a GUI firewall configuration and management tool that supports
+iptables (netfilter), ipfilter, pf, ipfw, Cisco PIX (FWSM, ASA) and Cisco routers
+extended access lists. Firewall Builder uses an object-oriented approach, it helps
+administrator maintain a database of network objects and allows policy editing
+using simple drag-and-drop operations.
+"
+HOMEPAGE="http://www.fwbuilder.org/"
+DOWNLOADS="mirror://sourceforge/fwbuilder/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:fwbuilder"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/docs/firewall_builder_release_notes.html#${PV}"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs/firewall_builder_manuals.html [[ lang = en ]]"
+
+SLOT="0"
+LICENCES="GPL-2"
+
+src_prepare() {
+    export STRIPPROG=true
+
+    # We're running eqmake4 instead.
+    sed -i -e '/runqmake.sh/d' configure || die "removing runqmake.sh failed"
+}
+
+src_install() {
+    default
+
+    touch "${IMAGE}"usr/share/doc/${PNV}/INSTALL \
+    rm \
+        "${IMAGE}"usr/share/doc/${PNV}/COPYING \
+        "${IMAGE}"usr/share/doc/${PNV}/INSTALL \
+        || die "removing cruft failed"
+}
