@@ -1,4 +1,5 @@
 # Copyright 2008 Santiago M. Mola
+# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'whois-4.7.24.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -8,47 +9,69 @@
 require toolchain-funcs
 
 MY_PNV=${PNV/-/_}
-SUMMARY="improved Whois Client"
+
+SUMMARY="Marco d'Itri's improved whois client"
+DESCRIPTION="
+This whois implementation supports all protocol extensions (RIPE, 6bone, CRSNIC)
+with the familiar RIPE command line interface and IPv6 support. It also
+automagically queries the right registry for all domains and most netblocks.
+"
 HOMEPAGE="http://www.linux.it/~md/software/"
 DOWNLOADS="mirror://debian/pool/main/w/whois/${MY_PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="idn nls"
-RESTRICT="test" # Gentoo bug #59327
 
 DEPENDENCIES="
-    run+build: idn? ( net-dns/libidn )
-    build: dev-lang/perl"
+    build:
+        dev-lang/perl
+    build+run:
+        idn? ( net-dns/libidn )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PNV}-gentoo-security.patch )
+DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" prefix=/usr )
 
 src_prepare() {
     default
 
+    # Use the install from PATH.
     sed -i -e "s:/usr/bin/install:install:" po/Makefile || die "sed po/Makefile failed"
-    #Makefile calls po/Makefile install-po
+
+    # Makefile calls po/Makefile install-po
     echo "install-pos: install" >> po/Makefile || die "echo >> po/Makefile failed"
+
     if ! option nls ; then
+        # Remove the nls-related references.
         sed -i -e '/ENABLE_NLS/s:define:undef:' config.h || die "sed config.h failed"
         sed -i -e "s:cd po.*::" Makefile || die "sed Makefile failed"
     fi
 }
 
 src_compile() {
-    local mydefines="CONFIG_FILE=/etc/whois.conf "
+    local mydefines="CONFIG_FILE=/etc/whois.conf"
+
     if option idn ; then
-        mydefines+="HAVE_LIBIDN=1"
+        mydefines+=" HAVE_LIBIDN=1"
     fi
 
-    emake OPTS="${CFLAGS}" \
+    emake \
+        OPTS="${CFLAGS}" \
         CC="$(tc-getCC)" \
         ${mydefines}
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" prefix=/usr )
-
 src_install() {
     default
+
+    if option nls ; then
+        emake -j1 BASEDIR="${IMAGE}" install-pos
+    fi
+
     insinto /etc
     doins whois.conf
 }
