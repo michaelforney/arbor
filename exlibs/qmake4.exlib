@@ -15,20 +15,19 @@ DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 eqmake4() {
     [[ ${@} == ${@%.pro} && -z ${EQMAKE4_SOURCES[@]} ]] && EQMAKE4_SOURCES=( ${PN}.pro )
 
-    doit() { echo "${@}" && "${@}" ; }
-
-    doit \
-    /usr/bin/qmake \
-        QTDIR="/usr/$(get_libdir)" \
-        QMAKE="/usr/bin/qmake" \
-        QMAKE_CFLAGS_RELEASE="${CFLAGS}" \
-        QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS}" \
-        QMAKE_LFLAGS_RELEASE="${LDFLAGS}" \
-        QMAKE_CFLAGS_DEBUG="${CFLAGS}" \
-        QMAKE_CXXFLAGS_DEBUG="${CXXFLAGS}" \
-        QMAKE_LFLAGS_DEBUG="${LDFLAGS}" \
-        "${EQMAKE4_SOURCES[@]}" "${@}" \
-        || die_unless_nonfatal "eqmake4: returned exit status: $?"
+    local cmd=( /usr/bin/qmake
+        QTDIR="/usr/$(get_libdir)"
+        QMAKE="/usr/bin/qmake"
+        QMAKE_CFLAGS_RELEASE="${CFLAGS}"
+        QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS}"
+        QMAKE_LFLAGS_RELEASE="${LDFLAGS}"
+        QMAKE_CFLAGS_DEBUG="${CFLAGS}"
+        QMAKE_CXXFLAGS_DEBUG="${CXXFLAGS}"
+        QMAKE_LFLAGS_DEBUG="${LDFLAGS}"
+        "${EQMAKE4_SOURCES[@]}" "${@}"
+    )
+    echo "${cmd[@]}"
+    "${cmd[@]}" || die_unless_nonfatal "eqmake4: returned exit status: $?"
 }
 
 qmake4_src_configure() {
