@@ -53,8 +53,9 @@ pkg_pretend() {
 }
 
 src_prepare() {
+    libdir=$(get_libdir)
     # Use correct path to filefuncs.so on multilib systems
-    sed -e "s:/lib/rcscripts:/$(get_libdir)/rcscripts:" \
+    sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:" \
         -i "${WORK}"/src/awk/{cachedepends,genenviron}.awk || die 'sed failed'
 
     default
@@ -62,9 +63,6 @@ src_prepare() {
 
 src_compile() {
     append-ldflags -static
-
-    libdir="lib"
-    [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
 
     cd "${WORK}/src" || die "Could not enter src/"
     emake \

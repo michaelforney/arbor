@@ -49,8 +49,7 @@ pkg_pretend() {
 }
 
 pkg_postinst() {
-    libdir="lib"
-    [[ ${SYMLINK_LIB} == "yes" ]] && libdir=$(get_abi_LIBDIR "${DEFAULT_ABI}")
+    libdir=$(get_libdir)
 
     local x
     # create directory structure. for readability leave out /usr and /var

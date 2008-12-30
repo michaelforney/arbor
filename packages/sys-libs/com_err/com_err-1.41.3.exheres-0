@@ -47,7 +47,7 @@ src_install() {
 
     dolib.a lib/libcom_err.a
     dodir /$(get_libdir)
-    mv "${IMAGE}"/usr/$(get_libdir)/*$(get_libname)* "${IMAGE}"/$(get_libdir)/ \
-        || die "move $(get_libname)"
-    gen_usr_ldscript libcom_err$(get_libname)
+    mv "${IMAGE}"/usr/$(get_libdir)/*.so* "${IMAGE}"/$(get_libdir)/ \
+        || die "move .so"
+    gen_usr_ldscript libcom_err.so
 }
