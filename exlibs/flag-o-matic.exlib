@@ -61,34 +61,6 @@ require toolchain-funcs multilib
 #### bindnow-flags ####
 # Returns the flags to enable "now" binding in the current selected linker.
 #
-################ DEPRECATED functions ################
-# The following are still present to avoid breaking existing
-# code more than necessary; however they are deprecated. Please
-# use gcc-specs-* from toolchain-funcs.eclass instead, if you
-# need to know which hardened techs are active in the compiler.
-# See bug #100974
-#
-#### has_hardened ####
-# Returns true if the compiler has 'Hardened' in its version string,
-# (note; switched-spec vanilla compilers satisfy this condition) or
-# the specs file name contains 'hardened'.
-#
-#### has_pie ####
-# Returns true if the compiler by default or with current CFLAGS
-# builds position-independent code.
-#
-#### has_pic ####
-# Returns true if the compiler by default or with current CFLAGS
-# builds position-independent code.
-#
-#### has_ssp_all ####
-# Returns true if the compiler by default or with current CFLAGS
-# generates stack smash protections for all functions
-#
-#### has_ssp ####
-# Returns true if the compiler by default or with current CFLAGS
-# generates stack smash protections for most vulnerable functions
-#
 
 # C[XX]FLAGS that we allow in strip-flags
 # Note: shell globs and character lists are allowed
@@ -418,91 +390,6 @@ get-flag() {
             return 0
         fi
     done
-    return 1
-}
-
-# DEPRECATED - use gcc-specs-relro or gcc-specs-now from toolchain-funcs
-has_hardened() {
-    ewarn "has_hardened: deprecated, please use gcc-specs-{relro,now}()!" >&2
-
-    test_version_info Hardened && return 0
-    # The specs file wont exist unless gcc has GCC_SPECS support
-    [[ -f ${GCC_SPECS} && ${GCC_SPECS} != ${GCC_SPECS/hardened/} ]]
-}
-
-# DEPRECATED - use gcc-specs-pie from toolchain-funcs
-# indicate whether PIC is set
-has_pic() {
-    ewarn "has_pic: deprecated, please use gcc-specs-pie()!" >&2
-
-    [[ ${CFLAGS/-fPIC} != ${CFLAGS} || \
-       ${CFLAGS/-fpic} != ${CFLAGS} ]] || \
-    gcc-specs-pie
-}
-
-# DEPRECATED - use gcc-specs-pie from toolchain-funcs
-# indicate whether PIE is set
-has_pie() {
-    ewarn "has_pie: deprecated, please use gcc-specs-pie()!" >&2
-
-    [[ ${CFLAGS/-fPIE} != ${CFLAGS} || \
-       ${CFLAGS/-fpie} != ${CFLAGS} ]] || \
-    gcc-specs-pie
-}
-
-# DEPRECATED - use gcc-specs-ssp from toolchain-funcs
-# indicate whether code for SSP is being generated for all functions
-has_ssp_all() {
-    ewarn "has_ssp_all: deprecated, please use gcc-specs-ssp()!" >&2
-
-    # note; this matches only -fstack-protector-all
-    [[ ${CFLAGS/-fstack-protector-all} != ${CFLAGS} || \
-       -n $(echo | $(tc-getCC) ${CFLAGS} -E -dM - | grep __SSP_ALL__) ]] || \
-    gcc-specs-ssp-all
-}
-
-# DEPRECATED - use gcc-specs-ssp from toolchain-funcs
-# indicate whether code for SSP is being generated
-has_ssp() {
-    ewarn "has_ssp: deprecated, please use gcc-specs-ssp()!" >&2
-
-    # note; this matches both -fstack-protector and -fstack-protector-all
-    [[ ${CFLAGS/-fstack-protector} != ${CFLAGS} || \
-       -n $(echo | $(tc-getCC) ${CFLAGS} -E -dM - | grep __SSP__) ]] || \
-    gcc-specs-ssp
-}
-
-has_m64() {
-    # this doesnt test if the flag is accepted, it tests if the flag
-    # actually -WORKS-. non-multilib gcc will take both -m32 and -m64!
-    # please dont replace this function with test_flag in some future
-    # clean-up!
-
-    local temp="$(mktemp)"
-    echo "int main() { return(0); }" > "${temp}".c
-    MY_CC=$(tc-getCC)
-    ${MY_CC/ .*/} -m64 -o "$(mktemp)" "${temp}".c > /dev/null 2>&1
-    local ret=$?
-    rm -f "${temp}".c
-    [[ ${ret} != 1 ]] && return 0
-    return 1
-}
-
-has_m32() {
-    # this doesnt test if the flag is accepted, it tests if the flag
-    # actually -WORKS-. non-multilib gcc will take both -m32 and -m64!
-    # please dont replace this function with test_flag in some future
-    # clean-up!
-
-    [ "$(tc-arch)" = "amd64" ] && has_multilib_profile && return 0
-
-    local temp=$(mktemp)
-    echo "int main() { return(0); }" > "${temp}".c
-    MY_CC=$(tc-getCC)
-    ${MY_CC/ .*/} -m32 -o "$(mktemp)" "${temp}".c > /dev/null 2>&1
-    local ret=$?
-    rm -f "${temp}".c
-    [[ ${ret} != 1 ]] && return 0
     return 1
 }
 
