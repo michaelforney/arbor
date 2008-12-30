@@ -18,7 +18,7 @@ DOWNLOADS="http://hal.freedesktop.org/releases/${PNV}.tar.bz2
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="acpi apm verbose"
+MYOPTIONS="acpi apm verbose platform: amd64 ia64 x86"
 
 DEPENDENCIES="
     build+run:
@@ -27,7 +27,9 @@ DEPENDENCIES="
         >=dev-libs/glib-2.14
         >=dev-util/gperf-3.0.3
         >=dev-libs/expat-1.95.8
-        >=sys-apps/dmidecode-2.7
+        platform:amd64? ( >=sys-apps/dmidecode-2.7 )
+        platform:ia64? ( >=sys-apps/dmidecode-2.7 )
+        platform:x86? ( >=sys-apps/dmidecode-2.7 )
         >=dev-libs/libusb-0.1.10a
         >=dev-libs/dbus-glib-0.61
         >=sys-apps/pciutils-2.2.7
@@ -41,7 +43,8 @@ DEPENDENCIES="
     post,required:
         || ( =app-misc/hal-info-20081001 =app-misc/hal-info-20081022 )
     post,suggested:
-        >=sys-power/pm-utils-0.99.3
+        platform:amd64? ( >=sys-power/pm-utils-0.99.3 )
+        platform:x86? ( >=sys-power/pm-utils-0.99.3 )
 "
 
 # tests for HAL *NEVER* actually work/ed
