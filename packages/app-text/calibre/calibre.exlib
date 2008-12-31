@@ -54,6 +54,7 @@ src_prepare() {
     # For help2man to succeed, we need to tell it the path to the tools.
     sed -i -e "s:\('help2man',\) \(prog\):\1 \'PYTHONPATH=\"${IMAGE}$(python_get_sitedir)\" \' + \'${IMAGE}usr/bin/\' + \2:" \
         src/calibre/linux.py || die "sed'ing in the IMAGE path failed"
+    default
 }
 
 src_install() {
