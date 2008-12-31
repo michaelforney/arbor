@@ -71,7 +71,20 @@ src_install() {
     dodir /usr/share/icons/hicolor
     dodir /usr/share/mime/packages
 
+    # We need to bypass the default kde-config output and force it to tell
+    # xdg-mime to use a different path to avoid sandbox violations.
+    cat - > "${TEMP}/kde-config" <<EOF
+#!/bin/bash
+
+case \$1:\$2 in
+    --version:) echo -e "Qt: 3.3.8\nKDE: 3.5.10\nkde-config: 1.0" ;;
+    --path:mime) echo "${D}/usr/share/mimelnk/" ;;
+esac
+EOF
+    chmod +x "${TEMP}/kde-config"
+
     # Running the post_install script.
+    PATH="${TEMP}:${PATH}" \
     KDEDIRS="${IMAGE}/usr" \
     XDG_DATA_DIRS="${IMAGE}/usr/share" \
     DESTDIR="${IMAGE}" \
