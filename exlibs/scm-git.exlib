@@ -71,6 +71,11 @@ scm-git_do_appraise() {
             echo "$(scm_get_var REVISION) is not present in ${dir}"
             return 1
         elif [[ $(scm-git_git -q cat-file -t $(scm_get_var REVISION)) == commit ]]; then
+            if [[ -n $(scm_get_var BRANCH) ]] && ! scm-git_git -q rev-list "refs/heads/$(scm_get_var BRANCH)" \
+                    | grep -Fx $(scm_get_var REVISION) >/dev/null; then
+                echo "revision $(scm_get_var REVISION) is not part of branch $(scm_get_var BRANCH) of ${dir}"
+                return 1
+            fi
             return 2
         else
             die "$(scm_get_var REVISION) is not a commit in ${dir}"
@@ -86,6 +91,11 @@ scm-git_do_appraise() {
 
     if [[ -n $(scm_get_var TAG) ]]; then
         if [[ -n $(scm-git_git -q for-each-ref "refs/tags/$(scm_get_var TAG)") ]]; then
+            if [[ -n $(scm_get_var BRANCH) ]] && ! scm-git_git -q rev-list "refs/heads/$(scm_get_var BRANCH)" \
+                    | grep -Fx $(scm-git_git -q rev-parse "refs/tags/$(scm_get_var TAG)") >/dev/null; then
+                echo "tag $(scm_get_var TAG) is not part of branch $(scm_get_var BRANCH) of ${dir}"
+                return 1
+            fi
             return 2
         else
             echo "${dir} does not contain the tag $(scm_get_var TAG)"
