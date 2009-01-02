@@ -26,7 +26,7 @@ scm-svn_do_check_vars() {
         && die "$(scm_var_name SVN_RAW_URI) must not be set at the same time as $(scm_var_name BRANCH) or $(scm_var_name TAG) or $(scm_var_name SUBPATH)"
     [[ -n $(scm_get_var BRANCH) && -n $(scm_get_var TAG) ]] \
         && die "for svn, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name BRANCH)"
-    [[ -n $(scm_get_var REVISION) ]] && \
+    [[ -n $(scm_get_var REVISION) && $(scm_get_var REVISION) != _ ]] && \
         [[ $(scm_get_var REVISION) == *[^0-9]* || $(scm_get_var REVISION) -eq 0 ]] \
         && die "for svn, $(scm_var_name REVISION) must be a positive integer"
 
@@ -94,6 +94,8 @@ scm-svn_info() {
 }
 
 scm-svn_do_appraise() {
+    [[ $(scm_get_var REVISION) == _ ]] && die "$(scm_var_name REVISION) is _, but was not filled in by a svn:externals declaration"
+
     local dir=$(scm_get_var CHECKOUT_TO)
 
     if [[ ! -d ${dir}/.svn ]]; then
@@ -196,8 +198,12 @@ scm-svn_do_resolve_externals() {
                             || errors+=( "svn URI for ${that} is ${got}, but wanted ${uri}" )x
 
                         got=$(SCM_THIS=${that} scm_get_var REVISION)
-                        [[ ${got} == ${revision} ]] \
-                            || errors+=( "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}" )
+                        if [[ ${got} == _ ]]; then
+                            SCM_THIS=${that} scm_set_var REVISION ${revision}
+                        else
+                            [[ ${got} == ${revision} ]] \
+                                || errors+=( "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}" )
+                        fi
 
                     fi
                     unset externals[${idx}]
