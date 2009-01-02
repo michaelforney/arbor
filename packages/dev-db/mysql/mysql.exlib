@@ -1,0 +1,102 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require eutils versionator flag-o-matic toolchain-funcs
+
+export_exlib_phases pkg_pretend pkg_setup src_install # src_test pkg_config
+
+MYSQL_MAJOR_VERSION=$(get_version_component_range 1-2)
+
+SUMMARY="A relational database management system (RDBMS)"
+HOMEPAGE="http://www.mysql.com/"
+DOWNLOADS="http://mirror.provenscaling.com/mysql/enterprise/source/${MYSQL_MAJOR_VERSION}/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_DOCUMENTATION="
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/index.html               [[ lang = [ en ] ]]
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html   [[ lang = [ en ] note = [ Post installation documentation ] ]]
+"
+
+LICENCES="GPL-2" # with-exceptions
+SLOT="0"
+MYOPTIONS="big-tables debug ssl"
+
+DEPENDENCIES="
+    build+run:
+        ssl? ( dev-libs/openssl )
+"
+
+_DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNVR}" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    big-tables
+    debug
+    'ssl openssl'
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-assembler
+    # Compile the client with threads
+    --enable-thread-safe-client
+    # Where to put mysqld, mysqlmanager
+    --libexecdir="/usr/sbin"
+    # Deprecated, will be removed
+    --without-berkeley-db
+    # Benchmark suite needs BDB-Mysql
+    # post,suggested: perl? ( dev-perl/DBD-Mysql )
+    --without-bench
+    --with-comment="Exherbo, ${PNVR}"
+    # XXX: Add option=embedded, and a patch to compile proper shared libraries for mysql embedded
+    --with-embedded-server
+    --with-embedded-privilege-control
+    --with-mysqld-user=mysql
+    # Use the system readline. --with-readling builds the internal readling copy.
+    --without-readline
+    --with-extra-charsets=all
+    --with-innodb # Needs --with-server
+    --with-server
+    --with-zlib
+)
+
+mysql_pkg_pretend() {
+    # Sanity check when upgrading to a different x.y version of mysql
+    if [[ -z ${MYSQL_MAJOR_UPGRADE} ]] && has_version ${CATEGORY}/${PN} && \
+        ! has_version =${CATEGORY}/${PN}-${MYSQL_MAJOR_VERSION}*; then
+        ewarn "To install a different major version of MySQL, you have to dump/reload your database."
+        ewarn "When you've done this, please set 'MYSQL_MAJOR_UPGRADE=YesPlease', to continue the upgrade."
+        ewarn "For more information visit:"
+        ewarn "http://dev.mysql.com/doc/refman/5.0/en/upgrade.html"
+        ewarn "http://dev.mysql.com/doc/refman/5.0/en/downgrading.html"
+        die "Dump your databases before doing a major version upgrade of MySQL."
+    fi
+
+    # Pending genesis integration:
+    # Upgrading to any version requires starting/stopping the PostgreSQL server.
+}
+
+if false; then
+# XXX
+mysql_pkg_config() {
+    :
+}
+fi
+
+mysql_pkg_setup() {
+    enewgroup mysql 60
+    enewuser mysql 60 -1 /dev/null mysql
+}
+
+if false; then
+# XXX
+# See mysql-test/README
+mysql_src_test() {
+    :
+}
+fi
+
+mysql_src_install() {
+    default
+
+    hereenvd 46mysql <<EOF
+LDPATH=/usr/$(get_libdir)/${PN}
+EOF
+}
+
