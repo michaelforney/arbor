@@ -226,7 +226,7 @@ scm-svn_check_externals() {
 
 scm-svn_do_checkout() {
     local rev=$(scm_get_var REVISION)
-    scm-svn_svn checkout ${rev:+-r${rev}} "$(scm-svn_uri)" "$(scm_get_var CHECKOUT_TO)"
+    scm-svn_svn checkout "$(scm-svn_uri)${rev:+@${rev}}" "$(scm_get_var CHECKOUT_TO)"
     scm-svn_check_externals
 }
 
@@ -251,7 +251,7 @@ scm-svn_do_update() {
 
     local rev=$(scm_get_var REVISION)
     if [[ $(scm-svn_uri) != $(scm-svn_info URL) ]]; then
-        scm-svn_svn switch ${rev:+-r${rev}} "$(scm-svn_uri)" "${dir}"
+        scm-svn_svn switch "$(scm-svn_uri)${rev:+@${rev}}" "${dir}"
     else
         scm-svn_svn update ${rev:+-r${rev}} "${dir}"
     fi
