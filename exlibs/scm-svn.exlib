@@ -123,7 +123,7 @@ scm-svn_do_appraise() {
     fi
 }
 
-scm-svn_check_externals() {
+scm-svn_do_resolve_externals() {
     local errors=( )
     local externals=( $(scm_get_var SVN_EXTERNALS) ) idx
 
@@ -227,7 +227,6 @@ scm-svn_check_externals() {
 scm-svn_do_checkout() {
     local rev=$(scm_get_var REVISION)
     scm-svn_svn checkout "$(scm-svn_uri)${rev:+@${rev}}" "$(scm_get_var CHECKOUT_TO)"
-    scm-svn_check_externals
 }
 
 scm-svn_do_update() {
@@ -255,7 +254,6 @@ scm-svn_do_update() {
     else
         scm-svn_svn update ${rev:+-r${rev}} "${dir}"
     fi
-    scm-svn_check_externals
 }
 
 scm-svn_do_revision() {

@@ -100,12 +100,16 @@ scm_access_checkout() {
     return ${status}
 }
 
+scm_do_resolve_externals() {
+    :
+}
+
 scm_check_timestamp() {
     [[ -e ${1}/${2} && -n $(find "${1}" -maxdepth 1 -name "${2}" \
         -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print) ]]
 }
 
-scm_fetch_one() {
+scm_perform_fetch() {
     local dir=$(scm_get_var CHECKOUT_TO)
 
     local whynot status
@@ -169,6 +173,11 @@ scm_fetch_one() {
     fi
 }
 
+scm_fetch_one() {
+    scm_perform_fetch
+    scm_call resolve_externals
+}
+
 scm_src_fetch_extra() {
     scm_{for_each,access_checkout,fetch_one}
 }
@@ -191,6 +200,8 @@ scm_do_unpack() {
 }
 
 scm_unpack_one() {
+    scm_call resolve_externals
+
     local whynot
     if [[ -d $(scm_get_var CHECKOUT_TO) ]]; then
         whynot=$(scm_call appraise)
