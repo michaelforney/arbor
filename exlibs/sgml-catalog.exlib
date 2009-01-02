@@ -54,7 +54,8 @@ sgml-catalog_cleanup() {
     if [[ -e /usr/bin/gensgmlenv ]] ; then
         einfo "Regenerating SGML environment variables ..."
         gensgmlenv
-        hereenvd 93sgmltools-lite <<<"$(grep -v export /etc/sgml/sgml.env)"
+        # We can't use hereenvd here, since that uses doins, which accesses IMAGE, which isn't valid in pkg_{prerm,postinst}
+        grep -v export /etc/sgml/sgml.env >/etc/env.d/93sgmltools-lite || ewarn "Couldn't update /etc/env.d/93sgmltools-lite"
     fi
 }
 
