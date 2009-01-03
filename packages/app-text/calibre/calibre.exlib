@@ -98,10 +98,13 @@ EOF
     # Removing junk.
     rm -r "${IMAGE}"usr/share/applications/{defaults.list,mimeinfo.cache} \
         "${IMAGE}"usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
-        "${IMAGE}"tmp \
         "${IMAGE}"/usr/share/{applnk,desktop-directories} \
         "${IMAGE}"/etc/xdg \
         || die "removing junk failed"
+    if [[ ${PV} == "0.4.123" ]]; then
+        rm -r "${IMAGE}"tmp || die "removing junk failed"
+    fi
+die
 }
 
 pkg_postinst() {
