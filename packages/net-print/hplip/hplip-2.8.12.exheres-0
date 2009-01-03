@@ -56,30 +56,28 @@ DEPENDENCIES="
         )
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "dbus dbus-build"
-    "doc doc-build"
-    "fax fax-build"
-    "gui gui-build"
-    "gui qt4"
-    "scanner scan-build"
-    "snmp network-build"
-)
-
 # Whatever an hpijs-only build may be, I don't need it. Please shout if you do.
 # Or even better: Send a git format-patch while you're in here already anyway. :)
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --with-hpppddir=/usr/share/ppd/${PN}
-    --with-cupsbackenddir=$(cups-config --serverbin)/backend
-    --with-cupsfilterdir=$(cups-config --serverbin)/filter
-    --disable-dependency-tracking
-    --disable-foomatic-drv-install
-    --disable-hpijs-only-build
-    --disable-pp-build
-    --disable-qt3
-    --enable-foomatic-ppd-install
-    --enable-foomatic-rip-hplip-install
-)
+src_configure() {
+    econf \
+        --with-hpppddir=/usr/share/ppd/${PN} \
+        --with-cupsbackenddir=$(cups-config --serverbin)/backend \
+        --with-cupsfilterdir=$(cups-config --serverbin)/filter \
+        --disable-dependency-tracking \
+        --disable-foomatic-drv-install \
+        --disable-hpijs-only-build \
+        --disable-pp-build \
+        --disable-qt3 \
+        --enable-foomatic-ppd-install \
+        --enable-foomatic-rip-hplip-install \
+        $(option_enable dbus dbus-build) \
+        $(option_enable doc doc-build) \
+        $(option_enable fax fax-build) \
+        $(option_enable gui gui-build) \
+        $(option_enable gui qt4) \
+        $(option_enable scanner scan-build) \
+        $(option_enable snmp network-build)
+}
 
 src_install() {
     default
