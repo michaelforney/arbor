@@ -44,7 +44,7 @@ src_prepare() {
     # use system headers
     rm -r include/linux include/netinet || die "failed to remove system headers"
 
-    # fix hardcoded gc
+    # fix hardcoded gcc
     sed -i -e "s:^gcc:$(tc-getCC):" configure || die "sed configure failed"
 
     # fix hardcoded -O2 and allow user CFLAGS
@@ -53,6 +53,10 @@ src_prepare() {
         -i Makefile || die "sed Makefile (2) failed"
 
     sed -i 's:/usr/local:/usr:' tc/m_ipt.c include/iptables.h || die "sed /usr/local failed"
+
+    if ! option berkdb ; then
+        sed -i -e '/TARGETS/s:arpd::' "${WORK}/misc/Makefile" || die "sed s:arpd:: failed"
+    fi
 
     # libdir fixes
     sed -e "s:/usr/lib:/usr/$(get_libdir):g" \
