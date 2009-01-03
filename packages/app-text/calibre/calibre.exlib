@@ -4,7 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation
 
 NEED_PYTHON=2.5:=
-require distutils freedesktop-desktop freedesktop-mime multilib
+require distutils freedesktop-desktop freedesktop-mime multilib bash-completion
 
 SUMMARY="Calibre is *the* eBook library management application."
 DESCRIPTION="
@@ -18,6 +18,7 @@ HOMEPAGE="http://${PN}.kovidgoyal.net/"
 DOWNLOADS="http://${PN}.kovidgoyal.net/downloads/${PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="pypi:${PN}"
 
 UPSTREAM_CHANGELOG="http://${PN}.kovidgoyal.net/wiki/Changelog"
 UPSTREAM_DOCUMENTATION="http://${PN}.kovidgoyal.net/user_manual/ [[ lang = en ]]"
@@ -65,21 +66,23 @@ src_install() {
 
     # We have to create these directories before running the post_install
     # script because xdg-* needs to see them even if it doesn't use them...
-    dodir /etc/xdg/menus
-    dodir /usr/share/applications
-    dodir /usr/share/applnk
-    dodir /usr/share/desktop-directories
-    dodir /usr/share/icons/hicolor
-    dodir /usr/share/mime/packages
+    dodir \
+        /etc/xdg/menus \
+        /usr/share/applications \
+        /usr/share/applnk \
+        /usr/share/desktop-directories \
+        /usr/share/icons/hicolor \
+        /usr/share/mime/packages
 
     # We need to bypass the default kde-config output and force it to tell
     # xdg-mime to use a different path to avoid sandbox violations.
+    # The versions we're echoing don't matter.
     cat - > "${TEMP}/kde-config" <<EOF
 #!/bin/bash
 
 case \$1:\$2 in
     --version:) echo -e "Qt: 3.3.8\nKDE: 3.5.10\nkde-config: 1.0" ;;
-    --path:mime) echo "${D}/usr/share/mimelnk/" ;;
+    --path:mime) echo "${IMAGE}/usr/share/mimelnk/" ;;
 esac
 EOF
     chmod +x "${TEMP}/kde-config"
@@ -95,14 +98,20 @@ EOF
         --group-file="${ROOT}"/etc/group --dont-check-root \
         || die "post-installation failed."
 
+    # Move the bash-completion file and properly install it.
+    mv "${IMAGE}"/etc/bash_completion.d/calibre "${WORK}/" \
+        || die "cannot move the bash-completion file"
+    dobashcompletion "${WORK}"/calibre
+    find "${IMAGE}"/etc -type d -empty -delete
+
     # Removing junk.
-    rm -r "${IMAGE}"usr/share/applications/{defaults.list,mimeinfo.cache} \
-        "${IMAGE}"usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
-        "${IMAGE}"/usr/share/{applnk,desktop-directories} \
-        "${IMAGE}"/etc/xdg \
+    rm -r \
+        "${IMAGE}/"usr/share/applications/{defaults.list,mimeinfo.cache} \
+        "${IMAGE}/"usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
+        "${IMAGE}/"usr/share/{applnk,desktop-directories} \
         || die "removing junk failed"
     if [[ ${PV} == "0.4.123" ]]; then
-        rm -r "${IMAGE}"tmp || die "removing junk failed"
+        rm -r "${IMAGE}"/tmp || die "removing junk failed"
     fi
 }
 
