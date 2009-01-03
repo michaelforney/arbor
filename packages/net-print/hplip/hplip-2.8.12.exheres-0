@@ -86,21 +86,25 @@ src_install() {
         $(cups-config --serverbin)/filter/foomatic-rip-hplip \
         $(cups-config --serverbin)/filter/foomatic-rip
 
-    # Moving dll.conf which originally belongs to sane-backends out of the way.
-    mv "${IMAGE}"etc/sane.d/dll.conf "${TEMP}"hplip_dll.conf || die "moving dll.conf failed"
-    rmdir "${IMAGE}"etc/sane.d || die "removing empty /etc/sane.d failed"
+    if option scanner ; then
+        # Moving dll.conf which originally belongs to sane-backends out of the way.
+        mv "${IMAGE}"etc/sane.d/dll.conf "${TEMP}"hplip_dll.conf || die "moving dll.conf failed"
+        rmdir "${IMAGE}"etc/sane.d || die "removing empty /etc/sane.d failed"
+    fi
     find "${IMAGE}"/usr -type d -empty -delete || die "removing empty dirs failed"
 }
 
 pkg_postinst() {
     python_mod_optimize /usr/share/${PN}
 
-    # Merging hplip's dll.conf entry into the original one.
-    cp "${ROOT}"etc/sane.d/dll.conf "${TEMP}" || die "copying dll.conf failed"
-    cat "${TEMP}"hplip_dll.conf >> "${TEMP}"dll.conf \
-        || die "adding hplip's dll.conf to the original one failed."
-    cp "${TEMP}"dll.conf "${ROOT}"etc/sane.d/dll.conf \
-        || die "writing back dll.conf failed"
+    if option scanner ; then
+        # Merging hplip's dll.conf entry into the original one.
+        cp "${ROOT}"etc/sane.d/dll.conf "${TEMP}" || die "copying dll.conf failed"
+        cat "${TEMP}"hplip_dll.conf >> "${TEMP}"dll.conf \
+            || die "adding hplip's dll.conf to the original one failed."
+        cp "${TEMP}"dll.conf "${ROOT}"etc/sane.d/dll.conf \
+            || die "writing back dll.conf failed"
+    fi
 }
 
 pkg_postrm() {
