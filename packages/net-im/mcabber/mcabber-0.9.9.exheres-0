@@ -1,0 +1,32 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A small Jabber console client."
+DESCRIPTION="
+mcabber includes features such as SSL support, MUC (Multi-User Chat) support,
+history logging, command completion, OpenPGP encryption, OTR (Off-the-Record
+Messaging) support and external action triggers."
+HOMEPAGE="http://www.${PN}.com"
+DOWNLOADS="${HOMEPAGE}/files/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="crypt otr spell ssl"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        dev-libs/glib:2
+        sys-libs/ncurses[unicode]
+        crypt? ( app-crypt/gpgme )
+        otr? ( >=net-libs/libotr-3.1.0 )
+        spell? ( app-spell/aspell )
+        ssl? ( dev-libs/openssl )"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-sigwinch )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'crypt gpgme' otr 'spell aspell' ssl )
+
