@@ -37,20 +37,21 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-remove-test.patch )
 
 PYTHON_MODNAME="bzrlib"
 
-src_install() {
-    distutils_src_install
-
-    insinto /usr/share/doc/${PNV}
-    doins -r doc/en/*
-
-    dobashcompletion contrib/bash/bzr
-}
-
 src_test() {
-    export LC_ALL=C
     # Some tests expect the usual pyc compiling behaviour.
     python_enable_pyc
     "${python}" bzr --no-plugins selftest || die "bzr selftest failed"
     # Just to make sure we don't hit any errors on later stages.
     python_disable_pyc
 }
+
+src_install() {
+    distutils_src_install
+
+    insinto /usr/share/doc/${PNV}
+    doins -r doc/en/*
+    mv "${IMAGE}"/usr{,/share}/man || die "Failed to move man-pages"
+
+    dobashcompletion contrib/bash/bzr
+}
+
