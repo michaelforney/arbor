@@ -24,6 +24,12 @@ scm-git_do_dependencies() {
     else
         echo "${git}"
     fi
+
+    if [[ -n $(scm_get_var TAG) ]]; then
+        local keys
+        scm_get_array GIT_TAG_SIGNING_KEYS keys
+        [[ ${#keys[@]} -gt 0 ]] && echo app-crypt/gnupg
+    fi
 }
 
 scm-git_do_check_vars() {
@@ -96,6 +102,33 @@ scm-git_do_appraise() {
                 echo "tag $(scm_get_var TAG) is not part of branch $(scm_get_var BRANCH) of ${dir}"
                 return 1
             fi
+
+            local keys
+            scm_get_array GIT_TAG_SIGNING_KEYS keys
+            if [[ ${#keys[@]} -gt 0 ]]; then
+                local gpghome=$(mktemp -d -p "${TEMP}" gpg-XXXXXX) errors
+                [[ -n ${gpghome} ]] || die "mktemp failed"
+
+                for key in "${keys[@]}"; do
+                    if ! errors=$(HOME=${gpghome} gpg --import "${key}" 2>&1); then
+                        echo "${errors}" >&2
+                        die "gpg --import ${key} failed"
+                    fi
+                done
+
+                cat >"${gpghome}/gpg" <<EOF
+#! /bin/sh
+exec $(type -P gpg) --keyserver-options no-auto-key-retrieve "\${@}"
+EOF
+                [[ ${?} -eq 0 ]] || die "create gpg wrapper failed"
+                chmod +x "${gpghome}/gpg" || die "chmod +x gpg wrapper failed"
+
+                if ! errors=$(HOME=${gpghome} PATH=${gpghome}:${PATH} nonfatal scm-git_git -q verify-tag "$(scm_get_var TAG)" 2>&1 >/dev/null); then
+                    echo "${errors}" >&2
+                    die "tag $(scm_get_var TAG) in ${dir} is not signed by any of the permitted keys"
+                fi
+            fi
+
             return 2
         else
             echo "${dir} does not contain the tag $(scm_get_var TAG)"
