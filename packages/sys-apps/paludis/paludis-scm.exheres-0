@@ -32,8 +32,7 @@ DEPENDENCIES="
             )
         )
     build+run:
-        >=app-admin/eselect-1.0.2
-        >=app-admin/eselect-news-20071201
+        app-admin/eclectic
         >=app-shells/bash-3
         inquisitio? ( dev-libs/pcre++ )
         python? (
@@ -92,7 +91,8 @@ src_configure() {
         --with-clients=${clients} \
         --with-environments=${environments} \
         --with-repositories=${repositories} \
-        --with-default-distribution=exherbo
+        --with-default-distribution=exherbo \
+        --with-config-framework=eclectic
 }
 
 src_test() {
