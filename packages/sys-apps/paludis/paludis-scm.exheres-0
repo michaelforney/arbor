@@ -32,7 +32,8 @@ DEPENDENCIES="
             )
         )
     build+run:
-        app-admin/eclectic
+        >=app-admin/eselect-1.0.2
+        >=app-admin/eselect-news-20071201
         >=app-shells/bash-3
         inquisitio? ( dev-libs/pcre++ )
         python? (
@@ -91,8 +92,7 @@ src_configure() {
         --with-clients=${clients} \
         --with-environments=${environments} \
         --with-repositories=${repositories} \
-        --with-default-distribution=exherbo \
-        --with-config-framework=eclectic
+        --with-default-distribution=exherbo
 }
 
 src_test() {
@@ -128,7 +128,6 @@ src_install() {
     do
         dozshcompletion "${WORK}/zsh-completion/${zshcomp}"
     done
-    keepdir /var/lib/exherbo/news
 }
 
 pkg_preinst() {
