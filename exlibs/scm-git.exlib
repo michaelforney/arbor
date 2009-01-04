@@ -67,7 +67,7 @@ scm-git_git() {
 scm-git_do_appraise() {
     local dir=$(scm_get_var CHECKOUT_TO)
 
-    if ! nonfatal scm-git_git -q rev-parse HEAD &>/dev/null; then
+    if ! nonfatal scm-git_git -q for-each-ref &>/dev/null; then
         echo "${dir} is not a git checkout"
         return 3
     fi
