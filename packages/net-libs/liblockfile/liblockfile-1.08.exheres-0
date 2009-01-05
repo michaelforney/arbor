@@ -4,34 +4,30 @@
 #     Copyright 1999-2007 Gentoo Foundation
 
 SUPPORTED_AUTOCONF=( 2.5 )
-SUPPORTED_AUTOMAKE=( 1.10 )
+SUPPORTED_AUTOMAKE=( none )
 
 require multilib autotools
 
-SUMMARY="Liblockfile is a shared library with NFS-safe locking functions."
+SUMMARY="Liblockfile is a shared library with NFS-safe locking functions"
 HOMEPAGE="http://packages.qa.debian.org/${PN:0:4}/${PN}.html"
-DOWNLOADS="mirror://debian/pool/main/libl/${PN}/${PN}_${PV}.tar.gz"
+DOWNLOADS="mirror://debian/pool/main/libl/${PN}/${PN}_${PV}.orig.tar.gz"
 
-LICENCES="LGPL-2"
+LICENCES="|| ( LGPL-3 LGPL-2.1 LGPL-2 GPL-3 GPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-respectflags.patch"
-    "${FILES}/${PN}-orphan-file.patch"
+    "${FILES}/${PNV}-respect-ldflags.patch"
+    "${FILES}/${PNV}-orphan-file.patch"
+    "${FILES}/${PNV}-remove-debug-code.patch"
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-mailgroup=mail --enable-shared )
 DEFAULT_SRC_INSTALL_PARAMS=( ROOT="${IMAGE}" )
 
 src_prepare() {
     default
-
-    # Rename an internal function so it does not conflict with
-    # libc's function.
-    sed -i -e 's/eaccess/egidaccess/g' *.c
-
-    eautoreconf
+    eautoconf
 }
 
 src_install() {
