@@ -1,0 +1,132 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( 1.10 )
+
+require alternatives toolchain-funcs versionator autotools
+
+export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst pkg_postrm
+
+SUMMARY="The only Operating System that doesn't come with a real editor"
+HOMEPAGE="http://www.gnu.org/software/${PN}/"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
+
+LICENCES="GPL-3"
+SLOT="$(get_major_version)"
+MYOPTIONS="alsa gif gtk jpeg png spell tiff X xpm
+    ( gif gtk jpeg png tiff xpm ) [[ requires = X ]]"
+
+DEPENDENCIES="
+    build:
+        alsa? ( dev-util/pkg-config )
+        X? ( dev-util/pkg-config )
+    build+run:
+        net-libs/liblockfile
+        sys-libs/ncurses
+        alsa? ( >=sys-sound/alsa-lib-1.0.0 )
+        spell? ( app-spell/aspell )
+        X? (
+            x11-libs/libXmu
+            x11-libs/libXt
+            x11-data/xbitmaps
+            gif? ( media-libs/giflib )
+            gtk? (
+              >=dev-libs/glib-2.6:2
+              >=x11-libs/gtk+-2.6:2
+              >=x11-libs/libXft-0.13.0
+            )
+            jpeg? ( media-libs/jpeg )
+            png? ( media-libs/libpng )
+            tiff? ( media-libs/tiff )
+            xpm? ( x11-libs/libXpm )
+        )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --program-suffix=-${SLOT}
+    --infodir=/usr/share/info/emacs-${SLOT}
+    --without-kerberos
+    --without-kerberos5
+    --without-hesiod
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'alsa sound'
+    'X x'
+    'gtk x-toolkit gtk' 'gtk toolkit-scroll-bars'
+    'gif' 'jpeg' 'png' 'xpm'
+)
+
+
+# I screwed up and created directories instead of files for high-score things.
+# This'll barf at the merge stage, paludis doesn't allow 'file over directory' merges.
+# This can go for the next version bump
+emacs_pkg_pretend() {
+    if best_version "<${CATEGORY}/${PN}-22.3"; then
+        die "Screwed upgrade path, remove all previously installed versions of ${CATEGORY}/${PN} first"
+    fi
+}
+
+emacs_pkg_setup() {
+    # Gentoo bug #131505
+    export SANDBOX_ON=0
+}
+
+emacs_src_prepare() {
+    # Link to giflib instead of ungif
+    sed -e '/AC_CHECK_LIB/s/ungif,/gif,/' \
+        -e '/AC_DEFINE.*HAVE_GIF/s/ungif/gif/' \
+        -e 's/-lungif/-lgif/' \
+        -i configure.in src/Makefile.in || die 'Sed to link to giflib failed'
+
+    # Compressing *.el files saves 25MB diskspace, which is not worth it on modern systems
+    sed -e 's/@GZIP_PROG@//' \
+        -i {.,leim}/Makefile.in || die 'Sed to disable elisp compression failed'
+
+    autotools_src_prepare
+}
+
+emacs_src_install() {
+    default
+
+    keepdir /usr/share/${PN}/site-lisp
+
+    # Handle slotting:
+    rm "${IMAGE}/usr/bin/${PNV}-${SLOT}" || die 'Failed to remove duplicate emacs binary'
+
+    local i m
+    for m in "${IMAGE}"/usr/share/man/man?/*; do
+        mv "${m}" "${m%.1}-${SLOT}.1" || die "mv man ${m} failed"
+    done
+    for i in "${IMAGE}"/usr/share/info/${PN}-${SLOT}/*; do
+        mv "${i}" "${i}.info" || die "mv info ${i} failed"
+    done
+
+    # Compile a list of everything we install that needs the alternatives treatment:
+    cd "${IMAGE}"
+
+    local unique src target alternatives=()
+    for src in usr/bin/*-${SLOT} usr/share/man/man?/* ; do
+        target=${src/-${SLOT}}
+        unique=${target##*/}
+        alternatives+=( "${unique}" "/${target}" "${src##*/}" )
+    done
+    alternatives+=( info/${PN} /usr/share/info/${PN} ${PN}-${SLOT} )
+
+    local importance=${SLOT//scm/999}
+    alternatives_for \
+        ${PN} ${PN}-${SLOT} ${importance} \
+        ${alternatives[@]}
+    # FIXME: alternatives for ctags
+}
+
+emacs_pkg_postinst() {
+    alternatives_pkg_postinst
+}
+
+emacs_pkg_postrm() {
+    alternatives_pkg_postrm
+}
+
