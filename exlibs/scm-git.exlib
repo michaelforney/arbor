@@ -106,7 +106,7 @@ scm-git_do_appraise() {
             local keys
             scm_get_array GIT_TAG_SIGNING_KEYS keys
             if [[ ${#keys[@]} -gt 0 ]]; then
-                local gpghome=$(mktemp -d -p "${TEMP}" gpg-XXXXXX) errors
+                local gpghome=$(mktemp -d -p "${TEMP}" gpg-XXXXXX)
                 [[ -n ${gpghome} ]] || die "mktemp failed"
 
                 cat >"${gpghome}/gpg" <<EOF
