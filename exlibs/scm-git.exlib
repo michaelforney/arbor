@@ -109,24 +109,20 @@ scm-git_do_appraise() {
                 local gpghome=$(mktemp -d -p "${TEMP}" gpg-XXXXXX) errors
                 [[ -n ${gpghome} ]] || die "mktemp failed"
 
-                for key in "${keys[@]}"; do
-                    if ! errors=$(HOME=${gpghome} gpg --import "${key}" 2>&1); then
-                        echo "${errors}" >&2
-                        die "gpg --import ${key} failed"
-                    fi
-                done
-
                 cat >"${gpghome}/gpg" <<EOF
-#! /bin/sh
-exec $(type -P gpg) --keyserver-options no-auto-key-retrieve "\${@}"
+#! /usr/bin/env bash
+$(HOME=${gpghome} declare -p HOME)
+$(gpg=$(type -P gpg); declare -p gpg)
+errors=\$("\${gpg}" --keyserver-options no-auto-key-retrieve "\${@}" 2>&1 >/dev/null) && exit
+status=\${?}
+echo "\${errors}" >&2
+exit \${status}
 EOF
                 [[ ${?} -eq 0 ]] || die "create gpg wrapper failed"
                 chmod +x "${gpghome}/gpg" || die "chmod +x gpg wrapper failed"
 
-                if ! errors=$(HOME=${gpghome} PATH=${gpghome}:${PATH} nonfatal scm-git_git -q verify-tag "$(scm_get_var TAG)" 2>&1 >/dev/null); then
-                    echo "${errors}" >&2
-                    die "tag $(scm_get_var TAG) in ${dir} is not signed by any of the permitted keys"
-                fi
+                PATH=${gpghome}:${PATH} gpg --import "${keys[@]}" || die "gpg --import ${keys[@]} failed"
+                PATH=${gpghome}:${PATH} scm-git_git -q verify-tag "$(scm_get_var TAG)" >/dev/null
             fi
 
             return 2
