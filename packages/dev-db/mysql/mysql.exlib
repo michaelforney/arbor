@@ -19,7 +19,9 @@ http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="big-tables debug ssl"
+MYOPTIONS="big-tables debug embedded-server ssl
+    embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
+"
 
 DEPENDENCIES="
     build+run:
@@ -30,6 +32,8 @@ _DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNVR}" )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     big-tables
     debug
+    # XXX: Add a patch to compile proper shared libraries for mysql embedded
+    'embedded-server' 'embedded-server embedded-privilege-control'
     'ssl openssl'
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -44,9 +48,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # post,suggested: perl? ( dev-perl/DBD-Mysql )
     --without-bench
     --with-comment="Exherbo, ${PNVR}"
-    # XXX: Add option=embedded, and a patch to compile proper shared libraries for mysql embedded
-    --without-embedded-server
-    --without-embedded-privilege-control
     --with-mysqld-user=mysql
     # Use the system readline. --with-readling builds the internal readling copy.
     --without-readline
