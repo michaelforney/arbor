@@ -1,0 +1,50 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="git://git.sv.gnu.org/${PN}.git"
+
+require ${PN} scm-git
+
+DOWNLOADS=""
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="dbus freetype gpm otf svg tiff
+    ( freetype otf svg tiff )    [[ requires = X ]]
+    otf [[
+        description = [ Support for OpenType fonts ]
+        requires = freetype
+    ]]
+"
+
+DEPENDENCIES="
+    build:
+      >=sys-apps/texinfo-4.6 [[ description = [ Needed to build info pages for non-releases ] ]]
+        dbus? ( dev-util/pkg-config )
+    build+run:
+        dbus? ( >=sys-apps/dbus-1.0.0 )
+        freetype? (
+          >=media-libs/fontconfig-2.2.0
+            media-libs/freetype:2
+          >=x11-libs/libXft-0.13.0
+        )
+        gpm? ( sys-libs/gpm )
+        otf? ( dev-libs/libotf )
+        svg? ( gnome-desktop/librsvg:2 )
+        tiff? ( media-libs/tiff )
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
+    'dbus' 'freetype' 'freetype xft' 'gpm' 'otf libotf' 'svg rsvg' 'tiff'
+)
+DEFAULT_SRC_CONFIGURE_PARAMS+=(
+    --without-m17n-flt
+    --without-xim
+)
+
+src_prepare() {
+    # We need this in src_install()
+    EMACS_SCM_REAL_VERSION=$(sed -ne '/^AC_INIT/s/^AC_INIT([[:alpha:],]*[[:space:]]*\([[:digit:].]*\))$/\1/p' configure.in)
+    [[ -z ${EMACS_SCM_REAL_VERSION} ]] && die "EMACS_SCM_REAL_VERSION sed sanity check failed"
+
+    emacs_src_prepare
+}
+

@@ -94,7 +94,7 @@ emacs_src_install() {
     keepdir /usr/share/${PN}/site-lisp
 
     # Handle slotting:
-    rm "${IMAGE}/usr/bin/${PNV}-${SLOT}" || die 'Failed to remove duplicate emacs binary'
+    rm "${IMAGE}/usr/bin/${PN}-${EMACS_SCM_REAL_VERSION:-${PV}}-${SLOT}" || die 'Failed to remove duplicate emacs binary'
 
     local i m
     for m in "${IMAGE}"/usr/share/man/man?/*; do
