@@ -1,0 +1,71 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require versionator multilib
+
+MY_PNV="${PNV/_alpha/a}"
+
+SUMMARY="Highly portable CD/DVD/BluRay command line recording software"
+DESCRIPTION="
+The suite includes the following programs:
+
+cdrecord    A CD/DVD/BD recording program
+readcd      A program to read CD/DVD/BD media with CD-clone features
+cdda2wav    The most evolved CD-audio extraction program with paranoia support
+mkisofs     A program to create hybrid ISO9660/JOLIET/HFS filesystes with optional Rock Ridge attributes
+isodebug    A program to print mkisofs debug information from media
+isodump     A program to dump ISO-9660 media
+isoinfo     A program to analyse/verify ISO/9660/Joliet/Rock-Ridge Filesystems
+isovfy      A program to verify the ISO-9660 structures
+rscsi       A Remote SCSI enabling daemon
+"
+HOMEPAGE="http://cdrecord.berlios.de/private/cdrecord.html"
+DOWNLOADS="ftp://ftp.berlios.de/pub/cdrecord/$([[ -z ${PV/*_alpha*} ]] && echo 'alpha/')/${MY_PNV}.tar.bz2"
+
+# COPYING has detailed licence info for each subpart of the project
+LICENCES="CDDL
+    GPL-2.0 [[ note = [ mkisofs ] ]]
+    LGPL-2.1 [[ note = [ libcdrparanoia ] ]]"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+# Internal libfile (patched?)
+#          libcdparanoia (patched)
+DEPENDENCIES="
+    build+run:
+        !app-cdr/cdrkit [[ description = [ Various file collisions: /usr/bin/{devdump,isodebug,isodump,isoinfo,isovfy} ] ]]
+"
+
+WORK=${WORKBASE}/${PN}-$(get_version_component_range 1-3)
+
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+
+src_prepare() {
+    sed -e "/^INS_BASE/s:/opt/schily:/usr:" \
+        -e "/^LDPATH/s:/opt/schily:/usr:" \
+        -e "/^RUNPATH/s:-R/opt/schily/lib::" \
+        -e "/^LDPATH/s:lib:$(get_libdir):" \
+        -e "/^RUNPATH/s:lib:$(get_libdir):" \
+        -i DEFAULTS/Defaults.linux \
+        || die "Failed to fix installation paths"
+}
+
+# ./configure is a shell script that notifies people not to use ./configure anymore, and fails
+src_configure() {
+    :
+}
+
+src_install() {
+    default
+
+    if [[ $(get_libdir) != lib ]]; then
+        mv "${IMAGE}"/usr/{lib,$(get_libdir)} || die "Failed to move libs into the correct libdir"
+    fi
+
+    mv "${IMAGE}"/usr/{,share/}man || die "Failed to move manual pages into /usr/share"
+
+    # Don't install man-pages that related to the buildsystem
+    rm -r "${IMAGE}"/usr/share/man/man5 || die "Failed to remove silly manual pages"
+}
+
