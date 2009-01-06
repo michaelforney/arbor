@@ -121,7 +121,7 @@ EOF
                 [[ ${?} -eq 0 ]] || die "create gpg wrapper failed"
                 chmod +x "${gpghome}/gpg" || die "chmod +x gpg wrapper failed"
 
-                PATH=${gpghome}:${PATH} gpg --import "${keys[@]}" || die "gpg --import ${keys[@]} failed"
+                PATH=${gpghome}:${PATH} gpg --import "${keys[@]}" || die "gpg --import ${keys[*]} failed"
                 PATH=${gpghome}:${PATH} scm-git_git -q verify-tag "$(scm_get_var TAG)" >/dev/null
             fi
 
