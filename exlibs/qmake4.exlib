@@ -8,14 +8,18 @@ require multilib
 
 export_exlib_phases src_configure
 
+[[ -z ${QMAKE4_EXLIB_QT_DEPENDENCY} ]] &&
 DEPENDENCIES="build: x11-libs/qt:4 [[ note = [ Qt-Core, for qmake ] ]]"
 
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 
 eqmake4() {
+    [[ -x /usr/bin/qmake ]] || die "eqmake4() called but no qmake found"
+
     [[ ${@} == ${@%.pro} && -z ${EQMAKE4_SOURCES[@]} ]] && EQMAKE4_SOURCES=( ${PN}.pro )
 
-    local cmd=( /usr/bin/qmake
+    local cmd=(
+        /usr/bin/qmake
         QTDIR="/usr/$(get_libdir)"
         QMAKE="/usr/bin/qmake"
         QMAKE_CFLAGS_RELEASE="${CFLAGS}"
