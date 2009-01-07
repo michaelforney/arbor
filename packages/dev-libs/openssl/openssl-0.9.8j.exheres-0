@@ -12,9 +12,10 @@ MYOPTIONS="platform: ppc64"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1
-    "${FILES}"/openssl-0.9.8i-CFLAGS.patch
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-CFLAGS.patch )
+# Parallel build is broken
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_PREFIX="${IMAGE}" )
 
 src_prepare() {
     default
@@ -27,18 +28,12 @@ src_configure() {
 
     # ppc64 needs to be configured manually with Configure instead of config.
     if option platform:ppc64; then
-        ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl \
-            shared threads || die "Configure failed"
+        ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl shared threads \
+            || die "Configure failed (ppc64)"
     else
-        ./config --prefix=/usr --openssldir=/etc/ssl \
-            shared threads || die "Configure failed"
+        ./config --prefix=/usr --openssldir=/etc/ssl shared threads || die "Configure failed"
     fi
 }
-
-# parallel build is broken
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-
-DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_PREFIX="${IMAGE}" )
 
 src_install() {
     default
