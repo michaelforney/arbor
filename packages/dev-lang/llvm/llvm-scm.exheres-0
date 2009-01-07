@@ -1,0 +1,23 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="http://llvm.org/svn/llvm-project/llvm"
+
+require llvm scm-svn
+
+DOWNLOADS=""
+
+PLATFORMS="~amd64"
+
+# FIXME /usr/lib is hardcoded
+
+# Doesn't currently build, shared libs aren't recommended by upstream
+# CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
+
+src_install() {
+    cmake_src_install
+
+    # FIXME Shouldn't be built in the first place
+    rm -r "${IMAGE}"/usr/examples || die "Couldn't remove /usr/examples"
+}
+
