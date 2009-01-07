@@ -1,0 +1,45 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="C library for reading and writing tar, cpio, zip, ISO, and other archive formats"
+DESCRIPTION="
+The formats supported include:
+gzip (read and write, uses zlib)
+bzip2 (read and write, uses bzlib)
+compress (read and write, uses an internal implementation)
+separate command-line compressors (no auto-detect for these)
+tar (read and write, including GNU extensions)
+pax (read and write, including GNU and star extensions)
+ISO9660 (read only, with some limitations)
+Zip (read only, with some limitations)
+mtree (read and write)
+shar (write only)
+ar (read and write, including BSD and GNU/SysV variants)
+"
+# XXX: cpio (read and write, including odc and newc variants)
+HOMEPAGE="http://code.google.com/p/${PN} http://people.freebsd.org/~kientzle/${PN}"
+DOWNLOADS="http://${PN}.googlecode.com/files/${PNV}.tar.gz"
+
+LICENCES="BSD"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="acl xattr"
+
+DEPENDENCIES="
+    build+run:
+        app-arch/gzip
+        app-arch/bzip2
+        app-arch/lzma-utils
+        acl? ( sys-apps/acl )
+        xattr? ( sys-apps/attr )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+    # FIXME: bsdcpio tests fail
+    # --enable-bsdcpio=shared
+    --disable-bsdcpio
+    --with-{zlib,bz2lib,lzmadec}
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl xattr )
+
