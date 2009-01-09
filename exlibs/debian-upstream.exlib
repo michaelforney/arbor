@@ -1,0 +1,11 @@
+# Copyright 2009 Mike Kelly <pioto@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+# This exlib is useful for packages whose upstream is Debian. It'll do
+# 'the right thing' for DOWNLOADS
+
+DEBIAN_UPSTREAM_PN="${DEBIAN_UPSTREAM_PN:-${PN}}"
+DEBIAN_UPSTREAM_PV="${DEBIAN_UPSTREAM_PV:-${PV}}"
+
+DOWNLOADS="mirror://debian/pool/main/${DEBIAN_UPSTREAM_PN:0:1}/${DEBIAN_UPSTREAM_PN}/${DEBIAN_UPSTREAM_PN}_${DEBIAN_UPSTREAM_PV}.tar.gz"
+

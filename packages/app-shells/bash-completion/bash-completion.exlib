@@ -14,9 +14,6 @@ DEPENDENCIES="
         app-admin/eclectic
       >=app-shells/bash-3.2_p19"
 
-#WORK="${WORKBASE}/${PN}"
-#DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PV} )
-
 src_prepare() {
     sed -i '/BASH_COMPLETION=\/etc\/bash_completion/s,/etc/bash_completion,/usr/share/bash-completion/base,' \
         bash_completion || die "BASH_COMPLETION sed failed"
