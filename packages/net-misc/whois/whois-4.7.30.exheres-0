@@ -8,8 +8,6 @@
 
 require toolchain-funcs
 
-MY_PNV=${PNV/-/_}
-
 SUMMARY="Marco d'Itri's improved whois client"
 DESCRIPTION="
 This whois implementation supports all protocol extensions (RIPE, 6bone, CRSNIC)
@@ -17,7 +15,8 @@ with the familiar RIPE command line interface and IPv6 support. It also
 automagically queries the right registry for all domains and most netblocks.
 "
 HOMEPAGE="http://www.linux.it/~md/software/"
-DOWNLOADS="mirror://debian/pool/main/w/whois/${MY_PNV}.tar.gz"
+
+require debian-upstream
 
 REMOTE_IDS="freshmeat:${PN}"
 
