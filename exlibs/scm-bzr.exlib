@@ -1,0 +1,91 @@
+# Copyright 2009 Mike Kelly <pioto@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+# This exlib provides support for bazzar repositories. In addition to
+# the standard scm.exlib options, the following variables are
+# recognized:
+#
+#   SCM_REVISION - a revision spec to checkout. See `bzr help
+#   revisionspec`
+
+if [[ -z ${SCM_TYPE} ]]; then
+    SCM_TYPE=bzr
+    require scm
+fi
+
+scm-bzr_do_dependencies() {
+    local bzr="dev-scm/bzr"
+    if [[ $(scm_get_var REPOSITORY) == sftp://* ]]; then
+        echo "${bzr}[sftp]"
+    else
+        echo "${bzr}"
+    fi
+}
+
+scm-bzr_do_check_vars() {
+    # I really don't feel like making a gigantic regexp to match all the
+    # possible bzr revision specs...
+    scm_modify_var REVISION scm_trim_slashes -leading -trailing
+}
+
+scm-bzr_bzr() {
+    local echo=echo
+    if [[ ${1} == -q ]]; then
+        shift
+        echo=:
+    fi
+
+    local cmd=${1} global=( ) extra=( )
+    shift
+    local dir=$(scm_get_var CHECKOUT_TO)
+    if has "${cmd}" checkout co; then
+        extra+=( '--lightweight' )
+        dir=${dir%/*}
+    fi
+
+    ${echo} cd "${dir}" '&&' bzr "${global[@]}" "${cmd}"  "${extra[@]}" "${@}"
+    ( cd "${dir}" && bzr "${global[@]}" "${cmd}" "${extra[@]}" "${@}" ) \
+        || die_unless_nonfatal "bzr ${cmd} failed"
+}
+
+scm-bzr_do_revision() {
+    scm-bzr_bzr -q revno
+}
+
+scm-bzr_get_branch() {
+    scm-bzr_bzr -q info |sed -n '/branch:/s/.*branch: \(.*\)\//\1/p'
+}
+
+scm-bzr_do_appraise() {
+    local dir=$(scm_get_var CHECKOUT_TO)
+
+    if [[ ! -d ${dir}/.bzr ]]; then
+        echo "${dir} is not a bzr checkout"
+        return 3
+    fi
+
+    if [[ $(scm_get_var REPOSITORY) != $(scm-bzr_get_branch) ]]; then
+        echo "${dir} is a checkout of $(scm-bzr_get_branch), but wanted $(scm_get_var REPOSITORY)"
+        return 3
+    fi
+
+    if [[ -n $(scm_get_var REVISION) ]]; then
+        if [[ $(scm_get_var REVISION) -eq $(scm-bzr_do_revision) ]]; then
+            return 2
+        else
+            echo "${dir} is a checkout of revision $(scm-bzr_do_revision), but wanted $(scm_get_var REVISION)"
+            return 1
+        fi
+    fi
+}
+
+scm-bzr_do_update() {
+    local branch=$(scm-bzr_get_branch)
+    scm-bzr_bzr switch ${branch}
+}
+
+scm-bzr_do_checkout() {
+    local dir=$(scm_get_var CHECKOUT_TO) branch=$(scm_get_var REPOSITORY)
+    scm-bzr_bzr checkout ${branch} ${dir}
+}
+
