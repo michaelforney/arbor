@@ -12,20 +12,24 @@ SUMMARY="An open-source memory debugger for GNU/Linux"
 HOMEPAGE="http://www.valgrind.org"
 DOWNLOADS="http://www.valgrind.org/downloads/${PNV}.tar.bz2"
 
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/docs/manual/dist.news.html"
+
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="-* ~amd64 ~x86"
-MYOPTIONS="X platform: amd64"
+MYOPTIONS="platform: amd64"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-pkg-config.patch" )
+# DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-pkg-config.patch" )
 
 src_prepare() {
     default
 
-    sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
-    sed -e "s:doc/${PN}:doc/${PNV}:" -i docs/Makefile.am
+    sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' \
+        -i configure.in #|| die "CFLAGS sed failed"
+    sed -e "s:doc/${PN}:doc/${PNV}:" \
+        -i docs/Makefile.am || "docs sed failed"
 
     eautoreconf
 }
@@ -40,7 +44,6 @@ src_configure() {
         myconf='--enable-only64bit'
     fi
 
-    econf ${myconf} \
-        $(option X && echo ' --with-x' || echo ' --with-x=no')
+    econf ${myconf}
 }
 
