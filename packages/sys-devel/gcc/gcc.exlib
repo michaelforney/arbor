@@ -2,8 +2,6 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-# Based in part upon 'gcc.ebuild' from Gentoo, which is:
-#     Copyright 1999-2008 Gentoo Foundation.
 
 require multilib versionator alternatives
 
@@ -49,6 +47,8 @@ fi
 WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 
+DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
+
 src_unpack() {
     if ever at_least 4.3 && option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${SLOT}.jar}
@@ -77,8 +77,6 @@ src_configure() {
         $(option_enable nls) \
         $(option_enable propolice libssp)
 }
-
-DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
 src_install() {
     default
