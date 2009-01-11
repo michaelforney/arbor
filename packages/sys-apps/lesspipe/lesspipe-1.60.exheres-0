@@ -1,0 +1,128 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2008, 2009 David Leverton <dleverton@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A preprocessor for less"
+HOMEPAGE="http://www-zeuthen.desy.de/~friebel/unix/lesspipe.html"
+DOWNLOADS="ftp://ftp.ifh.de/pub/unix/utility/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        app-arch/unzip [[ note = [ Used for one test ] ]]
+    build+run:
+        dev-lang/perl:*
+        sys-apps/file
+    run:
+        app-arch/gzip
+        app-arch/tar
+        sys-apps/less
+        sys-devel/binutils [[ note = [ For ar, nm, strings ] ]]
+        perl? ( dev-lang/perl:* )
+
+    post,suggested:
+        app-arch/bzip2 [[ description = [ Allows viewing bzipped files and tarballs ] ]]
+        app-arch/lzip [[ description = [ Allows viewing lzipped files and tarballs ] ]]
+        app-arch/lzma-utils [[ description = [ Allows viewing lzma-compressed files and tarballs ] ]]
+
+        app-arch/cpio [[ description = [ Allows viewing RPM packages, together with app-arch/rpm ] ]]
+        app-arch/rpm [[
+            description = [ Allows viewing the contents of RPM packages, together with app-arch/cpio ]
+            note = [ Supports rpmunpack too, but that appears to be long dead ]
+        ]]
+
+        <=sys-devel/gcc-4.3_alpha[java] [[
+            description = [ Allows viewing the contents of Jar archives ]
+            note = [ fastjar replaced with gjar in 4.3; fastjar released separately, but again, long dead ]
+        ]]
+
+        app-arch/unzip [[ description = [ Allows viewing the contents of Zip archives and OpenDocument/OpenOffice documents ] ]]
+
+        || (
+            app-arch/unrar [[ description = [ Allows viewing the contents of RAR archives ] ]]
+            app-arch/rar [[ description = [ Allows viewing the contents of RAR archives ] ]]
+        )
+
+        app-arch/p7zip [[ description = [ Allows viewing the contents of 7-zip archives ] ]]
+        app-arch/cabextract [[ description = [ Allows viewing the contents of Windows cabinet archives ] ]]
+
+        || (
+            app-cdr/cdrtools [[ description = [ Allows viewing information about ISO9660 filesystem images ] ]]
+            app-cdr/cdrkit [[ description = [ Allows viewing information about ISO9660 filesystem images ] ]]
+        )
+
+        || (
+            app-text/texlive [[ description = [ Allows viewing TeX DVI documents ] ]]
+            app-text/dvi2tty [[ description = [ Allows viewing TeX DVI documents ] ]]
+        )
+
+        || (
+            app-text/html2text [[ description = [ Allows viewing HTML documents ] ]]
+            www-client/elinks [[ description = [ Allows viewing HTML documents ] ]]
+            www-client/links [[ description = [ Allows viewing HTML documents ] ]]
+            www-client/lynx [[ description = [ Allows viewing HTML documents ] ]]
+            www-client/w3m [[ description = [ Allows viewing HTML documents ] ]]
+        )
+
+        sys-apps/groff [[ description = [ Allows formatting and viewing *roff documents of various kinds ] ]]
+        app-arch/dpkg [[ description = [ Used for viewing metadata about Debian packages ] ]]
+
+        || (
+            app-text/pstotext [[ description = [ Allows viewing PostScript documents ] ]]
+            app-text/ghostscript [[ description = [ Allows viewing PostScript documents ] ]]
+        )
+
+        app-text/poppler [[ description = [ Allows viewing PDF documents ] ]]
+        app-text/djvu [[ description = [ Allows viewing DjVu documents ] ]]
+
+        || (
+            app-text/antiword [[ description = [ Allows viewing Microsoft Word documents ] ]]
+            app-text/catdoc [[ description = [ Allows viewing Microsoft Word documents ] ]]
+        )
+
+        app-text/unrtf [[ description = [ Allows viewing RTF documents ] ]]
+        app-text/xlhtml [[ description = [ Allows viewing Microsoft Excel spreadsheets, together with a suitable text-mode HTML viewer ] ]]
+        app-text/ppthtml [[ description = [ Allows viewing Microsoft Powerpoint presentations, together with a suitable text-mode HTML viewer ] ]]
+        app-text/o3read [[ description = [ Allows viewing OpenDocument/OpenOffice documents, together with a suitable text-mode HTML viewer ] ]]
+        media-gfx/ImageMagick [[ description = [ Allows viewing metadata about images in various formats ] ]]
+
+        || (
+            media-sound/id3v2 [[ description = [ Allows viewing ID3 tags in MP3 files ] ]]
+            media-sound/mp3info [[ description = [ Allows viewing ID3 tags in MP3 files ] ]]
+        )
+
+        sys-libs/glibc [[ description = [ Allows performing some character encoding conversions on viewed files ] ]]
+        app-crypt/gnupg [[ description = [ Allows viewing data encrypted by PGP or compatible programs ] ]]
+        dev-util/plutil [[ description = [ Allows viewing binary-format Mac OS X property list files ] ]]
+"
+# lsbom - appears to be OS X-only
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/lesspipe-1.60-runtime-tests.patch )
+
+src_configure() {
+    # Can't use econf as it's not autotools, just a hand-written perl script
+    ./configure --prefix="${IMAGE}"/usr --yes || \
+        die "failed to configure lesspipe"
+}
+
+src_compile() {
+    # Don't run ./configure twice
+    :
+}
+
+# german.txt is outdated, and everyone speaks English anyway :-P
+src_install() {
+    dodir /usr/share/man/man1 # Makefile won't install man page otherwise
+    default
+
+    hereenvd 70less <<EOF
+LESSOPEN="| lesspipe.sh %s"
+LESS="-R -M --shift 5"
+EOF
+}
+
