@@ -1,0 +1,33 @@
+# Copyright 2008 Thomas Anderson
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require freedesktop-desktop freedesktop-mime
+
+MY_PN="djvulibre"
+WORK="${WORKBASE}/${MY_PN}-${PV}"
+
+SUMMARY="DjVu viewers, encoders and utilities"
+HOMEPAGE="http://${PN}.sourceforge.org/"
+DOWNLOADS="mirror://sourceforge/${PN}/${MY_PN}-${PV}.tar.gz"
+
+LICENCES="GPL-2"
+MYOPTIONS=""
+SLOT="0"
+
+DEPENDENCIES="
+    build+run:
+      >=media-libs/jpeg-6b
+        media-libs/tiff
+"
+
+REMOTE_IDS="sourceforge:${PN}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-jpeg
+    --with-tiff
+    --enable-threads
+    # Use djview4 if you need a djvu viewer http://djvu.sourceforge.net/djview4.html
+    --disable-djview --without-qt --disable-desktopfiles --disable-i18n --disable-xmltools
+)
+
