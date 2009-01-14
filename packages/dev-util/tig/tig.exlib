@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel
+# Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'tig-0.9.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -19,6 +19,7 @@ DEPENDENCIES="
         sys-libs/ncurses"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libiconv )
+# FIXME: install contrib/tigrc, when the warnings it spews are fixed
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ${PN}{.1,rc.5}.{html,txt} )
 
 src_install() {
