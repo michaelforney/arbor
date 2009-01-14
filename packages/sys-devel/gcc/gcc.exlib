@@ -199,6 +199,7 @@ EOF
             alternatives+=( classpath_security /${x} ${bn%.${ext}}-${SLOT}.${ext} )
         done
         alternatives+=( libgcj_tools /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
+        alternatives+=( usr_bin_java /usr/bin/java gij-${SLOT} )
     fi
 
     alternatives_for "${alternatives[@]}"
