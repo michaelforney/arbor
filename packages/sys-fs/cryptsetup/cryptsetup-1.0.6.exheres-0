@@ -1,4 +1,5 @@
-# Copyright (C) 2008 Stephen Bennett
+# Copyright 2008 Stephen Bennett
+# Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
 SUPPORTED_AUTOCONF=( 2.5 )
@@ -13,7 +14,7 @@ DOWNLOADS="http://cryptsetup.googlecode.com/files/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="static"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
@@ -26,13 +27,44 @@ DEPENDENCIES="
         sys-fs/udev
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( static )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-sbindir=/sbin )
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-udevsettle.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PNV}-udevsettle.patch"
+    "${FILES}/${PNV}-Fix-make-distcheck.patch"
+)
+
+src_configure() {
+    local static dir
+    for static in enable disable; do
+        dir="${WORKBASE}/${static}-static"
+        mkdir -v "${dir}"
+        cd "${dir}"
+        ECONF_SOURCE="../${PNV}"
+        DEFAULT_SRC_CONFIGURE_PARAMS=( "--${static}-static" "--sbindir=/sbin" )
+        default
+    done
+}
+
+src_compile() {
+    local static dir
+    for static in enable disable; do
+        dir="${WORKBASE}/${static}-static"
+        cd "${dir}"
+        default
+    done
+}
 
 src_install() {
+    into /
+    newsbin "${WORKBASE}/enable-static/src/cryptsetup" cryptsetup.static
+
+    cd "${WORKBASE}/disable-static"
     default
 
     # make install creates this empty dir for some reason. Nuke it.
     rmdir "${IMAGE}/usr/$(get_libdir)/${PN}"
+
+    # for the docs
+    cd "${WORK}"
+    default
 }
+

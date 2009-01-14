@@ -1,0 +1,43 @@
+Upstream: Submitted, http://code.google.com/p/cryptsetup/issues/detail?id=6
+Reason: split compile doesn't work properly
+Source: Mike Kelly <pioto@pioto.org>
+
+From bbad582d0e6ca4c35c5f58dc3f06158b98a80969 Mon Sep 17 00:00:00 2001
+From: Mike Kelly <pioto@pioto.org>
+Date: Tue, 13 Jan 2009 23:30:47 -0500
+Subject: [PATCH] Fix `make distcheck`.
+
+---
+ luks/Makefile.am |    2 +-
+ src/Makefile.am  |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/luks/Makefile.am b/luks/Makefile.am
+index 7d7f1b9..47d63ed 100644
+--- a/luks/Makefile.am
++++ b/luks/Makefile.am
+@@ -2,7 +2,7 @@ moduledir = $(libdir)/cryptsetup
+ 
+ noinst_LTLIBRARIES = libluks.la
+ 
+-libluks_la_CFLAGS = -I sha
++libluks_la_CFLAGS = -I $(top_srcdir)/luks/sha
+ 
+ libluks_la_SOURCES = \
+ 	af.c \
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 8a74318..4b76058 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -15,7 +15,7 @@ cryptsetup_SOURCES = \
+ 
+ cryptsetup_LDADD = \
+ 	@POPT_LIBS@				\
+-	$(top_srcdir)/lib/libcryptsetup.la
++	$(top_builddir)/lib/libcryptsetup.la
+ 
+ if STATIC_CRYPTSETUP
+ _STATIC_FLAGS = -all-static
+-- 
+1.6.1
+
