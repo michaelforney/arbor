@@ -25,7 +25,6 @@ DEPENDENCIES="
         )"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-parallel-make.patch
     "${FILES}"/${PNV}-man-unicode-dashes.patch
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' )
@@ -41,7 +40,7 @@ src_install() {
         appresdir="${IMAGE}/etc/X11/app-defaults" \
         install
 
-    rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/$(get_libdir)/groff/site-tmac || \
+    rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/$(get_libdir)/groff/site-tmac ||
         die "rmdir failed"
 
     dosym tbl /usr/bin/gtbl
