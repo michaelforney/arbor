@@ -40,3 +40,10 @@ src_test() {
     ${python} ./run-tests.py --tmpdir="${TEMP}" || die "${python} .run-tests.py --tmpdir=\"${TEMP}\" failed"
 }
 
+src_install() {
+    distutils_src_install
+    dobashcompletion contrib/bash_completion
+    doman doc/hg*.?
+    dodoc doc/{hg.1,hgignore.5,hgrc.5}.{html,txt} contrib/sample.hgrc
+}
+
