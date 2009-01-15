@@ -1,0 +1,40 @@
+# Copyright 2008 Ciaran McCreesh
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Text based document generation"
+HOMEPAGE="http://www.methods.co.nz/asciidoc/"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        dev-lang/python:*
+
+    post,suggested:
+        app-text/docbook-dsssl-stylesheets
+        dev-libs/libxslt
+"
+
+UPSTREAM_DOCUMENTATION="
+http://powerman.name/doc/asciidoc [[ description = [ Cheatsheet ] ]]
+http://www.methods.co.nz/asciidoc/userguide.html [[ description = [ User Guide ] ]]
+http://www.methods.co.nz/asciidoc/faq.html [[ description = [ FAQ ] ]]
+"
+UPSTREAM_RELEASE_NOTES="http://www.methods.co.nz/asciidoc/CHANGELOG.html"
+
+src_prepare() {
+    sed -i 's, /etc/vim,,' Makefile.in \
+        || die 'install-vim suckage-fixing sed failed'
+}
+
+src_install() {
+    dodir '/usr/share/vim/vimfiles'
+    DEFAULT_SRC_INSTALL_PARAMS=( 'vimdir=/usr/share/vim/vimfiles' )
+    default
+}
+
