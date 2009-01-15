@@ -5,16 +5,20 @@ SUMMARY="Library and utilities for handling TIFF-files"
 HOMEPAGE="http://remotesensing.org/libtiff/"
 DOWNLOADS="ftp://ftp.remotesensing.org/pub/libtiff/${PNV}.tar.gz"
 
-LICENCES="as-is"
+LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="jpeg zlib X"
+MYOPTIONS="jpeg"
 
 DEPENDENCIES="
-    X? ( x11-libs/libICE
-          x11-libs/libX11 )
-    zlib? ( sys-libs/zlib )
-    jpeg? ( media-libs/jpeg )"
+    build+run:
+        x11-dri/freeglut
+        x11-dri/mesa
+        x11-libs/libX11
+        x11-libs/libICE
+        jpeg? ( media-libs/jpeg )
+"
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( zlib jpeg "X x" )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( jpeg )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-cxx --with-zlib --with-x )
 
