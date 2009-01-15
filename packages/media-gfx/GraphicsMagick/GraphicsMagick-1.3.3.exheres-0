@@ -1,0 +1,103 @@
+# Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( 1.10 )
+
+require autotools
+
+MY_PN="graphicsmagick"
+
+SUMMARY="GraphicsMagick Image Processing System"
+DESCRIPTION="
+GraphicsMagick is the swiss army knife of image processing. Comprised of 337K
+lines of C and C++ code, it provides a robust and efficient collection of tools
+and libraries which support reading, writing, and manipulating an image in over
+88 major formats including important formats like DPX, GIF, JPEG, JPEG-2000,
+PNG, PDF, PNM, and TIFF.
+
+GraphicsMagick is originally derived from ImageMagick 5.5.2 but has been
+completely independent of the ImageMagick project since then. Since the fork
+from ImageMagick in 2002, many improvements have been made (see news) by many
+authors using an open development model but without breaking the API or
+utilities operation. (More on the homepage)"
+HOMEPAGE="http://www.graphicsmagick.org"
+DOWNLOADS="mirror://sourceforge/${MY_PN}/${PNV}.tar.bz2"
+
+BUGS_TO="ingmar@exherbo.org"
+REMOTE_IDS="freshmeat:${PN} sourceforge:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/Changelog.html"
+UPSTREAM_NEWS="${HOMEPAGE}/NEWS.html"
+UPSTREAM_DOCUMENTATION="
+${HOMEPAGE}/FAQ.html [[ lang = en description = [ FAQ ] ]]
+"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="jasper"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libxml2
+        media-libs/freetype:2
+        media-libs/lcms
+        media-libs/libpng
+      >=media-libs/jpeg-6b
+        media-libs/tiff
+        x11-libs/libX11
+        x11-libs/libXext
+        jasper? ( media-libs/jasper )
+    run:
+        fonts/ghostscript-fonts-std
+    post,suggested:
+        sci-apps/gnuplot   [[ description = [ Support for reading GNUPlot files ] ]]
+"
+# TODO
+# - perl? ( >=dev-lang/perl-5.8.1:= )
+# - configure.ac also has checks for: rst2html, txt2html p7zip, zip, but none of these are necessary
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-tests.patch" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'jasper jp2'
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-threads
+    --disable-openmp
+    # Disable OpenMP for algorithms which sometimes run slower
+    --disable-openmp-slow
+    --with-modules --enable-shared
+    --with-gnu-ld
+    --without-included-ltdl
+    # C++
+    --with-magick-plus-plus
+    # Doesn't build
+    --without-perl
+    --with-bzlib
+    # libdps
+    --without-dps
+    # media-libs/libfpx
+    --without-fpx
+    # Enable Ghostscript library support (not recommended)
+    --without-gslib
+    # libjbig
+    --without-jbig
+    --with-jpeg
+    --with-lcms
+    --with-png
+    --with-tiff
+    # libtrio
+    --without-trio
+    # TrueType support (freetype)
+    --with-ttf
+    # WMF support, libwmf (or varieties?)
+    --without-wmf
+    # --with-fontpath=
+    # Tests fail without this
+    --with-gs-font-dir=/usr/share/fonts/default/ghostscript/
+    # --with-windows-font-dir=
+    --with-xml
+    --with-zlib
+)
+

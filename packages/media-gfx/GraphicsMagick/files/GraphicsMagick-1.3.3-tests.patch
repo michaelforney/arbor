@@ -1,0 +1,50 @@
+From b7bb04abbfc7a3104cb2e95677babc6432ff8144 Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Thu, 15 Jan 2009 14:32:29 +0100
+Subject: [PATCH] Disable some functionality tests for the MatLab format (MAT).
+
+They always fail for me, they pass outside sandbox.
+---
+ tests/Makefile.am |   19 +++++++++++++++++++
+ 1 files changed, 19 insertions(+), 0 deletions(-)
+
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index dfdae48..a4f09fb 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -84,6 +84,24 @@ TESTS_JPEG_XFAIL_TESTS = \
+ 	tests/rwfile_JPEG_truecolor16.sh
+ endif
+ 
++# These always fail for me with the following errors:
++#
++# Magick: No decode delegate for this image format (/var/tmp/paludis/build/media-gfx-GraphicsMagick-1.3.3/temp/gm671sgU)
++# FAIL: tests/rwblob_MAT_bilevel.sh
++# Magick: No decode delegate for this image format (/var/tmp/paludis/build/media-gfx-GraphicsMagick-1.3.3/temp/gm671sgU)
++# FAIL: tests/rwblob_MAT_gray.sh
++# Magick: No decode delegate for this image format (/var/tmp/paludis/build/media-gfx-GraphicsMagick-1.3.3/temp/gm671sgU)
++# FAIL: tests/rwblob_MAT_pallette.sh
++# Magick: No decode delegate for this image format (/var/tmp/paludis/build/media-gfx-GraphicsMagick-1.3.3/temp/gm671sgU)
++# FAIL: tests/rwblob_MAT_truecolor.sh
++#
++# Seems to work outside sandbox
++TESTS_MAT_XFAIL_TESTS= \
++	tests/rwblob_MAT_bilevel.sh \
++	tests/rwblob_MAT_gray.sh \
++	tests/rwblob_MAT_pallette.sh \
++	tests/rwblob_MAT_truecolor.sh
++
+ if !HasJP2
+ TESTS_JP2_XFAIL_TESTS = \
+ 	tests/rwblob_JP2_bilevel.sh \
+@@ -198,6 +216,7 @@ TESTS_XFAIL_TESTS = \
+ 	$(TESTS_JBIG_XFAIL_TESTS) \
+ 	$(TESTS_JP2_XFAIL_TESTS) \
+ 	$(TESTS_JPEG_XFAIL_TESTS) \
++	$(TESTS_MAT_XFAIL_TESTS) \
+ 	$(TESTS_PNG_XFAIL_TESTS) \
+ 	$(TESTS_TIFF_XFAIL_TESTS) \
+ 	$(TESTS_X11_XFAIL_TESTS)
+-- 
+1.6.1
+
