@@ -1,0 +1,42 @@
+# Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="A UNIX port of 7z"
+HOMEPAGE="http://sourceforge.net/projects/${PN}"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV/-/_}_src_all.tar.bz2"
+
+LICENCES="|| ( LGPL-3 LGPL-2.1 )"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+WORK="${WORKBASE}/${PNV/-/_}"
+
+DEFAULT_SRC_COMPILE_PARAMS=( -f makefile.parallel_jobs all3 )
+DEFAULT_SRC_INSTALL_PARAMS=( -f makefile.parallel_jobs DEST_HOME="${IMAGE}/usr" )
+
+src_prepare() {
+    sed -e "/^OPTFLAGS/s:-O::" \
+        -e "/^ALLFLAGS/s:-s::" \
+        -e "/^CXX/s:$: ${CXXFLAGS}:" \
+        -e "/^CC/s:$: ${CFLAGS}:" \
+        -e "/^DEST_SHARE/s:lib/:$(get_libdir)/:" \
+        -e "/Rar/d" \
+        -i makefile* || die "Failed to replace upstream flags"
+    rm -rf CPP/7zip/Compress/Rar || die "Failed to remove non-GPL Rar source-code"
+}
+
+src_test() {
+    emake -j1 all_test
+}
+
+src_install() {
+    default
+    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/Codecs || die "Removing empty Codecs/ subdir failed"
+    find "${IMAGE}" -type f -iname "*License*" -o -iname "*copying*" -delete || die "Failed to remove licence files"
+}
+
