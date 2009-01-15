@@ -1,23 +1,37 @@
-Source: Gentoo (bug #147904)
+Source: Ingmar Vanhassel (Also see Gentoo (bug #147904), for a previous occurence of this bug.)
 Upstream: Reported, not fixed, KDE #134207
 Reason: Fix incorrect --libs output in valgrind.pc
 
-diff -ruN valgrind-3.2.2/valgrind.pc.in valgrind-3.2.2-fixed/valgrind.pc.in
---- valgrind-3.2.2/valgrind.pc.in	2007-01-02 15:52:30.000000000 +0100
-+++ valgrind-3.2.2-fixed/valgrind.pc.in	2007-01-25 18:54:13.478053000 +0100
-@@ -4,13 +4,13 @@
+From ec4f057ca17482a7a01a9ce1a280cb5fb4edca3a Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Thu, 15 Jan 2009 16:27:50 +0100
+Subject: [PATCH] Fix pkg-config file.
+
+---
+ valgrind.pc.in |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/valgrind.pc.in b/valgrind.pc.in
+index bd03509..b4bb10f 100644
+--- a/valgrind.pc.in
++++ b/valgrind.pc.in
+@@ -2,7 +2,7 @@ prefix=@prefix@
+ exec_prefix=@exec_prefix@
+ libdir=@libdir@
  includedir=@includedir@/valgrind
- arch=@VG_ARCH@
+-arch=@VG_ARCH@
++arch=@VG_ARCH_MAX@
  os=@VG_OS@
--platform=@VG_PLATFORM_PRI@
-+platform=@VG_ARCH@-@VG_OS@
+ platform=@VG_PLATFORM_PRI@
  valt_load_address=@VALT_LOAD_ADDRESS@
- 
- Name: Valgrind
+@@ -11,6 +11,6 @@ Name: Valgrind
  Description: A dynamic binary instrumentation framework
  Version: @VERSION@
  Requires:
 -Libs: -L${libdir}/valgrind/@VG_PLATFORM_PRI@ -lcoregrind -lvex -lgcc
-+Libs: -L${libdir}/valgrind/@VG_ARCH@-@VG_OS@ -lcoregrind -lvex -lgcc
++Libs: -L${libdir}/valgrind/@VG_ARCH_MAX@-@VG_OS@ -lcoregrind -lvex -lgcc
  Cflags: -I${includedir}
  
+-- 
+1.6.1
+
