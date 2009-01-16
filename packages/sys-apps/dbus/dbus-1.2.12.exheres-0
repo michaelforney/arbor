@@ -56,6 +56,10 @@ src_test() {
 src_install() {
     default
 
+    sed -i -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
+        "${IMAGE}/etc/dbus-1/system.conf" || die "failed to update pidfile config"
+
+
     newinitd "${FILES}"/dbus.init-1.0 dbus
 
     # dbus X session script (Gentoo bug #77504)
