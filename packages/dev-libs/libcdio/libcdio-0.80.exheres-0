@@ -4,14 +4,11 @@
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
 
-require autotools
+require autotools gnu
 
 SUMMARY="libcdio is a library for CD access."
 DESCRIPTION="The GNU Compact Disc Input and Control library contains a library for CD-ROM and CD image access."
-HOMEPAGE="http://www.gnu.org/software/${PN}/index.html"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.gz"
-
-UPSTREAM_DOCUMENTATION="http://www.gnu.org/software/${PN}/${PN}.html"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -33,3 +30,4 @@ DEFAULT_SRC_PREPARE_PATCHES+=(
     "${FILES}/${PNV}-fix-pkgconfig.patch"
     -p0 "${FILES}/${PNV}-automagic-cddb.patch"
 )
+

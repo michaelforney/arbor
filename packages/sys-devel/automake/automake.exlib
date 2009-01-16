@@ -1,14 +1,15 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require versionator
+require versionator gnu
+
 export_exlib_phases src_test src_install
 
 MY_PNV="${PNV/_/-}"
 
 SUMMARY="Tool used to automatically generate Makefile.in files"
-HOMEPAGE="http://www.gnu.org/software/automake http://sources.redhat.com/automake/"
+HOMEPAGE+=" http://sources.redhat.com/automake/"
 if ever at_least 1.6.1; then
     DOWNLOADS="mirror://gnu/${PN}/${MY_PNV}.tar.bz2"
 else

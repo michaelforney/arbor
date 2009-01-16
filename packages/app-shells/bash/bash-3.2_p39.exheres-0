@@ -1,13 +1,14 @@
 # Copyright 2007-2008 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require gnu
+
 PATCH_LEVEL=${PNV##*_p}
 
 MY_PNV=${PNV%_p*}
 WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Bash shell"
-HOMEPAGE="http://www.gnu.org/software/bash"
 DOWNLOADS="mirror://gnu/bash/${MY_PNV}.tar.gz
         $(for ((i=1; i<=PATCH_LEVEL; i++)); do
             printf "mirror://gnu/bash/${MY_PNV}-patches/bash32-%03d\n" ${i}
