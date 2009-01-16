@@ -5,6 +5,7 @@
 
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
+
 require autotools
 
 SUMMARY="Userspace access to USB devices"
@@ -12,7 +13,7 @@ HOMEPAGE="http://libusb.sourceforge.net/"
 DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
 
 LICENCES="LGPL-2"
-SLOT="0"
+SLOT="0.1"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="debug doc"
 
@@ -30,13 +31,13 @@ RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=("${FILES}/${PNV}-circular-dependency-cxx.patch")
 
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug debug all" "doc build-docs" )
+
 src_prepare() {
     default
     sed -i -e 's:-Werror::' Makefile.am || die "failed to remove -Werror"
     eautoreconf
 }
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug debug all" "doc build-docs" )
 
 src_install() {
     default
@@ -46,3 +47,4 @@ src_install() {
         dodoc doc/html/*.html
     fi
 }
+
