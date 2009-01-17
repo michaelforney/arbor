@@ -33,10 +33,10 @@ then
 	unset -f _load_completions  # not designed to be called more than once
     }
 
-    # 1. Load base, if eselected.  This was previously known as
+    # 1. Load base, if eclectic-ed.  This was previously known as
     #    /etc/bash_completion
-    # 2. Load completion modules, maintained via eselect bashcomp --global
-    # 3. Load user completion modules, maintained via eselect bashcomp
+    # 2. Load completion modules, maintained via eclectic bashcomp --global
+    # 3. Load user completion modules, maintained via eclectic bashcomp
     # 4. Load user completion file last, overrides modules at user discretion
     _load_completions \
 	/etc/bash_completion.d/base \

@@ -136,10 +136,3 @@ src_install() {
 pkg_preinst() {
     create-paludis-user
 }
-
-pkg_postinst() {
-    # Remove the symlink created by app-admin/eselect-news
-    if [[ -L "${ROOT}/var/lib/paludis/news" ]] ; then
-        rm "${ROOT}/var/lib/paludis/news"
-    fi
-}
