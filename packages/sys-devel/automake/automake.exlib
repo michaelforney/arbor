@@ -2,6 +2,7 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+ever at_least 1.6.1 || GNU_TARBALL_SUFFIX=gz
 require versionator gnu
 
 export_exlib_phases src_test src_install
@@ -10,11 +11,6 @@ MY_PNV="${PNV/_/-}"
 
 SUMMARY="Tool used to automatically generate Makefile.in files"
 HOMEPAGE+=" http://sources.redhat.com/automake/"
-if ever at_least 1.6.1; then
-    DOWNLOADS="mirror://gnu/${PN}/${MY_PNV}.tar.bz2"
-else
-    DOWNLOADS="mirror://gnu/${PN}/${MY_PNV}.tar.gz"
-fi
 
 if ever at_least 1.10.2; then
     LICENCES="GPL-3 FDL-1.3"

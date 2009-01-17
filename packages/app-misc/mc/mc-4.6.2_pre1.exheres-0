@@ -3,9 +3,10 @@
 # Based in part upon 'mc-4.6.2_pre1.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require versionator flag-o-matic gnu
-
 MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+
+GNU_TARBALL_SUFFIX=gz
+require versionator flag-o-matic gnu
 
 SUMMARY="GNU Midnight Commander is a s-lang based file manager."
 DESCRIPTION="
@@ -15,8 +16,7 @@ with syntax highlighting and an internal viewer with support for binary files.
 Also included is Virtual Filesystem (VFS), that allows files on remote systems
 (e.g. FTP servers) and files inside archives to be manipulated like real files. 
 "
-DOWNLOADS="mirror://gnu/${PN}/${MY_PNV}.tar.gz
-    http://dev.exherbo.org/~philantrop/distfiles/${MY_PNV}-patches-2.tbz2"
+DOWNLOADS+=" http://dev.exherbo.org/~philantrop/distfiles/${MY_PNV}-patches-2.tbz2"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:midnightcommander"

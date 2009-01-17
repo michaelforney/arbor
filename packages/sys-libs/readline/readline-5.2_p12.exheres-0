@@ -1,12 +1,13 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib toolchain-funcs
-
-PATCH_LEVEL=${PNV##*_p}
-
 MY_PNV=${PNV%_p*}
 WORK="${WORKBASE}/${MY_PNV}"
+
+GNU_TARBALL_SUFFIX=gz
+require multilib toolchain-funcs gnu
+
+PATCH_LEVEL=${PNV##*_p}
 
 SUMMARY="GNU command line editing and history library."
 DESCRIPTION="
@@ -17,7 +18,7 @@ lines, to recall and perhaps reedit those lines, and perform csh-like history ex
 commands.
 "
 HOMEPAGE="http://cnswww.cns.cwru.edu/php/chet/${PN}/rltop.html"
-DOWNLOADS="mirror://gnu/${PN}/${MY_PNV}.tar.gz
+DOWNLOADS+="
     $(for ((i=1; i<=PATCH_LEVEL; i++)); do
         printf "ftp://ftp.cwru.edu/pub/bash/${MY_PNV}-patches/readline52-%03d\n" ${i}
     done)"
