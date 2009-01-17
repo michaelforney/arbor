@@ -2,7 +2,12 @@
 # Distributed under the terms of the GNU General Public License v2
 
 HOMEPAGE="http://www.gnu.org/software/${MY_PN:-${PN}}/"
-DOWNLOADS="mirror://gnu/${MY_PN:-${PN}}/${MY_PNV:-${MY_PN:-${PN}}-${MY_PV:-${PV}}}.tar.${GNU_TARBALL_SUFFIX:-bz2}"
+if [[ -n ${GNU_DOWNLOAD_ALPHA} ]]; then
+    DOWNLOADS="ftp://alpha.gnu.org/pub/gnu/"
+else
+    DOWNLOADS="mirror://gnu/"
+fi
+DOWNLOADS+="${MY_PN:-${PN}}/${MY_PNV:-${MY_PN:-${PN}}-${MY_PV:-${PV}}}.tar.${GNU_TARBALL_SUFFIX:-bz2}"
 
 UPSTREAM_DOCUMENTATION="
 http://www.gnu.org/software/${MY_PN:-${PN}}/manual/${MY_PN:-${PN}}.html   [[ lang = en description = [ ${MY_PN:-${PN}} manual, HTML ] ]]
