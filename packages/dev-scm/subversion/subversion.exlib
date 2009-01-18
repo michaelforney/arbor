@@ -1,5 +1,5 @@
 # Copyright 2008 Bryan Østergaard <kloeri@exherbo.org>
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'subversion-1.4.6-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -20,7 +20,7 @@ UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-1.1"
 SLOT="0"
-MYOPTIONS="nls perl python ruby slowtests"
+MYOPTIONS="berkdb nls perl python ruby slowtests"
 
 RESTRICT="!slowtests? ( test )"
 
@@ -32,8 +32,9 @@ DEPENDENCIES="
         ruby? ( dev-lang/swig[ruby] )
         slowtests? ( >=dev-lang/python-2.2:* )
     build+run:
-        dev-libs/apr-util
+        dev-libs/apr-util[berkdb?]
         net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2|~0.28.3]
+        berkdb? ( >=sys-libs/db-4.0.14:= )
         perl? ( dev-lang/perl:= )
         python? ( dev-lang/python:= )
         ruby? ( dev-lang/ruby:= )
@@ -60,7 +61,9 @@ src_configure() {
         myconf+=" --without-swig"
     fi
 
-    econf ${myconf} \
+    econf \
+        ${myconf} \
+        $(option_with berkdb berkeley-db) \
         $(option_enable nls)
 }
 
