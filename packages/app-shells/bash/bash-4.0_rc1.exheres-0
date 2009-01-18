@@ -1,0 +1,83 @@
+# Copyright 2007-2008 Bryan Østergaard
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PNV="${PNV/_rc/-rc}"
+WORK="${WORKBASE}/${MY_PNV}"
+
+GNU_TARBALL_SUFFIX=gz
+require gnu
+
+SUMMARY="Bash shell"
+DESCRIPTION="
+Bash is the shell, or command language interpreter, that will appear in
+the GNU operating system. Bash is an sh-compatible shell that
+incorporates useful features from the Korn shell (ksh) and C shell
+(csh). It is intended to conform to the IEEE POSIX P1003.2/ISO 9945.2
+Shell and Tools standard. It offers functional improvements over sh for
+both programming and interactive use. In addition, most sh scripts can
+be run by Bash without modification.
+"
+
+LICENCES="GPL-3"
+SLOT="4"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS="nls"
+
+DEPENDENCIES="
+build+run:
+    sys-libs/ncurses
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin
+    --without-installed-readline
+    --with-curses )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc )
+
+src_prepare() {
+    sed -e 's,^/* \(#define SYS_BASHRC.*\) */$,\1,' \
+        -i config-top.h \
+        || die "config-top.h sed failed"
+    # upstream fail...
+    chmod +x ./configure
+}
+
+src_install() {
+    default
+
+    dosym bash bin/sh
+
+    insinto /etc/bash
+    doins "${FILES}/bashrc"
+
+    insinto /etc/skel
+    hereins .bashrc <<'EOF'
+# Don't run anything here unless we have an interactive shell.
+if [[ $- != *i* ]] ; then
+    return
+fi
+EOF
+    hereins .bash_profile <<'EOF'
+# Source ~/.bashrc for login shells as recommended by bash upstream
+[[ -f ~/.bashrc ]] && source ~/.bashrc
+EOF
+
+    keepdir /etc/bash/bashrc.d
+
+    # slot things
+    local f
+    for f in "${IMAGE}"/bin/bash{,bug} ; do
+        echo mv "${f}" "${f}-${SLOT}"
+        mv "${f}" "${f}-${SLOT}" || die "Failed to rename ${f}"
+    done
+    for f in "${IMAGE}"/usr/share/man/man1/bash{,bug}.1 ; do
+        echo mv "${f}" "${f/%.1/-${SLOT}.1}"
+        mv "${f}" "${f/%.1/-${SLOT}.1}" || die "Failed to rename ${f}"
+    done
+    f="${IMAGE}"/usr/share/info/bash.info
+    echo mv "${f}" "${f/%.info/-${SLOT}.info}"
+    mv "${f}" "${f/%.info/-${SLOT}.info}" || die "Failed to rename ${f}"
+    rm "${IMAGE}"/bin/sh || die "Failed to remove /bin/sh symlink"
+}
+
