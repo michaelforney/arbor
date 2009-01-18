@@ -1,0 +1,80 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2009 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require versionator
+
+SUMMARY="Popular system logger"
+HOMEPAGE="http://www.balabit.com/network-security/syslog-ng/"
+DOWNLOADS="http://www.balabit.com/downloads/files/${PN}/open-source-edition/${PV}/source/${PN}_${PV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS="caps ipv6 pcre tcpd vim-syntax"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/glib
+        dev-libs/openssl
+        sys-apps/eventlog
+        sys-devel/bison
+        caps? ( sys-libs/libcap )
+        pcre? ( dev-libs/pcre )
+        tcpd? ( >=sys-apps/tcp-wrappers-7.6 )
+    build:
+        dev-util/pkg-config
+    post:
+        vim-syntax? ( >=app-editors/vim-runtime-7:* )
+"
+
+# If someone wants to use the new SQL logging option directly, please find me
+# some good docs about.
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --sysconfdir=/etc/syslog-ng
+    --disable-env-wrapper
+    --disable-spoof-source
+    --disable-sql
+    --enable-dynamic-linking
+    --enable-ssl
+    --without-libnet
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "caps linux-caps"
+    ipv6
+    pcre
+    "tcpd tcp-wrapper"
+)
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    contrib/syslog-ng.conf.doc
+)
+
+src_test() {
+    if ! has_version dev-lang/python; then
+        ewarn 'dev-lang/python is required to run tests'
+        return 0
+    fi
+
+    default
+}
+
+src_install() {
+    default
+
+    rmdir "${IMAGE}"/usr/libexec || die "nuking empty dir failed"
+    if option vim-syntax ; then
+        insinto /usr/share/vim/vimfiles/syntax/
+        doins "${WORK}"/contrib/syslog-ng.vim
+    fi
+
+    # Install default configuration
+    insinto /etc/syslog-ng
+    doins doc/examples/syslog-ng.conf.sample
+
+    newinitd "${FILES}/syslog-ng.rc6" syslog-ng
+    newconfd "${FILES}/syslog-ng.confd" syslog-ng
+}
