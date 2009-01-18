@@ -36,7 +36,7 @@ src_install() {
 EOF
 
     if ! option 'setuid'; then
-        chgrp 'utmp' "${IMAGE}/usr/bin/${PNV}" || die 'chgrp failed'
-        chmod 2755 "${IMAGE}/usr/bin/${PNV}" || die 'chmod failed'
+        fowners root:utmp /usr/bin/${PNV}
+        fperms 2755 /usr/bin/${PNV}
     fi
 }
