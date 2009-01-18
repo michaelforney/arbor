@@ -36,11 +36,9 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc )
 
 src_prepare() {
-    sed -e 's,^/* \(#define SYS_BASHRC.*\) */$,\1,' \
-        -i config-top.h \
-        || die "config-top.h sed failed"
     # upstream fail...
     chmod +x ./configure
+    echo '#define SYS_BASHRC "/etc/bash/bashrc"' >> config-top.h
 }
 
 src_install() {
