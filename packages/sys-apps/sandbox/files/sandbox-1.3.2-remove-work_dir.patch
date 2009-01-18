@@ -1,0 +1,82 @@
+Source: Bo Ørsted Andresen <zlin@exherbo.org>
+Upstream: No.
+Reason: This crappy code causes cwd to be added to SANDBOX_WRITE when not using portage
+	(specifically when PORTAGE_TMPDIR isn't set) which is rather unfortunate. Paludis
+	already adds builddir to SANDBOX_WRITE so it isn't required at all.
+
+diff -ur sandbox-1.3.0/libsbutil/sbutil.h sandbox-1.3.0/libsbutil/sbutil.h
+--- sandbox-1.3.0/libsbutil/sbutil.h	2008-11-16 06:03:45.000000000 +0100
++++ sandbox-1.3.0/libsbutil/sbutil.h	2008-11-25 19:50:21.000000000 +0100
+@@ -25,7 +25,6 @@
+ #define BASHRC_NAME            "sandbox.bashrc"
+ #define TMPDIR                 "/tmp"
+ #define VAR_TMPDIR             "/var/tmp"
+-#define PORTAGE_TMPDIR         "/var/tmp/portage"
+ #define SANDBOX_LOG_LOCATION   "/var/log/sandbox"
+ #define LOG_FILE_PREFIX        "/sandbox-"
+ #define DEBUG_LOG_FILE_PREFIX  "/sandbox-debug-"
+@@ -35,7 +34,6 @@
+ 
+ #define ENV_EBUILD             "EBUILD"
+ #define ENV_TMPDIR             "TMPDIR"
+-#define ENV_PORTAGE_TMPDIR     "PORTAGE_TMPDIR"
+ 
+ #define ENV_BASH_ENV           "BASH_ENV"
+ 
+diff -ur sandbox-1.3.0/src/environ.c sandbox-1.3.0/src/environ.c
+--- sandbox-1.3.0/src/environ.c	2008-11-16 06:03:45.000000000 +0100
++++ sandbox-1.3.0/src/environ.c	2008-11-25 19:47:56.000000000 +0100
+@@ -207,9 +207,6 @@
+ 
+ 	if (-1 == setup_access_var(ENV_SANDBOX_WRITE))
+ 		return -1;
+-	if ((NULL == getenv(ENV_SANDBOX_WRITE)) &&
+-	    (NULL != sandbox_info->work_dir))
+-		setenv(ENV_SANDBOX_WRITE, sandbox_info->work_dir, 1);
+ 
+ 	if (-1 == setup_access_var(ENV_SANDBOX_PREDICT))
+ 		return -1;
+diff -ur sandbox-1.3.0/src/sandbox.c sandbox-1.3.0/src/sandbox.c
+--- sandbox-1.3.0/src/sandbox.c	2008-11-16 13:54:22.000000000 +0100
++++ sandbox-1.3.0/src/sandbox.c	2008-11-25 19:48:55.000000000 +0100
+@@ -25,18 +25,6 @@
+ 
+ int setup_sandbox(struct sandbox_info_t *sandbox_info, bool interactive)
+ {
+-	if (NULL != getenv(ENV_PORTAGE_TMPDIR)) {
+-		/* Portage handle setting SANDBOX_WRITE itself. */
+-		sandbox_info->work_dir[0] = '\0';
+-	} else {
+-		if (NULL == getcwd(sandbox_info->work_dir, SB_PATH_MAX)) {
+-			perror("sandbox:  Failed to get current directory");
+-			return -1;
+-		}
+-		if (interactive)
+-			setenv(ENV_SANDBOX_WORKDIR, sandbox_info->work_dir, 1);
+-	}
+-
+ 	/* Do not resolve symlinks, etc .. libsandbox will handle that. */
+ 	if (!rc_is_dir(VAR_TMPDIR, true)) {
+ 		perror("sandbox:  Failed to get var_tmp_dir");
+@@ -266,10 +254,6 @@
+ 	if (print_debug)
+ 		printf("Setting up the required environment variables.\n");
+ 
+-	/* If not in portage, cd into it work directory */
+-	if ('\0' != sandbox_info.work_dir[0])
+-		chdir(sandbox_info.work_dir);
+-
+ 	/* Setup the child environment stuff.
+ 	 * XXX:  We free this in spawn_shell(). */
+ 	sandbox_environ = setup_environ(&sandbox_info, print_debug);
+diff -ur sandbox-1.3.0/src/sandbox.h sandbox-1.3.0/src/sandbox.h
+--- sandbox-1.3.0/src/sandbox.h	2008-11-09 10:45:34.000000000 +0100
++++ sandbox-1.3.0/src/sandbox.h	2008-11-25 19:46:42.000000000 +0100
+@@ -18,7 +18,6 @@
+ 	char sandbox_debug_log[SB_PATH_MAX];
+ 	char sandbox_lib[SB_PATH_MAX];
+ 	char sandbox_rc[SB_PATH_MAX];
+-	char work_dir[SB_PATH_MAX];
+ 	char var_tmp_dir[SB_PATH_MAX];
+ 	char tmp_dir[SB_PATH_MAX];
+ 	char *home_dir;
