@@ -5,7 +5,7 @@ SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.9 )
 
 SCM_REPOSITORY="git://git.exherbo.org/eclectic.git"
-require common-metadata python autotools bash-completion scm-git
+require common-metadata python autotools bash-completion zsh-completion scm-git
 
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
@@ -29,6 +29,7 @@ src_compile() {
 
 src_install() {
     bash-completion_src_install
+    dozshcompletion misc/_eclectic
     dodoc doc/*.txt
     option doc && dodoc doc/*.html
 }
