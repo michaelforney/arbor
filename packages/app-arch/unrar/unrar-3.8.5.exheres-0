@@ -36,6 +36,10 @@ src_compile() {
     if option platform:amd64 ; then
         export CXXFLAGS+=" -fPIC"
     fi
+
+    # The "library" works *interactively* by default...
+    sed -i -e "s:DEFINES=\(.*\):DEFINES=-DSILENT \1:" makefile.unix
+
     emake -f makefile.unix lib
     mv "${TEMP}"/unrar unrar
 }
