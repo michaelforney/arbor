@@ -179,6 +179,7 @@ scm_fetch_one() {
 }
 
 scm_src_fetch_extra() {
+    [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; either set SCM_REPOSITORY before require scm{,-*}, or call scm_finalise in global scope after setting SCM_*"
     scm_{for_each,access_checkout,fetch_one}
 }
 
@@ -228,6 +229,7 @@ scm_unpack_one() {
 scm_src_unpack() {
     scm_src_fetch_extra
 
+    [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; either set SCM_REPOSITORY before require scm{,-*}, or call scm_finalise in global scope after setting SCM_*"
     scm_{for_each,access_checkout,unpack_one}
 }
 
