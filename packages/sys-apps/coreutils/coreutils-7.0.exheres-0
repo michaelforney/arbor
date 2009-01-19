@@ -57,7 +57,7 @@ src_install() {
     default
 
     local binfiles="basename cat chgrp chmod chown cp chroot cut date df dir
-                    dirname du echo env expr false head ln ls mkdir
+                    dirname du echo env expr false head hostname ln ls mkdir
                     mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort
                     stty sync tail touch tr true tty uname vdir wc yes"
 
@@ -69,7 +69,7 @@ src_install() {
     done
 
     # Note, we don't install hostname into /bin, since it'd collide with net-tools.
-    dosym hostname domainname
+    # dosym hostname domainname
 
     insinto /etc
     newins src/dircolors.hin DIR_COLORS
