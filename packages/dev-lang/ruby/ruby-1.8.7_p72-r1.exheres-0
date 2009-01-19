@@ -1,91 +1,15 @@
 # Copyright 2007, 2008 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
-# Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
-#     Copyright 1999-2007 Gentoo Foundation
 
-require common-metadata flag-o-matic multilib versionator
-
-MY_PNV="${PN}-$(replace_version_separator 3 '-')"
-SLOT=$(get_version_component_range 1-2)
-
-DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
-
-WORK=${WORKBASE}/${MY_PNV}
-
-MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
+require ${PN}
 
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
 
-DEPENDENCIES="
-    build+run:
-        berkdb? ( sys-libs/db:= )
-        gdbm? ( sys-libs/gdbm )
-        ssl? ( dev-libs/openssl )
-"
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-rexml-limit-entity-expansion.patch)
-
-DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
-
-src_configure() {
-    filter-flags -fomit-frame-pointer
-
-    unset SOCKS_SERVER
-
-    #Yes, this does always --enable-ipv6
-    myconf="--enable-ipv6"
-    if ! option ipv6; then
-        myconf+=" --with-lookup-order-hack=INET"
-    fi
-
-    econf --program-suffix=${MY_SUFFIX} --enable-shared \
-        $(option_enable doc install-doc) \
-        $(option_enable debug) \
-        $(option_with berkdb dbm) \
-        $(option_with gdbm) \
-        $(option_with ssl openssl) \
-        --disable-socks \
-        --disable-threads \
-        --without-tk \
-        ${myconf}
-}
 
 src_test() {
     # These tests are currently broken with ruby uninstalled
     rm -rf test/{soap,wdsl} test/webrick/test_{filehandler,cgi}.rb || die "rm broken tests failed"
-    # TERM="dumb" for test_readline.rb
-    emake -j1 check TERM="dumb"
-}
 
-src_install() {
-    unset RUBYOPT
-    D_LIBDIR="${IMAGE}/usr/$(get_libdir)"
-    LD_LIBRARY_PATH="${D_LIBDIR}"
-    RUBYLIB="${WORK}:${D_LIBDIR}/ruby/${SLOT}"
-
-    for dir in $(find "${WORK}/ext" -type d) ; do
-        RUBYLIB="${RUBYLIB}:${dir}"
-    done
-
-    export LD_LIBRARY_PATH RUBYLIB
-
-    default
-
-    MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
-    ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run"
-    keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
-            "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
-
-    for i in ruby irb erb testrb rdoc ri; do
-        dosym /usr/bin/${i}${MY_SUFFIX} /usr/bin/${i}
-    done
-
-    dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1
-
-    if option examples; then
-        insinto /usr/share/doc/${PNVR}
-        doins -r sample
-    fi
+    ruby_src_test
 }
 
