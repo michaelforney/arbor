@@ -25,6 +25,7 @@ src_prepare() {
         -e "/^CXX/s:$: ${CXXFLAGS}:" \
         -e "/^CC/s:$: ${CFLAGS}:" \
         -e "/^DEST_SHARE/s:lib/:$(get_libdir)/:" \
+        -e "/^DEST_MAN/s:man:share/&:" \
         -e "/Rar/d" \
         -i makefile* || die "Failed to replace upstream flags"
     rm -rf CPP/7zip/Compress/Rar || die "Failed to remove non-GPL Rar source-code"
@@ -36,7 +37,17 @@ src_test() {
 
 src_install() {
     default
-    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/Codecs || die "Removing empty Codecs/ subdir failed"
-    find "${IMAGE}" -type f -iname "*License*" -o -iname "*copying*" -delete || die "Failed to remove licence files"
+
+    # The
+    for executable in 7za 7zr 7z; do
+        herebin ${executable} <<EOF
+exec /usr/$(get_libdir)/${PN}/${executable} "\${@}"
+EOF
+    done
+
+    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/Codecs ||
+        die "Removing empty Codecs/ subdir failed"
+    find "${IMAGE}" -type f -iname "*License*" -o -iname "*copying*" -delete ||
+        die "Failed to remove licence files"
 }
 
