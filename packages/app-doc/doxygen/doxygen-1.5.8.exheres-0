@@ -62,12 +62,16 @@ src_prepare() {
 src_configure() {
     # option qt4 && export QTDIR=/usr
     #   $(option_with qt4 doxywizard) \
+    local myconf
+
+    # configure doesn't like --without-doxyapp
+    option examples && myconf+="--with-doxyapp"
 
     ./configure \
         --docdir /usr/share/doc/${PNVR} \
         --prefix /usr \
         --shared \
-        $(option_with examples doxyapp) ||
+        ${myconf} ||
         die "./configure failed."
 }
 
