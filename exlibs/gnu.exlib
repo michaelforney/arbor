@@ -14,3 +14,9 @@ http://www.gnu.org/software/${MY_PN:-${PN}}/manual/${MY_PN:-${PN}}.html   [[ lan
 http://www.gnu.org/software/${MY_PN:-${PN}}/manual/${MY_PN:-${PN}}.pdf    [[ lang = en description = [ ${MY_PN:-${PN}} manual, PDF  ] ]]
 "
 
+if [[ ${GNU_TARBALL_SUFFIX} == lzma ]]; then
+    DEPENDENCIES+="
+        build:
+            app-arch/lzma-utils"
+fi
+
