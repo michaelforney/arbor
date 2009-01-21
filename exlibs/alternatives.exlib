@@ -66,6 +66,11 @@ alternatives_for() {
         fi
         echo "PATH_${unique}='${src}'"
         echo "TARGET_${unique}='${target}'"
+        if [[ -e ${IMAGE}${src} ]]; then
+            local fulltarget=${target}
+            [[ ${fulltarget} != /* ]] && fulltarget=${src%/*}/${fulltarget}
+            mv "${IMAGE}${src}" "${IMAGE}${fulltarget}" || die "mv ${src} failed"
+        fi
         shift 3
     done >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
 
