@@ -30,8 +30,6 @@ src_compile() {
 }
 
 src_install() {
-    cd "${WORK}/alsa-kernel/include"
-
     insinto /usr/include/sound
-    doins *.h
+    doins alsa-kernel/include/*.h
 }
