@@ -12,12 +12,14 @@ DOWNLOADS="mirror://debian/pool/main/${PN:0:1}/${PN}/${PN}_${MY_PV}.orig.tar.gz"
 
 LICENCES=""
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
 
 WORK="${WORKBASE}/${PN}-${MY_PV}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --includedir=/usr/include/${PN} )
 
 src_prepare() {
     default
