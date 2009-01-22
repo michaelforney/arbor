@@ -20,10 +20,6 @@ DEPENDENCIES="
         dev-lang/perl"
 #        virtual/logger"
 
-src_compile() {
-    emake CC="$(tc-getCC)"
-}
-
 DEFAULT_SRC_INSTALL_PARAMS=(
     PREFIX=/usr
     MANDIR=/usr/share/man
@@ -46,6 +42,10 @@ src_prepare() {
             -i "${WORK}"/Makefile \
             || die "Activating sensord failed"
     fi
+}
+
+src_compile() {
+    emake CC="$(tc-getCC)"
 }
 
 src_install() {

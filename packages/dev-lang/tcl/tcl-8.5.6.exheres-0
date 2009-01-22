@@ -14,7 +14,7 @@ MY_PNV="${PN}${PV}"
 DOWNLOADS="mirror://sourceforge/${PN}/${MY_PNV}-src.tar.gz"
 
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug threads"
 
 DEPENDENCIES=""
@@ -25,7 +25,7 @@ RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p2 "${FILES}/${PN}-multilib.patch"
-    "${FILES}/${PN}-tclm4-soname.patch"
+        "${FILES}/${PN}-tclm4-soname.patch"
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug symbols" threads )
 
