@@ -33,6 +33,7 @@ DEPENDENCIES="
 # If someone wants to use the new SQL logging option directly, please find me
 # some good docs about.
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-pidfile-dir=/var/run
     --sysconfdir=/etc/syslog-ng
     --disable-env-wrapper
     --disable-spoof-source
@@ -71,10 +72,12 @@ src_install() {
         doins "${WORK}"/contrib/syslog-ng.vim
     fi
 
+    dodoc "${FILES}"/syslog-ng.conf.sample
+
     # Install default configuration
     insinto /etc/syslog-ng
-    doins doc/examples/syslog-ng.conf.sample
+    newins "${FILES}"/syslog-ng.conf.sample syslog-ng.conf
 
-    newinitd "${FILES}/syslog-ng.rc6" syslog-ng
-    newconfd "${FILES}/syslog-ng.confd" syslog-ng
+    newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
+    newconfd "${FILES}"/syslog-ng.confd syslog-ng
 }
