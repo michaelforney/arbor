@@ -1,7 +1,10 @@
 # Copyright 2008 Kim Højgaard-Hansen
 # Distributed under the terms of the GNU General Public License v2
 
-require lvm2 multilib
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( none ) # Uses autoconf only
+
+require lvm2 multilib autotools
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -13,6 +16,8 @@ DEPENDENCIES="
     build+run:
         >=sys-fs/device-mapper-1.02.29[dmeventd?]"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-some-makefile-fixes-for-liblvm2cmd-remove-some-har.patch" )
+
 DEFAULT_SRC_CONFIGURE_PARAMS=( "--enable-static_link" "--sbindir=/sbin" "--disable-selinux" "--enable-readline" "--enable-cmdlib" )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     dmeventd
@@ -20,4 +25,9 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     fsadm
     nls
 )
+
+src_prepare() {
+    default
+    eautoconf
+}
 

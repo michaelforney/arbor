@@ -4,7 +4,10 @@
 
 LVM2_PV=2.02.43
 
-require device-mapper multilib
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( none ) # Uses autoconf only
+
+require device-mapper multilib autotools
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -15,10 +18,16 @@ DEPENDENCIES="
         >=sys-fs/udev-127
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-some-makefile-fixes-for-liblvm2cmd-remove-some-har.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( "--enable-static_link" "--libdir=/$(get_libdir)" )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     dmeventd
     'dmeventd cmdlib'
     nls
 )
+
+src_prepare() {
+    default
+    eautoconf
+}
 
