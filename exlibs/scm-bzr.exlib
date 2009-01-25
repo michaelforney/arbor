@@ -133,7 +133,8 @@ scm-bzr_do_update() {
             scm-bzr_bzr pull -d "$(scm-bzr_local_branch)"
         fi
     else
-        scm-bzr_bzr branch "$(scm-bzr_uri)" "$(scm-bzr_local_branch)"
+        scm-bzr_bzr init --create-prefix "$(scm-bzr_local_branch)"
+        scm-bzr_bzr pull -d "$(scm-bzr_local_branch)" "$(scm-bzr_uri)"
     fi
 
     local branch=$(scm_get_var BRANCH)
