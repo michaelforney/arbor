@@ -25,11 +25,11 @@ UPSTREAM_DOCUMENTATION="http://bazaar-vcs.org/Documentation [[ lang = en ]]"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="sftp"
+MYOPTIONS=""
 
 DEPENDENCIES="
-    build+run:
-        sftp? ( dev-python/paramiko )
+    post,suggested:
+        dev-python/paramiko [[ description = [ Provides sftp support ] ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/bzr-1.10-remove-test.patch )
