@@ -1,0 +1,36 @@
+From c985e2e0e3e57420799d3707de6eb27bd869fe35 Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Sun, 25 Jan 2009 17:07:42 +0100
+Subject: [PATCH] Respect the user's CFLAGS and don't strip the binary.
+
+---
+ Makefile |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 65fc8f4..332f611 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,17 +1,15 @@
+-CFLAGS= -Wall -Wshadow -Wwrite-strings -Wsign-compare -Wfloat-equal \
++CFLAGS+= -Wall -Wshadow -Wwrite-strings -Wsign-compare -Wfloat-equal \
+ 	-Wmissing-noreturn -Wbad-function-cast \
+-	-Wmissing-prototypes -Winline -Wredundant-decls -O3
++	-Wmissing-prototypes -Winline -Wredundant-decls
+ 
+ all: pdfcrack
+ 
+ pdfcrack: main.o rc4.o md5.o pdfcrack.o pdfparser.o passwords.o common.o \
+ 	benchmark.o
+ 	gcc $(CFLAGS) -o $@ $+
+-	strip $@
+ 
+ pdfreader: pdfparser.o pdfreader.o common.o
+ 	gcc $(CFLAGS) -o $@ $+
+-	strip $@
+ 
+ clean:
+ 	rm -f pdfcrack pdfreader testreader *.o
+-- 
+1.6.1
+
