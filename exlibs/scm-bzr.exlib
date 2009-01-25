@@ -62,7 +62,7 @@ scm-bzr_revision_spec() {
 }
 
 scm-bzr_normalize_url() {
-    python -c 'import sys; from bzrlib.urlutils import *; print(normalize_url(sys.argv[1]))' "${1}"
+    python -c 'import sys; from bzrlib.urlutils import *; print(normalize_url(sys.argv[1]))' "${1}" || die "normalize_url failed"
 }
 
 scm-bzr_uri() {
