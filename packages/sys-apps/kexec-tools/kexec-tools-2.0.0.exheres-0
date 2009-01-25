@@ -1,0 +1,45 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Boot a new kernel over the currently running one - and more."
+DESCRIPTION="
+${PN} enables you to skip the BIOS when rebooting (provided you have enabled the
+kexec option in your current kernel, of course). Booting like this is much faster,
+more reliable since it skips the BIOS and allows you test kernel changes more easily.
+Furthermore, you could even boot a different OS if you used grub.exe from grub4dos.
+The latter is especially interesting if you need Linux features before booting
+into Windows.
+"
+HOMEPAGE="http://www.kernel.org/pub/linux/kernel/people/horms/${PN}/README.html"
+DOWNLOADS="http://www.kernel.org/pub/linux/kernel/people/horms/${PN}/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+DEPENDENCIES=""
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --without-gamecube
+    --without-xen
+    --with-zlib
+)
+
+src_install() {
+    default
+
+    doman \
+        kdump/kdump.8 \
+        kexec/kexec.8
+
+    dodoc \
+        doc/linux-i386-boot.txt \
+        doc/linux-i386-zero-page.txt \
+        doc/multiboot.html \
+        doc/nbi-spec.txt
+
+    newinitd "${FILES}"/kexec.init kexec
+    newconfd "${FILES}"/kexec.conf kexec
+}
