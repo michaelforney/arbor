@@ -36,15 +36,8 @@ scm-bzr_bzr() {
         echo=:
     fi
 
-    if [[ ${1} == -d ]]; then
-        local dir=${2}
-        shift 2
-        ${echo} cd "${dir}" '&&' bzr "${@}"
-        ( cd "${dir}" && bzr "${@}" )
-    else
-        ${echo} bzr "${@}"
-        bzr "${@}"
-    fi || die_unless_nonfatal "bzr ${1} failed"
+    ${echo} bzr "${@}"
+    bzr "${@}" || die_unless_nonfatal "bzr ${1} failed"
 }
 
 scm-bzr_revision_spec() {
@@ -78,7 +71,7 @@ scm-bzr_local_branch() {
 }
 
 scm-bzr_remote_branch() {
-    local branch=$(scm-bzr_bzr -q info "$(scm-bzr_local_branch)" | sed -n -e 's/^ *checkout of branch: \(.*\)\/$/\1/p')
+    local branch=$(scm-bzr_bzr -q info "$(scm-bzr_local_branch)" | sed -n -e 's/^ *parent branch: \(.*\)\/$/\1/p')
     [[ -n ${branch} ]] || die "could not determine parent branch for $(scm-bzr_local_branch)"
     scm-bzr_normalize_url "${branch}"
 }
@@ -135,12 +128,12 @@ scm-bzr_do_checkout() {
 scm-bzr_do_update() {
     if [[ -d $(scm-bzr_local_branch)/.bzr/branch ]]; then
         if [[ $(scm-bzr_remote_branch) != $(scm-bzr_uri) ]]; then
-            scm-bzr_bzr -d "$(scm-bzr_local_branch)" switch "$(scm-bzr_uri)"
+            scm-bzr_bzr pull -d "$(scm-bzr_local_branch)" --overwrite --remember "$(scm-bzr_uri)"
         else
-            scm-bzr_bzr update "$(scm-bzr_local_branch)"
+            scm-bzr_bzr pull -d "$(scm-bzr_local_branch)"
         fi
     else
-        scm-bzr_bzr checkout "$(scm-bzr_uri)" "$(scm-bzr_local_branch)"
+        scm-bzr_bzr branch "$(scm-bzr_uri)" "$(scm-bzr_local_branch)"
     fi
 
     local branch=$(scm_get_var BRANCH)
