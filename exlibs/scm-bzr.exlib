@@ -1,4 +1,5 @@
 # Copyright 2009 Mike Kelly <pioto@exherbo.org>
+# Copyright 2009 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if [[ -z ${SCM_TYPE} ]]; then
@@ -7,7 +8,7 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-bzr_do_dependencies() {
-    local bzr="dev-scm/bzr"
+    local bzr=">=dev-scm/bzr-1.9"
     if [[ $(scm_get_var REPOSITORY) == sftp://* ]]; then
         echo "${bzr} dev-python/paramiko"
     else
@@ -16,9 +17,15 @@ scm-bzr_do_dependencies() {
 }
 
 scm-bzr_do_check_vars() {
-    # I really don't feel like making a gigantic regexp to match all the
-    # possible bzr revision specs...
-    scm_modify_var REVISION scm_trim_slashes -leading -trailing
+    [[ -n $(scm_get_var TAG) && -n $(scm_get_var REVISION) ]] \
+        && die "for bzr, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name REVISION)"
+    [[ -z $(scm_get_var BRANCH) ]] && scm_set_var BRANCH trunk
+    local rev=$(scm_get_var REVISION)
+    [[ -n ${rev} ]] && [[ ! ${rev} =~ ^.*-[0-9]{14}-[0-9a-z]{16}$ && ! ${rev} =~ ^[0-9]+$ ]] \
+        && die "for bzr, $(scm_var_name REVISION) must be either a revision ID or an integer (non-dotted) revision number"
+
+    scm_modify_var REPOSITORY scm_trim_slashes -scheme -trailing
+    scm_modify_var BRANCH scm_trim_slashes -leading -trailing
 }
 
 scm-bzr_bzr() {
@@ -28,25 +35,51 @@ scm-bzr_bzr() {
         echo=:
     fi
 
-    local cmd=${1} global=( ) extra=( )
-    shift
-    local dir=$(scm_get_var CHECKOUT_TO)
-    if has "${cmd}" checkout co; then
-        extra+=( '--lightweight' )
-        dir=${dir%/*}
+    if [[ ${1} == -d ]]; then
+        local dir=${2}
+        shift 2
+        ${echo} cd "${dir}" '&&' bzr "${@}"
+        ( cd "${dir}" && bzr "${@}" )
+    else
+        ${echo} bzr "${@}"
+        bzr "${@}"
+    fi || die_unless_nonfatal "bzr ${1} failed"
+}
+
+scm-bzr_revision_spec() {
+    if [[ -n $(scm_get_var REVISION) ]]; then
+        if [[ $(scm_get_var REVISION) == *-*-* ]]; then
+            echo "revid:$(scm_get_var REVISION)"
+        else
+            echo "revno:$(scm_get_var REVISION)"
+        fi
+    elif [[ -n $(scm_get_var TAG) ]]; then
+        echo "tag:$(scm_get_var TAG)"
+    else
+        echo last:
     fi
-
-    ${echo} cd "${dir}" '&&' bzr "${global[@]}" "${cmd}"  "${extra[@]}" "${@}"
-    ( cd "${dir}" && bzr "${global[@]}" "${cmd}" "${extra[@]}" "${@}" ) \
-        || die_unless_nonfatal "bzr ${cmd} failed"
 }
 
-scm-bzr_do_revision() {
-    scm-bzr_bzr -q revno
+scm-bzr_normalize_url() {
+    python -c 'import sys; from bzrlib.urlutils import *; print(normalize_url(sys.argv[1]))' "${1}"
 }
 
-scm-bzr_get_branch() {
-    scm-bzr_bzr -q info |sed -n '/branch:/s/.*branch: \(.*\)\//\1/p'
+scm-bzr_uri() {
+    local uri=$(scm_get_var REPOSITORY)
+    [[ $(scm_get_var BRANCH) != . ]] && uri+=/$(scm_get_var BRANCH)
+    scm-bzr_normalize_url "${uri}"
+}
+
+scm-bzr_local_branch() {
+    local branch=$(scm_get_var CHECKOUT_TO)
+    [[ $(scm_get_var BRANCH) != . ]] && branch+=/$(scm_get_var BRANCH)
+    echo "${branch}"
+}
+
+scm-bzr_remote_branch() {
+    local branch=$(scm-bzr_bzr -q info "$(scm-bzr_local_branch)" | sed -n -e 's/^ *checkout of branch: \(.*\)\/$/\1/p')
+    [[ -n ${branch} ]] || die "could not determine parent branch for $(scm-bzr_local_branch)"
+    scm-bzr_normalize_url "${branch}"
 }
 
 scm-bzr_do_appraise() {
@@ -57,28 +90,67 @@ scm-bzr_do_appraise() {
         return 3
     fi
 
-    if [[ $(scm_get_var REPOSITORY) != $(scm-bzr_get_branch) ]]; then
-        echo "${dir} is a checkout of $(scm-bzr_get_branch), but wanted $(scm_get_var REPOSITORY)"
-        return 3
+    if [[ ! -d $(scm-bzr_local_branch)/.bzr/branch ]]; then
+        echo "${dir} does not contain the branch $(scm_get_var BRANCH)"
+        return 1
     fi
 
-    if [[ -n $(scm_get_var REVISION) ]]; then
-        if [[ $(scm_get_var REVISION) -eq $(scm-bzr_do_revision) ]]; then
+    if [[ $(scm_get_var REVISION) == *-*-* ]]; then
+        if nonfatal scm-bzr_bzr -q revision-info -d "$(scm-bzr_local_branch)" -r"$(scm-bzr_revision_spec)" &>/dev/null; then
             return 2
         else
-            echo "${dir} is a checkout of revision $(scm-bzr_do_revision), but wanted $(scm_get_var REVISION)"
+            echo "$(scm_get_var REVISION) is not present in $(scm-bzr_local_branch)"
             return 1
         fi
     fi
-}
 
-scm-bzr_do_update() {
-    local branch=$(scm-bzr_get_branch)
-    scm-bzr_bzr switch ${branch}
+    if [[ $(scm-bzr_uri) != $(scm-bzr_remote_branch) ]]; then
+        echo "${dir} is a checkout of $(scm-bzr_remote_branch), but wanted $(scm-bzr_uri)"
+        return 1
+    fi
+
+    if [[ -n $(scm_get_var REVISION) || -n $(scm_get_var TAG) ]]; then
+        if nonfatal scm-bzr_bzr -q revision-info -d "$(scm-bzr_local_branch)" -r"$(scm-bzr_revision_spec)" &>/dev/null; then
+            return 2
+        else
+            echo "$(scm-bzr_local_branch) does not contain the $(
+                    if [[ -n $(scm_get_var REVISION); then
+                        echo revision $(scm_get_var REVISION)
+                    else
+                        echo tag $(scm_get_var TAG)
+                    fi)"
+            return 1
+        fi
+    fi
+
+    return 0
 }
 
 scm-bzr_do_checkout() {
-    local dir=$(scm_get_var CHECKOUT_TO) branch=$(scm_get_var REPOSITORY)
-    scm-bzr_bzr checkout ${branch} ${dir}
+    scm-bzr_bzr init-repository --no-trees --1.9-rich-root "$(scm_get_var CHECKOUT_TO)"
+    scm-bzr_do_update
+}
+
+scm-bzr_do_update() {
+    if [[ -d $(scm-bzr_local_branch)/.bzr/branch ]]; then
+        if [[ $(scm-bzr_remote_branch) != $(scm-bzr_uri) ]]; then
+            scm-bzr_bzr -d "$(scm-bzr_local_branch)" switch "$(scm-bzr_uri)"
+        else
+            scm-bzr_bzr update "$(scm-bzr_local_branch)"
+        fi
+    else
+        scm-bzr_bzr checkout "$(scm-bzr_uri)" "$(scm-bzr_local_branch)"
+    fi
+
+    local branch=$(scm_get_var BRANCH)
+    scm_set_array FETCHED_BRANCHES "${branch//\//--}"
+}
+
+scm-bzr_do_revision() {
+    scm-bzr_bzr -q revision-info -d "$(scm-bzr_local_branch)" -r"$(scm-bzr_revision_spec)" | sed -e 's/^.* //'
+}
+
+scm-bzr_do_unpack() {
+    scm-bzr_bzr checkout -r"$(scm-bzr_revision_spec)" --lightweight "$(scm-bzr_local_branch)" "$(scm_get_var UNPACK_TO)"
 }
 
