@@ -297,7 +297,7 @@ scm_global_stuff() {
 
     local checkout_to=$(scm_get_var CHECKOUT_TO)
     [[ -z ${checkout_to} ]] && checkout_to=${SCM_THIS:-${PN}}
-    [[ ${checkout_to} == /* ]] || checkout_to=${FETCHEDDIR}/scm/${checkout_to}
+    [[ ${checkout_to} == /* ]] || checkout_to=${SCM_HOME}/${checkout_to}
     scm_set_var CHECKOUT_TO "$(scm_trim_slashes -trailing "${checkout_to}")"
 
     local unpack_to=$(scm_get_var UNPACK_TO)
@@ -309,6 +309,7 @@ scm_global_stuff() {
     DEPENDENCIES+=" $(scm_call dependencies)"
 }
 
+SCM_HOME=${FETCHEDDIR}/scm
 scm_finalise() {
     DEPENDENCIES+="( build,host,required: >=sys-apps/util-linux-ng-2.13_pre2"
     scm_{for_each,global_stuff}
