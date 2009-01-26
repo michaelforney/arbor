@@ -39,7 +39,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-dependency-tracking
     --without-lame
     --without-linux-qnx-sched
     --without-mp3-support
@@ -59,10 +58,3 @@ src_prepare() {
     sed -i -e 's:HAVE_SCANSTACK:NO_FRIGGING_SCANSTACK:g' mconfig.h
 }
 
-src_configure() {
-    # A few CFLAGS do not work see bug #99998
-    strip-flags
-    append-flags "-fno-inline"
-
-    default
-}
