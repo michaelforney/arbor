@@ -31,6 +31,7 @@ RESTRICT="userpriv"
 
 DEPENDENCIES="
     build+run:
+        user/sshd
         sys-apps/shadow
         >=dev-libs/openssl-0.9.8f
         >=sys-libs/zlib-1.2.3
@@ -43,15 +44,6 @@ DEPENDENCIES="
 "
 
 WORK="${WORKBASE}/${PARCH}"
-
-create-sshd-user() {
-    enewgroup sshd 22
-    enewuser sshd 22 -1 /var/empty sshd
-}
-
-pkg_setup() {
-    create-sshd-user
-}
 
 src_prepare() {
     sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
@@ -135,9 +127,6 @@ src_install() {
 
 pkg_postinst() {
     [[ ! -d ${ROOT}/var/empty ]] && mkdir -p "${ROOT}"/var/empty
-
-    enewgroup sshd 22
-    enewuser sshd 22 -1 /var/empty sshd
 
     ewarn "Remember to merge your config files in /etc/ssh/ and then"
     ewarn "restart sshd: '/etc/init.d/sshd restart'."
