@@ -32,6 +32,7 @@ DEPENDENCIES="
             )
         )
     build+run:
+        user/paludisbuild
         app-admin/eclectic
         >=app-shells/bash-3
         inquisitio? ( dev-libs/pcre++ )
@@ -52,17 +53,6 @@ DEPENDENCIES="
         sys-apps/sandbox
     post:
         vim-syntax? ( >=app-editors/vim-runtime-7:* )"
-
-create-paludis-user() {
-    enewgroup "paludisbuild"
-    enewuser "paludisbuild" -1 -1 "/var/tmp/paludis" "paludisbuild"
-}
-
-pkg_setup() {
-    replace-flags -Os -O2
-    replace-flags -O3 -O2
-    create-paludis-user
-}
 
 src_prepare() {
     default
@@ -133,6 +123,3 @@ src_install() {
     rm -rf "${IMAGE}"/var/lib/gentoo || die 'rm -r /var/lib/gentoo failed'
 }
 
-pkg_preinst() {
-    create-paludis-user
-}
