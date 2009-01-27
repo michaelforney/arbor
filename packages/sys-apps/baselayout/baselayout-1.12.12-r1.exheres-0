@@ -58,6 +58,9 @@ src_prepare() {
     sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:" \
         -i "${WORK}"/src/awk/{cachedepends,genenviron}.awk || die 'sed failed'
 
+    sed -e 's/dependancies/dependencies/' \
+        -i lib/rcscripts/net/*.sh || die "Dependancies, we can't spell it :("
+
     default
 }
 
