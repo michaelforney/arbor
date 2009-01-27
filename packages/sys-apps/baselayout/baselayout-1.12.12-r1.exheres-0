@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
 # Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
@@ -72,25 +72,6 @@ src_compile() {
         LIBDIR="${libdir}"
 }
 
-pkg_preinst() {
-    # 2008-08-20: safety measure to prevent removal of directories that were part
-    # of CONTENTS in 1.12.12 and below (before sys-apps/skeleton-filesystem-layout)
-    local x target
-    for x in /boot /dev/shm /var/lock; do
-        touch "${ROOT}"${x}/.keep_do_not_break_me || die "Could not touch ${x}/.keep_do_not_break_me"
-    done
-
-    if [[ ${SYMLINK_LIB} == yes ]]; then
-        for x in {,/usr,/usr/local}/lib; do
-            if [[ -L ${ROOT}${x} ]]; then
-                target=$(readlink "${ROOT}${x}") || die "rewriting ${ROOT}${x} failed"
-                rm "${ROOT}${x}" || die "rm ${ROOT}${x} failed"
-                ln -s "${target}" "${ROOT}${x}" || die "ln -s ${target} ${ROOT}${x} failed"
-            fi
-        done
-    fi
-}
-
 src_install() {
     local x rcscripts_dir=/${libdir}/rcscripts
 
@@ -143,6 +124,25 @@ src_install() {
 
     rm -r "${IMAGE}"/etc/modules.d || die "rm -r ${IMAGE}/etc/modules.d failed"
     rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4 || die "rm ${IMAGE}/etc/modules.autoload.d/kernel-2.4 failed"
+}
+
+pkg_preinst() {
+    # 2008-08-20: safety measure to prevent removal of directories that were part
+    # of CONTENTS in 1.12.12 and below (before sys-apps/skeleton-filesystem-layout)
+    local x target
+    for x in /boot /dev/shm /var/lock; do
+        touch "${ROOT}"${x}/.keep_do_not_break_me || die "Could not touch ${x}/.keep_do_not_break_me"
+    done
+
+    if [[ ${SYMLINK_LIB} == yes ]]; then
+        for x in {,/usr,/usr/local}/lib; do
+            if [[ -L ${ROOT}${x} ]]; then
+                target=$(readlink "${ROOT}${x}") || die "rewriting ${ROOT}${x} failed"
+                rm "${ROOT}${x}" || die "rm ${ROOT}${x} failed"
+                ln -s "${target}" "${ROOT}${x}" || die "ln -s ${target} ${ROOT}${x} failed"
+            fi
+        done
+    fi
 }
 
 pkg_postinst() {
