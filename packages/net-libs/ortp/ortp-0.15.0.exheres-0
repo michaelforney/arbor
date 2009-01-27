@@ -1,0 +1,32 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A Real-time Transport Protocol (RTP, RFC3550) library"
+HOMEPAGE="http://www.linphone.org/index.php/eng/code_review/${PN}"
+DOWNLOADS="mirror://savannah/linphone/${PN}/sources/${PNV}.tar.gz"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="debug doc ipv6"
+
+DEPENDENCIES="
+    build:
+        doc? ( app-doc/doxygen )
+    build+run:
+        dev-libs/openssl
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug ipv6 )
+# Yes, this is correct
+DEFAULT_SRC_CONFIGURE_PARAMS=( --docdir=/usr/share/doc/ )
+
+src_install() {
+    default
+
+    # There's no option to disable building apidocs, so remove them if not requested
+    if option !doc; then
+        rm -r "${IMAGE}/usr/share/doc/${PNV}/html" || die "Couldn't remove api documentation"
+    fi
+}
+
