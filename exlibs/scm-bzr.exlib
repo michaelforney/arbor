@@ -121,6 +121,7 @@ scm-bzr_do_appraise() {
 }
 
 scm-bzr_do_checkout() {
+    mkdir "$(scm_get_var CHECKOUT_TO)" || die "mkdir failed"
     scm-bzr_bzr init-repository --no-trees --1.9-rich-root "$(scm_get_var CHECKOUT_TO)"
     scm-bzr_do_update
 }
