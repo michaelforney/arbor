@@ -23,17 +23,19 @@ DEPENDENCIES="
         >=sys-fs/udev-120
 "
 
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=${IMAGE}/usr )
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=${IMAGE} )
 
 src_prepare() {
     sed -i \
         -e "s:^\(CC\) = gcc:\1 = $(tc-getCC):" \
         -e "s:^\(AR\) = ar:\1 = $(tc-getAR):" \
         -e "s:^\(RANLIB\) = ranlib:\1 = $(tc-getRANLIB):" \
-        -e "s:^\(CFLAGS=-0s\):#\1:" \
+        -e "/^CFLAGS=/s:^:#:" \
         -e "s:^\(@\$(LDCONFIG).*\):#\1:" \
-        -e "s:^\(INSTALL_MAN= \$(PREFIX)\)/man/:\1/share/man:" \
+        -e "s:^\(INSTALL_MAN= \$(PREFIX)\)/man/:\1/usr/share/man:" \
+        -e "s:^\(INSTALL_INC= \$(PREFIX)\)/include/:\1/usr/include:" \
         -e "s:^\(INSTALL_LIB= \$(PREFIX)\)/lib/:\1/$(get_libdir)/:" \
         -e "s:^\(CC\) = gcc:\1 = $(tc-getCC):" \
         Makefile || die "sed failed"
 }
+
