@@ -1,0 +1,30 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUPPORTED_AUTOCONF=( 2.5 )
+SUPPORTED_AUTOMAKE=( 1.10 )
+
+require autotools
+
+SUMMARY="Utilities for linking CUPS to HAL"
+HOMEPAGE="http://fedorahosted.org/${PN}"
+DOWNLOADS="${HOMEPAGE}/attachment/wiki/ProjectReleases/${PNV}.tar.gz?format=raw -> ${PNV}.tar.gz"
+
+LICENCES="GPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        dev-libs/dbus-glib
+      >=dev-libs/glib-2.4:2
+        net-print/cups[dbus]
+        sys-apps/dbus
+        sys-apps/hal
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-libdir.patch" )
+
