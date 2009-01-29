@@ -6,7 +6,7 @@
 SUPPORTED_AUTOMAKE=( 1.10 )
 SUPPORTED_AUTOCONF=( 2.5 )
 
-require autotools eutils multilib pam
+require autotools multilib pam
 
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
@@ -38,6 +38,7 @@ DEPENDENCIES="
         python? ( dev-lang/python:* )
         ssl? ( dev-libs/openssl )
         tiff? ( media-libs/tiff )
+        group/lpadmin
     post:
         xinetd? ( sys-apps/xinetd )
         app-text/ghostscript[cups]
@@ -80,10 +81,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
 DEFAULT_SRC_INSTALL_PARAMS+=(
     BUILDROOT="${IMAGE}"
 )
-
-pkg_setup() {
-    enewgroup lpadmin
-}
 
 src_prepare() {
     # remove default optimizations
