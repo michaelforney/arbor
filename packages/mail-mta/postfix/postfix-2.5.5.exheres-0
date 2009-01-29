@@ -3,7 +3,7 @@
 # Based in part upon 'postfix-2.5.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require eutils multilib toolchain-funcs pam alternatives
+require multilib toolchain-funcs pam alternatives
 
 SUMMARY="Fast, easy to administer and secure mail transport agent."
 HOMEPAGE="http://www.postfix.org"
@@ -19,17 +19,10 @@ DEPENDENCIES="
     sys-libs/db:=
     ssl? ( dev-libs/openssl )
     sys-libs/pam
-    "
-
-create_group_user() {
-    enewgroup postfix
-    enewgroup postdrop
-    enewuser postfix -1 -1 "/var/spool/postfix" postfix
-}
-
-pkg_setup() {
-    create_group_user
-}
+    group/postdrop
+    group/postfix
+    user/postfix
+"
 
 src_compile() {
     local ccargs="" auxlibs=""
