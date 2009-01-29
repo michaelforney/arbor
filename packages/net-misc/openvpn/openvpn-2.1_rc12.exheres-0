@@ -3,7 +3,7 @@
 # Based in part upon 'openvpn-2.1_rc9.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata eutils multilib
+require common-metadata multilib
 
 UPSTREAM_CHANGELOG="${UPSTREAM_DOCUMENTATION_BASE}/change-log/changelog-21.html"
 UPSTREAM_RELEASE_NOTES="${UPSTREAM_DOCUMENTATION_BASE}/release-notes.html"
@@ -23,6 +23,9 @@ DEPENDENCIES="
     run:
         iproute2? ( sys-apps/iproute2 )
         !iproute2? ( sys-apps/net-tools )
+    post:
+        group/openvpn
+        user/openvpn
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -90,9 +93,4 @@ src_install() {
     doexe plugin/*/*.so
 
     dodoc "${FILES}"/README.Exherbo
-}
-
-pkg_postinst() {
-    enewgroup openvpn
-    enewuser openvpn "" "" "" openvpn
 }
