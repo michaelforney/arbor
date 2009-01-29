@@ -3,7 +3,7 @@
 # Based in part upon 'portmap-6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require eutils toolchain-funcs
+require toolchain-funcs
 
 SUMMARY="daemon for implementing remote procedure calls between computer programs"
 HOMEPAGE="http://neil.brown.name/portmap/"
@@ -24,11 +24,6 @@ WORK="${WORKBASE}/${PN}_${PV}"
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-tcpd.patch"
 )
-
-pkg_setup() {
-    enewgroup rpc 111
-    enewuser rpc 111 -1 /dev/null rpc
-}
 
 src_compile() {
     tc-export CC
