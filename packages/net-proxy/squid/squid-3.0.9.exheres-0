@@ -113,7 +113,15 @@ src_configure() {
 src_install() {
     default
 
-    newconfd "${FILES}"/squid.confd squid
+    hereconfd squid <<EOF
+# switches for squid
+SQUID_OPTS="-DYC"
+
+# Max. number of filedescriptors to use. You can increase this on a busy
+# cache to a maximum of (currently) 8192 filedescriptors. Default is 1024.
+SQUID_MAXFD=1024
+EOF
+
     option pam && newpamd "${FILES}"/squid.pam squid
 
     # Needs to be suid root for looking into /etc/shadow
