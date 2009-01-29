@@ -3,7 +3,7 @@
 # Based in part upon 'wireshark-1.1.0.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata eutils
+require common-metadata
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -28,6 +28,8 @@ DEPENDENCIES="
         pcre? ( dev-libs/pcre )
         caps? ( sys-libs/libcap )
         c-ares? ( >=net-dns/c-ares-1.5 )
+    post:
+        group/${PN}
 "
 #        lua? ( >=dev-lang/lua-5.1 )
 
@@ -83,9 +85,4 @@ src_install() {
         insinto /usr/share/applications
         doins wireshark.desktop
     fi
-}
-
-pkg_postinst() {
-    # Add group for users allowed to sniff.
-    enewgroup wireshark
 }
