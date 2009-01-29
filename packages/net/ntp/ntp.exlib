@@ -52,7 +52,12 @@ src_install() {
     fowners ntp:ntp /var/lib/ntp
 
     newinitd "${FILES}"/ntpd.initd ntpd
-    newconfd "${FILES}"/ntpd.confd ntpd
+    hereconfd ntpd <<EOF
+# Options to pass to the ntpd process
+# Most people should leave this line alone ...
+# however, if you know what you're doing, feel free to tweak
+NTPD_OPTS="-u ntp:ntp"
+EOF
 
     find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
 }
