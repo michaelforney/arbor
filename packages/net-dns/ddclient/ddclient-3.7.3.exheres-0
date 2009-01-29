@@ -3,8 +3,6 @@
 # Based in part upon 'ddclient-3.7.3-r1.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require eutils
-
 SUMMARY="Perl updater client for dynamic DNS services"
 DESCRIPTION="
 ddclient is a Perl client used to update dynamic DNS entries for accounts on 
@@ -25,16 +23,14 @@ MYOPTIONS=""
 DEPENDENCIES="
     run:
        dev-perl/IO-Socket-SSL
+    build+run:
+        group/${PN}
+        user/${PN}
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}"/${PN}-reasonable-security.patch
 )
-
-pkg_setup() {
-    enewgroup ${PN}
-    enewuser ${PN} -1 -1 -1 ${PN}
-}
 
 src_install() {
     default
