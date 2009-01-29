@@ -3,7 +3,7 @@
 # Based in part upon 'clamav-0.93.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require eutils common-metadata
+require common-metadata
 
 PLATFORMS="~amd64"
 MYOPTIONS="ipv6 nls unrar"
@@ -16,6 +16,8 @@ MYOPTIONS="ipv6 nls unrar"
 DEPENDENCIES="
     build+run:
         dev-libs/gmp
+        group/clamav
+        user/clamav
 "
 
 # Valgrind test fails here, other tests work. Need to look into it.
@@ -34,11 +36,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-experimental
     --disable-milter
 )
-
-pkg_setup() {
-    enewgroup clamav
-    enewuser clamav -1 -1 /dev/null clamav
-}
 
 src_install() {
     default
