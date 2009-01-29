@@ -2,7 +2,7 @@
 # Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils toolchain-funcs flag-o-matic
+require toolchain-funcs flag-o-matic
 
 MY_PV=${PV/_p/-P}
 MY_PNV=${PN}-${MY_PV}
@@ -31,7 +31,10 @@ DEPENDENCIES="
     build+run:
         dev-libs/libxml2
         idn? ( net-dns/idnkit )
-        ssl? ( dev-libs/openssl )"
+        ssl? ( dev-libs/openssl )
+        group/named
+        user/named
+"
 
 WORK="${WORKBASE}/${MY_PNV}"
 
@@ -44,9 +47,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 
 pkg_setup() {
     tc-export AR CC LD
-
-    enewgroup named 40
-    enewuser named 40 -1 /etc/bind named
 
     # Fix ipv6 with glibc-2.8. Gentoo #227333
     # This is done in lib/bind/configure.in, not sure if that's enough to fix this bug
