@@ -40,5 +40,9 @@ src_install() {
     dodoc BLURBv5 CHANGES README*
 
     newinitd "${FILES}"/portmap.rc6 portmap
-    newconfd "${FILES}"/portmap.confd portmap
+    hereconfd portmap <<EOF
+# Options for `portmap`.
+# For a full list, just run `portmap -h`.
+#PORTMAP_OPTS="-l"
+EOF
 }
