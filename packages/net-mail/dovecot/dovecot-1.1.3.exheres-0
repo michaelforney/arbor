@@ -1,7 +1,7 @@
 # Copyright 2008 Fernando J. Pereda
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils multilib
+require multilib
 
 SUMMARY="Fast, secure, IMAP/POP server"
 HOMEPAGE="http://www.dovecot.org"
@@ -16,8 +16,11 @@ DEPENDENCIES="
     sys-apps/shadow
     sys-libs/pam
     ssl? ( dev-libs/openssl )
+    group/${PN}
+    user/${PN}
     post,suggested:
         net-mail/dovecot-sieve [[ description = [ Sieve plugin for deliver. ] ]]
+        
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -29,11 +32,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "ssl" )
-
-pkg_setup() {
-    enewgroup dovecot
-    enewuser dovecot -1 -1 /dev/null dovecot
-}
 
 src_install() {
     default
