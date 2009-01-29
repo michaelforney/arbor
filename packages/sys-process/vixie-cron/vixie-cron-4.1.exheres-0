@@ -3,7 +3,7 @@
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require eutils toolchain-funcs pam
+require toolchain-funcs pam
 
 PATCH_VER="1.0"
 
@@ -20,12 +20,9 @@ MYOPTIONS="pam"
 DEPENDENCIES="
     build+run:
        pam? ( sys-libs/pam )
+       group/cron
+       user/cron
 "
-
-pkg_setup() {
-    enewgroup cron 16
-    enewuser cron 16 -1 /var/spool/cron cron
-}
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${WORKBASE}/${PNV}-gentoo-r4.patch"
