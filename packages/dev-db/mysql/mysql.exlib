@@ -1,9 +1,9 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require eutils versionator flag-o-matic toolchain-funcs
+require versionator flag-o-matic toolchain-funcs
 
-export_exlib_phases pkg_pretend pkg_setup src_install # src_test pkg_config
+export_exlib_phases pkg_pretend src_install # src_test pkg_config
 
 MYSQL_MAJOR_VERSION=$(get_version_component_range 1-2)
 
@@ -26,6 +26,8 @@ MYOPTIONS="big-tables debug embedded-server ssl
 DEPENDENCIES="
     build+run:
         ssl? ( dev-libs/openssl )
+        group/${PN}
+        user/${PN}
 "
 
 _DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNVR}" )
@@ -79,11 +81,6 @@ mysql_pkg_config() {
     :
 }
 fi
-
-mysql_pkg_setup() {
-    enewgroup mysql 60
-    enewuser mysql 60 -1 /dev/null mysql
-}
 
 if false; then
 # XXX
