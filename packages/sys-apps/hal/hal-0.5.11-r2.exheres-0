@@ -107,14 +107,10 @@ src_install() {
     newinitd "${FILES}/0.5.11-hald.rc" hald
 
     # configuration
-    cp "${FILES}/0.5.11-hald.conf" "${WORKBASE}/"
-
-    if option verbose ; then
-        sed -e 's:HALD_VERBOSE="no":HALD_VERBOSE="yes":' \
-            -i "${WORKBASE}/0.5.11-hald.conf" || die "sed failed"
-    fi
-
-    newconfd "${WORKBASE}/0.5.11-hald.conf" hald
+    hereconfd hald <<EOF
+# Should HAL be verbose to syslog? Useful for debugging
+HALD_VERBOSE="$(option verbose && echo yes || echo no)"
+EOF
 
     dodoc "${WORKBASE}/hal-config-examples/"*.fdi
     dobin "${WORKBASE}/hal-config-examples/migrate-xorg-to-fdi.py"
