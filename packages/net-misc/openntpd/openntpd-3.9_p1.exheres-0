@@ -41,6 +41,12 @@ src_install() {
     rmdir "${IMAGE}"/var{/empty,}
 
     newinitd "${FILES}/${PN}.rc" ${PN}
-    newconfd "${FILES}/${PN}.conf.d" ${PN}
+    hereconfd "${PN}" <<EOF
+NTPD_HOME=/var/empty
+
+# See ntpd(8) man page ... some popular options:
+#  -s   Set the time immediately at startup
+NTPD_OPTS=""
+EOF
 }
 
