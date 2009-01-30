@@ -82,16 +82,14 @@ src_configure() {
         --sysconfdir=/etc/ssh \
         --libexecdir=/usr/$(get_libdir)/misc \
         --datadir=/usr/share/openssh \
-        --disable-suid-ssh \
         --with-privsep-path=/var/empty \
         --with-privsep-user=sshd \
         --with-md5-passwords \
         --with-ssl-engine \
-        --without-ldap \
         --without-libedit \
         --without-kerberos5 \
         $(option_with pam) \
-        $(option_enable tcpd tcp-wrappers)
+        $(option_with tcpd tcp-wrappers)
 }
 
 src_test() {
