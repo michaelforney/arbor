@@ -3,7 +3,7 @@
 # Based in part upon exim-4.69-r1.ebuild from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require eutils fixheadtails multilib alternatives
+require fixheadtails multilib alternatives
 
 SUMMARY="A highly configurable, drop-in replacement for sendmail"
 HOMEPAGE="http://www.exim.org"
@@ -28,6 +28,9 @@ DEPENDENCIES="
         sasl? ( net-libs/cyrus-sasl )
         ssl? ( dev-libs/openssl )
         tcpd? ( sys-apps/tcp-wrappers )
+        group/mail
+        user/mail
+        user/postmaster
 "
 # TODO Eximon
 EXIMON="
@@ -52,12 +55,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-exherbo-defaults.patch
 )
 DEFAULT_SRC_COMPILE_PARAMS=( build=Exim-Exherbo )
-
-pkg_setup() {
-    enewgroup mail 12
-    enewuser mail 8 -1 /var/spool/mail mail
-    enewuser postmaster 14 -1 /var/spool/mail
-}
 
 src_prepare() {
     mv "${WORKBASE}"/${PN}-texinfo-${PV}/doc/*.texinfo "${WORK}"/doc/ || die "Failed to move .texinfo files"
