@@ -17,6 +17,8 @@ scm-bzr_do_dependencies() {
 }
 
 scm-bzr_do_check_vars() {
+    [[ $(scm_get_var REPOSITORY) == lp:* ]] && die "lp: URIs are not supported, use 'HOME=/var/empty bzr info $(scm_get_var REPOSITORY)' to find the real URI"
+
     [[ -n $(scm_get_var TAG) && -n $(scm_get_var REVISION) ]] \
         && die "for bzr, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name REVISION)"
     [[ -z $(scm_get_var BRANCH) ]] && scm_set_var BRANCH trunk
