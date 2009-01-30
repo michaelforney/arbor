@@ -4,7 +4,7 @@
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require versionator flag-o-matic multilib
+require versionator multilib
 
 export_exlib_phases src_configure src_test src_install
 
@@ -43,8 +43,6 @@ DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
 WORK=${WORKBASE}/${MY_PNV}
 
 ruby_src_configure() {
-    filter-flags -fomit-frame-pointer
-
     unset SOCKS_SERVER
 
     # Yes, this does always --enable-ipv6
