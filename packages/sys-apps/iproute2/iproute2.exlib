@@ -32,9 +32,11 @@ DEFAULT_SRC_COMPILE_PARAMS+=(
     CC=$(tc-getCC)
     AR=$(tc-getAR)
     HOSTCC=$(tc-getBUILD_CC)
+    LIBDIR=/usr/$(get_libdir)
 )
 
 DEFAULT_SRC_INSTALL_PARAMS+=(
+    LIBDIR=/usr/$(get_libdir)
     DESTDIR="${IMAGE}"
     DOCDIR=/usr/share/doc/${PNVR}
     MANDIR=/usr/share/man
@@ -52,24 +54,16 @@ src_prepare() {
         -e 's:^CFLAGS =:CFLAGS +=:' \
         -i Makefile || die "sed Makefile (2) failed"
 
-    sed -i 's:/usr/local:/usr:' tc/m_ipt.c include/iptables.h || die "sed /usr/local failed"
+    sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' \
+        -i netem/Makefile || die "sed netem/Makefile failed"
+
+    sed -e "s:/usr/local/lib:/usr/$(get_libdir):" \
+        -i include/iptables.h || die "sed include/iptables.h failed"
 
     if ! option berkdb ; then
-        sed -i -e '/TARGETS/s:arpd::' "${WORK}/misc/Makefile" || die "sed s:arpd:: failed"
+        sed -e '/TARGETS/s:arpd::' \
+            -i misc/Makefile || die "sed s:arpd:: failed"
     fi
-
-    # libdir fixes
-    sed -e "s:/usr/lib:/usr/$(get_libdir):g" \
-        -i netem/Makefile tc/{Makefile,tc.c,q_netem.c,m_ipt.c} include/iptables.h \
-        || die "sed libdir failed"
-
-    sed -e "s:/lib/:/$(get_libdir)/:g" \
-        -i netem/Makefile tc/{Makefile,tc_util.c} ip/iplink.c || die "sed libdir (2) failed"
-
-    sed -e "s:/usr/local/lib/iptables:/usr/$(get_libdir)/iptables:g" \
-        -i include/iptables.h || die "sed libdir (3) failed"
-
-    echo -n 'TC_CONFIG_ATM := n' > Config
 }
 
 src_install() {
