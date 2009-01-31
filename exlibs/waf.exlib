@@ -1,0 +1,40 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+export_exlib_phases src_configure src_compile src_install
+
+DEPENDENCIES="
+    build:
+      >=dev-lang/python-2.3:*
+"
+
+ewaf() {
+    echo ./waf "${@}"
+    ./waf \
+        --verbose --verbose \
+        --nocache \
+        "${@}" ||
+        die "./waf ${@}: returned exit status: $?"
+}
+
+waf_src_configure() {
+    ewaf configure \
+        --prefix=/usr/ \
+        --bindir=/usr/bin/ \
+        --libdir=/usr/$(get_libdir)/ \
+        --datadir=/usr/share/ \
+        --htmldir=/usr/share/doc/${PNVR}/html/ \
+        ${WAF_SRC_CONFIGURE_PARAMS[@]}
+}
+
+waf_src_compile() {
+    ewaf build
+}
+
+waf_src_install() {
+    ewaf install \
+        --destdir="${IMAGE}"
+}
+
