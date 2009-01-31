@@ -3,7 +3,7 @@
 # Based in part upon 'ntp-4.2.4_p4.ebuild' which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata eutils multilib toolchain-funcs
+require common-metadata multilib toolchain-funcs
 
 SLOT="0"
 
@@ -11,6 +11,7 @@ MYOPTIONS="caps debug ipv6 parse-clocks ssl"
 
 DEPENDENCIES="
     build+run:
+        user/ntp
         >=sys-libs/ncurses-5.2
         >=sys-libs/readline-4.1
         ssl? ( dev-libs/openssl )
@@ -20,11 +21,6 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "caps linuxcaps" "parse-clocks" "ipv6" "debug debugging" "ssl crypto" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( WHERE-TO-START )
-
-pkg_setup() {
-    enewgroup ntp 123
-    enewuser ntp 123 -1 -1 ntp
-}
 
 src_install() {
     default
