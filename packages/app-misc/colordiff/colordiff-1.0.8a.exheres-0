@@ -1,0 +1,31 @@
+# Copyright 2007 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Colour-highlighted diff output"
+HOMEPAGE="http://colordiff.sourceforge.net/"
+DOWNLOADS="http://${PN}.sourceforge.net/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build:
+        sys-apps/diffutils"
+
+src_compile() {
+    # has a Makefile with various targets, but none we want here
+    :
+}
+
+DEFAULT_SRC_INSTALL_PARAMS=(
+    INSTALL_DIR="${IMAGE}"/usr/bin
+    MAN_DIR="${IMAGE}"/usr/share/man/man1
+    ETC_DIR="${IMAGE}"/etc
+)
+
+src_install() {
+    dodir /etc
+    default
+}
+
