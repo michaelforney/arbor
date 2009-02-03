@@ -238,16 +238,7 @@ scm_do_info() {
 }
 
 scm_pkg_info() {
-    if [[ -n ${SCM_ACTUAL_REVISION} ]]; then
-        local output=$(scm_{for_each,call} info)
-        if [[ -n ${output} ]]; then
-            echo "${output}"
-        else
-            default
-        fi
-    else
-        default
-    fi
+    [[ -n ${SCM_ACTUAL_REVISION} ]] && scm_{for_each,call} info
 }
 
 scm_trim_slashes() {
