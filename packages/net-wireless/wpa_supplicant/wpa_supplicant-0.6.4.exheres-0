@@ -3,20 +3,23 @@
 # Based in part upon 'wpa_supplicant-0.6.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata toolchain-funcs
+QMAKE4_EXLIB_QT_DEPENDENCY=NoThanks
+
+require common-metadata toolchain-funcs qmake4
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="dbus readline"
+MYOPTIONS="dbus readline qt4"
 
 DEPENDENCIES="
     build+run:
+        dev-libs/openssl
         dbus? ( sys-apps/dbus )
         readline? (
             sys-libs/ncurses
             sys-libs/readline
         )
-        dev-libs/openssl
+        qt4? ( x11-libs/qt:4[X][qt3support] )
 "
 
 WORK="${WORKBASE}/${PNV}/${PN}"
@@ -62,6 +65,21 @@ src_prepare() {
     echo "CONFIG_DRIVER_WIRED=y"          >> .config
 }
 
+src_configure() {
+    if option qt4; then
+        eqmake4 -o wpa_gui-qt4/Makefile wpa_gui-qt4/wpa_gui.pro
+    fi
+}
+
+src_compile() {
+    default
+
+    if option qt4; then
+        cd wpa_gui-qt4 || die "Couldn't enter ./wpa_gui-qt4"
+        emake
+    fi
+}
+
 src_install() {
     dosbin  wpa_supplicant
     dobin wpa_cli wpa_passphrase
@@ -89,5 +107,10 @@ src_install() {
         newins dbus-wpa_supplicant.conf wpa_supplicant.conf
         insinto /usr/share/dbus-1/system-services
         newins dbus-wpa_supplicant.service "fi.epitest.hostap.WPASupplicant.service"
+    fi
+
+    if option qt4; then
+        dobin wpa_gui-qt4/wpa_gui
+        # FIXME .desktop entry
     fi
 }
