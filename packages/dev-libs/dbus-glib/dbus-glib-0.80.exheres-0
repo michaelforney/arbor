@@ -1,0 +1,36 @@
+# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="D-Bus GLib Bindings"
+HOMEPAGE="http://www.freedesktop.org/wiki/Software/DBusBindings"
+DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
+
+LICENCES="|| ( GPL-2 AFL-2.1 )"
+SLOT="1"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="bash-completion doc verbose"
+
+DEPENDENCIES="
+    build+run:
+        >=dev-libs/glib-2.10:2
+        >=sys-apps/dbus-1.1
+          dev-libs/expat
+    build:
+          sys-devel/gettext
+        >=dev-util/pkg-config-0.20
+        doc? ( >=dev-doc/gtk-doc-1.4 )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-tests' '--with-xml=expat' '--disable-doxygen-docs' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose verbose-mode" )
+
+src_install() {
+    default
+
+    rmdir "${IMAGE}/usr/libexec" || die "failed to prune empty dirs"
+    if ! option bash-completion ; then
+        rmdir "${IMAGE}"/etc/{bash_completion.d,} || die "failed to prune empty dirs"
+    fi
+}
+
