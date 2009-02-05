@@ -28,9 +28,9 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose ve
 src_install() {
     default
 
-    rmdir "${IMAGE}/usr/libexec" || die "failed to prune empty dirs"
     if ! option bash-completion ; then
-        rmdir "${IMAGE}"/etc/{bash_completion.d,} || die "failed to prune empty dirs"
+        rmdir "${IMAGE}"/etc/{bash_completion.d,} "${IMAGE}"/usr/libexec ||
+            die "failed to prune empty dirs"
     fi
 }
 
