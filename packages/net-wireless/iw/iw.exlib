@@ -1,0 +1,27 @@
+# Copyright 2009 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
+
+SUMMARY="A new nl80211 based CLI configuration utility for wireless devices"
+DESCRIPTION="
+The future replacement for wireless-tools. It contains an utility to configure
+wireless devices from the command line.
+"
+HOMEPAGE="http://wireless.kernel.org/en/users/Documentation/${PN}/"
+DOWNLOADS="http://wireless.kernel.org/download/${PN}/${PNV}.tar.bz2"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}"
+
+LICENCES="ISC"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        net-libs/libnl
+"
+
+DEFAULT_SRC_COMPILE_PARAMS+=( CC=$(tc-getCC) )
+DEFAULT_SRC_INSTALL_PARAMS+=( BINDIR=/sbin )
