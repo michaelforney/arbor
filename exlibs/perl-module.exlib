@@ -53,7 +53,7 @@ perl-module_src_configure() {
         perl Build.PL ${myconf} --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
             die "Unable to build!"
-    elif [[ -f Makefile.PL && ! ${PN} == "module-build" ]]; then
+    elif [[ -f Makefile.PL && ${PN} != "module-build" ]]; then
         einfo "Using ExtUtils::MakeMaker"
         perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
