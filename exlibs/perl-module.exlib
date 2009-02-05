@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 #
 # Based in part upon 'perl-module.eclass' which is
@@ -50,12 +50,14 @@ perl-module_src_configure() {
 
     if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
         einfo "Using Module::Build"
-        perl Build.PL ${myconf} --installdirs=vendor --destdir="${IMAGE}" --libdoc= <<< ${pm_echovar} \
-            || die "Unable to build!"
+        perl Build.PL ${myconf} --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
+            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
+            die "Unable to build!"
     elif [[ -f Makefile.PL && ! ${PN} == "module-build" ]]; then
         einfo "Using ExtUtils::MakeMaker"
-        perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" <<< ${pm_echovar} \
-            || die "Unable to build!"
+        perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
+            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
+            die "Unable to build!"
     fi
 
     if [[ ! -f Build.PL && ! -f Makefile.PL ]]; then
