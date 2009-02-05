@@ -1,0 +1,29 @@
+Upstream: Yes (mailed)
+Reason: /sbin was hardcoded in install target
+Source: Daniel Mierswa <impulze@impulze.org>
+
+From 8470b50c4b9a750ffa5881c37395e839f1c8947f Mon Sep 17 00:00:00 2001
+From: Daniel Mierswa <impulze@impulze.org>
+Date: Fri, 6 Feb 2009 00:12:09 +0100
+Subject: [PATCH] use SBINDIR instead of hard-coded /sbin
+
+---
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 461103d..106397d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -109,7 +109,7 @@ verify: $(REG_BIN) regdbdump
+ 
+ install: crda crda.8.gz regdbdump.8.gz
+ 	$(NQ) '  INSTALL  crda'
+-	$(Q)$(MKDIR) $(DESTDIR)/sbin
++	$(Q)$(MKDIR) $(DESTDIR)/$(SBINDIR)
+ 	$(Q)$(INSTALL) -m 755 -t $(DESTDIR)/$(SBINDIR) crda
+ 	$(NQ) '  INSTALL  regdbdump'
+ 	$(Q)$(INSTALL) -m 755 -t $(DESTDIR)/$(SBINDIR) regdbdump
+-- 
+1.6.1.2
+
