@@ -50,12 +50,12 @@ perl-module_src_configure() {
 
     if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
         einfo "Using Module::Build"
-        perl Build.PL ${myconf} --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
+        perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
             die "Unable to build!"
     elif [[ -f Makefile.PL && ${PN} != "module-build" ]]; then
         einfo "Using ExtUtils::MakeMaker"
-        perl Makefile.PL ${myconf} INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
+        perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
             die "Unable to build!"
     fi
