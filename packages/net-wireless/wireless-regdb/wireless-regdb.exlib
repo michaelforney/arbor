@@ -1,0 +1,26 @@
+# Copyright 2009 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="Regulatory domain database"
+DESCRIPTION="
+Provides 'regulatory.bin'. A signed newly maintained regulatory database
+which can be used by other programs or operating systems.
+"
+HOMEPAGE="( )"
+DOWNLOADS="http://wireless.kernel.org/download/${PN}/${PNV}.tar.bz2"
+
+LICENCES="ISC"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-lang/python
+        dev-libs/openssl
+"
+
+UPSTREAM_DOCUMENTATION="http://wireless.kernel.org/en/developers/Regulatory#Theregulatorydatabase"
+
+DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}/${PN}-CRDA_PATH.patch" )
+DEFAULT_SRC_INSTALL_PARAMS+=( CRDA_PATH=/usr/$(get_libdir)/crda )
