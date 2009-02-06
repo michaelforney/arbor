@@ -28,4 +28,6 @@ src_compile() {
 src_install() {
     emake DESTDIR="${IMAGE}" mandir=/usr/share/man libdir=/usr/$(get_libdir) \
         NLS=$(option nls && echo true || echo false) install
+    newinitd "${FILES}"/${PN}-init.d ${PN}
+    newconfd "${FILES}"/${PN}-conf.d ${PN}
 }
