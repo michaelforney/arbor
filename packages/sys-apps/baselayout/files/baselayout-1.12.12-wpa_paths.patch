@@ -1,0 +1,83 @@
+--- ./lib/rcscripts/net/wpa_supplicant.sh.bak	2009-02-06 21:33:14.470507077 +0100
++++ ./lib/rcscripts/net/wpa_supplicant.sh	2009-02-06 21:34:50.644506894 +0100
+@@ -5,14 +5,14 @@
+ # Fix any potential localisation problems
+ # Note that LC_ALL trumps LC_anything_else according to locale(7)
+ wpa_supplicant() {
+-	LC_ALL=C /sbin/wpa_supplicant "$@"
++	LC_ALL=C /usr/bin/wpa_supplicant "$@"
+ }
+ 
+ wpa_cli() {
+ 	if [[ -n ${ctrl_dir} ]] ; then
+-		LC_ALL=C /bin/wpa_cli -p "${ctrl_dir}" "$@"
++		LC_ALL=C /usr/bin/wpa_cli -p "${ctrl_dir}" "$@"
+ 	else
+-		LC_ALL=C /bin/wpa_cli "$@"
++		LC_ALL=C /usr/bin/wpa_cli "$@"
+ 	fi
+ }
+ 
+@@ -37,7 +37,7 @@
+ #
+ # Returns 0 if wpa_supplicant is installed, otherwise 1
+ wpa_supplicant_check_installed() {
+-	[[ -x /sbin/wpa_supplicant ]] && return 0
++	[[ -x /usr/bin/wpa_supplicant ]] && return 0
+ 	${1:-false} && eerror "For WPA support (wpa_supplicant) support, emerge net-wireless/wpa_supplicant"
+ 	return 1 
+ }
+@@ -118,7 +118,7 @@
+ 	pidfile="/var/run/wpa_cli-${iface}.pid"
+ 	if [[ -f ${pidfile} ]] ; then
+ 		${report} && ebegin "Stopping wpa_cli on ${iface}"
+-		start-stop-daemon --stop --exec /bin/wpa_cli --pidfile "${pidfile}"
++		start-stop-daemon --stop --exec /usr/bin/wpa_cli --pidfile "${pidfile}"
+ 		${report} && eend "$?"
+ 	fi
+ 
+@@ -126,7 +126,7 @@
+ 	pidfile="/var/run/wpa_supplicant-${iface}.pid"
+ 	if [[ -f ${pidfile} ]] ; then
+ 		${report} && ebegin "Stopping wpa_supplicant on ${iface}"
+-		start-stop-daemon --stop --exec /sbin/wpa_supplicant \
++		start-stop-daemon --stop --exec /usr/bin/wpa_supplicant \
+ 			--pidfile "${pidfile}"
+ 		${report} && eend "$?"
+ 	fi
+@@ -198,7 +198,7 @@
+ 	# We don't configure wireless if we're being called from
+ 	# the background unless we're not currently running
+ 	if ${IN_BACKGROUND} ; then
+-		if service_started_daemon "net.${iface}" /sbin/wpa_supplicant ; then
++		if service_started_daemon "net.${iface}" /usr/bin/wpa_supplicant ; then
+ 			if wpa_supplicant_exists "${iface}" ; then
+ 				ESSID=$(wpa_supplicant_get_essid "${iface}")
+ 				ESSIDVAR=$(bash_variable "${ESSID}")
+@@ -310,7 +310,7 @@
+ 	[[ ! -x ${actfile} ]] && unset actfile
+ 	[[ -n ${actfile} ]] && opts="${opts} -W"
+ 
+-	eval start-stop-daemon --start --exec /sbin/wpa_supplicant \
++	eval start-stop-daemon --start --exec /usr/bin/wpa_supplicant \
+ 		--pidfile "/var/run/wpa_supplicant-${iface}.pid" \
+ 		-- "${opts}" -W -B -i"${iface}" \
+ 		-P"/var/run/wpa_supplicant-${iface}.pid"
+@@ -321,7 +321,7 @@
+ 	if [[ -n ${actfile} ]] ; then
+ 		mark_service_inactive "net.${iface}"
+ 		ebegin "Starting wpa_cli on ${iface}"
+-		start-stop-daemon --start --exec /bin/wpa_cli \
++		start-stop-daemon --start --exec /usr/bin/wpa_cli \
+ 			--pidfile "/var/run/wpa_cli-${iface}.pid" \
+ 			-- -a"${actfile}" -p"${ctrl_dir}" -i"${iface}" \
+ 			-P"/var/run/wpa_cli-${iface}.pid" -B
+@@ -376,7 +376,7 @@
+ wpa_supplicant_post_stop() {
+ 	if ${IN_BACKGROUND} ; then
+ 		# Only stop wpa_supplicant if it's not the controlling daemon
+-		! service_started_daemon "net.$1" /sbin/wpa_supplicant 0
++		! service_started_daemon "net.$1" /usr/bin/wpa_supplicant 0
+ 	fi
+ 	[[ $? == 0 ]] && wpa_supplicant_kill "$1" true
+ 	return 0
