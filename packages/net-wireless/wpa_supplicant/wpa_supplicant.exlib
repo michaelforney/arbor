@@ -76,6 +76,8 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${PNV}/${PN}"
 
+DEFAULT_SRC_TEST_PARAMS=( tests )
+
 config() {
     local str="CONFIG_${1}"
     [[ $# -eq 2 ]] && str="${str}=${2}" || str="${str}=y"
@@ -180,10 +182,6 @@ src_compile() {
 
     tc-export CC
     emake -j1
-}
-
-src_test() {
-    emake tests
 }
 
 src_install() {
