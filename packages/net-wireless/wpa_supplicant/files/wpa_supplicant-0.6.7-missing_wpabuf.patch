@@ -1,0 +1,31 @@
+Upstream: Yes
+Reason: undefined references to wpabuf functions
+Source: Daniel Mierswa <impulze@impulze.org>
+
+http://lists.shmoo.com/pipermail/hostap/2009-February/019223.html
+
+From 512669792395762147ceb29169d9fa2bfc5c10e5 Mon Sep 17 00:00:00 2001
+From: Daniel Mierswa <impulze@impulze.org>
+Date: Fri, 6 Feb 2009 00:47:49 +0100
+Subject: [PATCH] missing wpabuf object when using CONFIG_PRIVSEP
+
+---
+ wpa_supplicant/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/wpa_supplicant/Makefile b/wpa_supplicant/Makefile
+index 9f7a785..7923504 100644
+--- a/wpa_supplicant/Makefile
++++ b/wpa_supplicant/Makefile
+@@ -1032,7 +1032,7 @@ OBJS_t2 := $(OBJS) $(OBJS_l2) preauth_test.o
+ OBJS += $(CONFIG_MAIN).o
+ 
+ ifdef CONFIG_PRIVSEP
+-OBJS_priv += $(OBJS_d) ../src/drivers/drivers.o ../src/drivers/scan_helpers.o
++OBJS_priv += $(OBJS_d) ../src/drivers/drivers.o ../src/drivers/scan_helpers.o ../src/utils/wpabuf.o
+ OBJS_priv += $(OBJS_l2)
+ OBJS_priv += ../src/utils/os_$(CONFIG_OS).o
+ OBJS_priv += ../src/utils/$(CONFIG_ELOOP).o
+-- 
+1.6.1.2
+

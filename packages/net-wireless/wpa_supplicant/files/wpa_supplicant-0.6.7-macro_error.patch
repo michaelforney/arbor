@@ -1,0 +1,27 @@
+From ceb9543a81ff4cc45929a4cc9157a9747e7f8dde Mon Sep 17 00:00:00 2001
+From: Daniel Mierswa <impulze@impulze.org>
+Date: Fri, 6 Feb 2009 01:09:15 +0100
+Subject: [PATCH] use separate variable to avoid macro errors
+
+---
+ wpa_supplicant/Makefile |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/wpa_supplicant/Makefile b/wpa_supplicant/Makefile
+index 7923504..8694057 100644
+--- a/wpa_supplicant/Makefile
++++ b/wpa_supplicant/Makefile
+@@ -1146,8 +1146,9 @@ eap_ikev2.so: ../src/eap_peer/eap_ikev2.c ../src/eap_peer/ikev2.c ../src/eap_com
+ 		-Deap_peer_ikev2_register=eap_peer_method_dynamic_init
+ 
+ %.so: %.c
++	file = $(basename $*)
+ 	$(CC) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $< \
+-		-D$(*:eap_%=eap_peer_%)_register=eap_peer_method_dynamic_init
++		-D$(file:eap_%=eap_peer_%)_register=eap_peer_method_dynamic_init
+ 
+ 
+ wpa_supplicant.exe: wpa_supplicant
+-- 
+1.6.1.2
+
