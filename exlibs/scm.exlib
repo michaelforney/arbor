@@ -231,6 +231,7 @@ scm_src_unpack() {
 
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; either set SCM_REPOSITORY before require scm{,-*}, or call scm_finalise in global scope after setting SCM_*"
     scm_{for_each,access_checkout,unpack_one}
+    SCM_IS_BUILT=1
 }
 
 scm_do_info() {
@@ -238,7 +239,7 @@ scm_do_info() {
 }
 
 scm_pkg_info() {
-    [[ -n ${SCM_ACTUAL_REVISION} ]] && scm_{for_each,call} info
+    [[ -n ${SCM_IS_BUILT} ]] && scm_{for_each,call} info
 }
 
 scm_trim_slashes() {
