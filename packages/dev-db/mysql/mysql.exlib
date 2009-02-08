@@ -1,11 +1,11 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require versionator flag-o-matic toolchain-funcs
+require flag-o-matic toolchain-funcs
 
 export_exlib_phases pkg_pretend src_install # src_test pkg_config
 
-MYSQL_MAJOR_VERSION=$(get_version_component_range 1-2)
+MYSQL_MAJOR_VERSION=$(ever range 1-2)
 
 SUMMARY="A relational database management system (RDBMS)"
 HOMEPAGE="http://www.mysql.com/"
