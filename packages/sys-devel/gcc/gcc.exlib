@@ -109,7 +109,7 @@ src_install() {
     ### slots handling
     pushd "${IMAGE}" || die "Could not enter IMAGE"
 
-    local x bn ext alternatives=( "${PN}" "${SLOT}" "$(delete_all_version_separators "${SLOT}")" )
+    local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT//.}" )
 
     # binaries - slotted properly by upstream, manage with alternatives
     for x in usr/bin/*-${SLOT}; do
