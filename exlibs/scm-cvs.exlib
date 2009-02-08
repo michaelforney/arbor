@@ -161,9 +161,7 @@ scm-cvs_do_revision() {
     scm-cvs_revision_list | sha1sum | cut -d' ' -f1
 }
 
-scm-cvs_do_unpack() {
-    scm_do_unpack
-
+scm-cvs_do_set_actual_vars() {
     scm_set_var CVS_ACTUAL_REVISION_LIST "$(scm-cvs_revision_list)"
 }
 

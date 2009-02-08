@@ -200,6 +200,12 @@ scm_do_unpack() {
     cp -pPR "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)" || die "cp failed"
 }
 
+scm_do_set_actual_vars() {
+    local rev=$(scm_call revision)
+    [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
+    scm_set_var ACTUAL_REVISION "${rev}"
+}
+
 scm_unpack_one() {
     scm_call resolve_externals
 
@@ -220,10 +226,7 @@ scm_unpack_one() {
 
     scm_call unpack
     rm -f "${dir}/.scm.exlib.timestamp"{,.*}
-
-    local rev=$(scm_call revision)
-    [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
-    scm_set_var ACTUAL_REVISION "${rev}"
+    scm_call set_actual_vars
 }
 
 scm_src_unpack() {
