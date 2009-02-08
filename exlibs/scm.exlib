@@ -134,8 +134,9 @@ scm_perform_fetch() {
     if [[ -n ${SCM_MIN_UPDATE_DELAY} ]]; then
         [[ ${SCM_MIN_UPDATE_DELAY} == *[^0-9]* || ${SCM_MIN_UPDATE_DELAY} -eq 0 ]] \
             && die "SCM_MIN_UPDATE_DELAY must be a positive integer"
+        local branch=$(scm_get_var BRANCH)
         if scm_check_timestamp "${dir}" .scm.exlib.timestamp ||
-                { [[ -n $(scm_get_var BRANCH) ]] && scm_check_timestamp "${dir}" .scm.exlib.timestamp."$(scm_get_var BRANCH)"; }; then
+                { [[ -n ${branch} ]] && scm_check_timestamp "${dir}" .scm.exlib.timestamp."${branch//\//--}"; }; then
             if [[ ${status} -eq 0 ]]; then
                 einfo "Not fetching ${SCM_THIS:-primary repository} because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
                 return
@@ -167,6 +168,7 @@ scm_perform_fetch() {
     local fetched
     scm_get_array FETCHED_BRANCHES fetched
     if [[ ${#fetched[@]} -gt 0 ]]; then
+        fetched=( "${fetched[@]//\//--}" )
         touch "${fetched[@]/#/${dir}/.scm.exlib.timestamp.}" || die "touch failed"
     else
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"

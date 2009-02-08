@@ -140,8 +140,7 @@ scm-bzr_do_update() {
         scm-bzr_bzr pull -d "$(scm-bzr_local_branch)" "$(scm-bzr_uri)"
     fi
 
-    local branch=$(scm_get_var BRANCH)
-    scm_set_array FETCHED_BRANCHES "${branch//\//--}"
+    scm_set_array FETCHED_BRANCHES "$(scm_get_var BRANCH)"
 }
 
 scm-bzr_do_revision() {
