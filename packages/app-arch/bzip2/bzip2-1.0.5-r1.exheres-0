@@ -2,7 +2,7 @@
 # Copyright 2008 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib versionator
+require multilib
 
 SUMMARY="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
@@ -47,7 +47,7 @@ src_install() {
     # Install shared libraries to /$(get_libdir)
     into /
     dolib.so libbz2.so.${PV}
-    for v in libbz2.so{,.{$(get_version_component_range 1),$(get_version_component_range 1-2)}} ; do
+    for v in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
         dosym libbz2.so.${PV} /$(get_libdir)/${v}
     done
 

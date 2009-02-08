@@ -3,7 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 ever at_least 1.6.1 || GNU_TARBALL_SUFFIX=gz
-require versionator gnu
+require gnu
 
 export_exlib_phases src_test src_install
 
@@ -19,7 +19,7 @@ elif ever at_least 1.10.1; then
 else
     LICENCES="GPL-2"
 fi
-SLOT="$(get_version_component_range 1-2)"
+SLOT="$(ever range 1-2)"
 MYOPTIONS="slowtests"
 
 DEPENDENCIES="

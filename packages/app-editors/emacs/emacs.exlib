@@ -7,14 +7,14 @@ SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
 
 GNU_TARBALL_SUFFIX=gz
-require alternatives toolchain-funcs versionator autotools gnu
+require alternatives toolchain-funcs autotools gnu
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst pkg_postrm
 
 SUMMARY="The only Operating System that doesn't come with a real editor"
 
 LICENCES="GPL-3"
-SLOT="$(get_major_version)"
+SLOT="$(ever major)"
 MYOPTIONS="alsa gif gtk jpeg png spell tiff X xpm
     ( gif gtk jpeg png tiff xpm ) [[ requires = X ]]"
 

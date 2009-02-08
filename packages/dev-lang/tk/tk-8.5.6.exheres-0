@@ -6,7 +6,7 @@
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
 
-require multilib autotools versionator
+require multilib autotools
 
 MY_PNV="${PN}${PV}"
 
@@ -51,7 +51,7 @@ src_install() {
     default
     nonfatal emake DESTDIR="${IMAGE}" install-private-headers || die "emake install-private-headers failed"
 
-    local v1=$(get_version_component_range 1-2)
+    local v1=$(ever range 1-2)
     # Fix the tkConfig.sh to eliminate references to the build directory
     local mylibdir=$(get_libdir) ; mylibdir=${mylibdir//\/}
     sed -i \

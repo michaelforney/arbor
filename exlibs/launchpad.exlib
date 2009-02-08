@@ -1,13 +1,11 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require versionator
-
 HOMEPAGE="http://launchpad.net/${LAUNCHPAD_PROJECT:-${PN}}/"
 
-DOWNLOADS="${HOMEPAGE}$(get_version_component_range 1-2)/${PV}/+download/${PNV}.tar.gz"
+DOWNLOADS="${HOMEPAGE}$(ever range 1-2)/${PV}/+download/${PNV}.tar.gz"
 
-# See RDF data @ ${HOMEPAGE}$(get_version_component_range 1-2)/${PV}/+rdf
+# See RDF data @ ${HOMEPAGE}$(ever range 1-2)/${PV}/+rdf
 REMOTE_IDS="launchpad:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(get_version_component_range 1-2)/${PV}"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(ever range 1-2)/${PV}"
 

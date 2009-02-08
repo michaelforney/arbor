@@ -7,7 +7,7 @@
 SUPPORTED_AUTOCONF=( 2.5 )
 SUPPORTED_AUTOMAKE=( 1.10 )
 
-require common-metadata multilib autotools versionator
+require common-metadata multilib autotools
 
 MY_PNV="${PN}${PV}"
 
@@ -35,7 +35,7 @@ src_install() {
 
     keepdir /usr/$(get_libdir)/${PN}8/8.3/
 
-    local v1=$(get_version_component_range 1-2)
+    local v1=$(ever range 1-2)
     dosym /usr/bin/tclsh{${v1},}
 
     # Fix the tclConfig.sh to eliminate references to the build directory

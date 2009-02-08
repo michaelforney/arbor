@@ -20,7 +20,7 @@
 # These variable specify which vimrc files from the files/ dir will be installed.
 
 #require vim/doc flag-o-matic fdo-mime bash-completion
-require versionator vim-doc flag-o-matic
+require vim-doc flag-o-matic
 
 [[ "${PN}" != 'vim-runtime' ]] && require alternatives python
 [[ "${PN}" != 'gvim' ]] && require bash-completion
@@ -28,7 +28,7 @@ require versionator vim-doc flag-o-matic
 export_exlib_phases src_prepare src_configure src_compile src_test src_install pkg_postinst pkg_postrm
 
 ### Versions and patchlevels
-VIM_VERSION="${VIM_VERSION:-$(get_version_component_range 1-2)}"
+VIM_VERSION="${VIM_VERSION:-$(ever range 1-2)}"
 VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL:-${PV#${VIM_VERSION}.}}"
 VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL##0}"
 VIM_PATCH_LEVEL="${VIM_PATCH_LEVEL:-0}"

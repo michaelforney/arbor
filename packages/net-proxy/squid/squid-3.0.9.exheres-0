@@ -6,11 +6,11 @@
 SUPPORTED_AUTOCONF=( "2.5" )
 SUPPORTED_AUTOMAKE=( "1.10" )
 
-require versionator pam toolchain-funcs autotools
+require pam toolchain-funcs autotools
 
-PMAJOR=$(get_major_version)
-PMINOR=$(get_version_component_range 2)
-PPLEVL=$(get_version_component_range 3)
+PMAJOR=$(ever major)
+PMINOR=$(ever range 2)
+PPLEVL=$(ever range 3)
 MY_PNV=${PN}-${PMAJOR}.${PMINOR}.STABLE${PPLEVL}
 
 SUMMARY="Squid is a full-featured, high performance web proxy cache"
