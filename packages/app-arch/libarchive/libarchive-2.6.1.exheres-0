@@ -29,7 +29,6 @@ DEPENDENCIES="
     build+run:
         app-arch/gzip
         app-arch/bzip2
-        app-arch/xz
         acl? ( sys-apps/acl )
         xattr? ( sys-apps/attr )
 "
@@ -39,7 +38,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # FIXME: bsdcpio tests fail
     # --enable-bsdcpio=shared
     --disable-bsdcpio
-    --with-{zlib,bz2lib,lzmadec}
+    --with-{zlib,bz2lib}
+    --without-lzmadec
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl xattr )
 
