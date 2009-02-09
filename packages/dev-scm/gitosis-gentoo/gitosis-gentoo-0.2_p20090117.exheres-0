@@ -1,0 +1,49 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+PYTHON_MODNAME="gitosis"
+
+require distutils
+
+SUMMARY="Manage git repositories, provide access to them over SSH, with tight access control and not needing shell accounts"
+DESCRIPTION="
+Gitosis aims to make hosting git repos easier and safer. It manages multiple
+repositories under one user account, using SSH keys to identify users. End
+users do not need shell accounts on the server, they will talk to one shared
+account that will not let them run arbitrary commands.
+"
+HOMEPAGE="
+http://git.overlays.gentoo.org/gitweb/?p=proj/gitosis-gentoo.git    [[ description = [ Homepage for the Gentoo fork (this package) ] ]]
+http://eagain.net/gitweb/?p=gitosis.git;a=summary                   [[ description = [ Homepage for the original Gitosis package ] ]]
+"
+# Make sure that this grabs a commit from the gentoo branch, master contains the original gitosis.
+DOWNLOADS="http://git.overlays.gentoo.org/gitweb/?p=proj/gitosis-gentoo.git;a=snapshot;h=1d768c5b;sf=tbz2 -> ${PNV}.tar.bz2"
+
+UPSTREAM_DOCUMENTATION="
+http://git.overlays.gentoo.org/gitweb/?p=proj/gitosis-gentoo.git;a=blob;f=README.rst
+"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+      >=dev-python/setuptools-0.6_rc5
+    build+run:
+        dev-scm/git
+        group/git
+        user/git
+"
+
+WORK=${WORKBASE}/${PN}
+
+src_install() {
+    distutils_src_install
+    dodoc example.conf gitweb.conf lighttpd-gitweb.conf TODO.rst
+
+    keepdir /var/git/
+    fowners git:git /var/git/
+}
+
