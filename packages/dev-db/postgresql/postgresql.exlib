@@ -1,0 +1,83 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require versionator
+
+export_exlib_phases pkg_pretend
+
+PSQL_MAJOR_VERSION=$(ever range 1-2)
+
+SUMMARY="PostgreSQL is a powerful, open source relational database system"
+DESCRIPTION="
+PostgreSQL is a powerful, open source relational database system.
+It has more than 15 years of active development and a proven architecture that has earned it
+a strong reputation for reliability, data integrity, and correctness.
+It runs on all major operating systems, including Linux, UNIX (AIX, BSD, HP-UX, SGI IRIX, Mac OS X, Solaris, Tru64), and Windows.
+It is fully ACID compliant, has full support for foreign keys, joins, views, triggers, and stored procedures (in multiple languages).
+It includes most SQL92 and SQL99 data types, including INTEGER, NUMERIC, BOOLEAN, CHAR, VARCHAR, DATE, INTERVAL, and TIMESTAMP.
+It also supports storage of binary large objects, including pictures, sounds, or video.
+It has native programming interfaces for C/C++, Java, .Net, Perl, Python, Ruby, Tcl, ODBC, among others,
+and exceptional documentation.
+"
+HOMEPAGE="http://www.postgresql.org"
+
+BUGS_TO="ingmar@exherbo.org"
+REMOTE_IDS="freshmeat:pgsql"
+
+UPSTREAM_DOCUMENTATION="
+${HOMEPAGE}/docs/manuals/           [[ lang = en description = [ PostgreSQL Manuals ] ]]
+${HOMEPAGE}/docs/faq/               [[ lang = en description = [ FAQ ] ]]
+${HOMEPAGE}/support/security.html   [[ lang = en description = [ Security Information ] ]]
+"
+UPSTREAM_RELEASE_NOTES="
+http://wiki.postgresql.org/wiki/WhatsNew${PSQL_MAJOR_VERSION//.}
+${HOMEPAGE}/docs/${PSQL_MAJOR_VERSION}/static/release-${PSQL_MAJOR_VERSION//./-}.html
+"
+DOWNLOADS="mirror://${PN}/source/v${PV}/${PNV}.tar.bz2"
+
+LICENCES="PostgreSQL"
+SLOT="0"
+MYOPTIONS="nls pam perl python readline ssl tcl"
+
+DEPENDENCIES="
+    build:
+        sys-devel/flex
+    build+run:
+        group/postgres
+        user/postgres
+        pam? ( sys-libs/pam )
+        perl? ( dev-lang/perl:= )
+        python? ( dev-lang/python:= )
+        readline? ( sys-libs/readline )
+        ssl? ( dev-libs/openssl )
+        tcl? ( dev-lang/tcl:= )
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    # 'kerberos krb5'
+    pam perl python readline 'ssl openssl' tcl
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-docdir=/usr/share/doc/${PNVR}
+    --with-system-tzdata=/usr/share/zoneinfo
+    --with-zlib
+    # Force thread-safety on, 64bit sandbox breaks the ./configure test, Gentoo #234762
+    --enable-thread-safety-force
+)
+
+postgresql_pkg_pretend() {
+    if [[ -z ${POSTGRESQL_MAJOR_UPGRADE} ]] && has_version ${CATEGORY}/${PN} && \
+        ! has_version =${CATEGORY}/${PN}-${PSQL_MAJOR_VERSION}*; then
+        ewarn "To install a different major version of PostgreSQL, you have to dump/reload your database."
+        ewarn "When you've done this, please set 'POSTGRESQL_MAJOR_UPGRADE=YesPlease', to continue the upgrade."
+        ewarn "For more information visit http://www.postgresql.org/support/versioning."
+        die "Dump your databases before doing a major version upgrade of PostgreSQL."
+    fi
+
+    # Pending genesis integration:
+    # Upgrading to any version requires starting/stopping the PostgreSQL server.
+}
+
+# XXX: See http://wiki.postgresql.org/wiki/Detailed_installation_guides
+# postgresql_pkg_config()
+
