@@ -1,0 +1,30 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Debian Almquist Shell, a POSIX-compliant /bin/sh implementation"
+DESCRIPTION="
+DASH is a POSIX-compliant implementation of /bin/sh that aims to be as small as
+possible. It does this without sacrificing speed where possible. In fact, it is
+significantly faster than bash (the GNU Bourne-Again SHell) for most tasks."
+HOMEPAGE="http://gondor.apana.org.au/~herbert/dash"
+DOWNLOADS="${HOMEPAGE}/files/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_CHANGELOG="http://git.kernel.org/?p=utils/dash/dash.git;a=summary"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="libedit [[ description = [ Add editline support using libedit ] ]]"
+
+DEPENDENCIES="
+    build+run:
+        libedit? ( dev-libs/libedit )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --bindir=/bin
+    --enable-static
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( libedit )
+
