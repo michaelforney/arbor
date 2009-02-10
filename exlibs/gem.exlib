@@ -5,6 +5,8 @@
 #
 # Purpose: Install rubygems packages
 
+export_exlib_phases src_install
+
 if [[ -z ${DOWNLOADS} ]]; then
     DOWNLOADS="http://gems.rubyforge.org/gems/${PNV}.gem"
     REMOTE_IDS="rubyforge:${PN}"
@@ -16,7 +18,6 @@ MYOPTIONS="doc"
 DEPENDENCIES="
     >=dev-ruby/rubygems-1.2.0
 "
-export_exlib_phases src_install
 
 gem_src_install() {
     unset GEM_HOME GEM_PATH RUBYOPT
@@ -36,7 +37,7 @@ gem_src_install() {
 
     if [[ -d ${IMAGE}/${vendor_gem_dir}/bin ]]; then
         exeinto /usr/bin
-        for exe in ${IMAGE}/${vendor_gem_dir}/bin/* ; do
+        for exe in "${IMAGE}"/${vendor_gem_dir}/bin/* ; do
             doexe "${exe}"
         done
     fi

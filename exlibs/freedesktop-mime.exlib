@@ -3,12 +3,7 @@
 
 export_exlib_phases pkg_postinst pkg_postrm
 
-freedesktop-mime_is_shared_mime_info() {
-    [[ "${CATEGORY}/${PN}" == 'x11-misc/shared-mime-info' ]]
-}
-
-freedesktop-mime_is_shared_mime_info || DEPENDENCIES="build: x11-misc/shared-mime-info"
-
+[[ "${CATEGORY}/${PN}" == 'x11-misc/shared-mime-info' ]] || DEPENDENCIES="build: x11-misc/shared-mime-info"
 
 freedesktop-mime_update_mime_database() {
     if [[ "${ROOT}" == / ]] ; then

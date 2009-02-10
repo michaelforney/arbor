@@ -11,7 +11,6 @@
 # DEPEND in vim-plugin or by whatever version of vim is being
 # installed by the eclass.
 
-
 update_vim_helptags() {
     local vimfiles vim d s
 
@@ -38,30 +37,30 @@ update_vim_helptags() {
     # Install the documentation symlinks into the versioned vim
     # directory and run :helptags
     for d in "${ROOT}"/usr/share/vim/vim[0-9]*; do
-        [[ -d "$d/doc" ]] || continue   # catch a failed glob
+        [[ -d "${d}/doc" ]] || continue   # catch a failed glob
 
         # Remove links, and possibly remove stale dirs
-        find $d/doc -name \*.txt -type l | while read s; do
-            [[ $(readlink "$s") = $vimfiles/* ]] && rm -f "$s"
+        find "${d}"/doc -name \*.txt -type l | while read s; do
+            [[ $(readlink "${s}") = ${vimfiles}/* ]] && rm -f "${s}"
         done
-        if [[ -f "$d/doc/tags" && $(find "$d" | wc -l | tr -d ' ') = 3 ]]; then
+        if [[ -f "${d}/doc/tags" && $(find "${d}" | wc -l | tr -d ' ') = 3 ]]; then
             # /usr/share/vim/vim61
             # /usr/share/vim/vim61/doc
             # /usr/share/vim/vim61/doc/tags
-            einfo "Removing $d"
-            rm -r "$d"
+            einfo "Removing ${d}"
+            rm -r "${d}"
             continue
         fi
 
         # Re-create / install new links
-        if [[ -d $vimfiles/doc ]]; then
-            ln -s $vimfiles/doc/*.txt $d/doc 2>/dev/null
+        if [[ -d ${vimfiles}/doc ]]; then
+            ln -s "${vimfiles}"/doc/*.txt "${d}"/doc 2>/dev/null
         fi
 
         # Update tags; need a vim binary for this
         if [[ -n "$vim" ]]; then
-            einfo "Updating documentation tags in $d"
-            DISPLAY= $vim -u NONE -U NONE -T xterm -X -n -f \
+            einfo "Updating documentation tags in ${d}"
+            DISPLAY= ${vim} -u NONE -U NONE -T xterm -X -n -f \
                 '+set nobackup nomore' \
                 "+helptags $d/doc" \
                 '+qa!' </dev/null &>/dev/null
@@ -70,3 +69,4 @@ update_vim_helptags() {
 
     [[ -n "${vim}" && -f "${vim}" ]] && rm "${vim}"
 }
+
