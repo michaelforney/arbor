@@ -1,4 +1,4 @@
-# Copyright 2007 Bo Ørsted Andresen
+# Copyright 2007-2009 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Colour-highlighted diff output"
@@ -10,7 +10,8 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="build:
+DEPENDENCIES="
+    build:
         sys-apps/diffutils"
 
 src_compile() {
@@ -18,14 +19,12 @@ src_compile() {
     :
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=(
-    INSTALL_DIR="${IMAGE}"/usr/bin
-    MAN_DIR="${IMAGE}"/usr/share/man/man1
-    ETC_DIR="${IMAGE}"/etc
-)
-
 src_install() {
-    dodir /etc
-    default
+    newbin colordiff{.pl,}
+    newbin cdiff{.sh,}
+    doman c{,olor}diff.1
+    insinto /etc
+    doins colordiffrc{,-lightbg}
+    dodoc BUGS CHANGES README TODO
 }
 
