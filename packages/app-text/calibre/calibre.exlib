@@ -6,6 +6,8 @@
 NEED_PYTHON=2.5:=
 require distutils freedesktop-desktop freedesktop-mime multilib bash-completion
 
+export_exlib_phases src_prepare src_install pkg_postinst
+
 SUMMARY="Calibre is *the* eBook library management application."
 DESCRIPTION="
 Formerly known as libprs500, Calibre is an e-book library management application.
@@ -32,23 +34,24 @@ DEPENDENCIES="
         dev-python/setuptools
     build+run:
         dev-lang/python[sqlite]
-        >=dev-python/Imaging-1.1.6
         >=dev-libs/libusb-0.1.12:0.1
-        >=dev-python/PyQt4-4.4.2
-        >=dev-python/mechanize-0.1.8
         >=media-gfx/ImageMagick-6.3.5
-        >=x11-apps/xdg-utils-1.0.2
-        >=dev-python/dbus-python-0.82.2
-        >=dev-python/lxml-2.0.5
         >=dev-python/BeautifulSoup-3.0.5
+        >=dev-python/python-dateutil-1.4.1
+        >=dev-python/dbus-python-0.82.2
+        >=dev-python/Imaging-1.1.6
+        >=dev-python/lxml-2.0.5
+        >=dev-python/mechanize-0.1.11
+        >=dev-python/PyQt4-4.4.2
         >=sys-apps/help2man-1.36.4
         >=sys-apps/hal-0.5.11
+        >=x11-apps/xdg-utils-1.0.2
     post,suggested:
         app-arch/unrar [[ description = [ for unpacking compressed ebooks ] ]]
         app-arch/unzip [[ description = [ for unpacking compressed ebooks ] ]]
 "
 
-src_prepare() {
+calibre_src_prepare() {
     # Removing the post_install call. We'll do that stuff in src_install.
     sed -i -e "/if 'install'/,/subprocess.check_call/d" \
         setup.py || die "couldn't remove post_install call"
@@ -58,7 +61,7 @@ src_prepare() {
     default
 }
 
-src_install() {
+calibre_src_install() {
     pushd "${WORK}"/build
     ln -s lib\.* lib
     popd
@@ -115,7 +118,7 @@ EOF
     fi
 }
 
-pkg_postinst() {
+calibre_pkg_postinst() {
     freedesktop-mime_update_desktop_database
     freedesktop-mime_update_mime_database
     distutils_pkg_postinst
