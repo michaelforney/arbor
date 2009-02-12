@@ -12,80 +12,48 @@ require versionator
 
 export_exlib_phases src_prepare
 
-DEPENDENCIES="build: sys-devel/libtool"
-
 autotools_dependencies() {
-    if [[ -n ${SUPPORTED_AUTOCONF[@]} ]]; then
-        if [[ ${SUPPORTED_AUTOCONF[@]} == none ]]; then
-            WANT_AUTOCONF=none
-        else
-            sorted_any_of_slot_dependencies \
-                sys-devel/autoconf \
-                "${SUPPORTED_AUTOCONF[@]}"
-        fi
+    if [[ ${SUPPORTED_AUTOCONF[@]} == none ]]; then
+        WANT_AUTOCONF=none
     else
-        [[ ${WANT_AUTOCONF:-latest} == latest ]] && WANT_AUTOCONF="2.5"
-        [[ ${WANT_AUTOCONF} != none ]] \
-            && echo " sys-devel/autoconf:${WANT_AUTOCONF}"
+        sorted_any_of_slot_dependencies \
+            sys-devel/autoconf "${SUPPORTED_AUTOCONF[@]}"
     fi
 
-    if [[ -n ${SUPPORTED_AUTOMAKE[@]} ]]; then
-        if [[ ${SUPPORTED_AUTOMAKE[@]} == none ]]; then
-            WANT_AUTOMAKE="none"
-        else
-            sorted_any_of_slot_dependencies \
-                sys-devel/automake \
-                "${SUPPORTED_AUTOMAKE[@]}"
-        fi
+    if [[ ${SUPPORTED_AUTOMAKE[@]} == none ]]; then
+        WANT_AUTOMAKE="none"
     else
-        [[ ${WANT_AUTOMAKE:-latest} == latest ]] && WANT_AUTOMAKE="1.10"
-        [[ ${WANT_AUTOMAKE} != none ]] \
-            && echo " sys-devel/automake:${WANT_AUTOMAKE}"
+        sorted_any_of_slot_dependencies \
+            sys-devel/automake "${SUPPORTED_AUTOMAKE[@]}"
     fi
 }
 
-[[ -n ${WANT_AUTOCONF} ]] && AUTOCONF_DEPRECATED="${WANT_AUTOCONF}"
-[[ -n ${WANT_AUTOMAKE} ]] && AUTOMAKE_DEPRECATED="${WANT_AUTOMAKE}"
-DEPENDENCIES+="$(autotools_dependencies)"
+DEPENDENCIES="
+    build:
+        sys-devel/libtool
+        $(autotools_dependencies)
+"
 
 autotools_select_versions() {
     local i sorted_slots=()
     if [[ -z ${WANT_AUTOCONF} && ${SUPPORTED_AUTOCONF[@]} != none ]]; then
-        if [[ -n ${SUPPORTED_AUTOCONF[@]} ]]; then
-            sorted_slots=( $(version_sort ${SUPPORTED_AUTOCONF[@]}) )
-            for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
-                has_version sys-devel/autoconf:${sorted_slots[i]} \
-                    && export WANT_AUTOCONF="${sorted_slots[i]}" \
-                    && break
-            done
-            [[ -z ${WANT_AUTOCONF} ]] && die "No autoconf installed"
-        else
-            [[ ${WANT_AUTOCONF:-latest} == latest ]] \
-                && export WANT_AUTOCONF="2.5" \
-                && AUTOCONF_DEPRECATED="${WANT_AUTOCONF}"
-        fi
+        sorted_slots=( $(version_sort ${SUPPORTED_AUTOCONF[@]}) )
+        for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
+            has_version sys-devel/autoconf:${sorted_slots[i]} \
+                && export WANT_AUTOCONF="${sorted_slots[i]}" \
+                && break
+        done
+        [[ -z ${WANT_AUTOCONF} ]] && die "No autoconf installed"
     fi
     if [[ -z ${WANT_AUTOMAKE} && ${SUPPORTED_AUTOMAKE[@]} != none ]]; then
-        if [[ -n ${SUPPORTED_AUTOMAKE[@]}  ]]; then
-            sorted_slots=( $(version_sort ${SUPPORTED_AUTOMAKE[@]}) )
-            for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
-                has_version sys-devel/automake:${sorted_slots[i]} \
-                    && export WANT_AUTOMAKE="${sorted_slots[i]}" \
-                    && break
-            done
-            [[ -z ${WANT_AUTOMAKE} ]] && die "No automake installed"
-        else
-            [[ ${WANT_AUTOMAKE:-latest} == latest ]] \
-                && export WANT_AUTOMAKE="1.10" \
-                && AUTOMAKE_DEPRECATED="${WANT_AUTOMAKE}"
-        fi
+        sorted_slots=( $(version_sort ${SUPPORTED_AUTOMAKE[@]}) )
+        for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
+            has_version sys-devel/automake:${sorted_slots[i]} \
+                && export WANT_AUTOMAKE="${sorted_slots[i]}" \
+                && break
+        done
+        [[ -z ${WANT_AUTOMAKE} ]] && die "No automake installed"
     fi
-    for i in AUTO{CONF,MAKE}_DEPRECATED; do
-        if [[ -n ${!i} ]]; then
-            ewarn "WANT_${i%_DEPRECATED} is deprecated. Please convert ${PN} to set SUPPORTED_${i%_DEPRECATED} instead."
-            export ${i}=""
-        fi
-    done
 }
 
 # Variables:
