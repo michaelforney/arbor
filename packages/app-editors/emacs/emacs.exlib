@@ -3,11 +3,8 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-SUPPORTED_AUTOCONF=( 2.5 )
-SUPPORTED_AUTOMAKE=( 1.10 )
-
 GNU_TARBALL_SUFFIX=gz
-require alternatives toolchain-funcs autotools gnu
+require alternatives toolchain-funcs gnu autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst pkg_postrm
 

@@ -12,6 +12,12 @@ require versionator
 
 export_exlib_phases src_prepare
 
+myexparam supported_autoconf[]
+myexparam supported_automake[]
+
+exparam -v SUPPORTED_AUTOCONF supported_autoconf[@]
+exparam -v SUPPORTED_AUTOMAKE supported_automake[@]
+
 autotools_dependencies() {
     if [[ ${SUPPORTED_AUTOCONF[@]} == none ]]; then
         WANT_AUTOCONF=none

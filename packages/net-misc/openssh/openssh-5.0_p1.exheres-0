@@ -3,10 +3,7 @@
 # Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-SUPPORTED_AUTOCONF=( 2.5 )
-SUPPORTED_AUTOMAKE=( 1.10 )
-
-require multilib autotools pam
+require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] pam
 
 # Make it more portable between straight releases and _p? releases.
 PARCH=${PNV/_/}
