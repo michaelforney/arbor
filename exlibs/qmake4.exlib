@@ -8,7 +8,9 @@ require multilib
 
 export_exlib_phases src_configure
 
-[[ -z ${QMAKE4_EXLIB_QT_DEPENDENCY} ]] &&
+myexparam no_qt_dependency=
+
+[[ -z $(exparam no_qt_dependency) ]] &&
 DEPENDENCIES="build: x11-libs/qt:4 [[ note = [ Qt-Core, for qmake ] ]]"
 
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
