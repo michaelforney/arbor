@@ -3,16 +3,14 @@
 # Based in part upon 'aspell-de-0.60_pre20030222.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-ASPELL_DESC="German and Swiss-German"
-ASPOSTFIX="6"
-
-require aspell-dict
+require aspell-dict [ major_pv="6" desc="German and Swiss-German" ]
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 
-FILENAME=aspell6-de-20030222-1
+FILENAME=aspell6-de-${PV#*_pre}-1
 DOWNLOADS="mirror://gnu/aspell/dict/de/${FILENAME}.tar.bz2"
 
 WORK="${WORKBASE}/${FILENAME}"
+

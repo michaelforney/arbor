@@ -7,8 +7,10 @@
 
 # Which language is the dictionary for? It's used for the DESCRIPTION of the
 # package.
+myexparam desc
 
 # What major version of aspell is this dictionary for?
+myexparam major_pv=
 
 require versionator
 
@@ -19,10 +21,10 @@ SPELL_LANG=${PN/aspell-/}
 MY_PV=$(replace_version_separator $(get_last_version_component_index) '-' $PV)
 
 # With APOSTFIX=6 aspell-en-6.0.0 becomes aspell6-en-6.0-0
-MY_PNV=aspell${ASPOSTFIX}-${SPELL_LANG}-${MY_PV}
+MY_PNV=aspell$(exparam major_pv)-${SPELL_LANG}-${MY_PV}
 WORK="${WORKBASE}/${MY_PNV}"
 
-SUMMARY="${ASPELL_DESC} language dictionary for aspell"
+SUMMARY="$(exparam desc) language dictionary for aspell"
 HOMEPAGE="http://aspell.net"
 DOWNLOADS="mirror://gnu/aspell/dict/${SPELL_LANG}/${MY_PNV}.tar.bz2"
 
