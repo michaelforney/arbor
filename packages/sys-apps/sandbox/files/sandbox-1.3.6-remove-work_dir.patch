@@ -4,6 +4,9 @@ Reason: This crappy code causes cwd to be added to SANDBOX_WRITE when not using 
 	(specifically when PORTAGE_TMPDIR isn't set) which is rather unfortunate. Paludis
 	already adds builddir to SANDBOX_WRITE so it isn't required at all.
 
+	The last hunk tries to source /etc/make.conf and /etc/make.globals
+	during src_test which obviously fails without portage. We don't need it.
+
 diff --git a/libsbutil/sbutil.h b/libsbutil/sbutil.h
 index d45ee09..a02c4a5 100644
 --- a/libsbutil/sbutil.h
@@ -85,4 +88,47 @@ index e25a206..41bfe66 100644
  	char tmp_dir[SB_PATH_MAX];
  	char *home_dir;
  };
-
+--- a/data/sandbox.bashrc	2009-02-12 14:22:59.000000000 +0100
++++ b/data/sandbox.bashrc	2009-02-12 14:25:47.000000000 +0100
+@@ -51,41 +51,6 @@
+ 		)
+ 	fi
+ 
+-	# do ebuild environment loading ... detect if we're in portage
+-	# build area or not ... uNF uNF uNF
+-	#sbs_pdir=$(portageq envvar PORTAGE_TMPDIR)/portage/ #portageq takes too long imo
+-	if [[ -z ${PORTAGE_TMPDIR} ]] ; then
+-		sbs_gpdir=$( source /etc/make.globals && echo $PORTAGE_TMPDIR 2> /dev/null)
+-		sbs_cpdir=$( source /etc/make.conf && echo $PORTAGE_TMPDIR 2> /dev/null)
+-		[[ -z ${sbs_cpdir} ]] \
+-			&& sbs_pdir=${sbs_gpdir} \
+-			|| sbs_pdir=${sbs_cpdir}
+-	else
+-		sbs_pdir=${PORTAGE_TMPDIR}
+-	fi
+-	[[ -z ${sbs_pdir} ]] && sbs_pdir=/var/tmp
+-	sbs_pdir=${sbs_pdir}/portage/
+-
+-	if [[ ${PWD:0:${#sbs_pdir}} == "${sbs_pdir}" ]] ; then
+-		sbs_bdir=$(echo ${PWD:${#sbs_pdir}} | cut -d/ -f1)
+-		sbs_tmpenvfile=${sbs_pdir}${sbs_bdir}/temp/environment
+-		if [[ -e ${sbs_tmpenvfile} ]] ; then
+-			echo "Found environment at ${sbs_tmpenvfile}"
+-			printf " * Would you like to enter the portage environment ? "
+-			read env
+-			sbs_PREPWD=${PWD}
+-			if [[ ${env} == "y" ]] ; then
+-				# First try to source variables and export them ...
+-				eval $(sed -e '/^[[:alnum:]_-]*=/s:^:export :' \
+-				           -e '/^[[:alnum:]_-]* ()/Q' "${sbs_tmpenvfile}") 2>/dev/null
+-				# Then grab everything (including functions)
+-				source "${sbs_tmpenvfile}" 2> /dev/null
+-				export SANDBOX_WRITE=${SANDBOX_WRITE}:${sbs_pdir}${sbs_bdir}:${sbs_pdir}/homedir
+-			fi
+-			PWD=${sbs_PREPWD}
+-		fi
+-	fi
+-
+ 	unset sbs_gpdir sbs_cpdir sbs_pdir sbs_bdir sbs_tmpenvfile sbs_PREPWD env
+ 
+ 	cd "${PWD}"
