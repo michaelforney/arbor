@@ -11,12 +11,12 @@ MYOPTIONS="dbus readline"
 
 DEPENDENCIES="
     build+run:
+        dev-libs/openssl
         dbus? ( sys-apps/dbus )
         readline? (
             sys-libs/ncurses
             sys-libs/readline
         )
-        dev-libs/openssl
 "
 
 WORK="${WORKBASE}/${PNV}/${PN}"
@@ -63,13 +63,12 @@ src_prepare() {
 }
 
 src_install() {
-    dosbin  wpa_supplicant
+    dosbin wpa_supplicant
     dobin wpa_cli wpa_passphrase
 
     #for baselayout 1
-    dodir /sbin
+    dodir /{,s}bin
     dosym /usr/sbin/wpa_supplicant /sbin/wpa_supplicant
-    dodir /bin
     dosym /usr/bin/wpa_cli /bin/wpa_cli
 
     exeinto /etc/wpa_supplicant
@@ -89,3 +88,4 @@ src_install() {
         newins dbus-wpa_supplicant.conf wpa_supplicant.conf
     fi
 }
+
