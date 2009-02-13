@@ -1,20 +1,27 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+myexparam alpha=
+myexparam suffix=bz2
+
+myexparam pn=${MY_PN:-${PN}}
+myexparam pv=${MY_PV:-${PV}}
+myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
+
 HOMEPAGE="http://www.gnu.org/software/${MY_PN:-${PN}}/"
-if [[ -n ${GNU_DOWNLOAD_ALPHA} ]]; then
+if [[ -n $(exparam alpha) ]]; then
     DOWNLOADS="ftp://alpha.gnu.org/pub/gnu/"
 else
     DOWNLOADS="mirror://gnu/"
 fi
-DOWNLOADS+="${MY_PN:-${PN}}/${MY_PNV:-${MY_PN:-${PN}}-${MY_PV:-${PV}}}.tar.${GNU_TARBALL_SUFFIX:-bz2}"
+DOWNLOADS+="$(exparam pn)/$(exparam pnv).tar.$(exparam suffix)"
 
 UPSTREAM_DOCUMENTATION="
-http://www.gnu.org/software/${MY_PN:-${PN}}/manual/${MY_PN:-${PN}}.html   [[ lang = en description = [ ${MY_PN:-${PN}} manual, HTML ] ]]
-http://www.gnu.org/software/${MY_PN:-${PN}}/manual/${MY_PN:-${PN}}.pdf    [[ lang = en description = [ ${MY_PN:-${PN}} manual, PDF  ] ]]
+http://www.gnu.org/software/$(exparam pn)/manual/$(exparam pn).html   [[ lang = en description = [ $(exparam pn) manual, HTML ] ]]
+http://www.gnu.org/software/$(exparam pn)/manual/$(exparam pn).pdf    [[ lang = en description = [ $(exparam pn) manual, PDF  ] ]]
 "
 
-if [[ ${GNU_TARBALL_SUFFIX} == lzma || ${GNU_TARBALL_SUFFIX} == xz ]]; then
+if has $(exparam suffix) lzma xz; then
     DEPENDENCIES+="
         build:
             app-arch/xz"
