@@ -1,0 +1,92 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'lua-5.1.3.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require multilib
+
+SUMMARY="An Extensible Extension Language"
+HOMEPAGE="http://www.lua.org/"
+DOWNLOADS="http://www.lua.org/ftp/${PNV}.tar.gz"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="readline"
+
+DEPENDENCIES="
+build+run:
+    readline? ( sys-libs/readline )
+"
+
+# FIXME: Build a lua shared library, keeping the lua interpreter statically linked for performance reasons:
+#   http://article.gmane.org/gmane.comp.lang.lua.general/18519
+#   This is not done upstream for portability.
+
+#DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNVR#${PN}-}/ )
+
+src_prepare() {
+    # Doing this here instead of passing relevant options in src_{compile,install} is cleaner
+    # Set install paths, don't create empty directories.
+    sed -e "/^INSTALL_TOP/s:= .*:= ${IMAGE}/usr:" \
+        -e "/^INSTALL_MAN/s:= .*:= ${IMAGE}/usr/share/man/man1:" \
+        -e "/^INSTALL/s:lib:$(get_libdir):" \
+        -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
+        -i Makefile || die "sedding Makefile failed"
+    sed -e "/^prefix/s:/.*$:/usr:" \
+        -e "s:/lib:/$(get_libdir):" \
+        -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
+
+    default
+}
+
+src_compile() {
+    # Using dlopen is recommended, see INSTALL.
+    # The echo target outputs some debug info.
+    local readline_cflags readline_libs
+    if option readline ; then
+        readline_cflags=" -DLUA_USE_READLINE"
+        readline_libs=" -lreadline -lhistory -lncurses"
+    fi
+    emake \
+        CC=$(tc-getCC) \
+        CFLAGS="-DLUA_USE_DLOPEN -DLUA_USE_POSIX${readline_cflags} ${CFLAGS}" \
+        MYLDFLAGS="${LDFLAGS}" \
+        MYLIBS="-Wl,-E -ldl${readline_libs}" \
+        PLAT="linux" \
+        echo all
+}
+
+src_test() {
+    default
+
+    # Run lua test scripts
+    # Skipped, because they're interactive: globals luac table xd
+    tests="bisect cf echo env factorial fibfor fib hello life printf readonly sieve sort trace-calls trace-globals"
+    for t in ${tests}; do
+        echo "./src/lua test/${t}.lua"
+        case ${t} in
+            readonly)
+                ./src/lua test/${t}.lua && die "Test ./src/lua test/${t}.lua failed" ;;
+            *)
+                ./src/lua test/${t}.lua || die "Test ./src/lua test/${t}.lua failed" ;;
+        esac
+    done
+}
+
+src_install() {
+    default
+
+    insinto /usr/$(get_libdir)/pkgconfig
+    doins etc/${PN}.pc
+
+    insinto /usr/share/pixmaps
+    doins etc/${PN}.ico
+
+    insinto /usr/share/doc/${PNVR}/html
+    doins doc/*{css,html,gif,png}
+
+    doman doc/*.?
+}
+
