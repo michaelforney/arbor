@@ -37,6 +37,9 @@ src_prepare() {
     sed -e "/^prefix/s:/.*$:/usr:" \
         -e "s:/lib:/$(get_libdir):" \
         -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
+    sed -e 's:/usr/local/:/usr/:' \
+        -e "s:lib/:$(get_libdir)/:" \
+        -i src/luaconf.h || die "sedding src/luaconf.h failed"
 
     default
 }
