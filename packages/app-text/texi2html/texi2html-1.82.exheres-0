@@ -1,0 +1,39 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="${PN} is a Perl script that converts GNU info files into HTML"
+DESCRIPTION="
+${PN} now supports many advanced features, such as internationalization and
+extremely configurable output formats. It is still in development despite the fact
+that GNU makeinfo now supports HTML output because it still supports many features
+beyond those supported by makeinfo.
+"
+HOMEPAGE="http://www.nongnu.org/${PN}"
+DOWNLOADS="mirror://savannah/${PN}/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_RELEASE_NOTES="http://savannah.nongnu.org/download/${PN}/NEWS-${PV}"
+UPSTREAM_DOCUMENTATION="http://ximbiot.com/${PN}/manuals/${PV}/ [[ lang = en ]]"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-perl/Text-Unidecode
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-encode
+    --with-unidecode
+)
+
+src_test() {
+    pushd test
+    make check
+    make long-check
+    popd
+}
