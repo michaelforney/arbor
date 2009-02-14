@@ -1,7 +1,7 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib luaforge
+require luaforge
 
 SUMMARY="a lua filesystem library"
 DESCRIPTION="
@@ -18,9 +18,4 @@ LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64"
 MYOPTIONS=""
-
-src_prepare() {
-    sed -e "s,/lib/,/$(get_libdir)/," \
-        -i config
-}
 
