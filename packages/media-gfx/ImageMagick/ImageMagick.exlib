@@ -1,6 +1,9 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require versionator
+MY_PV="${MY_PV:-$(replace_version_separator 3 -)}"
+
 SUMMARY="Software suite to manipulate a variety of image formats"
 DESCRIPTION="ImageMagick is a software suite to create, edit, and compose bitmap
 images. It can read, convert and write images in a variety of formats (over 100)
@@ -9,7 +12,7 @@ and TIFF. Use ImageMagick to translate, flip, mirror, rotate, scale, shear and
 transform images, adjust image colors, apply various special effects, or draw
 text, lines, polygons, ellipses and Bézier curves."
 HOMEPAGE="http://www.imagemagick.org/"
-DOWNLOADS="ftp://ftp.imagemagick.org/pub/${PN}/${PN}-${PV%.*}-${PV##*.}.tar.bz2"
+DOWNLOADS="ftp://ftp.imagemagick.org/pub/${PN}/${PN}-${MY_PV}.tar.bz2"
 
 LICENCES="ImageMagick"
 
@@ -19,4 +22,6 @@ REMOTE_IDS="freshmeat:ImageMagick"
 
 UPSTREAM_CHANGELOG="http://freshmeat.net/redir/imagemagick/4365/url_changelog/changelog.php"
 UPSTREAM_DOCUMENTATION="http://www.imagemagick.org/script/api.php"
+
+WORK="${WORKBASE}/${PN}-${MY_PV}"
 

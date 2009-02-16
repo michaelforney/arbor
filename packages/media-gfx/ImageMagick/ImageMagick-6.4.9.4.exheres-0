@@ -4,11 +4,12 @@
 # Based in part upon 'imagemagick-6.4.2.0.ebuild' from Gentoo Linux, which is:
 #    Copyright 1999-2008 Gentoo Foundation
 
-require ImageMagick
+require ImageMagick multilib
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="X bzip2 cxx djvu fontconfig fpx graphviz jpeg2000 jpeg openexr lcms perl png svg tiff truetype xml zlib"
+MYOPTIONS="X bzip2 cxx djvu fontconfig fpx graphviz jpeg2000 jpeg openexr lcms png svg tiff truetype xml zlib"
+# perl
 
 DEPENDENCIES="
     build:
@@ -30,7 +31,6 @@ DEPENDENCIES="
         jpeg? ( >=media-libs/jpeg-6b )
         lcms? ( media-libs/lcms )
         openexr? ( media-libs/openexr )
-        perl? ( >=dev-lang/perl-5.8.6 )
         png? ( >=media-libs/libpng-1.2.4 )
         svg? ( >=gnome-desktop/librsvg-2.9.0 x11-libs/cairo[svg] )
         tiff? ( >=media-libs/tiff-3.5.5 )
@@ -38,8 +38,7 @@ DEPENDENCIES="
         xml? ( >=dev-libs/libxml2-2.4.10 )
         zlib? ( sys-libs/zlib )
 "
-
-WORK="${WORKBASE}/${PNV%.*}"
+#        perl? ( >=dev-lang/perl-5.8.6 )
 
 RESTRICT="test"
 
@@ -48,7 +47,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--disable-openmp'
 '--with-modules' '--enable-hdri' '--with-gslib' )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus' 'djvu'
-'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
+'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'jpeg' 'lcms' 'openexr' 'png' 'svg rsvg'
 'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
 'xml' 'zlib' )
+# 'perl' 
+
+src_install() {
+    default
+
+    rmdir \
+        "${IMAGE}"/usr/$(get_libdir)/${PN}-${PV%.*}/modules-Q16/{coders,filters,} \
+        "${IMAGE}"/usr/include/ImageMagick/Magick++/ \
+        || die 'empty dirs rmdir failed'
+}
 
