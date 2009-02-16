@@ -58,7 +58,7 @@ src_install() {
     rmdir \
         "${IMAGE}"/usr/$(get_libdir)/${PN}-${PV%.*}/modules-Q16/{coders,filters,} \
         || die 'empty dirs rmdir failed'
-    if !option cxx ; then
+    if option !cxx ; then
         rmdir \
             "${IMAGE}"/usr/include/ImageMagick/Magick++/ \
             || die 'empty dirs rmdir failed'
