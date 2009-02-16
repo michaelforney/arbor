@@ -1,49 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu
+require binutils
 
-SUMMARY="Collection of binary tools including ld and as"
-
-LICENCES="GPL-2"
-SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
-
-DEPENDENCIES=""
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/76_all_use-new-ld-dtags.patch"
-)
-DEFAULT_SRC_CONFIGURE_PARAMS=( --host=${CHOST} )
-
-src_install() {
-    default
-
-    # Construct env.d/binutils configuration
-    mkdir -p "${IMAGE}/etc/env.d/binutils"
-
-    insinto /etc/env.d/binutils
-    hereins ${CHOST}-${PV} <<EOF
-TARGET="${CHOST}"
-VER="${PV}"
-LIBPATH="/usr/$(get_libdir)/${PN}/${CHOST}-${PV}"
-FAKE_TARGETS="${CHOST}"
-EOF
-
-    # Make sure a binutils version is selected for ${CHOST}
-    if [[ ! -e "${IMAGE}/etc/env.d/${PN}/config-${CHOST}" ]]; then
-        insinto /etc/env.d/${PN}
-        hereins config-${CHOST} <<EOF
-CURRENT="${PV}"
-EOF
-    fi
-
-    for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
-        target=${f#${IMAGE}}
-        name=${f##*/}
-        dosym ${target} /usr/bin/${CHOST}-${name}
-        dosym ${target} /usr/bin/${name}
-     done
-}
 
