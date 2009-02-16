@@ -1,7 +1,8 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 MODULE_AUTHOR="PETDANCE"
+
 require bash-completion perl-module
 
 SUMMARY="Ack is a grep-like tool, aimed at programmers with large trees of source code."
@@ -16,12 +17,13 @@ DEPENDENCIES="
     build:
         dev-perl/Test-Harness
     build+run:
-        dev-perl/File-Next"
+        dev-perl/File-Next
+"
 
 src_install() {
     perl-module_src_install
-    dodoc "${FILES}/ackrc.example"
 
-    dobashcompletion "${FILES}"/ack.bashcompletion
+    dodoc "${FILES}/ackrc.example"
+    dobashcompletion etc/ack.bash_completion.sh
 }
 
