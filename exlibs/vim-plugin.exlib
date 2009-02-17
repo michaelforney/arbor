@@ -39,7 +39,7 @@ if [[ -n "${VIM_SCRIPT_ID}" ]] ; then
     HOMEPAGE="http://www.vim.org/scripts/script.php?script_id=${VIM_SCRIPT_ID}"
 fi
 if [[ -n "${VIM_SRC_ID}" ]] ; then
-    DOWNLOADS="http://www.vim.org/scripts/download_script.php?src_id=${VIM_SRC_ID} -> ${PNVR}.${VIM_SRC_SUFFIX}"
+    DOWNLOADS="http://www.vim.org/scripts/download_script.php?src_id=${VIM_SRC_ID} -> ${PNV}.${VIM_SRC_SUFFIX}"
     WORK="${WORKBASE}"
 fi
 
@@ -53,7 +53,7 @@ vim-plugin_src_unpack() {
     default
     [[ "${VIM_SRC_SUFFIX}" == 'vim' && -n "${VIM_SCRIPT_TYPE}" ]] || return
     mkdir "${VIM_SCRIPT_TYPE}"/
-    cp "${FETCHEDDIR}/${PNVR}.vim" "${VIM_SCRIPT_TYPE}/${PN}.vim"
+    cp "${FETCHEDDIR}/${PNV}.vim" "${VIM_SCRIPT_TYPE}/${PN}.vim"
 }
 
 vim-plugin_src_install() {
