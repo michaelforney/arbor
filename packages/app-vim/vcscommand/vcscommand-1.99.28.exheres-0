@@ -1,0 +1,30 @@
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+require vim-plugin [ vim_version=7.0 script_id=90 ]
+
+MY_PV="${PV/#1.99./beta}"
+
+SUMMARY="vim CVS/SVN/SVK/git integration plugin"
+DESCRIPTION="
+VIM 7 plugin useful for manipulating files controlled by CVS, SVN, SVK
+and git within VIM, including committing changes and performing diffs
+using the vimdiff system.
+"
+HOMEPAGE+=" http://code.google.com/p/vcscommand/"
+DOWNLOADS="http://vcscommand.googlecode.com/files/${PN}-${MY_PV}.zip"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+post,suggested:
+    dev-scm/cvs [[ description = [ for managing cvs repos ] ]]
+    dev-scm/subversion [[ description = [ for managing svn repos ] ]]
+    dev-scm/git [[ description = [ for managing git repos ] ]]
+"
+
+WORK="${WORKBASE}"
+
