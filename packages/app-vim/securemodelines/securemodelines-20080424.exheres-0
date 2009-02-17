@@ -1,19 +1,13 @@
 # Copyright 2008 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-VIM_PLUGIN_VIM_VERSION="7.0"
-require common-metadata vim-plugin
+require vim-plugin [ vim_version=7.0 script_id=1876 src_id=8598 src_suffix=vim script_type=plugin ]
 
-DOWNLOADS="http://www.vim.org/scripts/download_script.php?src_id=8598 -> ${PNV}.vim"
+SUMMARY="Secure, user-configurable modeline support for Vim 7."
+DESCRIPTION="
+Vim's internal modeline support allows all sorts of annoying and potentially insecure options to be set. This script implements a much more heavily restricted modeline parser that permits only user-specified options to be set.
+"
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-
-WORK="${WORKBASE}"
-
-src_unpack() {
-    cd "${WORK}"
-    mkdir plugin/
-    cp "${FETCHEDDIR}/${PNV}.vim" "plugin/${PN}.vim"
-}
 

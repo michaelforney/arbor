@@ -1,25 +1,60 @@
-# Copyright 1999-2004 Gentoo Foundation
+# Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/vim-plugin.eclass,v 1.21 2007/05/07 19:06:14 pioto Exp $
+# Based in part upon 'vim-plugin.eclass', which is:
+#     Copyright 1999-2004 Gentoo Foundation
 #
-# This eclass simplifies installation of app-vim plugins into
+# This exlib simplifies installation of app-vim plugins into
 # /usr/share/vim/vimfiles.  This is a version-independent directory
 # which is read automatically by vim.  The only exception is
 # documentation, for which we make a special case via vim-doc.eclass
 
 require vim-doc
 
-VIM_PLUGIN_VIM_VERSION="${VIM_PLUGIN_VIM_VERSION:-6.4}"
+# minimum required vim/gvim version, defaults to 6.4
+myexparam vim_version=6.4
+exparam -v VIM_PLUGIN_VIM_VERSION vim_version
+# script_id from vim.org, for HOMEPAGE and REMOTE_IDS
+myexparam script_id=
+exparam -v VIM_SCRIPT_ID script_id
+# src_id from vim.org, for DOWNLOADS
+myexparam src_id=
+exparam -v VIM_SRC_ID src_id
+# suffix for the renamed source file, defaults to .zip
+myexparam src_suffix=zip
+exparam -v VIM_SRC_SUFFIX src_suffix
+# if suffix is 'vim', where the file should be installed
+myexparam script_type=
+exparam -v VIM_SCRIPT_TYPE script_type
 
 DEPENDENCIES="
-    build,run:
+build,run:
     || (
         >=app-editors/vim-${VIM_PLUGIN_VIM_VERSION}
         >=app-editors/gvim-${VIM_PLUGIN_VIM_VERSION}
-    )"
-DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2"
+    )
+"
 
-export_exlib_phases src_install pkg_postinst pkg_postrm
+if [[ -n "${VIM_SCRIPT_ID}" ]] ; then
+    REMOTE_IDS="vim:${VIM_SCRIPT_ID}"
+    HOMEPAGE="http://www.vim.org/scripts/script.php?script_id=${VIM_SCRIPT_ID}"
+fi
+if [[ -n "${VIM_SRC_ID}" ]] ; then
+    DOWNLOADS="http://www.vim.org/scripts/download_script.php?src_id=${VIM_SRC_ID} -> ${PNVR}.${VIM_SRC_SUFFIX}"
+    WORK="${WORKBASE}"
+fi
+
+LICENCES="vim"
+
+BUGS_TO="pioto@exherbo.org"
+
+export_exlib_phases src_unpack src_install pkg_postinst pkg_postrm
+
+vim-plugin_src_unpack() {
+    default
+    [[ "${VIM_SRC_SUFFIX}" == 'vim' && -n "${VIM_SCRIPT_TYPE}" ]] || return
+    mkdir "${VIM_SCRIPT_TYPE}"/
+    cp "${FETCHEDDIR}/${PNVR}.vim" "${VIM_SCRIPT_TYPE}/${PN}.vim"
+}
 
 vim-plugin_src_install() {
     local f
