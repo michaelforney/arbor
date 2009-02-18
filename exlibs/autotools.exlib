@@ -34,7 +34,8 @@ autotools_dependencies() {
     fi
 }
 
-DEPENDENCIES="
+myexparam deps_var=DEPENDENCIES
+printf -v "$(exparam deps_var)" "%s" "
     build:
         sys-devel/libtool
         $(autotools_dependencies)
