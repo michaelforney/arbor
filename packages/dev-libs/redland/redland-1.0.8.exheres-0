@@ -3,7 +3,7 @@
 # Based in part upon 'redland-1.0.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require multilib autotools [ deps_var=autotools_deps supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 SUMMARY="High-level interface for the Resource Description Framework"
 HOMEPAGE="http://librdf.org"
@@ -17,6 +17,7 @@ MYOPTIONS="berkdb sqlite ssl" # mysql postgres
 DEPENDENCIES="
     build:
         dev-util/pkg-config
+        !berkdb? ( ${autotools_deps} )
     build+run:
         dev-libs/libxml2
         >=dev-libs/rasqal-0.9.16
