@@ -67,7 +67,8 @@ src_prepare()
     sed -i 's:^sasldir = .*$:sasldir = $(plugindir):' \
         "${WORK}"/plugins/Makefile.{am,in} || die "sed failed"
     rm -f "${WORK}/config/libtool.m4" || die "rm libtool.m4 failed"
-    AT_M4DIR="${WORK}/cmulocal ${WORK}/config" eautoreconf
+    AT_M4DIR=( "${WORK}"/{cmulocal,config} )
+    eautoreconf
 }
 
 src_compile()
