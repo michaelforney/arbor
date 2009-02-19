@@ -11,7 +11,7 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-git_do_dependencies() {
-    local git='>=dev-scm/git-1.6.0'
+    local git='>=dev-scm/git-1.6.1'
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "${git}[curl] net-misc/curl[ssl]"
     elif [[ $(scm_get_var REPOSITORY) == http://* || $(scm_get_var REPOSITORY) == ftp://* ]]; then
@@ -141,7 +141,7 @@ EOF
 }
 
 scm-git_do_checkout() {
-    scm-git_git clone --bare "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
+    scm-git_git clone --bare --verbose "$(scm_get_var REPOSITORY)" "$(scm_get_var CHECKOUT_TO)"
     scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
     scm-git_git gc --auto
 }
@@ -155,7 +155,7 @@ scm-git_do_update() {
     fi
 
     local branch=$(scm_get_var BRANCH)
-    scm-git_git fetch -f -u origin "refs/heads/${branch:-*}:refs/heads/${branch:-*}"
+    scm-git_git fetch -f --verbose -u origin "refs/heads/${branch:-*}:refs/heads/${branch:-*}"
     scm-git_git gc --auto
     [[ -n ${branch} ]] && scm_set_array FETCHED_BRANCHES "${branch}"
 }
