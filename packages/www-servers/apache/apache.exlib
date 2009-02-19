@@ -5,6 +5,10 @@ require multilib
 
 export_exlib_phases src_prepare src_install
 
+myexparam apache_modules[]
+
+exparam -v APACHE_MODULES apache_modules[@]
+
 PV2=$(ever range 1-2)
 
 SUMMARY="An open-source HTTP server"
@@ -29,15 +33,17 @@ UPSTREAM_RELEASE_NOTES="http://httpd.apache.org/docs/${PV2}/new_features_${PV2//
 
 LICENCES="Apache-2.0"
 SLOT="0"
-MYOPTIONS="ssl"
+MYOPTIONS="ssl
+    apache_modules: ${APACHE_MODULES[*]}
+"
 
 # configure.in checks net-misc/rsync, not sure why
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        dev-libs/apr:1
-        dev-libs/apr-util:1
+      >=dev-libs/apr-1.2.0:1
+      >=dev-libs/apr-util-1.2.0:1
         dev-libs/pcre
         group/apache
         user/apache
@@ -64,8 +70,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # Use external pcre, --without-pcre enables an internal copy
     --with-pcre
 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "${APACHE_MODULES[@]/#/apache_modules:}"
+)
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ssl )
-
 
 apache_src_prepare() {
     default
