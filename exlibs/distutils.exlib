@@ -11,12 +11,11 @@
 
 require python multilib
 
-export_exlib_phases src_unpack src_compile src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_compile src_install pkg_postinst pkg_postrm
 
-# The distutils src_unpack function, this function is exported
-distutils_src_unpack() {
-    unpack ${ARCHIVES}
-    cd "${WORK}"
+# The distutils src_prepare function, this function is exported
+distutils_src_prepare() {
+    default
 
     # remove ez_setup stuff to prevent packages
     # from installing setuptools on their own
