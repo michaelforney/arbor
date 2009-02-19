@@ -7,6 +7,8 @@ require multilib
 
 export_exlib_phases src_configure src_test src_install
 
+myexparam docs=true
+
 SUMMARY="UNIX Shell similar to the Korn shell"
 HOMEPAGE="http://www.zsh.org/"
 DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2 ftp://ftp.zsh.org/pub/${PNV}.tar.bz2
@@ -80,7 +82,9 @@ zsh_src_install() {
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/StartupFiles
 
-    if option doc; then
+    local docs
+    exparam -v docs docs
+    if [[ ${docs} == true ]] && option doc; then
         doins "${WORK}"/Doc/${PN}.pdf
         # XXX: fix 'emake -C Doc DESTDIR="${IMAGE}" install.html' to not ignore --htmldir
         insinto /usr/share/doc/${PNVR}/html
