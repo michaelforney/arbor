@@ -151,7 +151,7 @@ scm-git_do_update() {
     [[ -n ${old_origin} ]] || die "could not determine origin URL for $(scm_get_var CHECKOUT_TO)"
     if [[ ${old_origin} != $(scm_get_var REPOSITORY) ]]; then
         scm-git_git config remote.origin.url "$(scm_get_var REPOSITORY)"
-	eval "$(scm-git_git -q for-each-ref --shell --format "scm-git_git update-ref -d %(refname)" refs/{heads,tags}/\*)"
+        eval "$(scm-git_git -q for-each-ref --shell --format "scm-git_git update-ref -d %(refname)" refs/{heads,tags}/\*)"
     fi
 
     local branch=$(scm_get_var BRANCH)
