@@ -1,6 +1,6 @@
 # Copyright 2007, 2008 Bryan Østergaard
 # Copyright 2008 Anders Ossowicki
-# Copyright 2008 Ingmar Vanhassel
+# Copyright 2008, 2009 Ingmar Vanhassel
 # Copyright 2008 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
@@ -20,16 +20,23 @@ UPSTREAM_DOCUMENTATION=
 
 LICENCES="|| ( Artistic GPL GPL-2 GPL-3 )"
 SLOT="$(ever range 1-2)"
-MYOPTIONS=""
+MYOPTIONS="berkdb gdbm"
 
 DEPENDENCIES="
     build+run:
-        dev-perl/Pod-Parser"
+        dev-perl/Pod-Parser
+        berkdb? ( sys-libs/db:= )
+        gdbm? ( sys-libs/gdbm )
+"
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
 
 # WORK="${TEMP}/build"
 WORK="${WORKBASE}/build"
+
+db_define() {
+    option "${1}" && echo 'D' || echo 'U'
+}
 
 perl-5_src_prepare() {
     cd "${WORKBASE}/${PNV}"
@@ -68,6 +75,9 @@ perl-5_src_configure() {
         -Duseshrplib \
         -Dmksymlinks \
         -Duselargefiles \
+        -Ui_ndbm \
+        -$(db_define gdbm)i_gdbm \
+        -$(db_define berkdb)i_db \
         "${PERL5_CONFIGURE_PARAMS[@]}" \
         || die "Configure failed"
 }
