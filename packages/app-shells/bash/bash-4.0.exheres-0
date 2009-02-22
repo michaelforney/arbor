@@ -28,7 +28,6 @@ build+run:
     sys-libs/ncurses
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/bash-4.0-rc1-printf-v.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin
     --without-installed-readline
     --with-curses )
@@ -37,8 +36,6 @@ DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc )
 
 src_prepare() {
     default
-    # upstream fail...
-    chmod +x ./configure
     echo '#define SYS_BASHRC "/etc/bash/bashrc"' >> config-top.h
 }
 
