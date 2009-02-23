@@ -8,7 +8,7 @@
 
 require multilib versionator alternatives
 
-export_exlib_phases src_prepare src_configure src_test src_install
+export_exlib_phases src_unpack src_prepare src_configure src_test src_install
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
@@ -38,10 +38,14 @@ db_define() {
     option "${1}" && echo 'D' || echo 'U'
 }
 
+perl-5_src_unpack() {
+    default
+    mkdir "${WORK}" || die "mkdir failed"
+}
+
 perl-5_src_prepare() {
     cd "${WORKBASE}/${PNV}"
     default
-    mkdir "${WORK}" || die "mkdir failed"
 }
 
 perl-5_src_configure() {
@@ -56,30 +60,33 @@ perl-5_src_configure() {
     # now. At least parrot breaks if we don't have -$osname in $archname
     local archname="${CHOST%%-*}-linux"
 
-    sh "${WORKBASE}/${PNV}/Configure" \
-        -des \
-        -Dcf_by='Exherbo' \
-        -Dprefix=/usr \
-        -Dvendorprefix=/usr \
-        -Dsiteprefix=/usr \
-        -Doptimize="${CFLAGS}" \
-        -Darchname="${CHOST%%-*}-linux" \
-        -Dlibperl="libperl.so.1.${PV}" \
-        -Dprivlib="/usr/$(get_libdir)/perl5/${PV}" \
-        -Darchlib="/usr/$(get_libdir)/perl5/${PV}/$archname" \
-        -Dsitelib="/usr/$(get_libdir)/perl5/site_perl/${PV}" \
-        -Dsitearch="/usr/$(get_libdir)/perl5/site_perl/${PV}/$archname" \
-        -Dvendorlib="/usr/$(get_libdir)/perl5/vendor_perl/${PV}" \
-        -Dvendorarch="/usr/$(get_libdir)/perl5/vendor_perl/${PV}/$archname" \
-        -Uinstallusrbinperl= \
-        -Duseshrplib \
-        -Dmksymlinks \
-        -Duselargefiles \
-        -Ui_ndbm \
-        -$(db_define gdbm)i_gdbm \
-        -$(db_define berkdb)i_db \
-        "${PERL5_CONFIGURE_PARAMS[@]}" \
-        || die "Configure failed"
+    cmd=(
+        "${WORKBASE}/${PNV}/Configure"
+        -des
+        -Dcf_by='Exherbo'
+        -Dprefix=/usr
+        -Dvendorprefix=/usr
+        -Dsiteprefix=/usr
+        -Doptimize="${CFLAGS}"
+        -Darchname="${CHOST%%-*}-linux"
+        -Dlibperl="libperl.so.1.${PV}"
+        -Dprivlib="/usr/$(get_libdir)/perl5/${PV}"
+        -Darchlib="/usr/$(get_libdir)/perl5/${PV}/$archname"
+        -Dsitelib="/usr/$(get_libdir)/perl5/site_perl/${PV}"
+        -Dsitearch="/usr/$(get_libdir)/perl5/site_perl/${PV}/$archname"
+        -Dvendorlib="/usr/$(get_libdir)/perl5/vendor_perl/${PV}"
+        -Dvendorarch="/usr/$(get_libdir)/perl5/vendor_perl/${PV}/$archname"
+        -Uinstallusrbinperl=
+        -Duseshrplib
+        -Dmksymlinks
+        -Duselargefiles
+        -Ui_ndbm
+        -$(db_define gdbm)i_gdbm
+        -$(db_define berkdb)i_db
+        "${PERL5_CONFIGURE_PARAMS[@]}"
+    )
+    echo sh "${cmd[@]}" >&2
+    sh "${cmd[@]}" || die "Configure failed"
 }
 
 perl-5_src_test() {
@@ -142,3 +149,4 @@ EOF
     done
     alternatives_for ${PN} ${SLOT} "$(delete_all_version_separators "${SLOT}")" "${alternatives[@]}"
 }
+
