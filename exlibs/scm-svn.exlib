@@ -83,7 +83,18 @@ scm-svn_svn() {
     has "${cmd}" checkout co export status stat st switch sw update up && extra+=( --ignore-externals )
 
     ${echo} svn "${cmd}" "${extra[@]}" "${@}"
-    svn "${cmd}" "${extra[@]}" "${@}" || die_unless_nonfatal "svn ${cmd} failed"
+    if [[ ! -e ~/.subversion && -n ${SCM_SVN_CONFIG_DIR} ]]; then
+        ln -s "${SCM_SVN_CONFIG_DIR}" ~/.subversion || die "ln -s .subversion failed"
+
+        svn "${cmd}" "${extra[@]}" "${@}"
+        local status=${?}
+
+        rm ~/.subversion || die "rm .subversion symlink failed"
+
+        [[ ${status} -eq 0 ]]
+    else
+        svn "${cmd}" "${extra[@]}" "${@}"
+    fi || die_unless_nonfatal "svn ${cmd} failed"
 }
 
 scm-svn_info() {
