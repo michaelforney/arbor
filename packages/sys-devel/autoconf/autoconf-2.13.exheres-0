@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require ${PN}
+require autoconf
 
 SLOT="2.1"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
@@ -12,3 +12,4 @@ src_prepare() {
     # Make all needed directories during installation
     sed -ri 's:(^INSTALL.+=.+):\1 -D:' Makefile.in
 }
+
