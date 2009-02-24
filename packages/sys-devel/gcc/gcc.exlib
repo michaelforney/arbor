@@ -58,11 +58,15 @@ src_unpack() {
     else
         default
     fi
+    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+}
+
+src_prepare() {
+    cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
+    default
 }
 
 src_configure() {
-    mkdir "${WORK}" && cd "${WORK}" || die "mkdir ${WORK} failed"
-
     local i LANGS="c++"
     for i in ada fortran objc obj-c++; do
         option ${i} && LANGS+=",${i}"
@@ -292,3 +296,4 @@ pkg_postrm() {
         done
     done
 }
+

@@ -20,9 +20,12 @@ WORK="${WORK}/narrow/"
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-shared --with-normal --without-termcap --libdir=/$(get_libdir) )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gpm )
 
-src_configure() {
+src_unpack() {
+    default
     mkdir "${WORK}" "${WORK_WIDE}" || die "Creating ${WORK}, ${WORK_WIDE} failed"
-    cd "${WORK}" || die "cd ${WORK} failed"
+}
+
+src_configure() {
     default
 
     if option unicode; then
