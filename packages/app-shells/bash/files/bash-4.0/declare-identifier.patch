@@ -1,0 +1,20 @@
+Source: Chet Ramey, http://thread.gmane.org/gmane.comp.shells.bash.bugs/12444/focus=12448
+Upstream: Yes.
+Reason: Catch errors with assignment to associative arrays.
+
+*** ../bash-4.0/builtins/declare.def	2009-01-04 14:32:22.000000000 -0500
+--- builtins/declare.def	2009-02-25 09:41:35.000000000 -0500
+***************
+*** 288,291 ****
+--- 288,297 ----
+  	    }
+  	}
++       else if (legal_identifier (name) == 0)
++ 	{
++ 	  sh_invalidid (name);
++ 	  assign_error++;
++ 	  NEXT_VARIABLE ();
++ 	}
+        else
+  	value = "";
+

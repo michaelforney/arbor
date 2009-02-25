@@ -43,8 +43,6 @@ src_prepare() {
 src_install() {
     default
 
-    dosym bash bin/sh
-
     insinto /etc/bash
     doins "${FILES}/bashrc"
 
@@ -75,6 +73,5 @@ EOF
     f="${IMAGE}"/usr/share/info/bash.info
     echo mv "${f}" "${f/%.info/-${SLOT}.info}"
     mv "${f}" "${f/%.info/-${SLOT}.info}" || die "Failed to rename ${f}"
-    rm "${IMAGE}"/bin/sh || die "Failed to remove /bin/sh symlink"
 }
 
