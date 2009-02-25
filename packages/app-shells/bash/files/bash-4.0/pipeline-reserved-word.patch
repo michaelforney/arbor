@@ -1,0 +1,14 @@
+Source: Chet Ramey, http://thread.gmane.org/gmane.comp.shells.bash.bugs/12440/focus=12461
+Upstream: Yes.
+Reason: Parse |& { } statement properly.
+
+*** ../bash-4.0/parse.y	2009-01-08 08:29:12.000000000 -0500
+--- parse.y	2009-02-25 17:25:56.000000000 -0500
+***************
+*** 4450,4453 ****
+--- 4457,4461 ----
+      case AND_AND:
+      case BANG:
++     case BAR_AND:
+      case DO:
+      case DONE:
