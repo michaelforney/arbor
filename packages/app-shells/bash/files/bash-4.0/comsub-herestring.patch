@@ -1,0 +1,24 @@
+Source: Chet Ramey, http://thread.gmane.org/gmane.comp.shells.bash.bugs/12468/focus=12475
+Upstream: Yes.
+Reason: Fix issues with white space before here strings.
+
+*** ../bash-4.0/parse.y	2009-01-08 08:29:12.000000000 -0500
+--- parse.y	2009-02-26 17:22:15.000000000 -0500
+***************
+*** 3395,3400 ****
+  	      else
+  		shell_ungetc (peekc);
+! 	      tflags |= LEX_HEREDELIM;
+! 	      lex_firstind = -1;
+  	      continue;
+  	    }
+--- 3402,3410 ----
+  	      else
+  		shell_ungetc (peekc);
+! 	      if (peekc != '<')
+! 		{
+! 		  tflags |= LEX_HEREDELIM;
+! 		  lex_firstind = -1;
+! 		}
+  	      continue;
+  	    }
