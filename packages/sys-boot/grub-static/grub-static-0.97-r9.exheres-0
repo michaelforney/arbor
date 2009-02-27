@@ -4,7 +4,7 @@
 require gnu
 
 SUMMARY="GRUB (Grand Unified Boot) bootlader (precompiled version for amd64)"
-DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2"
+DOWNLOADS="mirror://gentoo/${PNVR}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -14,10 +14,10 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 WORK=${WORKBASE}
-GRUB_PNV="grub-0.97-r3"
+GRUB_PNV="grub-0.97-r9"
 
 src_install() {
     cp -a "${WORKBASE}"/* "${IMAGE}"
-    mv "${IMAGE}"/usr/share/doc/{${GRUB_PNV},${PNV}}
+    mv "${IMAGE}"/usr/share/doc/{${GRUB_PNV},${PNVR}}
 }
 
