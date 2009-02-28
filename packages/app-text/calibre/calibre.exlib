@@ -1,4 +1,4 @@
-# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'calibre-0.4.77.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -113,9 +113,6 @@ EOF
         "${IMAGE}/"usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
         "${IMAGE}/"usr/share/{applnk,desktop-directories} \
         || die "removing junk failed"
-    if [[ ${PV} == "0.4.123" ]]; then
-        rm -r "${IMAGE}"/tmp || die "removing junk failed"
-    fi
 }
 
 calibre_pkg_postinst() {
