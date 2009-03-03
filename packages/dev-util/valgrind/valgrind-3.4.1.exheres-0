@@ -1,9 +1,9 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'valgrind-3.3.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require flag-o-matic toolchain-funcs
 
 SUMMARY="An open-source memory debugger for GNU/Linux"
 HOMEPAGE="http://www.valgrind.org"
@@ -17,8 +17,6 @@ PLATFORMS="-* ~amd64 ~x86"
 MYOPTIONS="platform: amd64"
 
 DEPENDENCIES=""
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-pkg-config.patch" )
 
 src_prepare() {
     sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' \
