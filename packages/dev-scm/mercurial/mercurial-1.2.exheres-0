@@ -1,5 +1,5 @@
 # Copyright (c) 2007 Alexander Færøy <ahf@exherbo.org>
-# Copyright (c) 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright (c) 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require bash-completion distutils
@@ -29,15 +29,12 @@ PYTHON_MODNAME="${PN} hgext"
 src_test() {
     cd tests || die "Couldn't enter tests"
 
-    # Tests fail due to changed error messages
-    # tar
+    # Tests fail due to changed error message (from tar)
     rm -f test-archive || die "Bad tests (1)"
-    # glibc
-    rm -f test-bad-pull test-http-proxy test-static-http || die "Bad tests (2)"
-    # no clue
-    rm -f test-inotify-issue1371 || die "Bad tests (3)"
 
-    ${python} ./run-tests.py --tmpdir="${TEMP}" || die "${python} .run-tests.py --tmpdir=\"${TEMP}\" failed"
+    ${python} ./run-tests.py \
+        --tmpdir="${TEMP}" \
+        --verbose || die "${python} .run-tests.py --tmpdir=\"${TEMP}\" failed"
 }
 
 src_install() {
