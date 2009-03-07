@@ -38,7 +38,7 @@ cmake_have() {
 }
 
 cmake_option() {
-    _cmake_option '' "${@}"
+    _cmake_option '' "$@"
 }
 
 # Similar to cmake_enable but using WANT instead of ENABLE.
@@ -134,7 +134,7 @@ cmake_src_configure() {
 # Function for building the package. Automatically detects the correct build
 # dir.  All arguments including CMAKE_SRC_COMPILE_PARAMS are passed to emake.
 cmake_src_compile() {
-    _cmake_run emake ${CMAKE_SRC_COMPILE_PARAMS[@]} "$@"
+    _cmake_run emake "${CMAKE_SRC_COMPILE_PARAMS[@]}" "$@"
 }
 
 # Function for testing the package. Automatically detects the build dir. Uses
