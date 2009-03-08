@@ -34,10 +34,10 @@ DEPENDENCIES="
     build+run:
         berkdb? ( sys-libs/db:= )
         gdbm? ( sys-libs/gdbm )
-        ssl? ( dev-libs/openssl )
+        ssl? ( >=dev-libs/openssl-0.9.8g )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-rexml-limit-entity-expansion.patch)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}/ )
 DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
 
 WORK=${WORKBASE}/${MY_PNV}

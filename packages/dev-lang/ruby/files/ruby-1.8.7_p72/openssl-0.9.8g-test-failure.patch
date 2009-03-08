@@ -1,0 +1,30 @@
+Source: Upstream (Stripped ChangeLog)
+Upstream: On trunk, not on 1_8 or 1_8_7
+Reason:
+commit 5cf99e7f973cac550716334fd5ef6f26a6c04eed
+Author: kazu <kazu@b2dd03c8-39d4-4d8f-98ff-823fe69b080e>
+Date:   Tue Sep 9 11:41:45 2008 +0000
+
+    * test/openssl/test_ssl.rb (OpenSSL#test_client_session):
+      Debian's openssl 0.9.8g-13 failed at assert(ssl.session_reused?),
+      when use default SSLContext. [ruby-dev:36167]
+    
+    
+    git-svn-id: http://svn.ruby-lang.org/repos/ruby/trunk@19268 b2dd03c8-39d4-4d8f-98ff-823fe69b080e
+
+diff --git a/test/openssl/test_ssl.rb b/test/openssl/test_ssl.rb
+index ea95989..186d855 100644
+--- a/test/openssl/test_ssl.rb
++++ b/test/openssl/test_ssl.rb
+@@ -439,7 +439,10 @@ class OpenSSL::TestSSL < Test::Unit::TestCase
+     start_server(PORT, OpenSSL::SSL::VERIFY_NONE, true) do |server, port|
+       2.times do
+         sock = TCPSocket.new("127.0.0.1", port)
+-        ssl = OpenSSL::SSL::SSLSocket.new(sock)
++        # Debian's openssl 0.9.8g-13 failed at assert(ssl.session_reused?),
++        # when use default SSLContext. [ruby-dev:36167]
++        ctx = OpenSSL::SSL::SSLContext.new("TLSv1")
++        ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+         ssl.sync_close = true
+         ssl.session = last_session if last_session
+         ssl.connect
