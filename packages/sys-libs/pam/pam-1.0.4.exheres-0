@@ -34,7 +34,11 @@ pkg_pretend() {
     fi
 }
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.0.1-disable-regenerate-man.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( 
+    "${FILES}"/${PN}-1.0.1-disable-regenerate-man.patch 
+    "-p0"
+    "${FILES}"/${PNV}-fix-tst-pam_mkargv-on-32bit.patch 
+)
 AT_M4DIR=m4
 
 src_prepare() {
