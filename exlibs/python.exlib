@@ -94,21 +94,6 @@ python_get_sitedir() {
 }
 
 #
-# name:   python_tkinter_exists
-# desc:   run without arguments, checks if python was compiled with Tkinter
-#     support.  If not, prints an error message and dies.
-#
-python_tkinter_exists() {
-    if ! python -B -c "import Tkinter" >/dev/null 2>&1; then
-        eerror "You need to recompile python with Tkinter support."
-        eerror "Try adding: 'dev-lang/python tk'"
-        eerror "in to /etc/portage/package.use"
-        echo
-        die "missing tkinter support with installed python"
-    fi
-}
-
-#
 # name:   python_mod_exists
 # desc:   run with the module name as an argument. it will check if a
 #     python module is installed and loadable. it will return
