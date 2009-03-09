@@ -21,7 +21,19 @@ MYOPTIONS="doc"
 
 DEPENDENCIES="
     build+run:
-        dev-lang/tcl"
+        dev-lang/tcl
+        dev-tcl/expect"
+#    test:
+#        dev-util/dejagnu
+
+src_test() {
+    if ! has_version dev-util/dejagnu; then
+        ewarn "You need to build dejagnu a second time to run the tests"
+        return
+    fi
+
+    default
+}
 
 src_install() {
     default
