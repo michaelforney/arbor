@@ -44,14 +44,7 @@ distutils_src_install() {
 
     ${python} -B setup.py install --root="${IMAGE}" --no-compile "$@" || die
 
-    DDOCS="CHANGELOG KNOWN_BUGS MAINTAINERS PKG-INFO CONTRIBUTORS TODO NEWS"
-    DDOCS="${DDOCS} Change* MANIFEST* README* AUTHORS"
-
-    for doc in ${DDOCS}; do
-        [[ -s "$doc" ]] && dodoc $doc
-    done
-
-    [[ -n "${DOCS}" ]] && dodoc ${DOCS}
+    emagicdocs
 }
 
 # Generic pyc/pyo cleanup script. This function is exported.
