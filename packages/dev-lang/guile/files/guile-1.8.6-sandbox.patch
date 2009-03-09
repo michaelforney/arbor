@@ -1,0 +1,26 @@
+Source: Ingmar Vanhassel
+Upstream: No
+Reason: Don't trigger sandbox violations
+
+From 016a44e11b22108f9b64f8a93433a25b3bae2d02 Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Mon, 9 Mar 2009 21:28:12 +0100
+Subject: [PATCH] Don't trigger sandbox violations
+
+---
+ guile-config/Makefile.am |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/guile-config/Makefile.am b/guile-config/Makefile.am
+index cedcba9..2158ac8 100644
+--- a/guile-config/Makefile.am
++++ b/guile-config/Makefile.am
+@@ -43,4 +43,4 @@ guile-config: guile-config.in ${top_builddir}/libguile/libpath.h
+ ## Get rid of any copies of the configuration script under the old
+ ## name, so people don't end up running ancient copies of it.
+ install-exec-local:
+-	rm -f ${bindir}/build-guile
++	true
+-- 
+1.6.2
+

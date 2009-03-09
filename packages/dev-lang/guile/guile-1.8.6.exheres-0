@@ -1,0 +1,29 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+
+SUMMARY="An interpreter for the Scheme programming language -- Project GNU's extension language"
+DESCRIPTION="
+Guile is a library designed to help programmers create flexible applications.
+Using Guile in an application allows programmers to write plug-ins, or modules
+(there are many names, but the concept is essentially the same) and users to
+use them to have an application fit their needs."
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+      >=dev-libs/gmp-4.1
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-sandbox.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    # Exherbo has no proper emacs support yet
+    --disable-elisp
+    --enable-deprecated
+)
+
