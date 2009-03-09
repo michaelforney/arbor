@@ -1,13 +1,15 @@
 # Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+SUPPORTED_AUTOCONF=( 2.5)
+SUPPORTED_AUTOMAKE=( 1.10 )
+
 require multilib
 
 SUMMARY="Tool for automating interactive applications"
 HOMEPAGE="http://expect.nist.gov/"
-DOWNLOADS="http://expect.nist.gov/src/${PNV}.tar.bz2"
+DOWNLOADS="http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}.tar.bz2"
 
-# from ${HOMEPAGE}
 DESCRIPTION="Expect is a tool for automating interactive applications
 such as telnet, ftp, passwd, fsck, rlogin, tip, etc. Expect really
 makes this stuff trivial. Expect is also useful for testing these same
@@ -20,30 +22,23 @@ absolutely invaluable tool - using it, you will be able to automate
 tasks that you've never even thought of before - and you'll be able to
 do this automation quickly and easily."
 
-# Some of the test files are GPL-2.  Some files refer to something
-# called "license.terms", but it doesn't seem to exist....
-LICENCES="public-domain GPL-2"
+# Some of the test files are GPL-2, but I don't think that counts
+LICENCES="public-domain"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="examples tk"
+MYOPTIONS="examples" # threads is supported by configure, but currently a no-op according to comments
 
 DEPENDENCIES="
     build+run:
         dev-lang/tcl
-        tk? ( dev-tcl/tk )"
+        dev-lang/tk"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-shared
     --with-tcl=/usr/$(get_libdir)
+    --with-tclinclude=/usr/include
     --with-tk=/usr/$(get_libdir)
+    --with-tkinclude=/usr/include
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tk x" )
-
-src_test() {
-    # both!
-    emake -j1 check
-    emake -j1 test
-}
 
 src_install() {
     default
