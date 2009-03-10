@@ -275,6 +275,10 @@ scm_trim_slashes() {
     echo "${myscheme}${value}"
 }
 
+scm_do_need_slotted_checkout_dir() {
+    true
+}
+
 scm_do_check_vars() {
     :
 }
@@ -293,7 +297,10 @@ scm_global_stuff() {
         && die "$(scm_var_name REPOSITORY) must be set"
 
     local checkout_to=$(scm_get_var CHECKOUT_TO)
-    [[ -z ${checkout_to} ]] && checkout_to=${SCM_THIS:-${PN}}
+    if [[ -z ${checkout_to} ]]; then
+        checkout_to=${SCM_THIS:-${PN}}
+        [[ ${SLOT} != 0 ]] && scm_call need_slotted_checkout_dir && checkout_to+=:${SLOT}
+    fi
     [[ ${checkout_to} == /* ]] || checkout_to=${SCM_HOME}/${checkout_to}
     scm_set_var CHECKOUT_TO "$(scm_trim_slashes -trailing "${checkout_to}")"
 

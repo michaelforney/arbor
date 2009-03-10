@@ -16,6 +16,10 @@ scm-bzr_do_dependencies() {
     fi
 }
 
+scm-bzr_do_need_slotted_checkout_dir() {
+    false
+}
+
 scm-bzr_do_check_vars() {
     [[ $(scm_get_var REPOSITORY) == lp:* ]] && die "lp: URIs are not supported, use 'HOME=/var/empty bzr info $(scm_get_var REPOSITORY)' to find the real URI"
 
