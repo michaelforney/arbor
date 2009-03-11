@@ -1,38 +1,3 @@
-From eeff21c40d007e96c7d945d572e69a242e06fe7c Mon Sep 17 00:00:00 2001
-From: Saleem Abdulrasool <compnerd@compnerd.org>
-Date: Sat, 4 Oct 2008 21:49:21 -0700
-Subject: [PATCH] support for installing to /lib and /lib64
-
-Allow installation into /lib64 for isolation in multi-lib systems
----
- Makefile.am.inc                          |    1 +
- extras/ata_id/Makefile.am                |    2 +-
- extras/cdrom_id/Makefile.am              |    4 +-
- extras/collect/Makefile.am               |    2 +-
- extras/edd_id/Makefile.am                |    4 +-
- extras/firmware/Makefile.am              |    2 +-
- extras/floppy/Makefile.am                |    2 +-
- extras/fstab_import/Makefile.am          |    4 +-
- extras/path_id/Makefile.am               |    2 +-
- extras/rule_generator/Makefile.am        |   14 +++-
- extras/rule_generator/write_cd_rules     |  117 ---------------------------
- extras/rule_generator/write_cd_rules.in  |  117 +++++++++++++++++++++++++++
- extras/rule_generator/write_net_rules    |  130 ------------------------------
- extras/rule_generator/write_net_rules.in |  130 ++++++++++++++++++++++++++++++
- extras/scsi_id/Makefile.am               |    2 +-
- extras/usb_id/Makefile.am                |    2 +-
- extras/volume_id/Makefile.am             |    2 +-
- rules/Makefile.am                        |   10 ++-
- rules/rules.d/50-udev-default.rules      |  122 ----------------------------
- rules/rules.d/50-udev-default.rules.in   |  122 ++++++++++++++++++++++++++++
- 20 files changed, 403 insertions(+), 388 deletions(-)
- delete mode 100644 extras/rule_generator/write_cd_rules
- create mode 100644 extras/rule_generator/write_cd_rules.in
- delete mode 100644 extras/rule_generator/write_net_rules
- create mode 100644 extras/rule_generator/write_net_rules.in
- delete mode 100644 rules/rules.d/50-udev-default.rules
- create mode 100644 rules/rules.d/50-udev-default.rules.in
-
 diff --git a/Makefile.am.inc b/Makefile.am.inc
 index 7ecd55d..c09b396 100644
 --- a/Makefile.am.inc
@@ -46,7 +11,7 @@ index 7ecd55d..c09b396 100644
  
  AM_CFLAGS =
 diff --git a/extras/ata_id/Makefile.am b/extras/ata_id/Makefile.am
-index 47ab0d6..c997713 100644
+index d31fd2c..0634b03 100644
 --- a/extras/ata_id/Makefile.am
 +++ b/extras/ata_id/Makefile.am
 @@ -1,6 +1,6 @@
@@ -58,7 +23,7 @@ index 47ab0d6..c997713 100644
  	ata_id
  
 diff --git a/extras/cdrom_id/Makefile.am b/extras/cdrom_id/Makefile.am
-index bb97d96..ca65fae 100644
+index 51b6a20..e26490e 100644
 --- a/extras/cdrom_id/Makefile.am
 +++ b/extras/cdrom_id/Makefile.am
 @@ -1,10 +1,10 @@
@@ -75,7 +40,7 @@ index bb97d96..ca65fae 100644
  	60-cdrom_id.rules
  
 diff --git a/extras/collect/Makefile.am b/extras/collect/Makefile.am
-index 895f1b7..805f7c2 100644
+index d9792b8..c716e53 100644
 --- a/extras/collect/Makefile.am
 +++ b/extras/collect/Makefile.am
 @@ -1,6 +1,6 @@
@@ -87,7 +52,7 @@ index 895f1b7..805f7c2 100644
  	collect
  
 diff --git a/extras/edd_id/Makefile.am b/extras/edd_id/Makefile.am
-index 28ff8aa..d59ee86 100644
+index 9bfe432..2dff5a6 100644
 --- a/extras/edd_id/Makefile.am
 +++ b/extras/edd_id/Makefile.am
 @@ -1,10 +1,10 @@
@@ -104,10 +69,10 @@ index 28ff8aa..d59ee86 100644
  	61-persistent-storage-edd.rules
  
 diff --git a/extras/firmware/Makefile.am b/extras/firmware/Makefile.am
-index 78b28f6..593f0d3 100644
+index 42f5876..f4514fd 100644
 --- a/extras/firmware/Makefile.am
 +++ b/extras/firmware/Makefile.am
-@@ -1,6 +1,6 @@
+@@ -1,9 +1,9 @@
  include $(top_srcdir)/Makefile.am.inc
  
 -udevhomedir = $(udev_prefix)/lib/udev
@@ -115,8 +80,12 @@ index 78b28f6..593f0d3 100644
  dist_udevhome_SCRIPTS = \
  	firmware.sh
  
+-udevrulesdir = $(udev_prefix)/lib/udev/rules.d
++udevrulesdir = $(udev_prefix)/$(libdir_name)/udev/rules.d
+ dist_udevrules_DATA = \
+ 	50-firmware.rules
 diff --git a/extras/floppy/Makefile.am b/extras/floppy/Makefile.am
-index 8dadefa..a6d2034 100644
+index 8cb9cbd..e09f8b1 100644
 --- a/extras/floppy/Makefile.am
 +++ b/extras/floppy/Makefile.am
 @@ -1,6 +1,6 @@
@@ -128,7 +97,7 @@ index 8dadefa..a6d2034 100644
  	create_floppy_devices
  
 diff --git a/extras/fstab_import/Makefile.am b/extras/fstab_import/Makefile.am
-index d16c681..06d3588 100644
+index c63dc7c..1f71df3 100644
 --- a/extras/fstab_import/Makefile.am
 +++ b/extras/fstab_import/Makefile.am
 @@ -1,10 +1,10 @@
@@ -145,7 +114,7 @@ index d16c681..06d3588 100644
  	79-fstab_import.rules
  
 diff --git a/extras/path_id/Makefile.am b/extras/path_id/Makefile.am
-index b85b747..15f5086 100644
+index f489290..972334f 100644
 --- a/extras/path_id/Makefile.am
 +++ b/extras/path_id/Makefile.am
 @@ -1,6 +1,6 @@
@@ -157,7 +126,7 @@ index b85b747..15f5086 100644
  	path_id
  
 diff --git a/extras/rule_generator/Makefile.am b/extras/rule_generator/Makefile.am
-index 8981912..03f002c 100644
+index e8a8f17..03f002c 100644
 --- a/extras/rule_generator/Makefile.am
 +++ b/extras/rule_generator/Makefile.am
 @@ -1,6 +1,6 @@
@@ -168,7 +137,7 @@ index 8981912..03f002c 100644
  dist_udevhome_SCRIPTS = \
  	write_cd_rules \
  	write_net_rules
-@@ -8,7 +8,7 @@ dist_udevhome_SCRIPTS = \
+@@ -8,8 +8,21 @@ dist_udevhome_SCRIPTS = \
  dist_udevhome_DATA = \
  	rule_generator.functions
  
@@ -177,10 +146,10 @@ index 8981912..03f002c 100644
  dist_udevrules_DATA = \
  	75-cd-aliases-generator.rules \
  	75-persistent-net-generator.rules
-@@ -16,3 +16,13 @@ dist_udevrules_DATA = \
- distclean-local:
- 	rm -f Makefile.in
  
++distclean-local:
++	rm -f Makefile.in
++
 +write_cd_rules: write_cd_rules.in
 +	$(SED) -e "s:@@libdir@@:$(libdir_name):g" < $< > $@
 +
@@ -193,7 +162,7 @@ index 8981912..03f002c 100644
 +
 diff --git a/extras/rule_generator/write_cd_rules b/extras/rule_generator/write_cd_rules
 deleted file mode 100644
-index 8de2276..0000000
+index 398cd27..0000000
 --- a/extras/rule_generator/write_cd_rules
 +++ /dev/null
 @@ -1,117 +0,0 @@
@@ -222,7 +191,7 @@ index 8de2276..0000000
 -. /lib/udev/rule_generator.functions
 -
 -find_next_available() {
--	raw_find_next_available "$(find_all_rules 'SYMLINK+=' "$1")"
+-	raw_find_next_available "$(find_all_rules 'SYMLINK\+=' "$1")"
 -}
 -
 -write_rule() {
@@ -316,7 +285,7 @@ index 8de2276..0000000
 -
 diff --git a/extras/rule_generator/write_cd_rules.in b/extras/rule_generator/write_cd_rules.in
 new file mode 100644
-index 0000000..16e3c10
+index 0000000..77967f0
 --- /dev/null
 +++ b/extras/rule_generator/write_cd_rules.in
 @@ -0,0 +1,117 @@
@@ -345,7 +314,7 @@ index 0000000..16e3c10
 +. /@@libdir@@/udev/rule_generator.functions
 +
 +find_next_available() {
-+	raw_find_next_available "$(find_all_rules 'SYMLINK+=' "$1")"
++	raw_find_next_available "$(find_all_rules 'SYMLINK\+=' "$1")"
 +}
 +
 +write_rule() {
@@ -710,7 +679,7 @@ index 0000000..6f797d6
 +
 +exit 0
 diff --git a/extras/scsi_id/Makefile.am b/extras/scsi_id/Makefile.am
-index 08da1c9..1f0b48e 100644
+index 29d5fe7..4c0e8ee 100644
 --- a/extras/scsi_id/Makefile.am
 +++ b/extras/scsi_id/Makefile.am
 @@ -1,6 +1,6 @@
@@ -722,7 +691,7 @@ index 08da1c9..1f0b48e 100644
  	scsi_id
  
 diff --git a/extras/usb_id/Makefile.am b/extras/usb_id/Makefile.am
-index c54d83e..cf9b569 100644
+index dfb52f1..b298025 100644
 --- a/extras/usb_id/Makefile.am
 +++ b/extras/usb_id/Makefile.am
 @@ -1,6 +1,6 @@
@@ -734,7 +703,7 @@ index c54d83e..cf9b569 100644
  	usb_id
  
 diff --git a/extras/volume_id/Makefile.am b/extras/volume_id/Makefile.am
-index c58f1a8..9ae5b5a 100644
+index 4a8ba94..b7ca6a1 100644
 --- a/extras/volume_id/Makefile.am
 +++ b/extras/volume_id/Makefile.am
 @@ -3,7 +3,7 @@ include $(top_srcdir)/Makefile.am.inc
@@ -747,7 +716,7 @@ index c58f1a8..9ae5b5a 100644
  	vol_id
  
 diff --git a/rules/Makefile.am b/rules/Makefile.am
-index d6cefe3..ac7f5b9 100644
+index 7f3cd59..ac7f5b9 100644
 --- a/rules/Makefile.am
 +++ b/rules/Makefile.am
 @@ -1,6 +1,6 @@
@@ -758,120 +727,120 @@ index d6cefe3..ac7f5b9 100644
  dist_udevrules_DATA = \
  	rules.d/50-udev-default.rules \
  	rules.d/60-persistent-storage.rules \
-@@ -18,8 +18,12 @@ EXTRA_DIST = \
+@@ -18,4 +18,12 @@ EXTRA_DIST = \
  	packages \
  	redhat \
  	suse \
 -	gentoo
--
 +	gentoo \
 +	rules.d/50-udev-default.rules.in
- 
- distclean-local:
- 	rm -f Makefile.in
++
++distclean-local:
++	rm -f Makefile.in
 +
 +rules.d/50-udev-default.rules: rules.d/50-udev-default.rules.in
 +	$(SED) -e "s:@@libdir@@:$(libdir_name):g" < $< > $@
 +
 diff --git a/rules/rules.d/50-udev-default.rules b/rules/rules.d/50-udev-default.rules
 deleted file mode 100644
-index ad725fc..0000000
+index 95d82d7..0000000
 --- a/rules/rules.d/50-udev-default.rules
 +++ /dev/null
-@@ -1,122 +0,0 @@
+@@ -1,120 +0,0 @@
 -# do not edit this file, it will be overwritten on update
 -
 -SUBSYSTEM=="block", SYMLINK+="block/%M:%m"
 -SUBSYSTEM!="block", SYMLINK+="char/%M:%m"
 -
--KERNEL=="pty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
--KERNEL=="tty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
--KERNEL=="ptmx",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
--KERNEL=="tty",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
--KERNEL=="tty[0-9]*",		GROUP="tty", MODE="0620", OPTIONS+="last_rule"
--KERNEL=="vcs|vcs[0-9]*|vcsa|vcsa[0-9]*", GROUP="tty", OPTIONS+="last_rule"
--KERNEL=="console",		MODE="0600", OPTIONS+="last_rule"
+-KERNEL=="pty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660"
+-KERNEL=="tty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660"
+-KERNEL=="ptmx",			GROUP="tty", MODE="0666"
+-KERNEL=="tty",			GROUP="tty", MODE="0666"
+-KERNEL=="tty[0-9]*",		GROUP="tty", MODE="0620"
+-KERNEL=="vcs|vcs[0-9]*|vcsa|vcsa[0-9]*", GROUP="tty"
+-KERNEL=="console",		MODE="0600"
 -
 -# serial
--KERNEL=="tty[A-Z]*|pppox*|ircomm*|noz*", GROUP="uucp"
--KERNEL=="ppp",			MODE="0600", OPTIONS+="ignore_remove"
--KERNEL=="mwave",		NAME="modems/mwave", GROUP="uucp"
--KERNEL=="hvc*|hvsi*",		GROUP="uucp"
--KERNEL=="lirc0",		SYMLINK+="lirc"
+-KERNEL=="tty[A-Z]*[0-9]|pppox[0-9]*|ircomm[0-9]*|noz[0-9]*", GROUP="dialout"
+-KERNEL=="ppp",			MODE="0600"
+-KERNEL=="mwave",		NAME="modems/mwave", GROUP="dialout"
+-KERNEL=="hvc*|hvsi*",		GROUP="dialout"
 -
 -# mem
 -KERNEL=="null|zero|full|random|urandom", MODE="0666"
--KERNEL=="null",			SYMLINK+="X0R"
 -KERNEL=="mem|kmem|port|nvram",	GROUP="kmem", MODE="0640"
--KERNEL=="ram0",			SYMLINK+="ramdisk"
--KERNEL=="ram1",			SYMLINK+="ram"
 -
 -# input
 -KERNEL=="mouse*|mice|event*",	NAME="input/%k", MODE="0640"
--KERNEL=="ts[0-9]*|uinput",	NAME="input/%k", MODE="0600"
--KERNEL=="js[0-9]*",		NAME="input/%k", MODE="0644", SYMLINK+="%k"
+-KERNEL=="ts[0-9]*|uinput",	NAME="input/%k", MODE="0640"
+-KERNEL=="js[0-9]*",		NAME="input/%k", MODE="0644"
 -
 -# video4linux
 -SUBSYSTEM=="video4linux",	GROUP="video"
 -KERNEL=="vttuner*",		GROUP="video"
 -KERNEL=="vtx*|vbi*",		GROUP="video"
 -KERNEL=="winradio*",		GROUP="video"
--KERNEL=="vbi0",			SYMLINK+="vbi"
--KERNEL=="radio0",		SYMLINK+="radio"
--KERNEL=="video0",		SYMLINK+="video"
 -
 -# graphics
 -KERNEL=="agpgart",		MODE="0600", GROUP="video"
--KERNEL=="card[0-9]*",		NAME="dri/%k", MODE="0666"
--KERNEL=="fb0",			SYMLINK+="fb"
+-KERNEL=="card[0-9]*",		NAME="dri/%k"
 -KERNEL=="pmu",			GROUP="video"
 -KERNEL=="nvidia*|nvidiactl*",	GROUP="video"
 -SUBSYSTEM=="graphics",		GROUP="video"
+-SUBSYSTEM=="drm",		GROUP="video"
 -
--# DVB video
--SUBSYSTEM=="dvb", PROGRAM="/bin/sh -c 'K=%k; K=$${K#dvb}; printf dvb/adapter%%i/%%s $${K%%%%.*} $${K#*.}'", NAME="%c"
--SUBSYSTEM=="dvb",		GROUP="video"
+-# DVB (video)
+-SUBSYSTEM=="dvb", ENV{DVB_ADAPTER_NUM}=="?*", NAME="dvb/adapter$env{DVB_ADAPTER_NUM}/$env{DVB_DEVICE_TYPE}$env{DVB_DEVICE_NUM}", GROUP="video"
+-SUBSYSTEM=="dvb", ENV{DVB_ADAPTER_NUM}=="", PROGRAM="/bin/sh -c 'K=%k; K=$${K#dvb}; printf dvb/adapter%%i/%%s $${K%%%%.*} $${K#*.}'", NAME="%c", GROUP="video"
 -
 -# Firewire
--KERNEL=="dv1394*",		SYMLINK+="dv1394/%n"
--KERNEL=="video1394*",		NAME="video1394/%n"
--KERNEL=="dv1394*|video1394*|raw1394*",	GROUP="video"
--
--# firmware class requests
--SUBSYSTEM=="firmware", ACTION=="add", RUN+="firmware.sh"
+-KERNEL=="dv1394[0-9]*",		NAME="dv1394/%n", GROUP="video"
+-KERNEL=="video1394[0-9]*",	NAME="video1394/%n", GROUP="video"
 -
 -# libusb device nodes
--SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", NAME="bus/usb/$env{BUSNUM}/$env{DEVNUM}", MODE="0644"
+-SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", NAME="bus/usb/$env{BUSNUM}/$env{DEVNUM}", MODE="0664"
 -
 -# printer
 -KERNEL=="parport[0-9]*",	GROUP="lp"
 -SUBSYSTEM=="printer",		KERNEL=="lp*", GROUP="lp"
+-SUBSYSTEM=="ppdev",		GROUP="lp"
 -SUBSYSTEM=="usb",		KERNEL=="lp*", NAME="usb/%k", SYMLINK+="usb%k", GROUP="lp"
--KERNEL=="lp[0-9]*",		GROUP="lp", SYMLINK+="par%n"
+-KERNEL=="lp[0-9]*",		GROUP="lp"
 -KERNEL=="irlpt[0-9]*",		GROUP="lp"
 -
--# block, tapes, block-releated
+-# block
 -SUBSYSTEM=="block", GROUP="disk"
--SUBSYSTEM=="block", KERNEL=="sr[0-9]*", SYMLINK+="scd%n"
--KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="floppy", OPTIONS+="all_partitions"
--KERNEL=="fd[0-9]",		GROUP="floppy"
+-
+-# floppy
+-KERNEL=="fd[0-9]", GROUP="floppy"
 -KERNEL=="fd[0-9]", ACTION=="add", ATTRS{cmos}=="?*", RUN+="create_floppy_devices -c -t $attr{cmos} -m %M -M 0640 -G floppy $root/%k"
--KERNEL=="sch[0-9]*",		GROUP="disk"
--KERNEL=="sg[0-9]*",		ATTRS{type}!="3|6", GROUP="disk", MODE="0640"
--KERNEL=="ht[0-9]*|nht[0-9]*",	GROUP="disk"
--KERNEL=="pg[0-9]*",		GROUP="disk"
--KERNEL=="pt[0-9]*|npt[0-9]*",	GROUP="disk"
+-KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="floppy", OPTIONS+="all_partitions"
+-
+-# cdrom
+-SUBSYSTEM=="block", KERNEL=="sr[0-9]*", SYMLINK+="scd%n", GROUP="cdrom"
+-SUBSYSTEM=="block", KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="cdrom", GROUP="cdrom"
+-SUBSYSTEMS=="scsi", ATTRS{type}=="4|5", GROUP="cdrom"
+-KERNEL=="pktcdvd[0-9]*", NAME="pktcdvd/%k", GROUP="cdrom"
+-KERNEL=="pktcdvd", NAME="pktcdvd/control", GROUP="cdrom"
+-
+-# tape
+-KERNEL=="ht[0-9]*|nht[0-9]*", GROUP="tape"
+-KERNEL=="pt[0-9]*|npt[0-9]*|pht[0-9]*", GROUP="tape"
+-SUBSYSTEMS=="scsi", ATTRS{type}=="1|8", GROUP="tape"
+-
+-# block-releated
+-KERNEL=="sch[0-9]*", GROUP="disk"
+-SUBSYSTEMS=="scsi", ATTRS{type}=="0", GROUP="disk"
+-KERNEL=="pg[0-9]*", GROUP="disk"
 -KERNEL=="qft[0-9]*|nqft[0-9]*|zqft[0-9]*|nzqft[0-9]*|rawqft[0-9]*|nrawqft[0-9]*", GROUP="disk"
--KERNEL=="rawctl",		NAME="raw/%k", GROUP="disk"
+-KERNEL=="rawctl", NAME="raw/rawctl", GROUP="disk"
 -SUBSYSTEM=="raw", KERNEL=="raw[0-9]*", NAME="raw/%k", GROUP="disk"
--KERNEL=="pktcdvd[0-9]*",	NAME="pktcdvd/%k"
--KERNEL=="pktcdvd",		NAME="pktcdvd/control"
--KERNEL=="qft0",			SYMLINK+="ftape"
--SUBSYSTEM=="bsg",		NAME="bsg/%k"
--SUBSYSTEM=="aoe",		NAME="etherd/%k", GROUP="disk"
+-SUBSYSTEM=="bsg", NAME="bsg/%k"
+-SUBSYSTEM=="aoe", NAME="etherd/%k", GROUP="disk", MODE="0220"
+-SUBSYSTEM=="aoe", KERNEL=="err", MODE="0440"
 -
 -# network
--KERNEL=="tun",			NAME="net/%k", MODE="0666", OPTIONS+="ignore_remove"
+-KERNEL=="tun",			NAME="net/%k", MODE="0666"
 -
 -# CPU
 -KERNEL=="cpu[0-9]*",		NAME="cpu/%n/cpuid"
@@ -880,17 +849,14 @@ index ad725fc..0000000
 -
 -# miscellaneous
 -KERNEL=="fuse",			MODE="0666"
--KERNEL=="rtc|rtc0",		MODE="0644"
--KERNEL=="rtc0",			SYMLINK+="rtc"
+-SUBSYSTEM=="rtc", DRIVERS=="rtc_cmos", SYMLINK+="rtc"
 -KERNEL=="auer[0-9]*",		NAME="usb/%k"
--KERNEL=="hw_random",		NAME="hwrng", SYMLINK+="%k"
+-KERNEL=="hw_random",		NAME="hwrng"
 -KERNEL=="mmtimer",		MODE="0644"
 -KERNEL=="rflash[0-9]*",		MODE="0400"
 -KERNEL=="rrom[0-9]*",		MODE="0400"
--KERNEL=="sbpcd0",		SYMLINK+="sbpcd"
--KERNEL=="slram[0-9]*", 		SYMLINK+="xpram%n"
--KERNEL=="sxctl",		NAME="specialix_sxctl", SYMLINK+="%k"
--KERNEL=="rioctl",		NAME="specialix_rioctl", SYMLINK+="%k"
+-KERNEL=="sxctl",		NAME="specialix_sxctl""
+-KERNEL=="rioctl",		NAME="specialix_rioctl"
 -KERNEL=="iowarrior[0-9]*",	NAME="usb/%k"
 -KERNEL=="hiddev[0-9]*",		NAME="usb/%k"
 -KERNEL=="legousbtower[0-9]*",	NAME="usb/%k"
@@ -900,106 +866,107 @@ index ad725fc..0000000
 -
 -# do not delete static device nodes
 -ACTION=="remove", NAME=="?*", TEST=="/lib/udev/devices/$name", OPTIONS+="ignore_remove"
--
+-ACTION=="remove", NAME=="", TEST=="/lib/udev/devices/%k", OPTIONS+="ignore_remove"
 diff --git a/rules/rules.d/50-udev-default.rules.in b/rules/rules.d/50-udev-default.rules.in
 new file mode 100644
-index 0000000..8a61775
+index 0000000..577e8a2
 --- /dev/null
 +++ b/rules/rules.d/50-udev-default.rules.in
-@@ -0,0 +1,122 @@
+@@ -0,0 +1,121 @@
 +# do not edit this file, it will be overwritten on update
 +
 +SUBSYSTEM=="block", SYMLINK+="block/%M:%m"
 +SUBSYSTEM!="block", SYMLINK+="char/%M:%m"
 +
-+KERNEL=="pty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
-+KERNEL=="tty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660", OPTIONS+="last_rule"
-+KERNEL=="ptmx",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
-+KERNEL=="tty",			GROUP="tty", MODE="0666", OPTIONS+="last_rule"
-+KERNEL=="tty[0-9]*",		GROUP="tty", MODE="0620", OPTIONS+="last_rule"
-+KERNEL=="vcs|vcs[0-9]*|vcsa|vcsa[0-9]*", GROUP="tty", OPTIONS+="last_rule"
-+KERNEL=="console",		MODE="0600", OPTIONS+="last_rule"
++KERNEL=="pty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660"
++KERNEL=="tty[pqrstuvwxyzabcdef][0123456789abcdef]", GROUP="tty", MODE="0660"
++KERNEL=="ptmx",			GROUP="tty", MODE="0666"
++KERNEL=="tty",			GROUP="tty", MODE="0666"
++KERNEL=="tty[0-9]*",		GROUP="tty", MODE="0620"
++KERNEL=="vcs|vcs[0-9]*|vcsa|vcsa[0-9]*", GROUP="tty"
++KERNEL=="console",		MODE="0600"
 +
 +# serial
-+KERNEL=="tty[A-Z]*|pppox*|ircomm*|noz*", GROUP="uucp"
-+KERNEL=="ppp",			MODE="0600", OPTIONS+="ignore_remove"
-+KERNEL=="mwave",		NAME="modems/mwave", GROUP="uucp"
-+KERNEL=="hvc*|hvsi*",		GROUP="uucp"
-+KERNEL=="lirc0",		SYMLINK+="lirc"
++KERNEL=="tty[A-Z]*[0-9]|pppox[0-9]*|ircomm[0-9]*|noz[0-9]*", GROUP="dialout"
++KERNEL=="ppp",			MODE="0600"
++KERNEL=="mwave",		NAME="modems/mwave", GROUP="dialout"
++KERNEL=="hvc*|hvsi*",		GROUP="dialout"
 +
 +# mem
 +KERNEL=="null|zero|full|random|urandom", MODE="0666"
-+KERNEL=="null",			SYMLINK+="X0R"
 +KERNEL=="mem|kmem|port|nvram",	GROUP="kmem", MODE="0640"
-+KERNEL=="ram0",			SYMLINK+="ramdisk"
-+KERNEL=="ram1",			SYMLINK+="ram"
 +
 +# input
 +KERNEL=="mouse*|mice|event*",	NAME="input/%k", MODE="0640"
-+KERNEL=="ts[0-9]*|uinput",	NAME="input/%k", MODE="0600"
-+KERNEL=="js[0-9]*",		NAME="input/%k", MODE="0644", SYMLINK+="%k"
++KERNEL=="ts[0-9]*|uinput",	NAME="input/%k", MODE="0640"
++KERNEL=="js[0-9]*",		NAME="input/%k", MODE="0644"
 +
 +# video4linux
 +SUBSYSTEM=="video4linux",	GROUP="video"
 +KERNEL=="vttuner*",		GROUP="video"
 +KERNEL=="vtx*|vbi*",		GROUP="video"
 +KERNEL=="winradio*",		GROUP="video"
-+KERNEL=="vbi0",			SYMLINK+="vbi"
-+KERNEL=="radio0",		SYMLINK+="radio"
-+KERNEL=="video0",		SYMLINK+="video"
 +
 +# graphics
 +KERNEL=="agpgart",		MODE="0600", GROUP="video"
-+KERNEL=="card[0-9]*",		NAME="dri/%k", MODE="0666"
-+KERNEL=="fb0",			SYMLINK+="fb"
++KERNEL=="card[0-9]*",		NAME="dri/%k"
 +KERNEL=="pmu",			GROUP="video"
 +KERNEL=="nvidia*|nvidiactl*",	GROUP="video"
 +SUBSYSTEM=="graphics",		GROUP="video"
++SUBSYSTEM=="drm",		GROUP="video"
 +
-+# DVB video
-+SUBSYSTEM=="dvb", PROGRAM="/bin/sh -c 'K=%k; K=$${K#dvb}; printf dvb/adapter%%i/%%s $${K%%%%.*} $${K#*.}'", NAME="%c"
-+SUBSYSTEM=="dvb",		GROUP="video"
++# DVB (video)
++SUBSYSTEM=="dvb", ENV{DVB_ADAPTER_NUM}=="?*", NAME="dvb/adapter$env{DVB_ADAPTER_NUM}/$env{DVB_DEVICE_TYPE}$env{DVB_DEVICE_NUM}", GROUP="video"
++SUBSYSTEM=="dvb", ENV{DVB_ADAPTER_NUM}=="", PROGRAM="/bin/sh -c 'K=%k; K=$${K#dvb}; printf dvb/adapter%%i/%%s $${K%%%%.*} $${K#*.}'", NAME="%c", GROUP="video"
 +
 +# Firewire
-+KERNEL=="dv1394*",		SYMLINK+="dv1394/%n"
-+KERNEL=="video1394*",		NAME="video1394/%n"
-+KERNEL=="dv1394*|video1394*|raw1394*",	GROUP="video"
-+
-+# firmware class requests
-+SUBSYSTEM=="firmware", ACTION=="add", RUN+="firmware.sh"
++KERNEL=="dv1394[0-9]*",		NAME="dv1394/%n", GROUP="video"
++KERNEL=="video1394[0-9]*",	NAME="video1394/%n", GROUP="video"
 +
 +# libusb device nodes
-+SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", NAME="bus/usb/$env{BUSNUM}/$env{DEVNUM}", MODE="0644"
++SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", NAME="bus/usb/$env{BUSNUM}/$env{DEVNUM}", MODE="0664"
 +
 +# printer
 +KERNEL=="parport[0-9]*",	GROUP="lp"
 +SUBSYSTEM=="printer",		KERNEL=="lp*", GROUP="lp"
++SUBSYSTEM=="ppdev",		GROUP="lp"
 +SUBSYSTEM=="usb",		KERNEL=="lp*", NAME="usb/%k", SYMLINK+="usb%k", GROUP="lp"
-+KERNEL=="lp[0-9]*",		GROUP="lp", SYMLINK+="par%n"
++KERNEL=="lp[0-9]*",		GROUP="lp"
 +KERNEL=="irlpt[0-9]*",		GROUP="lp"
 +
-+# block, tapes, block-releated
++# block
 +SUBSYSTEM=="block", GROUP="disk"
-+SUBSYSTEM=="block", KERNEL=="sr[0-9]*", SYMLINK+="scd%n"
-+KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="floppy", OPTIONS+="all_partitions"
-+KERNEL=="fd[0-9]",		GROUP="floppy"
++
++# floppy
++KERNEL=="fd[0-9]", GROUP="floppy"
 +KERNEL=="fd[0-9]", ACTION=="add", ATTRS{cmos}=="?*", RUN+="create_floppy_devices -c -t $attr{cmos} -m %M -M 0640 -G floppy $root/%k"
-+KERNEL=="sch[0-9]*",		GROUP="disk"
-+KERNEL=="sg[0-9]*",		ATTRS{type}!="3|6", GROUP="disk", MODE="0640"
-+KERNEL=="ht[0-9]*|nht[0-9]*",	GROUP="disk"
-+KERNEL=="pg[0-9]*",		GROUP="disk"
-+KERNEL=="pt[0-9]*|npt[0-9]*",	GROUP="disk"
++KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="floppy", OPTIONS+="all_partitions"
++
++# cdrom
++SUBSYSTEM=="block", KERNEL=="sr[0-9]*", SYMLINK+="scd%n", GROUP="cdrom"
++SUBSYSTEM=="block", KERNEL=="hd*", SUBSYSTEMS=="ide", ATTRS{media}=="cdrom", GROUP="cdrom"
++SUBSYSTEMS=="scsi", ATTRS{type}=="4|5", GROUP="cdrom"
++KERNEL=="pktcdvd[0-9]*", NAME="pktcdvd/%k", GROUP="cdrom"
++KERNEL=="pktcdvd", NAME="pktcdvd/control", GROUP="cdrom"
++
++# tape
++KERNEL=="ht[0-9]*|nht[0-9]*", GROUP="tape"
++KERNEL=="pt[0-9]*|npt[0-9]*|pht[0-9]*", GROUP="tape"
++SUBSYSTEMS=="scsi", ATTRS{type}=="1|8", GROUP="tape"
++
++# block-releated
++KERNEL=="sch[0-9]*", GROUP="disk"
++SUBSYSTEMS=="scsi", ATTRS{type}=="0", GROUP="disk"
++KERNEL=="pg[0-9]*", GROUP="disk"
 +KERNEL=="qft[0-9]*|nqft[0-9]*|zqft[0-9]*|nzqft[0-9]*|rawqft[0-9]*|nrawqft[0-9]*", GROUP="disk"
-+KERNEL=="rawctl",		NAME="raw/%k", GROUP="disk"
++KERNEL=="rawctl", NAME="raw/rawctl", GROUP="disk"
 +SUBSYSTEM=="raw", KERNEL=="raw[0-9]*", NAME="raw/%k", GROUP="disk"
-+KERNEL=="pktcdvd[0-9]*",	NAME="pktcdvd/%k"
-+KERNEL=="pktcdvd",		NAME="pktcdvd/control"
-+KERNEL=="qft0",			SYMLINK+="ftape"
-+SUBSYSTEM=="bsg",		NAME="bsg/%k"
-+SUBSYSTEM=="aoe",		NAME="etherd/%k", GROUP="disk"
++SUBSYSTEM=="bsg", NAME="bsg/%k"
++SUBSYSTEM=="aoe", NAME="etherd/%k", GROUP="disk", MODE="0220"
++SUBSYSTEM=="aoe", KERNEL=="err", MODE="0440"
 +
 +# network
-+KERNEL=="tun",			NAME="net/%k", MODE="0666", OPTIONS+="ignore_remove"
++KERNEL=="tun",			NAME="net/%k", MODE="0666"
 +
 +# CPU
 +KERNEL=="cpu[0-9]*",		NAME="cpu/%n/cpuid"
@@ -1008,17 +975,14 @@ index 0000000..8a61775
 +
 +# miscellaneous
 +KERNEL=="fuse",			MODE="0666"
-+KERNEL=="rtc|rtc0",		MODE="0644"
-+KERNEL=="rtc0",			SYMLINK+="rtc"
++SUBSYSTEM=="rtc", DRIVERS=="rtc_cmos", SYMLINK+="rtc"
 +KERNEL=="auer[0-9]*",		NAME="usb/%k"
-+KERNEL=="hw_random",		NAME="hwrng", SYMLINK+="%k"
++KERNEL=="hw_random",		NAME="hwrng"
 +KERNEL=="mmtimer",		MODE="0644"
 +KERNEL=="rflash[0-9]*",		MODE="0400"
 +KERNEL=="rrom[0-9]*",		MODE="0400"
-+KERNEL=="sbpcd0",		SYMLINK+="sbpcd"
-+KERNEL=="slram[0-9]*", 		SYMLINK+="xpram%n"
-+KERNEL=="sxctl",		NAME="specialix_sxctl", SYMLINK+="%k"
-+KERNEL=="rioctl",		NAME="specialix_rioctl", SYMLINK+="%k"
++KERNEL=="sxctl",		NAME="specialix_sxctl""
++KERNEL=="rioctl",		NAME="specialix_rioctl"
 +KERNEL=="iowarrior[0-9]*",	NAME="usb/%k"
 +KERNEL=="hiddev[0-9]*",		NAME="usb/%k"
 +KERNEL=="legousbtower[0-9]*",	NAME="usb/%k"
@@ -1028,7 +992,53 @@ index 0000000..8a61775
 +
 +# do not delete static device nodes
 +ACTION=="remove", NAME=="?*", TEST=="/@@libdir@@/udev/devices/$name", OPTIONS+="ignore_remove"
++ACTION=="remove", NAME=="", TEST=="/@@libdir@@/devices/%k", OPTIONS+="ignore_remove"
 +
--- 
-1.6.0.4
-
+diff --git a/udev/udev-rules.c b/udev/udev-rules.c
+index 905a1a0..ab02d60 100644
+--- a/udev/udev-rules.c
++++ b/udev/udev-rules.c
+@@ -1330,7 +1330,7 @@ static int add_rule(struct udev_rules *rules, char *line,
+ 
+ 				/* allow programs in /lib/udev called without the path */
+ 				if (strchr(file, '/') == NULL) {
+-					util_strlcpy(file, UDEV_PREFIX "/lib/udev/", sizeof(file));
++					util_strlcpy(file, UDEV_PREFIX "/" LIBDIR "/udev/", sizeof(file));
+ 					util_strlcat(file, value, sizeof(file));
+ 					pos = strchr(file, ' ');
+ 					if (pos)
+@@ -1734,7 +1734,7 @@ struct udev_rules *udev_rules_new(struct udev *udev, int resolve_names)
+ 		add_matching_files(udev, &sort_list, filename, ".rules");
+ 
+ 		/* read default rules */
+-		add_matching_files(udev, &sort_list, UDEV_PREFIX "/lib/udev/rules.d", ".rules");
++		add_matching_files(udev, &sort_list, UDEV_PREFIX "/" LIBDIR "/udev/rules.d", ".rules");
+ 
+ 		/* sort all rules files by basename into list of files */
+ 		udev_list_entry_foreach_safe(sort_loop, sort_tmp, udev_list_get_entry(&sort_list)) {
+diff --git a/udev/udev-util.c b/udev/udev-util.c
+index 3d5eb76..94bf9bf 100644
+--- a/udev/udev-util.c
++++ b/udev/udev-util.c
+@@ -295,7 +295,7 @@ int util_run_program(struct udev *udev, const char *command, char **envp,
+ 
+ 	/* allow programs in /lib/udev/ to be called without the path */
+ 	if (strchr(argv[0], '/') == NULL) {
+-		util_strlcpy(program, UDEV_PREFIX "/lib/udev/", sizeof(program));
++		util_strlcpy(program, UDEV_PREFIX "/" LIBDIR "/udev/", sizeof(program));
+ 		util_strlcat(program, argv[0], sizeof(program));
+ 		argv[0] = program;
+ 	}
+diff --git a/udev/udevd.c b/udev/udevd.c
+index ee3d6f5..21021f7 100644
+--- a/udev/udevd.c
++++ b/udev/udevd.c
+@@ -906,7 +906,7 @@ int main(int argc, char *argv[])
+ 		} else {
+ 			char filename[UTIL_PATH_SIZE];
+ 
+-			inotify_add_watch(inotify_fd, UDEV_PREFIX "/lib/udev/rules.d",
++			inotify_add_watch(inotify_fd, UDEV_PREFIX "/" LIBDIR "/udev/rules.d",
+ 					  IN_CREATE | IN_DELETE | IN_MOVE | IN_CLOSE_WRITE);
+ 			inotify_add_watch(inotify_fd, SYSCONFDIR "/udev/rules.d",
+ 					  IN_CREATE | IN_DELETE | IN_MOVE | IN_CLOSE_WRITE);
