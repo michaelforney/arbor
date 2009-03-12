@@ -9,6 +9,8 @@
 #       Robin Johnson <robbat2@gentoo.org>
 #       Michael Cummings <mcummings@gentoo.org>
 
+require multilib
+
 export_exlib_phases src_configure src_compile src_test src_install
 
 myexparam module_author=
@@ -115,6 +117,9 @@ perl-module_src_install() {
             sed -i -e "s:${IMAGE}:/:g" "${file}"
         fi
     done
+
+    find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete || die "Couldn't remove .packlist files"
+    find "${IMAGE}/usr/$(get_libdir)" -type d -empty -delete || die "Couldn't remove empty directories in ${IMAGE}/usr/$(get_libdir)"
 }
 
 perlinfo() {
