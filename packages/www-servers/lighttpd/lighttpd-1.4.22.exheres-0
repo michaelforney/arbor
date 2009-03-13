@@ -53,11 +53,13 @@ src_install() {
     fi
 
     insinto /etc/lighttpd
-    doins ${FILES}/lighttpd.conf
+    doins "${FILES}"/lighttpd.conf
+    newinitd "${FILES}"/lighttpd.initd lighttpd
+    newconfd "${FILES}"/lighttpd.confd lighttpd
 
-    keepdir /var/log/lighttpd
+    keepdir /var/{log,run}/lighttpd
     keepdir /var/www/localhost/htdocs
 
-    fowners lighttpd:lighttpd /var/log/lighttpd
+    fowners lighttpd:lighttpd /var/{log,run}/lighttpd
     fperms 0750 /var/log/lighttpd
 }
