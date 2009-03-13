@@ -1,0 +1,14 @@
+Source: Richard Brown
+Upstream: no
+Reason: Paludis is using fd3 for logging
+diff --git a/tests/script-1.sh b/tests/script-1.sh
+index 3ac6252..e460feb 100755
+--- a/tests/script-1.sh
++++ b/tests/script-1.sh
+@@ -1,5 +1,5 @@
+ #!/bin/sh
+ # http://bugs.gentoo.org/257418
+ [ "${at_xfail}" = "yes" ] && exit 77 # see script-0
+-(>/dev/fd/3)
++(>/dev/fd/400)
+ exit 0

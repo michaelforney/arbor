@@ -1,0 +1,23 @@
+Source: Richard Brown
+Upstream: no
+Reason: Don't want to depend on pax-utils
+---
+ tests/script-0 |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tests/script-0 b/tests/script-0
+index 7e6bde6..1ad3bc4 100755
+--- a/tests/script-0
++++ b/tests/script-0
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+ # shell scripts only get properly wrapped if our native shell is the
+ # same abi as the compiled libsandbox #259244
+-sh=$(scanelf -BF'%M#F' /bin/sh)
+-sb=$(scanelf -BF'%M#F' "${abs_top_builddir}"/libsandbox/.libs/libsandbox.so)
++sh=$(readelf -h /bin/sh | grep Class)
++sb=$(readelf -h "${abs_top_builddir}"/libsandbox/.libs/libsandbox.so | grep Class)
+ [ "${sh}" = "${sb}" ] && exit 0 || exit 77
+-- 
+1.6.2
+

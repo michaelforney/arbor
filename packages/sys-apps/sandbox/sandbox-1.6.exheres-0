@@ -1,0 +1,36 @@
+# Copyright 2007 Peter Tersløv Forsberg
+# Based on work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Sandbox gives some security assurance when installing packages"
+HOMEPAGE="http://gentoo.org/"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.lzma"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        app-arch/xz"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-1.3.6-remove-work_dir.patch
+    "${FILES}"/${PNV}-dont-depend-on-pax-utils.patch
+    "${FILES}"/${PNV}-fd3-is-used-by-paludis.patch
+)
+
+src_install() {
+    default
+
+    keepdir /var/log/sandbox
+    fowners root:paludisbuild /var/log/sandbox
+    fperms 0770 /var/log/sandbox
+}
+
+pkg_preinst() {
+    chown root:paludisbuild "${IMAGE}"/var/log/sandbox
+    chmod 0770 "${IMAGE}"/var/log/sandbox
+}
+
