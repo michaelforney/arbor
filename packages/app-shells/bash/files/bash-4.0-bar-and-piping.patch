@@ -1,0 +1,20 @@
+Source: Chet Ramey, http://thread.gmane.org/gmane.comp.shells.bash.bugs/12586/focus=12592
+Upstream: Yes.
+Reason: Fix |& pipes for non-builtin simple commands and some shell functions.
+
+*** ../bash-4.0-patched/parse.y	2009-03-09 10:27:05.000000000 -0400
+--- parse.y	2009-03-12 09:02:31.000000000 -0400
+***************
+*** 1123,1127 ****
+  			  REDIRECT *r;
+  
+! 			  tc = $1;
+  			  rd.dest = 1;
+  			  r = make_redirection (2, r_duplicating_output, rd);
+--- 1123,1127 ----
+  			  REDIRECT *r;
+  
+! 			  tc = $1->type == cm_simple ? $1->value.Simple : $1;
+  			  rd.dest = 1;
+  			  r = make_redirection (2, r_duplicating_output, rd);
+
