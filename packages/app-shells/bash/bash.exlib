@@ -1,0 +1,81 @@
+# Copyright 2007-2008 Bryan Østergaard
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PNV=${PNV%_p*}
+WORK="${WORKBASE}/${MY_PNV}"
+
+require gnu [ suffix=gz ]
+
+PATCH_LEVEL=${PNV##*_p}
+
+SUMMARY="Bash shell"
+DESCRIPTION="
+Bash is the shell, or command language interpreter, that will appear in
+the GNU operating system. Bash is an sh-compatible shell that
+incorporates useful features from the Korn shell (ksh) and C shell
+(csh). It is intended to conform to the IEEE POSIX P1003.2/ISO 9945.2
+Shell and Tools standard. It offers functional improvements over sh for
+both programming and interactive use. In addition, most sh scripts can
+be run by Bash without modification.
+"
+DOWNLOADS+="
+        $(for ((i=1; i<=PATCH_LEVEL; i++)); do
+            printf "mirror://gnu/bash/${MY_PNV}-patches/${MY_PNV//[.-]}-%03d\n" ${i}
+        done)"
+
+if ever at_least 4; then
+    LICENCES="GPL-3"
+else
+    LICENCES="GPL-2"
+fi
+SLOT="0"
+MYOPTIONS="nls"
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --bindir=/bin
+    --without-installed-readline
+    --with-curses
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc )
+
+src_prepare() {
+    local i patches
+    patches=(-p0)
+    for ((i=1; i<=PATCH_LEVEL; i++)); do
+        patches+=("${FETCHEDDIR}/${MY_PNV//[.-]}-$(printf "%03d" ${i})")
+    done
+    expatch "${patches[@]}"
+    default
+    echo '#define SYS_BASHRC "/etc/bash/bashrc"' >> config-top.h
+}
+
+src_install() {
+    default
+
+    dosym bash bin/sh
+
+    insinto /etc/bash
+    doins "${FILES}/bashrc"
+
+    insinto /etc/skel
+    hereins .bashrc <<'EOF'
+# Don't run anything here unless we have an interactive shell.
+if [[ $- != *i* ]] ; then
+    return
+fi
+EOF
+    hereins .bash_profile <<'EOF'
+# Source ~/.bashrc for login shells as recommended by bash upstream
+[[ -f ~/.bashrc ]] && source ~/.bashrc
+EOF
+
+    keepdir /etc/bash/bashrc.d
+}
+
