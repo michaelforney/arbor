@@ -15,7 +15,6 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-CFLAGS.patch )
 # Parallel build is broken
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_PREFIX="${IMAGE}" )
 
 src_prepare() {
     default
@@ -36,7 +35,7 @@ src_configure() {
 }
 
 src_install() {
-    default
+    emake -j1 INSTALL_PREFIX="${IMAGE}" install
     keepdir /etc/ssl/{certs,private}
 }
 
