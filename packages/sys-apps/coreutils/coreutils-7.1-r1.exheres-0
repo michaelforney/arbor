@@ -29,7 +29,7 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-skip-tests.patch )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' nls )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gmp )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-install-program=arch,hostname
+    --enable-install-program=arch
     --enable-largefile
 )
 
@@ -43,7 +43,7 @@ src_install() {
     default
 
     local binfiles="basename cat chgrp chmod chown cp chroot cut date df dir
-                    dirname du echo env expr false head hostname ln ls mkdir
+                    dirname du echo env expr false head ln ls mkdir
                     mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort
                     stty sync tail touch tr true tty uname vdir wc yes"
 
