@@ -12,11 +12,12 @@ DOWNLOADS="ftp://ftp.porcupine.org/mirrors/postfix-release/official/${PNV}.tar.g
 LICENCES="IPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ssl"
+MYOPTIONS="cyrus ssl"
 
 DEPENDENCIES="
     dev-libs/pcre
     sys-libs/db:=
+    cyrus? ( net-libs/cyrus-sasl )
     ssl? ( dev-libs/openssl )
     sys-libs/pam
     group/postdrop
@@ -35,6 +36,10 @@ src_compile() {
     fi
 
     ccargs+=' -DUSE_SASL_AUTH'
+    if option cyrus ; then
+        ccargs+=" -DUSE_CYRUS_SASL -I/usr/include/sasl"
+        auxlibs+=" -lsasl2"
+    fi
     ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'$(get_libdir)'/postfix\"'
     ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'
     ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PNVR}'/readme\"'
