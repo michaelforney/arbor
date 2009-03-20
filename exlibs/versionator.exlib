@@ -3,25 +3,8 @@
 # $Header: /var/cvsroot/gentoo-x86/eclass/versionator.eclass,v 1.13 2007/04/23 19:35:05 swegener Exp $
 #
 # Original Author: Ciaran McCreesh <ciaranm@gentoo.org>
-#
-# This eclass provides functions which simplify manipulating $PV and similar
-# variables. Most functions default to working with $PV, although other
-# values can be used.
-#
-# Simple Example 1: $PV is 1.2.3b, we want 1_2.3b:
-#     MY_PV=$(replace_version_separator 1 '_' )
-#
-# Full list of user usable functions provided by this eclass (see the functions
-# themselves for documentation):
-#     replace_version_separator       index     newvalue   ver_str
-#     replace_all_version_separators      newvalue  ver_str
-#     delete_version_separator        index ver_str
-#     delete_all_version_separators   ver_str
-#     get_last_version_component_index    ver_str
-#
-# Rather than being a number, the index parameter can be a separator character
-# such as '-', '.' or '_'. In this case, the first separator of this kind is
-# selected.
+
+# This exlib is obsolete, use ever functions instead
 
 get_all_version_components() {
     die "get_all_version_components sucks, use ever split_all"
@@ -40,67 +23,23 @@ get_version_component_range() {
 }
 
 get_after_major_version() {
-    die "get_after_major_version sucks, use ever range 2-, or implement ever remainder"
+    die "get_after_major_version sucks, use ever remainder"
 }
 
-# Replace the $1th separator with $2 in $3 (defaults to $PV if $3 is not
-# supplied). If there are fewer than $1 separators, don't change anything.
-#     1 '_' 1.2.3   -> 1_2.3
-#     2 '_' 1.2.3   -> 1.2_3
-#     1 '_' 1b-2.3  -> 1b_2.3
-# Rather than being a number, $1 can be a separator character such as '-', '.'
-# or '_'. In this case, the first separator of this kind is selected.
 replace_version_separator() {
-    local w i c found=0 v="${3:-${PV}}"
-    w=${1:-1}
-    c=( $(ever split_all ${v} ) )
-    if [[ "${w//[[:digit:]]/}" == "${w}" ]] ; then
-        # it's a character, not an index
-        for (( i = 0 ; i < ${#c[@]} ; i = $i + 1 )) ; do
-            if [[ "${c[${i}]}" == "${w}" ]] ; then
-                c[${i}]="${2}"
-                break
-            fi
-        done
-    else
-        for (( i = 0 ; i < ${#c[@]} ; i = $i + 1 )) ; do
-            if [[ -n "${c[${i}]//[^-._]}" ]] ; then
-                found=$(($found + 1))
-                if [[ "$found" == "${w}" ]] ; then
-                    c[${i}]="${2}"
-                    break
-                fi
-            fi
-        done
-    fi
-    c=${c[@]}
-    echo ${c// }
+    die "replace_version_separator sucks, use ever replace"
 }
 
-# Replace all version separators in $2 (defaults to $PV) with $1.
-#     '_' 1b.2.3    -> 1b_2_3
 replace_all_version_separators() {
-    local c
-    c=( $(ever split_all "${2:-${PV}}" ) )
-    c="${c[@]//[-._]/$1}"
-    echo ${c// }
+    die "replace_all_version_separator sucks, use ever replace_all"
 }
 
-# Delete the $1th separator in $2 (defaults to $PV if $2 is not supplied). If
-# there are fewer than $1 separators, don't change anything.
-#     1 1.2.3       -> 12.3
-#     2 1.2.3       -> 1.23
-#     1 1b-2.3      -> 1b2.3
-# Rather than being a number, $1 can be a separator character such as '-', '.'
-# or '_'. In this case, the first separator of this kind is deleted.
 delete_version_separator() {
-    replace_version_separator "${1}" "" "${2}"
+    die "delete_version_separator sucks, use ever delete"
 }
 
-# Delete all version separators in $1 (defaults to $PV).
-#     1b.2.3        -> 1b23
 delete_all_version_separators() {
-    replace_all_version_separators "" "${1}"
+    die "delete_all_version_separator sucks, use ever delete"
 }
 
 get_version_component_count() {
