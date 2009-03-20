@@ -3,8 +3,6 @@
 # Based in part upon 'rubygems-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require versionator
-
 SUMMARY="Centralised Ruby extension management"
 HOMEPAGE="http://rubyforge.org/projects/rubygems/"
 LICENCES="|| ( Ruby GPL-2 )"
@@ -44,7 +42,7 @@ src_install() {
 
     dosym "gem${ver_stripped}" /usr/bin/gem
 
-    dodoc README doc/release_notes/rel_$(replace_all_version_separators '_').rdoc
+    dodoc README doc/release_notes/rel_$(ever replace_all '_').rdoc
 
     insinto ${vendor_dir}/rubygems/defaults/
     doins "${FILES}"/operating_system.rb

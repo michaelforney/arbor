@@ -6,7 +6,7 @@
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib versionator alternatives flag-o-matic
+require multilib alternatives flag-o-matic
 
 export_exlib_phases src_unpack src_prepare src_configure src_test src_install
 
@@ -150,6 +150,6 @@ EOF
         [[ ${unique} == *.1 ]] && unique=man_${unique%.1}
         alternatives+=( ${unique} /${target} ${src##*/} )
     done
-    alternatives_for ${PN} ${SLOT} "$(delete_all_version_separators "${SLOT}")" "${alternatives[@]}"
+    alternatives_for ${PN} ${SLOT} "$(ever delete_all "${SLOT}")" "${alternatives[@]}"
 }
 

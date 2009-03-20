@@ -18,7 +18,7 @@ export_exlib_phases src_configure
 
 SPELL_LANG=${PN/aspell-/}
 # replace last separator
-MY_PV=$(replace_version_separator $(get_last_version_component_index) '-' $PV)
+MY_PV=$(ever replace $(get_last_version_component_index) '-' $PV)
 
 # With APOSTFIX=6 aspell-en-6.0.0 becomes aspell6-en-6.0-0
 MY_PNV=aspell$(exparam major_pv)-${SPELL_LANG}-${MY_PV}

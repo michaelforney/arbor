@@ -4,13 +4,13 @@
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require versionator multilib
+require multilib
 
 export_exlib_phases src_configure src_test src_install
 
-MY_PNV="${PN}-$(replace_version_separator 3 '-')"
+MY_PNV="${PN}-$(ever replace 3 '-')"
 SLOT=$(ever range 1-2)
-MY_SUFFIX=$(delete_version_separator 1 ${SLOT})
+MY_SUFFIX=$(ever delete 1 ${SLOT})
 
 SUMMARY="An object-oriented scripting language"
 DESCRIPTION="A dynamic, open source programming language with a focus on
@@ -26,7 +26,7 @@ BUGS_TO="rbrown@exherbo.org"
 
 REMOTE_IDS="freshmeat:${PN}"
 
-tag_number=$(replace_all_version_separators '_' ${PV})
+tag_number=$(ever replace_all '_' ${PV})
 UPSTREAM_CHANGELOG="http://svn.ruby-lang.org/repos/ruby/tags/v${tag_number/p}/ChangeLog"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}en/documentation/"
 

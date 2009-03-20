@@ -1,13 +1,11 @@
 # Copyright 2008 Wulf Krueger <philantrop@exherbo.org>
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require versionator
-
 MY_PV="${PV/rc/RC-}"
-MY_PNV="${PN}-$(replace_version_separator 3 - ${MY_PV})"
+MY_PNV="${PN}-$(ever replace 3 - ${MY_PV})"
 
 SUMMARY="Cross platform Make"
 HOMEPAGE="http://www.cmake.org/"
