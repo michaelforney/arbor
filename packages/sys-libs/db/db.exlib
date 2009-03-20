@@ -1,5 +1,5 @@
 # Copyright 2008 Bryan Østergaard
-# Copyright 2008 Ingmar Vanhassel
+# Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -30,6 +30,7 @@ src_install() {
 
     # dist/Makefile.in needs fixing for --docdir
     if option doc; then
+        dodir /usr/share/doc/
         mv "${IMAGE}"/usr/docs "${IMAGE}"/usr/share/doc/${PNVR} || die 'Failed to put docs in the correct docdir'
     else
         rm -r "${IMAGE}"/usr/docs || die 'Failed to remove api docs'
