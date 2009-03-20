@@ -41,8 +41,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 
 src_prepare() {
     if option nfs ; then
-#        cp "${FETCHEDDIR}"/acl-2.2.42-CITI_NFS4_ALL-2.dif . || die "copying patch failed"
-#        sed -i '/^diff --git a.debian.changelog b.debian.changelog/,/^diff --git/d' acl-2.2.42-CITI_NFS4_ALL-2.dif || die
         expatch "${FETCHEDDIR}"/acl-2.2.42-CITI_NFS4_ALL-2.dif
     fi
     sed -i \
