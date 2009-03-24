@@ -1,0 +1,62 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
+# Distributed under the terms of the GNU General Purpose License v2
+# Based in part upon 'imagemagick-6.4.2.0.ebuild' from Gentoo Linux, which is:
+#    Copyright 1999-2008 Gentoo Foundation
+
+require ImageMagick multilib
+
+SLOT="0"
+PLATFORMS="~x86"
+MYOPTIONS="X bzip2 cxx djvu fontconfig fpx graphviz jpeg2000 jpeg openexr lcms perl png svg tiff truetype xml zlib"
+
+DEPENDENCIES="
+    build:
+        X? ( x11-proto/xextproto )
+    build+run:
+        app-text/ghostscript
+        X?  (
+                x11-libs/libSM
+                x11-libs/libICE
+                x11-libs/libX11
+                x11-libs/libXext
+            )
+        bzip2? ( app-arch/bzip2 )
+        djvu? ( app-text/djvu )
+        fontconfig? ( media-libs/fontconfig )
+        fpx? ( media-libs/libfpx )
+        graphviz? ( media-gfx/graphviz )
+        jpeg2000? ( media-libs/jasper )
+        jpeg? ( >=media-libs/jpeg-6b )
+        lcms? ( media-libs/lcms )
+        openexr? ( media-libs/openexr )
+        perl? ( >=dev-lang/perl-5.8.6 )
+        png? ( >=media-libs/libpng-1.2.4 )
+        svg? ( >=gnome-desktop/librsvg-2.9.0 x11-libs/cairo[svg] )
+        tiff? ( >=media-libs/tiff-3.5.5 )
+        truetype? ( media-libs/freetype:2 media-fonts/corefonts )
+        xml? ( >=dev-libs/libxml2-2.4.10 )
+        zlib? ( sys-libs/zlib )
+"
+
+#RESTRICT="test"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static=no' '--enable-shared=yes'
+'--disable-openmp' '--without-included-ltdl' '--with-quantum-depth=16'
+'--with-threads' '--with-modules' '--enable-hdri' '--with-gslib' )
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus' 'djvu'
+'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
+'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
+'xml' 'zlib' )
+
+src_install() {
+    default
+
+    if option !cxx ; then
+        rmdir \
+            "${IMAGE}"/usr/include/ImageMagick/Magick++/ \
+            || die 'empty dirs rmdir failed'
+    fi
+}
+
