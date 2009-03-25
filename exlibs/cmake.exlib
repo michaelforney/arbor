@@ -147,9 +147,9 @@ cmake_src_test() {
 # Function for installing the package. Automatically detects the build dir.
 # Uses default_src_install.
 cmake_src_install() {
-    # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
-    [[ -d ${ECMAKE_BUILD_DIR} ]] && DEFAULT_SRC_INSTALL_EXTRA_PREFIXES+=( "${WORK}/" )
     _cmake_run default_src_install
+    # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
+    [[ -d ${ECMAKE_BUILD_DIR} ]] && emagicdocs
 }
 
 ### Functions below this are for internal use only.
