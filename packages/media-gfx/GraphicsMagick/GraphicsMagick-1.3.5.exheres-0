@@ -1,8 +1,6 @@
 # Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-#require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
-
 MY_PN="graphicsmagick"
 
 SUMMARY="GraphicsMagick Image Processing System"
@@ -55,7 +53,8 @@ DEPENDENCIES="
 # - perl? ( >=dev-lang/perl-5.8.1:= )
 # - configure.ac also has checks for: rst2html, txt2html p7zip, zip, but none of these are required
 
-#DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-tests.patch" )
+RESTRICT=test
+
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'jpeg2000 jp2'
 )
