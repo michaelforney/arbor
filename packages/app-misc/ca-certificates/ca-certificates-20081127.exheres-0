@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'ca-certificates-20070303-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -31,9 +31,9 @@ src_unpack() {
 
 src_install() {
     # Handle documentation & manuals Exherbo-style
-    dodoc usr/share/doc/ca-certificates/*
-    find "${IMAGE}/usr/share" -type f -name '*.gz' -print0 | xargs -0 gunzip \
-        || die 'Failed to unzip docs/man-pages'
+    find ./usr/share -type f -name '*.gz' | xargs gunzip || die 'Failed to unzip docs/man-pages'
+    dodoc ./usr/share/doc/ca-certificates/*
+    rm -r ./usr/share/doc/ca-certificates || die "Couldn't remove /usr/share/doc/ca-certificates"
 
     cp -pPR * "${IMAGE}"/ || die "Installing data failed"
 
