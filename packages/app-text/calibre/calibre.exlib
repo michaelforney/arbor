@@ -3,7 +3,7 @@
 # Based in part upon 'calibre-0.4.77.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-NEED_PYTHON=2.5:=
+NEED_PYTHON=2.6:=
 require distutils freedesktop-desktop freedesktop-mime multilib bash-completion
 
 export_exlib_phases src_prepare src_install pkg_postinst
@@ -17,13 +17,13 @@ library management, format conversion, news-feeds-to-ebook conversion as well as
 e-book reader sync features.
 "
 HOMEPAGE="http://${PN}.kovidgoyal.net/"
-DOWNLOADS="http://${PN}.kovidgoyal.net/downloads/${PNV}.tar.gz"
+DOWNLOADS="${HOMEPAGE}/downloads/${PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="pypi:${PN}"
 
-UPSTREAM_CHANGELOG="http://${PN}.kovidgoyal.net/wiki/Changelog"
-UPSTREAM_DOCUMENTATION="http://${PN}.kovidgoyal.net/user_manual/ [[ lang = en ]]"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/wiki/Changelog"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/user_manual/ [[ lang = en ]]"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -37,6 +37,7 @@ DEPENDENCIES="
         >=dev-libs/libusb-0.1.12:0.1
         >=media-gfx/ImageMagick-6.3.5
         >=dev-python/BeautifulSoup-3.0.5
+        >=dev-python/dnspython-1.6.0
         >=dev-python/python-dateutil-1.4.1
         >=dev-python/dbus-python-0.82.2
         >=dev-python/Imaging-1.1.6
