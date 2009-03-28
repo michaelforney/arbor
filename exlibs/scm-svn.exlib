@@ -39,12 +39,17 @@ scm-svn_do_check_vars() {
     if [[ -n ${externals[@]} ]]; then
         for idx in ${!externals[@]}; do
             [[ ${externals[${idx}]} == ?*:* ]] || die "$(scm_var_name SVN_EXTERNALS) entry ${externals[${idx}]} is malformed"
+            local path=$(scm_trim_slashes -leading -trailing "${externals[${idx}]%:*}")
             local that=${externals[${idx}]##*:}
-            externals[${idx}]=$(scm_trim_slashes -leading -trailing "${externals[${idx}]%:*}"):${that}
+            externals[${idx}]=${path}:${that}
             if [[ -n ${that} ]]; then
                 has ${that} ${SCM_SECONDARY_REPOSITORIES} || die "$(scm_var_name SVN_EXTERNALS) references non-existent repository ${that}"
                 local othertype=$(SCM_THIS=${that} scm_get_var TYPE)
                 [[ ${othertype:-${SCM_TYPE}} == svn ]] || die "$(scm_var_name SVN_EXTERNALS) references non-svn repository ${that}"
+                if [[ -z $(SCM_THIS=${that} scm_get_var UNPACK_TO) ]]; then
+                    local my_unpack_to=$(scm_get_var UNPACK_TO)
+                    SCM_THIS=${that} scm_set_var UNPACK_TO "${my_unpack_to}/${path}"
+                fi
             fi
         done
         scm_set_var SVN_EXTERNALS "${externals[*]}"
