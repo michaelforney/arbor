@@ -78,9 +78,11 @@ scm-svn_svn() {
         echo=:
     fi
 
-    local cmd=${1} extra=( --non-interactive )
+    local cmd=${1} extra=( --non-interactive --no-auth-cache )
     shift
     has "${cmd}" checkout co export status stat st switch sw update up && extra+=( --ignore-externals )
+    [[ -n $(scm_get_var SVN_USERNAME) ]] && extra+=( --username "$(scm_get_var SVN_USERNAME)" )
+    [[ -n $(scm_get_var SVN_PASSWORD) ]] && extra+=( --password "$(scm_get_var SVN_PASSWORD)" )
 
     ${echo} svn "${cmd}" "${extra[@]}" "${@}"
     if [[ ! -e ~/.subversion && -n ${SCM_SVN_CONFIG_DIR} ]]; then
