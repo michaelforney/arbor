@@ -11,7 +11,11 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="dev-lang/perl"
+DEPENDENCIES="
+    build:
+        app-arch/unzip
+    build+run:
+        dev-lang/perl:*"
 
 WORK=${WORKBASE}/Markdown_${PV}
 
@@ -21,3 +25,4 @@ src_install()
 {
     dobin Markdown.pl
 }
+
