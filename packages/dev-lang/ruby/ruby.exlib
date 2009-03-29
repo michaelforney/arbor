@@ -4,7 +4,7 @@
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib
+require alternatives multilib
 
 export_exlib_phases src_configure src_test src_install
 
@@ -89,11 +89,15 @@ ruby_src_install() {
     keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
             "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
 
-    for i in ruby irb erb testrb rdoc ri; do
-        dosym /usr/bin/${i}${MY_SUFFIX} /usr/bin/${i}
+    cd "${IMAGE}"
+    local unique src target alternatives=()
+    for src in usr/bin/*${MY_SUFFIX} usr/share/man/man1/*${MY_SUFFIX}.1; do
+        [[ ${src/${MY_SUFFIX}} == ${src} ]] && target=${src/${MY_SUFFIX}} || target=${src/${MY_SUFFIX}}
+        unique=${target##*/}
+        [[ ${unique} == *.1 ]] && unique=man_${unique%.1}
+        alternatives+=( ${unique} /${target} ${src##*/} )
     done
-
-    dosym /usr/share/man/man1/ruby18.1 /usr/share/man/man1/ruby.1
+    alternatives_for ${PN} ${SLOT} ${MY_SUFFIX} "${alternatives[@]}"
 
     if option examples; then
         insinto /usr/share/doc/${PNVR}
