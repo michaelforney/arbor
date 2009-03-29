@@ -92,7 +92,6 @@ ruby_src_install() {
     cd "${IMAGE}"
     local unique src target alternatives=()
     for src in usr/bin/*${MY_SUFFIX} usr/share/man/man1/*${MY_SUFFIX}.1; do
-        [[ ${src/${MY_SUFFIX}} == ${src} ]] && target=${src/${MY_SUFFIX}} || target=${src/${MY_SUFFIX}}
         unique=${target##*/}
         [[ ${unique} == *.1 ]] && unique=man_${unique%.1}
         alternatives+=( ${unique} /${target} ${src##*/} )
