@@ -88,6 +88,11 @@ ruby_src_install() {
     keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
             "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
 
+    if option examples; then
+        insinto /usr/share/doc/${PNVR}
+        doins -r sample
+    fi
+
     cd "${IMAGE}"
     local unique src target alternatives=()
     for src in usr/bin/*${MY_SUFFIX} usr/share/man/man1/*${MY_SUFFIX}.1; do
@@ -97,10 +102,5 @@ ruby_src_install() {
         alternatives+=( ${unique} /${target} ${src##*/} )
     done
     alternatives_for ${PN} ${SLOT} ${MY_SUFFIX} "${alternatives[@]}"
-
-    if option examples; then
-        insinto /usr/share/doc/${PNVR}
-        doins -r sample
-    fi
 }
 
