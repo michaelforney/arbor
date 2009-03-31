@@ -39,6 +39,7 @@ if [[ -n "${VIM_SCRIPT_ID}" ]] ; then
     HOMEPAGE="http://www.vim.org/scripts/script.php?script_id=${VIM_SCRIPT_ID}"
 fi
 if [[ -n "${VIM_SRC_ID}" ]] ; then
+    [[ ${VIM_SRC_SUFFIX} == zip ]] && DEPENDENCIES+=" build: app-arch/unzip"
     DOWNLOADS="http://www.vim.org/scripts/download_script.php?src_id=${VIM_SRC_ID} -> ${PNV}.${VIM_SRC_SUFFIX}"
     WORK="${WORKBASE}"
 fi
