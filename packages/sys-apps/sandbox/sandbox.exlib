@@ -20,7 +20,7 @@ UPSTREAM_CHANGELOG="http://git.overlays.gentoo.org/gitweb/?p=proj/sandbox.git;a=
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PV}/ )
 
-src_install() {
+sandbox_src_install() {
     default
 
     keepdir /var/log/sandbox
@@ -28,7 +28,7 @@ src_install() {
     fperms 0770 /var/log/sandbox
 }
 
-pkg_preinst() {
+sandbox_pkg_preinst() {
     chown root:paludisbuild "${IMAGE}"/var/log/sandbox
     chmod 0770 "${IMAGE}"/var/log/sandbox
 }
