@@ -105,10 +105,9 @@ emacs_src_install() {
     local unique src target alternatives=()
     for src in usr/bin/*-${SLOT} usr/share/man/man?/* ; do
         target=${src/-${SLOT}}
-        unique=${target##*/}
-        alternatives+=( "${unique}" "/${target}" "${src##*/}" )
+        alternatives+=( "/${target}" "${src##*/}" )
     done
-    alternatives+=( info/${PN} /usr/share/info/${PN} ${PN}-${SLOT} )
+    alternatives+=( /usr/share/info/${PN} ${PN}-${SLOT} )
 
     local importance=${SLOT//scm/999}
     alternatives_for \

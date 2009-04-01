@@ -130,9 +130,9 @@ src_install() {
     addpredict /var/spool/exim
     default
 
-    alternatives_for mta ${PN} 10 sendmail /usr/sbin/sendmail ${PN}
+    alternatives_for mta ${PN} 10 /usr/sbin/sendmail ${PN}
     mv "${IMAGE}"/etc/mail/{,${PN}.}aliases || die "mv /etc/mail/aliases failed"
-    alternatives_for mta ${PN} 10 aliases /etc/mail/aliases ${PN}.aliases
+    alternatives_for mta ${PN} 10 /etc/mail/aliases ${PN}.aliases
 
     dodoc "${WORK}"/doc/*
     doman "${WORK}/doc/${PN}.8"

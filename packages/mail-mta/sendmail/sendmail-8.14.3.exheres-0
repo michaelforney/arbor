@@ -189,19 +189,19 @@ src_install() {
     echo mv /usr/sbin/{,${PN}.}sendmail
     mv "${IMAGE}"/usr/sbin/{,${PN}.}sendmail || die "mv /usr/sbin/sendmail failed"
 
-    alternatives_for mta ${PN} 5 sendmail /usr/sbin/sendmail ${PN}.sendmail
-    alternatives_for mta ${PN} 5 aliases /etc/mail/aliases ${PN}.aliases
+    alternatives_for mta ${PN} 5 /usr/sbin/sendmail ${PN}.sendmail
+    alternatives_for mta ${PN} 5 /etc/mail/aliases ${PN}.aliases
 
     local x
     for x in hoststat mailq newaliases purgestat; do
         echo rm /usr/bin/${x}
         rm "${IMAGE}"/usr/bin/${x} || die "rm /usr/bin/${x} failed"
-        alternatives_for mta ${PN} 5 ${x} /usr/bin/${x} ../sbin/sendmail
+        alternatives_for mta ${PN} 5 /usr/bin/${x} ../sbin/sendmail
     done
 
     for x in man1/{mailq.1,newaliases.1} man5/aliases.5; do
         echo mv /usr/share/man/${x%/*}/{,${PN}.}${x##*/}
         mv "${IMAGE}"/usr/share/man/${x%/*}/{,${PN}.}${x##*/} || die "mv ${x} failed"
-        alternatives_for mta ${PN} 5 man_${x##*/} /usr/share/man/${x} ${PN}.${x##*/}
+        alternatives_for mta ${PN} 5 /usr/share/man/${x} ${PN}.${x##*/}
     done
 }

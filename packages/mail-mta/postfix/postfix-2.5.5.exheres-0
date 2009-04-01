@@ -64,16 +64,16 @@ src_install() {
     rm "${IMAGE}"/usr/bin/{mailq,newaliases} || die "rm /usr/bin/{mailq,newaliases} failed"
     rmdir "${IMAGE}"/usr/bin || die "rmdir /usr/bin failed"
 
-    alternatives_for mta ${PN} 9 sbin_sendmail /usr/sbin/sendmail ${PN}.sendmail
-    alternatives_for mta ${PN} 9 lib_sendmail /usr/$(get_libdir)/sendmail ../sbin/sendmail
-    alternatives_for mta ${PN} 9 mailq /usr/bin/mailq ../sbin/sendmail
-    alternatives_for mta ${PN} 9 newaliases /usr/bin/newaliases ../sbin/sendmail
+    alternatives_for mta ${PN} 9 /usr/sbin/sendmail ${PN}.sendmail
+    alternatives_for mta ${PN} 9 /usr/$(get_libdir)/sendmail ../sbin/sendmail
+    alternatives_for mta ${PN} 9 /usr/bin/mailq ../sbin/sendmail
+    alternatives_for mta ${PN} 9 /usr/bin/newaliases ../sbin/sendmail
 
     local manpage
     for manpage in man1/{mailq.1,newaliases.1} man5/aliases.5; do
         echo mv /usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/}
         mv "${IMAGE}"/usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/} || die "mv ${manpage} failed"
-        alternatives_for mta ${PN} 9 man_${manpage##*/} /usr/share/man/${manpage} ${PN}.${manpage##*/}
+        alternatives_for mta ${PN} 9 /usr/share/man/${manpage} ${PN}.${manpage##*/}
     done
 
     keepdir /var/lib/postfix

@@ -143,13 +143,11 @@ EOF
 
     # Save a list of what executables & man-pages we're installing
     cd "${IMAGE}"
-    local unique src target alternatives=()
+    local src target alternatives=()
     for src in usr/bin/*${PV} usr/share/man/man1/*${PV}.1; do
         [[ ${src/-${PV}} == ${src} ]] && target=${src/${PV}} || target=${src/-${PV}}
-        unique=${target##*/}
-        [[ ${unique} == *.1 ]] && unique=man_${unique%.1}
-        alternatives+=( ${unique} /${target} ${src##*/} )
+        alternatives+=( /${target} ${src##*/} )
     done
-    alternatives_for ${PN} ${SLOT} "$(ever delete_all "${SLOT}")" "${alternatives[@]}"
+    alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
 }
 

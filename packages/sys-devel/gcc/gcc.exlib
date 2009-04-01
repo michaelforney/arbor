@@ -114,14 +114,14 @@ src_install() {
     ### slots handling
     pushd "${IMAGE}" || die "Could not enter IMAGE"
 
-    local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT//.}" )
+    local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
 
     # binaries - slotted properly by upstream, manage with alternatives
     for x in usr/bin/*-${SLOT}; do
         bn=$(basename "${x}" -${SLOT})
-        alternatives+=( bin_${bn} /usr/bin/${bn} ${bn}-${SLOT} )
+        alternatives+=( /usr/bin/${bn} ${bn}-${SLOT} )
     done
-    alternatives+=( bin_cc /usr/bin/cc gcc )
+    alternatives+=( /usr/bin/cc gcc )
 
     # libraries
     for x in usr/${libdir}/*.* usr/${libdir}/debug/usr/${libdir}/*.*; do
@@ -165,18 +165,18 @@ src_install() {
     for x in usr/share/info/*.info; do
         bn=$(basename "${x}" .info)
         mv usr/share/info/${bn}{,-${SLOT}}.info || die "mv /${x} failed"
-        alternatives+=( info_${bn} /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
+        alternatives+=( /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
     done
 
     # man pages
     for x in usr/share/man/man1/*-${SLOT}.1; do
         bn=$(basename "${x}" -${SLOT}.1)
-        alternatives+=( man1_${bn} /usr/share/man/man1/${bn}.1 ${bn}-${SLOT}.1 )
+        alternatives+=( /usr/share/man/man1/${bn}.1 ${bn}-${SLOT}.1 )
     done
     for x in usr/share/man/man7/*; do
         bn=$(basename "${x}" .7)
         mv "${x%.7}"{,-${SLOT}}.7 || die "mv /${x} failed"
-        alternatives+=( man7_${bn} /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
+        alternatives+=( /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
     done
 
     # locales
@@ -184,7 +184,7 @@ src_install() {
         for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
             bn=$(basename "${x}" .mo)
             mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
-            alternatives+=( locale_${x} /${x} ${bn}-${SLOT}.mo )
+            alternatives+=( /${x} ${bn}-${SLOT}.mo )
         done
     fi
 
@@ -201,10 +201,10 @@ EOF
             ext=${bn#*.}
             echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
             mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-            alternatives+=( classpath_security /${x} ${bn%.${ext}}-${SLOT}.${ext} )
+            alternatives+=( /${x} ${bn%.${ext}}-${SLOT}.${ext} )
         done
-        alternatives+=( libgcj_tools /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
-        alternatives+=( usr_bin_java /usr/bin/java gij-${SLOT} )
+        alternatives+=( /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
+        alternatives+=( /usr/bin/java gij-${SLOT} )
     fi
 
     alternatives_for "${alternatives[@]}"
