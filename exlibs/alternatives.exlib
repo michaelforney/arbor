@@ -1,5 +1,6 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Copyright 2008 Mike Kelly
+# Copyright 2009 David Leverton
 # Distributed under the terms of the GNU General Public License v2
 
 # If your package provides pkg_postinst or pkg_postrm phases, you need to be
@@ -11,9 +12,9 @@ DEPENDENCIES="
     build+run:
         app-admin/eclectic"
 
-# alternatives_for alternative provider importance unique source target [ unique source target [...]]
+# alternatives_for alternative provider importance source target [ source target [...]]
 alternatives_for() {
-    (( $# >= 6 )) && (( $#%3 == 0)) || die "${FUNCNAME} requires exactly N*3 arguments where N>1"
+    (( $# >= 5 )) && (( ($#-3)%2 == 0)) || die "${FUNCNAME} requires exactly 3+N*2 arguments where N>=1"
     local x dupl alternative=${1} provider=${2} importance=${3} index unique src target ret=0
     shift 3
 
@@ -23,7 +24,7 @@ alternatives_for() {
         ((ret++))
     fi
 
-    [[ -d "${IMAGE}${ALTERNATIVES_DIR}/${alternative}" ]] || dodir "${ALTERNATIVES_DIR}/${alternative}"
+    [[ -d "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}" ]] || dodir "${ALTERNATIVES_DIR}/${alternative}/${provider}"
 
     # keep track of provided alternatives for use in pkg_post{rm,inst}. keep a mapping between importance and
     # provided alternatives and make sure the former is set to only one value
@@ -31,7 +32,7 @@ alternatives_for() {
         index=${#ALTERNATIVES_PROVIDED[@]}
         ALTERNATIVES_PROVIDED+=( "${alternative}:${provider}" )
         ALTERNATIVES_IMPORTANCE[index]=${importance}
-        echo "IMPORTANCE=${importance}" >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
+        echo "${importance}" > "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}/_importance"
     else
         for((index=0;index<${#ALTERNATIVES_PROVIDED[@]};index++)); do
             if [[ ${alternative}:${provider} == ${ALTERNATIVES_PROVIDED[index]} ]]; then
@@ -42,40 +43,40 @@ alternatives_for() {
                     fi
                 else
                     ALTERNATIVES_IMPORTANCE[index]=${importance}
-                    echo "IMPORTANCE=${importance}" >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
+                    echo "${importance}" > "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}/_importance"
                 fi
             fi
         done
     fi
 
-    while (( $# >= 3 )); do
-        # unique is used in bash variable names and hence can only contain alphanumeric characters and _
-        # handle dash, dot, plus and slash because they are so common in paths
-        unique=${1}; src=${2}; target=${3}
-        unique=${unique//-/_dash_}
-        unique=${unique//./_dot_}
-        unique=${unique//+/_plus_}
-        unique=${unique//\//_slash_}
-        if [[ ${unique} != *([[:alnum:]_]) ]]; then
-            eerror "Illegal unique (${unique}) detected, only alphanumeric characters and _ are legal"
+    while (( $# >= 2 )); do
+        src=${1//+(\/)/\/}; target=${2//+(\/)/\/}
+        if [[ ${src} != /* ]]; then
+            eerror "Source path must be absolute, but got ${src}"
             ((ret++))
-        fi
-        echo "PATH_${unique}='${src}'"
-        echo "TARGET_${unique}='${target}'"
-        if [[ -e ${IMAGE}${src} ]]; then
-            local fulltarget=${target}
-            [[ ${fulltarget} != /* ]] && fulltarget=${src%/*}/${fulltarget}
-            mv "${IMAGE}${src}" "${IMAGE}${fulltarget}" || die "mv ${src} failed"
-        fi
-        shift 3
-    done >> "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}"
 
-    # sanity check for unique identifiers
-    dupl=$(sed -e 's/=.*$//' "${IMAGE}${ALTERNATIVES_DIR}/${alternative}/${provider}" | sort | uniq -d)
-    if [[ -n ${dupl} ]]; then
-        dupl=$(echo "${dupl}" | sed -e 's/^PATH_//' -e 's/^TARGET_//' | uniq)
-        eerror "Duplicate unique identifiers detected: '"${dupl}"'"
-    fi
+        else
+            local reltarget= dir=${ALTERNATIVES_DIR}/${alternative}/${provider}${src%/*}
+            while [[ -n ${dir} ]]; do
+                reltarget+=../
+                dir=${dir%/*}
+            done
+
+            reltarget=${reltarget%/}
+            [[ ${target} == /* ]] || reltarget+=${src%/*}/
+            reltarget+=${target}
+            dodir "${ALTERNATIVES_DIR}/${alternative}/${provider}${src%/*}"
+            dosym "${reltarget}" "${ALTERNATIVES_DIR}/${alternative}/${provider}${src}"
+
+            if [[ -e ${IMAGE}${src} ]]; then
+                local fulltarget=${target}
+                [[ ${fulltarget} != /* ]] && fulltarget=${src%/*}/${fulltarget}
+                mv "${IMAGE}${src}" "${IMAGE}${fulltarget}" || die "mv ${src} failed"
+            fi
+        fi
+        shift 2
+    done
+
     [[ ${ret} -eq 0 ]] || die "Errors detected for ${provider}, provided for ${alternative}"
 }
 
@@ -111,19 +112,25 @@ EOF
 }
 
 alternatives_pkg_postrm() {
-    local a alt provider
+    local a alt provider p
     for a in "${ALTERNATIVES_PROVIDED[@]}"; do
         alt="${a%:*}"
         provider="${a#*:}"
         if [[ -d "${ROOT}${ALTERNATIVES_DIR}/${alt}" ]]; then
-            einfo "Making sure ${alt} has a valid provider"
-            echo eclectic "${alt}" update "${provider}"
-            eclectic "${alt}" update "${provider}"
-            continue
+            for p in "${ROOT}${ALTERNATIVES_DIR}/${alt}"/*; do
+                if [[ -d ${p} ]]; then
+                    einfo "Making sure ${alt} has a valid provider"
+                    echo eclectic "${alt}" update "${provider}"
+                    eclectic "${alt}" update "${provider}"
+                    continue 2
+                fi
+            done
         fi
         einfo "Cleaning up unused alternatives module for ${alt}"
         echo eclectic "${alt}" unset
         eclectic "${alt}" unset
+        echo rmdir "${ROOT}${ALTERNATIVES_DIR}/${alt}"
+        rmdir "${ROOT}${ALTERNATIVES_DIR}/${alt}"
         echo rm "${ROOT}/usr/share/eclectic/modules/${alt}.eclectic"
         rm "${ROOT}/usr/share/eclectic/modules/${alt}.eclectic"
     done
