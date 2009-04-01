@@ -1,0 +1,64 @@
+# Copyright 2007-2008 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=xz ]
+
+SUMMARY="Core file, shell and text utilities expected to be on any system."
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS="acl caps gmp nls
+    gmp [[ description = [ The utilities time, factor and expr support arbitrarily large numbers ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        nls? ( sys-devel/gettext )
+    build+run:
+        acl? (
+            sys-apps/acl
+            sys-apps/attr
+        )
+        caps? ( sys-libs/libcap )
+        gmp? ( dev-libs/gmp )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-7.1-skip-tests.patch
+    "${FILES}"/${PNV}-test-stdin-unreadable.patch
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gmp )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-install-program=arch
+    --enable-largefile
+)
+
+src_test() {
+    addwrite /dev/full
+    export RUN_EXPENSIVE_TESTS="yes"
+    default
+}
+
+src_install() {
+    default
+
+    # Note: We don't install hostname into /bin, since it'd collide with net-tools.
+    local binfiles="basename cat chgrp chmod chown cp chroot cut date df dir
+                    dirname du echo env expr false head ln ls mkdir
+                    mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort
+                    stty sync tail touch tr true tty uname vdir wc yes"
+
+    dodir /bin
+    for binfile in ${binfiles}; do
+        mv "${IMAGE}"/usr/bin/${binfile} "${IMAGE}"/bin/${binfile} ||
+            die "Moving ${binfile} to /bin/ failed"
+        dosym /bin/${binfile} /usr/bin/${binfile}
+    done
+
+    insinto /etc
+    newins src/dircolors.hin DIR_COLORS
+}
+
