@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require distutils
+require zsh-completion distutils
 
 SUMMARY="Bugzilla command line client"
 HOMEPAGE="http://pybugz.googlecode.com"
@@ -17,3 +17,9 @@ DEPENDENCIES="
         dev-lang/python:=[readline]"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-default-exherbo.patch )
+
+src_install() {
+    distutils_src_install
+    dozshcompletion contrib/zsh-completion
+}
+
