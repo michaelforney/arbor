@@ -10,6 +10,8 @@ require multilib alternatives flag-o-matic
 
 export_exlib_phases src_unpack src_prepare src_configure src_test src_install
 
+myexparam Module_Build_pv=
+
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
 
@@ -143,10 +145,32 @@ EOF
 
     # Save a list of what executables & man-pages we're installing
     cd "${IMAGE}"
-    local src target alternatives=()
+    local src target alternatives=() Module_Build_pv Module_Build_importance
+    exparam -v Module_Build_pv Module_Build_pv
+    if [[ -n ${Module_Build_pv} ]]; then
+        Module_Build_importance=${Module_Build_pv%.*}
+        local decimal=${Module_Build_pv#*.}
+        while [[ -n ${decimal} ]]; do
+            Module_Build_importance+=.${decimal:0:2}
+            decimal=${decimal:2}
+        done
+    fi
+
     for src in usr/bin/*${PV} usr/share/man/man1/*${PV}.1; do
-        [[ ${src/-${PV}} == ${src} ]] && target=${src/${PV}} || target=${src/-${PV}}
-        alternatives+=( /${target} ${src##*/} )
+        if [[ ${src} == usr/bin/config_data-${PV} ]]; then
+            [[ -n ${Module_Build_pv} ]] || die "Module_Build_pv not set"
+            mv ${src} usr/bin/config_data-perl-${PV} || die "mv failed"
+            alternatives_for config_data ${Module_Build_pv}_perl-${SLOT} ${Module_Build_importance} \
+                /usr/bin/config_data config_data-perl-${PV}
+        elif [[ ${src} == usr/share/man/man1/config_data-${PV}.1 ]]; then
+            [[ -n ${Module_Build_pv} ]] || die "Module_Build_pv not set"
+            mv ${src} usr/share/man/man1/config_data-perl-${PV}.1 || die "mv failed"
+            alternatives_for config_data ${Module_Build_pv}_perl-${SLOT} ${Module_Build_importance} \
+                /usr/share/man/man1/config_data.1 config_data-perl-${PV}.1
+        else
+            [[ ${src/-${PV}} == ${src} ]] && target=${src/${PV}} || target=${src/-${PV}}
+            alternatives+=( /${target} ${src##*/} )
+        fi
     done
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
 }
