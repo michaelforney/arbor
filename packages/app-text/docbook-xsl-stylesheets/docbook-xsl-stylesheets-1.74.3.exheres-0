@@ -23,6 +23,11 @@ DEPENDENCIES="
 
 WORK=${WORKBASE}/${MY_PNV}
 
+src_prepare() {
+    sed -e 's/^XSLTPROC=/XSLT=/' -i Makefile ||
+        die "Fixing Makefail failed"
+}
+
 src_install() {
     insinto /usr/share/sgml/docbook/xsl-stylesheets
     doins VERSION
