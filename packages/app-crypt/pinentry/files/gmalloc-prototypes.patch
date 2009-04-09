@@ -1,0 +1,33 @@
+Source: From Debian see bug #471613
+Upstream: Yes, https://bugs.g10code.com/gnupg/issue893
+Reason: Fix conflicting types for 'g_malloc'
+--- a/gtk+-2/gtksecentry.c
++++ b/gtk+-2/gtksecentry.c
+@@ -270,7 +270,7 @@
+ 
+ 
+ gpointer
+-g_malloc(gulong size)
++g_malloc(gsize size)
+ {
+     gpointer p;
+ 
+@@ -288,7 +288,7 @@
+ }
+ 
+ gpointer
+-g_malloc0(gulong size)
++g_malloc0(gsize size)
+ {
+     gpointer p;
+ 
+@@ -308,7 +308,7 @@
+ }
+ 
+ gpointer
+-g_realloc(gpointer mem, gulong size)
++g_realloc(gpointer mem, gsize size)
+ {
+     gpointer p;
+ 
+
