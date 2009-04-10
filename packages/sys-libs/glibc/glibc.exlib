@@ -44,7 +44,7 @@ src_unpack() {
     unpack ${ARCHIVES}
 
     if ever at_least 2.9; then
-        mv glibc-${PV}-2* glibc-${PV}
+        mv glibc-${PV/_p*}-2* glibc-${PV}
         mv *ports* glibc-ports-${PV}
     elif ! ever at_least 2.8; then
         mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
