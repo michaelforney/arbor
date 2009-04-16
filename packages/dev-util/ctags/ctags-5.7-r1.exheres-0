@@ -1,6 +1,8 @@
 # Copyright 2007-2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require alternatives
+
 SUMMARY="Exuberant ctags"
 HOMEPAGE="http://ctags.sourceforge.net"
 DOWNLOADS="mirror://sourceforge/ctags/${PNV}.tar.gz"
@@ -16,4 +18,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --with-posix-regex --disable-etags )
 
 src_install() {
     einstall
+    alternatives_for ctags exuberant-ctags 1000 \
+        /usr/bin/ctags exuberant-ctags \
+        /usr/share/man/man1/ctags.1 exuberant-ctags.1
 }

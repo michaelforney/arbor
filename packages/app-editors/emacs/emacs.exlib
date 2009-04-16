@@ -38,6 +38,7 @@ DEPENDENCIES="
             tiff? ( media-libs/tiff )
             xpm? ( x11-libs/libXpm )
         )
+        !<dev-util/ctags-5.7-r1
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -102,10 +103,18 @@ emacs_src_install() {
     # Compile a list of everything we install that needs the alternatives treatment:
     cd "${IMAGE}"
 
-    local unique src target alternatives=()
+    local unique src target alternatives=() alternatives_ctags=()
     for src in usr/bin/*-${SLOT} usr/share/man/man?/* ; do
-        target=${src/-${SLOT}}
-        alternatives+=( "/${target}" "${src##*/}" )
+        if [[ ${src} == usr/bin/ctags-${SLOT} ]]; then
+            mv ${src} ${src/${SLOT}/${PN}-${SLOT}} || die "mv ctags failed"
+            alternatives_ctags+=( /usr/bin/ctags ctags-${PN}-${SLOT} )
+        elif [[ ${src} == usr/share/man/man1/ctags-${SLOT}.1 ]]; then
+            mv ${src} ${src/${SLOT}/${PN}-${SLOT}} || die "mv ctags.1 failed"
+            alternatives_ctags+=( /usr/share/man/man1/ctags.1 ctags-${PN}-${SLOT}.1 )
+        else
+            target=${src/-${SLOT}}
+            alternatives+=( "/${target}" "${src##*/}" )
+        fi
     done
     alternatives+=( /usr/share/info/${PN} ${PN}-${SLOT} )
 
@@ -113,7 +122,9 @@ emacs_src_install() {
     alternatives_for \
         ${PN} ${PN}-${SLOT} ${importance} \
         ${alternatives[@]}
-    # FIXME: alternatives for ctags
+    alternatives_for \
+        ctags ${PN}-${SLOT} ${importance} \
+        ${alternatives_ctags[@]}
 }
 
 emacs_pkg_postinst() {
