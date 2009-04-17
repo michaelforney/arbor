@@ -5,13 +5,12 @@
 
 SUMMARY="Centralised Ruby extension management"
 HOMEPAGE="http://rubyforge.org/projects/rubygems/"
-LICENCES="|| ( Ruby-1.8 GPL-2 )"
+DOWNLOADS="mirror://rubyforge/${PN}/${PNV}.tgz"
 
+LICENCES="|| ( Ruby-1.8 GPL-2 )"
 PLATFORMS="~amd64 ~x86"
 SLOT="0"
 MYOPTIONS="doc"
-
-DOWNLOADS="mirror://rubyforge/${PN}/${PNV}.tgz"
 
 DEPENDENCIES="
     build+run:
@@ -21,8 +20,9 @@ DEPENDENCIES="
 src_install() {
     unset GEM_HOME GEM_PATH RUBYOPT
 
-    site_gem_dir=$(ruby -rrbconfig -e 'print Config::CONFIG["sitelibdir"].gsub("site_ruby","gems")')
-    vendor_gem_dir=${site_gem_dir/gems/vendor_gems}
+    vendor_dir=$(ruby -rrbconfig -e 'print Config::CONFIG["vendorlibdir"]')
+    vendor_gem_dir=${vendor_dir/vendor_ruby/vendor_gems}
+    site_gem_dir=${vendor_dir/vendor_ruby/gems}
     ver=$(basename ${site_gem_dir})
     ver_stripped=${ver/./}
 
@@ -39,22 +39,10 @@ src_install() {
 
     dosym "gem${ver_stripped}" /usr/bin/gem
 
-    dodoc README doc/release_notes/rel_1_2_0.rdoc
+    dodoc README doc/release_notes/rel_$(ever replace_all '_').rdoc
 
-    # still need to set env var until this is fixed
-    # http://rubyforge.org/tracker/index.php?func=detail&aid=21853&group_id=126&atid=575
-    hereenvd 10rubygems <<EOF
-GEM_PATH="${site_gem_dir}:${vendor_gem_dir}"
-EOF
-
-    insinto /etc
-    hereins gemrc <<EOF
-# vim: set ft=yaml sw=2 sts=2 et :
-# set gempath so user can see vendor_gem and install to normal gem
-gempath:
-  - ${site_gem_dir}
-  - ${vendor_gem_dir}
-EOF
+    insinto ${vendor_dir}/rubygems/defaults/
+    doins "${FILES}"/operating_system.rb
 }
 
 pkg_postinst() {
