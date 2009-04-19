@@ -8,17 +8,17 @@ SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc zlib"
+MYOPTIONS="doc"
 
 DEPENDENCIES="
     build+run:
         >=dev-libs/libgcrypt-1.2.4
         >=dev-libs/libtasn1-1.8
-        zlib? ( >=sys-libs/zlib-1.2.3 )
+        >=sys-libs/zlib-1.2.3
     build:
-        >=sys-devel/gettext-0.17
         doc? ( >=dev-doc/gtk-doc-1.1 )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-guile )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'doc gtk-doc' zlib )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-guile --with-zlib )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'doc gtk-doc' )
+
