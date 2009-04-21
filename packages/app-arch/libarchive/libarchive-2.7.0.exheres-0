@@ -29,17 +29,23 @@ DEPENDENCIES="
     build+run:
         app-arch/gzip
         app-arch/bzip2
+        app-arch/xz
+        dev-libs/openssl
         acl? ( sys-apps/acl )
         xattr? ( sys-apps/attr )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
-    # FIXME: bsdcpio tests fail
+    # FIXME: bsdcpio tests fail: http://code.google.com/p/libarchive/issues/detail?id=26
     # --enable-bsdcpio=shared
     --disable-bsdcpio
-    --with-{zlib,bz2lib}
+    # Enable gzip, bzip2, xz support
+    --with-{zlib,bz2lib,lzma}
+    # Disable old app-arch/lzma support
     --without-lzmadec
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl xattr )
+# On 2.7 branch, past 2.7.0 tag:
+# DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ssl openssl' )
 
