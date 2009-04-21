@@ -1,20 +1,22 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-MY_PNV=${PNV/-/_}
+MY_PNV=${PNV/-/_}+nmu1
 SUMMARY="Library for handling paper characteristics"
 HOMEPAGE="http://packages.debian.org/unstable/source/libpaper"
 DOWNLOADS="mirror://debian/pool/main/libp/libpaper/${MY_PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS=""
-UPSTREAM_CHANGELOG="http://packages.debian.org/changelogs/pool/main/libp/${PN}/${MY_PNV}+nmu1/changelog"
+UPSTREAM_CHANGELOG="http://packages.debian.org/changelogs/pool/main/libp/${PN}/${MY_PNV}/changelog"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64"
 MYOPTIONS=""
 DEPENDENCIES=""
+
+WORK="${WORKBASE}/${MY_PNV/_/-}"
 
 src_install() {
     default
