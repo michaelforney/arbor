@@ -35,11 +35,10 @@ DEPENDENCIES="
         xattr? ( sys-apps/attr )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-bsdcpio-tests-sgid-bit.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
-    # FIXME: bsdcpio tests fail: http://code.google.com/p/libarchive/issues/detail?id=26
-    # --enable-bsdcpio=shared
-    --disable-bsdcpio
+    --enable-bsdcpio=shared
     # Enable gzip, bzip2, xz support
     --with-{zlib,bz2lib,lzma}
     # Disable old app-arch/lzma support
