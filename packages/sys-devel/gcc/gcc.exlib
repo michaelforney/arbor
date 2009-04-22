@@ -27,7 +27,9 @@ DEPENDENCIES="
 
 if ever at_least 4.3; then
     MYOPTIONS+=" java"
-    DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${SLOT}.jar )"
+    # ecj jar version will need manual updating. No 4.4 version available (yet?)
+    ECJ_JAR_PV="4.3"
+    DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
     DEPENDENCIES+="
         build:
             doc? ( >=app-doc/doxygen-1.5.1 )
@@ -52,8 +54,8 @@ DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
 src_unpack() {
     if ever at_least 4.3 && option java ; then
-        unpack --if-compressed ${ARCHIVES//ecj-${SLOT}.jar}
-        cp "${FETCHEDDIR}"/ecj-${SLOT}.jar "${ECONF_SOURCE}"/ecj.jar \
+        unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
+        cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar \
             || die "copying ecj.jar failed."
     else
         default
