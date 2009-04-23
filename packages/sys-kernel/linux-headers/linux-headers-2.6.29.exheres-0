@@ -36,5 +36,8 @@ src_compile() {
 
 src_install() {
     emake INSTALL_HDR_PATH="${IMAGE}/usr" headers_install
+
+    # DRM headers are installed by x11-dri/libdrm
+    rm -r "${IMAGE}"/usr/include/drm || die "Couldn't remove /usr/include/drm headers"
 }
 
