@@ -1,4 +1,4 @@
-# Copyright 2008 Mike Kelly
+# Copyright 2008, 2009 Mike Kelly
 # Distributed under the terms of the GPL v2
 
 MY_PNV="${PN}_${PV}"
@@ -35,7 +35,7 @@ WORK="${WORKBASE}/${MY_PNV}"
 src_compile() { :; }
 
 src_install() {
-    DESTDIR="${IMAGE}" MAN_D="/usr/share/man" ./install.sh 
+    DESTDIR="${IMAGE}" MAN_D="/usr/share/man" ./install.sh
     keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
 
     rm "${IMAGE}"/etc/init.d/laptop-mode
