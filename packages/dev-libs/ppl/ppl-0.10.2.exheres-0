@@ -1,0 +1,19 @@
+# Copyright.2009 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Modern C++ library for the manipulation of numerical information that can be represented by points in some $n$-dimensional vector space"
+HOMEPAGE="http://www.cs.unipr.it/ppl/"
+DOWNLOADS="http://www.cs.unipr.it/${PN}/Download/ftp/releases/${PV}/${PNV}.tar.bz2"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="build+run:
+    >=dev-libs/gmp-4.3.0-r1
+    app-doc/doxygen"
+
+# Don't support Java, ML and Fortran interfaces for now
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-interfaces="c cxx" )
+DEFAULT_SRC_INSTALL_PARAMS=( DESTDIR="${IMAGE}" )
