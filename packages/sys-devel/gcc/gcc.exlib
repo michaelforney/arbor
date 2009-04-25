@@ -47,6 +47,13 @@ else
                        >=dev-libs/mpfr-2.3 )"
 fi
 
+if ever at_least 4.4.0-r1; then
+    MYOPTIONS+=" graphite"
+    DEPENDENCIES+="
+        build:
+            dev-libs/cloog-ppl"
+fi
+
 WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 
@@ -81,6 +88,8 @@ src_configure() {
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=yes \
         --program-suffix=-${SLOT} \
+        $(option_with graphite cloog) \
+        $(option_with graphite ppl) \
         $(option_enable nls) \
         $(option_enable propolice libssp)
 }
