@@ -1,4 +1,4 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2009 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'openvpn-2.1_rc9.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
@@ -83,7 +83,7 @@ src_install() {
     fi
 
     # Install plugins and easy-rsa
-    pushd easy-rsa/2.0 >/dev/null 2>&1 
+    pushd easy-rsa/2.0 >/dev/null 2>&1
     emake -j1 install "DESTDIR=${IMAGE}/usr/share/${PN}/easy-rsa" \
         || die "installing easy-rsa failed."
     popd
