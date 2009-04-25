@@ -1,11 +1,13 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
-# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'hplip-2.8.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
 NEED_PYTHON=2.3:=
 require python
+
+export_exlib_phases src_configure src_install pkg_postinst pkg_postrm
 
 SUMMARY="HP Linux Imaging and Printing System"
 DESCRIPTION="
@@ -28,8 +30,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/node/118"
 
 LICENCES="GPL-2 MIT BSD"
 SLOT="0"
-PLATFORMS="~amd64"
-MYOPTIONS="dbus doc fax [[ requires = dbus ]] gui scanner snmp"
+MYOPTIONS="dbus doc fax [[ requires = dbus ]] gui policykit [[ description = [ Allow the commandline tools to be run by regular users ] ]] scanner snmp"
 
 DEPENDENCIES="
     build+run:
@@ -46,6 +47,9 @@ DEPENDENCIES="
             >=x11-libs/qt-4.4.3:4
             >=dev-python/PyQt4-4.4.4
         )
+        policykit? (
+            >=sys-auth/PolicyKit-0.9
+        )
         scanner? (
             media-gfx/sane-backends
             >=dev-python/Imaging-1.1.6
@@ -55,10 +59,13 @@ DEPENDENCIES="
             net-analyzer/net-snmp
         )
 "
+# fax - python-ctypes
+# fax - reportlab
+# all - python-xml
 
 # Whatever an hpijs-only build may be, I don't need it. Please shout if you do.
 # Or even better: Send a git format-patch while you're in here already anyway. :)
-src_configure() {
+hplip_src_configure() {
     econf \
         --with-hpppddir=/usr/share/ppd/${PN} \
         --with-cupsbackenddir=$(cups-config --serverbin)/backend \
@@ -74,11 +81,12 @@ src_configure() {
         $(option_enable fax fax-build) \
         $(option_enable gui gui-build) \
         $(option_enable gui qt4) \
+        $(option_enable policykit policykit) \
         $(option_enable scanner scan-build) \
         $(option_enable snmp network-build)
 }
 
-src_install() {
+hplip_src_install() {
     default
 
     dosym \
@@ -93,7 +101,7 @@ src_install() {
     find "${IMAGE}"/usr -type d -empty -delete || die "removing empty dirs failed"
 }
 
-pkg_postinst() {
+hplip_pkg_postinst() {
     python_mod_optimize /usr/share/${PN}
 
     if option scanner ; then
@@ -106,6 +114,6 @@ pkg_postinst() {
     fi
 }
 
-pkg_postrm() {
+hplip_pkg_postrm() {
         python_mod_cleanup /usr/share/${PN}
 }
