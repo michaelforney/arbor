@@ -1,7 +1,9 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2009 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'libevent-1.4.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
+
+export_exlib_phases src_test
 
 MY_PNV="${PNV}-stable"
 
@@ -11,18 +13,14 @@ DOWNLOADS="http://monkey.org/~provos/${MY_PNV}.tar.gz"
 
 LICENCES="BSD"
 SLOT="0"
-PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS=""
-
 DEPENDENCIES=""
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-test.patch"
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-1.4.3-test.patch" )
 
-src_test() {
+libevent_src_test() {
     pushd test >/dev/null
     einfo "Running tests"
     ./test.sh > "${TEMP}"/tests
