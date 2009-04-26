@@ -65,8 +65,14 @@ src_configure() {
 src_install() {
     emake -j1 DIST_ROOT="${IMAGE}" install install-dev install-lib
 
+    # we don't install static libraries
+    rm "${IMAGE}/usr/$(get_libdir)"/libacl.{a,la}
+
     # move shared libs to /
     dodir /$(get_libdir)
     mv "${IMAGE}"/usr/$(get_libdir)/libacl.so* "${IMAGE}"/$(get_libdir)/ || die "moving libs to / failed"
     gen_usr_ldscript libacl.so
+
+    # fix circular linking
+    ln -sf "/$(get_libdir)/libacl.so.1" "${IMAGE}/$(get_libdir)/libacl.so"
 }
