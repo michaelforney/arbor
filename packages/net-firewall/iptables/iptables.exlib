@@ -1,30 +1,30 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2009 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 
 require versionator multilib
 
-MY_PNV="${PN}-$(ever replace 3 '-')"
+export_exlib_phases src_install
+
+MY_PNV="${PNV/_/-}"
 
 SUMMARY="A Linux kernel packet filter control tool"
 DESCRIPTION="
 iptables is built on top of netfilter, the packet alteration framework for Linux
 2.4.x and 2.6.x. It is a major rewrite of its predecessor ipchains, and is used
-to control packet filtering, Network Address Translation (masquerading, 
-portforwarding, transparent proxying), and special effects such as packet mangling. 
+to control packet filtering, Network Address Translation (masquerading,
+portforwarding, transparent proxying), and special effects such as packet mangling.
 "
 HOMEPAGE="http://netfilter.org/projects/${PN}"
 DOWNLOADS="http://netfilter.org/projects/${PN}/files/${MY_PNV}.tar.bz2"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_CHANGELOG="http://netfilter.org/projects/iptables/files/changes-iptables-1.4.1.1-1.4.2-rc1.txt [[ lang = en ]]"
+UPSTREAM_CHANGELOG="http://netfilter.org/projects/${PN}/files/changes-iptables-${PV}.txt [[ lang = en ]]"
 UPSTREAM_DOCUMENTATION="http://netfilter.org/documentation/"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
-
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -38,14 +38,14 @@ DEFAULT_SRC_INSTALL_EXCLUDE=( "release.sh" )
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-src_install() {
+iptables_src_install() {
     default
 
     keepdir /var/lib/iptables
     keepdir /var/lib/ip6tables
 
     newinitd "${FILES}"/${PN}-1.4.2.init iptables
-    dosym /etc/init.d/${PN} /etc/init.d/ip6tables   
+    dosym /etc/init.d/${PN} /etc/init.d/ip6tables
     newconfd "${FILES}"/${PN}-1.4.2.confd iptables
     newconfd "${FILES}"/ip6tables-1.4.2.confd ip6tables
 }
