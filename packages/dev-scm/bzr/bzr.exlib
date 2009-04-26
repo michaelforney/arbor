@@ -1,10 +1,14 @@
-# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'bzr-1.10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
 NEED_PYTHON=2.5:=
-require python bash-completion launchpad distutils
+require python bash-completion distutils
+
+export_exlib_phases src_test src_install
+
+MY_PV=${PV/_}
 
 SUMMARY="Bazaar is a simple distributed version control system."
 DESCRIPTION="
@@ -14,17 +18,17 @@ context. Users can commit to local branches without requiring special permission
 from the branches that they branched from.
 If you have a choice, use dev-scm/git instead.
 "
-HOMEPAGE="http://bazaar-vcs.org/"
+HOMEPAGE="http://bazaar-vcs.org"
+DOWNLOADS="https://launchpad.net/${PN}/$(ever range 1-2)/${MY_PV}/+download/${PN}-${MY_PV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
-REMOTE_IDS+=" freshmeat:${PN}"
+REMOTE_IDS="freshmeat:${PN} launchpad:${PN}"
 
 UPSTREAM_RELEASE_NOTES="http://doc.bazaar-vcs.org/${PN}.dev/en/release-notes/NEWS.html"
-UPSTREAM_DOCUMENTATION="http://bazaar-vcs.org/Documentation [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/Documentation [[ lang = en ]]"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -35,11 +39,11 @@ DEPENDENCIES="
         dev-scm/bzrtools [[ description = [ Provides rsync support, and other useful extra functionality ] ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/bzr-1.10-remove-test.patch )
-
 PYTHON_MODNAME="bzrlib"
 
-src_test() {
+WORK="${WORKBASE}"/${PN}-${MY_PV}
+
+bzr_src_test() {
     # Some tests expect the usual pyc compiling behaviour.
     python_enable_pyc
     "${python}" bzr --no-plugins selftest || die "bzr selftest failed"
@@ -47,7 +51,7 @@ src_test() {
     python_disable_pyc
 }
 
-src_install() {
+bzr_src_install() {
     distutils_src_install
 
     insinto /usr/share/doc/${PNVR}
@@ -56,4 +60,3 @@ src_install() {
 
     dobashcompletion contrib/bash/bzr
 }
-
