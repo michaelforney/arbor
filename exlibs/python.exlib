@@ -120,7 +120,7 @@ python_mod_compile() {
     local f myroot myfiles=()
 
     # Check if phase is pkg_postinst()
-    [[ ${EBUILD_PHASE} != postinst ]] &&\
+    [[ ${EXHERES_PHASE} != postinst ]] &&\
         die "${FUNCNAME} should only be run in pkg_postinst()"
 
     # allow compiling for older python versions
@@ -161,7 +161,7 @@ python_mod_optimize() {
     local myroot mydirs=() myfiles=() myopts=()
 
     # Check if phase is pkg_postinst()
-    [[ ${EBUILD_PHASE} != postinst ]] &&\
+    [[ ${EXHERES_PHASE} != postinst ]] &&\
         die "${FUNCNAME} should only be run in pkg_postinst()"
 
     # strip trailing slash
@@ -236,7 +236,7 @@ python_mod_cleanup() {
     local SEARCH_PATH=() myroot src_py
 
     # Check if phase is pkg_postrm()
-    [[ ${EBUILD_PHASE} != postrm ]] &&\
+    [[ ${EXHERES_PHASE} != postrm ]] &&\
         die "${FUNCNAME} should only be run in pkg_postrm()"
 
     # strip trailing slash
