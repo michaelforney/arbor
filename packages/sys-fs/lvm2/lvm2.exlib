@@ -1,28 +1,67 @@
 # Copyright 2008 Kim Højgaard-Hansen
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
+export_exlib_phases src_prepare src_install
+
 SUMMARY="Userspace toolset providing logical volume management facilities"
-HOMEPAGE="http://sources.redhat.com/lvm2/"
-DOWNLOADS="ftp://sources.redhat.com/pub/${PN}/LVM2.${PV}.tgz"
+DESCRIPTION="
+LVM2 is a logical volume manager for the Linux kernel: it manages disk drives and
+similar mass-storage devices, in particular large ones. The term "volume" refers
+to a disk drive or part thereof.
+"
+BASE_URL="sources.redhat.com"
+HOMEPAGE="http://${BASE_URL}/${PN}/"
+DOWNLOADS="ftp://${BASE_URL}/pub/${PN}/LVM2.${PV}.tgz"
 
 LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS="
+    debug
+    dmeventd [[ description = [ DM event daemon to monitor active mapped devices ] ]]
+    fsadm [[ description = [ Utility to resize or check filesystem on a device ] ]]
+"
 
-UPSTREAM_RELEASE_NOTES="ftp://sources.redhat.com/pub/${PN}/WHATS_NEW"
+UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
 
-WORK="${WORKBASE}/LVM2.${PV}"
+DEPENDENCIES="
+    build+run:
+        >=sys-fs/device-mapper-1.02.29[dmeventd?]"
 
-MAKEOPTS="${MAKEOPTS} -j1"
+# The tests would need userpriv, some loving and we *really* want them in src_test_slow...
+RESTRICT="test"
 
-src_prepare() {
-    sed -i -e '/LANGS=/cLANGS=' "${WORK}/po/Makefile.in" || die "failed to remove translations"
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --sbindir=/sbin
+    --enable-cmdlib
+    --enable-readline
+    --enable-static_link
+    --disable-selinux
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    dmeventd
+    'dmeventd cmdlib'
+    fsadm
+)
+
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+
+WORK="${WORKBASE}"/LVM2.${PV}
+
+lvm2_src_prepare() {
+    # Broken and only for German. Das braucht niemand.
+    sed -i -e '/LANGS=/cLANGS=' "${WORK}"/po/Makefile.in || die "failed to remove translations"
+
     default
 }
 
-src_install() {
+lvm2_src_install() {
     default
 
     insinto /$(get_libdir)/rcscripts/addons
     doins "${FILES}/lvm-start.sh"
     doins "${FILES}/lvm-stop.sh"
 }
-
