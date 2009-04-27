@@ -11,6 +11,8 @@ freedesktop-mime_is_desktop_file_utils || DEPENDENCIES="build: dev-util/desktop-
 
 
 freedesktop-mime_update_desktop_database() {
+    illegal_in_global_scope
+
     if [[ "${ROOT}" == / ]] ; then
         ebegin "Updating desktop database"
         /usr/bin/update-desktop-database -q /usr/share/applications
@@ -21,10 +23,14 @@ freedesktop-mime_update_desktop_database() {
 }
 
 freedesktop-desktop_pkg_postrm() {
+    illegal_in_global_scope
+
     freedesktop-mime_update_desktop_database
 }
 
 freedesktop-desktop_pkg_postinst() {
+    illegal_in_global_scope
+
     freedesktop-mime_update_desktop_database
 }
 

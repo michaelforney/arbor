@@ -11,6 +11,8 @@
 MYOPTIONS="zsh-completion"
 
 dozshcompletion() {
+    illegal_in_global_scope
+
     [[ -z ${1} ]] && die "usage: dozshcompletion <file> [ <installed name> ]"
     if option zsh-completion; then
         insinto /usr/share/zsh/site-functions
@@ -19,6 +21,8 @@ dozshcompletion() {
 }
 
 install-zsh-completions() {
+    illegal_in_global_scope
+
     local c
     for c in "${ZSH_COMPLETIONS[@]}"; do
         dozshcompletion ${c}

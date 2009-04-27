@@ -65,6 +65,8 @@ require toolchain-funcs multilib
 # C[XX]FLAGS that we allow in strip-flags
 # Note: shell globs and character lists are allowed
 setup-allowed-flags() {
+    illegal_in_global_scope
+
     if [[ -z ${ALLOWED_FLAGS} ]] ; then
         export ALLOWED_FLAGS="-pipe"
         export ALLOWED_FLAGS="${ALLOWED_FLAGS} -O -O0 -O1 -O2 -mcpu -march -mtune"
@@ -97,6 +99,8 @@ setup-allowed-flags() {
 # inverted filters for hardened compiler.  This is trying to unpick
 # the hardened compiler defaults.
 _filter-hardened() {
+    illegal_in_global_scope
+
     local f
     for f in "$@" ; do
         case "${f}" in
@@ -120,6 +124,8 @@ _filter-hardened() {
 # Strings removed are matched as globs, so for example
 # '-O*' would remove -O1, -O2 etc.
 _filter-var() {
+    illegal_in_global_scope
+
     local f x VAR VAL
     declare -a new
 
@@ -137,6 +143,8 @@ _filter-var() {
 }
 
 filter-flags() {
+    illegal_in_global_scope
+
     _filter-hardened "$@"
     _filter-var CFLAGS "$@"
     _filter-var CPPFLAGS "$@"
@@ -145,22 +153,30 @@ filter-flags() {
 }
 
 filter-lfs-flags() {
+    illegal_in_global_scope
+
     [[ -n $@ ]] && die "filter-lfs-flags takes no arguments"
     filter-flags -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 }
 
 append-cppflags() {
+    illegal_in_global_scope
+
     [[ -z $* ]] && return 0
     export CPPFLAGS="${CPPFLAGS} $*"
     return 0
 }
 
 append-lfs-flags() {
+    illegal_in_global_scope
+
     [[ -n $@ ]] && die "append-lfs-flags takes no arguments"
     append-cppflags -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
 }
 
 append-flags() {
+    illegal_in_global_scope
+
     [[ -z $* ]] && return 0
     export CFLAGS="${CFLAGS} $*"
     export CXXFLAGS="${CXXFLAGS} $*"
@@ -168,6 +184,8 @@ append-flags() {
 }
 
 replace-flags() {
+    illegal_in_global_scope
+
     [[ $# != 2 ]] \
         && echo && eerror "Usage: replace-flags <old flag> <new flag>" \
         && die "replace-flags takes 2 arguments, not $#"
@@ -192,6 +210,8 @@ replace-flags() {
 }
 
 replace-cpu-flags() {
+    illegal_in_global_scope
+
     local newcpu="$#" ; newcpu="${!newcpu}"
     while [ $# -gt 1 ] ; do
         # quote to make sure that no globbing is done (particularly on
@@ -205,6 +225,8 @@ replace-cpu-flags() {
 }
 
 _is_flagq() {
+    illegal_in_global_scope
+
     local x
     for x in ${!1} ; do
         [[ ${x} == $2 ]] && return 0
@@ -213,24 +235,34 @@ _is_flagq() {
 }
 
 is-flagq() {
+    illegal_in_global_scope
+
     [[ -n $2 ]] && die "Usage: is-flag <flag>"
     _is_flagq CFLAGS $1 || _is_flagq CXXFLAGS $1
 }
 
 is-flag() {
+    illegal_in_global_scope
+
     is-flagq "$@" && echo true
 }
 
 is-ldflagq() {
+    illegal_in_global_scope
+
     [[ -n $2 ]] && die "Usage: is-ldflag <flag>"
     _is_flagq LDFLAGS $1
 }
 
 is-ldflag() {
+    illegal_in_global_scope
+
     is-ldflagq "$@" && echo true
 }
 
 filter-mfpmath() {
+    illegal_in_global_scope
+
     local orig_mfpmath new_math prune_math
 
     # save the original -mfpmath flag
@@ -259,6 +291,8 @@ filter-mfpmath() {
 }
 
 strip-flags() {
+    illegal_in_global_scope
+
     local x y flag NEW_CFLAGS NEW_CXXFLAGS
 
     setup-allowed-flags
@@ -309,6 +343,8 @@ strip-flags() {
 }
 
 test-flag-PROG() {
+    illegal_in_global_scope
+
     local comp=$1
     local flags="$2"
 
@@ -327,6 +363,8 @@ test-flag-CC() { test-flag-PROG "CC" "$1"; }
 test-flag-CXX() { test-flag-PROG "CXX" "$1"; }
 
 test-flags-PROG() {
+    illegal_in_global_scope
+
     local comp=$1
     local flags
     local x
@@ -358,12 +396,16 @@ test-flags() { test-flags-CC "$@"; }
 
 # Depriciated, use test-flags()
 test_flag() {
+    illegal_in_global_scope
+
     ewarn "test_flag: deprecated, please use test-flags()!" >&2
 
     test-flags-CC "$@"
 }
 
 test_version_info() {
+    illegal_in_global_scope
+
     if [[ $($(tc-getCC) --version 2>&1) == *$1* ]]; then
         return 0
     else
@@ -372,11 +414,15 @@ test_version_info() {
 }
 
 strip-unsupported-flags() {
+    illegal_in_global_scope
+
     export CFLAGS=$(test-flags-CC ${CFLAGS})
     export CXXFLAGS=$(test-flags-CXX ${CXXFLAGS})
 }
 
 get-flag() {
+    illegal_in_global_scope
+
     local f findflag="$1"
 
     # this code looks a little flaky but seems to work for
@@ -394,6 +440,8 @@ get-flag() {
 }
 
 replace-sparc64-flags() {
+    illegal_in_global_scope
+
     local SPARC64_CPUS="ultrasparc3 ultrasparc v9"
 
     if [ "${CFLAGS/mtune}" != "${CFLAGS}" ]; then
@@ -420,6 +468,8 @@ replace-sparc64-flags() {
 }
 
 append-ldflags() {
+    illegal_in_global_scope
+
     [[ -z $* ]] && return 0
     export LDFLAGS="${LDFLAGS} $*"
     return 0
@@ -428,6 +478,8 @@ append-ldflags() {
 # Remove flags from LDFLAGS - it's up to the ebuild to filter
 # CFLAGS and CXXFLAGS via filter-flags if they need to.
 filter-ldflags() {
+    illegal_in_global_scope
+
     _filter-var LDFLAGS "$@"
     return 0
 }
@@ -436,6 +488,8 @@ filter-ldflags() {
 # are suitable for passing directly to 'ld'; note LDFLAGS is usually passed
 # to gcc where it needs the '-Wl,'.
 raw-ldflags() {
+    illegal_in_global_scope
+
     local x input="$@"
     [[ -z ${input} ]] && input=${LDFLAGS}
     set --
@@ -448,6 +502,8 @@ raw-ldflags() {
 
 # Gets the flags needed for "NOW" binding
 bindnow-flags() {
+    illegal_in_global_scope
+
     case $($(tc-getLD) -v 2>&1 </dev/null) in
     *GNU* | *'with BFD'*) # GNU ld
         echo "-Wl,-z,now" ;;

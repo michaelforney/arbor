@@ -12,6 +12,8 @@ DEPENDENCIES="
 # suggested/recommended? app-text/sgmltools-lite
 
 sgml-catalog_cat_doinstall() {
+    illegal_in_global_scope
+
     if [[ ! -e ${2} ]] ; then
         eerror "${2} doesn't appear to exist, although it ought to!"
         continue
@@ -21,6 +23,8 @@ sgml-catalog_cat_doinstall() {
 }
 
 sgml-catalog_cat_doremove() {
+    illegal_in_global_scope
+
     if [[ -e ${2} ]] ; then
         ewarn "${2} still exists!  Not removing from ${1}"
         ewarn "This is normal behavior for an upgrade ..."
@@ -50,6 +54,8 @@ sgml-catalog_pkg_postrm() {
 }
 
 sgml-catalog_cleanup() {
+    illegal_in_global_scope
+
     # gensgmlenv comes from sgmltools-lite
     if [[ -e /usr/bin/gensgmlenv ]] ; then
         einfo "Regenerating SGML environment variables ..."

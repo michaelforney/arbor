@@ -123,6 +123,8 @@ perl-module_src_install() {
 }
 
 perlinfo() {
+    illegal_in_global_scope
+
     local v version installsitearch installsitelib installarchlib installvendorlib installvendorarch
     for v in version installsitearch installsitelib installarchlib \
         installvendorlib installvendorarch; do
@@ -151,6 +153,8 @@ perlinfo() {
 }
 
 fixlocalpod() {
+    illegal_in_global_scope
+
     perlinfo
 
     for perldir in "${IMAGE}${ARCH_LIB}" "${IMAGE}${SITE_LIB}" "${IMAGE}${VENDOR_LIB}"; do

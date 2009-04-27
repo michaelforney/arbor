@@ -60,6 +60,8 @@ scm_call() {
 }
 
 scm_access_checkout() {
+    illegal_in_global_scope
+
     [[ ${#} -ge 1 ]] || die "scm_access_checkout needs at least one argument"
     local dir=$(scm_get_var CHECKOUT_TO)
     local lock=${dir%/*}/.lock-${dir##*/}
@@ -105,11 +107,15 @@ scm_do_resolve_externals() {
 }
 
 scm_check_timestamp() {
+    illegal_in_global_scope
+
     [[ -e ${1}/${2} && -n $(find "${1}" -maxdepth 1 -name "${2}" \
         -mmin -$((${SCM_MIN_UPDATE_DELAY} * 60)) -print) ]]
 }
 
 scm_perform_fetch() {
+    illegal_in_global_scope
+
     local dir=$(scm_get_var CHECKOUT_TO)
 
     local whynot status
@@ -176,6 +182,8 @@ scm_perform_fetch() {
 }
 
 scm_fetch_one() {
+    illegal_in_global_scope
+
     scm_perform_fetch
     scm_call resolve_externals
 }

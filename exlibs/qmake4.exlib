@@ -16,6 +16,8 @@ DEPENDENCIES="build: x11-libs/qt:4 [[ note = [ Qt-Core, for qmake ] ]]"
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 
 eqmake4() {
+    illegal_in_global_scope
+
     [[ -x /usr/bin/qmake ]] || die "eqmake4() called but no qmake found"
 
     [[ ${@} == ${@%.pro} && -z ${EQMAKE4_SOURCES[@]} ]] && EQMAKE4_SOURCES=( ${PN}.pro )
@@ -37,6 +39,8 @@ eqmake4() {
 }
 
 qmake4_src_configure() {
+    illegal_in_global_scope
+
     eqmake4 \
         "${QMAKE4_SRC_CONFIGURE_PARAMS[@]}"
 }

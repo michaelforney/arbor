@@ -93,6 +93,8 @@ vim-plugin_pkg_postrm() {
 # /usr/share/vim/vimfiles/after/* comprised of the snippets in
 # /usr/share/vim/vimfiles/after/*/*.d
 update_vim_afterscripts() {
+    illegal_in_global_scope
+
     local d f afterdir=${ROOT}/usr/share/vim/vimfiles/after
 
     # Nothing to do if the dir isn't there

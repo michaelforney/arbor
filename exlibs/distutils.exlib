@@ -95,6 +95,8 @@ distutils_pkg_postinst() {
 # Calls python_version, so that you can use something like
 #  e.g. insinto /usr/include/python${PYVER}
 distutils_python_version() {
+    illegal_in_global_scope
+
     python_version
 }
 

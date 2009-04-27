@@ -50,10 +50,14 @@ __python_eclass_test() {
 # note:   supported by >=dev-lang/python-2.2.3-r3 only.
 #
 python_disable_pyc() {
+    illegal_in_global_scope
+
     export PYTHONDONTWRITEBYTECODE=1
 }
 
 python_enable_pyc() {
+    illegal_in_global_scope
+
     unset PYTHONDONTWRITEBYTECODE
 }
 
@@ -74,6 +78,8 @@ __python_version_extract() {
 }
 
 python_version() {
+    illegal_in_global_scope
+
     [[ -n "${PYVER}" ]] && return 0
     local tmpstr
     python=${python:-/usr/bin/python}
@@ -84,12 +90,16 @@ python_version() {
 
 # Run without arguments, returns the python library directory.
 python_get_libdir() {
+    illegal_in_global_scope
+
     python_version
     echo -n "/usr/$(get_libdir)/python${PYVER}"
 }
 
 # Run without arguments, returns the python site-packages directory.
 python_get_sitedir() {
+    illegal_in_global_scope
+
     echo -n "$(python_get_libdir)/site-packages"
 }
 
@@ -105,6 +115,8 @@ python_get_sitedir() {
 #     fi
 #
 python_mod_exists() {
+    illegal_in_global_scope
+
     [[ "$1" ]] || die "${FUNCNAME} requires an argument!"
     python -B -c "import $1" >/dev/null 2>&1
 }
@@ -117,6 +129,8 @@ python_mod_exists() {
 #     python_mod_compile /usr/lib/python2.3/site-packages/pygoogle.py
 #
 python_mod_compile() {
+    illegal_in_global_scope
+
     local f myroot myfiles=()
 
     # Check if phase is pkg_postinst()
@@ -158,6 +172,8 @@ python_mod_compile() {
 #     python_mod_optimize /usr/share/codegen
 #
 python_mod_optimize() {
+    illegal_in_global_scope
+
     local myroot mydirs=() myfiles=() myopts=()
 
     # Check if phase is pkg_postinst()
@@ -233,6 +249,8 @@ python_mod_optimize() {
 #     if they are, then it will remove their corresponding .pyc and .pyo
 #
 python_mod_cleanup() {
+    illegal_in_global_scope
+
     local SEARCH_PATH=() myroot src_py
 
     # Check if phase is pkg_postrm()

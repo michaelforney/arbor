@@ -89,6 +89,8 @@ autotools_select_versions() {
 # This function mimes the behavior of autoreconf, but uses the different
 # eauto* functions to run the tools. It doesn't take any parameters.
 eautoreconf() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local pwd=$(pwd) x auxdir
 
@@ -119,6 +121,8 @@ eautoreconf() {
 # without e prefix.
 # They also force installing the support files for safety.
 eaclocal() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local aclocal_opts=()
 
@@ -141,6 +145,8 @@ eaclocal() {
 }
 
 _elibtoolize() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local opts lttest
 
@@ -159,6 +165,8 @@ _elibtoolize() {
 }
 
 eautoheader() {
+    illegal_in_global_scope
+
     autotools_select_versions
     # Check if we should run autoheader
     [[ -n $(autotools_check_macro "AC_CONFIG_HEADERS") ]] || return 0
@@ -166,6 +174,8 @@ eautoheader() {
 }
 
 eautoconf() {
+    illegal_in_global_scope
+
     autotools_select_versions
     if [[ ! -f configure.ac && ! -f configure.in ]] ; then
         echo
@@ -178,6 +188,8 @@ eautoconf() {
 }
 
 eautotest() {
+    illegal_in_global_scope
+
     autotools_select_versions
     if [[ ! -f testsuite.at ]] ; then
         echo
@@ -190,6 +202,8 @@ eautotest() {
 }
 
 eautomake() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local extra_opts
 
@@ -219,6 +233,8 @@ eautomake() {
 
 # Internal function to run an autotools' tool
 autotools_run_tool() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local ret=0
 
@@ -234,6 +250,8 @@ autotools_run_tool() {
 
 # Internal function to check for support
 autotools_check_macro() {
+    illegal_in_global_scope
+
     autotools_select_versions
     [[ -f configure.ac || -f configure.in ]] && \
         WANT_AUTOCONF="2.5" autoconf --trace=$1 2>/dev/null
@@ -242,6 +260,8 @@ autotools_check_macro() {
 
 # Internal function to get additional subdirs to configure
 autotools_get_subdirs() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local subdirs_scan_out
 
@@ -258,6 +278,8 @@ autotools_get_subdirs() {
 }
 
 autotools_get_auxdir() {
+    illegal_in_global_scope
+
     autotools_select_versions
     local auxdir_scan_out
 

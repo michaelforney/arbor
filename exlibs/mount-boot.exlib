@@ -13,6 +13,8 @@
 export_exlib_phases pkg_preinst
 
 mount-boot_mount_boot_partition() {
+    illegal_in_global_scope
+
     if [[ -n ${DONT_MOUNT_BOOT} ]] ; then
         return
     else
@@ -70,5 +72,7 @@ mount-boot_mount_boot_partition() {
 }
 
 mount-boot_pkg_preinst() {
+    illegal_in_global_scope
+
     mount-boot_mount_boot_partition
 }

@@ -12,6 +12,8 @@ require multilib
 #
 # Install pam auth config file in /etc/pam.d
 dopamd() {
+    illegal_in_global_scope
+
     [[ -z $1 ]] && die "dopamd requires at least one argument"
 
     ( # dont want to pollute calling env
@@ -26,6 +28,8 @@ dopamd() {
 #
 # Install pam file <old name> as <new name> in /etc/pam.d
 newpamd() {
+    illegal_in_global_scope
+
     [[ $# -ne 2 ]] && die "newpamd requires two arguments"
 
     ( # dont want to pollute calling env
@@ -40,6 +44,8 @@ newpamd() {
 #
 # Installs the config files in /etc/security/<section>/
 dopamsecurity() {
+    illegal_in_global_scope
+
     [[ $# -lt 2 ]] && die "dopamsecurity requires at least two arguments"
 
     ( # dont want to pollute calling env
@@ -53,6 +59,8 @@ dopamsecurity() {
 #
 # Installs the config file <old name> as <new name> in /etc/security/<section>/
 newpamsecurity() {
+    illegal_in_global_scope
+
     [[ $# -ne 3 ]] && die "newpamsecurity requires three arguments"
 
     ( # dont want to pollute calling env
@@ -66,6 +74,8 @@ newpamsecurity() {
 #
 # Returns the pam modules' directory for current implementation
 getpam_mod_dir() {
+    illegal_in_global_scope
+
     if has_version sys-libs/pam || has_version sys-libs/openpam; then
         PAM_MOD_DIR=/$(get_libdir)/security
     else
@@ -80,6 +90,8 @@ getpam_mod_dir() {
 #
 # Install pam module file in the pam modules' dir for current implementation
 dopammod() {
+    illegal_in_global_scope
+
     [[ -z $1 ]] && die "dopammod requires at least one argument"
 
     exeinto $(getpam_mod_dir)
@@ -102,6 +114,8 @@ newpammod() {
 # This function creates a pamd file which mimics system-auth file
 # for the given levels in the /etc/pam.d directory.
 pamd_mimic_system() {
+    illegal_in_global_scope
+
     [[ $# -lt 2 ]] && die "pamd_mimic_system requires at least two argments"
 
     dodir /etc/pam.d
@@ -133,6 +147,8 @@ pamd_mimic_system() {
 # Cleans a pam.d file from modules that might not be present on the system
 # where it's going to be installed
 cleanpamd() {
+    illegal_in_global_scope
+
     while [[ -n $1 ]]; do
         if ! has_version sys-libs/pam; then
             sed -e '/pam_shells\|pam_console/s:^:#:' \

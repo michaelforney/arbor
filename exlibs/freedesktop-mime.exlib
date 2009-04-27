@@ -6,6 +6,8 @@ export_exlib_phases pkg_postinst pkg_postrm
 [[ "${CATEGORY}/${PN}" == 'x11-misc/shared-mime-info' ]] || DEPENDENCIES="build: x11-misc/shared-mime-info"
 
 freedesktop-mime_update_mime_database() {
+    illegal_in_global_scope
+
     if [[ "${ROOT}" == / ]] ; then
         ebegin "Updating MIME database"
         /usr/bin/update-mime-database /usr/share/mime
@@ -16,10 +18,14 @@ freedesktop-mime_update_mime_database() {
 }
 
 freedesktop-mime_pkg_postrm() {
+    illegal_in_global_scope
+
     freedesktop-mime_update_mime_database
 }
 
 freedesktop-mime_pkg_postinst() {
+    illegal_in_global_scope
+
     freedesktop-mime_update_mime_database
 }
 

@@ -14,6 +14,8 @@ DEPENDENCIES="
 
 # alternatives_for alternative provider importance source target [ source target [...]]
 alternatives_for() {
+    illegal_in_global_scope
+
     (( $# >= 5 )) && (( ($#-3)%2 == 0)) || die "${FUNCNAME} requires exactly 3+N*2 arguments where N>=1"
     local x dupl alternative=${1} provider=${2} importance=${3} index unique src target ret=0
     shift 3
@@ -83,6 +85,8 @@ alternatives_for() {
 export_exlib_phases pkg_postinst pkg_postrm
 
 alternatives_pkg_postinst() {
+    illegal_in_global_scope
+
     local a alt provider module_version="20080924"
     for a in "${ALTERNATIVES_PROVIDED[@]}"; do
         alt="${a%:*}"
@@ -112,6 +116,8 @@ EOF
 }
 
 alternatives_pkg_postrm() {
+    illegal_in_global_scope
+
     local a alt provider p
     for a in "${ALTERNATIVES_PROVIDED[@]}"; do
         alt="${a%:*}"
