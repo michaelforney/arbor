@@ -33,13 +33,6 @@ DEPENDENCIES="
         berkdb? ( sys-libs/db:= )
 "
 
-DEFAULT_SRC_COMPILE_PARAMS+=(
-    CC=$(tc-getCC)
-    AR=$(tc-getAR)
-    HOSTCC=$(tc-getBUILD_CC)
-    LIBDIR=/usr/$(get_libdir)
-)
-
 DEFAULT_SRC_INSTALL_PARAMS+=(
     LIBDIR=/usr/$(get_libdir)
     DESTDIR="${IMAGE}"
@@ -73,6 +66,10 @@ src_prepare() {
         sed -e '/TARGETS/s:arpd::' \
             -i misc/Makefile || die "sed s:arpd:: failed"
     fi
+}
+
+src_compile() {
+    emake CC=$(tc-getCC) AR=$(tc-getAR) HOSTCC=$(tc-getBUILD_CC) LIBDIR=/usr/$(get_libdir)
 }
 
 src_install() {
