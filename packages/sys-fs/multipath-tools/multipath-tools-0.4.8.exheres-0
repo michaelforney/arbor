@@ -1,0 +1,68 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'multipath-tools-0.4.8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2009 Gentoo Foundation
+
+require multilib toolchain-funcs
+
+SUMMARY="Userland tools for the device Mapper multipathing driver"
+DESCRIPTION="
+If you don't know what this is, you don't want it. Unless you want kpartx which
+is part of this package.
+"
+HOMEPAGE="http://christophe.varoqui.free.fr"
+DOWNLOADS="${HOMEPAGE}/${PN}/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE} [[ lang = en ]]"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        >=dev-libs/libaio-0.3.107
+        || (
+            >=sys-fs/lvm2-2.02.45
+            >=sys-fs/device-mapper-1.02.30
+        )
+        >=sys-fs/sysfsutils-2.1.0
+        >=sys-fs/udev-141
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-build.patch )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( multipath.conf.annotated multipath.conf.synthetic )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( kpartx )
+
+src_prepare() {
+    default
+
+    local my_libdir=$(get_libdir)
+    sed -i -e '/KRNLLIB/s:/lib/:/'${my_libdir}'/:' Makefile || die "sed 1 failed"
+    sed -i -e '/libudevdir/s:/lib/:/'${my_libdir}'/:' Makefile.inc || die "sed 2 failed"
+}
+
+src_compile() {
+    emake -j1 CC="$(tc-getCC)"
+}
+
+src_install() {
+    default
+
+    insinto /etc
+    newins "${WORK}"/multipath.conf.annotated multipath.conf
+    fperms 644 /etc/udev/rules.d/65-multipath.rules
+    fperms 644 /etc/udev/rules.d/66-kpartx.rules
+
+    # This is the monitoring daemon
+    newinitd "${FILES}"/rc-multipathd multipathd
+    # Handle early-boot startup as well as shutdown of multipath devices
+    insinto /$(get_libdir)/rcscripts/addons
+    doins "${FILES}"/multipath-start.sh
+    doins "${FILES}"/multipath-stop.sh
+}
