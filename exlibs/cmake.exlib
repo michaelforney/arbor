@@ -18,6 +18,7 @@ DEPENDENCIES="
 export_exlib_phases src_configure src_compile src_test src_install
 
 ECMAKE_BUILD_DIR="${WORKBASE}"/build
+DEFAULT_SRC_TEST_PARAMS+=( ARGS="--verbose" )
 
 # Similar to option_enable for cmake. A few examples:
 #   `cmake_enable Foo`     -> foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
@@ -156,7 +157,6 @@ cmake_src_compile() {
 # Function for testing the package. Automatically detects the build dir. Uses
 # default_src_test.
 cmake_src_test() {
-    DEFAULT_SRC_TEST_PARAMS+=( ARGS="--verbose" )
     _cmake_run default_src_test
 }
 
