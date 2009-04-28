@@ -17,9 +17,9 @@ UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-1.1"
 SLOT="0"
-MYOPTIONS="berkdb nls perl python ruby slowtests"
+MYOPTIONS="berkdb nls perl python ruby"
 
-RESTRICT="!slowtests? ( test )"
+RESTRICT="test"
 
 DEPENDENCIES="
     build:
@@ -27,7 +27,7 @@ DEPENDENCIES="
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
-        slowtests? ( >=dev-lang/python-2.2:* )
+        build_options:slow_tests? ( >=dev-lang/python-2.2:* )
     build+run:
         dev-libs/apr-util[berkdb?]
         net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2|~0.28.3]
@@ -69,6 +69,10 @@ src_compile() {
     option perl && emake swig-pl
     option python && emake swig-py
     option ruby && emake swig-rb
+}
+
+src_test_slow() {
+    default_src_test
 }
 
 src_install() {

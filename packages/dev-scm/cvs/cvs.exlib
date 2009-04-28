@@ -51,9 +51,9 @@ offers the following significant advantages over RCS:
 
 LICENCES="GPL-2 FDL-1.1" # COPYING is GPL-1, but most files have GPL-2 headers
 SLOT="0"
-MYOPTIONS="pam slowtests" # XXX kerberos
+MYOPTIONS="pam" # XXX kerberos
 
-RESTRICT="!slowtests? ( test )"
+RESTRICT="test"
 
 DEPENDENCIES="
     build+run:
@@ -72,7 +72,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( pam )
 
-cvs_src_test() {
+cvs_src_test_slow() {
     addwrite /dev/full
     TMPDIR=${TMPDIR%/} default
 }
@@ -85,5 +85,5 @@ DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( DEVEL-CVS MINOR-BUGS PROJECTS TESTS doc/{RCSFILES,cvs-paper.{ps,pdf},writeproxy.rtf} )
 DEFAULT_SRC_INSTALL_EXCLUDE=( README.VMS )
 
-export_exlib_phases src_test src_install
+export_exlib_phases src_test_slow src_install
 

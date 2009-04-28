@@ -20,7 +20,9 @@ UPSTREAM_CHANGELOG="${HOMEPAGE}users/news/version_${PV//./_}"
 LICENCES="freedist Boost-1.0"
 SLOT="0"
 
-MYOPTIONS="doc expat slowtests"
+RESTRICT="test"
+
+MYOPTIONS="doc expat"
 # Libraries that need compiling:
 # PARTS+=" date_time filesystem function_types graph iostreams mpi program_options python regex serialization signals system test thread wave"
 #
@@ -117,11 +119,10 @@ src_compile() {
     popd >/dev/null || die "popd failed."
 }
 
-src_test() {
-    option slowtests || return 0
+src_test_slow() {
     cd "${WORK}/status"
     echo "Running ${PN} tests, go make some coffee!"
-    
+
     nonfatal ebjam --dump-tests 2>&1 | tee regress.log || ewarn "'ebjam --dump-tests' returned non-zero exit status: $?"
 
     "${WORK}"/tools/regression/build/bin/gcc-$(gcc-fullversion)/exherbo/threading-multi/process_jam_log --v2 < "${WORK}"/status/regress.log \
