@@ -52,29 +52,6 @@ DEFAULT_SRC_PREPARE_PATCHES+=(
     "${FILES}/${PN}-backend-https.patch"
 )
 
-DEFAULT_SRC_CONFIGURE_PARAMS+=(
-    --enable-pdftops # see below
-    --enable-raw-printing
-    --enable-static
-    --with-cups-user=lp
-    --with-cups-group=lp
-    --with-system-groups=lpadmin
-    --libdir="/usr/$(get_libdir)"
-    --localstatedir=/var
-    --with-docdir="/usr/share/doc/${PNVR}/handbook"
-    DSOFLAGS="${LDFLAGS}"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=(
-    dbus gnutls 'gnutls ssl' jpeg pam png ssl 'ssl openssl' tiff threads
-    # acl 'kerberos glssapi' ldap slp
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
-    perl python # java php
-    'xinetd xinetd /etc/xinetd.d'
-)
-
 DEFAULT_SRC_INSTALL_PARAMS+=(
     BUILDROOT="${IMAGE}"
 )
@@ -116,7 +93,31 @@ src_configure() {
 
     [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
 
-    DEFAULT_SRC_CONFIGURE_PARAMS+=( --with-languages="${CUPSLANGS}" )
+    # XXX Enables: acl 'kerberos glssapi' ldap slp
+    # XXX Withs: java php
+    econf \
+        --enable-pdftops \
+        --enable-raw-printing \
+        --enable-static \
+        --with-cups-{group,user}=lp \
+        --with-system-groups=lpadmin \
+        --libdir="/usr/$(get_libdir)" \
+        --localstatedir=/var \
+        --with-docdir="/usr/share/doc/${PNVR}/handbook" \
+        --with-languages="${CUPSLANGS}" \
+        $(option_enable dbus) \
+        $(option_enable gnutls) \
+        $(option_enable gnutls ssl) \
+        $(option_enable jpeg) \
+        $(option_enable pam) \
+        $(option_enable png) \
+        $(option_enable ssl) \
+        $(option_enable ssl openssl) \
+        $(option_enable tiff) \
+        $(option_enable threads) \
+        $(option_with perl) \
+        $(option_with python) \
+        $(option_with xinetd xinetd /etc/xinetd.d)
 
     default
 }
