@@ -6,7 +6,8 @@ require gnu [ suffix=gz ]
 SUMMARY="Extensible M4 macro package producing configure scripts"
 
 LICENCES="GPL-2"
-MYOPTIONS="slowtests"
+MYOPTIONS=""
+RESTRICT="test"
 
 DEPENDENCIES="
     build:
@@ -20,7 +21,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
-src_test() {
-    option slowtests && default
+src_test_slow() {
+   emake check
 }
 
