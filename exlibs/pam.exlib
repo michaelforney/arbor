@@ -76,14 +76,7 @@ newpamsecurity() {
 getpam_mod_dir() {
     illegal_in_global_scope
 
-    if has_version sys-libs/pam || has_version sys-libs/openpam; then
-        PAM_MOD_DIR=/$(get_libdir)/security
-    else
-        # Unable to find PAM implementation... defaulting
-        PAM_MOD_DIR=/$(get_libdir)/security
-    fi
-
-    echo ${PAM_MOD_DIR}
+    echo /$(get_libdir)/security
 }
 
 # dopammod <file> [more files]
