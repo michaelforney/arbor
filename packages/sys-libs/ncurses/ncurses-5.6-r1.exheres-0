@@ -30,9 +30,12 @@ src_configure() {
 
     if option unicode; then
         cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
-        DEFAULT_SRC_CONFIGURE_PARAMS+=( --includedir=/usr/include/ncursesw )
-        DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=( 'unicode widec' )
-        default
+
+        econf \
+            "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
+            --includedir=/usr/include/ncursesw \
+            $(option_with gpm) \
+            $(option_enable 'unicode widec')
     fi
 }
 

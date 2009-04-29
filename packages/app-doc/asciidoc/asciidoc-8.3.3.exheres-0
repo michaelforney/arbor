@@ -27,6 +27,8 @@ http://www.methods.co.nz/asciidoc/faq.html [[ description = [ FAQ ] ]]
 "
 UPSTREAM_RELEASE_NOTES="http://www.methods.co.nz/asciidoc/CHANGELOG.html"
 
+DEFAULT_SRC_INSTALL_PARAMS=( vimdir='/usr/share/vim/vimfiles' )
+
 src_prepare() {
     sed -i 's, /etc/vim,,' Makefile.in \
         || die 'install-vim suckage-fixing sed failed'
@@ -34,7 +36,6 @@ src_prepare() {
 
 src_install() {
     dodir '/usr/share/vim/vimfiles'
-    DEFAULT_SRC_INSTALL_PARAMS=( 'vimdir=/usr/share/vim/vimfiles' )
     default
 }
 
