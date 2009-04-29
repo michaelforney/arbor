@@ -6,7 +6,7 @@
 NEED_PYTHON=2.5:=
 require python bash-completion distutils
 
-export_exlib_phases src_test src_install
+export_exlib_phases src_test_slow src_install
 
 MY_PV=${PV/_}
 
@@ -30,6 +30,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/Documentation [[ lang = en ]]"
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS=""
+RESTRICT="test"
 
 DEPENDENCIES="
     post,recommended:
@@ -43,7 +44,7 @@ PYTHON_MODNAME="bzrlib"
 
 WORK="${WORKBASE}"/${PN}-${MY_PV}
 
-bzr_src_test() {
+bzr_src_test_slow() {
     # Some tests expect the usual pyc compiling behaviour.
     python_enable_pyc
     "${python}" bzr --no-plugins selftest || die "bzr selftest failed"
@@ -60,3 +61,4 @@ bzr_src_install() {
 
     dobashcompletion contrib/bash/bzr
 }
+
