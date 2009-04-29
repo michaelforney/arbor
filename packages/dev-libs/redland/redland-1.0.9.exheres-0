@@ -45,3 +45,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "sqlite sqlite-version 3"
 )
 
+src_install() {
+    default
+
+    if ! option mysql && ! option postgresql && ! option sqlite; then
+        rmdir "${IMAGE}"/usr/$(get_libdir)/redland || die "Removing empty directories failed"
+    fi
+}
