@@ -46,28 +46,23 @@ src_prepare() {
     sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
         || die "sed to fix the xauth path failed"
 
+    default
+
     if [[ -n ${X509_PATCH} ]] && option X509 ; then
-        DEFAULT_SRC_PREPARE_PATCHES+=( 
-            -p1 "${WORKBASE}/${X509_PATCH/.gz}"
-            -p0 "${FILES}/${PN}-4.9_p1-x509-hpn-glue.patch"
+        expatch \
+            -p1 "${WORKBASE}/${X509_PATCH/.gz}" \
+            -p0 "${FILES}/${PN}-4.9_p1-x509-hpn-glue.patch" \
             -p0 "${FILES}/${PN}-4.7_p1-GSSAPI-dns.patch"
-        )
     else
-        DEFAULT_SRC_PREPARE_PATCHES+=(
-            -p0 "${FETCHEDDIR}/${PARCH}-gsskex-20080404.patch"
-        )
+        expatch -p0 "${FETCHEDDIR}/${PARCH}-gsskex-20080404.patch"
     fi
 
     if [[ -n ${HPN_PATCH} ]] && option hpn ; then
-        DEFAULT_SRC_PREPARE_PATCHES+=(
-            -p1 "${WORKBASE}/${HPN_PATCH/.gz}"
-        )
+        expatch -p1 "${WORKBASE}/${HPN_PATCH/.gz}"
     fi
 
-    default
-
-    sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac} \
-        || die "sed to fix linking to openssl failed"
+    sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac} ||
+        die "sed to fix linking to openssl failed"
 
     eautoreconf
 }
