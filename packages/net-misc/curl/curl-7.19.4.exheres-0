@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
@@ -19,21 +19,22 @@ DEPENDENCIES="
             dev-libs/openssl
         )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
-    --disable-{gssapi,ldap,sspi}
-    --without-{gnutls,nss,krb4,libssh2,spnego}
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares ipv6 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'idn libidn' 'ssl' )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting
 )
 
 src_configure() {
-    option ssl && DEFAULT_SRC_CONFIGURE_PARAMS+=( --without-ca-bundle --with-ca-path=/etc/ssl/certs )
-    default
+    econf \
+        --disable-{gssapi,ldap,sspi} \
+        --without-{gnutls,nss,krb4,libssh2,spnego} \
+        --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile} \
+        $(option_enable ares) \
+        $(option_enable ipv6) \
+        $(option_with idn libidn) \
+        $(option_with ssl) \
+        $(option ssl && echo --without-ca-bundle) \
+        $(option ssl && echo --with-ca-path=/etc/ssl/certs)
 }
 
 
