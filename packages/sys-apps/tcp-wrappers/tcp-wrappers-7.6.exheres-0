@@ -29,9 +29,9 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     )
 
 src_prepare() {
-    option ipv6 && DEFAULT_SRC_PREPARE_PATCHES+=( -p2 "${PATCHDIR}/${PNV}-ipv6-1.14.diff" )
-
     default
+
+    option ipv6 && expatch -p2 "${PATCHDIR}"/${PNV}-ipv6-1.14.diff
 }
 
 src_compile() {
