@@ -1,4 +1,4 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2009 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -34,10 +34,10 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_prepare() {
-    option pam && DEFAULT_SRC_PREPARE_PATCHES+=( -p1 "${WORKBASE}/${PNV}-pam.patch" )
-
     default
-    
+
+    option pam && expatch -p1 "${WORKBASE}"/${PNV}-pam.patch
+
     sed -i -e "s:gcc \(-Wall.*\):$(tc-getCC) \1 ${CFLAGS}:" \
         -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile \
         || die "sed Makefile failed"
