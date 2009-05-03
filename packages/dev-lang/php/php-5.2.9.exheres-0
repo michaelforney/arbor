@@ -1,0 +1,315 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="PHP is a general-purpose scripting language especially suited for web development"
+DESCRIPTION="
+PHP is a widely-used Open Source general-purpose scripting language that is especially
+suited for Web development and can be embedded into HTML. Its syntax draws upon
+C, Java, and Perl, and is easy to learn. PHP runs on many different platforms and
+can be used as a standalone executable or as a module under a variety of Web servers.
+It has excellent support for databases, XML, LDAP, IMAP, Java, various Internet
+protocols, and general data manipulation, and is extensible via its powerful API.
+"
+HOMEPAGE="http://www.${PN}.net"
+DOWNLOADS="${HOMEPAGE}/distributions/${PNV}.tar.bz2"
+
+LICENCES="PHP-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    debug
+    ipv6
+    php_extensions:
+        curl        [[ description = [ Build the cURL extension (includes curl-wrappers). ] ]]
+        berkdb      [[ description = [ Build the Berkeley DB extension. ] ]]
+        exif        [[ description = [ Support acquiring metadata from images using exif. ] ]]
+        filter      [[ description = [ Build the input filter extension. ] ]]
+        ftp         [[ description = [ Enable FTP support. ] requires = [ php_extensions: ssl ] ]]
+        gd          [[ description = [ Support dynamic image manipulation via the GD graphics library (activates all supported formats) ] ]]
+        gdbm        [[ description = [ Build the GNU DBM extension. ] ]]
+        imap        [[ description = [ Support for the IMAP4 protocol. ] ]]
+        kerberos    [[ description = [ Support for Kerberos authentication. ] ]]
+        ldap        [[ description = [ Support for LDAP authentication (activates SASL, too). ] ]]
+        libedit     [[ description = [ Use libedit, the readline replacement. ] requires = [ php_extensions: -readline ] ]]
+        mcrypt      [[ description = [ Support modern encryption algorithms, e. g. AES. ] ]]
+        mssql       [[ description = [ Support for MS SQL-Server. ] ]]
+        mysql       [[ description = [ Support for the popular MySQL database. ] requires = [ php_extensions: -recode ] ]]
+        ncurses     [[ description = [ Include ncurses support (CLI/CGI only) ] ]]
+        pcre        [[ description = [ Include support for Perl Compatible Regular Expressions. ] ]]
+        pdo-dblib   [[ description = [ PDO: Support for MS SQL-Server. ] ]]
+        pdo-mysql   [[ description = [ PDO: Support for the popular MySQL database. ] ]]
+        pdo-odbc    [[ description = [ PDO: Support for ODBC. ] ]]
+        pdo-pgsql   [[ description = [ PDO: Support for PostgreSQL. ] ]]
+        pdo-sqlite  [[ description = [ PDO: Support for sqlite3. ] ]]
+        pgsql       [[ description = [ Support for the PostgreSQL database. ] ]]
+        pspell      [[ description = [ Support for spell checking via aspell. ] ]]
+        readline    [[ description = [ Include readline support (CLI/CGI only) ] requires = [ php_extensions: -libedit ] ]]
+        recode      [[ description = [ Include support for the recode extension. ] requires = [ php_extensions: -mysql ] ]]
+        ssl         [[ description = [ Include OpenSSL support (can be used for FTP, IMAP, SNMP). ] ]]
+        tidy        [[ description = [ Include TIDY support. ] ]]
+        unixodbc    [[ description = [ Support for using ODBC database connections using unixODBC. ] ]]
+        xml         [[ description = [ Support for XML parsing/reading/writing. ] ]]
+        xsl         [[ description = [ Include XSL support. ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+    build+run:
+        >=dev-libs/gmp-4.3.0
+        >=www-servers/apache-2.2.11
+        php_extensions:curl? ( >=net-misc/curl-7.19.4 )
+        php_extensions:berkdb? ( >=sys-libs/db-4.6.21 )
+        php_extensions:ftp? ( >=dev-libs/openssl-0.9.8j )
+        php_extensions:gd? (
+            >=media-libs/gd-2.0.35
+            >=media-libs/jpeg-6b
+            >=media-libs/libpng-1.2.35
+            >=x11-libs/libXpm-3.5.7
+            media-libs/freetype:2
+            >=media-libs/t1lib-5.1.2
+        )
+        php_extensions:gdbm? ( >=sys-libs/gdbm-1.8.3 )
+        php_extensions:imap? (
+            php_extensions:ssl? (
+                >=dev-libs/c-client-2007e[ssl]
+            )
+            !php_extensions:ssl? (
+                >=dev-libs/c-client-2007e[-ssl]
+            )
+        )
+        php_extensions:kerberos? ( >=app-crypt/heimdal-1.2.1 )
+        php_extensions:ldap? (
+            >=net-nds/openldap-2.4.15
+            >=net-libs/cyrus-sasl-2.1.22
+        )
+        php_extensions:libedit? ( >=dev-libs/libedit-2.11_p20080712 )
+        php_extensions:mcrypt? ( >=dev-libs/libmcrypt-2.5.8 )
+        php_extensions:mssql? ( >=dev-db/freetds-0.82 )
+        php_extensions:mysql? ( >=dev-db/mysql-5.0.72 )
+        php_extensions:ncurses? ( >=sys-libs/ncurses-5.7 )
+        php_extensions:pcre? ( >=dev-libs/pcre-7.9 )
+        php_extensions:pdo-dblib? ( >=dev-db/freetds-0.82 )
+        php_extensions:pdo-mysql? ( >=dev-db/mysql-5.0.72 )
+        php_extensions:pdo-odbc? ( >=dev-db/unixODBC-2.2.14 )
+        php_extensions:pdo-pgsql? ( >=dev-db/postgresql-8.3.7 )
+        php_extensions:pdo-sqlite? ( >=dev-db/sqlite-3.5.9 )
+        php_extensions:pgsql? ( >=dev-db/postgresql-8.3.7 )
+        php_extensions:pspell? ( >=app-spell/aspell-0.50.0 )
+        php_extensions:readline? ( >=sys-libs/readline-5.2_p12 )
+        php_extensions:recode? ( >=app-text/recode-3.6 )
+        php_extensions:ssl? (
+            >=dev-libs/openssl-0.9.8j
+            php_extensions:imap? (
+                >=dev-libs/c-client-2007e[ssl]
+            )
+        )
+        php_extensions:tidy? ( >=app-text/tidy-20080116 )
+        php_extensions:unixodbc? ( >=dev-db/unixODBC-2.2.14 )
+        php_extensions:xml? ( >=dev-libs/libxml2-2.7.2_p20081127 )
+        php_extensions:xsl? ( >=dev-libs/libxslt-1.1.0 )
+"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog-$(ever major).php [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.php"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/$(ever replace_all _).php [[ lang = en ]]"
+
+# 98,3% of the tests pass but 1,5% fail. Most of those fail because things like
+# ODBC are not configured and/or running. If someone really wants to look into
+# that, be my guest. I won't but I reported the test failures upstream.
+RESTRICT="test"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --libdir=/usr/share/${PN}
+    --enable-bcmath
+    --enable-calendar
+    --enable-cli
+    --enable-ctype
+    --enable-dba
+    --enable-discard-path
+    --enable-flatfile
+    --enable-force-cgi-redirect
+    --enable-hash
+    --enable-inifile
+    --enable-magic-quotes
+    --enable-mbstring
+    --enable-mbregex
+    --enable-mbregex-backtrack
+    --enable-pcntl
+    --enable-posix
+    --enable-reflection
+    --enable-safe-mode
+    --enable-session
+    --enable-shmop
+    --enable-sockets
+    --enable-sysvmsg
+    --enable-sysvsem
+    --enable-sysvshm
+    --enable-zend-multibyte
+    --enable-zip
+    --disable-dbase
+    --disable-embed
+    --with-apxs2
+    --with-bz2
+    --with-config-file-path=/etc/${PN}
+    --with-config-file-scan-dir=/etc/${PN}
+    --with-exec-dir=/usr/bin
+    --with-gettext
+    --with-gmp
+    --with-iconv
+    --with-layout=GNU
+    --with-zlib
+    --with-zlib-dir=/usr
+    --without-adabas
+    --without-aolserver
+    --without-apache-hooks
+    --without-apache-hooks-static
+    --without-apxs
+    --without-birdstep
+    --without-caudium
+    --without-cdb
+    --without-continuity
+    --without-custom-odbc
+    --without-empress
+    --without-empress-bcs
+    --without-esoob
+    --without-fbsql
+    --without-fdftk
+    --without-mhash
+    --without-ibm-db2
+    --without-interbase
+    --without-iodbc
+    --without-isapi
+    --without-milter
+    --without-ming
+    --without-mm
+    --without-msql
+    --without-ndbm
+    --without-nsapi
+    --without-ODBCRouter
+    --without-oci8
+    --without-pdo-firebird
+    --without-pdo-oci
+    --without-phttpd
+    --without-pi3web
+    --without-qdbm
+    --without-roxen
+    --without-sapdb
+    --without-snmp
+    --without-solid
+    --without-sybase
+    --without-sybase-ct
+    --without-thttpd
+    --without-ttf
+    --without-tux
+    --without-webjames
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    debug
+    ipv6
+    "php_extensions:exif exif"
+    "php_extensions:filter filter"
+    "php_extensions:gd gd-native-ttf"
+    "php_extensions:pdo-sqlite sqlite-utf8"
+    "php_extensions:xml dom"
+    "php_extensions:xml libxml"
+    "php_extensions:xml simplexml"
+    "php_extensions:xml soap"
+    "php_extensions:xml wddx"
+    "php_extensions:xml xml"
+    "php_extensions:xml xmlreader"
+    "php_extensions:xml xmlwriter"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "php_extensions:curl curl"
+    "php_extensions:curl curlwrappers"
+    "php_extensions:berkdb db4"
+    "php_extensions:gd gd=/usr"
+    "php_extensions:gd jpeg-dir=/usr"
+    "php_extensions:gd freetype-dir=/usr"
+    "php_extensions:gd png-dir=/usr"
+    "php_extensions:gd t1lib=/usr"
+    "php_extensions:gd xpm-dir=/usr"
+    "php_extensions:imap imap"
+    "php_extensions:gdbm gdbm"
+    "php_extensions:kerberos kerberos"
+    "php_extensions:ldap ldap"
+    "php_extensions:ldap ldap-sasl"
+    "php_extensions:libedit libedit"
+    "php_extensions:mcrypt mcrypt"
+    "php_extensions:mssql mssql"
+    "php_extensions:mysql mysql"
+    "php_extensions:ncurses ncurses"
+    "php_extensions:pcre pcre-dir=/usr"
+    "php_extensions:pcre pcre-regex=/usr"
+    "php_extensions:pdo-dblib pdo-dblib=/usr"
+    "php_extensions:pdo-mysql pdo-mysql=/usr"
+    "php_extensions:pdo-odbc pdo-odbc=unixODBC,/usr"
+    "php_extensions:pdo-pgsql pdo-pgsql=/usr"
+    "php_extensions:pdo-sqlite pdo-sqlite=/usr"
+    "php_extensions:pgsql pgsql=/usr"
+    "php_extensions:pspell pspell"
+    "php_extensions:readline readline"
+    "php_extensions:recode recode"
+    "php_extensions:ssl imap-ssl"
+    "php_extensions:ssl openssl"
+    "php_extensions:tidy tidy"
+    "php_extensions:unixodbc unixODBC=/usr"
+    "php_extensions:xsl xsl"
+)
+
+DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    CODING_STANDARDS
+    EXTENSIONS
+    UPGRADING
+)
+
+DEFAULT_SRC_INSTALL_EXCLUDE=(
+    README.QNX
+    README.WIN32-BUILD-SYSTEM
+    README.Zeus
+)
+
+src_test() {
+    # We enable safe mode by default but for the tests, it must be disabled. Thus,
+    # we make sure the standard php.ini-dist (which disables safe mode) gets used
+    # here.
+    cp php.ini-dist tmp-php.ini
+    sed -i -e 's:\(echo >\) \($(top_builddir)/tmp-php.ini;\):\1> \2 :' Makefile
+
+    emake -j1 test
+}
+
+src_install() {
+    # Needed but useless because we'll remove it later.
+    mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
+    cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2 || die "copying httpd.conf failed"
+
+    default
+
+    # Cleaning up.
+    rm -r "${IMAGE}"/.{channels,registry} || die "removing obsolete dirs failed"
+    rmdir "${IMAGE}"/usr/include/php/include || die "removing empty dirs failed"
+    rm \
+        "${IMAGE}"/.{depdb,depdblock,filemap,lock} \
+        "${IMAGE}"/etc/apache2/* \
+        || die "removing cruft failed"
+
+    keepdir /usr/share/pear/.registry/.channel.__uri
+    keepdir /usr/share/pear/.registry/.channel.pecl.php.net
+
+    dodir /etc/${PN}
+    insinto /etc/${PN}
+    newins php.ini-recommended php.ini
+
+    dodir /etc/apache2/modules.d
+    insinto /etc/apache2/modules.d
+    doins "${FILES}"/70_mod_php.conf
+}
