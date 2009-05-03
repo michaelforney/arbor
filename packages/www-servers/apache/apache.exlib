@@ -59,6 +59,7 @@ WORK="${WORKBASE}/httpd-${PV}"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-layout=Exherbo
+    --enable-so
 
     --datadir=/usr/share/apache2
     # Stupid autoconf that doesn't take --docdir=/usr/share/doc/${PNVR}
@@ -83,15 +84,24 @@ apache_src_prepare() {
 apache_src_install() {
     default
 
-    keepdir /var/lib/dav /var/log/apache2 /var/cache/apache2
-    fowners apache:apache /var/lib/dav /var/log/apache2 /var/cache/apache2
-    fperms 0755 /var/lib/dav /var/log/apache2 /var/cache/apache2
+    keepdir /var/lib/dav /var/{cache,log,run}/apache2
+    fowners apache:apache /var/lib/dav /var/{cache,log,run}/apache2
+    fperms 0755 /var/lib/dav /var/{cache,log,run}/apache2
 
     rm -r "${IMAGE}"/etc/apache2/original || die "Failed to remove duplicate config files"
     # rm -r "${IMAGE}"/usr/share/apache2/build || die "Removing junk failed"
 
     find "${IMAGE}"/usr/share/doc/${PNVR}/manual/ -type d -empty -delete ||
         die "Couldn't remove empty directories under /usr/share/manual/"
+
+    newconfd "${FILES}"/apache-confd apache2
+    newinitd "${FILES}"/apache-initd apache2
+
+    # Fix user/group.
+    sed -i -e "s:^\(.* \)daemon$:\1 ${PN}:" "${IMAGE}"/etc/apache2/httpd.conf
+
+    # Add modules.d config part.
+    cat "${FILES}"/apache-modules.d.conf >> "${IMAGE}"/etc/apache2/httpd.conf
 }
 
 # Rather than trying to outsmart autoconf, we define our own layout, to get a
@@ -118,10 +128,9 @@ add-exherbo-layout() {
     cgidir:        /srv/www/cgi-bin
     includedir:    \${prefix}/include+
     localstatedir: /var
-    runtimedir:    \${localstatedir}/log
-    logfiledir:    \${localstatedir}/log
+    runtimedir:    \${localstatedir}/run/apache2
+    logfiledir:    \${localstatedir}/log/apache2
     proxycachedir: \${localstatedir}/proxy
 </Layout>
 EOF
 }
-

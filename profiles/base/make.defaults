@@ -5,7 +5,7 @@
 # metadata/info/variables.conf.
 SUBOPTIONS="APACHE_MODULES ENCODINGS EPIPHANY_EXTENSIONS GSTREAMER_PLUGINS IM_PROTOCOLS
 INPUT_DRIVERS KDE_PARTS KIPI_PLUGINS KOPETE_PLUGINS LINGUAS PLATFORM AMD64_CPU_FEATURES
-IA64_CPU_FEATURES PPC_CPU_FEATURES VIDEO_DRIVERS X86_CPU_FEATURES"
+IA64_CPU_FEATURES PPC_CPU_FEATURES VIDEO_DRIVERS X86_CPU_FEATURES PHP_EXTENSIONS"
 
 # SUBOPTIONS variables that the package manager hides.
 HIDDEN_SUBOPTIONS="PLATFORM AMD64_CPU_FEATURES IA64_CPU_FEATURES PPC_CPU_FEATURES X86_CPU_FEATURES"
@@ -31,3 +31,7 @@ KDE_PARTS="${KDE_PARTS} kate" # kdesdk
 KDE_PARTS="${KDE_PARTS} amor kteatime ktux kweather" # kdetoys
 KDE_PARTS="${KDE_PARTS} kcalc kcharselect kdf kgpg kwallet" # kdeutils
 KDE_PARTS="${KDE_PARTS} kpresenter krita kspread kword" # koffice
+
+# Wulf C. Krueger <philantrop@exherbo.org>
+# Default Apache modules to make it work with its default httpd.conf.
+APACHE_MODULES="alias authz_host dir log_config logio mime"
