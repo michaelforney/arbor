@@ -1,0 +1,58 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'redland-1.0.8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require multilib autotools [ deps_var=autotools_deps supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+
+SUMMARY="High-level interface for the Resource Description Framework"
+HOMEPAGE="http://librdf.org"
+DOWNLOADS="http://download.librdf.org/source/${PNV}.tar.gz"
+
+LICENCES="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="berkdb sqlite ssl" # mysql postgres
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        !berkdb? ( ${autotools_deps} )
+    build+run:
+        dev-libs/libxml2
+        >=dev-libs/rasqal-0.9.16
+        berkdb? ( sys-libs/db:= )
+        sqlite? ( dev-db/sqlite:3 )
+        ssl? ( dev-libs/openssl )"
+
+src_prepare() {
+    if option !berkdb; then
+        # This test fails without berkdb
+        sed -e 's: rdf_model_test::' -e '/^rdf_model_test:/{g;n;d;}' \
+            -i "${WORK}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test"
+        eautomake # eautoreconf needs dev-util/gtk-doc
+    fi
+}
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-raptor=system
+    --with-rasqal=system
+    --with-xml-parser=libxml
+    --without-mysql
+    --without-postgresql
+    --with-threads
+    --disable-modular
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "berkdb bdb"
+    "ssl openssl-digests"
+    "sqlite"
+    "sqlite sqlite-version 3"
+)
+
+src_install() {
+    default
+
+    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}
+}
+
