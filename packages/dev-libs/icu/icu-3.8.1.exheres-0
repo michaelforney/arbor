@@ -15,8 +15,9 @@ DEPENDENCIES=""
 WORK="${WORKBASE}/${PN}/source"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PN}-3.8-set-breaktype-public.patch"
-                              -p0 "${FILES}/${PN}-3.8-regexp-CVE-2007-4770-4771.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--with-iostream=st'd )
+                              -p0 "${FILES}/${PN}-3.8-regexp-CVE-2007-4770-4771.patch"
+                              -p2 "${FILES}/${PNV}-bare-elif.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--with-iostream=std' )
 
 src_prepare() {
     default
