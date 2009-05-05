@@ -88,8 +88,8 @@ src_configure() {
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=yes \
         --program-suffix=-${SLOT} \
-        $(option_with graphite cloog) \
-        $(option_with graphite ppl) \
+        $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
+        $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
         $(option_enable nls) \
         $(option_enable propolice libssp)
 }
