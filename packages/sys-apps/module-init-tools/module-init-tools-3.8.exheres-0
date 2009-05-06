@@ -20,6 +20,18 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CODING )
 
+pkg_pretend() {
+    local file errors=()
+    for file in "${ROOT}"/etc/modprobe.d/* ; do
+        [[ -f ${file} && ${file} != *.conf ]] && errors+=( "${file}" )
+    done
+
+    if [[ -n ${errors[@]} ]]; then
+        eerror "Files in /etc/modprobe.d should end in '.conf', please migrate the following files: ${errors[@]/#/$'\n'}"
+        die "Rename your files in /etc/modprobe.d to end in '.conf'"
+    fi
+}
+
 src_install() {
     default
     dosym ../bin/lsmod /sbin/lsmod
