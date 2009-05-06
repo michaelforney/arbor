@@ -33,8 +33,11 @@ DEPENDENCIES="
     build+run:
         activefilter? ( >=dev-libs/libpcap-0.9.8 )
         atm? ( net-dialup/linux-atm )
+        eap-tls? (
+            net-misc/curl
+          >=dev-libs/openssl-0.9.7
+        )
         pam? ( sys-libs/pam )
-        eap-tls? ( net-misc/curl >=dev-libs/openssl-0.9.7 )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -64,64 +67,65 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 src_prepare() {
     default
 
-    option eap-tls && {
+    if option eap-tls ; then
         # see http://eaptls.spe.net/index.html for more info
-        einfo "Enabling EAP-TLS support"
         expatch -p1 "${WORKBASE}"/patch/eaptls-0.7-gentoo.patch
-    }
+    fi
 
-    option atm && {
-        einfo "Enabling PPPoATM support"
-        sed -i "s/^#HAVE_LIBATM=yes/HAVE_LIBATM=yes/" pppd/plugins/pppoatm/Makefile.linux
-    }
+    if option atm ; then
+        sed -i "s/^#HAVE_LIBATM=yes/HAVE_LIBATM=yes/" pppd/plugins/pppoatm/Makefile.linux ||
+            die "PPPoATM sed failed"
+    fi
 
-    option activefilter || {
-        einfo "Disabling active filter"
-        sed -i "s/^FILTER=y/#FILTER=y/" pppd/Makefile.linux
-    }
+    if option activefilter ; then
+        sed -i "s/^FILTER=y/#FILTER=y/" pppd/Makefile.linux ||
+            die "activefilter sed failed"
+    fi
 
-    option pam && {
-        einfo "Enabling PAM"
-        sed -i "s/^#USE_PAM=y/USE_PAM=y/" pppd/Makefile.linux
-    }
+    if option pam ; then
+        sed -i "s/^#USE_PAM=y/USE_PAM=y/" pppd/Makefile.linux ||
+            die "PAM sed failed"
+    fi
 
-    option ipv6 && {
-        einfo "Enabling IPv6"
-        sed -i "s/#HAVE_INET6/HAVE_INET6/" pppd/Makefile.linux
-    }
+    if option ipv6 ; then
+        sed -i "s/#HAVE_INET6/HAVE_INET6/" pppd/Makefile.linux ||
+            die "IPV6 sed failed"
+    fi
 
-    einfo "Enabling CBCP"
-    sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux
+    sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux ||
+        die "CBCP sed failed"
 
-    option dhcp && {
+    if option dhcp ; then
         # copy the ppp-dhcp plugin files
-        einfo "Copying ppp-dhcp plugin files..."
         tar -xzf "${FETCHEDDIR}/ppp-dhcpc.tgz" -C pppd/plugins/ \
             && sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux \
             || die "ppp-dhcp plugin addition failed"
         expatch -p1 "${WORKBASE}/patch/dhcp-make-vars.patch"
         expatch -p1 "${WORKBASE}/patch/dhcp-sys_error_to_strerror.patch"
-    }
+    fi
 
     # Set correct libdir
-    sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8}
+    sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8} ||
+        die "libdir sed failed"
 
-    option radius && {
+    if option radius ; then
         # set the right paths in radiusclient.conf
         sed -i -e "s:/usr/local/etc:/etc:" \
-            -e "s:/usr/local/sbin:/usr/sbin:" pppd/plugins/radius/etc/radiusclient.conf
+            -e "s:/usr/local/sbin:/usr/sbin:" pppd/plugins/radius/etc/radiusclient.conf ||
+            die "radiusclient.conf sed failed"
 
         # set config dir to /etc/ppp/radius
         sed -i -e "s:/etc/radiusclient:/etc/ppp/radius:g" \
             pppd/plugins/radius/{*.8,*.c,*.h} \
-            pppd/plugins/radius/etc/*
-    }
+            pppd/plugins/radius/etc/* ||
+            die "radius config dir sed failed"
+    fi
 }
 
 src_configure() {
     export CC="$(tc-getCC)"
     export AR="$(tc-getAR)"
-    
+
     default
 }
 
@@ -247,3 +251,4 @@ pkg_postinst() {
     elog "Users needing particular scripts (ssh,rsh,etc.) should check out the"
     elog "/usr/share/doc/${PNVR}/scripts directory."
 }
+
