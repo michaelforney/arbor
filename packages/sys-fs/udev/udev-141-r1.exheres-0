@@ -40,8 +40,8 @@ src_install() {
     newinitd "${FILES}/udev-postmount-initd-128" udev-postmount
 
     insinto /etc/modprobe.d
-    newins "${FILES}/blacklist-128" blacklist
-    newins "${FILES}/pnp-aliases-128" pnp-aliases
+    newins "${FILES}/blacklist-128" blacklist.conf
+    newins "${FILES}/pnp-aliases-128" pnp-aliases.conf
     # }}}
 
     # helper scripts {{{
@@ -58,8 +58,8 @@ src_install() {
         "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-stop.sh"      \
         "${IMAGE}/$(get_libdir)/udev/write_root_link_rule"          \
         "${IMAGE}/etc/init.d/udev-postmount"                        \
-        "${IMAGE}/etc/modprobe.d/pnp-aliases"                       \
-        "${IMAGE}/etc/modprobe.d/blacklist"                         \
+        "${IMAGE}/etc/modprobe.d/pnp-aliases.conf"                  \
+        "${IMAGE}/etc/modprobe.d/blacklist.conf"                    \
     || die
     # }}}
 
