@@ -6,6 +6,8 @@
 
 require bash-completion autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] perl-module python
 
+export_exlib_phases src_prepare src_configure src_compile src_test_slow src_install
+
 SUMMARY="Popular version control system"
 HOMEPAGE="http://subversion.tigris.org/"
 DOWNLOADS="http://${PN}.tigris.org/downloads/${PNV}.tar.bz2"
@@ -29,8 +31,9 @@ DEPENDENCIES="
         ruby? ( dev-lang/swig[ruby] )
         build_options:slow_tests? ( >=dev-lang/python-2.2:* )
     build+run:
+      >=dev-db/sqlite-3.4.0
         dev-libs/apr-util[berkdb?]
-        net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2|~0.28.3]
+        net-misc/neon[~0.25.0|~0.25.1|~0.25.2|~0.25.3|~0.25.4|~0.25.5|~0.26.0|~0.26.1|~0.26.2|~0.26.3|~0.26.4|~0.27.2|~0.28.0|~0.28.1|~0.28.2|~0.28.3|~0.28.4]
         berkdb? ( >=sys-libs/db-4.0.14:= )
         perl? ( dev-lang/perl:= )
         python? ( dev-lang/python:= )
@@ -46,16 +49,23 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-perl-ccopts.patch"
 )
 
-src_prepare() {
+subversion_src_prepare() {
     default
     eautoconf # Doesn't use automake
 }
 
-src_configure() {
+subversion_src_configure() {
+    myconf=(
+        # Needs pkg-config, dbus, glib-2.0 gnome-keyring-1, --enable-shared & apr support for DSOs
+        --without-gnome-keyring
+        # Needs qt:4[dbus], nls, --enable-shared, apr DSOs, dbus, pkg-config, kdelibs
+        --without-kwallet
+    )
+
     if option perl || option python || option ruby; then
-        myconf+=" --with-swig"
+        myconf+=( --with-swig )
     else
-        myconf+=" --without-swig"
+        myconf+=( --without-swig )
     fi
 
     econf \
@@ -64,7 +74,7 @@ src_configure() {
         $(option_enable nls)
 }
 
-src_compile() {
+subversion_src_compile() {
     default
     option perl && emake swig-pl
     option python && emake swig-py
@@ -75,7 +85,7 @@ src_test_slow() {
     emake check
 }
 
-src_install() {
+subversion_src_install() {
     default
 
     if option perl; then
