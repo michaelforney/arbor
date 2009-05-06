@@ -102,6 +102,7 @@ apache_src_install() {
 
     # Add modules.d config part.
     cat "${FILES}"/apache-modules.d.conf >> "${IMAGE}"/etc/apache2/httpd.conf
+    keepdir /etc/apache2/modules.d
 }
 
 # Rather than trying to outsmart autoconf, we define our own layout, to get a
