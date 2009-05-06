@@ -41,23 +41,23 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${WORKBASE}/patch/make-vars.patch"
-    -p1 "${WORKBASE}/patch/mpls.patch"
-    -p1 "${WORKBASE}/patch/killaddr-smarter.patch"
-    -p1 "${WORKBASE}/patch/wait-children.patch"
-    -p1 "${WORKBASE}/patch/maxoctets-2Glimit.patch"
-    -p1 "${WORKBASE}/patch/defaultgateway.patch"
-    -p1 "${WORKBASE}/patch/mschapv2-initialize-response.patch"
-    -p1 "${WORKBASE}/patch/linkpidfile.patch"
-    -p1 "${WORKBASE}/patch/qa-fixes.patch"
-    -p1 "${WORKBASE}/patch/kill-pg.patch"
-    -p1 "${WORKBASE}/patch/auth-fail.patch"
-    -p1 "${WORKBASE}/patch/defaultmetric.patch"
-    -p1 "${WORKBASE}/patch/dev-ppp.patch"
-    -p1 "${WORKBASE}/patch/gtk2.patch"
-    -p1 "${WORKBASE}/patch/pppoe-lcp-timeout.patch"
-    -p1 "${WORKBASE}/patch/passwordfd-read-early.patch"
-    -p1 "${WORKBASE}/patch/pppd-usepeerwins.patch"
+    "${WORKBASE}/patch/make-vars.patch"
+    "${WORKBASE}/patch/mpls.patch"
+    "${WORKBASE}/patch/killaddr-smarter.patch"
+    "${WORKBASE}/patch/wait-children.patch"
+    "${WORKBASE}/patch/maxoctets-2Glimit.patch"
+    "${WORKBASE}/patch/defaultgateway.patch"
+    "${WORKBASE}/patch/mschapv2-initialize-response.patch"
+    "${WORKBASE}/patch/linkpidfile.patch"
+    "${WORKBASE}/patch/qa-fixes.patch"
+    "${WORKBASE}/patch/kill-pg.patch"
+    "${WORKBASE}/patch/auth-fail.patch"
+    "${WORKBASE}/patch/defaultmetric.patch"
+    "${WORKBASE}/patch/dev-ppp.patch"
+    "${WORKBASE}/patch/gtk2.patch"
+    "${WORKBASE}/patch/pppoe-lcp-timeout.patch"
+    "${WORKBASE}/patch/passwordfd-read-early.patch"
+    "${WORKBASE}/patch/pppd-usepeerwins.patch"
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=(
@@ -96,10 +96,9 @@ src_prepare() {
         die "CBCP sed failed"
 
     if option dhcp ; then
-        # copy the ppp-dhcp plugin files
-        tar -xzf "${FETCHEDDIR}/ppp-dhcpc.tgz" -C pppd/plugins/ \
-            && sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux \
-            || die "ppp-dhcp plugin addition failed"
+        mv "${WORKBASE}/dhcp" "${WORK}/pppd/plugins/" || die "moving ppp-dhcp plugin failed"
+        sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux ||
+            die "ppp-dhcp plugin addition failed"
         expatch -p1 "${WORKBASE}/patch/dhcp-make-vars.patch"
         expatch -p1 "${WORKBASE}/patch/dhcp-sys_error_to_strerror.patch"
     fi
@@ -127,14 +126,6 @@ src_configure() {
     export AR="$(tc-getAR)"
 
     default
-}
-
-src_test() {
-    :
-# From the Makefile:
-#   # no tests yet, one day...
-#   installcheck:
-#           true
 }
 
 src_install() {
@@ -172,10 +163,7 @@ src_install() {
 
     pamd_mimic_system ppp auth account session
 
-    local PLUGINS_DIR=/usr/$(get_libdir)/pppd/$(awk -F '"' '/VERSION/ {print $2}' pppd/patchlevel.h)
-    # closing " for syntax coloring
-
-    insinto "${PLUGINS_DIR}"
+    insinto /usr/$(get_libdir)/pppd/${PV}
     insopts -m0755
     doins pppd/plugins/minconn.so
     doins pppd/plugins/passprompt.so
@@ -210,8 +198,8 @@ src_install() {
 
     dodoc FAQ PLUGINS README* SETUP
     dodoc "${FILES}"/README.mpls
-    cp -pPR {contrib,scripts} "${IMAGE}/usr/share/doc/${PNVR}/" \
-        || die "copying contrib and scripts failed."
+    cp -pPR {contrib,scripts} "${IMAGE}/usr/share/doc/${PNVR}/" ||
+        die "copying contrib and scripts failed."
 
     dosbin scripts/pon
     dosbin scripts/poff
