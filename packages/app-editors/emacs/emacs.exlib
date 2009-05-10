@@ -3,7 +3,7 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require alternatives toolchain-funcs gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require game alternatives toolchain-funcs gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst pkg_postrm
 
@@ -89,6 +89,14 @@ emacs_src_install() {
 
     keepdir /usr/share/${PN}/site-lisp
 
+    keepdir /var/lib/games/emacs
+    dovarlibgames -R
+    # they lose group write permission anyway after being updated
+    chmod g-w "${IMAGE}"/var/lib/games/emacs/* || die "chmod failed"
+    preserve_scores "${IMAGE}"/var/lib/games/emacs/*
+    fowners wizard:games /usr/libexec/emacs/${PV}/${CHOST}/update-game-score
+    fperms ug+s /usr/libexec/emacs/${PV}/${CHOST}/update-game-score
+
     # Handle slotting:
     rm "${IMAGE}/usr/bin/${PN}-${EMACS_SCM_REAL_VERSION:-${PV}}-${SLOT}" || die 'Failed to remove duplicate emacs binary'
 
@@ -128,6 +136,7 @@ emacs_src_install() {
 }
 
 emacs_pkg_postinst() {
+    game_pkg_postinst
     alternatives_pkg_postinst
 }
 
