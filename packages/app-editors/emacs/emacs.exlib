@@ -94,8 +94,8 @@ emacs_src_install() {
     # they lose group write permission anyway after being updated
     chmod g-w "${IMAGE}"/var/lib/games/emacs/* || die "chmod failed"
     preserve_scores "${IMAGE}"/var/lib/games/emacs/*
-    fowners wizard:games /usr/libexec/emacs/${PV}/${CHOST}/update-game-score
-    fperms ug+s /usr/libexec/emacs/${PV}/${CHOST}/update-game-score
+    fowners wizard:games /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
+    fperms ug+s /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
 
     # Handle slotting:
     rm "${IMAGE}/usr/bin/${PN}-${EMACS_SCM_REAL_VERSION:-${PV}}-${SLOT}" || die 'Failed to remove duplicate emacs binary'
