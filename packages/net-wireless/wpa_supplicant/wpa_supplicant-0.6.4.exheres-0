@@ -63,6 +63,7 @@ wpa_config() {
 }
 
 src_prepare() {
+    expatch "${FILES}"/${PN}-gcc44.patch
     wpa_config > .config
 }
 
