@@ -1,0 +1,35 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A terminal multiplexer, it enables a number of terminals (or windows) to be accessed and controlled from a single terminal"
+HOMEPAGE="http://tmux.sourceforge.net"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="vim-syntax"
+
+DEPENDENCIES=""
+
+BUGS_TO="ingmar@exherbo.org"
+
+DEFAULT_SRC_COMPILE_PARAMS=( PREFIX=/usr )
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=/usr )
+
+src_prepare() {
+    sed -e 's:/man/:/share/man/:' -i GNUmakefile ||
+        die "Couldn't fix man-pages path"
+}
+
+src_install() {
+    default
+
+    dodoc examples/*.conf
+
+    if option vim-syntax ; then
+        insinto /usr/share/vim/vimfiles/syntax
+        doins examples/tmux.vim
+    fi
+}
+
