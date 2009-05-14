@@ -1,0 +1,14 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require openldap flag-o-matic
+
+PLATFORMS="~amd64"
+
+src_prepare() {
+    # http://www.openldap.org/lists/openldap-bugs/200808/msg00130.html
+    append-cppflags -D_GNU_SOURCE
+
+    openldap_src_prepare
+}
+
