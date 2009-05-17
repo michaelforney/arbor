@@ -1,0 +1,73 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require cmake
+
+SUMMARY="PoDoFo is a library to work with the PDF file format"
+DESCRIPTION="
+The PoDoFo library is a free, portable C++ library which includes classes to parse
+PDF files and modify their contents into memory. The changes can be written back
+to disk easily. The parser can also be used to extract information from a PDF file
+(for example the parser could be used in a PDF viewer). Besides parsing PoDoFo
+includes also very simple classes to create your own PDF files. All classes are
+documented so it is easy to start writing your own application using PoDoFo.
+"
+HOMEPAGE="http://${PN}.sourceforge.net"
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN} sourceforge:${PN}"
+
+UPSTREAM_CHANGELOG="http://${PN}.svn.sourceforge.net/viewvc/${PN}/${PN}/tags/RELEASE_$(ever replace_all _)/ChangeLog [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/doc/html/index.html [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="http://sourceforge.net/mailarchive/forum.php?thread_name=200812311642.02912.domseichter%40web.de&forum_name=podofo-users [[ lang = en ]]"
+
+LICENCES="GPL-2 LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+        fontconfig [[ description = [ Support fontconfig in PoDoFo ] ]]
+        graph [[ description = [ Support for graphs using boost ] ]]
+        lua [[ description = [ Support Lua plan files for imposition ] ]]
+        platform:
+            amd64
+"
+
+DEPENDENCIES="
+    build:
+        >=dev-cpp/cppunit-1.12.1
+    build+run:
+        >=dev-libs/openssl-0.9.8j
+        >=media-libs/freetype-2.3.9
+        >=media-libs/jpeg-6b
+        >=media-libs/tiff-3.8.2-r1
+        graph? ( >=dev-libs/boost-1.38.0 )
+        fontconfig? ( >=media-libs/fontconfig-2.6.0 )
+        lua? ( >=dev-lang/lua-5.1.4 )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PNV}-automagic-deps.patch
+    -p1 "${FILES}"/${PNV}-tests.patch
+)
+
+CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE )
+CMAKE_SRC_CONFIGURE_OPTION_WANTS=(
+    "fontconfig FONTCONFIG"
+    "graph BOOST"
+    "platform:amd64 LIB64"
+)
+CMAKE_SRC_CONFIGURE_OPTION_WITHS=( "lua LUA" )
+
+src_test() {
+    pushd "${WORKBASE}"/build/test
+    ./DeviceTest/DeviceTest || die "test 1 failed"
+    ./FilterTest/FilterTest || die "test 2 failed"
+    ./ParserTest/ParserTest ./CreationTest/resources/Illust.pdf lala.pdf || die "test 3 failed"
+    ./PdfError_Test || die "test 4 failed"
+    ./TokenizerTest/TokenizerTest ./CreationTest/resources/Illust.pdf || die "test 5 failed"
+    ./VariantTest/VariantTest || die "test 6 failed"
+    ./WatermarkTest/WatermarkTest ./CreationTest/resources/Illust.pdf lala.pdf || die "test 7 failed"
+    ./unit/podofo-test || die "podofo-test failed"
+    popd
+}
