@@ -18,11 +18,10 @@ DEPENDENCIES="
 WORK="${WORKBASE}"
 
 src_unpack() {
-    wget http://pciids.sourceforge.net/v2.2/pci.ids
+    wget http://pciids.sourceforge.net/v2.2/pci.ids || die "failed to fetch file"
 }
 
 src_install() {
     insinto /usr/share/misc
     doins pci.ids
 }
-

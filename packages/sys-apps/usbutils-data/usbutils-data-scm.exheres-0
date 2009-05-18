@@ -18,11 +18,10 @@ DEPENDENCIES="
 WORK="${WORKBASE}"
 
 src_unpack() {
-    wget http://www.linux-usb.org/usb.ids
+    wget http://www.linux-usb.org/usb.ids || die "failed to fetch file"
 }
 
 src_install() {
     insinto /usr/share/misc/
     doins usb.ids
 }
-
