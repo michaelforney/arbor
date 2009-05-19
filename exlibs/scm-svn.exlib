@@ -7,7 +7,7 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-svn_do_dependencies() {
-    local svn='>=dev-scm/subversion-1.5.0_alpha1'
+    local svn='dev-scm/subversion[>=1.5.0_alpha1]'
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "${svn} net-misc/neon[ssl]"
     #elif [[ $(scm_get_var REPOSITORY) == http://* ]]; then

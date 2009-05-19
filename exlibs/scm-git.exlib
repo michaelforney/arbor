@@ -11,7 +11,7 @@ if [[ -z ${SCM_TYPE} ]]; then
 fi
 
 scm-git_do_dependencies() {
-    local git='>=dev-scm/git-1.6.1'
+    local git='dev-scm/git[>=1.6.1]'
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
         echo "${git}[curl] net-misc/curl[ssl]"
     elif [[ $(scm_get_var REPOSITORY) == http://* || $(scm_get_var REPOSITORY) == ftp://* ]]; then
