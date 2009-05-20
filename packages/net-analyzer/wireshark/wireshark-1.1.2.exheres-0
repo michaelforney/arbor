@@ -14,12 +14,12 @@ MYOPTIONS="c-ares caps gcrypt gnutls gtk ipv6 pcap pcre smi threads zlib"
 
 DEPENDENCIES="
     build:
-        >=dev-util/pkg-config-0.15.0
+        dev-util/pkg-config[>=0.15.0]
     build+run:
         group/${PN}
         zlib? ( sys-libs/zlib )
         smi? ( net-libs/libsmi )
-        gtk? ( >=dev-libs/glib-2.0.4
+        gtk? ( dev-libs/glib[>=2.0.4]
                 x11-libs/gtk+:2
                 x11-libs/pango
                 dev-libs/atk )
@@ -28,7 +28,7 @@ DEPENDENCIES="
         pcap? ( dev-libs/libpcap )
         pcre? ( dev-libs/pcre )
         caps? ( sys-libs/libcap )
-        c-ares? ( >=net-dns/c-ares-1.5 )
+        c-ares? ( net-dns/c-ares[>=1.5] )
 "
 #        lua? ( >=dev-lang/lua-5.1 )
 

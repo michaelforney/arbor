@@ -19,31 +19,31 @@ MYOPTIONS="acpi apm policykit verbose platform: amd64 ia64 x86"
 
 DEPENDENCIES="
     build+run:
-        >=sys-fs/udev-130
-        >=sys-apps/dbus-1.0
-        >=dev-libs/glib-2.14
-        >=dev-util/gperf-3.0.3
-        >=dev-libs/expat-1.95.8
-        platform:amd64? ( >=sys-apps/dmidecode-2.7 )
-        platform:ia64? ( >=sys-apps/dmidecode-2.7 )
-        platform:x86? ( >=sys-apps/dmidecode-2.7 )
-        >=dev-libs/libusb-0.1.10a:0.1
-        >=dev-libs/dbus-glib-0.61
-        >=sys-apps/pciutils-2.2.7
-        >=sys-apps/util-linux-ng-2.13
-        >=sys-kernel/linux-headers-2.6.22
-        policykit? ( >=sys-auth/PolicyKit-0.7
-                     >=sys-auth/ConsoleKit-0.3.0 )
+        sys-fs/udev[>=130]
+        sys-apps/dbus[>=1.0]
+        dev-libs/glib[>=2.14]
+        dev-util/gperf[>=3.0.3]
+        dev-libs/expat[>=1.95.8]
+        platform:amd64? ( sys-apps/dmidecode[>=2.7] )
+        platform:ia64? ( sys-apps/dmidecode[>=2.7] )
+        platform:x86? ( sys-apps/dmidecode[>=2.7] )
+        dev-libs/libusb:0.1[>=0.1.10a]
+        dev-libs/dbus-glib[>=0.61]
+        sys-apps/pciutils[>=2.2.7]
+        sys-apps/util-linux-ng[>=2.13]
+        sys-kernel/linux-headers[>=2.6.22]
+        policykit? ( sys-auth/PolicyKit[>=0.7]
+                     sys-auth/ConsoleKit[>=0.3.0] )
     build:
           dev-util/pkg-config
-        >=dev-util/intltool-0.35
+        dev-util/intltool[>=0.35]
     run:
         sys-apps/usbutils-data
     post,required:
-        || ( >=app-misc/hal-info-20081001 )
+        || ( app-misc/hal-info[>=20081001] )
     post,suggested:
-        platform:amd64? ( >=sys-power/pm-utils-0.99.3 )
-        platform:x86? ( >=sys-power/pm-utils-0.99.3 )
+        platform:amd64? ( sys-power/pm-utils[>=0.99.3] )
+        platform:x86? ( sys-power/pm-utils[>=0.99.3] )
 "
 
 # tests for HAL *NEVER* actually work/ed

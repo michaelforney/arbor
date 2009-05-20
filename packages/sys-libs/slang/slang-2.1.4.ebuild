@@ -25,10 +25,10 @@ MYOPTIONS="pcre png"
 
 DEPENDENCIES="
     build+run:
-        >=sys-libs/ncurses-5.6
-        >=sys-libs/readline-5.1
-        pcre? ( >=dev-libs/pcre-7.8 )
-        png? ( >=media-libs/libpng-1.2.31 )
+        sys-libs/ncurses[>=5.6]
+        sys-libs/readline[>=5.1]
+        pcre? ( dev-libs/pcre[>=7.8] )
+        png? ( media-libs/libpng[>=1.2.31] )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(

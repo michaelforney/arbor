@@ -25,11 +25,11 @@ MYOPTIONS="logrotate pcap sqlite"
 
 DEPENDENCIES="
     build+run:
-        sqlite? ( >=dev-db/sqlite-3.5.9 )
-        pcap? ( >=dev-libs/libpcap-0.9.8 )
+        sqlite? ( dev-db/sqlite[>=3.5.9] )
+        pcap? ( dev-libs/libpcap[>=0.9.8] )
     run:
-        >=net-firewall/iptables-1.4.1
-        logrotate? ( >=app-admin/logrotate-3.7.7 )
+        net-firewall/iptables[>=1.4.1]
+        logrotate? ( app-admin/logrotate[>=3.7.7] )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(

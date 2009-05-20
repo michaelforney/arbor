@@ -17,14 +17,14 @@ MYOPTIONS="dbus freetype gpm otf svg tiff
 
 DEPENDENCIES="
     build:
-      >=sys-apps/texinfo-4.6 [[ description = [ Needed to build info pages for non-releases ] ]]
+      sys-apps/texinfo[>=4.6] [[ description = [ Needed to build info pages for non-releases ] ]]
         dbus? ( dev-util/pkg-config )
     build+run:
-        dbus? ( >=sys-apps/dbus-1.0.0 )
+        dbus? ( sys-apps/dbus[>=1.0.0] )
         freetype? (
-          >=media-libs/fontconfig-2.2.0
-            media-libs/freetype:2
-          >=x11-libs/libXft-0.13.0
+          media-libs/fontconfig[>=2.2.0]
+          media-libs/freetype:2
+          x11-libs/libXft[>=0.13.0]
         )
         gpm? ( sys-libs/gpm )
         otf? ( dev-libs/libotf )

@@ -34,25 +34,25 @@ DEPENDENCIES="
     build+run:
         user/paludisbuild
         app-admin/eclectic
-        >=app-shells/bash-3
-        inquisitio? ( >=dev-libs/pcre-7.8 )
+        app-shells/bash[>=3]
+        inquisitio? ( dev-libs/pcre[>=7.8] )
         python? (
             dev-lang/python:=
             dev-libs/boost
         )
         qa? (
             app-crypt/gnupg
-            >=dev-libs/libxml2-2.6
-            >=dev-libs/pcre-7.8
+            dev-libs/libxml2[>=2.6]
+            dev-libs/pcre[>=7.8]
         )
         ruby? ( dev-lang/ruby )
-        xml? ( >=dev-libs/libxml2-2.6 )
+        xml? ( dev-libs/libxml2[>=2.6] )
     run:
         net-misc/wget
         net-misc/rsync
         sys-apps/sandbox
     post:
-        vim-syntax? ( >=app-editors/vim-runtime-7:* )"
+        vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
 
 src_prepare() {
     default
