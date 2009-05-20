@@ -46,11 +46,11 @@ DEPENDENCIES="
 # with detection of exuberant-ctags by configure.
 DEPENDENCIES+="
     build:
-        >=sys-apps/sed-4
+        sys-apps/sed[>=4]
         sys-devel/autoconf:2.5
     run+build:
         dev-util/ctags
-        >=sys-libs/ncurses-5.2-r2"
+        sys-libs/ncurses[>=5.2-r2]"
 
 #MYOPTIONS="nls acl"
 MYOPTIONS="nls"
@@ -61,7 +61,7 @@ if [[ ${PN} != vim-runtime ]]; then
    #MYOPTIONS+=" cscope"
     DEPENDENCIES+="
         build+run:
-            gpm?     ( >=sys-libs/gpm-1.19.3 )
+            gpm?     ( sys-libs/gpm[>=1.19.3] )
             !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
             perl?    ( dev-lang/perl )
             python?  ( dev-lang/python:= )
