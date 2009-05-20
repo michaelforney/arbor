@@ -1,4 +1,4 @@
-# Copyright 2008 Ali Polatel
+# Copyright 2008, 2009 Ali Polatel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'distutils.eclass' from Gentoo, which is:
 #   Copyright 1999-2008 Gentoo Foundation
@@ -9,7 +9,13 @@
 #
 # It inherits python, multilib.
 
-require python multilib
+myexparam python_dep=
+
+myexparam has_lib=yes
+myexparam has_bin=
+
+require multilib
+require python [ python_dep=$(exparam python_dep) has_lib=$(exparam has_lib) has_bin=$(exparam has_bin) ]
 
 export_exlib_phases src_prepare src_compile src_install pkg_postinst pkg_postrm
 

@@ -18,9 +18,21 @@
 
 require multilib
 
+myexparam python_dep=
 
-if [[ -n "${NEED_PYTHON}" ]] ; then
-    DEPENDENCIES="build+run: >=dev-lang/python-${NEED_PYTHON}"
+myexparam has_lib=yes
+myexparam has_bin=
+
+if [[ -n $(exparam has_lib) ]]; then
+    [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
+    build+run:
+        dev-lang/python:=[>=$(exparam python_dep)]
+"
+elif [[ -n $(exparam has_bin) ]]; then
+    [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
+    build+run:
+        dev-lang/python:*[>=$(exparam python_dep)]
+"
 fi
 
 __python_eclass_test() {
