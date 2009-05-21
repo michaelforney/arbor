@@ -1,0 +1,11 @@
+--- openssl-0.9.8k/Configure	2009-05-21 19:27:00.000000000 +0200
++++ openssl-0.9.8k/Configure	2009-05-21 19:28:31.000000000 +0200
+@@ -957,7 +957,7 @@
+ if($ENV{CC}) {
+     $cc = $ENV{CC};
+ }
+-my $cflags = $fields[$idx_cflags];
++my $cflags = join(" ", $ENV{CFLAGS}, grep({!/^-[Omfg]/} split(/\s+/, $fields[$idx_cflags])));
+ my $unistd = $fields[$idx_unistd];
+ my $thread_cflag = $fields[$idx_thread_cflag];
+ my $sys_id = $fields[$idx_sys_id];
