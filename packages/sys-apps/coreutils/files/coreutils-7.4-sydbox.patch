@@ -1,0 +1,64 @@
+Source: Ali Polatel <polatel@gmail.com>
+Upstream: No
+Reason: Disable tests that fail with sydbox (reasons below)
+
+diff -ur coreutils-7.4/tests/ls/no-cap coreutils-7.4-sydbox/tests/ls/no-cap
+--- coreutils-7.4/tests/ls/no-cap	2009-02-27 18:36:00.000000000 +0200
++++ coreutils-7.4-sydbox/tests/ls/no-cap	2009-05-21 15:48:20.000000000 +0300
+@@ -24,6 +24,8 @@
+ . $srcdir/test-lib.sh
+ require_strace_ capget
+
++skip_test_ 'This test fails with sydbox due to strace usage'
++
+ fail=0
+ strace -e capget ls --color=always > /dev/null 2> out || fail=1
+ $EGREP 'capget\(' out || skip_test_ "your ls doesn't call capget"
+diff -ur coreutils-7.4/tests/ls/stat-free-symlinks coreutils-7.4-sydbox/tests/ls/stat-free-symlinks
+--- coreutils-7.4/tests/ls/stat-free-symlinks	2009-02-27 18:36:00.000000000 +0200
++++ coreutils-7.4-sydbox/tests/ls/stat-free-symlinks	2009-05-21 15:48:50.000000000 +0300
+@@ -24,6 +24,8 @@
+ . $srcdir/test-lib.sh
+ require_strace_ stat
+
++skip_test_ 'This test fails with sydbox due to strace usage'
++
+ touch x || framework_failure
+ chmod a+x x || framework_failure
+ ln -s x link-to-x || framework_failure
+diff -ur coreutils-7.4/tests/mv/atomic coreutils-7.4-sydbox/tests/mv/atomic
+--- coreutils-7.4/tests/mv/atomic	2009-02-27 18:36:01.000000000 +0200
++++ coreutils-7.4-sydbox/tests/mv/atomic	2009-05-21 15:49:56.000000000 +0300
+@@ -24,6 +24,8 @@
+ . $srcdir/test-lib.sh
+ require_strace_ unlink
+
++skip_test_ 'This test fails with sydbox due to strace usage'
++
+ # Before the fix, mv would unnecessarily unlink the destination symlink:
+ #   $ rm -rf s[12]; ln -s / s1; ln -s /tmp s2; strace -qe unlink /bin/mv -T s1 s2
+ #   unlink("s2") = 0
+diff -ur coreutils-7.4/tests/mv/atomic2 coreutils-7.4-sydbox/tests/mv/atomic2
+--- coreutils-7.4/tests/mv/atomic2	2009-02-27 18:36:01.000000000 +0200
++++ coreutils-7.4-sydbox/tests/mv/atomic2	2009-05-21 15:49:22.000000000 +0300
+@@ -24,6 +24,8 @@
+ . $srcdir/test-lib.sh
+ require_strace_ unlink
+
++skip_test_ 'This test fails with sydbox due to strace usage'
++
+ # Before the fix, mv would unnecessarily unlink the destination symlink:
+ #   $ rm -f a b b2; touch a b; ln b b2; strace -e unlink /p/bin/mv a b
+ #   unlink("b")                             = 0
+diff -ur coreutils-7.4/tests/touch/fail-diag coreutils-7.4-sydbox/tests/touch/fail-diag
+--- coreutils-7.4/tests/touch/fail-diag	2009-02-27 18:36:01.000000000 +0200
++++ coreutils-7.4-sydbox/tests/touch/fail-diag	2009-05-21 16:05:28.000000000 +0300
+@@ -24,6 +24,8 @@
+ . $srcdir/test-lib.sh
+ skip_if_root_
+
++skip_test_ 'This test raises a sandbox violation with sydbox which makes fail diagnosis impossible'
++
+ d1=no-$$
+ dir=/$d1/such-dir
+ # Ensure that $d1 doesn't already exist.
