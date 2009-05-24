@@ -2,21 +2,20 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
+myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
+myexparam libidn_uri="mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2"
+
 require multilib
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
-if ever at_least 2.9; then
-    DOWNLOADS="mirror://sourceware/glibc/snapshots/${PNV/_p/-}.tar.bz2
-               mirror://sourceware/glibc/snapshots/${PNV%_p*}-ports-${PV#*_p}.tar.bz2"
-elif ever at_least 2.8; then
-    DOWNLOADS="http://dev.exherbo.org/~kloeri/distfiles/${PNV}.tar.bz2
-               http://dev.exherbo.org/~kloeri/distfiles/${PN}-ports-${PV}.tar.bz2"
-else
-    DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2
-        mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2
-        mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
-fi
+
+exparam -v source_uri source_uri
+exparam -v ports_uri ports_uri
+exparam -v libidn_uri libidn_uri
+
+DOWNLOADS="${source_uri} ${ports_uri} ${libidn_uri}"
 
 LICENCES="LGPL-2"
 SLOT="0"
@@ -43,13 +42,18 @@ src_unpack() {
     mkdir "${WORK}"
     unpack ${ARCHIVES}
 
-    if ever at_least 2.9; then
+    if [[ ${PV/_p*} != ${PV} ]] ; then
         mv glibc-${PV/_p*}-2* glibc-${PV}
-        mv *ports* glibc-ports-${PV}
-    elif ! ever at_least 2.8; then
+        mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
+    fi
+
+    if [[ -n ${libidn_uri} ]] ; then
         mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
     fi
-    mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
+
+    if [[ -n ${ports_uri} ]] ; then
+        mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
+    fi
 }
 
 src_install() {
