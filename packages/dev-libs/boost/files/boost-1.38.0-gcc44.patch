@@ -1,0 +1,151 @@
+Source: https://svn.boost.org/trac/boost/changeset/48960
+Upstream: Backported from trunk/
+Reason: boost doesn't build with gcc-4.4
+
+diff -ur boost_1_38_0/boost/python/call.hpp boost_1_38_0-gcc44/boost/python/call.hpp
+--- boost_1_38_0/boost/python/call.hpp	2004-07-26 03:32:12.000000000 +0300
++++ boost_1_38_0-gcc44/boost/python/call.hpp	2009-05-25 00:00:16.000000000 +0300
+@@ -38,7 +38,10 @@
+ 
+ # endif // CALL_DWA2002411_HPP
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ # if !(BOOST_WORKAROUND(__MWERKS__, > 0x3100)                      \
+         && BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3201)))
+ #  line BOOST_PP_LINE(__LINE__, call.hpp)
+@@ -76,4 +79,5 @@
+ 
+ # undef N
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif
+diff -ur boost_1_38_0/boost/python/call_method.hpp boost_1_38_0-gcc44/boost/python/call_method.hpp
+--- boost_1_38_0/boost/python/call_method.hpp	2004-08-20 14:10:24.000000000 +0300
++++ boost_1_38_0-gcc44/boost/python/call_method.hpp	2009-05-25 00:04:26.000000000 +0300
+@@ -37,7 +37,10 @@
+ 
+ # endif // CALL_METHOD_DWA2002411_HPP
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ # if !(BOOST_WORKAROUND(__MWERKS__, > 0x3100)                      \
+         && BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3201)))
+ #  line BOOST_PP_LINE(__LINE__, call_method.hpp)
+@@ -76,4 +79,5 @@
+ 
+ # undef N
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif // BOOST_PP_IS_ITERATING
+diff -ur boost_1_38_0/boost/python/detail/result.hpp boost_1_38_0-gcc44/boost/python/detail/result.hpp
+--- boost_1_38_0/boost/python/detail/result.hpp	2008-03-22 23:45:55.000000000 +0200
++++ boost_1_38_0-gcc44/boost/python/detail/result.hpp	2009-05-25 00:05:38.000000000 +0300
+@@ -86,7 +86,10 @@
+ # endif // RESULT_DWA2002521_HPP
+ 
+ /* --------------- function pointers --------------- */
+-#elif BOOST_PP_ITERATION_DEPTH() == 1 && BOOST_PP_ITERATION_FLAGS() == BOOST_PYTHON_FUNCTION_POINTER
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1 && BOOST_PP_ITERATION_FLAGS() == BOOST_PYTHON_FUNCTION_POINTER
+ # if !(BOOST_WORKAROUND(__MWERKS__, > 0x3100)                      \
+         && BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3201)))
+ #  line BOOST_PP_LINE(__LINE__, result.hpp(function pointers))
+@@ -128,4 +131,5 @@
+ # undef N
+ # undef Q
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif
+diff -ur boost_1_38_0/boost/python/object/make_holder.hpp boost_1_38_0-gcc44/boost/python/object/make_holder.hpp
+--- boost_1_38_0/boost/python/object/make_holder.hpp	2007-11-25 20:07:19.000000000 +0200
++++ boost_1_38_0-gcc44/boost/python/object/make_holder.hpp	2009-05-25 00:02:36.000000000 +0300
+@@ -47,7 +47,10 @@
+ 
+ # endif // MAKE_HOLDER_DWA20011215_HPP
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1
+ # if !(BOOST_WORKAROUND(__MWERKS__, > 0x3100)                      \
+         && BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3201)))
+ #  line BOOST_PP_LINE(__LINE__, make_holder.hpp)
+@@ -102,4 +105,5 @@
+ 
+ # undef N
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif
+diff -ur boost_1_38_0/boost/python/object/pointer_holder.hpp boost_1_38_0-gcc44/boost/python/object/pointer_holder.hpp
+--- boost_1_38_0/boost/python/object/pointer_holder.hpp	2006-09-21 01:49:18.000000000 +0300
++++ boost_1_38_0-gcc44/boost/python/object/pointer_holder.hpp	2009-05-25 00:03:22.000000000 +0300
+@@ -163,7 +163,10 @@
+ # endif // POINTER_HOLDER_DWA20011215_HPP
+ 
+ /* --------------- pointer_holder --------------- */
+-#elif BOOST_PP_ITERATION_DEPTH() == 1 && BOOST_PP_ITERATION_FLAGS() == 1
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1 && BOOST_PP_ITERATION_FLAGS() == 1
+ # if !(BOOST_WORKAROUND(__MWERKS__, > 0x3100)                      \
+         && BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3201)))
+ #  line BOOST_PP_LINE(__LINE__, pointer_holder.hpp)
+@@ -205,4 +208,5 @@
+ 
+ # undef N
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif
+diff -ur boost_1_38_0/boost/python/object/value_holder.hpp boost_1_38_0-gcc44/boost/python/object/value_holder.hpp
+--- boost_1_38_0/boost/python/object/value_holder.hpp	2006-01-11 05:31:48.000000000 +0200
++++ boost_1_38_0-gcc44/boost/python/object/value_holder.hpp	2009-05-25 00:08:06.000000000 +0300
+@@ -117,7 +117,10 @@
+ 
+ // --------------- value_holder ---------------
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1 && BOOST_PP_ITERATION_FLAGS() == 1
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1 && BOOST_PP_ITERATION_FLAGS() == 1
+ # if !(BOOST_WORKAROUND(__MWERKS__, > 0x3100)                      \
+         && BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3201)))
+ #  line BOOST_PP_LINE(__LINE__, value_holder.hpp(value_holder))
+@@ -163,4 +166,5 @@
+ 
+ # undef N
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif
+diff -ur boost_1_38_0/boost/python/signature.hpp boost_1_38_0-gcc44/boost/python/signature.hpp
+--- boost_1_38_0/boost/python/signature.hpp	2004-07-26 03:32:12.000000000 +0300
++++ boost_1_38_0-gcc44/boost/python/signature.hpp	2009-05-25 00:06:34.000000000 +0300
+@@ -113,7 +113,10 @@
+ 
+ # endif // SIGNATURE_JDG20020813_HPP
+ 
+-#elif BOOST_PP_ITERATION_DEPTH() == 1 // defined(BOOST_PP_IS_ITERATING)
++// For gcc 4.4 compatability, we must include the
++// BOOST_PP_ITERATION_DEPTH test inside an #else clause.
++#else // BOOST_PP_IS_ITERATING
++#if BOOST_PP_ITERATION_DEPTH() == 1 // defined(BOOST_PP_IS_ITERATING)
+ 
+ # define N BOOST_PP_ITERATION()
+ 
+@@ -176,4 +179,5 @@
+ # undef Q
+ # undef N
+ 
++#endif // BOOST_PP_ITERATION_DEPTH()
+ #endif // !defined(BOOST_PP_IS_ITERATING)
