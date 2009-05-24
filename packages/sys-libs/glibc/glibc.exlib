@@ -1,5 +1,5 @@
 # Copyright 2007-2008 Bryan Østergaard <kloeri@exherbo.org>
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -7,8 +7,8 @@ require multilib
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
 if ever at_least 2.9; then
-    DOWNLOADS="ftp://sources.redhat.com/pub/glibc/snapshots/${PNV/_p/-}.tar.bz2
-               ftp://sources.redhat.com/pub/glibc/snapshots/${PNV%_p*}-ports-${PV#*_p}.tar.bz2"
+    DOWNLOADS="mirror://sourceware/glibc/snapshots/${PNV/_p/-}.tar.bz2
+               mirror://sourceware/glibc/snapshots/${PNV%_p*}-ports-${PV#*_p}.tar.bz2"
 elif ever at_least 2.8; then
     DOWNLOADS="http://dev.exherbo.org/~kloeri/distfiles/${PNV}.tar.bz2
                http://dev.exherbo.org/~kloeri/distfiles/${PN}-ports-${PV}.tar.bz2"
