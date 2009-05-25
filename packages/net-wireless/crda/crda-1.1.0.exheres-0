@@ -1,0 +1,88 @@
+# Copyright 2009 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib toolchain-funcs
+
+SUMMARY="Central Regulatory Domain Agent"
+DESCRIPTION="
+CRDA acts as the udev helper for communication between the kernel and userspace
+for regulatory compliance. It relies on nl80211 for communication. CRDA is
+intended to be run only through udev communication from the kernel. The user
+should never have to run it manually except if debugging udev issues.
+"
+HOMEPAGE="http://wireless.kernel.org/en/developers/Regulatory/CRDA"
+DOWNLOADS="http://wireless.kernel.org/download/${PN}/${PNV}.tar.bz2"
+
+LICENCES="ISC"
+SLOT="0"
+PLATFORMS="~amd64"
+
+MYOPTIONS="
+( crypt ssl ) [[
+    description = [ Use libgcrypt or OpenSSL to validate the regulatory database ]
+    number-selected = exactly-one
+]]
+"
+
+DEPENDENCIES="
+    build:
+        dev-lang/python:*
+        dev-python/M2Crypto
+        dev-util/pkg-config
+        net-wireless/wireless-regdb
+    build+run:
+        net-libs/libnl
+        crypt? ( dev-libs/libgcrypt )
+        ssl? ( dev-libs/openssl )
+"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}"
+
+CRDA_DIR=/usr/$(get_libdir)/crda
+
+DEFAULT_SRC_PREPARE_PATCHES+=(
+    "${FILES}/${PNV}-buildtool.patch"
+)
+
+src_prepare() {
+    default
+
+    # do not add debug symbols by default, uncompressed manuals
+    sed -e /'^CFLAGS +='/s:-g:: \
+        -e /crda.8.gz/s:.gz::g \
+        -e /regdbdump.8.gz/s:.gz::g \
+        -i Makefile || die "Failed to sanitize CFLAGS."
+
+    # remove hardcoded search paths
+    sed -e /"\"\/usr\/local\/lib\/crda\/regulatory.bin\","/d \
+        -e /"\"\/usr\/lib\/crda\/regulatory.bin\","/d \
+        -e /"\"\/lib\/crda\/regulatory.bin\","/d \
+        -i crda.c || die "Failed to remove regulatory search paths."
+}
+
+src_compile() {
+    local mymake
+
+    option ssl && mymake+=( USE_OPENSSL=1 )
+
+    emake REG_BIN=${CRDA_DIR}/regulatory.bin \
+          PUBKEY_DIR=${CRDA_DIR}/pubkeys \
+          CC=$(tc-getCC) \
+          ${mymake[@]} \
+          crda verify
+}
+
+src_install() {
+    local mymake
+
+    option ssl && mymake+=( USE_OPENSSL=1 )
+
+    emake DESTDIR="${IMAGE}" \
+          UDEV_RULE_DIR=/$(get_libdir)/udev/rules.d \
+          SBINDIR=/usr/sbin \
+          ${mymake[@]} \
+          install
+
+    emagicdocs
+}
+

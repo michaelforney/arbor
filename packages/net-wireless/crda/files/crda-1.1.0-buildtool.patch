@@ -1,0 +1,44 @@
+Upstream: I'll send it right there!
+Reason: No need to replace the REG_BIN path twice
+Source: Daniel Mierswa <impulze@impulze.org>
+
+From 51290d257398528dabd1ab4f14d1257119ee9888 Mon Sep 17 00:00:00 2001
+From: Daniel Mierswa <impulze@impulze.org>
+Date: Mon, 25 May 2009 04:39:26 +0200
+Subject: [PATCH] allow REG_BIN to be passed through to crda.c
+
+---
+ Makefile |    2 ++
+ crda.c   |    3 +++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index b93b735..5c585ce 100644
+--- a/Makefile
++++ b/Makefile
+@@ -62,6 +62,8 @@ endif
+ NLLIBS += `pkg-config --libs $(NLLIBNAME)`
+ CFLAGS += `pkg-config --cflags $(NLLIBNAME)`
+ 
++CFLAGS += -DREG_BIN=\"$(REG_BIN)\"
++
+ ifeq ($(V),1)
+ Q=
+ NQ=@true
+diff --git a/crda.c b/crda.c
+index d2ba29a..650c0be 100644
+--- a/crda.c
++++ b/crda.c
+@@ -164,6 +164,9 @@ int main(int argc, char **argv)
+ 
+ 	const char *regdb_paths[] = {
+ 		"/usr/local/lib/crda/regulatory.bin", /* Users/preloads can override */
++#ifdef REG_BIN
++		REG_BIN, /* chosen during installation */
++#endif
+ 		"/usr/lib/crda/regulatory.bin", /* General distribution package usage */
+ 		"/lib/crda/regulatory.bin", /* alternative for distributions */
+ 		NULL
+-- 
+1.6.3.1
+
