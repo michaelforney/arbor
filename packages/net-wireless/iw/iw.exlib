@@ -14,6 +14,7 @@ DOWNLOADS="http://wireless.kernel.org/download/${PN}/${PNV}.tar.bz2"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}"
 
 LICENCES="ISC"
+SLOT="0"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -24,4 +25,10 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_COMPILE_PARAMS+=( CC=$(tc-getCC) )
-DEFAULT_SRC_INSTALL_PARAMS+=( BINDIR=/sbin )
+DEFAULT_SRC_INSTALL_PARAMS+=( BINDIR=/usr/sbin )
+
+src_prepare() {
+    default
+
+    sed /iw.8.gz/s:.gz::g -i Makefile || die "Failed sed'ing Makefile"
+}
