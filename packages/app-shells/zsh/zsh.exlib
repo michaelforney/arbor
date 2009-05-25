@@ -84,9 +84,12 @@ zsh_src_install() {
 
     local docs
     exparam -v docs docs
-    if [[ ${docs} == true ]] && option doc; then
+    if [[ ${docs} == build ]] && option doc ; then
+        # FIXME 'emake -C Doc DESTDIR="${IMAGE}" install.html' shouldn't ignore --htmldir
+        emake DESTDIR="${IMAGE}" install.html
+        mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
+    elif [[ ${docs} == true ]] && option doc ; then
         doins "${WORK}"/Doc/${PN}.pdf
-        # XXX: fix 'emake -C Doc DESTDIR="${IMAGE}" install.html' to not ignore --htmldir
         insinto /usr/share/doc/${PNVR}/html
         doins "${WORK}"/Doc/*.html
     fi
