@@ -14,9 +14,11 @@ DEPENDENCIES="
         sys-libs/ncurses[>=5.2]
         sys-libs/readline[>=4.1]
         ssl? ( dev-libs/openssl )
-        caps? ( sys-libs/libcap )
-        group/${PN}
-        user/${PN}
+        caps? (
+            sys-libs/libcap
+            group/${PN}
+            user/${PN}
+        )
 "
 
 WORK="${WORKBASE}/${MY_PNV}"
@@ -28,7 +30,7 @@ src_install() {
     default
 
     dodir /usr/sbin
-    mv "${IMAGE}"/usr/bin/{ntpd,ntpdate} "${IMAGE}"/usr/sbin/ || die "move to sbin"
+    mv "${IMAGE}"/usr/bin/{ntpd,ntpdate} "${IMAGE}"/usr/sbin/ || die "move to sbin failed."
 
     doman "${WORKBASE}"/man/*.[58]
     insinto /usr/share/doc/${PNVR}/html/
@@ -50,11 +52,12 @@ src_install() {
     fowners ntp:ntp /var/lib/ntp
 
     newinitd "${FILES}"/ntpd.initd ntpd
+    # As of ntp-4.2.4_p7-RC1 ntp will only drop privileges if linuxcaps is enabled
     hereconfd ntpd <<EOF
 # Options to pass to the ntpd process
 # Most people should leave this line alone ...
 # however, if you know what you're doing, feel free to tweak
-NTPD_OPTS="-u ntp:ntp"
+NTPD_OPTS="$(option caps && echo '-u ntp:ntp')"
 EOF
 
     find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
