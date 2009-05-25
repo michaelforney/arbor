@@ -27,7 +27,7 @@ DEPENDENCIES="
         gdbm? ( sys-libs/gdbm )
         pcre? ( dev-libs/pcre[>=3.9] )"
 
-DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
+DEFAULT_SRC_INSTALL_PARAMS=( install install.info install.html )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
 
 zsh_src_configure() {
@@ -82,16 +82,17 @@ zsh_src_install() {
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/StartupFiles
 
+    # Zsh doesn't respect --htmldir, patch send upstream but rejected so far..
+    if option doc ; then
+        mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
+    else
+        rm -r "${IMAGE}"/usr/share/zsh/htmldoc/ || die "Couldn't remove html docs"
+    fi
+
     local docs
     exparam -v docs docs
-    if [[ ${docs} == build ]] && option doc ; then
-        # FIXME 'emake -C Doc DESTDIR="${IMAGE}" install.html' shouldn't ignore --htmldir
-        emake DESTDIR="${IMAGE}" install.html
-        mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
-    elif [[ ${docs} == true ]] && option doc ; then
+    if [[ ${docs} == true ]] && option doc ; then
         doins "${WORK}"/Doc/${PN}.pdf
-        insinto /usr/share/doc/${PNVR}/html
-        doins "${WORK}"/Doc/*.html
     fi
 }
 
