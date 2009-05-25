@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'procmail-3.22.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -24,7 +24,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-maxprocs-fix.patch"
 )
 DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS0="${CFLAGS}" LDFLAGS0="${LDFLAGS}" STRIP="" )
-DEFAULT_SRC_INSTALL_PARAMS=( BINDIR="${IMAGE}/usr/bin" MAN1DIR="${IMAGE}/usr/share/man/man1" MAN5DIR="${IMAGE}/usr/share/man/man5" install-suid )
+DEFAULT_SRC_INSTALL_PARAMS=( BINDIR="${IMAGE}/usr/bin" MAN1DIR="${IMAGE}/usr/share/man/man1" MAN5DIR="${IMAGE}/usr/share/man/man5" install )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 
 src_prepare() {
@@ -37,6 +37,11 @@ src_prepare() {
 
 src_install() {
     default
+
+    fowners root:mail /usr/bin/procmail
+    fowners :mail /usr/bin/lockfile
+    fperms 6755 /usr/bin/procmail
+    fperms 2755 /usr/bin/lockfile
 
     dodir /var/spool/${PN}/
     keepdir /var/spool/${PN}/
