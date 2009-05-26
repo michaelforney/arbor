@@ -12,31 +12,32 @@ DOWNLOADS="ftp://ftp.alsa-project.org/pub/${PN#alsa-}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ffmpeg pulseaudio jack samplerate" # speex
+MYOPTIONS="ffmpeg pulseaudio jack samplerate speex"
 
 DEPENDENCIES="
     build+run:
-        sys-sound/alsa-lib
+        sys-sound/alsa-lib[>=1.0.11]
         ffmpeg? ( media/ffmpeg )
         pulseaudio? ( media-sound/pulseaudio[>=0.9.2] )
         jack? ( media-sound/jack-audio-connection-kit[>=0.98] )
         samplerate? ( media-libs/libsamplerate )
+        speex? ( media-libs/speex[>=1.2_rc] )
 "
-#       speex? ( >=media-libs/speex-1.2_rc )
 
-DEFAULT_SRC_CONFIGURE_PARAMS+=(
-    --without-speex # in theory enabling speex should work, but the configure script encounters an undefined
-                    # reference and falls back to a builtin version. hard-disable until that's fixed.
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=(
-    'ffmpeg avcodec'
-    pulseaudio
-    jack
-    samplerate
-)
-#DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
-#    'speex speex lib'
-#)
+#FIXME Speex is automagic
+
+src_configure() {
+    econf \
+        $(option_enable ffmpeg avcodec) \
+        $(option_enable pulseaudio) \
+        $(option_enable jack) \
+        $(option_enable samplerate) \
+        $(if option speex ; then
+            echo --with-speex=lib
+          else
+            echo --with-speex=no
+          fi)
+}
 
 src_install() {
     default
@@ -47,6 +48,6 @@ src_install() {
     option jack && dodoc README-jack
     option pulseaudio && dodoc README-pulse
     option samplerate && dodoc samplerate.txt
-    #option speex && dodoc speexrate.txt
+    option speex && dodoc speexrate.txt
 }
 
