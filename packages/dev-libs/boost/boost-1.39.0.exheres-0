@@ -1,33 +1,72 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cmake
-
-PLATFORMS="~amd64 ~x86"
-
 MY_PNV=${PN}_$(ever replace_all '_')
+
+require cmake
 
 SUMMARY="Boost Libraries for C++"
 HOMEPAGE="http://www.boost.org/"
 DOWNLOADS="mirror://sourceforge/${PN}/${MY_PNV}.tar.bz2"
 
-REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_CHANGELOG="${HOMEPAGE}users/news/version_${PV//./_}"
-
 LICENCES="freedist Boost-1.0"
 SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="debug doc"
 
-WORK="${WORKBASE}/boost_${PV//./_}"
+# All tests are slow, run only slow tests
+RESTRICT="test"
 
-MYOPTIONS="doc expat"
+DEPENDENCIES="
+    build:
+        doc? (
+            app-arch/unzip      [[ note = [ tools/build/CMake/BoostDocs.cmake ] ]]
+            app-doc/doxygen     [[ note = [ tools/build/CMake/BoostDocs.cmake ] ]]
+            dev-libs/libxslt    [[ note = [ tools/build/CMake/BoostDocs.cmake ] ]]
+        )   [[ note = [ tools/build/CMake/BoostDocs.cmake ] ]]
+    build+run:
+        dev-lang/python:=
+        dev-libs/expat
+        dev-libs/icu
+"
+
+
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/users/news/version_${PV//./_}"
+
+WORK="${WORKBASE}/${PN}_${PV//./_}"
+
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/1.37.0/0001-Fix-compilation-when-fno-exceptions-is-used.patch"
     "${FILES}/${PNV}-accumulators-example.patch"
 )
 
-CMAKE_SRC_CONFIGURE_PARAMS=( "-DCMAKE_IS_EXPERIMENTAL=YES_I_KNOW" )
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    -DCMAKE_IS_EXPERIMENTAL=YES_I_KNOW
+    -DBUILD_BCP:BOOL=FALSE # Fails with undefined references to 'main'
+    -DBUILD_STATIC:BOOL=FALSE
+    -DMPI_FOUND:BOOL=FALSE # Avoid automagic dependency
+)
+CMAKE_SRC_CONFIGURE_OPTION_BUILDS=(
+    DEBUG
+    'doc BUILD_DOCUMENTATION'
+)
+
+src_compile() {
+    pushd "${ECMAKE_BUILD_DIR}" || die "Could not enter ${PN}_build"
+
+    # See https://svn.boost.org/trac/boost/ticket/2189
+    emake modularize
+
+    cmake_src_compile
+}
+
+# FIXME Run tests with cmake
+# src_test_slow() { : ; }
 
 src_install() {
-    cd ${ECMAKE_BUILD_DIR} || die "Could not chdir to build directory."
-    emake DESTDIR="${DESTDIR}" install
+    cmake_src_install
+
+    rmdir "${IMAGE}"/usr/include/boost/interprocess/containers/detail || die "Couldn't nuke empty dir"
 }
+
