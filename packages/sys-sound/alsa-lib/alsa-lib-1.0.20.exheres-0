@@ -15,7 +15,8 @@ DEPENDENCIES="
     build:
         doc? ( app-doc/doxygen[>=1.2.6] )
     build+run:
-        dev-lang/python:="
+        python? ( dev-lang/python:= )
+"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MEMORY-LEAK )
@@ -25,8 +26,8 @@ src_compile() {
 
     if option doc; then
         emake doc
-        find doc/doxygen/html -type f -print0 | xargs -0 \
-            sed -i -e "s:${WORK}::g" || die "sed to strip ${WORK} from api docs failed"
+        find doc/doxygen/html -type f -print0 | xargs -0 sed -i -e "s:${WORK}::g" ||
+            die "sed to strip ${WORK} from api docs failed"
     fi
 }
 
