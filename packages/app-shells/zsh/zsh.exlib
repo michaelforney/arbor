@@ -27,7 +27,7 @@ DEPENDENCIES="
         gdbm? ( sys-libs/gdbm )
         pcre? ( dev-libs/pcre[>=3.9] )"
 
-DEFAULT_SRC_INSTALL_PARAMS=( install install.info install.html )
+DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
 
 zsh_src_configure() {
@@ -82,11 +82,16 @@ zsh_src_install() {
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/StartupFiles
 
-    # Zsh doesn't respect --htmldir, patch send upstream but rejected so far..
-    if option doc ; then
-        mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
+    if ever at_least 4.3.10_pre5 ; then
+        option doc && emake DESTDIR=${IMAGE} install.html
     else
-        rm -r "${IMAGE}"/usr/share/zsh/htmldoc/ || die "Couldn't remove html docs"
+        # This doesn't respect --htmldir for versions older than 4.3.10_pre, so fix up manually. Fixed upstream
+        emake DESTDIR=${IMAGE} install.html
+        if option doc ; then
+            mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
+        else
+            rm -r "${IMAGE}"/usr/share/zsh/htmldoc/ || die "Couldn't remove html docs"
+        fi
     fi
 
     local docs
