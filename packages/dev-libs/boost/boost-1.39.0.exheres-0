@@ -1,0 +1,33 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require cmake
+
+PLATFORMS="~amd64 ~x86"
+
+MY_PNV=${PN}_$(ever replace_all '_')
+
+SUMMARY="Boost Libraries for C++"
+HOMEPAGE="http://www.boost.org/"
+DOWNLOADS="mirror://sourceforge/${PN}/${MY_PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_CHANGELOG="${HOMEPAGE}users/news/version_${PV//./_}"
+
+LICENCES="freedist Boost-1.0"
+SLOT="0"
+
+WORK="${WORKBASE}/boost_${PV//./_}"
+
+MYOPTIONS="doc expat"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/1.37.0/0001-Fix-compilation-when-fno-exceptions-is-used.patch"
+    "${FILES}/${PNV}-accumulators-example.patch"
+)
+
+CMAKE_SRC_CONFIGURE_PARAMS=( "-DCMAKE_IS_EXPERIMENTAL=YES_I_KNOW" )
+
+src_install() {
+    cd ${ECMAKE_BUILD_DIR} || die "Could not chdir to build directory."
+    emake DESTDIR="${DESTDIR}" install
+}
