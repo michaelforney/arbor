@@ -15,7 +15,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug doc"
 
 # All tests are slow, run only slow tests
-RESTRICT="test"
+# RESTRICT="test"
 
 DEPENDENCIES="
     build:
@@ -61,8 +61,10 @@ src_compile() {
     cmake_src_compile
 }
 
-# FIXME Run tests with cmake
-# src_test_slow() { : ; }
+# FIXME https://svn.boost.org/trac/boost/wiki/CMakeTesting
+# Some tests need static libs
+# cmake -DBUILD_TESTING:BOOL=TRUE fails with CMake 2.6.4
+# src_test_slow() { ctest ; }
 
 src_install() {
     cmake_src_install
