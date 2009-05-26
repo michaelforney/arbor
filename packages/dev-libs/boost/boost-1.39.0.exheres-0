@@ -50,6 +50,7 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
 CMAKE_SRC_CONFIGURE_OPTION_BUILDS=(
     DEBUG
     'doc BUILD_DOCUMENTATION'
+    'doc BUILD_DOCUMENTATION_HTML'
 )
 
 src_compile() {
@@ -70,5 +71,18 @@ src_install() {
     cmake_src_install
 
     rmdir "${IMAGE}"/usr/include/boost/interprocess/containers/detail || die "Couldn't nuke empty dir"
+
+    # FIXME CMakeLists in doc, doc/src seem broke & setting option=doc has no effect
+    # Install docs the brute-force way...
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/html
+        doins -r doc more people wiki
+
+        find libs -iname test -o -iname src -print0 | xargs -0 rm -r \
+            || die "Couldn't clean out ./libs/."
+        doins -r libs
+
+        dosym /usr/include/${PN} /usr/share/doc/${PNVR}/html/${PN}
+    fi
 }
 
