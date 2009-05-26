@@ -5,6 +5,8 @@
 # Based in part upon 'alsa-plugins-1.0.19.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
+
 SUMMARY="Plugins for ALSA"
 HOMEPAGE="http://www.alsa-project.org"
 DOWNLOADS="ftp://ftp.alsa-project.org/pub/${PN#alsa-}/${PNV}.tar.bz2"
@@ -23,6 +25,8 @@ DEPENDENCIES="
         samplerate? ( media-libs/libsamplerate )
         speex? ( media-libs/speex[>=1.2_rc] )
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-automagic-speex.patch" )
 
 #FIXME Speex is automagic
 
