@@ -21,8 +21,10 @@ MYOPTIONS="caps doc pcre unicode
     gdbm [[ description = [ Build gdbm bindings, allowing one to use a gdbm database like a zsh hash ] ]]"
 
 DEPENDENCIES="
+    build:
+        doc? ( app-text/texi2html [[ description = [ Convert texinfo docs to .html ] ]] )
     build+run:
-      sys-libs/ncurses[>=5.1]
+        sys-libs/ncurses[>=5.1]
         caps? ( sys-libs/libcap )
         gdbm? ( sys-libs/gdbm )
         pcre? ( dev-libs/pcre[>=3.9] )"
