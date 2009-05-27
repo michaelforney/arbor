@@ -14,24 +14,26 @@ SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS=""
 
+RESTRICT="test"
+
 DEPENDENCIES="
-build:
-    app-text/build-docbook-catalog[>=1.2]
-run:
-    dev-libs/libxml2
+    build:
+        app-text/build-docbook-catalog[>=1.2]
 "
 
 WORK=${WORKBASE}/${MY_PNV}
+
+src_compile() { : ; }
 
 src_install() {
     insinto /usr/share/sgml/docbook/xsl-stylesheets
 
     local i
     for sheet in */ ; do
-        i=$(basename $sheet)
+        i=$(basename ${sheet})
         pushd "${WORK}"/${i} >/dev/null
         for doc in ChangeLog README; do
-            if [ -e "$doc" ]; then
+            if [[ -e ${doc} ]]; then
                 mv ${doc} ${doc}.${i}
                 dodoc ${doc}.${i}
                 rm ${doc}.${i}
@@ -42,10 +44,8 @@ src_install() {
         popd > /dev/null
     done
 
-    # Install misc. docs
-    dodoc AUTHORS BUGS NEWS README RELEASE-NOTES.txt TODO
-
     doins VERSION
+    emagicdocs
 }
 
 pkg_postinst() {
@@ -53,6 +53,6 @@ pkg_postinst() {
 }
 
 pkg_postrm() {
-    #FIXME: may not be available
     build-docbook-catalog
 }
+
