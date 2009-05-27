@@ -36,7 +36,7 @@ DEPENDENCIES="
         ssl? ( dev-libs/openssl[>=0.9.8g] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}/ )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV} )
 DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
 
 WORK="${WORKBASE}"/${MY_PNV}
@@ -44,10 +44,17 @@ WORK="${WORKBASE}"/${MY_PNV}
 ruby_src_configure() {
     unset SOCKS_SERVER
 
-    # Yes, this does always --enable-ipv6
+    # Yes, this does always call --enable-ipv6
     myconf="--enable-ipv6"
     if option !ipv6; then
         myconf+=" --with-lookup-order-hack=INET"
+    fi
+
+    if ever at_least "1.9"; then
+        myconf+=" --with-ruby-version=minor
+            --with-rubylibprefix=/usr/$(get_libdir)/ruby
+            --with-rubyhdrdir=/usr/include/ruby-${SLOT}
+        "
     fi
 
     econf \
@@ -66,7 +73,11 @@ ruby_src_configure() {
 
 ruby_src_test() {
     # TERM="dumb" for test_readline.rb
-    emake -j1 check TERM="dumb"
+    if ever at_least 1.9 ; then
+        emake -j1 test TERM="dumb"
+    else
+        emake -j1 check TERM="dumb"
+    fi
 }
 
 ruby_src_install() {
@@ -93,12 +104,18 @@ ruby_src_install() {
         doins -r sample
     fi
 
-    cd "${IMAGE}"
+    pushd "${IMAGE}"
+    if ever at_least "1.9"; then
+        rm usr/bin/{gem19,rake19} || die "Failed to remove unwanted bins"
+        rm usr/share/man/man1/rake19.1 || die "Failed to remove unwanted mans"
+    fi
     local src target alternatives=()
     for src in usr/bin/*${MY_SUFFIX} usr/share/man/man1/*${MY_SUFFIX}.1; do
         target=${src/${MY_SUFFIX}}
         alternatives+=( /${target} ${src##*/} )
     done
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
+    popd
+
 }
 
