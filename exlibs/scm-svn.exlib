@@ -112,7 +112,7 @@ scm-svn_svn() {
 
 scm-svn_info() {
     local what=${2:-$(scm_get_var CHECKOUT_TO)}
-    local info=$(scm-svn_svn -q info "${what}" | sed -ne "s/^${1}: //p")
+    local info=$(scm-svn_svn -q info "${what}"@ | sed -ne "s/^${1}: //p")
     [[ -n ${info} ]] || die "could not determine ${1} for ${what}"
     echo "${info}"
 }
@@ -236,7 +236,7 @@ scm-svn_do_resolve_externals() {
             done
 
             errors+=( "no repository declared for svn external ${dir}" )
-        done <<<"$(scm-svn_svn -q propget --strict svn:externals "$(scm_get_var CHECKOUT_TO)/${extbase}")"
+        done <<<"$(scm-svn_svn -q propget --strict svn:externals "$(scm_get_var CHECKOUT_TO)/${extbase}@")"
     done <<<"$(cd "$(scm_get_var CHECKOUT_TO)" && find . -name .svn -prune -or -type d -print)"
 
     if [[ -n ${!externals[@]} ]]; then
@@ -255,8 +255,7 @@ scm-svn_do_resolve_externals() {
 }
 
 scm-svn_do_checkout() {
-    local rev=$(scm_get_var REVISION)
-    scm-svn_svn checkout "$(scm-svn_uri)${rev:+@${rev}}" "$(scm_get_var CHECKOUT_TO)"
+    scm-svn_svn checkout "$(scm-svn_uri)@$(scm_get_var REVISION)" "$(scm_get_var CHECKOUT_TO)"
 }
 
 scm-svn_do_update() {
@@ -280,7 +279,7 @@ scm-svn_do_update() {
 
     local rev=$(scm_get_var REVISION)
     if [[ $(scm-svn_uri) != $(scm-svn_info URL) ]]; then
-        scm-svn_svn switch "$(scm-svn_uri)${rev:+@${rev}}" "${dir}"
+        scm-svn_svn switch "$(scm-svn_uri)@${rev}" "${dir}"
     else
         scm-svn_svn update ${rev:+-r${rev}} "${dir}"
     fi
