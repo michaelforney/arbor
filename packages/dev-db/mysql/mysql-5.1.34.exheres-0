@@ -1,0 +1,11 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require mysql
+
+for mirror in 'http://mysql.tonnikala.org/' 'http://mysql.mirrors.pair.com/' 'http://sunsite.informatik.rwth-aachen.de/mysql/'
+do DOWNLOADS+=" http://dev.mysql.com/get/Downloads/MySQL-${MYSQL_MAJOR_VERSION}/${PNV}.tar.gz/from/${mirror} -> ${PNV}.tar.gz"
+done
+
+PLATFORMS="~amd64 ~x86"
+
