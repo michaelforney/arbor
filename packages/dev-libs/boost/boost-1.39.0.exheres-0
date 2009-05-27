@@ -53,6 +53,12 @@ CMAKE_SRC_CONFIGURE_OPTION_BUILDS=(
     'doc BUILD_DOCUMENTATION_HTML'
 )
 
+src_prepare() {
+    default
+
+    sed -e '/BOOST_VERSION_MINOR/s/38/39/' -i CMakeLists.txt || die "Couldn't fix version"
+}
+
 src_compile() {
     pushd "${ECMAKE_BUILD_DIR}" || die "Could not enter ${PN}_build"
 
