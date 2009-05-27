@@ -1,9 +1,11 @@
 # Copyright 2007 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
+require zsh-completion
+
 SUMMARY="Command-line interface to various pastebins"
 HOMEPAGE="http://wgetpaste.zlin.dk/"
-DOWNLOADS="${HOMEPAGE}/${PNVR}.bz2"
+DOWNLOADS="${HOMEPAGE}/${PNVR}.tar.bz2"
 
 LICENCES="as-is"
 SLOT="0"
@@ -18,9 +20,8 @@ DEPENDENCIES="
     post,suggested:
         x11-utils/xclip"
 
-WORK=${WORKBASE}
-
 src_install() {
-    newbin "${WORKBASE}"/${PNV} ${PN}
+    dobin ${PN}
+    dozshcompletion _wgetpaste
 }
 
