@@ -1,6 +1,8 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+MY_PNV=${PNV/p}
+
 require bash-completion perl-module [ module_author=PETDANCE ]
 
 SUMMARY="Ack is a grep-like tool, aimed at programmers with large trees of source code."
@@ -15,8 +17,10 @@ DEPENDENCIES="
     build:
         dev-lang/perl:*[>=5.8.9]
     build+run:
-        dev-perl/File-Next
+        dev-perl/File-Next[>=0.40]
 "
+
+WORK=${WORKBASE}/${PNV/p}
 
 src_install() {
     perl-module_src_install
