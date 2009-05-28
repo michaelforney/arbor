@@ -89,10 +89,8 @@ zsh_src_install() {
     else
         if option doc ; then
             # This doesn't respect --htmldir for versions older than 4.3.10_pre, so fix up manually. Fixed upstream
-            emake DESTDIR=${IMAGE} install.html
+            emake DESTDIR="${IMAGE}" install.html
             mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
-        else
-            rm -r "${IMAGE}"/usr/share/zsh/htmldoc/ || die "Couldn't remove html docs"
         fi
     fi
 
