@@ -18,6 +18,9 @@ PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="acpi apm policykit verbose platform: amd64 ia64 x86"
 
 DEPENDENCIES="
+    build:
+        dev-util/pkg-config[>=0.20]
+        dev-util/intltool[>=0.35]
     build+run:
         sys-fs/udev[>=130]
         sys-apps/dbus[>=1.0]
@@ -29,24 +32,18 @@ DEPENDENCIES="
         sys-apps/pciutils[>=2.2.7]
         sys-apps/util-linux-ng[>=2.15]
         sys-kernel/linux-headers[>=2.6.22]
-        platform:amd64? (
-            sys-apps/dmidecode[>=2.7]
-            sys-power/pm-utils[>=0.99.2]
-        )
+        platform:amd64? ( sys-apps/dmidecode[>=2.7] )
         platform:ia64? ( sys-apps/dmidecode[>=2.7] )
-        platform:x86? (
-            sys-apps/dmidecode[>=2.7]
-            sys-power/pm-utils[>=0.99.2]
-        )
+        platform:x86? ( sys-apps/dmidecode[>=2.7] )
         policykit? ( sys-auth/PolicyKit[>=0.7]
                      sys-auth/ConsoleKit[>=0.3.0] )
-    build:
-        dev-util/pkg-config[>=0.20]
-        dev-util/intltool[>=0.35]
     run:
         sys-apps/usbutils-data
     post,required:
         app-misc/hal-info[>=20081001]
+    post,suggested:
+        platform:amd64? ( sys-power/pm-utils[>=0.99.2]  [[ description = [ Necessary for suspending, hibernating ] ]] )
+        platform:x86? ( sys-power/pm-utils[>=0.99.2]    [[ description = [ Necessary for suspending, hibernating ] ]] )
 "
 
 # tests for HAL *NEVER* actually work/ed
