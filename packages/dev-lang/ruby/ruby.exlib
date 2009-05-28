@@ -37,7 +37,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV} )
-DEFAULT_SRC_COMPILE_PARAMS=EXTLDFLAGS="${LDFLAGS}"
+DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
 
 WORK="${WORKBASE}"/${MY_PNV}
 
@@ -45,18 +45,20 @@ ruby_src_configure() {
     unset SOCKS_SERVER
 
     # Yes, this does always call --enable-ipv6
-    myconf="--enable-ipv6"
-    if option !ipv6; then
-        myconf+=" --with-lookup-order-hack=INET"
-    fi
+    myconf+=( --enable-ipv6 )
+    option !ipv6 && myconf+=( --with-lookup-order-hack=INET )
 
     if ever at_least "1.9"; then
-        myconf+=" --with-ruby-version=minor
+        myconf+=(
+            --with-ruby-version=minor
             --with-rubylibprefix=/usr/$(get_libdir)/ruby
             --with-rubyhdrdir=/usr/include/ruby-${SLOT}
-        "
+        )
     fi
 
+    # FIXME configure: WARNING: unrecognized options:
+    # --disable-socks, --disable-threads, --without-tk, --disable-debug, --without-dbm,
+    # --without-gdbm, --with-openssl, --with-lookup-order-hack=INET, --enable-ipv6
     econf \
         --program-suffix=${MY_SUFFIX} \
         --enable-shared \
@@ -68,7 +70,7 @@ ruby_src_configure() {
         $(option_with berkdb dbm) \
         $(option_with gdbm) \
         $(option_with ssl openssl) \
-        ${myconf}
+        "${myconf[@]}"
 }
 
 ruby_src_test() {
