@@ -72,13 +72,27 @@ ruby_src_configure() {
 }
 
 ruby_src_test() {
+    # make test finally runs miniruby, set LD_LIBRARY_PATH so it can find libruby19.so.1.9
+    ever at_least 1.9 && export LD_LIBRARY_PATH="${WORK}${LD_LIBRARY_PATH:-:}${LD_LIBRARY_PATH}"
     # TERM="dumb" for test_readline.rb
-    if ever at_least 1.9 ; then
-        emake -j1 test TERM="dumb"
+    emake -j1 test TERM="dumb"
+}
+
+if ever at_least 1.9 ; then
+export_exlib_phases src_test_slow
+
+ruby_src_test_slow() {
+    # Extended tests need ruby installed, setting LD_LIBRARY_PATH partially
+    # works around this, but you'll still hit /usr/bin/ruby19: No such file or
+    # directory
+    if has_version ${CATEGORY}/${PN}[=${PVR}] ; then
+        emake -j1 test-all TERM="dumb"
     else
-        emake -j1 check TERM="dumb"
+        ewarn "ruby_src_test_slow() needs ${CATEGORY}/${PN}[=${PVR}] installed, skipping src_test_slow()"
     fi
 }
+fi
+
 
 ruby_src_install() {
     unset RUBYOPT
