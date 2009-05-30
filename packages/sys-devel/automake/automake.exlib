@@ -9,7 +9,7 @@ else
     require gnu [ suffix=gz ]
 fi
 
-export_exlib_phases src_test_slow src_install
+export_exlib_phases src_test_expensive src_install
 
 SUMMARY="Tool used to automatically generate Makefile.in files"
 HOMEPAGE+=" http://sources.redhat.com/automake/"
@@ -33,7 +33,7 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=-${SLOT} )
 
-automake_src_test_slow() {
+automake_src_test_expensive() {
     emake check
 }
 

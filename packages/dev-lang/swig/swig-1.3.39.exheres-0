@@ -14,7 +14,7 @@ MYOPTIONS="doc lua perl python ruby"
 
 DEPENDENCIES="
     build:
-        build_options:slow_tests? ( dev-libs/boost )
+        build_options:expensive_tests? ( dev-libs/boost )
     build+run:
         lua? ( dev-lang/lua:= )
         perl? ( dev-lang/perl:= )
@@ -30,7 +30,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lua "perl perl5" python ruby )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( NEW FUTURE )
 
-src_test_slow() {
+src_test_expensive() {
     emake check
 }
 

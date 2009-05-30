@@ -5,7 +5,7 @@
 
 require python [ python_dep=2.5 ] bash-completion distutils
 
-export_exlib_phases src_test_slow src_install
+export_exlib_phases src_test_expensive src_install
 
 MY_PV=${PV/_}
 
@@ -43,7 +43,7 @@ PYTHON_MODNAME="bzrlib"
 
 WORK="${WORKBASE}"/${PN}-${MY_PV}
 
-bzr_src_test_slow() {
+bzr_src_test_expensive() {
     # Some tests expect the usual pyc compiling behaviour.
     python_enable_pyc
     "${python}" bzr --no-plugins selftest || die "bzr selftest failed"

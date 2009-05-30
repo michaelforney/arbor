@@ -81,16 +81,16 @@ ruby_src_test() {
 }
 
 if ever at_least 1.9 ; then
-export_exlib_phases src_test_slow
+export_exlib_phases src_test_expensive
 
-ruby_src_test_slow() {
+ruby_src_test_expensive() {
     # Extended tests need ruby installed, setting LD_LIBRARY_PATH partially
     # works around this, but you'll still hit /usr/bin/ruby19: No such file or
     # directory
     if has_version ${CATEGORY}/${PN}[=${PVR}] ; then
         emake -j1 test-all TERM="dumb"
     else
-        ewarn "ruby_src_test_slow() needs ${CATEGORY}/${PN}[=${PVR}] installed, skipping src_test_slow()"
+        ewarn "ruby_src_test_expensive() needs ${CATEGORY}/${PN}[=${PVR}] installed, skipping src_test_expensive()"
     fi
 }
 fi

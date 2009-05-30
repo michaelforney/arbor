@@ -6,7 +6,7 @@
 
 require bash-completion autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] perl-module python
 
-export_exlib_phases src_prepare src_configure src_compile src_test_slow src_install
+export_exlib_phases src_prepare src_configure src_compile src_test_expensive src_install
 
 SUMMARY="Popular version control system"
 HOMEPAGE="http://subversion.tigris.org/"
@@ -29,7 +29,7 @@ DEPENDENCIES="
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
-        build_options:slow_tests? ( dev-lang/python:*[>=2.2] )
+        build_options:expensive_tests? ( dev-lang/python:*[>=2.2] )
     build+run:
       dev-db/sqlite[>=3.4.0]
         dev-libs/apr-util[berkdb?]
@@ -81,7 +81,7 @@ subversion_src_compile() {
     option ruby && emake swig-rb
 }
 
-src_test_slow() {
+src_test_expensive() {
     emake check
 }
 
