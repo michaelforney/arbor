@@ -55,10 +55,15 @@ pkg_pretend() {
 src_prepare() {
     libdir=$(get_libdir)
     # Use correct path to filefuncs.so on multilib systems
-    sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:" \
-        -i "${WORK}"/src/awk/{cachedepends,genenviron}.awk || die 'sed failed'
+    sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:g" \
+        -i "${WORK}"/src/awk/{cachedepends,genenviron}.awk || die 'libdir sed failed'
 
-    sed -e 's/dependancies/dependencies/' \
+    # Use correct paths for wpa_cli, wpa_supplicant
+    sed -e "s:/sbin/wpa_supplicant:/usr/sbin/wpa_supplicant:" \
+        -e "s:/bin/wpa_cli:/usr/bin/wpa_cli:" \
+        -i lib/rcscripts/net/wpa_supplicant.sh || die "wpa_supplicant sed failed"
+
+    sed -e 's/dependancies/dependencies/g' \
         -i lib/rcscripts/net/*.sh || die "Dependancies, we can't spell it :("
 
     default
