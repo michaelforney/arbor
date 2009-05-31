@@ -19,7 +19,8 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     debug
     ipv6
-    apache [[ description = [ Support for Apache. ] ]]
+    apache [[ description = [ Build PHP for the Apache webserver. ] ]]
+    pear [[ description = [ Support for using the PHP Extension and Application Repository (PEAR). ] requires = [ php_extensions: pcre xml ] ]]
     php_extensions:
         curl        [[ description = [ Build the cURL extension (includes curl-wrappers). ] ]]
         berkdb      [[ description = [ Build the Berkeley DB extension. ] ]]
@@ -227,6 +228,8 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "apache apxs2"
+    pear
     "php_extensions:curl curl"
     "php_extensions:curl curlwrappers"
     "php_extensions:berkdb db4"
@@ -291,31 +294,35 @@ src_test() {
 src_install() {
     # Needed but useless because we'll remove it later.
     if option apache; then
-	mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
-	cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2 || die "copying httpd.conf failed"
+        mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
+        cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2 || die "copying httpd.conf failed"
     fi
 
     default
 
     # Cleaning up.
-    rm -r "${IMAGE}"/.{channels,registry} || die "removing obsolete dirs failed"
+    if option pear; then
+        rm -r "${IMAGE}"/.{channels,registry} || die "removing obsolete dirs failed"
+        rm "${IMAGE}"/.{depdb,depdblock,filemap,lock} || die "removing cruft failed"
+    fi
     rmdir "${IMAGE}"/usr/include/php/include || die "removing empty dirs failed"
-    rm    "${IMAGE}"/.{depdb,depdblock,filemap,lock} || die "removing cruft failed"
 
     if option apache; then
-    rm  "${IMAGE}"/etc/apache2/*  || die "removing cruft failed"
+        rm "${IMAGE}"/etc/apache2/* || die "removing apache files failed"
     fi
 
-    keepdir /usr/share/pear/.registry/.channel.__uri
-    keepdir /usr/share/pear/.registry/.channel.pecl.php.net
+    if option pear; then
+        keepdir /usr/share/pear/.registry/.channel.__uri
+        keepdir /usr/share/pear/.registry/.channel.pecl.php.net
+    fi
 
     dodir /etc/${PN}
     insinto /etc/${PN}
     newins php.ini-recommended php.ini
 
     if option apache; then
-	dodir /etc/apache2/modules.d
-	insinto /etc/apache2/modules.d
-	doins "${FILES}"/70_mod_php.conf
+       dodir /etc/apache2/modules.d
+       insinto /etc/apache2/modules.d
+       doins "${FILES}"/70_mod_php.conf
     fi
 }
