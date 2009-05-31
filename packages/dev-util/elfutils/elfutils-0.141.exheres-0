@@ -17,15 +17,12 @@ DEPENDENCIES="
         nls? ( sys-devel/gettext )
 "
 
-src_configure() {
+DEFAULT_SRC_CONFIGURE_PARAMS=(
     # http://bugs.gentoo.org/show_bug.cgi?id=211529#c2
-    ./configure \
-        --prefix=/usr \
-        --libdir=/usr/$(get_libdir) \
-        --program-prefix='eu-' \
-        --with-bzlib \
-        --with-zlib \
-        $(option_enable nls) ||
-    die "./configure failed"
-}
+    --enable-dependency-tracking
+    --program-prefix='eu-'
+    --with-bzlib
+    --with-zlib
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
