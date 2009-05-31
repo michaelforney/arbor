@@ -1,0 +1,31 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="Libraries/utilities to handle ELF objects"
+HOMEPAGE="https://fedorahosted.org/releases/${PN:0:1}/${PN:1:1}/${PN}/"
+DOWNLOADS="https://fedorahosted.org/releases/${PN:0:1}/${PN:1:1}/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="nls"
+
+DEPENDENCIES="
+    build:
+        nls? ( sys-devel/gettext )
+"
+
+src_configure() {
+    # http://bugs.gentoo.org/show_bug.cgi?id=211529#c2
+    ./configure \
+        --prefix=/usr \
+        --libdir=/usr/$(get_libdir) \
+        --program-prefix='eu-' \
+        --with-bzlib \
+        --with-zlib \
+        $(option_enable nls) ||
+    die "./configure failed"
+}
+
