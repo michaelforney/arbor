@@ -37,14 +37,16 @@ if ever at_least 4.3; then
                     app-arch/zip )
         build+run:
             dev-libs/gmp[>=4.1]
-            dev-libs/mpfr[>=2.3]"
+            dev-libs/mpfr[>=2.3]
+            ada? ( dev-lang/gnat:${SLOT} )"
 else
     DEPENDENCIES+="
         build:
             doc? ( app-doc/doxygen[>=1.3.9] )
         build+run:
             fortran? ( dev-libs/gmp[>=4.1]
-                       dev-libs/mpfr[>=2.3] )"
+                       dev-libs/mpfr[>=2.3] )
+            ada? ( dev-lang/gnat:${SLOT} )"
 fi
 
 if ever at_least 4.4.0-r1; then
