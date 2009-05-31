@@ -19,6 +19,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     debug
     ipv6
+    apache [[ description = [ Support for Apache. ] ]]
     php_extensions:
         curl        [[ description = [ Build the cURL extension (includes curl-wrappers). ] ]]
         berkdb      [[ description = [ Build the Berkeley DB extension. ] ]]
@@ -57,7 +58,7 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
         dev-libs/gmp[>=4.3.0]
-        www-servers/apache[>=2.2.11]
+        apache? ( www-servers/apache[>=2.2.11] )
         php_extensions:curl? ( net-misc/curl[>=7.19.4] )
         php_extensions:berkdb? ( sys-libs/db[>=4.6.21] )
         php_extensions:ftp? ( dev-libs/openssl[>=0.9.8j] )
@@ -130,6 +131,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-ctype
     --enable-dba
     --enable-discard-path
+    --enable-fastcgi
     --enable-flatfile
     --enable-force-cgi-redirect
     --enable-hash
@@ -152,7 +154,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-zip
     --disable-dbase
     --disable-embed
-    --with-apxs2
     --with-bz2
     --with-config-file-path=/etc/${PN}
     --with-config-file-scan-dir=/etc/${PN}
@@ -289,18 +290,21 @@ src_test() {
 
 src_install() {
     # Needed but useless because we'll remove it later.
-    mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
-    cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2 || die "copying httpd.conf failed"
+    if option apache; then
+	mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
+	cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2 || die "copying httpd.conf failed"
+    fi
 
     default
 
     # Cleaning up.
     rm -r "${IMAGE}"/.{channels,registry} || die "removing obsolete dirs failed"
     rmdir "${IMAGE}"/usr/include/php/include || die "removing empty dirs failed"
-    rm \
-        "${IMAGE}"/.{depdb,depdblock,filemap,lock} \
-        "${IMAGE}"/etc/apache2/* \
-        || die "removing cruft failed"
+    rm    "${IMAGE}"/.{depdb,depdblock,filemap,lock} || die "removing cruft failed"
+
+    if option apache; then
+    rm  "${IMAGE}"/etc/apache2/*  || die "removing cruft failed"
+    fi
 
     keepdir /usr/share/pear/.registry/.channel.__uri
     keepdir /usr/share/pear/.registry/.channel.pecl.php.net
@@ -309,7 +313,9 @@ src_install() {
     insinto /etc/${PN}
     newins php.ini-recommended php.ini
 
-    dodir /etc/apache2/modules.d
-    insinto /etc/apache2/modules.d
-    doins "${FILES}"/70_mod_php.conf
+    if option apache; then
+	dodir /etc/apache2/modules.d
+	insinto /etc/apache2/modules.d
+	doins "${FILES}"/70_mod_php.conf
+    fi
 }
