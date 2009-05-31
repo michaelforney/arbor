@@ -14,14 +14,13 @@ DOWNLOADS="http://${PN}.tigris.org/downloads/${PNV}.tar.bz2"
 
 REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_CHANGELOG="http://svn.collab.net/repos/svn/tags/${PV}/CHANGES"
-UPSTREAM_RELEASE_NOTES="http://${PN}.tigris.org/svn_${PV:0:3}_releasenotes.html"
+UPSTREAM_RELEASE_NOTES="http://${PN}.tigris.org/svn_$(ever range 1-2)_releasenotes.html"
 UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-1.1"
 SLOT="0"
 MYOPTIONS="berkdb nls perl python ruby"
-
-RESTRICT="test"
+RESTRICT="test" # Expensive tests
 
 DEPENDENCIES="
     build:
@@ -69,6 +68,7 @@ subversion_src_configure() {
     fi
 
     econf \
+        --disable-mod-activation \
         ${myconf} \
         $(option_with berkdb berkeley-db) \
         $(option_enable nls)
