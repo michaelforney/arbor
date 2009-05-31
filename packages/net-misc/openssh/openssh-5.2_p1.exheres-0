@@ -14,7 +14,6 @@ HPN_PATCH="${PARCH}-hpn13v3.diff.gz"
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
 HOMEPAGE="http://www.openssh.org/"
 DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
-    http://www.sxw.org.uk/computing/patches/${PARCH/5.2/5.0}-gsskex-20080404.patch
     X509? ( http://roumenpetrov.info/${PN}/x509-${X509_VERSION}/${X509_PATCH} )
     hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )"
 
@@ -62,8 +61,6 @@ src_prepare() {
         expatch \
             -p1 "${WORKBASE}/${X509_PATCH%.gz}" \
             -p0 "${FILES}/${PN}-4.7_p1-GSSAPI-dns.patch"
-    else
-        expatch -p0 "${FETCHEDDIR}/${PARCH/5.2/5.0}-gsskex-20080404.patch"
     fi
 
     if [[ -n ${HPN_PATCH} ]] && option hpn ; then
