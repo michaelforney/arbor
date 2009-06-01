@@ -11,8 +11,14 @@ myexparam docs=true
 
 SUMMARY="UNIX Shell similar to the Korn shell"
 HOMEPAGE="http://www.zsh.org/"
-DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2 ftp://ftp.zsh.org/pub/${PNV}.tar.bz2
-    doc? ( mirror://sourceforge/${PN}/${PNV}-doc.tar.bz2 ftp://ftp.zsh.org/pub/${PNV}-doc.tar.bz2 )"
+DOWNLOADS="
+    ftp://ftp.zsh.org/pub/${PNV}.tar.bz2
+    mirror://sourceforge/${PN}/${PNV}.tar.bz2
+    doc? (
+        ftp://ftp.zsh.org/pub/${PNV}-doc.tar.bz2
+        mirror://sourceforge/${PN}/${PNV}-doc.tar.bz2
+    )
+"
 
 LICENCES="ZSH
     gdbm? ( GPL-2 [[ note = [ Enabling gdbm means that the binary is covered by the GPL-2 ] ]] )"
@@ -36,6 +42,7 @@ zsh_src_configure() {
     econf \
         --bindir=/bin \
         --libdir=/usr/$(get_libdir) \
+        --docdir=/usr/share/doc/${PNVR} \
         --htmldir=/usr/share/doc/${PNVR}/html \
         --enable-etcdir=/etc/zsh \
         --enable-fndir=/usr/share/zsh/${PV%_*}/functions \
@@ -84,15 +91,7 @@ zsh_src_install() {
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/StartupFiles
 
-    if ever at_least 4.3.10_pre5 ; then
-        option doc && emake DESTDIR=${IMAGE} install.html
-    else
-        if option doc ; then
-            # This doesn't respect --htmldir for versions older than 4.3.10_pre, so fix up manually. Fixed upstream
-            emake DESTDIR="${IMAGE}" install.html
-            mv "${IMAGE}"/usr/share/{zsh/htmldoc,doc/${PNVR}/html} || die "Couldn't move html docs to htmldir"
-        fi
-    fi
+    option doc && emake DESTDIR=${IMAGE} install.html
 
     local docs
     exparam -v docs docs
