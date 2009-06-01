@@ -35,7 +35,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 )
 
 src_prepare() {
-    expatch "${FILES}"/${PN}-sensors-detect.patch
+    expatch "${FILES}"/${PNV}-sensors-detect.patch
 
     if option sensord; then
         sed -e 's:^# \(PROG_EXTRA\):\1:' \
