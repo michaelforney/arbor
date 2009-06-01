@@ -17,11 +17,15 @@ DEPENDENCIES="
         sys-libs/ncurses[>=5.2]
         nls? ( sys-devel/gettext )"
 
-# We have no tcl, hence no dejagnu and therefore tests fail..
+# Don't want to harddepend on dejagnu (-> tcl, expect)
 RESTRICT=test
 #test? ( dev-util/dejagnu )
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-werror )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-werror
+    # FIXME Breaks with readline-6.0*
+    # --with-system-readline
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( gdb sim )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CONTRIBUTE )
