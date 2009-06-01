@@ -1,0 +1,48 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PV=${PV/_p/-P}
+MY_PNV=${PN//-tools}-${MY_PV}
+
+SUMMARY="Tools from the bind package: dig, dnssec-keygen, host, nslookup, nsupdate"
+DESCRIPTION="
+DNS tools like dig and nslookup are extremely useful to have. They usually ship
+with bind itself but it doesn't make any sense to install the full bind package
+for them. Thus, this allows you to install just the tools.
+"
+HOMEPAGE="https://www.isc.org/software/bind"
+DOWNLOADS="ftp://ftp.isc.org/isc/bind9/${MY_PV}/${MY_PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="idn ipv6"
+
+DEPENDENCIES="
+    build+run:
+        idn? ( net-dns/idnkit )
+"
+
+DEFAULT_SRC_CONFIGURE_ENABLES=( ipv6 )
+DEFAULT_SRC_CONFIGURE_WITHS=( idn )
+
+WORK="${WORKBASE}"/${MY_PNV}
+
+src_compile() {
+    for subdir in lib bin/dig lib/lwres bin/nsupdate bin/dnssec ; do
+        cd "${WORK}"/${subdir}
+        emake -j1 || die "making ${subdir} failed."
+    done
+}
+
+src_install() {
+    dobin bin/dig/{dig,host,nslookup}
+    dobin bin/dnssec/dnssec-keygen
+    dobin bin/nsupdate/nsupdate
+
+    doman bin/dig/{dig.1,host.1,nslookup.1}
+    doman bin/dnssec/dnssec-keygen.8
+    doman bin/nsupdate/nsupdate.1
+}
