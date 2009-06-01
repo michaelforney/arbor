@@ -26,14 +26,28 @@ UPSTREAM_RELEASE_NOTES="http://oldwww.isc.org/sw/${PN}/view/?release=${MY_PV}&no
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="idn ipv6 ssl" # kerberos
+MYOPTIONS="
+    berkdb
+    idn
+    ipv6
+    ldap
+    mysql [[ requires = [ -threads ] ]]
+    postgres [[ description = [ Adds support for the PostgreSQL backend. ] ]]
+    ssl
+    threads [[ requires = [ -mysql ] ]]
+"
 
 DEPENDENCIES="
     build+run:
         dev-libs/libxml2
-        >=net-dns/libbind-6.0_beta1[ipv6=]
+        net-dns/libbind[>=6.0][ipv6=]
+        berkdb? ( sys-libs/db:= )
         idn? ( net-dns/idnkit )
+        ldap? ( net-nds/openldap )
+        mysql? ( dev-db/mysql )
+        postgres? ( dev-db/postgresql )
         ssl? ( dev-libs/openssl )
+        threads? ( sys-libs/libcap[>=2.1.0] )
         group/named
         user/named
 "
@@ -56,36 +70,37 @@ src_configure() {
         fi
     }
 
-    # --enable-{linux-caps,threads}: Need to figure out its interaction with
-    # other option before enabling threads. Tested using caps and threads
-    # with 9.6.0_p1; the results were disheartening.
-    # Remember to change libbind with respect to threads as well if it gets enabled
-    # here.
     # --enable-isc-spnego: Bundled kerberos parts
     econf \
         --includedir=/usr/include \
         --sysconfdir=/etc/${PN} \
         --enable-isc-spnego=no \
         --enable-largefile=yes \
-        --enable-linux-caps=no \
-        --enable-threads=no \
-        --with-dlz-bdb=no \
-        --with-dlz-filesystem=no \
-        --with-dlz-ldap=no \
-        --with-dlz-mysql=no \
+        --with-dlz-filesystem=yes \
         --with-dlz-odbc=no \
-        --with-dlz-postgres=no \
-        --with-dlz-stub=no \
+        --with-dlz-stub=yes \
         --with-docbook-xsl=no \
         --with-gssapi=no \
         --with-libtool=yes \
         --with-libxml2=yes \
-        --with-pkcs11=no \
         --with-randomdev=/dev/urandom \
         $(myoption enable ipv6) \
+        $(myoption enable threads) \
+        $(myoption enable threads linux-caps) \
+        $(myoption with berkdb dlz-bdb) \
         $(myoption with idn) \
+        $(myoption with ldap dlz-ldap) \
+        $(myoption with mysql dlz-mysql) \
+        $(myoption with postgres dlz-postgres) \
         $(myoption with ssl openssl)
 }
+
+# Note to self or anyone who's going to work on bind: It will fail with a cryptic
+# error ("RUNTIME_CHECK(dst_initialized == isc_boolean_true) failed") if you try
+# to disable pkcs11 with either of the following switches:
+#        --with-pkcs11=no \
+#        --without-pkcs11 \
+# *Not* using any switches turns pkcs11 off, though... Upstreams...
 
 src_install() {
     default
