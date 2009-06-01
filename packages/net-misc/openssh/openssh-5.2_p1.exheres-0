@@ -42,7 +42,7 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${PARCH}"
 
-_pkg_pretend() {
+pkg_pretend() {
     local err=()
     option hpn && err+=( "option=hpn: HPN patch disabled for ${PNVR}: Only a provisional patch is available" )
     if (( ${#err} )) ; then
