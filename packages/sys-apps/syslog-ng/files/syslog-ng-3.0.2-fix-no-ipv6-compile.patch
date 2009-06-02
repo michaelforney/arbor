@@ -1,0 +1,32 @@
+Author: Saleem Abdulrasool <compnerd@compnerd.org>
+Reason: fix build with -ipv6
+Upstream: No
+--- 
+--- syslog-ng-3.0.2/src/templates.c	2009-06-01 20:11:24.000000000 -0700
++++ syslog-ng-3.0.2/src/templates.c	2009-06-01 20:18:35.000000000 -0700
+@@ -220,6 +220,16 @@
+     
+ }
+ 
++static inline gboolean
++sockaddr_inet_check(const GSockAddr * const saddr)
++{
++#if ENABLE_IPV6
++  return (g_sockaddr_inet_check(saddr) || g_sockaddr_inet6_check(saddr));
++#else
++  return g_sockaddr_inet_check(saddr);
++#endif
++}
++
+ gboolean
+ log_macro_expand(GString *result, gint id, guint32 flags, gint ts_format, TimeZoneInfo *zone_info, gint frac_digits, gint32 seq_num, LogMessage *msg)
+ {
+@@ -392,7 +402,7 @@
+       {
+         gchar *ip;
+ 
+-        if (msg->saddr && (g_sockaddr_inet_check(msg->saddr) || g_sockaddr_inet6_check(msg->saddr)))
++        if (msg->saddr && sockaddr_inet_check(msg->saddr))
+           {
+             gchar buf[MAX_SOCKADDR_STRING];
+ 
