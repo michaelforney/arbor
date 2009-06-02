@@ -36,7 +36,9 @@ DEPENDENCIES="
         pcre? ( dev-libs/pcre[>=3.9] )"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( Etc/ Functions/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES Etc/{completion-style-guide,relnote_4.3.{5..10.txt},zsh-development-guide )
+DEFAULT_SRC_INSTALL_EXCLUDE=( FAQ.yo )
 
 zsh_src_configure() {
     econf \
@@ -64,6 +66,7 @@ zsh_src_test() {
 
     # This test starts a zsh process which in turn sources /etc/profile.env through /etc/zsh/zshenv,
     # which gets locales from the user env, which make this test fail. Reported upstream.
+    # See http://www.zsh.org/mla/workers/2008/msg01505.html
     rm "${WORK}"/Test/Y02compmatch.ztst || die "Removing tests failed"
 
     # Some tests need a homedir, so we create a pseudo homedir
