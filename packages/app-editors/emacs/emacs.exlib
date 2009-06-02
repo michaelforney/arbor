@@ -60,7 +60,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 # This'll barf at the merge stage, paludis doesn't allow 'file over directory' merges.
 # This can go for the next version bump
 emacs_pkg_pretend() {
-    if best_version "<${CATEGORY}/${PN}-22.3"; then
+    if best_version "${CATEGORY}/${PN}[<22.3]"; then
         die "Screwed upgrade path, remove all previously installed versions of ${CATEGORY}/${PN} first"
     fi
 }
