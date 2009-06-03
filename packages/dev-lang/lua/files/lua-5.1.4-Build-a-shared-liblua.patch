@@ -1,0 +1,94 @@
+Source: Ingmar Vanhassel <ingmar@exherbo.org>, based on Debian patch by John V. Belmonte <jbelmonte@debian.org>
+Upstream: No, won't be accepted either:
+	This is not done upstream for portability.
+	http://article.gmane.org/gmane.comp.lang.lua.general/18519
+Reason: Build a shared liblua
+
+
+
+From 772f89a357ce6d79d5facedc396d61941f111f6b Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Wed, 3 Jun 2009 03:31:44 +0200
+Subject: [PATCH] Add support for shared library to makefiles.
+
+lua5.1 version 5.1.4-3
+debian_make.patch John V. Belmonte <jbelmonte@debian.org>
+
+With the following changes:
+- s/debian/exherbo/
+- Respect LDFLAGS
+---
+ Makefile     |   25 +++++++++++++++++++++++++
+ src/Makefile |   26 ++++++++++++++++++++++++++
+ 2 files changed, 51 insertions(+), 0 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 6e78f66..861e640 100644
+--- a/Makefile
++++ b/Makefile
+@@ -126,3 +126,28 @@ lecho:
+ .PHONY: all $(PLATS) clean test install local none dummy echo pecho lecho
+ 
+ # (end of Makefile)
++
++# Use libtool for binary installs, etc.
++
++export V
++export LIBTOOL = libtool --quiet --tag=CC
++# See libtool manual about how to set this
++export LIB_VERSION = 0:0:0
++
++exherbo_clean:
++	cd src; $(MAKE) $@
++
++exherbo_test: exherbo_linux
++	src/lua$(V) test/hello.lua
++
++exherbo_install: exherbo_linux
++	cd src; mkdir -p $(INSTALL_BIN) $(INSTALL_INC) $(INSTALL_LIB) $(INSTALL_MAN)
++	cd src; $(LIBTOOL) --mode=install $(INSTALL_EXEC) lua$(V) luac$(V) $(INSTALL_BIN)
++	cd src; $(INSTALL_DATA) $(TO_INC) $(INSTALL_INC)
++	cd src; $(LIBTOOL) --mode=install $(INSTALL_DATA) liblua$(V).la $(INSTALL_LIB)
++	$(foreach NAME,$(TO_MAN),$(INSTALL_DATA) doc/$(NAME) $(INSTALL_MAN)/$(basename $(NAME))$(V)$(suffix $(NAME));)
++
++# ISSUE: MYCFLAGS not honored in the case of a CFLAGS override
++exherbo_linux:
++	cd src; $(MAKE) exherbo_all CFLAGS+=-DLUA_USE_LINUX \
++		LIB_LIBS="-lm -ldl" LUA_LIBS="-lreadline -lncurses"
+diff --git a/src/Makefile b/src/Makefile
+index e4a3cd6..f84190c 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -180,3 +180,29 @@ print.o: print.c ldebug.h lstate.h lua.h luaconf.h lobject.h llimits.h \
+   ltm.h lzio.h lmem.h lopcodes.h lundump.h
+ 
+ # (end of Makefile)
++
++# The following rules use libtool for compiling and linking in order to
++# provide shared library support.  While we are at it, our desired version
++# suffixes are added to the targets, preventing conflicts with rules in
++# the upstream makefile.
++
++LIB_NAME = liblua$(V).la
++LIB_OBJS = $(CORE_O:.o=.lo) $(LIB_O:.o=.lo)
++
++%.lo %.o: %.c
++	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $<
++
++$(LIB_NAME) $(LIB_NAME:.la=.a): $(LIB_OBJS)
++	$(LIBTOOL) --mode=link $(CC) -version-info $(LIB_VERSION) \
++            -rpath $(RPATH) -o $(LIB_NAME) $(LIB_OBJS) $(LIB_LIBS) $(LDFLAGS)
++
++lua$(V): $(LUA_O) $(LIB_NAME)
++	$(LIBTOOL) --mode=link $(CC) -static -Wl,-E -o $@ $(LUA_O) $(LIB_NAME) $(LUA_LIBS) $(LDFLAGS)
++
++luac$(V): $(LUAC_O) $(LIB_NAME)
++	$(LIBTOOL) --mode=link $(CC) -static -o $@ $(LUAC_O) $(LIB_NAME) $(LDFLAGS)
++
++exherbo_clean:
++	$(LIBTOOL) --mode=clean $(RM) $(ALL_O:.o=.lo) $(LIB_NAME) lua$(V) luac$(V)
++
++exherbo_all: $(LIB_NAME) lua$(V) luac$(V)
+-- 
+1.6.3.1
+

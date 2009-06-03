@@ -4,6 +4,8 @@
 # Based in part upon 'lua-5.1.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
+V=$(ever range 1-2)
+
 require multilib
 
 SUMMARY="An Extensible Extension Language"
@@ -13,20 +15,15 @@ DOWNLOADS="http://www.lua.org/ftp/${PNV}.tar.gz"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="readline"
+MYOPTIONS=""
 
-DEPENDENCIES="
-    build+run:
-        readline? ( sys-libs/readline )
-"
+DEPENDENCIES=""
 
 UPSTREAM_DOCUMENTATION="
-http://www.lua.org/manual/$(ever range 1-2)/        [[ description = [ Reference documentation, HTML ] ]]
+http://www.lua.org/manual/${V}/        [[ description = [ Reference documentation, HTML ] ]]
 "
 
-# FIXME: Build a lua shared library, keeping the lua interpreter statically linked for performance reasons:
-#   http://article.gmane.org/gmane.comp.lang.lua.general/18519
-#   This is not done upstream for portability.
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-Build-a-shared-liblua.patch" )
 
 src_prepare() {
     # Doing this here instead of passing relevant options in src_{compile,install} is cleaner
@@ -36,9 +33,11 @@ src_prepare() {
         -e "/^INSTALL/s:lib:$(get_libdir):" \
         -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
         -i Makefile || die "sedding Makefile failed"
+
     sed -e "/^prefix/s:/.*$:/usr:" \
         -e "s:/lib:/$(get_libdir):" \
         -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
+
     sed -e 's:/usr/local/:/usr/:' \
         -e "s:lib/:$(get_libdir)/:" \
         -i src/luaconf.h || die "sedding src/luaconf.h failed"
@@ -47,41 +46,41 @@ src_prepare() {
 }
 
 src_compile() {
-    # Using dlopen is recommended, see INSTALL.
-    # The echo target outputs some debug info.
-    local readline_cflags readline_libs
-    if option readline ; then
-        readline_cflags=" -DLUA_USE_READLINE"
-        readline_libs=" -lreadline -lhistory -lncurses"
-    fi
-    emake \
-        CC=$(tc-getCC) \
-        CFLAGS="-DLUA_USE_DLOPEN -DLUA_USE_POSIX${readline_cflags} ${CFLAGS}" \
-        MYLDFLAGS="${LDFLAGS}" \
-        MYLIBS="-Wl,-E -ldl${readline_libs}" \
-        PLAT="linux" \
-        echo all
+    ARGS=(
+        CC=$(tc-getCC)
+        PLAT="linux"
+        RPATH="/usr/$(get_libdir)"
+    )
+
+    emake "${ARGS[@]}" echo
+    emake "${ARGS[@]}" exherbo_linux
 }
 
 src_test() {
-    default
+    emake exherbo_test
 
     # Run lua test scripts
     # Skipped, because they're interactive: globals luac table xd
     tests="bisect cf echo env factorial fibfor fib hello life printf readonly sieve sort trace-calls trace-globals"
     for t in ${tests}; do
-        echo "./src/lua test/${t}.lua"
+        echo "./src/lua${V} test/${t}.lua"
         case ${t} in
             readonly)
-                ./src/lua test/${t}.lua && die "Test ./src/lua test/${t}.lua failed" ;;
+                ./src/lua${V} test/${t}.lua && die "Test ./src/lua test/${t}.lua failed" ;;
             *)
-                ./src/lua test/${t}.lua || die "Test ./src/lua test/${t}.lua failed" ;;
+                ./src/lua${V} test/${t}.lua || die "Test ./src/lua test/${t}.lua failed" ;;
         esac
     done
 }
 
 src_install() {
-    default
+    emake "${ARGS[@]}" exherbo_install
+
+    for executable in lua{,c}${V} ; do
+        echo mv "${IMAGE}"/usr/bin/{${executable},${executable/${V}}}
+        mv "${IMAGE}"/usr/bin/{${executable},${executable/${V}}} ||
+            die "Couldn't unversion executables"
+    done
 
     insinto /usr/$(get_libdir)/pkgconfig
     doins etc/${PN}.pc
@@ -89,6 +88,7 @@ src_install() {
     insinto /usr/share/pixmaps
     doins etc/${PN}.ico
 
+    emagicdocs
     insinto /usr/share/doc/${PNVR}/html
     doins doc/*{css,html,gif,png}
 
