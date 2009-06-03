@@ -14,7 +14,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases.html"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~x86 ~amd64"
 MYOPTIONS="debug hal"
 
 DEPENDENCIES="
@@ -25,7 +25,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 
 src_install() {
     default
-    
+
     if option hal; then
         insinto /etc/hal/fdi/policy
         doins "${FILES}/10-${PN}.fdi"
