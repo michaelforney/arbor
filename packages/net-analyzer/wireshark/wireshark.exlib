@@ -21,8 +21,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs/"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="c-ares caps gcrypt gnutls gtk ipv6 pcap pcre smi threads zlib"
-# FIXME: Re-add lua once https://bugs.exherbo.org/121 is fixed.
+MYOPTIONS="c-ares caps gcrypt gnutls gtk ipv6 lua pcap pcre smi threads zlib"
 # FIXME: Add kerberos once we have an implementation.
 # FIXME: Add portaudio if requested.
 
@@ -41,19 +40,18 @@ DEPENDENCIES="
             x11-libs/pango
             dev-libs/atk
         )
+        lua? ( dev-lang/lua[>=5.1] )
         pcap? ( dev-libs/libpcap )
         pcre? ( dev-libs/pcre )
         smi? ( net-libs/libsmi )
         zlib? ( sys-libs/zlib )
 "
-#       lua? ( >=dev-lang/lua-5.1 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-profile-build
     --disable-usr-local
     --disable-warnings-as-errors
     --without-adns
-    --without-lua
     --without-portaudio
     --sysconfdir=/etc/wireshark
 )
@@ -70,6 +68,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "caps libcap"
     gcrypt
     gnutls
+    lua
     "pcap pcap"
     pcre
     "smi libsmi"
