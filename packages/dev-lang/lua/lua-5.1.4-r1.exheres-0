@@ -16,8 +16,8 @@ PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="readline"
 
 DEPENDENCIES="
-build+run:
-    readline? ( sys-libs/readline )
+    build+run:
+        readline? ( sys-libs/readline )
 "
 
 UPSTREAM_DOCUMENTATION="
@@ -27,8 +27,6 @@ http://www.lua.org/manual/$(ever range 1-2)/        [[ description = [ Reference
 # FIXME: Build a lua shared library, keeping the lua interpreter statically linked for performance reasons:
 #   http://article.gmane.org/gmane.comp.lang.lua.general/18519
 #   This is not done upstream for portability.
-
-#DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNVR#${PN}-}/ )
 
 src_prepare() {
     # Doing this here instead of passing relevant options in src_{compile,install} is cleaner
