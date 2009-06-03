@@ -30,7 +30,7 @@ src_install() {
 
     if option doc; then
         insinto /usr/share/doc/${PNVR}/html
-        doins -r "${WORKBASE}"/${PN}-$(ever replace_all _)-docs/
+        doins -r "${WORKBASE}"/${PN}-$(ever replace_all _ $(ever range 1-3))-docs/
     fi
 }
 
