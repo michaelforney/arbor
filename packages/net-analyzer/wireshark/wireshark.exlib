@@ -3,10 +3,23 @@
 # Based in part upon 'wireshark-1.1.0.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata
-
 export_exlib_phases src_install
 
+SUMMARY="A network protocol analyzer, formerly known as Ethereal"
+DESCRIPTION="
+Wireshark (formerly Ethereal) is a network protocol analyzer, or packet sniffer,
+that lets you capture and interactively browse the contents of network frames.
+The goal of the project is to create a commercial-quality packet analyzer for
+Unix, and the most useful packet analyzer on any platform.
+"
+HOMEPAGE="http://www.${PN}.org/"
+DOWNLOADS="${HOMEPAGE}/download/src/all-versions/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+BUGS_TO="philantrop@exherbo.org"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs/"
+
+LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="c-ares caps gcrypt gnutls gtk ipv6 pcap pcre smi threads zlib"
 # FIXME: Re-add lua once https://bugs.exherbo.org/121 is fixed.
@@ -18,20 +31,22 @@ DEPENDENCIES="
         dev-util/pkg-config[>=0.15.0]
     build+run:
         group/${PN}
-        zlib? ( sys-libs/zlib )
-        smi? ( net-libs/libsmi )
-        gtk? ( dev-libs/glib[>=2.0.4]
-                x11-libs/gtk+:2
-                x11-libs/pango
-                dev-libs/atk )
-        gnutls? ( dev-libs/gnutls )
-        gcrypt? ( dev-libs/libgcrypt )
-        pcap? ( dev-libs/libpcap )
-        pcre? ( dev-libs/pcre )
         caps? ( sys-libs/libcap )
         c-ares? ( net-dns/c-ares[>=1.5] )
+        gcrypt? ( dev-libs/libgcrypt )
+        gnutls? ( dev-libs/gnutls )
+        gtk? (
+            dev-libs/glib:2[>=2.0.4]
+            x11-libs/gtk+:2
+            x11-libs/pango
+            dev-libs/atk
+        )
+        pcap? ( dev-libs/libpcap )
+        pcre? ( dev-libs/pcre )
+        smi? ( net-libs/libsmi )
+        zlib? ( sys-libs/zlib )
 "
-#        lua? ( >=dev-lang/lua-5.1 )
+#       lua? ( >=dev-lang/lua-5.1 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-profile-build
