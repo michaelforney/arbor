@@ -1,0 +1,59 @@
+# Copyright 2008 Fernando J. Pereda
+# Distributed under the terms of the GPLv2
+
+SUMMARY="A text-based email client"
+HOMEPAGE="http://www.mutt.org"
+DOWNLOADS="ftp://ftp.mutt.org/mutt/devel/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="idn nls sasl ssl"
+
+DEPENDENCIES="
+    build:
+        app-text/docbook-xml-dtd:4.2
+        dev-libs/libxml2
+        dev-libs/libxslt
+        || (
+            www-client/lynx
+            www-client/w3m
+            www-client/elinks
+        )
+    build+run:
+        sys-libs/ncurses
+        sys-libs/gdbm
+        ssl? ( dev-libs/openssl )
+        idn? ( net-dns/libidn )
+        sasl? ( net-libs/cyrus-sasl )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-curses
+    --sysconfdir=/etc/${PN}
+    --with-docdir=/usr/share/doc/${PNV}
+    --with-homespool=.maildir
+    --with-regex
+
+    --enable-flock
+    --disable-fcntl
+    --enable-nfs-fix
+    --enable-external-dotlock
+
+    --enable-imap
+    --disable-pop
+    --enable-smtp
+
+    # hcache
+    --enable-hcache
+    --with-gdbm
+    --without-bdb
+    --without-qdbm
+    --without-tokyocabinet
+
+    --without-gnutls
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( idn ssl sasl )
+
