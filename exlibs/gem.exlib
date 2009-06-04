@@ -7,6 +7,9 @@
 
 export_exlib_phases src_install
 
+myexparam has_rdoc=true
+exparam -v has_rdoc has_rdoc
+
 if [[ -z ${DOWNLOADS} ]]; then
     DOWNLOADS="http://gems.rubyforge.org/gems/${PNV}.gem"
     REMOTE_IDS="rubyforge:${PN}"
@@ -14,7 +17,7 @@ fi
 
 HOMEPAGE="http://${PN}.rubyforge.org"
 
-MYOPTIONS="doc"
+[[ ${has_rdoc} == true ]] && MYOPTIONS="doc"
 DEPENDENCIES="
     build+run:
         dev-ruby/rubygems[>=1.2.0]
@@ -31,11 +34,18 @@ gem_src_install() {
     export GEM_HOME="${IMAGE}/${vendor_gem_dir}"
     export GEM_PATH="${vendor_gem_dir}:${GEM_HOME}"
 
-    myconf=""
-    if ! option doc; then
+    local myconf=
+    if [[ ${has_rdoc} == true ]]; then
+        if option doc; then
+            myconf="--ri --rdoc"
+        else
+            myconf+="--no-ri --no-rdoc"
+        fi
+    else
         myconf+="--no-ri --no-rdoc"
     fi
 
+    echo gem install "${GEM_SOURCE_DIR:-${FETCHEDDIR}}/${GEM_FILENAME:-${PNV}.gem}" --local ${myconf}
     gem install "${GEM_SOURCE_DIR:-${FETCHEDDIR}}/${GEM_FILENAME:-${PNV}.gem}" --local ${myconf} || die "gem install failed"
 
     if [[ -d ${IMAGE}/${vendor_gem_dir}/bin ]]; then
@@ -47,3 +57,4 @@ gem_src_install() {
 
     keepdir ${vendor_gem_dir}/{doc,gems,cache,specifications}
 }
+
