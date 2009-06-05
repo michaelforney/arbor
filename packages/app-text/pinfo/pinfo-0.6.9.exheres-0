@@ -21,13 +21,11 @@ DEPENDENCIES="
     build+run:
         sys-libs/ncurses"
 
+AT_M4DIR="${WORK}/macros"
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-FTPVIEWER.patch
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
-DEFAULT_SRC_CONFIGURE_OPTION_WITH=( readline )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( readline )
 
-src_prepare() {
-    AT_M4DIR="${WORK}/macros" eautoreconf
-}
