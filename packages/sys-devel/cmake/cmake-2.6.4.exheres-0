@@ -36,6 +36,8 @@ DEPENDENCIES="
 
 VIMFILE="${PN}.vim"
 
+DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
+
 bootstrap() {
     echo ./bootstrap "$@"
     ./bootstrap "$@" || die "./bootstrap failed"
@@ -43,6 +45,7 @@ bootstrap() {
 
 src_prepare() {
     default
+
     if option qt4; then
         sed -e '/Icon/ s/\.png//' \
             -i Source/QtDialog/CMake.desktop || die "sed to fix .desktop file failed."
@@ -60,6 +63,13 @@ src_configure() {
         --docdir=/share/doc/${PNVR} \
         --datadir=/share/${PN} \
         --mandir=/share/man
+}
+
+src_test() {
+    # Setting DISPLAY breaks qtwrapping test if Qt3 is installed, #188
+    export DISPLAY=
+
+    default
 }
 
 src_install() {
