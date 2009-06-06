@@ -5,7 +5,7 @@
 
 require common-metadata
 
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ipv6 nls unrar"
 
 #    build:
@@ -24,7 +24,7 @@ DEPENDENCIES="
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 nls unrar )
-DEFAULT_SRC_CONFIGURE_PARAMS=( 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-check --disable-tests-install
     --enable-bzip2
     --enable-lzma
@@ -43,7 +43,7 @@ src_install() {
     # Install /etc/logrotate.d/clamavd ?
     hereconfd clamd <<EOF
 # NOTICE: Since clamav-0.85-r1, only START_CLAMD and START_FRESHCLAM settings
-#	  are used, other are silently ignored
+#      are used, other are silently ignored
 
 START_CLAMD=yes
 START_FRESHCLAM=yes
