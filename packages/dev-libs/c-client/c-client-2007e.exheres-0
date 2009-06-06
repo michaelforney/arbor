@@ -67,10 +67,12 @@ src_install() {
     dolib.so c-client/libc-client.so.1.0.0
 
     # Headers
+    pushd c-client
     insinto /usr/include/imap
-    doins c-client/*.h
-    doins c-client/linkage.c
-    #exclude these dupes (can't do it before now due to symlink hell)
+    doins *.h
+    doins linkage.c
+    popd
+    # exclude these dupes (can't do it before now due to symlink hell)
     rm "${IMAGE}"/usr/include/imap/os_*.h || die "removing cruft failed"
 
     # Docs
