@@ -1,14 +1,21 @@
-# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'squid-3.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
 require pam toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
+export_exlib_phases src_prepare src_configure src_install
+
 PMAJOR=$(ever major)
 PMINOR=$(ever range 2)
 PPLEVL=$(ever range 3)
-MY_PNV=${PN}-${PMAJOR}.${PMINOR}.STABLE${PPLEVL}
+PDEVLV=$(ever range 4)
+if [[ -n ${PDEVLV} ]]; then
+    MY_PNV=${PN}-${PMAJOR}.${PMINOR}.${PPLEVL}.${PDEVLV}
+else
+    MY_PNV=${PN}-${PMAJOR}.${PMINOR}.STABLE${PPLEVL}
+fi
 
 SUMMARY="Squid is a full-featured, high performance web proxy cache"
 DESCRIPTION="
@@ -23,12 +30,11 @@ BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
 
 UPSTREAM_RELEASE_NOTES="http://www.${PN}-cache.org/Versions/v${PMAJOR}/${PMAJOR}.${PMINOR}/RELEASENOTES.html"
-UPSTREAM_CHANGELOG="http://www.${PN}-cache.org/Versions/v${PMAJOR}/${PMAJOR}.${PMINOR}/changesets/SQUID_3_0_STABLE9.html"
+UPSTREAM_CHANGELOG="http://www.${PN}-cache.org/Versions/v${PMAJOR}/${PMAJOR}.${PMINOR}/changesets/SQUID_${PMAJOR}_${PMINOR}_STABLE${PPLEVL}.html"
 UPSTREAM_DOCUMENTATION="http://www.${PN}-cache.org/Doc/ [[ lang = en ]]"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 
 MYOPTIONS="icap-client logrotate nis pam radius sasl snmp ssl threads"
 # FIXME: ldap, mysql, postgres, sqlite, samba
@@ -44,10 +50,6 @@ DEPENDENCIES="
         user/squid
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}"/${PNV}-defaults.patch
-)
-
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     QUICKSTART
     SPONSORS
@@ -55,7 +57,19 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-src_configure() {
+squid_src_prepare() {
+    default
+
+    # Removing the -Werror madness.
+    sed -i -e 's:-Werror::' acinclude.m4 configure.in || die "Werror sed failed"
+
+    # -fhuge-objects is not needed and not supported by gcc-4.4 anymore.
+    sed -i -e 's:\(HUGE_OBJECT_FLAG="\)-fhuge-objects":\1":' acinclude.m4
+
+    eautoreconf
+}
+
+squid_src_configure() {
     local basic_modules="getpwnam,NCSA,MSNT"
     option pam    && basic_modules+=",PAM"
     option sasl   && basic_modules+=",SASL"
@@ -64,6 +78,10 @@ src_configure() {
 
     local ext_helpers="ip_user,session,unix_group"
     local ntlm_helpers="fakeauth"
+
+    # Upstream doesn't support --without for these two... *sigh*
+    local myconf=""
+    option threads && myconf="--with-pthreads --with-aio"
 
     export CC=$(tc-getCC)
 
@@ -88,16 +106,15 @@ src_configure() {
         --enable-shared \
         --with-default-user=squid \
         --with-large-files \
-        --with-aio \
         --with-dl \
         --with-filedescriptors=8192 \
         $(option_enable snmp) \
         $(option_enable ssl) \
         $(option_enable icap-client) \
-        $(option_with threads pthreads)
+        ${myconf}
 }
 
-src_install() {
+squid_src_install() {
     default
 
     hereconfd squid <<EOF
