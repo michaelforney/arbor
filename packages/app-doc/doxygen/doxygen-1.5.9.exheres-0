@@ -3,8 +3,7 @@
 # Based in part upon 'doxygen-1.5.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-# FIXME: Add optional support for doxywizard (qt4), buildsystem needs /lots/ of fixing for that
-# require qmake4 [ no_qt_dependency=true ]
+require qmake4 [ no_qt_dependency=true ]
 
 require toolchain-funcs freedesktop-mime
 
@@ -18,7 +17,7 @@ UPSTREAM_RELEASE_NOTES="http://www.stack.nl/~dimitri/doxygen/changelog.html"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc dot examples" # latex qt4
+MYOPTIONS="doc dot examples qt4" # latex
 
 DEPENDENCIES="
     build:
@@ -33,11 +32,12 @@ DEPENDENCIES="
             media-gfx/graphviz
             media-libs/freetype:2
         )
+        qt4? ( x11-libs/qt:4[>=4.3.0] )
 "
-#       qt4? ( >=x11-libs/qt-4.3:4 )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-system-libpng.patch" # Remove internal libpng - see Gentoo bug #210237
+    # Remove internal libpng - see Gentoo bug #210237
+    "${FILES}/${PNV}-system-libpng.patch"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
 DEFAULT_SRC_INSTALL_PARAMS=( MAN1DIR="share/man/man1" )
@@ -54,24 +54,28 @@ src_prepare() {
         -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
         -i tmake/lib/linux*/tmake.conf || die "Failed to use user's *FLAGS"
 
-    # FIXME: Install path issues with the doxywizard binary
-    # option qt4 && eqmake4 addon/doxywizard/doxywizard.pro
+    # DESTDIR issues with the doxywizard binary
+    sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
+        -i addon/doxywizard/Makefile.in || die "DESTDIR fixing failed"
+
+    option qt4 && eqmake4 addon/doxywizard/doxywizard.pro
 }
 
 src_configure() {
-    # option qt4 && export QTDIR=/usr
-    #   $(option_with qt4 doxywizard) \
     local myconf
 
     # configure doesn't like --without-doxyapp
     option examples && myconf+="--with-doxyapp"
+    # Without this, Qt:3 is picked up, if it's installed
+    option qt4 && export QTDIR=/usr
 
     ./configure \
         --docdir /usr/share/doc/${PNVR} \
         --prefix /usr \
         --shared \
+        $(option_with qt4 doxywizard) \
         ${myconf} ||
-        die "./configure failed."
+        die "./configure failed"
 }
 
 src_compile() {
