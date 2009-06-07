@@ -40,6 +40,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-thread-safe-client
     # Where to put mysqld, mysqlmanager
     --libexecdir="/usr/sbin"
+    # mysqld puts its data directly in this
+    --localstatedir=/var/lib/mysql
     --with-comment="Exherbo, ${PNVR}"
     --with-mysqld-user=mysql
     # Use the system readline, libedit. --with-readline builds the internal readling copy.
@@ -93,6 +95,10 @@ mysql_src_install() {
 
     # Contains lots of cruft & some empty dirs
     rm -r "${IMAGE}"/usr/{mysql-test,sql-bench} || die "Couldn't nuke /usr/mysql-test"
+
+    keepdir /var/lib/mysql
+    fowners mysql:mysql /var/lib/mysql
+    fperms 755 /var/lib/mysql
 
     hereenvd 46mysql <<EOF
 LDPATH=/usr/$(get_libdir)/${PN}
