@@ -74,8 +74,10 @@ src_install() {
     done
     doins $(canonicalise linkage.c)
     popd
-    # exclude these dupes (can't do it before now due to symlink hell)
+    # We need to use the correct header for our OS. The rest gets deleted.
+    cp "${IMAGE}"/usr/include/imap/os_lnx.h "${TEMP}" || die "saving header failed"
     rm "${IMAGE}"/usr/include/imap/os_*.h || die "removing cruft failed"
+    cp "${TEMP}"/os_lnx.h "${IMAGE}"/usr/include/imap/osdep.h || die "restoring header failed"
 
     # Docs
     dodoc README docs/*.txt docs/CONFIG docs/RELNOTES
