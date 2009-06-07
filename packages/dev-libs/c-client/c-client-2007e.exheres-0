@@ -69,8 +69,10 @@ src_install() {
     # Headers
     pushd c-client
     insinto /usr/include/imap
-    doins *.h
-    doins linkage.c
+    for header in *.h ; do
+        doins $(canonicalise ${header})
+    done
+    doins $(canonicalise linkage.c)
     popd
     # exclude these dupes (can't do it before now due to symlink hell)
     rm "${IMAGE}"/usr/include/imap/os_*.h || die "removing cruft failed"
