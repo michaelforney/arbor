@@ -16,7 +16,13 @@ MYOPTIONS="doc nls"
 DEPENDENCIES=""
 
 # FIXME: Add java, mono and emacs support.
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-csharp --disable-java )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-csharp
+    --disable-java
+    --with-packager="Exherbo"
+    --with-packager-version="${PNVR}"
+    --with-packager-bug-reports="http://bugs.exherbo.org/"
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_install() {
