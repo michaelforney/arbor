@@ -20,7 +20,10 @@ LICENCES="as-is"
 SLOT="$(ever range 1-2)"
 MYOPTIONS="doc"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        !sys-libs/db:0 [[ description = [ Unmerge sys-libs/db:0 before installing slotted versions of Berkely DB ] ]]
+"
 
 ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PNV}/dist"
 WORK="${WORKBASE}/${PN}-${MY_PNV}/build_unix"
