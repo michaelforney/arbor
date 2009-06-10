@@ -2,11 +2,17 @@
 # Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+MY_PNV=${PV%_p*}
+PATCH_LEVEL=${PNV##*_p}
+
 require multilib alternatives
 
 SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
-DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PNV}.tar.gz"
+DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PNV}.tar.gz
+    $(for ((i=1 ; i<=PATCH_LEVEL ; i++ )) ; do
+        echo "http://www.oracle.com/technology/products/berkeley-db/${PN}/update/${MY_PNV}/patch.${MY_PNV}.${i} -> ${PN}-${MY_PNV}.${i}.patch"
+      done)"
 
 LICENCES="as-is"
 SLOT="$(ever range 1-2)"
@@ -14,8 +20,8 @@ MYOPTIONS="doc"
 
 DEPENDENCIES=""
 
-ECONF_SOURCE="${WORK}/dist"
-WORK="${WORKBASE}/${PNV}/build_unix"
+ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PNV}/dist"
+WORK="${WORKBASE}/${PN}-${MY_PNV}/build_unix"
 
 AT_M4DIR=( aclocal aclocal_java )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -29,7 +35,15 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
 src_prepare() {
-    cd "${WORKBASE}/${PNV}/dist/" || die "Couldn't enter ${WORKBASE}/${PNV}/dist/"
+    cd "${WORKBASE}/${PN}-${MY_PNV}/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/"
+
+    local patches
+    for ((i=1; i<=PATCH_LEVEL; i++)); do
+        patches+=( "${FETCHEDDIR}/${PN}-${MY_PNV}.${i}.patch" )
+    done
+    expatch -p0 "${patches[@]}"
+
+    cd "${WORKBASE}/${PN}-${MY_PNV}/dist/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/dist/"
 
     # Allow --docdir to work
     sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in || die "Docdir sed"
