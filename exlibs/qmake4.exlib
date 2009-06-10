@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 # EQMAKE4_SOURCES
@@ -17,6 +17,13 @@ DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 
 eqmake4() {
     illegal_in_global_scope
+
+    # Install into the correct libdir on 64 bit systems
+    if [[ $(get_libdir) == *64 ]] ; then
+        export QMAKESPEC="/usr/share/qt4/mkspecs/linux-g++-64"
+    else
+        export QMAKESPEC="/usr/share/qt4/mkspecs/linux-g++"
+    fi
 
     [[ -x /usr/bin/qmake ]] || die "eqmake4() called but no qmake found"
 
