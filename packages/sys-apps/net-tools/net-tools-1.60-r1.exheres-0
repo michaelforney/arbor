@@ -28,9 +28,10 @@ src_configure() {
     # We provide a static config and sed some options instead.
     option nls && sed -i -e 's:I18N 0:I18N 1:' config.h
     option ipv6 && sed -i -e 's:HAVE_AFINET6 0:HAVE_AFINET6 1:' config.h
+    # The file config.h needs to be more recent than the Makefile
+    touch config.h
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" )
-
