@@ -2,14 +2,14 @@
 # Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib alternatives
 
 SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
 DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PNV}.tar.gz"
 
 LICENCES="as-is"
-SLOT="0" # $(ever range 1-2)"
+SLOT="$(ever range 1-2)"
 MYOPTIONS="doc"
 
 DEPENDENCIES=""
@@ -17,23 +17,69 @@ DEPENDENCIES=""
 ECONF_SOURCE="${WORK}/dist"
 WORK="${WORKBASE}/${PNV}/build_unix"
 
+AT_M4DIR=( aclocal aclocal_java )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --includedir=/usr/include/${PN}${SLOT}
     --enable-compat185
     --enable-cxx
     --disable-java
     --disable-tcl
     --disable-test
 )
+DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
+
+src_prepare() {
+    cd "${WORKBASE}/${PNV}/dist/" || die "Couldn't enter ${WORKBASE}/${PNV}/dist/"
+
+    # Allow --docdir to work
+    sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in || die "Docdir sed"
+    # Hack in something similar --program-transform-name, simplifies slotting
+    sed -e '/INSTALLER.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
+        -e     '/CHMOD.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
+        -i ./Makefile.in || die "Program-transform-suffix sed"
+}
 
 src_install() {
     default
 
-    # dist/Makefile.in needs fixing for --docdir
-    if option doc; then
-        dodir /usr/share/doc/
-        mv "${IMAGE}"/usr/docs "${IMAGE}"/usr/share/doc/${PNVR} || die 'Failed to put docs in the correct docdir'
-    else
-        rm -r "${IMAGE}"/usr/docs || die 'Failed to remove api docs'
+    if option !doc ; then
+        rm -r "${IMAGE}"/usr/share || die 'Failed to remove api docs'
     fi
+
+    rm "${IMAGE}"/usr/$(get_libdir)/libdb{,_cxx}{.so,.a,-$(ever major).so} ||
+        die "Couldn't remove unversioned libraries"
+
+    local alternatives=() replace_me
+    pushd "${IMAGE}" || die "Couldn't enter IMAGE"
+
+    # Binaries,     /usr/bin/${PN}_*                -> /usr/bin/${PN}${SLOT}_*
+    for src in usr/bin/${PN}${SLOT}_* ; do
+        target=${src/${SLOT}/}
+        alternatives+=( /${target} ${src##*/} )
+    done
+
+    # Includes      /usr/include/*.h                -> /usr/include/${PN}${SLOT}/*.h
+    replace_me=${PN}${SLOT}/
+    for src in usr/include/${replace_me}/*.h ; do
+        target=${src/${replace_me}}
+        alternatives+=( /${target} ${src##usr/include/} )
+    done
+
+    # Libraries,    /usr/lib/lib*.*                 -> /usr/lib/lib*-${SLOT}.*
+    replace_me=-${SLOT}
+    for src in usr/$(get_libdir)/lib*${replace_me}.* ; do
+        target=${src/${replace_me}}
+        alternatives+=( /${target} ${src##*/} )
+    done
+
+    # Libraries,    /usr/lib/lib*-$(ever major).so   -> /usr/lib/lib*-${SLOT}.so
+    replace_me=-$(ever major)
+    for src in usr/$(get_libdir)/lib{,_cxx}${replace_me}.so ; do
+        target=${src/${replace_me}/${SLOT}}
+        alternatives+=( /${target} ${src##*/} )
+    done
+    popd || die "Couldn't leave IMAGE"
+
+    alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
 }
 
