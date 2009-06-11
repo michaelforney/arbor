@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'clamav-0.93.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -8,20 +8,14 @@ require common-metadata
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ipv6 nls unrar"
 
-#    build:
-#        build_options:recommended_tests? (
-#            dev-libs/check [[ description = [ Necessary to run the testsuite ] ]]
-#            dev-util/valgrind
-#        )
 DEPENDENCIES="
+    build:
+        dev-libs/check [[ description = [ Necessary to run the testsuite ] ]]
     build+run:
         dev-libs/gmp
         group/clamav
         user/clamav
 "
-
-# Valgrind test fails here, other tests work. Need to look into it.
-RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 nls unrar )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -36,6 +30,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-experimental
     --disable-milter
 )
+DEFAULT_SRC_TEST_PARAMS=( VALGRIND=no )
 
 src_install() {
     default
