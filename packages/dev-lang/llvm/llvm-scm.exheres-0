@@ -13,12 +13,13 @@ DOWNLOADS=""
 
 PLATFORMS="~amd64"
 
-# FIXME /usr/lib is hardcoded
 # FIXME /usr/include/llvm/(CMakeFiles|Makefile), bad globbing somewhere?
 # FIXME /usr/./include (cosmetic)
 
 # Doesn't currently build, shared libs aren't recommended by upstream
 # CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-libdir.patch" )
 
 src_install() {
     llvm_src_install
