@@ -73,7 +73,7 @@ src_configure() {
         --docdir /usr/share/doc/${PNVR} \
         --prefix /usr \
         --shared \
-        $(option_with qt4 doxywizard) \
+        $(option qt4 && option_with qt4 doxywizard) \
         ${myconf} ||
         die "./configure failed"
 }
