@@ -3,7 +3,7 @@
 
 require cmake
 
-export_exlib_phases src_compile src_install
+export_exlib_phases src_compile src_test src_install
 
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
@@ -22,11 +22,13 @@ DOWNLOADS="${HOMEPAGE}/releases/${PV}/${PNV}.tar.gz
 LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS=""
+# FIXME Some tests fail to find stdlib includes
+RESTRICT="test"
 
 DEPENDENCIES="
     build:
         dev-lang/perl:*
-        dev-lang/python:*
+        dev-lang/python:* [[ description = [ Used for Clang's testrunner ] ]]
         sys-devel/flex
 "
 
@@ -42,6 +44,10 @@ llvm_src_compile() {
 
     mkdir -p tools/clang/docs/tools/man/man1
     emake BUILD_FOR_WEBSITE=YesPlease -C tools/clang/docs/tools/ man html
+}
+
+llvm_src_test() {
+    _cmake_run nonfatal emake clang-test
 }
 
 llvm_src_install() {
