@@ -3,6 +3,8 @@
 
 require cmake
 
+export_exlib_phases src_compile src_install
+
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
 Low-Level Virtual Machine (LLVM) is a compiler infrastructure designed for
@@ -24,6 +26,7 @@ MYOPTIONS=""
 DEPENDENCIES="
     build:
         dev-lang/perl:*
+        dev-lang/python:*
         sys-devel/flex
 "
 
@@ -33,4 +36,28 @@ REMOTE_IDS="freshmeat:${PN}"
 
 UPSTREAM_DOCUMENTATION="http://llvm.org/docs [[ lang = en ]]"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
+
+llvm_src_compile() {
+    cmake_src_compile
+
+    # FIXME CMake doesn't build clang documentation yet
+    mkdir -p tools/clang/docs/tools/man/man1
+    emake BUILD_FOR_WEBSITE=YesPlease -C tools/clang/docs/tools/ man html
+}
+
+llvm_src_install() {
+    cmake_src_install
+
+    # FIXME CMake doesn't install LLVM docs yet
+    find docs/{img,HistoricalNotes} -type d -name .svn -print0 | xargs -0 rm -r || die "Couldn't remove .svn/ cruft"
+    insinto /usr/share/doc/${PNVR}/llvm/
+    doins -r docs/*.{css,html} docs/img/ docs/HistoricalNotes
+
+    # FIXME CMake doesn't install clang docs yet
+    cd "${WORK}/tools/clang/docs/" || die "Couldn't enter ${WORK}/tools/clang/docs/tools"
+    insinto /usr/share/doc/${PNVR}/clang/
+    doins *.{html,png}
+    doins tools/manpage.css tools/html/clang.html
+    doman tools/man/man1/clang.1
+}
 

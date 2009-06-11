@@ -21,7 +21,7 @@ PLATFORMS="~amd64"
 # CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
 
 src_install() {
-    cmake_src_install
+    llvm_src_install
 
     # FIXME Shouldn't be built in the first place
     rm -r "${IMAGE}"/usr/examples || die "Couldn't remove /usr/examples"
