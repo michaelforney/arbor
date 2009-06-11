@@ -4,6 +4,8 @@
 # This exlib is useful for packages whose upstream is Debian. It'll do
 # 'the right thing' for DOWNLOADS
 
+myexparam suffix=.tar.gz
+
 DEBIAN_UPSTREAM_PN="${DEBIAN_UPSTREAM_PN:-${PN}}"
 DEBIAN_UPSTREAM_PV="${DEBIAN_UPSTREAM_PV:-${PV}}"
 
@@ -12,5 +14,5 @@ if [[ "${DEBIAN_UPSTREAM_PN}" == lib* ]]; then
     DEBIAN_UPSTREAM_PREFIX="${DEBIAN_UPSTREAM_PN:0:4}"
 fi
 
-DOWNLOADS="mirror://debian/pool/main/${DEBIAN_UPSTREAM_PREFIX}/${DEBIAN_UPSTREAM_PN}/${DEBIAN_UPSTREAM_PN}_${DEBIAN_UPSTREAM_PV}.tar.gz"
+DOWNLOADS="mirror://debian/pool/main/${DEBIAN_UPSTREAM_PREFIX}/${DEBIAN_UPSTREAM_PN}/${DEBIAN_UPSTREAM_PN}_${DEBIAN_UPSTREAM_PV}$(exparam suffix)"
 
