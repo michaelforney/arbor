@@ -1,0 +1,48 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A build tool, backward compatible with Perforce Jam, a make replacement"
+DESCRIPTION="
+Boost.Jam (BJam) is a build tool based on FTJam, which in turn is based on
+Perforce Jam. It contains significant improvements made to facilitate its use
+in the Boost Build System, but should be backward compatible with Perforce Jam.
+
+Jam is a make(1) replacement that makes building simple things simple and
+building complicated things manageable.  Jam's language is expressive, making
+Jamfiles (c.f. Makefiles) compact.  Jam handles header file dependencies
+automatically and on-the-fly.  Jam is very portable: it runs on UNIX, VMS, Mac,
+and NT. Most Jamfiles themselves are portable.  Jam is unintrusive: it is
+small, it has negligible CPU overhead, and it doesn't create any of its own
+funny files (c.f. Odin, nmake, SunOS make).  Jam can build large projects
+spread across many directories in one pass, without recursing, tracking the
+relationships among all files. Jam can do this with multiple, concurrent
+processes.  Jam isn't under the blinkin GNU copyright, so you can incorporate
+it into commercial products.
+"
+HOMEPAGE="http://www.boost.org/"
+DOWNLOADS="mirror://sourceforge/boost/${PNV}.tgz"
+
+LICENCES="Boost-1.0"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    post:
+        sys-devel/boost-build
+"
+
+src_compile() {
+    ./build.sh gcc --release || die "./build.sh gcc returned exit status: $?"
+}
+
+src_install() {
+    dobin bin.linux*/bjam
+    dosym /usr/bin/{b,}jam
+
+    dodoc index.html boost.png boostbook.css
+    dodoc -r images
+    docinto jam
+    dodoc jam/*.html
+}
+
