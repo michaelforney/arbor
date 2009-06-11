@@ -22,13 +22,13 @@ SLOT="0"
 MYOPTIONS="berkdb nls perl python ruby"
 RESTRICT="test" # Expensive tests
 
+#       dev-lang/python:*[>=2.2] [[ description = [ Expensive tests ] ]]
 DEPENDENCIES="
     build:
         nls? ( sys-devel/gettext )
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
-        build_options:expensive_tests? ( dev-lang/python:*[>=2.2] )
     build+run:
       dev-db/sqlite[>=3.4.0]
         dev-libs/apr-util[berkdb?]
@@ -82,7 +82,11 @@ subversion_src_compile() {
 }
 
 src_test_expensive() {
-    emake check
+    if has_version dev-lang/python:*[>=2.2] ; then
+        emake check
+    else
+        ewarn "Subversion needs dev-lang/python:*[>=2.2] to run its tests"
+    fi
 }
 
 subversion_src_install() {
