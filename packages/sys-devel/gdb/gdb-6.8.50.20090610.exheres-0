@@ -1,0 +1,17 @@
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+#
+# Inspired by gdb-6.7.1.ebuild which is Copyright 1999-2007 Gentoo Foundation
+
+require gdb
+
+DOWNLOADS="mirror://sourceware/${PN}/snapshots/current/${PNV}.tar.bz2"
+
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-werror
+    # FIXME Breaks with readline-6.0*
+    # --with-system-readline
+)
+
