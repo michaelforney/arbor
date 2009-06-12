@@ -1,9 +1,9 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cmake
+require multilib cmake
 
-export_exlib_phases src_compile src_test src_install
+export_exlib_phases src_configure src_compile src_test src_install
 
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
@@ -38,6 +38,16 @@ REMOTE_IDS="freshmeat:${PN}"
 
 UPSTREAM_DOCUMENTATION="http://llvm.org/docs [[ lang = en ]]"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
+
+llvm_src_configure() {
+    local libdir=$(get_libdir)
+
+    CMAKE_SRC_CONFIGURE_PARAMS=(
+        -DLLVM_LIBDIR_SUFFIX=${libdir##lib}
+    )
+
+    cmake_src_configure
+}
 
 llvm_src_compile() {
     cmake_src_compile
