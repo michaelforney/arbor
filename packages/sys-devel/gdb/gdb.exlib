@@ -1,0 +1,31 @@
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+#
+# Inspired by gdb-6.7.1.ebuild which is Copyright 1999-2007 Gentoo Foundation
+
+SUMMARY="The GNU Project Debugger"
+HOMEPAGE="http://sourceware.org/gdb/"
+DOWNLOADS="mirror://sourceware/${PN}/releases/${PNV}.tar.bz2"
+
+LICENCES="GPL-2 LGPL-2"
+SLOT="0"
+MYOPTIONS="nls"
+
+# Don't want to harddepend on dejagnu (-> tcl, expect)
+RESTRICT=test
+#   build,test:
+#       dev-util/dejagnu
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses[>=5.2]
+        nls? ( sys-devel/gettext )"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-werror
+    --with-system-readline
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( gdb sim )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CONTRIBUTE )
+
