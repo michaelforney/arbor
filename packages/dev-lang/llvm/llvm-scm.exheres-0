@@ -25,7 +25,10 @@ PLATFORMS="~amd64"
 # Doesn't currently build, shared libs aren't recommended by upstream
 # CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-libdir.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PNV}-libdir.patch"
+    "${FILES}/${PNV}-libstdc++-includes.patch"
+)
 
 src_install() {
     llvm_src_install
