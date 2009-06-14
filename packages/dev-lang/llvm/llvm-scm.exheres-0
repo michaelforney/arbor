@@ -17,7 +17,7 @@ PLATFORMS="~amd64"
 #   /usr/include/llvm/(CMakeFiles|Makefile)
 #   /usr/include/clang/**/(CMakeLists.txt|Makefile)
 #   /usr/./include (though purely cosmetic)
-# FIXME Clang installs into /usr/Headers
+# FIXME Clang installs into /usr/Headers, add a CMake switch for this, plus include it in system include paths by default
 # FIXME What: /usr/lib*/*.o
 # FIXME Make building examples optional, install into proper paths
 # FIXME Support for building & installing documentation
@@ -26,7 +26,7 @@ PLATFORMS="~amd64"
 # CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-libstdc++-includes.patch"
+    "${FILES}/${PNV}-Exherbo-includes.patch"
 )
 
 src_install() {

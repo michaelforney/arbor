@@ -1,0 +1,37 @@
+From 795fff94dbe3dcbc5dfb16b2f402bea63050bfd2 Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Fri, 12 Jun 2009 03:06:23 +0200
+Subject: [PATCH] Add Exherbo include paths (linux-headers, libstdc++)
+
+---
+ tools/clang/lib/Frontend/InitHeaderSearch.cpp |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+
+diff --git a/tools/clang/lib/Frontend/InitHeaderSearch.cpp b/lib/Frontend/InitHeaderSearch.cpp
+index 6383c20..3ce7c31 100644
+--- a/tools/clang/lib/Frontend/InitHeaderSearch.cpp
++++ b/tools/clang/lib/Frontend/InitHeaderSearch.cpp
+@@ -121,7 +121,20 @@ void InitHeaderSearch::AddDefaultSystemIncludePaths(const LangOptions &Lang) {
+   AddPath("C:/mingw/include", System, false, false, false);
+ #else
+ 
++   // Exherbo 2009-06-14
++  AddPath("/usr/include/linux", System, true, false, false);
++  // XXX Hack, update when there's a proper configure switch for includedir
++  AddPath("/usr/Headers", System, true, false, false);
++
+   if (Lang.CPlusPlus) {
++   // Exherbo 2009-06-14
++    AddPath("/usr/include/c++/4.4.0", System, true, false, false);
++    AddPath("/usr/include/c++/4.4.0/i686-pc-linux-gnu", System, true, false,
++        false);
++    AddPath("/usr/include/c++/4.4.0/backward", System, true, false, false);
++    AddPath("/usr/include/c++/4.4.0/x86_64-pc-linux-gnu", System, true,
++        false, false);
++
+     AddPath("/usr/include/c++/4.2.1", System, true, false, false);
+     AddPath("/usr/include/c++/4.2.1/i686-apple-darwin10", System, true, false,
+         false);
+-- 
+1.6.3.2
+
