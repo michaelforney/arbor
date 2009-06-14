@@ -2,13 +2,13 @@
 # Distributed under the terms of the GPLv2
 
 SUMMARY="A text-based email client"
-HOMEPAGE="http://www.mutt.org"
+HOMEPAGE="http://www.mutt.org/"
 DOWNLOADS="ftp://ftp.mutt.org/mutt/devel/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="idn nls sasl ssl gpgme"
+MYOPTIONS="gpgme idn nls sasl ssl"
 
 DEPENDENCIES="
     build:
@@ -21,12 +21,12 @@ DEPENDENCIES="
             net-www/elinks
         )
     build+run:
-        sys-libs/ncurses
         sys-libs/gdbm
-        ssl? ( dev-libs/openssl )
+        sys-libs/ncurses
+        gpgme? ( app-crypt/gpgme )
         idn? ( net-dns/libidn )
         sasl? ( net-libs/cyrus-sasl )
-        gpgme? ( app-crypt/gpgme )
+        ssl? ( dev-libs/openssl )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -55,6 +55,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-gnutls
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls gpgme )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( idn ssl sasl )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gpgme nls )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( idn sasl ssl )
 
