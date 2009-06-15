@@ -98,7 +98,7 @@ mysql_src_install() {
     rm -r "${IMAGE}"/usr/{mysql-test,sql-bench} || die "Couldn't nuke /usr/mysql-test"
 
     keepdir /etc/mysql
-    cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf || die "copying default config failed""
+    cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf || die "copying default config failed"
     sed -i -e "/socket/s:=.*:= /var/run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf || die "fixing socket path failed"
 
     keepdir /var/{lib,log}/mysql
