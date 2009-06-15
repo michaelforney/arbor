@@ -18,12 +18,13 @@ http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="big-tables debug embedded-server ssl
+MYOPTIONS="big-tables debug embedded-server logrotate ssl
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
 "
 
 DEPENDENCIES="
     build+run:
+        logrotate? ( app-admin/logrotate )
         ssl? ( dev-libs/openssl )
         group/${PN}
         user/${PN}
@@ -96,12 +97,27 @@ mysql_src_install() {
     # Contains lots of cruft & some empty dirs
     rm -r "${IMAGE}"/usr/{mysql-test,sql-bench} || die "Couldn't nuke /usr/mysql-test"
 
-    keepdir /var/lib/mysql
-    fowners mysql:mysql /var/lib/mysql
-    fperms 755 /var/lib/mysql
+    keepdir /etc/mysql
+    cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf || die "copying default config failed""
+    sed -i -e "/socket/s:=.*:= /var/run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf || die "fixing socket path failed"
+
+    keepdir /var/{lib,log}/mysql
+    fowners mysql:mysql /var/{lib,log}/mysql
+    fperms 755 /var/{lib,log}/mysql
+
+    keepdir /var/run/mysqld
+    fowners mysql:mysql /var/run/mysqld
+    fperms 755 /var/run/mysqld
 
     hereenvd 46mysql <<EOF
 LDPATH=/usr/$(get_libdir)/${PN}
 EOF
-}
 
+    if option logrotate ; then
+        insinto /etc/logrotate.d
+        newins "${FILES}"/logrotate.mysql mysql
+    fi
+
+    newinitd "${FILES}"/mysql.rc6 mysql
+    newconfd "${FILES}"/mysql.conf.d mysql
+}
