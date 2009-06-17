@@ -6,19 +6,18 @@ require glibc [ ports_uri="http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PN}-
 
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 
-#RESTRICT=test
+# Sandbox causes numerous test failures
+RESTRICT=test
 
 src_prepare() {
     cd "${WORKBASE}/${PNV}"
     expatch -p0 "${FILES}/${PNV}-fgetwc.patch"
     expatch -p0 "${FILES}/${PNV}-disable-tst-cpuclock2.patch"
     expatch -p0 "${FILES}/${PNV}-disable-tst-atime.patch"
+    expatch -p0 "${FILES}/${PNV}-disable-tst-mutex5.patch"
 }
 
 src_test() {
-    # Sandbox causes numerous problems
-    export PALUDIS_DO_NOTHING_SANDBOXY="sandbox sucks"
-
     default
 }
 
