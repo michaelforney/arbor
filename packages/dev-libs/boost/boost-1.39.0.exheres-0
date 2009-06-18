@@ -49,8 +49,8 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
 )
 CMAKE_SRC_CONFIGURE_OPTION_BUILDS=(
     DEBUG
-    'doc BUILD_DOCUMENTATION'
-    'doc BUILD_DOCUMENTATION_HTML'
+    'doc DOCUMENTATION'
+    'doc DOCUMENTATION_HTML'
 )
 
 src_prepare() {
@@ -78,15 +78,17 @@ src_install() {
 
     rmdir "${IMAGE}"/usr/include/boost/interprocess/containers/detail || die "Couldn't nuke empty dir"
 
-    # FIXME CMakeLists in doc, doc/src seem broke & setting option=doc has no effect
-    # Install docs the brute-force way...
-    if option doc; then
-        insinto /usr/share/doc/${PNVR}/html
-        doins -r doc more people wiki
+    if option doc ; then
+        # FIXME Should really be handled by boosts buildsystem
+        local f
+        find doc/ libs/ -depth -iname 'test' -o -iname 'src' -o -iname 'CMakeLists.txt' -o -iname '*.cmake' -o -iname 'Jamfile.v2' -o -iname 'proj' -o -iname '*.vcproj' | while read f ; do
+            echo "rm -r ${f}"
+            rm -r "${f}" || die "Couldn't delete ${f}"
+        done
+        find . -type d -empty -delete || die "Couldn't remove empty directories"
 
-        find libs -iname test -o -iname src -print0 | xargs -0 rm -r \
-            || die "Couldn't clean out ./libs/."
-        doins -r libs
+        insinto /usr/share/doc/${PNVR}/html
+        doins -r doc libs more people wiki
 
         dosym /usr/include/${PN} /usr/share/doc/${PNVR}/html/${PN}
     fi
