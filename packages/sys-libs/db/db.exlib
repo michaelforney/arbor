@@ -93,7 +93,7 @@ src_install() {
 
     # Libraries,    /usr/lib/lib*-$(ever major).so   -> /usr/lib/lib*-${SLOT}.so
     replace_me=-$(ever major)
-    for src in usr/$(get_libdir)/lib{,_cxx}${replace_me}.so ; do
+    for src in usr/$(get_libdir)/libdb{,_cxx}${replace_me}.so ; do
         target=${src/${replace_me}/-${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done
