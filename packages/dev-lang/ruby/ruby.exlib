@@ -99,7 +99,7 @@ fi
 ruby_src_install() {
     unset RUBYOPT
     D_LIBDIR="${IMAGE}/usr/$(get_libdir)"
-    LD_LIBRARY_PATH="${D_LIBDIR}"
+    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${D_LIBDIR}"
     RUBYLIB="${WORK}:${D_LIBDIR}/ruby/${SLOT}"
 
     for dir in $(find "${WORK}/ext" -type d) ; do
