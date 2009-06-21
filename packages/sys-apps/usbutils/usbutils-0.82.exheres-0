@@ -3,8 +3,6 @@
 # Based upon 'usbutils-0.732.ebuild' from Gentoo which is:
 #    Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
-
 SUMMARY="USB enumeration utilities"
 HOMEPAGE="http://linux-usb.sourceforge.net/"
 DOWNLOADS="mirror://sourceforge/linux-usb/${PNV}.tar.gz"
@@ -16,27 +14,18 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        dev-libs/libusb:0.1[>=0.1.8]
+        dev-libs/libusb:0.1[>=0.1.12]
     run,post:
-          sys-apps/usbutils-data
+        sys-apps/usbutils-data
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/usbutils-0.73-byteorder.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --datadir=/usr/share/misc --disable-zlib )
-
-src_prepare() {
-    default
-
-    sed -i -e 's:/usr/share/usb.ids:/usr/share/misc/usb.ids:' \
-        lsusb.8 || die "failed to update man page"
-
-    eautoreconf
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--datadir=/usr/share/misc' '--disable-zlib' )
 
 src_install() {
     default
 
     # this is provided by usbutils-data
+    rm -f "${IMAGE}/usr/sbin/update-usbids.sh" || die "unable to remove update-usbids.sh"
     rm -f "${IMAGE}/usr/share/misc/usb.ids" || die "unable to remove usb.ids"
     rmdir "${IMAGE}/usr/share/misc/" || die "unable to remove /usr/share/misc"
 }
