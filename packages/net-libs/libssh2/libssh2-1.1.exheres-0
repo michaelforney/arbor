@@ -1,0 +1,26 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A library implementing the SSH2 protocol"
+HOMEPAGE="http://libssh2.haxx.se/"
+DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+# keyboard-interactive tests fail: Failed requesting pty
+RESTRICT=test
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/openssl
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --without-libgcrypt
+    --with-openssl
+    --with-libz
+)
+
