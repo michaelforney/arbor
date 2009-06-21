@@ -5,16 +5,17 @@
 
 require flag-o-matic multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] pam
 
+export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
+
 MY_PN="Linux-PAM"
 MY_PNV="${MY_PN}-${PV}"
 
-HOMEPAGE="http://www.kernel.org/pub/linux/libs/pam/"
+HOMEPAGE="http://www.kernel.org/pub/linux/libs/${PN}/"
 SUMMARY="Linux-PAM provides Pluggable Authentication Modules"
-DOWNLOADS="mirror://kernel/linux/libs/pam/library/${MY_PNV}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2"
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="nls"
 
 DEPENDENCIES="
@@ -23,33 +24,7 @@ DEPENDENCIES="
         sys-libs/cracklib[>=2.8.3]
 "
 
-WORK="${WORKBASE}/${MY_PNV}"
-
-pkg_pretend() {
-    if [[ ! -f /etc/pam.d/other ]]; then
-        ewarn "We won't be able to run the tests. They require /etc/pam.d/other which you don't"
-        ewarn "have. If you want to run the tests before installing ${PN} for the first time,"
-        ewarn "copy ${FILES}/pam.d/other"
-        ewarn "to /etc/pam.d/other and start the installation again. This is STRONGLY recommended."
-    fi
-}
-
-DEFAULT_SRC_PREPARE_PATCHES=( 
-    "${FILES}"/${PN}-1.0.1-disable-regenerate-man.patch 
-    "-p0"
-    "${FILES}"/${PNV}-fix-tst-pam_mkargv-on-32bit.patch 
-)
-AT_M4DIR=m4
-
-src_prepare() {
-    mkdir -p doc/txt
-    for readme in modules/pam_*/README; do
-        cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | \
-            sed -e 's|^modules/||')
-    done
-
-    autotools_src_prepare
-}
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.0.1-disable-regenerate-man.patch )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --libdir=/usr/$(get_libdir)
@@ -63,16 +38,39 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-isadir=/$(get_libdir)/security
     --enable-securedir=/$(get_libdir)/security
 )
+
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
-src_configure() {
+WORK="${WORKBASE}/${MY_PNV}"
+AT_M4DIR=m4
+
+pam_build_pkg_pretend() {
+    if [[ ! -f /etc/pam.d/other ]]; then
+        ewarn "We won't be able to run the tests. They require /etc/pam.d/other which you don't"
+        ewarn "have. If you want to run the tests before installing ${PN} for the first time,"
+        ewarn "copy ${FILES}/pam.d/other"
+        ewarn "to /etc/pam.d/other and start the installation again. This is STRONGLY recommended."
+    fi
+}
+
+pam_build_src_prepare() {
+    mkdir -p doc/txt
+    for readme in modules/pam_*/README; do
+        cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | \
+            sed -e 's|^modules/||')
+    done
+
+    autotools_src_prepare
+}
+
+pam_build_src_configure() {
     # Works around an autoconf 2.62 bug; libintl.h is included before
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
     append-flags -D_GNU_SOURCE
     default
 }
 
-src_test() {
+pam_build_src_test() {
     if [[ ! -f /etc/pam.d/other ]]; then
         ewarn "Skipping tests. You don't have /etc/pam.d/other."
     else
@@ -80,7 +78,7 @@ src_test() {
     fi
 }
 
-src_install() {
+pam_build_src_install() {
     default
     dodoc doc/txt/*
 
