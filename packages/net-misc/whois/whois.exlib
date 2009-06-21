@@ -8,6 +8,8 @@
 
 require toolchain-funcs
 
+export_exlib_phases src_prepare src_compile src_install
+
 SUMMARY="Marco d'Itri's improved whois client"
 DESCRIPTION="
 This whois implementation supports all protocol extensions (RIPE, 6bone, CRSNIC)
@@ -22,7 +24,6 @@ REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS="idn nls"
 
 DEPENDENCIES="
@@ -35,7 +36,7 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PN}-4.7.30-gentoo-security.patch )
 DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" prefix=/usr )
 
-src_prepare() {
+whois_src_prepare() {
     default
 
     # Use the install from PATH.
@@ -51,7 +52,7 @@ src_prepare() {
     fi
 }
 
-src_compile() {
+whois_src_compile() {
     local mydefines="CONFIG_FILE=/etc/whois.conf"
 
     if option idn ; then
@@ -64,7 +65,7 @@ src_compile() {
         ${mydefines}
 }
 
-src_install() {
+whois_src_install() {
     default
 
     if option nls ; then
