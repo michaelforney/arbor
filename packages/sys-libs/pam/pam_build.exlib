@@ -16,11 +16,12 @@ DOWNLOADS="mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2"
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
-        nls? ( sys-devel/gettext )
         sys-libs/cracklib[>=2.8.3]
 "
 
@@ -36,10 +37,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cracklib
     --enable-db=no
     --enable-isadir=/$(get_libdir)/security
+    --enable-nls
     --enable-securedir=/$(get_libdir)/security
 )
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 WORK="${WORKBASE}/${MY_PNV}"
 AT_M4DIR=m4
