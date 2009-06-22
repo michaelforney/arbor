@@ -18,7 +18,7 @@ HPIJS 2.x and supports over 1000 HP printer models including Deskjet, Business
 Inkjet, Photosmart, Business Inkjet, PSC, Officejet, Mono/Color LaserJet, and
 LaserJet Multifunction Peripheral (MFP).
 "
-HOMEPAGE="http://hplipopensource.com/hplip-web/"
+HOMEPAGE="http://hplipopensource.com/${PN}-web/"
 DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
@@ -62,8 +62,6 @@ DEPENDENCIES="
 # fax - reportlab
 # all - python-xml
 
-# Whatever an hpijs-only build may be, I don't need it. Please shout if you do.
-# Or even better: Send a git format-patch while you're in here already anyway. :)
 hplip_src_configure() {
     econf \
         --with-hpppddir=/usr/share/ppd/${PN} \
@@ -75,6 +73,7 @@ hplip_src_configure() {
         --disable-qt3 \
         --enable-foomatic-ppd-install \
         --enable-foomatic-rip-hplip-install \
+        --enable-hpcups-install \
         $(option_enable dbus dbus-build) \
         $(option_enable doc doc-build) \
         $(option_enable fax fax-build) \
