@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
@@ -9,12 +9,14 @@ DOWNLOADS="mirror://gnupg/${PN}/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="gtk"
+MYOPTIONS="gtk qt4"
 
 DEPENDENCIES="
     build+run:
         sys-libs/ncurses
-        gtk? ( x11-libs/gtk+[>=2] )"
+        gtk? ( x11-libs/gtk+:2 )
+        qt4? ( x11-libs/qt:4[X] )
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-maintainer-mode
@@ -23,5 +25,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-pinentry-gtk
     --disable-pinentry-qt
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "gtk pinentry-gtk2" )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "gtk pinentry-gtk2"
+    "qt4 pinentry-qt4"
+)
+
+src_prepare() {
+    # .moc files should be generated with the Qt version that's used, otherwise things break
+    if option qt4 ; then
+        for moc_crap_thing in qt4/*.moc ; do
+            moc ${moc_crap_thing/.moc/.h} > ${moc_crap_thing} || die "moc ${moc_crap_thing} failed"
+        done
+    fi
+}
 
