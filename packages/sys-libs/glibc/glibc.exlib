@@ -62,7 +62,11 @@ src_install() {
     keepdir /usr/$(get_libdir)/locale
 
     # Don't install /etc/{ld.so.cache,localtime}
-    rm "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime"
+    for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
+        if [[ -f ${file} ]] ; then
+            rm "${file}" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime"
+        fi
+    done
     # Don't install bundled timezone info
     rm -r "${IMAGE}/usr/share/zoneinfo" || die "Couldn't remove bundled timezone info"
 
