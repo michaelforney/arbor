@@ -1,0 +1,18 @@
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="USB enumeration utilities"
+DESCRIPTION="
+"
+HOMEPAGE="http://linux-usb.sourceforge.net/"
+DOWNLOADS="mirror://sourceforge/linux-usb/${PNV}.tar.gz"
+
+src_install() {
+    default
+
+    # this is provided by usbutils-data
+    rm -f "${IMAGE}/usr/sbin/update-usbids.sh" || die "unable to remove update-usbids.sh"
+    rm -f "${IMAGE}/usr/share/misc/usb.ids" || die "unable to remove usb.ids"
+    rmdir "${IMAGE}/usr/share/misc/" || die "unable to remove /usr/share/misc"
+}
+
