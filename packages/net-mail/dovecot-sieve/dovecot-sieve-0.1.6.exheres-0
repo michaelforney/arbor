@@ -1,0 +1,33 @@
+# Copyright 2008 Fernando J. Pereda
+# Copyright 2009 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+DOVECOT_VERSION="1.2"
+
+# keep in mind, to build the sieve tools (for compiling, debugging, etc.)
+# you need to build that thing in the dovecot sources since it needs internal
+# libraries not exported during make install of dovecot
+
+MYPNV="dovecot-${DOVECOT_VERSION}-sieve-${PV}"
+SUMMARY="Rewritten sieve plugin for dovecot (version 1.2+) deliver."
+HOMEPAGE="http://wiki.dovecot.org/LDA/Sieve/Dovecot"
+DOWNLOADS="http://www.rename-it.nl/dovecot/${DOVECOT_VERSION}/${MYPNV}.tar.gz"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        net-mail/dovecot[=${DOVECOT_VERSION}*]
+"
+
+WORK="${WORKBASE}/${MYPNV}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--with-dovecot=/usr/$(get_libdir)/dovecot"
+)
+
