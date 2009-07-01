@@ -4,7 +4,7 @@
 # Based in part upon 'subversion-1.4.6-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require bash-completion autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] perl-module python
+require bash-completion autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] perl-module python berkdb
 
 export_exlib_phases src_prepare src_configure src_compile src_test_expensive src_install
 
@@ -70,7 +70,7 @@ subversion_src_configure() {
     econf \
         --disable-mod-activation \
         ${myconf} \
-        $(option_with berkdb berkeley-db) \
+        $(option_with berkdb berkeley-db "db.h:$(berkdb_includedir)::db-$(berkdb_slot)") \
         $(option_enable nls)
 }
 
