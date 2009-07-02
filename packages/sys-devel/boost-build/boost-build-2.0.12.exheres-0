@@ -1,0 +1,37 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PV=$(ever range 1-2)-m$(ever range 3)
+
+SUMMARY="Boost.Build is an easy way to build C++ projects, everywhere"
+HOMEPAGE="http://www.boost.org/doc/tools/build/"
+DOWNLOADS="mirror://sourceforge/boost/${PN}-${MY_PV}.tar.bz2"
+
+UPSTREAM_CHANGELOG="http://svn.boost.org/svn/boost/trunk/tools/build/v2/changes.txt"
+
+LICENCES="Boost-1.0"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/boost-jam
+"
+
+WORK=${WORKBASE}/${PN}
+
+src_install() {
+    insinto /usr/share/boost-build/
+    doins -r *.jam build kernel options tools util
+
+    dodoc -r *.{html,png} doc notes
+    docinto examples
+    dodoc -r example/*
+
+    insinto /etc/
+    hereins site-config.jam <<EOF
+using gcc ;
+EOF
+}
+
