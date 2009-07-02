@@ -1,0 +1,24 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases src_compile src_install
+
+DEPENDENCIES="
+    build:
+        sys-devel/boost-jam
+"
+
+ejam() {
+    echo "jam ${@}"
+    jam "${@}" || die_unless_nonfatal "jam returned exit status: $?"
+}
+
+jam_src_compile() {
+    local j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
+    ejam -d+2 -j${j:-1}
+}
+
+jam_src_install() {
+    DESTDIR="${IMAGE}" ejam install
+}
+
