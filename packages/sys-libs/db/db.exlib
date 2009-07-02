@@ -42,10 +42,11 @@ DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 src_prepare() {
     cd "${WORKBASE}/${PN}-${MY_PNV}/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/"
 
-    local patches
+    local patches=()
     for ((i=1; i<=PATCH_LEVEL; i++)); do
-        expatch -p0 "${FETCHEDDIR}/${PN}-${MY_PNV}.${i}.patch"
+        patches+=( "${FETCHEDDIR}/${PN}-${MY_PNV}.${i}.patch" )
     done
+    expatch -p0 "${patches[@]}"
 
     cd "${WORKBASE}/${PN}-${MY_PNV}/dist/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/dist/"
 
