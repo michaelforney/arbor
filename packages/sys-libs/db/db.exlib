@@ -22,7 +22,7 @@ MYOPTIONS="doc"
 
 DEPENDENCIES="
     build+run:
-        !sys-libs/db:0 [[ description = [ Unmerge sys-libs/db:0 before installing slotted versions of Berkely DB ] ]]
+        !sys-libs/db:0 [[ description = [ Uninstall sys-libs/db:0 before installing slotted versions of Berkely DB ] ]]
 "
 
 ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PNV}/dist"
@@ -44,9 +44,8 @@ src_prepare() {
 
     local patches
     for ((i=1; i<=PATCH_LEVEL; i++)); do
-        patches+=( "${FETCHEDDIR}/${PN}-${MY_PNV}.${i}.patch" )
+        expatch -p0 "${FETCHEDDIR}/${PN}-${MY_PNV}.${i}.patch"
     done
-    expatch -p0 "${patches[@]}"
 
     cd "${WORKBASE}/${PN}-${MY_PNV}/dist/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/dist/"
 
