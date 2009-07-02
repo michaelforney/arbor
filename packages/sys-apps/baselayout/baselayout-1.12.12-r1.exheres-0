@@ -128,6 +128,9 @@ src_install() {
     sed -e 's:/bin/nano:/usr/bin/vim:' \
         -i "${IMAGE}"/etc/profile || die 'Failed to make EDITOR default to vim'
 
+    sed -e '/LESSOPEN/d' -i "${IMAGE}"/etc/env.d/00basic ||
+        die "Couldn't remove lesspipe references"
+
     rm -rf "${IMAGE}"/dev/pts || die "rm /dev/pts failed"
 
     rm -r "${IMAGE}"/etc/modules.d || die "rm -r ${IMAGE}/etc/modules.d failed"
