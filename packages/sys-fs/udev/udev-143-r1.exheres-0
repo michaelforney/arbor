@@ -8,21 +8,21 @@ require udev
 
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="extras"
 
 DEPENDENCIES="
     build:
         dev-libs/libxslt
-        dev-util/gperf
+        extras? ( dev-util/gperf )
     build+run:
-        dev-libs/glib:2[>=2.7.0]
-        dev-libs/libusb:0.1[>=0.1.12]
-        sys-apps/acl
-        sys-apps/usbutils[>=0.82]
+        extras? ( dev-libs/glib:2[>=2.7.0]
+                  sys-apps/acl
+                  dev-libs/libusb:0.1[>=0.1.12]
+                  sys-apps/usbutils[>=0.82] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-extras' "--with-rootlibdir=/$(get_libdir)"
-                               '--sbindir=/sbin' "--libexecdir=/$(get_libdir)/udev/" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--sbindir=/sbin' "--with-rootlibdir=/$(get_libdir)" "--libexecdir=/$(get_libdir)/udev/" )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( extras )
 
 src_install() {
     default
