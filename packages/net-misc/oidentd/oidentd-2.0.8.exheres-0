@@ -14,3 +14,9 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
+src_install() {
+    default
+
+    doinitd "${FILES}/oidentd"
+}
+
