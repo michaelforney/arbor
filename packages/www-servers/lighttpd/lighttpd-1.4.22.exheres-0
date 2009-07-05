@@ -5,8 +5,7 @@ require common-metadata multilib
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="bzip2 [[ description = [ build mod_compress ] ]]
-debug doc fam gdbm ipv6 lua pcre ssl webdav xattr zlib"
+MYOPTIONS="debug doc fam gdbm ipv6 lua pcre ssl webdav xattr"
 
 #FIXME doc also needs rst2html from docutils
 
@@ -17,7 +16,6 @@ DEPENDENCIES="
         user/${PN}
         group/${PN}
         xattr? ( sys-apps/attr )
-        bzip2? ( app-arch/bzip2 )
         debug? ( dev-util/valgrind )
         fam? ( app-admin/gamin )
         gdbm? ( sys-libs/gdbm )
@@ -29,20 +27,22 @@ DEPENDENCIES="
             dev-libs/libxml2
             sys-fs/e2fsprogs
         )
-        zlib? ( sys-libs/zlib )
 "
 
 #FIXME missing packages
 #FIXME test would like fcgi
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --libdir=/usr/$(get_libdir)/${PN}
-    --without-mysql
-    --without-ldap
-    --without-kerberos5
-    --without-memcache
+    "--libdir=/usr/$(get_libdir)/${PN}"
+    '--without-mysql'
+    '--without-ldap'
+    '--without-kerberos5'
+    '--without-memcache'
+    '--with-zlib'
+    '--with-bzip2'
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( bzip2 "debug valgrind" fam gdbm pcre "webdav webdav-locks" "webdav webdav-props" zlib "xattr attr" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "debug valgrind" fam gdbm pcre "webdav webdav-locks" "webdav webdav-props" "xattr attr" )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
@@ -64,3 +64,4 @@ src_install() {
     fowners lighttpd:lighttpd /var/{log,run}/lighttpd
     fperms 0750 /var/log/lighttpd
 }
+
