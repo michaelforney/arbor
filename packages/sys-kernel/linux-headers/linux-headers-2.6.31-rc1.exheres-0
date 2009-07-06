@@ -1,0 +1,43 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Linux kernel headers"
+HOMEPAGE="http://www.kernel.org"
+DOWNLOADS="mirror://kernel/linux/kernel/v2.6/testing/linux-${PV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+WORK="${WORKBASE}/linux-${PV}"
+
+# FIXME: Need to sanitize headers at some point
+
+src_compile() {
+    # Fix ARCH to match linux-headers values
+    case ${ARCH} in
+        x86)
+            ARCH=i386
+            ;;
+        amd64)
+            ARCH=x86_64
+            ;;
+        ppc64)
+            ARCH=powerpc
+            ;;
+    esac
+
+    emake mrproper
+    emake headers_check
+}
+
+src_install() {
+    emake INSTALL_HDR_PATH="${IMAGE}/usr" headers_install
+
+    # DRM headers are installed by x11-dri/libdrm
+    rm -r "${IMAGE}"/usr/include/drm || die "Couldn't remove /usr/include/drm headers"
+}
+
