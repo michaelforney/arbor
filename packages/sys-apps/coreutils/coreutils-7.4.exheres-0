@@ -38,8 +38,20 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 src_test() {
     addwrite /dev/full
-    export RUN_EXPENSIVE_TESTS="yes"
     default
+}
+
+src_test_expensive() {
+    local -a ts; ts=(
+        cp/{link-heap,perm}
+        du/{2g,fd-leak}
+        mv/leak-fd
+        rm/{ext3-perf,hash}
+        tail-2/{assert,assert-2,big-4gb}
+    )
+    cd tests \
+        && emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${ts[*]}" \
+        || die "emake failed for expensive tests"
 }
 
 src_install() {
