@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="Open source SSL and TLS implementation and cryptographic library"
 HOMEPAGE="http://www.openssl.org"
 DOWNLOADS="http://www.openssl.org/source/${PNV}.tar.gz"
@@ -21,8 +23,14 @@ DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 src_prepare() {
     default
+
+    # Fix libdir
+    sed -e "s:\(\$(INSTALL_PREFIX)\$(INSTALLTOP)\)/lib:\1/$(get_libdir):g" \
+        -e "/libdir=/s:/lib:/$(get_libdir):g" \
+        -i Makefile.org engines/Makefile || die "Libdir sed failed"
+
     # Fix manpath
-    sed -i 's:^MANDIR=.*$:MANDIR=/usr/share/man:' Makefile.org || die "sed failed"
+    sed -e 's:^MANDIR=.*$:MANDIR=/usr/share/man:' -i Makefile.org || die "Manual path sed failed"
 }
 
 src_configure() {
