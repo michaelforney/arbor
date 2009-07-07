@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net"
 DOWNLOADS="http://www.zlib.net/${PNV}.tar.gz"
@@ -17,9 +19,14 @@ DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
 src_configure() {
     ./configure \
         --prefix=/usr \
+        --libdir=/usr/$(get_libdir) \
         --shared \
         || die "configure failed"
 }
 
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" )
+DEFAULT_SRC_INSTALL_PARAMS=(
+    prefix="${IMAGE}/usr"
+    libdir="${IMAGE}/usr/$(get_libdir)"
+)
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
+
