@@ -1,8 +1,6 @@
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.9 ] ]
-
 SUMMARY="spell checker, stemmer and morphological analyzer"
 DESCRIPTION="
 Hunspell is a spell checker and morphological analyzer library and program
@@ -30,8 +28,6 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-readline )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ncurses ui' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
-
-AT_M4DIR="${WORK}/m4"
 
 src_install() {
     default
