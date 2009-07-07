@@ -37,6 +37,14 @@ src_configure() {
         $(option ssl && echo --with-ca-path=/etc/ssl/certs)
 }
 
+src_test() {
+    cat <<-EOF >> tests/data/DISABLED
+# Work around broken DNS servers, Exherbo #207
+020
+507
+EOF
+    default
+}
 
 src_install() {
     default
