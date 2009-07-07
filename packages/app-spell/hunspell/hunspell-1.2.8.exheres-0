@@ -18,16 +18,17 @@ UPSTREAM_RELEASE_NOTES="http://sourceforge.net/project/shownotes.php?group_id=14
 LICENCES="|| ( MPL-1.1 GPL-2 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ncurses nls readline"
+MYOPTIONS="ncurses nls"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
         ncurses? ( sys-libs/ncurses )
-        readline? ( sys-libs/readline )"
+"
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ncurses ui' readline )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-readline )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ncurses ui' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 AT_M4DIR="${WORK}/m4"
@@ -36,7 +37,8 @@ src_install() {
     default
 
     # these binaries are rarely used and have very generic names. move them to a separate dir.
-    dodir /usr/lib/${PN}
-    mv "${IMAGE}"/usr/bin/{analyze,chmorph,example,hzip,hunzip} "${IMAGE}"/usr/lib/${PN}/ \
+    dodir /usr/libexec/${PN}
+    mv "${IMAGE}"/usr/bin/{analyze,chmorph,example,hzip,hunzip} "${IMAGE}"/usr/libexec/${PN}/ \
         || die "mv failed"
 }
+
