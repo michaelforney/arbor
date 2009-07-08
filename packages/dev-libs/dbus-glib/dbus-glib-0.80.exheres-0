@@ -2,6 +2,8 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require bash-completion
+
 SUMMARY="D-Bus GLib Bindings"
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/DBusBindings"
 DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
@@ -28,9 +30,17 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose ve
 src_install() {
     default
 
-    if ! option bash-completion ; then
-        rmdir "${IMAGE}"/etc/{bash_completion.d,} "${IMAGE}"/usr/libexec ||
-            die "failed to prune empty dirs"
+    if option bash-completion ; then
+        dobashcompletion "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh dbus ||
+            die "failed to put bashcomp in its place"
+        rm "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh ||
+            die "failed to remove bad bashcomp"
+    else
+        rmdir "${IMAGE}"/usr/libexec ||
+            die "failed to prune empty dir"
+
     fi
+    rmdir "${IMAGE}"/etc/{bash_completion.d,} ||
+        die "failed to prune empty dirs"
 }
 
