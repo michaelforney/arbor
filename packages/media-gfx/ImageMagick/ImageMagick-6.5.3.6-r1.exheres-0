@@ -8,7 +8,7 @@ require ImageMagick multilib
 
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="X bzip2 cxx djvu fontconfig fpx graphviz jpeg2000 jpeg openexr lcms perl png svg tiff truetype xml zlib"
+MYOPTIONS="X cxx djvu fontconfig fpx graphviz jpeg2000 jpeg openexr lcms perl png svg tiff truetype xml"
 
 DEPENDENCIES="
     build:
@@ -21,7 +21,6 @@ DEPENDENCIES="
                 x11-libs/libX11
                 x11-libs/libXext
             )
-        bzip2? ( app-arch/bzip2 )
         djvu? ( app-text/djvu )
         fontconfig? ( media-libs/fontconfig )
         fpx? ( media-libs/libfpx )
@@ -36,19 +35,18 @@ DEPENDENCIES="
         tiff? ( media-libs/tiff[>=3.5.5] )
         truetype? ( media-libs/freetype:2 media-fonts/corefonts )
         xml? ( dev-libs/libxml2[>=2.4.10] )
-        zlib? ( sys-libs/zlib )
 "
 
 RESTRICT="test" # Multiple failures, possibly caused by sandbox
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static=no' '--enable-shared=yes'
 '--disable-openmp' '--without-included-ltdl' '--with-quantum-depth=16'
-'--with-threads' '--with-modules' '--enable-hdri' '--with-gslib' )
+'--with-threads' '--with-modules' '--enable-hdri' '--with-bzlib' '--with-gslib' '--with-zlib' )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'bzip2 bzlib' 'cxx magick-plus-plus' 'djvu'
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'cxx magick-plus-plus' 'djvu'
 'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
 'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
-'xml' 'zlib' )
+'xml' )
 
 src_configure() {
     default
