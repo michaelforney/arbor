@@ -1,0 +1,13 @@
+--- apr-1.3.5/test/testatomic.c	2009-07-09 15:12:30.000000000 +0300
++++ apr-1.3.5/test/testatomic.c	2009-07-09 15:13:39.000000000 +0300
+@@ -515,7 +515,9 @@
+ 
+ #if APR_HAS_THREADS
+     abts_run_test(suite, test_atomics_threaded, NULL);
+-    abts_run_test(suite, test_atomics_busyloop_threaded, NULL);
++    /* This test takes a lot of time with sydbox.
++     * abts_run_test(suite, test_atomics_busyloop_threaded, NULL);
++     */
+ #endif
+ 
+     return suite;
