@@ -38,12 +38,12 @@ src_test() {
 src_install() {
     default
 
-    # The
-    for executable in 7za 7zr 7z; do
-        herebin ${executable} <<EOF
-exec /usr/$(get_libdir)/${PN}/${executable} "\${@}"
+    herebin 7z <<EOF
+#!/bin/bash
+exec /usr/$(get_libdir)/${PN}/\${0##*/} "\${@}"
 EOF
-    done
+    dosym /usr/bin/7z /usr/bin/7za
+    dosym /usr/bin/7z /usr/bin/7zr
 
     rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/Codecs ||
         die "Removing empty Codecs/ subdir failed"
