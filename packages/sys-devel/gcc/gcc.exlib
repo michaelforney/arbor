@@ -84,11 +84,10 @@ src_configure() {
     done
     ever at_least 4.3 && option java && LANGS+=",java"
 
-    # Enable precompiled headers, disable for cross-compiling
     econf \
         --disable-multilib \
         --enable-languages="${LANGS}" \
-        --enable-libstdcxx-pch=yes \
+        --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --program-suffix=-${SLOT} \
         $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
         $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
