@@ -18,12 +18,9 @@ esac
 SUMMARY="Fast, secure, IMAP/POP server"
 HOMEPAGE="http://www.dovecot.org"
 
-DOWNLOADS="
-    ${HOMEPAGE}/releases/$(ever range 1-2)/${DOWNLOAD_PATH}/dovecot-${MYPV}.tar.gz
-    http://www.unicode.org/Public/UNIDATA/UnicodeData.txt -> ${PNV}-UnicodeData.txt
-"
+DOWNLOADS="${HOMEPAGE}/releases/$(ever range 1-2)/${DOWNLOAD_PATH}/dovecot-${MYPV}.tar.gz"
 
-LICENCES="LGPL-2.1 MIT BSD-3 public-domain Unicode-Data"
+LICENCES="LGPL-2.1 MIT BSD-3 public-domain"
 SLOT="0"
 PLATFORMS="~amd64"
 MYOPTIONS="berkdb caps doc mysql ldap lucene pam postgresql solr sqlite ssl
@@ -37,6 +34,9 @@ ssl [[ description = [ imaps/pop3s and STARTTLS support ] ]]
 WORK="${WORKBASE}/dovecot-${MYPV}"
 
 DEPENDENCIES="
+    build:
+        app-text/unicode-data
+
     build+run:
         berkdb? ( sys-libs/db:= )
         caps? ( sys-libs/libcap )
@@ -80,7 +80,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 
 src_unpack() {
     default
-    cp "${FETCHEDDIR}/${PNV}-UnicodeData.txt" "${WORK}/src/lib" || die "cp UnicodeData.txt failed"
+    cp /usr/share/unicode-data/UnicodeData.txt "${WORK}/src/lib" || die "cp UnicodeData.txt failed"
 }
 
 remove_example() {
