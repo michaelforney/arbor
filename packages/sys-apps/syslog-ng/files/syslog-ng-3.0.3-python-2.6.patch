@@ -1,0 +1,24 @@
+From: Balazs Scheidler <bazsi@balabit.hu>
+Date: Thu, 25 Jun 2009 06:57:09 +0000 (+0200)
+Subject: [func_test] make func_test run with Python2.6
+X-Git-Url: http://git.balabit.hu/?p=bazsi%2Fsyslog-ng-3.0.git;a=commitdiff_plain;h=08c9bf9d98e4e021756adc12c42605840140ba8b
+
+[func_test] make func_test run with Python2.6
+
+Under Ubuntu jaunty, Python 2.6 socket.ssl is not imported into
+the importing module if '*' is used for import symbols.
+
+Make the import explicit, this works.
+---
+
+diff --git a/tests/functional/messagegen.py b/tests/functional/messagegen.py
+index c43379a..37d5040 100644
+--- a/tests/functional/messagegen.py
++++ b/tests/functional/messagegen.py
+@@ -1,5 +1,6 @@
+ import struct, stat, re
+ from socket import *
++from socket import ssl
+ import os, sys, errno
+ 
+ from log import *

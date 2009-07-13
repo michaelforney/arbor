@@ -12,8 +12,7 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="caps ipv6 pcre tcpd vim-syntax"
-# ${PNVR}-fix-no-ipv6-compile.patch breaks this test
-RESTRICT="!ipv6? ( test )"
+RESTRICT="test"
 
 DEPENDENCIES="
     build+run:
@@ -29,8 +28,6 @@ DEPENDENCIES="
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )
 "
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNVR}-fix-no-ipv6-compile.patch" )
 
 # If someone wants to use the new SQL logging option directly, please find me
 # some good docs about.
