@@ -32,3 +32,13 @@ src_prepare() {
     autotools_src_prepare
 }
 
+src_install() {
+    default
+
+    hereenvd 30xerces-c <<EOF
+# See http://xerces.apache.org/xerces-c/samples-3.html
+# via http://bugs.gentoo.org/show_bug.cgi?id=259408#c7
+XERCESC_NLS_HOME=/usr/share/xerces-c/msg
+EOF
+}
+
