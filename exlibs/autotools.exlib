@@ -14,6 +14,7 @@ export_exlib_phases src_prepare
 
 myexparam supported_autoconf[]
 myexparam supported_automake[]
+myexparam need_libtool=true
 
 exparam -v SUPPORTED_AUTOCONF supported_autoconf[@]
 exparam -v SUPPORTED_AUTOMAKE supported_automake[@]
@@ -37,7 +38,7 @@ autotools_dependencies() {
 myexparam deps_var=DEPENDENCIES
 printf -v "$(exparam deps_var)" "%s" "
     build:
-        sys-devel/libtool
+        $($(exparam need_libtool) && echo sys-devel/libtool)
         $(autotools_dependencies)
 "
 
