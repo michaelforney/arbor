@@ -64,5 +64,12 @@ src_install() {
         rmdir "${IMAGE}"/usr/include/ImageMagick/Magick++/  \
             || die 'empty dirs rmdir failed'
     fi
+
+    if option perl ; then
+        local perllocal=( "${IMAGE}"/usr/$(get_libdir)/perl5/*/*/perllocal.pod )
+        rm "${perllocal[0]}" || die 'rm perllocal.pod failed'
+        rmdir "${perllocal[0]%/*}" || die 'rmdir empty dir failed'
+        rmdir "${perllocal[0]%/*/*}" || die 'rmdir empty dir failed'
+    fi
 }
 
