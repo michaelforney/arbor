@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 
@@ -21,8 +21,15 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${PNV/_p/-}"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls 'unicode widec' )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'unicode ncursesw' )
+
+src_configure() {
+    # The upstream configuration scripts doesn't respect
+    # --without-ncursesw, see #202
+    econf \
+        $(option_enable nls) \
+        $(option_enable unicode widec) \
+        --with-ncurses$(option unicode && echo w)
+}
 
 src_install() {
     default
