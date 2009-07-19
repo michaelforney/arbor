@@ -1,7 +1,7 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-myexparam alpha=
+myexparam -b alpha=false
 myexparam suffix=bz2
 
 myexparam pn=${MY_PN:-${PN}}
@@ -9,7 +9,7 @@ myexparam pv=${MY_PV:-${PV}}
 myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
 
 HOMEPAGE="http://www.gnu.org/software/${MY_PN:-${PN}}/"
-if [[ -n $(exparam alpha) ]]; then
+if exparam -b alpha; then
     DOWNLOADS="ftp://alpha.gnu.org/pub/gnu/"
 else
     DOWNLOADS="mirror://gnu/"

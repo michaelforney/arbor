@@ -7,7 +7,7 @@ require multilib
 
 export_exlib_phases src_configure src_test src_install
 
-myexparam docs=true
+myexparam -b docs=true
 
 SUMMARY="UNIX Shell similar to the Korn shell"
 HOMEPAGE="http://www.zsh.org/"
@@ -96,9 +96,7 @@ zsh_src_install() {
 
     option doc && emake DESTDIR=${IMAGE} install.html
 
-    local docs
-    exparam -v docs docs
-    if [[ ${docs} == true ]] && option doc ; then
+    if exparam -b docs && option doc ; then
         doins "${WORK}"/Doc/${PN}.pdf
     fi
 }

@@ -20,15 +20,15 @@ require multilib
 
 myexparam python_dep=
 
-myexparam has_lib=yes
-myexparam has_bin=
+myexparam -b has_lib=true
+myexparam -b has_bin=false
 
-if [[ -n $(exparam has_bin) ]]; then
+if exparam -b has_bin; then
     [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
     build+run:
         dev-lang/python:*[>=$(exparam python_dep)]
 "
-elif [[ -n $(exparam has_lib) ]]; then
+elif exparam -b has_lib; then
     [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
     build+run:
         dev-lang/python:=[>=$(exparam python_dep)]

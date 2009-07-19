@@ -7,8 +7,7 @@
 
 export_exlib_phases src_install
 
-myexparam has_rdoc=true
-exparam -v has_rdoc has_rdoc
+myexparam -b has_rdoc=true
 
 if [[ -z ${DOWNLOADS} ]]; then
     DOWNLOADS="http://gems.rubyforge.org/gems/${PNV}.gem"
@@ -17,7 +16,7 @@ fi
 
 HOMEPAGE="http://${PN}.rubyforge.org"
 
-[[ ${has_rdoc} == true ]] && MYOPTIONS="doc"
+exparam -b has_rdoc && MYOPTIONS="doc"
 DEPENDENCIES="
     build+run:
         dev-ruby/rubygems[>=1.2.0]
@@ -35,7 +34,7 @@ gem_src_install() {
     export GEM_PATH="${vendor_gem_dir}:${GEM_HOME}"
 
     local myconf=
-    if [[ ${has_rdoc} == true ]]; then
+    if exparam -b has_rdoc; then
         if option doc; then
             myconf="--ri --rdoc"
         else
