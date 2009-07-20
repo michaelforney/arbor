@@ -51,6 +51,8 @@ src_compile() {
 src_install() {
     default
 
+    keepdir /etc/sensors.d
+
     newinitd "${FILES}"/lm_sensors-init.d lm_sensors
     newinitd "${FILES}"/fancontrol-init.d fancontrol
 
