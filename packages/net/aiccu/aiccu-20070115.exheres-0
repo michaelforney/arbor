@@ -44,5 +44,6 @@ src_install() {
     doins "doc/${PN}.conf"
     dodoc doc/{README,HOWTO,changelog}
     doman doc/aiccu.1
+    newinitd "${FILES}/${PN}.init.d" "${PN}"
 }
 
