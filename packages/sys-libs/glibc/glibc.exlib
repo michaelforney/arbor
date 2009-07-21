@@ -33,7 +33,12 @@ DEPENDENCIES="
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 WORK="${TEMP}/build"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-crypt --with-add-ons --without-gd )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-add-ons
+    --with-crypt
+    --with-headers=/usr/include
+    --without-gd
+)
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
 src_unpack() {
