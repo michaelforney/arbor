@@ -221,6 +221,12 @@ EOF
 
     alternatives_for "${alternatives[@]}"
     popd
+
+    # remove empty directories from ${IMAGE}
+    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories from ${IMAGE}."
+
+    # fix libstdc++.so symlink
+    ln -sf /usr/${libdir}/libstdc++.so.6.0.* "${IMAGE}"/usr/${libdir}/libstdc++.so.6.0
 }
 
 pkg_preinst() {
