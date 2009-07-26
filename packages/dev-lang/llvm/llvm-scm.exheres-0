@@ -19,7 +19,6 @@ PLATFORMS="~amd64"
 #   /usr/./include (though purely cosmetic)
 # FIXME Clang installs into /usr/Headers, add a CMake switch for this, plus include it in system include paths by default
 # FIXME What: /usr/lib*/*.o
-# FIXME Make building examples optional, install into proper paths
 # FIXME Support for building & installing documentation
 
 # Doesn't currently build, shared libs aren't recommended by upstream
@@ -28,10 +27,4 @@ PLATFORMS="~amd64"
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-Exherbo-includes.patch"
 )
-
-src_install() {
-    llvm_src_install
-
-    rm -r "${IMAGE}"/usr/examples || die "Couldn't remove /usr/examples"
-}
 
