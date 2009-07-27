@@ -37,6 +37,7 @@ src_prepare() {
 
     sed -e "/^prefix/s:/.*$:/usr:" \
         -e "/^includedir/s:$:/${PN}$(ever range 1-2):" \
+        -e "/^Libs/s:-llua:&$(ever range 1-2):" \
         -e "s:/lib:/$(get_libdir):" \
         -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
 
