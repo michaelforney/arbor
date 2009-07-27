@@ -36,7 +36,7 @@ src_prepare() {
         -i Makefile || die "sedding Makefile failed"
 
     sed -e "/^prefix/s:/.*$:/usr:" \
-        -e "/^includedir/s:$:${PN}$(ever range 1-2):" \
+        -e "/^includedir/s:$:/${PN}$(ever range 1-2):" \
         -e "s:/lib:/$(get_libdir):" \
         -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
 
