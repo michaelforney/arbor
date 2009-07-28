@@ -15,7 +15,7 @@ if [[ -z ${WANT_AUTOCONF} || ${WANT_AUTOCONF} == latest ]]; then
     for v in ${AUTOCONF_VERSIONS}; do
         if [[ -x /usr/bin/${AUTOCONF_PROGRAM}-${v%%:*} ]]; then
             TARGET="/usr/bin/${AUTOCONF_PROGRAM}-${v%%:*}"
-	    break
+            break
         fi
     done
 else
@@ -31,7 +31,7 @@ unset v
 
 # Exit with error code 1 if TARGET is unset
 if [[ -z ${TARGET} ]]; then
-	exit 1
+    exit 1
 fi
 
 # Execute program
