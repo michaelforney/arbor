@@ -1,0 +1,22 @@
+# Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="git://git.irssi.org/irssi"
+SCM_BRANCH="trunk" # Blame ahf
+
+require irssi autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] scm-git
+
+DOWNLOADS=""
+
+PLATFORMS="~amd64 ~x86"
+
+DEPENDENCIES="
+    post,suggested:
+        net-www/lynx [[ description = [ used for .html -> .txt documetation at build time ] ]]
+"
+
+src_prepare() {
+    default
+    NOCONFIGURE=NoThanks ./autogen.sh || die "./autogen.sh: returned exit status $?"
+}
+
