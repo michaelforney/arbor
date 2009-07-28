@@ -5,13 +5,20 @@ require gnu [ suffix=gz ]
 
 SUMMARY="Extensible M4 macro package producing configure scripts"
 
-LICENCES="GPL-2"
+if ever at_least 2.64 ; then
+    LICENCES="|| ( GPL-3 GPL-2 ) FDL-1.3"
+elif ever at_least 2.61 ; then
+    LICENCES="|| ( GPL-3 GPL-2 ) FDL-1.2"
+else
+    LICENCES="GPL-2 FDL-1.2"
+fi
 MYOPTIONS=""
 RESTRICT="test"
 
 DEPENDENCIES="
     build:
         sys-apps/help2man
+        sys-devel/m4[>=1.4.6]
     run:
         sys-devel/autoconf-wrapper"
 
