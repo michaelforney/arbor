@@ -15,9 +15,11 @@ MYOPTIONS=""
 DEPENDENCIES="
     build+run:
         !sys-apps/sysvinit
+        sys-apps/dbus[>=1.2.16]
 "
 
-WANT_AUTOMAKE="1.10"
+# fails in sandbox
+RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
 
