@@ -23,8 +23,8 @@ RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
 
-pkg_preinst()
-{
-    find "${IMAGE}" -depth -type d -empty -delete
+src_install() {
+    default
+    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories"
 }
 
