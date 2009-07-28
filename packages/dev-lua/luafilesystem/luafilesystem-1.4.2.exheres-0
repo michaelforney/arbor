@@ -1,7 +1,7 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require luaforge
+require luaforge flag-o-matic
 
 SUMMARY="a lua filesystem library"
 DESCRIPTION="
@@ -18,4 +18,12 @@ LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
+
+src_prepare() {
+    luaforge_src_prepare
+
+    append-flags $(pkg-config --cflags lua)
+    sed -e "s:\(CFLAGS=\):\1 ${CFLAGS}:" \
+        -i "${WORK}"/config || die "sed config failed"
+}
 
