@@ -29,8 +29,6 @@ DEFAULT_SRC_INSTALL_PARAMS=( docdir=/usr/share/doc/${PNVR}/ )
 
 src_install() {
     default
-    if option !proxy ; then
-        rmdir "${IMAGE}"/usr/$(get_libdir)/irssi{/modules,} || die "Couldn't remove empty dirs (option !proxy)"
-    fi
+    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty dirs"
 }
 
