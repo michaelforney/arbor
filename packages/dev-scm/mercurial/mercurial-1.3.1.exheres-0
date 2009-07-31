@@ -5,12 +5,12 @@
 require bash-completion distutils
 
 SUMMARY="A fast, lightweight, distributed source control management system"
-HOMEPAGE="http://www.selenic.com/${PN}/wiki/"
+HOMEPAGE="http://mercurial.selenic.com/wiki/"
 DOWNLOADS="http://www.selenic.com/${PN}/release/${PNV}.tar.gz"
 
 UPSTREAM_RELEASE_NOTES="
-    http://www.selenic.com/mercurial/wiki/index.cgi/WhatsNew [[ lang = en ]]
-    http://www.selenic.com/mercurial/wiki/index.cgi/UpgradeNotes [[
+    http://mercurial.selenic.com/wiki/WhatsNew [[ lang = en ]]
+    http://mercurial.selenic.com/wiki/UpgradeNotes [[
         lang = en
         description = [ Important notes on upgrading from previous versions ]
     ]]
@@ -21,9 +21,6 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-# Python's deprecation warnings cause various tests to fail *sigh*
-RESTRICT="test"
-
 DEPENDENCIES="
     build+run:
       dev-lang/python:=[>=2.3]"
@@ -32,9 +29,6 @@ PYTHON_MODNAME="${PN} hgext"
 
 src_test() {
     cd tests || die "Couldn't enter tests"
-
-    # Tests fail due to changed error message (from tar)
-    rm -f test-archive || die "Bad tests (1)"
 
     ${python} ./run-tests.py \
         --tmpdir="${TEMP}" \
