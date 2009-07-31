@@ -14,7 +14,7 @@ ejam() {
 }
 
 jam_src_compile() {
-    local j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
+    local j=$(get-make-jobs)
     ejam -d+2 -j${j:-1}
 }
 

@@ -4,6 +4,8 @@
 # Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
+require flag-o-matic
+
 MY_PV="${PV/rc/RC-}"
 MY_PNV="${PN}-$(ever replace 3 - ${MY_PV})"
 
@@ -53,7 +55,7 @@ src_prepare() {
 }
 
 src_configure() {
-    j=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
+    local j=$(get-make-jobs)
 
     bootstrap \
         --parallel=${j:-1} \
