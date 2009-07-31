@@ -58,9 +58,6 @@ require toolchain-funcs multilib
 # Remove particular flags from LDFLAGS
 # Matches only complete flags
 #
-#### bindnow-flags ####
-# Returns the flags to enable "now" binding in the current selected linker.
-#
 
 # C[XX]FLAGS that we allow in strip-flags
 # Note: shell globs and character lists are allowed
@@ -490,25 +487,6 @@ raw-ldflags() {
         set -- "$@" ${x//,/ }
     done
     echo "$@"
-}
-
-# Gets the flags needed for "NOW" binding
-bindnow-flags() {
-    illegal_in_global_scope
-
-    case $($(tc-getLD) -v 2>&1 </dev/null) in
-    *GNU* | *'with BFD'*) # GNU ld
-        echo "-Wl,-z,now" ;;
-    *Apple*) # Darwin ld
-        echo "-bind_at_load" ;;
-    *)
-        # Some linkers just recognize -V instead of -v
-        case $($(tc-getLD) -V 2>&1 </dev/null) in
-            *Solaris*) # Solaris accept almost the same GNU options
-                echo "-Wl,-z,now" ;;
-        esac
-        ;;
-    esac
 }
 
 
