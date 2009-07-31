@@ -1,0 +1,35 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require flag-o-matic
+
+export_exlib_phases src_compile src_install
+
+DEPENDENCIES="
+    build:
+        sys-devel/scons
+"
+
+escons() {
+    illegal_in_global_scope
+
+    echo scons ${@}
+    scons "${@}" || die_unless_nonfatal "scons: returned exit status: $?"
+}
+
+scons_src_compile() {
+    escons \
+        --jobs $(get-make-jobs) \
+        CFLAGS="${CFLAGS}" \
+        CXXFLAGS="${CXXFLAGS}" \
+        LDFLAGS="${LDFLAGS}" \
+        "${SCONS_SRC_COMPILE_PARAMS[@]}"
+}
+
+scons_src_install() {
+    escons \
+        DESTDIR="${IMAGE}" \
+        "${SCONS_SRC_INSTALL_PARAMS[@]}" \
+        install
+}
+
