@@ -17,6 +17,8 @@ MYOPTIONS="openvz unicode"
 DEPENDENCIES="
     build+run:
         sys-libs/ncurses[unicode?]
+    post,suggested:
+        sys-process/lsof [[ description = [ can be called from within ${PN} ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( openvz unicode )
