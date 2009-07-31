@@ -3,7 +3,7 @@
 
 require flag-o-matic
 
-export_exlib_phases src_compile src_install
+export_exlib_phases src_configure src_compile src_install
 
 DEPENDENCIES="
     build:
@@ -17,8 +17,15 @@ escons() {
     scons "${@}" || die_unless_nonfatal "scons: returned exit status: $?"
 }
 
+scons_src_configure() {
+    echo -e "clean \n exit" | escons \
+        --config=force \
+        --interactive
+}
+
 scons_src_compile() {
     escons \
+        --config=cache \
         --jobs $(get-make-jobs) \
         CFLAGS="${CFLAGS}" \
         CXXFLAGS="${CXXFLAGS}" \
@@ -28,6 +35,7 @@ scons_src_compile() {
 
 scons_src_install() {
     escons \
+        --config=cache \
         DESTDIR="${IMAGE}" \
         "${SCONS_SRC_INSTALL_PARAMS[@]}" \
         install
