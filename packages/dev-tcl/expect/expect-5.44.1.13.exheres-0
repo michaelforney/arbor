@@ -1,10 +1,7 @@
 # Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-SUPPORTED_AUTOCONF=( 2.5)
-SUPPORTED_AUTOMAKE=( 1.10 )
-
-require multilib
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] multilib
 
 SUMMARY="Tool for automating interactive applications"
 HOMEPAGE="http://expect.nist.gov/"
@@ -26,19 +23,26 @@ do this automation quickly and easily."
 LICENCES="public-domain"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="examples" # threads is supported by configure, but currently a no-op according to comments
+MYOPTIONS="examples tk" # threads is supported by configure, but currently a no-op according to comments
 
 DEPENDENCIES="
     build+run:
         dev-lang/tcl
-        dev-lang/tk"
+        tk? ( dev-lang/tk )"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-no-tk.patch )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-tcl=/usr/$(get_libdir)
     --with-tclinclude=/usr/include
-    --with-tk=/usr/$(get_libdir)
     --with-tkinclude=/usr/include
 )
+
+src_configure() {
+    econf \
+        ${DEFAULT_SRC_CONFIGURE_PARAMS[@]} \
+        --with-tk=$(option tk && echo /usr/$(get_libdir) || echo no)
+}
 
 src_install() {
     default
