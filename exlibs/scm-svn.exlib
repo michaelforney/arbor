@@ -223,7 +223,7 @@ scm-svn_do_resolve_externals() {
 
                         got=$(SCM_THIS=${that} scm_get_var REVISION)
                         if [[ ${got} == _ ]]; then
-                            SCM_THIS=${that} scm_set_var REVISION ${revision}
+                            SCM_THIS=${that} scm_set_var REVISION "${revision}"
                         else
                             [[ ${got} == ${revision} ]] \
                                 || errors+=( "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}" )
