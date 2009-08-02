@@ -3,7 +3,7 @@
 # Based in part upon 'calibre-0.4.77.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib bash-completion
+require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib
 
 export_exlib_phases src_prepare src_install pkg_postinst
 
@@ -32,9 +32,10 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        dev-python/setuptools
+        dev-python/setuptools[>=0.6_rc5]
     build+run:
         app-text/podofo[>=0.7.0]
+        app-text/poppler[>=0.10.5]
         dev-lang/python[sqlite]
         dev-libs/libusb:0.1[>=0.1.12]
         media-gfx/ImageMagick[>=6.3.5]
@@ -43,15 +44,16 @@ DEPENDENCIES="
         dev-python/python-dateutil[>=1.4.1]
         dev-python/dbus-python[>=0.82.2]
         dev-python/Imaging[>=1.1.6]
-        dev-python/lxml[>=2.0.5]
+        dev-python/lxml[>=2.1.5]
         dev-python/mechanize[>=0.1.11]
-        dev-python/PyQt4[>=4.4.2][webkit]
+        dev-python/PyQt4[>=4.5.1][webkit]
         sys-apps/hal[>=0.5.11]
         x11-apps/xdg-utils[>=1.0.2]
     post,suggested:
         app-arch/unrar [[ description = [ for unpacking compressed ebooks ] ]]
         app-arch/unzip [[ description = [ for unpacking compressed ebooks ] ]]
 "
+
 # Calibre bundles a few libs and some of those are rather heavily patched because
 # their respective upstreams are unresponsive. As of May, 17th 2009:
 # <@kovid> patched ones are odf cssutils and pypdf
@@ -107,10 +109,6 @@ EOF
         --group-file="${ROOT}"/etc/group --dont-check-root \
         || die "post-installation failed."
 
-    # Move the bash-completion file and properly install it.
-    mv "${IMAGE}"/etc/bash_completion.d/calibre "${WORK}/" \
-        || die "cannot move the bash-completion file"
-    dobashcompletion "${WORK}"/calibre
     find "${IMAGE}"/etc -type d -empty -delete
 
     # Removing junk.
