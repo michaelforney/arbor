@@ -498,7 +498,9 @@ get-make-jobs() {
 
     [[ -n ${*} ]] && die "get-make-jobs takes no arguments"
 
-    sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}"
+    local jobs
+    jobs=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
+    echo "${jobs:-1}"
 }
 
 # Some tests for when we screw with things and want to make
