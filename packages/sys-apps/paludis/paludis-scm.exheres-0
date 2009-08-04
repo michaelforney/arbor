@@ -86,6 +86,12 @@ src_configure() {
         --with-config-framework=eclectic
 }
 
+src_compile() {
+    # zsh and libtool hate each other
+    unset path
+    default
+}
+
 src_test() {
     # Work around Sandbox bugs
     export PALUDIS_DO_NOTHING_SANDBOXY="sandbox sucks"
