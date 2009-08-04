@@ -226,7 +226,10 @@ EOF
     find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories from ${IMAGE}."
 
     # fix libstdc++.so symlink
-    ln -sf /usr/${libdir}/libstdc++.so.6.0.* "${IMAGE}"/usr/${libdir}/libstdc++.so.6.0
+    local major=$(readlink /usr/${libdir}/libstdc++.so)
+    local latest=$(ls /usr/${libdir}/${major}.*.*)
+    latest=${latest##*/}
+    ln -sf /usr/${libdir}/${latest} "${IMAGE}"/usr/${libdir}/${major}.0
 }
 
 pkg_preinst() {
