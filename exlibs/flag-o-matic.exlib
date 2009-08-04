@@ -498,9 +498,27 @@ get-make-jobs() {
 
     [[ -n ${*} ]] && die "get-make-jobs takes no arguments"
 
-    local jobs
-    jobs=$(sed -n -e 's,.*-j\([[:digit:]]\+\).*,\1,p' <<< "${MAKEOPTS}")
-    echo "${jobs:-1}"
+    local i j=1 n=false
+    for i in ${MAKEOPTS} ; do
+        if [[ ${n} == true ]] ; then
+            if [[ ${i} == -* ]] ; then
+                # Example: --jobs --load-average
+                # Ignore unlimited number of jobs, since non-make based systems may not support that
+                :
+            else
+                # Example: --jobs 2, -j 2
+                j=${i}
+            fi
+            n=false
+            continue
+        fi
+        case ${i} in
+            -j|--jobs) n=true ;;
+            -j*) j=${i#-j} ;;
+            --jobs=*) j=${i#--jobs=} ;;
+        esac
+    done
+    echo "${j}"
 }
 
 # Some tests for when we screw with things and want to make
