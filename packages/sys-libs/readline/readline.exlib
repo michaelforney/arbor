@@ -45,6 +45,9 @@ readline_src_prepare() {
         patches+=("${FETCHEDDIR}/${PN}$(ever delete_all ${MY_PV})-$(printf "%03d" ${i})")
     done
     expatch "${patches[@]}"
+
+    # Gentoo #71420
+    sed -e 's:^SHLIB_LIBS=:SHLIB_LIBS=-lncurses:' -i support/shobj-conf || die "Couldn't force curses linking"
 }
 
 readline_src_install() {
