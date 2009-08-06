@@ -151,9 +151,9 @@ _elibtoolize() {
     autotools_select_versions
     local opts lttest
 
-    # Check if we should run libtoolize (AM_PROG_LIBTOOL is an older macro,
-    # check for both AM_PROG_LIBTOOL and the current AC_PROG_LIBTOOL)
-    lttest="$(autotools_check_macro "AC_PROG_LIBTOOL")$(autotools_check_macro "AM_PROG_LIBTOOL")"
+    # Check if we should run libtoolize (AM_PROG_LIBTOOL and AC_PROG_LIBTOOL
+    # are deprecated but still in use; LT_INIT is current)
+    lttest="$(autotools_check_macro "AC_PROG_LIBTOOL")$(autotools_check_macro "AM_PROG_LIBTOOL")$(autotools_check_macro "LT_INIT")"
     [[ -n ${lttest} ]] || return 0
 
     [[ -f Makefile.am || -f GNUmakefile.am ]] && opts="--automake"
