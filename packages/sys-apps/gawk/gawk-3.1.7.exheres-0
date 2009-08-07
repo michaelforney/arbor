@@ -2,7 +2,7 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu [ suffix=gz ]
+require multilib gnu
 
 SUMMARY="GNU awk implementation"
 
@@ -14,7 +14,11 @@ MYOPTIONS="nls"
 DEPENDENCIES=""
 
 # install binaries outside /usr
-DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --bindir=/bin
+    # Internal copy of libsigsegv fails its tests
+    --disable-libsigsegv
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FUTURES LIMITATIONS POSIX.STD )
