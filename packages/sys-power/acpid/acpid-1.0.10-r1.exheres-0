@@ -43,6 +43,8 @@ src_compile() {
 src_install() {
     emake INSTPREFIX="${IMAGE}" install
 
+    keepdir /etc/acpi/events
+
     dodoc Changelog README TODO
     cp -r samples/ "${IMAGE}"/usr/share/doc/${PNV}/
 
