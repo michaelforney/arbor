@@ -18,6 +18,9 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/man-1.6f-unicode.patch" )
 
 src_configure() {
-    ./configure -default -confdir=/etc || die "configure failed"
+    ./configure \
+        -default \
+        -confdir=/etc \
+        -compatibility_mode_for_colored_groff || die "configure failed"
 }
 
