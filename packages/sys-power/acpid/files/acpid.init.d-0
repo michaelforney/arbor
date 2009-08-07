@@ -4,6 +4,12 @@
 
 opts="reload"
 
+depend() {
+    need localmount
+    use logger
+    before dbus hald
+}
+
 start() {
     local acpid_opts
     if [[ "${ACPID_LOG}" == y* ]] ; then
