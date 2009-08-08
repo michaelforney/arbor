@@ -29,6 +29,12 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( docs/PLATFORMS )
 
 WORK="${WORKBASE}/${PNV%a}"
 
+src_prepare() {
+    # Force regeneration of broken infopages
+    rm doc/libtool.info{,-{1,2}} || die "failed to remove info pages"
+    default
+}
+
 src_install() {
     default
 
