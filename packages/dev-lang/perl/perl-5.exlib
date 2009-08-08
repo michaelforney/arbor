@@ -121,10 +121,10 @@ perl-5_src_install() {
     local executable
     for executable in "${IMAGE}"/usr/bin/*; do
         if egrep -q '^#!/usr/bin/perl( +.*)?$' "${executable}"; then
-            sed -i "/^#!\/usr\/bin\/perl/s/perl/perl${PV}/" "${executable}" \
+            sed -i "/^#!\/usr\/bin\/perl/s/perl/perl${PV%-RC*}/" "${executable}" \
                 || die "shebang sed failed for ${executable}"
         fi
-        if [[ ${executable##*/} != *${PV} ]]; then
+        if [[ ${executable##*/} != *${PV%-RC*} ]]; then
             mv "${executable}" "${executable}-${PV}" || die "Failed to version ${executable/${IMAGE}}"
         fi
     done
@@ -172,6 +172,14 @@ EOF
             alternatives+=( /${target} ${src##*/} )
         fi
     done
+
+    # For RCs, this will make sure we get alternatives for usr/bin/perl5.10.1 when PV is 5.10.1-RC1
+    if [[ ${PV%-RC*} != ${PV} ]]; then
+        for src in usr/bin/*${PV%-RC*}; do
+            alternatives+=( /${src/${PV%-RC*}} ${src##*/} )
+        done
+    fi
+
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
 }
 
