@@ -19,7 +19,7 @@ DEPENDENCIES="
         doc? (
             app-text/openjade
             app-text/docbook-dsssl-stylesheets
-            app-text/docbook-sgml-utils
+            app-text/docbook-utils
             app-text/docbook-sgml-dtd:4.2
         )"
 
@@ -40,7 +40,7 @@ src_install() {
     default
 
     if option doc ; then
-        insinto /usr/share/doc/${PN}/html/
+        docinto html
         dodoc doc/html/*.html
     fi
 }
