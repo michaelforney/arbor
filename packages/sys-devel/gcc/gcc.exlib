@@ -3,7 +3,7 @@
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib alternatives gnu
+require multilib versionator alternatives gnu
 
 SUMMARY="GNU Compiler Collection"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
@@ -222,14 +222,14 @@ EOF
     alternatives_for "${alternatives[@]}"
     popd
 
-    # remove empty directories from ${IMAGE}
-    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories from ${IMAGE}."
-
     # fix libstdc++.so symlink
-    local major=$(readlink /usr/${libdir}/libstdc++.so)
-    local latest=$(ls /usr/${libdir}/${major}.*.*)
-    latest=${latest##*/}
-    ln -sf /usr/${libdir}/${latest} "${IMAGE}"/usr/${libdir}/${major}.0
+    mkdir "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
+    cp /usr/${libdir}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
+    cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
+    fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
+
+    find "${IMAGE}"/usr/${libdir}/${PN}/x86_64-pc-linux-gnu/${PV}/include-fixed -type d -empty -delete ||
+        die "Couldn't remove empty directories from ${IMAGE}/usr/${libdir}/${PN}/x86_64-pc-linux-gnu/${PV}/include-fixed"
 }
 
 pkg_preinst() {
@@ -260,6 +260,19 @@ generate_symlinks() {
         echo ln -fs "${source}" "${target}"
         ln -fs "${source}" "${target}" || eerror "Creating ${target} symlink failed"
     fi
+}
+
+fix_libstdcplusplus() {
+    local f versions=() versions_sorted latest
+    for f in "${1}"/libstdc++.so.*; do
+        versions+=( "${f##*/libstdc++.so.}" )
+    done
+    versions_sorted=( $(version_sort "${versions[@]}") )
+    latest=libstdc++.so.${versions_sorted[${#versions_sorted[@]}-1]}
+    while [[ ${latest} == libstdc++.so.* ]]; do
+        generate_symlinks true ${latest} "${2}"usr/${libdir}/${latest%.*}
+        latest=${latest%.*}
+    done
 }
 
 pkg_postinst() {
@@ -294,6 +307,11 @@ pkg_postinst() {
     for x in "${removed[@]}"; do
         [[ ! -e ${ROOT}${x} ]] && eerror "/${x} was removed and never recreated"
     done
+}
+
+pkg_prerm() {
+    # make sure libstdc++.so* symlinks are ok
+    fix_libstdcplusplus /usr/{libdir} "${ROOT}"
 }
 
 pkg_postrm() {
