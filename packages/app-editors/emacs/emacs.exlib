@@ -12,7 +12,7 @@ SUMMARY="The only Operating System that doesn't come with a real editor"
 LICENCES="GPL-3"
 SLOT="$(ever major)"
 MYOPTIONS="
-    X alsa dbus freetype gif gpm gtk jpeg otf png spell svg tiff tiff xpm
+    X alsa dbus freetype gif gpm gtk jpeg otf png svg tiff tiff xpm
     ( freetype gif gtk jpeg otf png svg tiff tiff xpm ) [[ requires = X ]]
     otf [[
         description = [ Support for OpenType fonts ]
@@ -31,7 +31,6 @@ DEPENDENCIES="
         net-libs/liblockfile
         sys-libs/ncurses
         alsa? ( sys-sound/alsa-lib[>=1.0.0] )
-        spell? ( app-spell/aspell )
         X? (
             x11-libs/libXmu
             x11-libs/libXt
@@ -56,6 +55,8 @@ DEPENDENCIES="
             x11-libs/libXft[>=0.13.0]
         )
         gpm? ( sys-libs/gpm )
+   post,suggested:
+        app-spell/aspell [[ description = [ For ispell and flyspell mode ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
