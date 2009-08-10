@@ -102,7 +102,7 @@ emacs_src_install() {
 
     local i m
     for m in "${IMAGE}"/usr/share/man/man?/*; do
-        mv "${m}" "${m%.1}-${SLOT}.1" || die "mv man ${m} failed"
+        mv "${m}" "${m%.?}-${SLOT}${m: -2}" || die "mv man ${m} failed"
     done
     for i in "${IMAGE}"/usr/share/info/${PN}-${SLOT}/*; do
         mv "${i}" "${i}.info" || die "mv info ${i} failed"
