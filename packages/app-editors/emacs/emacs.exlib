@@ -5,7 +5,7 @@
 
 require game alternatives toolchain-funcs gnu [ suffix=bz2 ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
-export_exlib_phases pkg_setup src_prepare src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_install pkg_postinst pkg_postrm
 
 SUMMARY="The only Operating System that doesn't come with a real editor"
 
@@ -54,11 +54,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'gtk x-toolkit gtk' 'gtk toolkit-scroll-bars'
     'gif' 'jpeg' 'png' 'xpm'
 )
-
-emacs_pkg_setup() {
-    # Gentoo bug #131505
-    export SANDBOX_ON=0
-}
 
 emacs_src_prepare() {
     # Link to giflib instead of ungif
