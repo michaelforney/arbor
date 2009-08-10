@@ -3,7 +3,7 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require game alternatives toolchain-funcs gnu [ suffix=bz2 ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require game alternatives toolchain-funcs gnu [ suffix=bz2 ]
 
 export_exlib_phases src_prepare src_install pkg_postinst pkg_postrm
 
@@ -56,17 +56,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 )
 
 emacs_src_prepare() {
-    # Link to giflib instead of ungif
-    sed -e '/AC_CHECK_LIB/s/ungif,/gif,/' \
-        -e '/AC_DEFINE.*HAVE_GIF/s/ungif/gif/' \
-        -e 's/-lungif/-lgif/' \
-        -i configure.in src/Makefile.in || die 'Sed to link to giflib failed'
-
     # Compressing *.el files saves 25MB diskspace, which is not worth it on modern systems
     sed -e 's/@GZIP_PROG@//' \
         -i {.,leim}/Makefile.in || die 'Sed to disable elisp compression failed'
-
-    autotools_src_prepare
+    default
 }
 
 emacs_src_install() {
