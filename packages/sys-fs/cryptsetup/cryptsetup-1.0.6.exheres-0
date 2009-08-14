@@ -37,9 +37,15 @@ src_configure() {
         cd "${dir}"
 
         ECONF_SOURCE="../${PNV}"
-        econf \
-            --${static}-static \
-            --sbindir=/sbin
+
+        local myeconf="--${static}-static"
+
+        if [[ "${static}" == "enable" ]] ; then
+            myeconf+=" --sbindir=/sbin"
+            myeconf+=" --libdir=/$(get_libdir)"
+        fi
+
+        econf ${myeconf}
     done
 }
 
