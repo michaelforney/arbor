@@ -144,10 +144,11 @@ compat_volume_nodes()
 {
 	# Only do this for baselayout-1*
 	if [ ! -e /lib/librc.so ]; then
+		local lvm_config='global { locking_dir = "/dev/.lvm" }'
 
 		# Create nodes that udev can't
 		[ -x /sbin/lvm ] && \
-			/sbin/lvm vgscan -P --mknodes --ignorelockingfailure &>/dev/null
+			/sbin/lvm vgscan -P --mknodes --config "${lvm_config}" &>/dev/null
 		# Running evms_activate on a LiveCD causes lots of headaches
 		[ -z "${CDBOOT}" -a -x /sbin/evms_activate ] && \
 			/sbin/evms_activate -q &>/dev/null

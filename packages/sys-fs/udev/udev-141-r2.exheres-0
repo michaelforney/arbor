@@ -4,34 +4,19 @@
 # Based in part upon 'udev-120.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require udev
+require udev autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="glib [[ description = [ build extra utilities for usb, acl, etc and gudev to integrate with glib main-loop ] ]]
-           gobject-introspection [[ description = [ build data for gobject introspection ] ]]"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         dev-libs/libxslt
-        glib? ( dev-util/gperf )
-    build+run:
-        glib? ( dev-libs/glib:2[>=2.7.0]
-                sys-apps/acl
-                dev-libs/libusb:0.1[>=0.1.12]
-                sys-apps/usbutils[>=0.82] )
-        gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
-
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    '--sbindir=/sbin'
-    "--with-rootlibdir=/$(get_libdir)"
-    "--libexecdir=/$(get_libdir)/udev/"
-    '--without-selinux'
-    "--docdir=/usr/share/doc/${PNVR}"
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib extras' 'gobject-introspection introspection' )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-support-for-installing-to-lib-and-lib64.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--exec-prefix=' "--with-libdir-name=$(get_libdir)" )
 
 src_install() {
     default
@@ -49,13 +34,10 @@ src_install() {
 
     # hooks {{{
     insinto /$(get_libdir)/rcscripts/addons
-    newins "${FILES}/udev-start-136.sh" udev-start.sh
-    newins "${FILES}/udev-stop-136.sh" udev-stop.sh
+    newins "${FILES}/udev-start-128-r1.sh" udev-start.sh
+    newins "${FILES}/udev-stop-128.sh" udev-stop.sh
 
-    newinitd "${FILES}/udev-initd-136" udev
-    newinitd "${FILES}/udev-mount-initd-136-r1" udev-mount
-    newinitd "${FILES}/udev-postmount-initd-136" udev-postmount
-    newinitd "${FILES}/udev-dev-tarball-initd-136" udev-dev-tarball
+    newinitd "${FILES}/udev-postmount-initd-128" udev-postmount
 
     insinto /etc/modprobe.d
     newins "${FILES}/blacklist-128" blacklist.conf
@@ -64,10 +46,10 @@ src_install() {
 
     # helper scripts {{{
     exeinto /$(get_libdir)/udev
-    newexe "${FILES}/net-130-r1.sh" net.sh
+    newexe "${FILES}/net-128.sh" net.sh
     newexe "${FILES}/move_tmp_persistent_rules-128.sh" move_tmp_persistent_rules.sh
     newexe "${FILES}/write_root_link_rule-128" write_root_link_rule
-    newexe "${FILES}/shell-compat-addon-136.sh" shell-compat-addon.sh
+    newexe "${FILES}/shell-compat-128.sh" shell-compat.sh
 
     # multilib our scripts
     sed -i -e "s:/lib/udev:/$(get_libdir)/udev:"                    \
@@ -75,13 +57,10 @@ src_install() {
         "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-start.sh"     \
         "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-stop.sh"      \
         "${IMAGE}/$(get_libdir)/udev/write_root_link_rule"          \
-        "${IMAGE}/etc/init.d/udev"                                  \
-        "${IMAGE}/etc/init.d/udev-mount"                            \
         "${IMAGE}/etc/init.d/udev-postmount"                        \
-        "${IMAGE}/etc/init.d/udev-dev-tarball"                      \
         "${IMAGE}/etc/modprobe.d/pnp-aliases.conf"                  \
         "${IMAGE}/etc/modprobe.d/blacklist.conf"                    \
-        || die "failed to fix up libdir in scripts"
+    || die
     # }}}
 
     # documentation {{{
@@ -89,6 +68,9 @@ src_install() {
     mv index.html writing_udev_rules.html
     insinto /usr/share/doc/${PNVR}/html
     doins *.html
+
+    docinto volume_id
+    dodoc "${WORK}/extras/volume_id/README"
     # }}}
 
     # config protect {{{
@@ -99,10 +81,5 @@ src_install() {
     keepdir "/etc/udev/rules.d"
     keepdir "/$(get_libdir)/udev/state"
     keepdir "/$(get_libdir)/udev/devices"
-
-    if option glib ; then
-        mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit || die "fixing ConsoleKit path failed"
-        rmdir "${IMAGE}"/usr/lib || die "removing empty dir failed"
-    fi
 }
 

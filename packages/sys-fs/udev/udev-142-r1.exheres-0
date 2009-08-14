@@ -4,25 +4,19 @@
 # Based in part upon 'udev-120.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require udev
+require udev autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 SLOT="0"
-PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="extras [[ description = [ build extra utilities for usb, acl, etc ] ]]"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         dev-libs/libxslt
-        extras? ( dev-util/gperf )
-    build+run:
-        extras? ( dev-libs/glib:2[>=2.7.0]
-                  sys-apps/acl
-                  dev-libs/libusb:0.1[>=0.1.12]
-                  sys-apps/usbutils[>=0.82] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--sbindir=/sbin' "--with-rootlibdir=/$(get_libdir)" "--libexecdir=/$(get_libdir)/udev/" )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( extras )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-support-for-installing-to-lib-and-lib64.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--exec-prefix=' "--with-libdir-name=$(get_libdir)" )
 
 src_install() {
     default
@@ -40,7 +34,7 @@ src_install() {
 
     # hooks {{{
     insinto /$(get_libdir)/rcscripts/addons
-    newins "${FILES}/udev-start-128.sh" udev-start.sh
+    newins "${FILES}/udev-start-128-r1.sh" udev-start.sh
     newins "${FILES}/udev-stop-128.sh" udev-stop.sh
 
     newinitd "${FILES}/udev-postmount-initd-128" udev-postmount
