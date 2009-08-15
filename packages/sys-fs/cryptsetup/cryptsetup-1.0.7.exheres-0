@@ -24,11 +24,6 @@ DEPENDENCIES="
         sys-fs/udev
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-udevsettle.patch"
-    "${FILES}/${PNV}-Fix-make-distcheck.patch"
-)
-
 src_configure() {
     local static dir
     for static in enable disable; do
@@ -39,6 +34,7 @@ src_configure() {
         ECONF_SOURCE="../${PNV}"
 
         local myeconf="--${static}-static"
+        myeconf+=" --disable-selinux"
 
         if [[ "${static}" == "enable" ]] ; then
             myeconf+=" --sbindir=/sbin"
