@@ -22,7 +22,7 @@ DEPENDENCIES="
     build+run:
         sys-libs/com_err[~${PV}]
         sys-libs/ss[~${PV}]
-        sys-apps/util-linux-ng[>=2.15-r1] [[ note = [ to ensure that libblkid from util-linux-ng is used ] ]]
+        sys-apps/util-linux-ng[>=2.16] [[ note = [ to ensure that libblkid and libuuid from util-linux-ng is used ] ]]
 "
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( RELEASE-NOTES )
@@ -61,6 +61,7 @@ e2fsprogs_src_configure() {
         --enable-tls \
         --enable-fsck \
         --disable-libblkid \
+        --disable-libuuid \
         --with-ldopts="${LDFLAGS}" \
         --without-included-gettext \
         $(option_enable !static dynamic-e2fsck)
@@ -91,3 +92,4 @@ e2fsprogs_src_install() {
     dosbin "${IMAGE}"/sbin/mklost+found
     rm -f "${IMAGE}"/sbin/mklost+found
 }
+
