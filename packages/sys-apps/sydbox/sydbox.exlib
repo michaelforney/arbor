@@ -1,0 +1,63 @@
+# Copyright 2009 Ali Polatel <polatel@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases pkg_pretend src_test src_install pkg_postinst
+
+SUMMARY="Sydbox the other sandbox"
+DESCRIPTION="
+Sydbox is a ptrace based sandbox implementation which is based in part upon
+catbox and strace. Being ptrace based, it doesn't suffer the well known
+security issues that LD_PRELOAD based sandbox implementations suffer from. It
+tries hard to avoid symlink and other kind of races to be on the secure side. It
+has basic support to disallow network connections. Currently it only supports
+x86 and x86_64 architectures but adding support for new architectures should be
+trivial.
+"
+HOMEPAGE="http://alip.github.com/sydbox/"
+DOWNLOADS="http://alip.anapnea.net/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-libs/check[>=0.9.4]
+    build+run:
+        dev-libs/glib:2[>=2.18]
+"
+
+BUGS_TO="polatel@gmail.com"
+
+sydbox_pkg_pretend() {
+    local kv kvminor
+
+    kv="$(uname -r | cut -d'-' -f1)"
+    kvminor="$(echo $kv | cut -d'.' -f3)"
+
+    case "$kv" in
+        2.6*)
+            if [[ "$kvminor" -lt 29 ]]; then
+                ewarn "sydbox works slow on kernels <2.6.29 due to a ptrace bug!"
+                ewarn "See http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=53da1d9456fe7f87a920a78fdbdcf1225d197cb7 for the fix!"
+            fi
+            ;;
+    esac
+}
+
+sydbox_src_test() {
+    if [[ -n "${PALUDIS_DO_NOTHING_SANDBOXY}" ]]; then
+        default
+    else
+        elog "Not running tests because sydbox doesn't work under sydbox"
+        elog "set PALUDIS_DO_NOTHING_SANDBOXY=1 if you want to run the tests"
+    fi
+}
+
+sydbox_src_install() {
+    default
+    doman data/sydbox.1
+    insinto /etc
+    doins conf/sydbox.conf
+}
+
