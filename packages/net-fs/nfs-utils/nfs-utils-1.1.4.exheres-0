@@ -3,30 +3,10 @@
 # Based in part upon 'nfs-utils-1.1.2-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib
+require multilib nfs-utils
 
-SUMMARY="NFS client and server daemons"
-HOMEPAGE="http://nfs.sourceforge.net/"
-DOWNLOADS="mirror://sourceforge/nfs/${PNV}.tar.bz2"
-
-LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="nfsv4 tcpd"
-
-# Wulf C. Krueger <philantrop@exherbo.org>:
-# FIXME: Add kerberos option and dependencies when it's in arbor.
-
-DEPENDENCIES="
-    build+run:
-        sys-fs/e2fsprogs[>=1.40.9]
-        net-nds/portmap[>=6.0]
-        tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
-        nfsv4? (
-                dev-libs/libevent[>=1.0b]
-                net-libs/libnfsidmap[>=0.16]
-        )
-"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-1.1.2-rpcgen-ioctl.patch"

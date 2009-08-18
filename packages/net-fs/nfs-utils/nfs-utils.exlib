@@ -1,0 +1,25 @@
+
+SUMMARY="NFS client and server daemons"
+HOMEPAGE="http://nfs.sourceforge.net/"
+DOWNLOADS="mirror://sourceforge/nfs/${PNV}.tar.bz2"
+
+
+LICENCES="GPL-2"
+MYOPTIONS="nfsv4 tcpd"
+
+# Wulf C. Krueger <philantrop@exherbo.org>:
+# FIXME: Add kerberos option and dependencies when it's in arbor.
+
+DEPENDENCIES="
+    build+run:
+        sys-fs/e2fsprogs[>=1.40.9]
+        net-nds/portmap[>=6.0]
+        tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
+        nfsv4? (
+                dev-libs/libevent[>=1.0b]
+                net-libs/libnfsidmap[>=0.16]
+        )
+"
+
+REMOTE_IDS="freshmeat:nfs-utils"
+
