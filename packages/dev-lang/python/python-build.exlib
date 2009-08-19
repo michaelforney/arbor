@@ -13,8 +13,13 @@ export_exlib_phases src_prepare src_configure src_compile src_test src_install p
 MY_PNV="Python-${PV}"
 
 SUMMARY="Python interpreter"
-HOMEPAGE="http://www.${PN}.org"
+HOMEPAGE="http://www.${PN}.org/"
 DOWNLOADS="http://${PN}.org/ftp/${PN}/${PV}/${MY_PNV}.tar.bz2"
+
+UPSTREAM_DOCUMENTATION="
+http://docs.${PN}.org/$(ever range 1-2)/
+"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/download/releases/${PV}/"
 
 LICENCES="PSF-2.2"
 SLOT="$(ever range 1-2)"
