@@ -93,6 +93,9 @@ python-build_src_test() {
 python-build_src_install() {
     default
 
+    mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a ||
+        die "Couldn't move libpython${SLOT}.a to libdir"
+
     # Installs empty directory.
     rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}${SLOT}/lib-old || die "Failed to remove lib-old"
 }
