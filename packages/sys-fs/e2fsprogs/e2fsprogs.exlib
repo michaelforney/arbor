@@ -5,7 +5,7 @@
 
 require toolchain-funcs multilib
 
-export_exlib_phases src_prepare src_configure src_test src_install
+export_exlib_phases src_configure src_test src_install
 
 SUMMARY="Filesystem utilities for use with ext2 and ext3 filesystems"
 HOMEPAGE="http://e2fsprogs.sourceforge.net/"
@@ -20,33 +20,12 @@ DEPENDENCIES="
         sys-apps/texinfo
         dev-util/pkg-config[>=0.20]
     build+run:
-        sys-libs/com_err[~${PV}]
-        sys-libs/ss[~${PV}]
         sys-apps/util-linux-ng[>=2.16] [[ note = [ to ensure that libblkid and libuuid from util-linux-ng is used ] ]]
 "
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( RELEASE-NOTES )
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/${PNV}-makefile.patch" )
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 COMPILE_ET=compile_et )
-
-e2fsprogs_src_prepare() {
-    default
-
-    # fake out files we forked into sep packages
-    sed -i \
-        -e '/^LIB_SUBDIRS/s:lib/et::' \
-        -e '/^LIB_SUBDIRS/s:lib/ss::' \
-        Makefile.in || die "remove subdirs"
-
-    # Since we've split out com_err/ss into their own exheres, we
-    # need to fake out the local files. Let the toolchain find them.
-    echo "GROUP ( /usr/$(get_libdir)/libcom_err.a )" > lib/libcom_err.a
-    echo "GROUP ( /usr/$(get_libdir)/libcom_err.so )" > lib/libcom_err.so
-    echo "GROUP ( /usr/$(get_libdir)/libss.a )" > lib/libss.a
-    echo "GROUP ( /usr/$(get_libdir)/libss.so )" > lib/libss.so
-    echo '#include_next <ss/ss_err.h>' > lib/ss/ss_err.h
-    ln -s /usr/bin/mk_cmds lib/ss/mk_cmds
-}
+DEFAULT_SRC_INSTALL_PARAMS=( install-libs )
 
 e2fsprogs_src_configure() {
     # Keep the package from doing silly things
@@ -57,13 +36,12 @@ e2fsprogs_src_configure() {
     econf \
         --bindir=/bin \
         --sbindir=/sbin \
-        --disable-uuidd \
-        --disable-fsck \
         --enable-elf-shlibs \
         --enable-tls \
+        --disable-uuidd \
+        --disable-fsck \
         --disable-libblkid \
         --disable-libuuid \
-        --with-ldopts="${LDFLAGS}" \
         --without-included-gettext \
         $(option_enable !static dynamic-e2fsck)
 }
@@ -77,20 +55,29 @@ e2fsprogs_src_test() {
 e2fsprogs_src_install() {
     default
 
+    dosym et/com_err.h /usr/include/com_err.h
+
     # Move shared libraries to /lib/, install static libraries to /usr/lib/,
     # and install linker scripts to /usr/lib/.
     dodir /$(get_libdir)
     mv "${IMAGE}"/usr/$(get_libdir)/*.so* "${IMAGE}"/$(get_libdir)/
     dolib.a lib/*.a
-    rm -f "${IMAGE}"/usr/$(get_libdir)/lib{com_err,ss}.a
     local x
     cd "${IMAGE}"/$(get_libdir)
     for x in *.so ; do
         gen_usr_ldscript ${x}
     done
 
-    # move 'useless' stuff to /usr/
+    # Move 'useless' stuff to /usr/
     dosbin "${IMAGE}"/sbin/mklost+found
-    rm -f "${IMAGE}"/sbin/mklost+found
+    rm -f "${IMAGE}"/sbin/mklost+found || die "removing binaries failed"
+    dobin "${IMAGE}"/bin/{compile_et,mk_cmds}
+    rm -f "${IMAGE}"/bin/{compile_et,mk_cmds} || die "removing binaries failed"
+
+    # e2fsprogs has references to the build directory here
+    sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' \
+        "${IMAGE}"/usr/bin/compile_et || die "Fixing et path failed"
+    sed -i -e '/^SS_DIR=/s:=.*:=/usr/share/ss:' \
+        "${IMAGE}"/usr/bin/mk_cmds || die "Fixing ss path failed"
 }
 
