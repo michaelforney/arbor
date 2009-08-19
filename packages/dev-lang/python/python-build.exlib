@@ -8,7 +8,7 @@
 # TODO: alternatives
 require flag-o-matic multilib toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] python
 
-export_exlib_phases src_prepare src_configure src_compile src_test src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_configure src_test src_install pkg_postinst pkg_postrm
 
 MY_PNV="Python-${PV}"
 
@@ -99,11 +99,7 @@ python-build_src_install() {
 
     mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a ||
         die "Couldn't move libpython${SLOT}.a to libdir"
-
-    # Installs empty directory.
-    rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}${SLOT}/lib-old || die "Failed to remove lib-old"
 }
-
 
 python-build_pkg_postinst() {
     python_version
