@@ -1,0 +1,26 @@
+Source: Ali Polatel <polatel@gmail.com>
+Upstream: No
+Reason: Decrease the number of simultaneous threads so the test passes under sydbox in a reasonable time.
+
+--- gettext-0.17/gettext-runtime/tests/test-lock.c	2005-07-18 14:37:15.000000000 +0300
++++ gettext-0.17/gettext-runtime/tests/test-lock.c	2009-08-20 19:28:24.000000000 +0300
+@@ -58,7 +58,7 @@
+ #define ENABLE_DEBUGGING 0
+ 
+ /* Number of simultaneous threads.  */
+-#define THREAD_COUNT 10
++#define THREAD_COUNT 4
+ 
+ /* Number of operations performed in each thread.
+    This is quite high, because with a smaller count, say 5000, we often get
+--- gettext-0.17/gettext-tools/gnulib-tests/test-lock.c	2007-10-07 23:29:46.000000000 +0300
++++ gettext-0.17/gettext-tools/gnulib-tests/test-lock.c	2009-08-20 19:46:19.000000000 +0300
+@@ -54,7 +54,7 @@
+ #define ENABLE_DEBUGGING 0
+ 
+ /* Number of simultaneous threads.  */
+-#define THREAD_COUNT 10
++#define THREAD_COUNT 4
+ 
+ /* Number of operations performed in each thread.
+    This is quite high, because with a smaller count, say 5000, we often get
