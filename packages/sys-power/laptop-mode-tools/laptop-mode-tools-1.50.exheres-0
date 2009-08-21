@@ -35,10 +35,12 @@ WORK="${WORKBASE}/${MY_PNV}"
 src_compile() { :; }
 
 src_install() {
-    DESTDIR="${IMAGE}" MAN_D="/usr/share/man" ./install.sh
+    DESTDIR="${IMAGE}" MAN_D="/usr/share/man" \
+        ACPI="force" \
+        ./install.sh || die "install.sh failed"
     keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
 
-    rm "${IMAGE}"/etc/init.d/laptop-mode
+    rm "${IMAGE}"/etc/init.d/laptop-mode || die "rm stock init.d script failed"
     newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
 }
 
