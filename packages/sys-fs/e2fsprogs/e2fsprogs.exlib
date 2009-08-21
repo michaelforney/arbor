@@ -5,7 +5,7 @@
 
 require toolchain-funcs multilib
 
-export_exlib_phases src_configure src_test src_install
+export_exlib_phases src_configure src_compile src_test src_install
 
 SUMMARY="Filesystem utilities for use with ext2 and ext3 filesystems"
 HOMEPAGE="http://e2fsprogs.sourceforge.net/"
@@ -27,6 +27,12 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( RELEASE-NOTES )
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/${PNV}-makefile.patch" )
 DEFAULT_SRC_INSTALL_PARAMS=( install-libs )
 
+STATIC_BINARIES=(
+    misc/{mke2fs,tune2fs,blkid}.static
+    e2fsck/e2fsck.static
+    resize/resize2fs.static
+)
+
 e2fsprogs_src_configure() {
     # Keep the package from doing silly things
     export ac_cv_path_LDCONFIG=:
@@ -42,8 +48,16 @@ e2fsprogs_src_configure() {
         --disable-fsck \
         --disable-libblkid \
         --disable-libuuid \
-        --without-included-gettext \
-        $(option_enable !static dynamic-e2fsck)
+        --without-included-gettext
+}
+
+e2fsprogs_src_compile() {
+    default
+    if option static ; then
+        for bin in "${STATIC_BINARIES[@]}" ; do
+            make -C $(dirname ${bin}) $(basename ${bin}) || die "Failed to build static binaries"
+        done
+    fi
 }
 
 e2fsprogs_src_test() {
@@ -77,5 +91,12 @@ e2fsprogs_src_install() {
         "${IMAGE}"/usr/bin/compile_et || die "Fixing et path failed"
     sed -i -e '/^SS_DIR=/s:=.*:=/usr/share/ss:' \
         "${IMAGE}"/usr/bin/mk_cmds || die "Fixing ss path failed"
+
+    if option static ; then
+        for bin in "${STATIC_BINARIES[@]}" ; do
+            dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})" \
+            || die "Failed to install static binaries"
+        done
+    fi
 }
 
