@@ -58,9 +58,6 @@ require toolchain-funcs multilib
 # Remove particular flags from LDFLAGS
 # Matches only complete flags
 #
-#### get-make-jobs ####
-# Returns the number of jobs parsed from MAKEOPTS
-#
 
 # C[XX]FLAGS that we allow in strip-flags
 # Note: shell globs and character lists are allowed
@@ -490,35 +487,6 @@ raw-ldflags() {
         set -- "$@" ${x//,/ }
     done
     echo "$@"
-}
-
-# Returns the number of jobs parsed from MAKEOPTS.
-get-make-jobs() {
-    illegal_in_global_scope
-
-    [[ -n ${*} ]] && die "get-make-jobs takes no arguments"
-
-    local i j=1 n=false
-    for i in ${MAKEOPTS} ; do
-        if [[ ${n} == true ]] ; then
-            if [[ ${i} == -* ]] ; then
-                # Example: --jobs --load-average
-                # Ignore unlimited number of jobs, since non-make based systems may not support that
-                :
-            else
-                # Example: --jobs 2, -j 2
-                j=${i}
-            fi
-            n=false
-            continue
-        fi
-        case ${i} in
-            -j|--jobs) n=true ;;
-            -j*) j=${i#-j} ;;
-            --jobs=*) j=${i#--jobs=} ;;
-        esac
-    done
-    echo "${j}"
 }
 
 # Some tests for when we screw with things and want to make

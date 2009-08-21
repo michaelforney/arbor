@@ -14,8 +14,7 @@ ejam() {
 }
 
 jam_src_compile() {
-    local j=$(get-make-jobs)
-    ejam -d+2 -j${j:-1}
+    ejam -d+2 -j${EXJOBS}
 }
 
 jam_src_install() {

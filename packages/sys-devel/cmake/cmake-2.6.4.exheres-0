@@ -4,8 +4,6 @@
 # Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic
-
 MY_PV="${PV/rc/RC-}"
 MY_PNV="${PN}-$(ever replace 3 - ${MY_PV})"
 
@@ -55,10 +53,8 @@ src_prepare() {
 }
 
 src_configure() {
-    local j=$(get-make-jobs)
-
     bootstrap \
-        --parallel=${j:-1} \
+        --parallel=${EXJOBS} \
         --$(option qt4 || echo "no-")qt-gui \
         --system-libs \
         --prefix=/usr \
