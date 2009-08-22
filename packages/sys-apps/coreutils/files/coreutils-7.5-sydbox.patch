@@ -2,18 +2,11 @@ Source: Ali Polatel <polatel@gmail.com>
 Upstream: No
 Reason: Disable tests that fail with sydbox (reasons below)
 
-diff -ur coreutils-7.4/tests/ls/no-cap coreutils-7.4-sydbox/tests/ls/no-cap
---- coreutils-7.4/tests/ls/no-cap	2009-02-27 18:36:00.000000000 +0200
-+++ coreutils-7.4-sydbox/tests/ls/no-cap	2009-05-21 15:48:20.000000000 +0300
-@@ -24,6 +24,8 @@
- . $srcdir/test-lib.sh
- require_strace_ capget
+Edit: Daniel Mierswa<impulze@impulze.org>
+I removed the disabling of 2 tests here since they seem to work fine
+with 7.5. There's another test failing on my machine (tail-2/assert)
+but since it works for alip, let's see if more people run into it.
 
-+skip_test_ 'This test fails with sydbox due to strace usage'
-+
- fail=0
- strace -e capget ls --color=always > /dev/null 2> out || fail=1
- $EGREP 'capget\(' out || skip_test_ "your ls doesn't call capget"
 diff -ur coreutils-7.4/tests/ls/stat-free-symlinks coreutils-7.4-sydbox/tests/ls/stat-free-symlinks
 --- coreutils-7.4/tests/ls/stat-free-symlinks	2009-02-27 18:36:00.000000000 +0200
 +++ coreutils-7.4-sydbox/tests/ls/stat-free-symlinks	2009-05-21 15:48:50.000000000 +0300
@@ -50,18 +43,6 @@ diff -ur coreutils-7.4/tests/mv/atomic2 coreutils-7.4-sydbox/tests/mv/atomic2
  # Before the fix, mv would unnecessarily unlink the destination symlink:
  #   $ rm -f a b b2; touch a b; ln b b2; strace -e unlink /p/bin/mv a b
  #   unlink("b")                             = 0
-diff -ur coreutils-7.4/tests/touch/fail-diag coreutils-7.4-sydbox/tests/touch/fail-diag
---- coreutils-7.4/tests/touch/fail-diag	2009-02-27 18:36:01.000000000 +0200
-+++ coreutils-7.4-sydbox/tests/touch/fail-diag	2009-05-21 16:05:28.000000000 +0300
-@@ -24,6 +24,8 @@
- . $srcdir/test-lib.sh
- skip_if_root_
-
-+skip_test_ 'This test raises a sandbox violation with sydbox which makes fail diagnosis impossible'
-+
- d1=no-$$
- dir=/$d1/such-dir
- # Ensure that $d1 doesn't already exist.
 diff -ur coreutils-7.4/tests/install/basic-1 coreutils-7.4-sydbox/tests/install/basic-1
 --- coreutils-7.4/tests/install/basic-1	2009-02-27 18:36:00.000000000 +0200
 +++ coreutils-7.4-sydbox/tests/install/basic-1	2009-08-16 18:54:49.000000000 +0300
