@@ -126,8 +126,9 @@ src_install() {
 
     # scripts/exim_install runs the exim binary we just build.
     # When exim runs, it recreates the spooldir, if it doesn't exist, which causes access violations.
-    # There doesn't seem to be a clean way to not run exim, or to make exim not do that, so addpredict will have to do..
-    addpredict /var/spool/exim
+    # There doesn't seem to be a clean way to not run exim, or to make exim not
+    # do that, so addfilter will have to do..
+    addfilter /var/spool/exim
     default
 
     alternatives_for mta ${PN} 10 /usr/sbin/sendmail ${PN}
