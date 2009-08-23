@@ -92,10 +92,6 @@ src_compile() {
 }
 
 src_test() {
-    # Work around Sandbox bugs
-    export PALUDIS_DO_NOTHING_SANDBOXY="sandbox sucks"
-    export BASH_ENV=/dev/null
-
     # 'make --dry-run check' fails so don't use default here.
     # emake dies by default (making the if ! code unreachable), and nonfatal breaks e_repository_TEST
     echo make ${MAKEOPTS} check
