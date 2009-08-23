@@ -52,6 +52,7 @@ autotools_select_versions() {
                 && break
         done
         [[ -z ${WANT_AUTOCONF} ]] && die "No autoconf installed"
+        einfo "Using autoconf:${WANT_AUTOCONF}"
     fi
     if [[ -z ${WANT_AUTOMAKE} && ${SUPPORTED_AUTOMAKE[@]} != none ]]; then
         sorted_slots=( $(version_sort ${SUPPORTED_AUTOMAKE[@]}) )
@@ -61,6 +62,7 @@ autotools_select_versions() {
                 && break
         done
         [[ -z ${WANT_AUTOMAKE} ]] && die "No automake installed"
+        einfo "Using automake:${WANT_AUTOMAKE}"
     fi
 }
 
