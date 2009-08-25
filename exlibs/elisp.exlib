@@ -1,0 +1,33 @@
+# Copyright 2009 Elias Pipping <elias@pipping.org>
+# Distributed under the terms of the GNU General Public License v2
+#
+# This is a wrapper around elisp-module.exlib that automates
+# compilation and installation even further, meant for packages
+# that contain nothing but emacs lisp
+
+require elisp-module
+
+export_exlib_phases src_compile src_install pkg_postinst pkg_postrm
+
+DEPENDENCIES+="
+    build+run:
+        app-editors/emacs
+"
+
+elisp_src_compile() {
+    elisp-compile *.el
+}
+
+elisp_src_install() {
+    elisp-install ${PN} *.el *.elc
+    elisp-install-site-file
+}
+
+elisp_pkg_postinst() {
+    elisp-module_pkg_postinst
+}
+
+elisp_pkg_postrm() {
+    elisp-module_pkg_postrm
+}
+
