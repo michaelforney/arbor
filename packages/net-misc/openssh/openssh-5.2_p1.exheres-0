@@ -21,7 +21,9 @@ DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="hpn pam tcpd X X509"
+MYOPTIONS="
+hpn pam tcpd X X509
+gtk [[ description = [ build gnome-ssh-askpass ] ]]"
 
 # Unfortunately, the tests need to be run as root.
 RESTRICT="userpriv"
@@ -35,6 +37,7 @@ DEPENDENCIES="
         pam? ( sys-libs/pam[>=0.78] )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
         X? ( x11-apps/xauth )
+        gtk? ( x11-libs/gtk+:2 )
     build:
         dev-util/pkg-config
         sys-kernel/linux-headers
@@ -90,6 +93,14 @@ src_configure() {
         $(option_with tcpd tcp-wrappers)
 }
 
+src_compile() {
+    default
+
+    if option gtk ; then
+        emake -C contrib gnome-ssh-askpass2
+    fi
+}
+
 src_test() {
     option X509 && export SSH_X509TESTS="blob_auth"
     emake -j1 tests
@@ -119,6 +130,10 @@ src_install() {
     diropts -m 0700
     dodir /etc/skel/.ssh
     rmdir "${IMAGE}"/var{/empty,}
+
+    if option gtk ; then
+        newbin contrib/gnome-ssh-askpass2 gnome-ssh-askpass
+    fi
 }
 
 pkg_postinst() {
