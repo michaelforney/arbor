@@ -50,7 +50,7 @@ DEPENDENCIES="
     run:
         net-misc/wget
         net-misc/rsync
-        sys-apps/sydbox[>=0.1_rc5]
+        sys-apps/sydbox[>=0.1_rc6]
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
 
@@ -92,9 +92,6 @@ src_compile() {
 }
 
 src_test() {
-    # Work around ptrace limitation: a traced process can't be traced again
-    export PALUDIS_DO_NOTHING_SANDBOXY=Ptrace
-
     # 'make --dry-run check' fails so don't use default here.
     # emake dies by default (making the if ! code unreachable), and nonfatal breaks e_repository_TEST
     echo make ${MAKEOPTS} check
