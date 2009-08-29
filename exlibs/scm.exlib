@@ -240,8 +240,6 @@ scm_unpack_one() {
 }
 
 scm_src_unpack() {
-    scm_src_fetch_extra
-
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; either set SCM_REPOSITORY before require scm{,-*}, or call scm_finalise in global scope after setting SCM_*"
     scm_{for_each,access_checkout,unpack_one}
     SCM_IS_BUILT=1
@@ -329,6 +327,6 @@ scm_finalise() {
 }
 [[ -n ${SCM_REPOSITORY} ]] && scm_finalise
 
-#export_exlib_phases src_fetch_extra pkg_scm_revision src_unpack pkg_info
-export_exlib_phases src_unpack pkg_info
+#export_exlib_phases pkg_scm_revision src_unpack pkg_info
+export_exlib_phases src_fetch_extra src_unpack pkg_info
 
