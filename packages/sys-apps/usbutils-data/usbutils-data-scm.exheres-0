@@ -17,8 +17,14 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}"
 
+src_fetch_extra() {
+    wget -O "${FETCHEDDIR}"/usb.ids http://www.linux-usb.org/usb.ids ||
+        die "Failed to fetch usb.ids"
+}
+
 src_unpack() {
-    wget http://www.linux-usb.org/usb.ids || die "failed to fetch file"
+    cp "${FETCHEDDIR}"/usb.ids .
+    [[ -s usb.ids ]] || die "usb.ids is not usuable"
 }
 
 src_install() {

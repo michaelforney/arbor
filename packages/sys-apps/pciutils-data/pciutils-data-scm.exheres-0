@@ -17,8 +17,14 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}"
 
+src_fetch_extra() {
+    wget -O "${FETCHEDDIR}"/pci.ids http://pciids.sourceforge.net/v2.2/pci.ids ||
+        die "Failed to fetch pci.ids"
+}
+
 src_unpack() {
-    wget http://pciids.sourceforge.net/v2.2/pci.ids || die "failed to fetch file"
+    cp "${FETCHEDDIR}"/pci.ids .
+    [[ -s pci.ids ]] || die "pci.ids is not usable"
 }
 
 src_install() {
