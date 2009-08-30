@@ -1,0 +1,39 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A small collection of programs that operate on patch files"
+DESCRIPTION="
+Patchutils contains a collection of tools for manipulating patch files: interdiff,
+combinediff, flipdiff, filterdiff, fixcvsdiff, rediff, lsdiff, grepdiff, splitdiff,
+recountdiff, and unwrapdiff. You can use interdiff to create an incremental patch
+between two patches that are against a common source tree, combinediff for creating
+a cumulative diff from two incremental patches, and flipdiff to transpose two
+incremental patches. Filterdiff is for extracting or excluding patches from a
+patch set based on modified files matching shell wildcards. Lsdiff lists modified
+files in a patch. Rediff, recountdiff, and unwrapdiff correct hand-edited (or
+otherwise broken) patches.
+"
+BASEURI="http://cyberelk.net/tim"
+HOMEPAGE="${BASEURI}/software/${PN}/"
+DOWNLOADS="${BASEURI}/data/${PN}/stable/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="http://git.fedorahosted.org/git/?p=${PN}.git;a=blob_plain;f=ChangeLog;hb=aad85c3fe6b0106db1d246ed50db89fcdfcb758a [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/man/index.html [[ lang = en ]]"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+DEPENDENCIES=""
+
+src_prepare() {
+    # Replace tests that require rpm's gendiff with dummies.
+    echo '/bin/true' > tests/gendiff1/run-test
+    echo '/bin/true' > tests/gendiff2/run-test
+    echo '/bin/true' > tests/comma/run-test
+
+    default
+}
