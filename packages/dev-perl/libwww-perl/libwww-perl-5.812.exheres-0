@@ -20,6 +20,8 @@ build+run:
     dev-perl/URI
     ssl? ( dev-perl/Crypt-SSLeay )"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sydbox.patch )
+
 src_install() {
     perl-module_src_install
     dosym /usr/bin/lwp-request /usr/bin/GET

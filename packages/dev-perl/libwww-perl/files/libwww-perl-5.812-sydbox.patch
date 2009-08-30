@@ -1,0 +1,14 @@
+Source: Ali Polatel <polatel@gmail.com>
+Upstream: No (TODO)
+Reason: Binding to 0.0.0.0 is bad, mmkay?
+--- libwww-perl-5.812/t/local/chunked.t	2008-04-07 15:57:58.000000000 +0300
++++ libwww-perl-5.812/t/local/chunked.t	2009-08-30 14:11:53.000000000 +0300
+@@ -138,7 +138,7 @@
+ } else {
+   die "cannot fork: $!" unless defined $pid;
+   my $d = HTTP::Daemon->new(
+-                            LocalAddr => '0.0.0.0',
++                            LocalAddr => '127.0.0.1',
+                             LocalPort => 8333,
+                             ReuseAddr => 1,
+                            ) or die;
