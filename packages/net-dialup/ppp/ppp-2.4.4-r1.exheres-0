@@ -77,7 +77,7 @@ src_prepare() {
             die "PPPoATM sed failed"
     fi
 
-    if option activefilter ; then
+    if option !activefilter ; then
         sed -i "s/^FILTER=y/#FILTER=y/" pppd/Makefile.linux ||
             die "activefilter sed failed"
     fi
