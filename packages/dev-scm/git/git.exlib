@@ -27,7 +27,7 @@ UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${P
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="curl doc ipv6 threads tk webdav
+MYOPTIONS="curl doc ipv6 threads tk webdav xinetd
     webdav [[ requires = curl ]]"
 
 DEPENDENCIES="
@@ -43,6 +43,7 @@ DEPENDENCIES="
         webdav? ( dev-libs/expat )
     run:
         dev-perl/Error              [[ description = [ Used in Git.pm ] ]]
+        xinetd? ( sys-apps/xinetd ) [[ description = [ Enables support for the xinetd super-server ] ]]
     post,suggested:
         app-crypt/gnupg             [[ description = [ Needed for signing and verifying tags ] ]]
         dev-scm/cvsps               [[ description = [ Dependency for 'git cvsimport' ] ]]
@@ -133,6 +134,13 @@ git_src_install() {
 
     fixlocalpod
 
+    newinitd "${FILES}"/git-daemon.initd git-daemon
+    newconfd "${FILES}"/git-daemon.confd git-daemon
+    if option xinetd ; then
+        dodir /etc/xinetd.d
+        insinto /etc/xinetd.d
+        newins "${FILES}"/git-daemon.xinetd git-daemon
+    fi
+
     keepdir /usr/share/${PN}/templates/branches
 }
-
