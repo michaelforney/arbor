@@ -353,14 +353,9 @@ _tc_gen_usr_ldscript() {
     [[ -n ${output_format} ]] && output_format="OUTPUT_FORMAT ( ${output_format} )"
 
     for lib in "$@" ; do
-        if [[ ${USERLAND} == "Darwin" ]] ; then
-            ewarn "Not creating fake dynamic library for $lib on Darwin;"
-            ewarn "making a symlink instead."
-            dosym "/${libdir}/${lib}" "/usr/${libdir}/${lib}"
-        else
-            (
-                insinto /usr/${libdir}
-                hereins ${lib} <<END_LDSCRIPT
+        (
+            insinto /usr/${libdir}
+            hereins ${lib} <<END_LDSCRIPT
 /* GNU ld script
    Since Gentoo has critical dynamic libraries
    in /lib, and the static versions in /usr/lib,
@@ -372,8 +367,7 @@ _tc_gen_usr_ldscript() {
 ${output_format}
 GROUP ( /${libdir}/${lib} )
 END_LDSCRIPT
-            )
-        fi
+        )
         fperms a+x "/usr/${libdir}/${lib}"
     done
 }

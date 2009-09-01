@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 #
 # Based in part upon autotools.eclass which is:
@@ -160,8 +160,7 @@ _elibtoolize() {
 
     [[ -f Makefile.am || -f GNUmakefile.am ]] && opts="--automake"
 
-    [[ "${USERLAND}" == "Darwin" ]] && LIBTOOLIZE="glibtoolize"
-    autotools_run_tool ${LIBTOOLIZE:-libtoolize} "$@" ${opts}
+    autotools_run_tool libtoolize "$@" ${opts}
 
     # Need to rerun aclocal
     eaclocal
