@@ -80,7 +80,6 @@ scm_access_checkout() {
         ) || die "mkdir failed"
     fi
 
-    local SANDBOX_WRITE=${SANDBOX_WRITE}
     addwrite "${dir}"
     addwrite "${lock}"
 
@@ -98,6 +97,9 @@ scm_access_checkout() {
             :
         } ${fd}>\"\${lock}\" || die \"opening lock file failed\"
     "
+
+    rmwrite "${dir}"
+    rmwrite "${lock}"
 
     return ${status}
 }
