@@ -101,8 +101,10 @@ src_install() {
     keepdir "/$(get_libdir)/udev/devices"
 
     if option glib ; then
-        mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit || die "fixing ConsoleKit path failed"
-        rmdir "${IMAGE}"/usr/lib || die "removing empty dir failed"
+        if [[ $(get_libdir) != lib ]] ; then
+            mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit || die "fixing ConsoleKit path failed"
+            rmdir "${IMAGE}"/usr/lib || die "removing empty dir failed"
+        fi
     fi
 }
 
