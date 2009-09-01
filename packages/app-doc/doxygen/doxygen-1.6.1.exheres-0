@@ -35,10 +35,8 @@ DEPENDENCIES="
         qt4? ( x11-libs/qt:4[>=4.3.0] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    # Remove internal libpng - see Gentoo bug #210237
-    "${FILES}/${PNV}-system-libpng.patch"
-)
+# Use eqmake4 instead
+DEFAULT_SRC_COMPILEPARAMS=( QMAKE=true )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
 DEFAULT_SRC_INSTALL_PARAMS=( MAN1DIR="share/man/man1" )
 
@@ -69,6 +67,7 @@ src_configure() {
     # Without this, Qt:3 is picked up, if it's installed
     option qt4 && export QTDIR=/usr
 
+
     ./configure \
         --docdir /usr/share/doc/${PNVR} \
         --prefix /usr \
@@ -94,6 +93,7 @@ src_compile() {
         cp doc/Makefile{,.orig} || die "cp doc/Makefile{,.orig} failed"
 
         sed -e '/GENERATE_LATEX/s:YES:NO:' \
+            -e '/USE_PDFLATEX/s:YES:NO:' \
             -i doc/Doxyfile || die "Disabling latex failed"
 
         sed -e '/@epstopdf/s:^:#DONOTWANT :' \
