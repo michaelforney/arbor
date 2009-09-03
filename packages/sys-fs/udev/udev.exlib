@@ -22,6 +22,9 @@ pkg_postinst() {
             killall -9 udevd &>/dev/null
         fi
 
+        # Change the wait mode to wait/eldest so
+        # sydbox doesn't wait for udevd to exit.
+        sydboxcmd wait/eldest
         /sbin/udevd --daemon
     fi
 }
