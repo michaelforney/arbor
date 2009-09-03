@@ -17,7 +17,10 @@ MYOPTIONS="berkdb sqlite ssl" # mysql postgres
 DEPENDENCIES="
     build:
         dev-util/pkg-config
-        !berkdb? ( ${autotools_deps} )
+        !berkdb? (
+            ${autotools_deps}
+            dev-doc/gtk-doc
+        )
     build+run:
         dev-libs/libxml2
         dev-libs/rasqal[>=0.9.16]
@@ -30,7 +33,7 @@ src_prepare() {
         # This test fails without berkdb
         sed -e 's: rdf_model_test::' -e '/^rdf_model_test:/{g;n;d;}' \
             -i "${WORK}"/librdf/Makefile.am || die "Failed to sed out rdf_model_test"
-        eautomake # eautoreconf needs dev-util/gtk-doc
+        eautoreconf # forced on eautomake anyway since update to 1.10.2
     fi
 }
 
