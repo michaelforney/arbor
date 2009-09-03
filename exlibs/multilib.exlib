@@ -1,64 +1,46 @@
-# Copyright 1999-2007 Gentoo Foundation
+# Copyright 2009 Stephen Bennett <spb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-#
-# This eclass is for all functions pertaining to handling multilib.
-# configurations.
 
-___ECLASS_RECUR_MULTILIB="yes"
-[[ -z ${___ECLASS_RECUR_TOOLCHAIN_FUNCS} ]] && require toolchain-funcs
-
-# get_libdir:
-# Returns the libdir for the selected ABI.  This is backwards compatible
-# and simply calls get_abi_LIBDIR() on newer profiles.  You should use this
-# to determine where to install shared objects (ex: /usr/$(get_libdir))
-
-# get_abi_var <VAR> [<ABI>]:
-# returns the value of ${<VAR>_<ABI>} which should be set in make.defaults
-#
-# get_abi_LIBDIR:
-# Alias for 'get_abi_var LIBDIR', etc.
-
-### END DOCUMENTATION ###
-
-# Defaults:
-export DEFAULT_ABI=${DEFAULT_ABI:-"default"}
-export LIBDIR_default=${CONF_LIBDIR:-"lib"}
-
-# This function simply returns the desired lib directory.
-get_libdir() {
-    local CONF_LIBDIR
-    if [ -n  "${CONF_LIBDIR_OVERRIDE}" ] ; then
-        # if there is an override, we want to use that... always.
-        echo ${CONF_LIBDIR_OVERRIDE}
-    else
-        get_abi_LIBDIR
-    fi
+get_abi_var()
+{
+    v=${2}_${1}
+    echo "${!v}"
 }
 
-# get_abi_var <VAR> [<ABI>]
-# returns the value of ${<VAR>_<ABI>} which should be set in make.defaults
-#
-# If <ABI> is not specified, ${ABI} is used.
-# If <ABI> is not specified and ${ABI} is not defined, ${DEFAULT_ABI} is used.
-# If <ABI> is not specified and ${ABI} and ${DEFAULT_ABI} are not defined, we return an empty string.
-#
-# Jeremy Huddleston <eradicator@gentoo.org>
-get_abi_var() {
-    local flag=$1
-    local abi
-    if [ $# -gt 1 ]; then
-        abi=${2}
-    elif [ -n "${ABI}" ]; then
-        abi=${ABI}
-    elif [ -n "${DEFAULT_ABI}" ]; then
-        abi=${DEFAULT_ABI}
-    else
-        abi="default"
-    fi
+save_abi_env()
+{
+    local class=$1
+    local oldabi=${CURRENT_ABI:-default}
 
-    local var="${flag}_${abi}"
-    echo ${!var}
+    for v in ${ABI_DEPENDENT_VARS} ; do
+        eval ${v}_${oldabi}=${!v}
+    done
 }
 
-get_abi_LIBDIR() { get_abi_var LIBDIR "$@"; }
+load_abi_env()
+{
+    local class=$1
+    local newabi=$2
+    local lv=ABI_DEPENDENT_VARS_${class}
+
+    for v in ${!lv} ; do
+        eval ${v}=\$\{${v}_${newabi}\}
+    done
+
+    eval CURRENT_ABI_${class}=${newabi}
+}
+
+switch_abi_env()
+{
+    save_abi_env "$1"
+    load_abi_env "$@"
+}
+
+load_abi_env C ${CURRENT_ABI_C:=${DEFAULT_ABI_C:-default}}
+
+get_libdir()
+{
+    ewarn "get_libdir is deprecated"
+    echo "${LIBDIR}"
+}
 
