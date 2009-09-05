@@ -1,8 +1,9 @@
-# Copyright 2008 Thomas Anderson
+# Copyright 2008, 2009 Thomas Anderson
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'desktop-file-utils-0.15.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
+require elisp-module
 
 SUMMARY="Command line utilities to work with desktop menu entries"
 HOMEPAGE="http://freedesktop.org/wiki/Software/desktop-file-utils"
@@ -11,11 +12,25 @@ DOWNLOADS="http://www.freedesktop.org/software/${PN}/releases/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="emacs"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        dev-libs/glib:2[>=2.12]"
+        dev-libs/glib:2[>=2.12]
+        emacs? ( app-editors/emacs )"
+
+src_install() {
+    default
+    option emacs && elisp-install-site-file
+}
+
+pkg_postinst() {
+    option emacs && elisp-module_pkg_postinst
+}
+
+pkg_postrm() {
+    option emacs && elisp-module_pkg_postrm
+}
 
