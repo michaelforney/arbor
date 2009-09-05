@@ -3,18 +3,17 @@
 # Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://ghostscript.com/"
-DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2"
+DOWNLOADS="http://ghostscript.com/releases/${PNV}.tar.xz"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="cairo cups gtk X
+MYOPTIONS="cairo cups gtk jpeg2000 X
     gtk [[ requires = [ cairo X ] ]]"
-# jpeg2000
 
 DEPENDENCIES="
     build:
@@ -28,6 +27,7 @@ DEPENDENCIES="
         cairo? ( x11-libs/cairo )
         cups? ( net-print/cups )
         gtk? ( x11-libs/gtk+:2 )
+        jpeg2000? ( media-libs/jasper )
         X? (
             x11-libs/libXext
             x11-libs/libXt
@@ -35,29 +35,26 @@ DEPENDENCIES="
     run:
         fonts/ghostscript-fonts-std
 "
-#       jpeg2000? ( media-libs/jasper )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-fPIC.patch
-    "${FILES}"/${PNV}-bitcmyk.patch
-    "${FILES}"/${PNV}-CVE-2009-0583.patch
 )
 
 src_prepare() {
     rm -r ./{expat,jasper,jpeg,libpng,Resource/Font,zlib} \
-        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng"
+        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng,urw-fonts & zlib"
 
     if option !gtk; then
         sed -e 's:\$(GSSOX)::' \
             -e 's:.*\$(GSSOX_XENAME)$::' \
-            -i base/*.mak \
-            || die 'GSSOX sed failed'
+            -i base/*.mak ||
+            die 'GSSOX sed failed'
     fi
 
-    sed -e 's:^\(docdir=\).*$:\1@docdir@:' \
-        -i base/Makefile.in base/*.mak || die 'docdir sed failed'
+    sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak || die 'docdir sed failed'
 
-    autotools_src_prepare
+    default
+    eautoreconf
     cd "${WORK}/ijs"
     eautoreconf
 }
