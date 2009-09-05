@@ -4,6 +4,8 @@
 # Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
+require elisp-module
+
 MY_PV="${PV/rc/RC-}"
 MY_PNV="${PN}-$(ever replace 3 - ${MY_PV})"
 
@@ -17,7 +19,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="CMake"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="qt4 vim-syntax"
+MYOPTIONS="emacs qt4 vim-syntax"
 
 DEPENDENCIES="
     build+run:
@@ -25,6 +27,7 @@ DEPENDENCIES="
         dev-libs/expat[>=2.0.1]
         dev-libs/libxml2[>=2.6.28]
         dev-libs/xmlrpc-c[>=1.06.09]
+        emacs? ( app-editors/emacs )
         qt4? ( x11-libs/qt:4 )
         vim-syntax? (
             || (
@@ -63,6 +66,11 @@ src_configure() {
         --mandir=/share/man
 }
 
+src_compile() {
+    default
+    option emacs && elisp-compile Docs/*.el
+}
+
 src_test() {
     # Setting DISPLAY breaks qtwrapping test if Qt3 is installed, #188
     export DISPLAY=
@@ -72,6 +80,11 @@ src_test() {
 
 src_install() {
     default
+
+    if option emacs; then
+        elisp-install ${PN} Docs/*.el
+        elisp-install-site-file
+    fi
 
     if option vim-syntax; then
         insinto /usr/share/vim/vimfiles/syntax
@@ -83,5 +96,13 @@ src_install() {
         insinto /usr/share/vim/vimfiles/ftdetect
         doins "${FILES}/${VIMFILE}"
     fi
+}
+
+pkg_postinst() {
+    option emacs && elisp-module_pkg_postinst
+}
+
+pkg_postrm() {
+    option emacs && elisp-module_pkg_postrm
 }
 
