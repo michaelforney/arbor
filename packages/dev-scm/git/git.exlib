@@ -1,9 +1,9 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib perl-module bash-completion
+require multilib perl-module bash-completion elisp-module
 
-export_exlib_phases src_unpack src_configure src_compile src_test src_install
+export_exlib_phases src_unpack src_configure src_compile src_test src_install pkg_postinst pkg_postrm
 
 SUMMARY="A distributed VCS focused on speed, effectivity and real-world usability on large projects"
 DESCRIPTION="Git is a fast, scalable, distributed revision control system with an unusually rich command set
@@ -27,7 +27,7 @@ UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${P
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="curl doc ipv6 threads tk webdav xinetd
+MYOPTIONS="curl doc emacs ipv6 threads tk webdav xinetd
     webdav [[ requires = curl ]]"
 
 DEPENDENCIES="
@@ -36,6 +36,7 @@ DEPENDENCIES="
         dev-libs/openssl
         sys-libs/zlib
         curl? ( net-misc/curl )
+        emacs? ( app-editors/emacs )
         tk? (
           dev-lang/tcl[>=8.4]
           dev-lang/tk[>=8.4]
@@ -95,6 +96,7 @@ myemake() {
 git_src_compile() {
     perlinfo
     myemake all
+    option emacs && elisp-compile contrib/emacs/*.el
 }
 
 git_src_test() {
@@ -120,6 +122,10 @@ git_src_install() {
     docinto /
 
     dobashcompletion contrib/completion/git-completion.bash
+    if option emacs; then
+        elisp-install ${PN} contrib/emacs/*.el{,c}
+        elisp-install-site-file
+    fi
 
     exeinto /usr/libexec/${PN}
     doexe contrib/fast-import/git-p4
@@ -144,3 +150,12 @@ git_src_install() {
 
     keepdir /usr/share/${PN}/templates/branches
 }
+
+git_pkg_postinst() {
+    option emacs && elisp-module_pkg_postinst
+}
+
+git_pkg_postrm() {
+    option emacs && elisp-module_pkg_postrm
+}
+
