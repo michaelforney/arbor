@@ -19,7 +19,7 @@ DOWNLOADS="${source_uri} ${ports_uri} ${libidn_uri}"
 
 LICENCES="LGPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="bootstrap"
 
 DEPENDENCIES="
     build:
@@ -28,24 +28,17 @@ DEPENDENCIES="
         sys-apps/sed
         sys-apps/texinfo
         sys-kernel/linux-headers
+        sys-devel/gcc[bootstrap=]
     run:
         sys-libs/timezone-data"
 
-ECONF_SOURCE="${WORKBASE}"/${PNV}
-WORK="${TEMP}/build"
+WORK="${WORKBASE}/build"
+ECONF_SOURCE="${WORKBASE}/${PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --with-add-ons
-    --with-crypt
-    --with-headers=/usr/include
-    --without-gd
-    --enable-kernel=2.6.22
-)
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
 src_unpack() {
-    mkdir "${WORK}"
-    unpack ${ARCHIVES}
+    default
 
     if [[ ${PV/_p*} != ${PV} ]] ; then
         mv glibc-${PV/_p*}-2* glibc-${PV}
@@ -59,25 +52,93 @@ src_unpack() {
     if [[ -n ${ports_uri} ]] ; then
         mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
     fi
+
+    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+}
+
+src_prepare() {
+    if option bootstrap ; then
+        sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig" || die "failed to remove gcc_eh linkage"
+    fi
+
+    default
+}
+
+src_configure() {
+    for ABI in ${ABIS_C} ; do
+        switch_abi_env C ${ABI}
+
+        mkdir "${WORK}/${ABI}" || die "mkdir ${ABI} failed"
+        cd "${WORK}/${ABI}" || die "entering ${ABI} failed"
+
+        echo "libc_cv_forced_unwind=yes" > config.cache
+        echo "libc_cv_c_cleanup=yes" >> config.cache
+        echo "libc_cv_slibdir=/${LIBDIR}" >> config.cache
+
+        CC="gcc -m${ABI}" CFLAGS="${CFLAGS} -O2 $([[ ${ARCH} == amd64 && ${ABI} == 32 ]] && echo -march=$(echo ${CTARGET} | awk -F- '{ print $1 }'))" \
+        "${ECONF_SOURCE}/configure" --prefix=/usr \
+                                    --sysconfdir=/etc \
+                                    --localstatedir=/var/lib \
+                                    --libdir="/usr/${LIBDIR}" \
+                                    --mandir=/usr/share/man \
+                                    --infodir=/usr/share/info \
+                                    --datadir=/usr/share \
+                                    '--cache-file=config.cache' \
+                                    '--with-headers=/usr/include' \
+                                    '--with-add-ons' '--with-crypt' \
+                                    '--without-gd' '--without-cvs' \
+                                    ${CTARGET} || die "configure failed"
+    done
+}
+
+src_compile() {
+    for ABI in ${ABIS_C} ; do
+        switch_abi_env C ${ABI}
+
+        cd "${WORK}/${ABI}" || die "entering ${ABI} failed"
+
+        default
+    done
 }
 
 src_install() {
-    export LANGUAGE=C LC_ALL=C
+    export LANGUAGE=C
+
+    # Note: the default abi must always be staged last.  We do this as the last
+    # one to get staged will clobber all collisions.  In particular, this will
+    # be all of the executables.  The supporting libraries (libc, nss, etc), are
+    # installed into architecutre specific directories.
+    for ABI in ${ABIS_C} ; do
+        if [[ ${ABI} != ${DEFAULT_ABI_C} ]] ; then
+            switch_abi_env C ${ABI}
+
+            cd "${WORK}/${ABI}" || die "entering ${ABI} failed"
+
+            default
+        fi
+    done
+
+    switch_abi_env C ${DEFAULT_ABI_C}
+
+    cd "${WORK}/${DEFAULT_ABI_C}" || die "entering ${DEFAULT_ABI_C} failed"
+
     default
 
     # localedef fails if /usr/lib/locale does not exist
-    keepdir /usr/$(get_libdir)/locale
+    keepdir "/usr/${LIBDIR}/locale"
 
-    # Don't install /etc/{ld.so.cache,localtime}
+    # don't install /etc/{ld.so.cache,localtime}
     for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
         if [[ -f ${file} ]] ; then
-            rm "${file}" || die "Couldn't remove /etc/ld.so.cache, /etc/localtime"
+            rm "${file}" || die "couldn't remove ${file##${IMAGE}}"
         fi
     done
-    # Don't install bundled timezone info
-    rm -r "${IMAGE}/usr/share/zoneinfo" || die "Couldn't remove bundled timezone info"
+
+    # don't install bundled timezone info
+    rm -r "${IMAGE}/usr/share/zoneinfo" || die "couldn't remove bundled timezone info"
 
     cd "${WORKBASE}/${PNV}"
+
     insinto /etc
     doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
 }
