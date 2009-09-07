@@ -1,0 +1,48 @@
+# Copyright 2009 Timothy Redaelli
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'mdadm-3.0.ebuild', which is:
+#     Copyright 1999-2009 Gentoo Foundation
+
+require common-metadata toolchain-funcs
+
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        sys-apps/util-linux-ng[>=2.16]"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-dont-make-man.patch
+    "${FILES}"/${PN}-2.6-syslog-updates.patch
+    -p0 "${FILES}"/${PN}-2.6.4-mdassemble.patch
+)
+
+src_compile() {
+    emake \
+        CROSS_COMPILE=${CHOST}- \
+        CWFLAGS="-Wall" \
+        CXFLAGS="${CFLAGS}" \
+        all mdassemble
+}
+
+src_install() {
+    emake DESTDIR="${IMAGE}" install
+    into /
+    dosbin mdassemble
+    dodoc ChangeLog INSTALL TODO README* ANNOUNCE-${PV}
+    
+    exeinto /$(get_libdir)/rcscripts/addons
+    doexe "${FILES}"/raid-start.sh
+    doexe "${FILES}"/raid-stop.sh
+
+    insinto /etc
+    newins mdadm.conf-example mdadm.conf
+    newinitd "${FILES}"/mdadm.rc mdadm
+    newconfd "${FILES}"/mdadm.confd mdadm
+    newinitd "${FILES}"/mdraid.rc mdraid
+
+    insinto /etc/udev/rules.d/
+    newins "${FILES}"/udev-145-64-md-raid.rules 64-md-raid.rules
+}
