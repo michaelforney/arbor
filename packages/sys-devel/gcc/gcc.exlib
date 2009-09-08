@@ -311,13 +311,13 @@ pkg_postinst() {
 }
 
 pkg_prerm() {
+    alternatives_pkg_prerm
+
     # make sure libstdc++.so* symlinks are ok
     fix_libstdcplusplus /usr/{libdir} "${ROOT}"
 }
 
 pkg_postrm() {
-    alternatives_pkg_postrm
-
     local x
     for x in "${symlinks[@]}"; do
         if [[ -L ${ROOT}${x/-${SLOT}} && ! -e ${ROOT}${x/-${SLOT}} ]]; then

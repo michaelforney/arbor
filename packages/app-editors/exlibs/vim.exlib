@@ -25,7 +25,7 @@ require vim-doc flag-o-matic
 [[ "${PN}" != 'vim-runtime' ]] && require alternatives python
 [[ "${PN}" != 'gvim' ]] && require bash-completion
 
-export_exlib_phases src_prepare src_configure src_compile src_test src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_configure src_compile src_test src_install pkg_postinst pkg_prerm pkg_postrm
 
 ### Versions and patchlevels
 VIM_VERSION="${VIM_VERSION:-$(ever range 1-2)}"
@@ -501,14 +501,16 @@ vim_pkg_postinst() {
     update_vim_symlinks
 }
 
+vim_pkg_prerm() {
+    [[ "${PN}" == 'vim-runtime' ]] || alternatives_pkg_prerm
+}
+
 vim_pkg_postrm() {
     # Update documentation tags (from vim-doc.exlib)
     update_vim_helptags
 
     # Make convenience symlinks
     update_vim_symlinks
-
-    [[ "${PN}" != 'vim-runtime' ]] && alternatives_pkg_postrm
 
     # Update fdo mime stuff, bug #78394
     #if [[ "${PN}" == "gvim" ]] ; then
