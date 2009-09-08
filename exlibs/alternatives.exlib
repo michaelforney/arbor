@@ -84,6 +84,19 @@ alternatives_for() {
 
 export_exlib_phases pkg_postinst pkg_prerm
 
+cleanup_old_alternatives_module() {
+    illegal_in_global_scope
+
+    local alt=${1} old_module="${ROOT}/usr/share/eclectic/modules/${alt}.eclectic"
+    if [[ -f "${old_module}" && "$(source "${old_module}" &>/dev/null; echo "${ALTERNATIVE}")" == "${alt}" ]]; then
+        local version="$(source "${old_module}" &>/dev/null; echo "${VERSION}")"
+        if [[ "${version}" == "0.1" || "${version}" == "20080924" ]]; then
+            echo rm "${old_module}"
+            rm "${old_module}" || eerror "rm ${old_module} failed"
+        fi
+    fi
+}
+
 alternatives_pkg_postinst() {
     illegal_in_global_scope
 
@@ -112,6 +125,8 @@ EOF
 
         echo eclectic "${alt}" update "${provider}"
         eclectic "${alt}" update "${provider}"
+
+        cleanup_old_alternatives_module ${alt}
     done
 }
 
