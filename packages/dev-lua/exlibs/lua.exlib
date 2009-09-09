@@ -1,0 +1,37 @@
+# Copyright 2009 Ali Polatel <polatel@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+# A utility exlib for installing Lua modules.
+
+require multilib
+
+lua_version() {
+    [[ -n ${LUAVER} ]] && return 0
+    local luaver=
+    luaver="$(lua -v 2>&1| cut -d' ' -f2)"
+    export LUAVER="${luaver%.*}"
+}
+
+lua_get_sharedir() {
+    lua_version
+    echo -n /usr/share/lua/${LUAVER}/
+}
+
+lua_get_libdir() {
+    lua_version
+    echo -n /usr/$(get_libdir)/lua/${LUAVER}
+}
+
+lua_install_module() {
+    lua_version
+
+    insinto /usr/share/lua/${LUAVER}
+    doins "$@"
+}
+
+lua_install_cmodule() {
+    lua_version
+
+    insinto /usr/$(get_libdir)/lua/${LUAVER}
+    doins "$@"
+}
