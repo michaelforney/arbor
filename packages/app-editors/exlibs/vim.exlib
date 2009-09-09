@@ -1,4 +1,4 @@
-# Copyright 2007 Mike Kelly <pioto@exherbo.org>
+# Copyright 2007, 2009 Mike Kelly <pioto@exherbo.org>
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Based upon vim.eclass, copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
@@ -325,9 +325,9 @@ vim_src_test() {
        # Make gvim not try to connect to X. See :help gui-x11-start
        # in vim for how this evil trickery works.
        ln -s "${WORK}"/src/{gvim,testvim}
-       testprog="../testvim"
+       testprog="${WORK}/src/testvim"
     else
-        testprog="../vim"
+        testprog="${WORK}/src/vim"
     fi
 
     # We've got to call make test from within testdir, since the Makefiles
@@ -335,7 +335,8 @@ vim_src_test() {
     cd "${WORK}"/src/testdir
 
     # We don't want to rebuild vim before running the tests
-    sed -i -e 's,: \$(VIMPROG),: ,' Makefile
+    sed -i -e 's,: \$(VIMPROG),: ,' Makefile \
+        || die "sedding out vimprog failed"
 
     # Don't try to do the additional GUI test
     emake -j1 VIMPROG=${testprog} TERM=dumb nongui
