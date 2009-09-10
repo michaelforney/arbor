@@ -19,6 +19,9 @@ MYOPTIONS="
     jpeg
     ssl
     tiff
+
+    jpeg? ( ( X fbcon ) [[ number-selected = at-least-one ]] )
+    tiff? ( ( X fbcon ) [[ number-selected = at-least-one ]] )
 "
 # sdl: support dropped until someone takes care
 
@@ -51,7 +54,9 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BRAILLE_HOWTO KEYS SITES )
 
 src_configure() {
     if option X || option fbcon; then
-        graphics="--enable-graphics"
+        graphics="--enable-graphics
+            $(option_with jpeg libjpeg)
+            $(option_with tiff libtiff)"
     else
         graphics="--disable-graphics"
     fi
@@ -63,9 +68,7 @@ src_configure() {
         $(option_with X x) \
         $(option_with fbcon fb) \
         $(option_with gpm) \
-        $(option_with jpeg libjpeg) \
-        $(option_with ssl) \
-        $(option_with tiff libtiff)
+        $(option_with ssl)
 }
 
 src_install() {
