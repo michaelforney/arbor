@@ -285,6 +285,14 @@ scm-svn_do_update() {
     fi
 }
 
+scm-svn_do_unpack() {
+    if [[ -z $(scm_get_var METADATA_UNNEEDED) ]]; then
+        scm_do_unpack
+        return ${?}
+    fi
+    scm-svn_svn export "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+}
+
 scm-svn_do_revision() {
     scm-svn_info 'Last Changed Rev'
 }
