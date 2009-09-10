@@ -1,4 +1,5 @@
 # Copyright 2008 Markus Rothe <markus@unixforces.net>
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -46,24 +47,21 @@ src_install() {
 
 pkg_pretend() {
     local x
-    if [[ ${SYMLINK_LIB} == "yes" ]]; then
-        for x in {,/usr,/usr/local}/lib; do
-            if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
-                die "${x}: Expected a symlink but found a directory"
-            fi
-        done
-    fi
+
+    for x in {,usr/,usr/local/}lib ; do
+        if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
+            die "${x}: Expected a symlink but found a directory"
+        fi
+    done
 }
 
 pkg_postinst() {
-    libdir=$(get_libdir)
+    local x ABI
 
-    local x
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
-    for x in bin boot dev{,/pts,/shm} etc{,/opt} home ${libdir} mnt \
-        opt proc sbin sys; do
-            create_root_owned_directory "${ROOT}${x}"
+    for x in bin boot dev{,/pts,/shm} etc{,/opt} home mnt opt proc sbin sys ; do
+        create_root_owned_directory "${ROOT}${x}"
     done
 
     # create device nodes
@@ -71,13 +69,20 @@ pkg_postinst() {
     create_device_node null    1 3 root:root 0666
 
     # /usr structure
-    for x in usr{,/bin,/include,/${libdir},/sbin,/share,/src}; do
+    for x in usr{,/bin,/include,/sbin,/share,/src}; do
         create_root_owned_directory "${ROOT}${x}"
     done
 
     # /usr/local structure
-    for x in usr/local{,/bin,/etc,/${libdir},/man,/sbin,/share{,/man}}; do
+    for x in usr/local{,/bin,/etc,/man,/sbin,/share{,/man}}; do
         create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # library directories
+    for ABI in ${ABIS_C} ; do
+        create_root_owned_directory "${ROOT}lib${ABI}"
+        create_root_owned_directory "${ROOT}usr/lib${ABI}"
+        create_root_owned_directory "${ROOT}usr/local/lib${ABI}"
     done
 
     # /var structure
@@ -91,15 +96,14 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
-    # create lib -> lib64 symlinks if needed
-    if [[ ${SYMLINK_LIB} == yes ]]; then
-        for x in {,usr/,usr/local/}lib; do
-            if [[ ! -e "${ROOT}${x}" ]]; then
-                echo "ln -s ${libdir} ${ROOT}${x}"
-                ln -s "${libdir}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
-            elif [[ ! -L "${ROOT}${x}" ]]; then
-                die "${x}: Expected a symlink but found a directory"
-            fi
-        done
-    fi
+    # create lib symlinks
+    for x in {,usr/,usr/local/}lib ; do
+        if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
+            die "${x}: Expected a symlink but found a directory"
+        fi
+
+        echo "ln -s ${LIBDIR} ${ROOT}${x}"
+        ln -s "${LIBDIR}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+    done
 }
+
