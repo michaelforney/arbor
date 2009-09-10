@@ -12,9 +12,14 @@ DOWNLOADS="http://links.twibright.com/download/${MY_PNV}.tar.bz2"
 
 SLOT="2"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="jpeg ssl tiff X"
-# directfb fbcon gpm svga png?
-
+MYOPTIONS="
+    X
+    fbcon [[ requires = gpm ]]
+    gpm
+    jpeg
+    ssl
+    tiff
+"
 # sdl: support dropped until someone takes care
 
 # Note: if X or fbcon usegflag are enabled, links will be built in graphic
@@ -22,33 +27,46 @@ MYOPTIONS="jpeg ssl tiff X"
 # (not required in text mode), so let's add libpng for X? and fbcon?
 
 # TODO:
-#   gpm? ( sys-libs/gpm )
-#   fbcon? ( >=media-libs/libpng-1.2.1
-#       >=media-libs/jpeg-6b
-#       sys-libs/gpm )
 #   directfb? ( dev-libs/DirectFB )
 #   sdl? ( >=media-libs/libsdl-1.2.0 )
-#   svga? ( >=media-libs/svgalib-1.4.3
-#   png? ( >=media-libs/libpng-1.2.1 )
+#   svga? ( >=media-libs/svgalib-1.4.3 )
 
 DEPENDENCIES="
 build+run:
-    ssl? ( dev-libs/openssl[>=0.9.6c] )
+    sys-libs/ncurses
     X? ( x11-libs/libXext
         media-libs/libpng[>=1.2.1]
         jpeg? ( media-libs/jpeg[>=6b] )
         tiff? ( media-libs/tiff[>=3.5.7] ) )
-    sys-libs/ncurses
+    fbcon? ( media-libs/libpng[>=1.2.1]
+        jpeg? ( media-libs/jpeg[>=6b] )
+        tiff? ( media-libs/tiff[>=3.5.7] ) )
+    gpm? ( sys-libs/gpm )
+    ssl? ( dev-libs/openssl[>=0.9.6c] )
 build:
     dev-util/pkg-config
 "
 
-# svga svgalib
-# directfb
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'jpeg libjpeg' 'tiff libtiff' ssl )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'X graphics' )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --without-fb --with-bzip2 --with-zlib )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BRAILLE_HOWTO KEYS SITES )
+
+src_configure() {
+    if option X || option fbcon; then
+        graphics="--enable-graphics"
+    else
+        graphics="--disable-graphics"
+    fi
+
+    econf \
+        ${graphics} \
+        --with-bzip2 \
+        --with-zlib \
+        $(option_with X x) \
+        $(option_with fbcon fb) \
+        $(option_with gpm) \
+        $(option_with jpeg libjpeg) \
+        $(option_with ssl) \
+        $(option_with tiff libtiff)
+}
 
 src_install() {
     default
