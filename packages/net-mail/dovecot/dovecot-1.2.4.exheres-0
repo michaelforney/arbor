@@ -91,12 +91,14 @@ src_install() {
     default
     keepdir /usr/$(get_libdir)/dovecot/auth
 
-    option berkdb || remove_example db
-    option ldap || remove_example ldap
+    if option doc ; then
+        option berkdb || remove_example db
+        option ldap || remove_example ldap
 
-    if ! option postgresql && ! option mysql && ! option sqlite ; then
-        remove_example dict-sql
-        remove_example sql
+        if ! option postgresql && ! option mysql && ! option sqlite ; then
+            remove_example dict-sql
+            remove_example sql
+        fi
     fi
 
 }
