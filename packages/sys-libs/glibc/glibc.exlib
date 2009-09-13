@@ -2,13 +2,13 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases src_unpack src_prepare src_configure src_compile src_install
+export_exlib_phases pkg_pretend src_unpack src_prepare src_configure src_compile src_install
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 myexparam libidn_uri="mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2"
 
-require multilib
+require flag-o-matic multilib
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
@@ -38,6 +38,18 @@ WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}/${PNV}"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
+
+glibc_pkg_pretend() {
+    local abi
+
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
+
+        if ! echo ${CFLAGS} | grep -q -- -march ; then
+            ewarn "-march setting not specified for target ABI: ${abi}; defaulting to native"
+        fi
+    done
+}
 
 glibc_src_unpack() {
     default
@@ -81,7 +93,11 @@ glibc_src_configure() {
         echo "libc_cv_c_cleanup=yes" >> config.cache
         echo "libc_cv_slibdir=/${LIBDIR}" >> config.cache
 
-        CC="${GCC} -m${ABI}" CFLAGS="${CFLAGS} -O2 $([[ ${ARCH} == amd64 && ${ABI} == 32 ]] && echo -march=$(echo ${CTARGET} | awk -F- '{ print $1 }'))" \
+        if ! echo ${CFLAGS} | grep -q -- -march ; then
+            append-flags -march=native
+        fi
+        append-flags -O2
+        CC="${GCC} -m${ABI}" \
         "${ECONF_SOURCE}/configure" --prefix=/usr \
                                     --sysconfdir=/etc \
                                     --localstatedir=/var/lib \
