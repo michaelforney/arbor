@@ -5,7 +5,7 @@
 
 require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib
 
-export_exlib_phases src_prepare src_install pkg_postinst
+export_exlib_phases src_prepare src_compile src_install pkg_postinst
 
 SUMMARY="Calibre is *the* eBook library management application."
 DESCRIPTION="
@@ -59,21 +59,29 @@ DEPENDENCIES="
 # <@kovid> patched ones are odf cssutils and pypdf
 # dev-python/pyPdf[>=1.12]
 
+WORK="${WORKBASE}"
+
 calibre_src_prepare() {
-    # Removing the post_install call. We'll do that stuff in src_install.
-    sed -i -e "/if 'install'/,/subprocess.check_call/d" \
-        setup.py || die "couldn't remove post_install call"
-    # For help2man to succeed, we need to tell it the path to the tools.
-    sed -i -e "s:\('help2man',\) \(prog\):\1 \'PYTHONPATH=\"${IMAGE}$(python_get_sitedir)\" \' + \'${IMAGE}usr/bin/\' + \2:" \
-        src/calibre/linux.py || die "sed'ing in the IMAGE path failed"
+    # Removing the post_install call. We run it separately.
+    sed -i -e "/self.run_postinstall()/d" setup/install.py \
+        || die "couldn't remove post_install call"
+
     distutils_src_prepare
 }
 
+calibre_src_compile() {
+    distutils_src_compile
+
+    # We don't want the gui compilation to be done in src_install so we do it here.
+    ${python} -B setup.py gui || die "gui compilation failed"
+}
+
 calibre_src_install() {
-    pushd "${WORK}"/build
-    ln -s lib\.* lib
-    popd
-    distutils_src_install
+    distutils_src_install \
+        --prefix="${IMAGE}" \
+        --bindir="${IMAGE}"/usr/bin \
+        --libdir="${IMAGE}"/usr/$(get_libdir)/calibre \
+        --sharedir="${IMAGE}"/usr/share/calibre
 
     # We have to create these directories before running the post_install
     # script because xdg-* needs to see them even if it doesn't use them...
@@ -85,42 +93,35 @@ calibre_src_install() {
         /usr/share/icons/hicolor \
         /usr/share/mime/packages
 
-    # We need to bypass the default kde-config output and force it to tell
-    # xdg-mime to use a different path to avoid sandbox violations.
-    # The versions we're echoing don't matter.
-    cat - > "${TEMP}/kde-config" <<EOF
-#!/bin/bash
-
-case \$1:\$2 in
-    --version:) echo -e "Qt: 3.3.8\nKDE: 3.5.10\nkde-config: 1.0" ;;
-    --path:mime) echo "${IMAGE}/usr/share/mimelnk/" ;;
-esac
-EOF
-    chmod +x "${TEMP}/kde-config"
-
     # Running the post_install script.
-    PATH="${TEMP}:${PATH}" \
     KDEDIRS="${IMAGE}/usr" \
     XDG_DATA_DIRS="${IMAGE}/usr/share" \
+    XDG_UTILS_INSTALL_MODE="system" \
     DESTDIR="${IMAGE}" \
-    PYTHONPATH="${WORK}/build/lib" \
-    python "${WORK}"/src/${PN}/linux.py \
-        --use-destdir --do-not-reload-udev-hal \
-        --group-file="${ROOT}"/etc/group --dont-check-root \
+    PYTHONPATH="${IMAGE}/usr/lib64/calibre" \
+    ${python} "${IMAGE}"/usr/bin/calibre_postinstall \
+        --use-destdir \
+        --group-file="${ROOT}"/etc/group \
+        --dont-check-root \
         || die "post-installation failed."
 
-    find "${IMAGE}"/etc -type d -empty -delete
+    # Fix paths.
+    for file in $(grep -lr "${IMAGE}" ${IMAGE}); do
+        sed -i -e "s:${IMAGE}::g" "${file}"
+    done
 
     # Removing junk.
     rm -r \
-        "${IMAGE}/"usr/share/applications/{defaults.list,mimeinfo.cache} \
-        "${IMAGE}/"usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
-        "${IMAGE}/"usr/share/{applnk,desktop-directories} \
+        "${IMAGE}"/usr/share/applications/{defaults.list,mimeinfo.cache} \
+        "${IMAGE}"/usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
+        "${IMAGE}"/usr/share/{applnk,desktop-directories} \
         || die "removing junk failed"
+    find "${IMAGE}"/ -type d -empty -delete
 }
 
 calibre_pkg_postinst() {
     freedesktop-mime_update_desktop_database
     freedesktop-mime_update_mime_database
-    distutils_pkg_postinst
+
+    python_mod_optimize /usr/lib64/calibre
 }

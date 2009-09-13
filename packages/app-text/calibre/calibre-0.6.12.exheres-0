@@ -1,0 +1,13 @@
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require calibre
+
+PLATFORMS="~amd64 ~x86"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PNV}-Make-root-a-synonym-for-prefix.patch
+    -p1 "${FILES}"/${PNV}-create-install-dirs.patch
+    -p1 "${FILES}"/${PNV}-Fix-calibre_postinstall-not-respecting-the-prefix.patch
+    -p1 "${FILES}"/${PNV}-Fix-memory-leak-when-queueing-books-for-bulk-convert.patch
+)
