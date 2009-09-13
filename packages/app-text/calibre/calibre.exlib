@@ -98,7 +98,7 @@ calibre_src_install() {
     XDG_DATA_DIRS="${IMAGE}/usr/share" \
     XDG_UTILS_INSTALL_MODE="system" \
     DESTDIR="${IMAGE}" \
-    PYTHONPATH="${IMAGE}/usr/lib64/calibre" \
+    PYTHONPATH="${IMAGE}/usr/$(get_libdir)/calibre" \
     ${python} "${IMAGE}"/usr/bin/calibre_postinstall \
         --use-destdir \
         --group-file="${ROOT}"/etc/group \
@@ -123,5 +123,5 @@ calibre_pkg_postinst() {
     freedesktop-mime_update_desktop_database
     freedesktop-mime_update_mime_database
 
-    python_mod_optimize /usr/lib64/calibre
+    python_mod_optimize /usr/$(get_libdir)/calibre
 }
