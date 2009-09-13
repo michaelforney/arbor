@@ -5,6 +5,8 @@
 
 require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] pam
 
+export_exlib_phases src_prepare src_install pkg_postinst
+
 SUMMARY="The Cyrus IMAP (Internet Message Access Protocol) server"
 DESCRIPTION="
 The Cyrus IMAP server is generally intended to be run on sealed systems, where
@@ -27,7 +29,6 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/imapd/ [[ lang = en ]]"
 
 LICENCES="cyrus-sasl"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     idled [[ description = [ idled listens for change notifications and alerts imapd/popd. If unset, polling is used instead. ] ]]
     kerberos
@@ -89,7 +90,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
-src_prepare() {
+cyrus-imapd_src_prepare() {
     default
 
     # Fix master(8)->cyrusmaster(8) manpage.
@@ -116,7 +117,7 @@ src_prepare() {
     AT_M4DIR="cmulocal" eautoreconf
 }
 
-src_install() {
+cyrus-imapd_src_install() {
     default
 
     # Link master to cyrusmaster (postfix has a master too)
@@ -170,7 +171,7 @@ src_install() {
     find "${IMAGE}"/usr -type d -empty -delete || die "removing empty dirs failed"
 }
 
-pkg_postinst() {
+cyrus-imapd_pkg_postinst() {
     if df -T /var/imap | grep -q ' ext2 ' ; then
         ebegin "Making /var/imap/user/* and /var/imap/quota/* synchronous."
         chattr +S /var/imap/{user,quota}{,/*}
