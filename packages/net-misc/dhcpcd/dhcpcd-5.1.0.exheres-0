@@ -14,11 +14,10 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_COMPILE_PARAMS=( "DBDIR=/var/lib/dhcpcd" "LIBEXECDIR=/$(get_libdir)/dhcpcd" )
-DEFAULT_SRC_INSTALL_PARAMS=(
-    DBDIR="/var/lib/dhcpcd"
-    LIBEXECDIR="/$(get_libdir)/dhcpcd"
-    HOOKSCRIPTS="50-yp.conf 50-ntp.conf 90-NetworkManager"
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--dbdir=/var/lib/dhcpcd"
+    "--libexecdir=/$(get_libdir)/dhcpcd"
+    "--with-hooks=yp ntp"
 )
 
 src_install() {
