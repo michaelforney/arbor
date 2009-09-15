@@ -1,0 +1,34 @@
+From 39da195a2390e190babed25fff1c51073583a12a Mon Sep 17 00:00:00 2001
+From: Roy Marples <roy@marples.name>
+Date: Thu, 3 Sep 2009 13:18:03 +0100
+Subject: [PATCH] Accept --bindir and --sbindir to modify SBINDIR - we don't use BINDIR.
+ --help now prints a simple message.
+
+---
+ configure |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/configure b/configure
+index 3b284a5..ec8176e 100755
+--- a/configure
++++ b/configure
+@@ -15,7 +15,7 @@ for x; do
+ 	--enable-fork) FORK=yes;;
+ 	--prefix) PREFIX=$var;;
+ 	--sysconfdir) SYSCONFDIR=$var;;
+-	--bindir) BINDIR=$var;;
++	--bindir|--sbindir) SBINDIR=$var;;
+ 	--libexecdir) LIBEXECDIR=$var;;
+ 	--statedir|--localstatedir) STATEDIR=$var;;
+ 	--dbdir) DBDIR=$var;;
+@@ -30,6 +30,7 @@ for x; do
+ 	--target) TARGET=$var;;
+ 	--libdir) LIBDIR=$var;;
+ 	--datadir|--infodir) ;; # ignore autotools
++	--help) echo "See the README file for available options"; exit 0;;
+ 	*) echo "$0: WARNING: unknown option $opt" >&2;;
+ 	esac
+ done
+-- 
+1.6.4.2
+
