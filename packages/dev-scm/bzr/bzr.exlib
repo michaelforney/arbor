@@ -3,7 +3,8 @@
 # Based in part upon 'bzr-1.10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require python [ python_dep=2.5 ] bash-completion distutils
+require python [ python_dep=2.5 ] bash-completion
+require distutils [ python_modules=[ bzrlib ] ]
 
 export_exlib_phases src_test_expensive src_install
 
@@ -38,8 +39,6 @@ DEPENDENCIES="
         dev-python/paramiko [[ description = [ Provides sftp support ] ]]
         dev-scm/bzrtools [[ description = [ Provides rsync support, and other useful extra functionality ] ]]
 "
-
-PYTHON_MODNAME="bzrlib"
 
 WORK="${WORKBASE}"/${PN}-${MY_PV}
 
