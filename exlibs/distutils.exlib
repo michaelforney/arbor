@@ -62,7 +62,7 @@ distutils_src_install() {
 # Generic pyc/pyo cleanup script. This function is exported.
 distutils_pkg_postrm() {
     local moddir pylibdir pymod
-    if [[ 0 == ${#PYTHON_MODULES[@]} ]]; then
+    if [[ -z ${PYTHON_MODULES[@]} ]]; then
         for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
             if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
                 PYTHON_MODULES=( ${PN} )
@@ -71,7 +71,7 @@ distutils_pkg_postrm() {
     fi
 
     ebegin "Performing python module cleanup..."
-    if [[ 0 < ${#PYTHON_MODULES[@]} ]]; then
+    if [[ -n ${PYTHON_MODULES[@]} ]]; then
         for pymod in "${PYTHON_MODULES[@]}"; do
             for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
                 if [[ -d "${pylibdir}"/site-packages/${pymod} ]]; then
@@ -90,7 +90,7 @@ distutils_pkg_postrm() {
 distutils_pkg_postinst() {
     local pylibdir pymod
 
-    if [[ 0 == ${#PYTHON_MODULES[@]} ]]; then
+    if [[ -z ${PYTHON_MODULES[@]} ]]; then
         for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
             if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
                 PYTHON_MODULES=( ${PN} )
