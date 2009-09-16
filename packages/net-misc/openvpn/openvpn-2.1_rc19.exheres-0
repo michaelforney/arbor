@@ -3,7 +3,7 @@
 # Based in part upon 'openvpn-2.1_rc9.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata multilib
+require common-metadata multilib toolchain-funcs
 
 UPSTREAM_CHANGELOG="${UPSTREAM_DOCUMENTATION_BASE}/change-log/changelog-21.html"
 UPSTREAM_RELEASE_NOTES="${UPSTREAM_DOCUMENTATION_BASE}/release-notes.html"
@@ -12,12 +12,12 @@ UPSTREAM_DOCUMENTATION="${UPSTREAM_DOCUMENTATION_BASE}/manuals/${PN}-21.html"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="examples iproute2 pam passwordsave pkcs11 threads"
+MYOPTIONS="examples iproute2 lzo pam passwordsave pkcs11 threads"
 
 DEPENDENCIES="
     build+run:
-        app-arch/lzo[>=2.02]
         dev-libs/openssl[>=0.9.8]
+        lzo? ( app-arch/lzo[>=2.02] )
         pam? ( sys-libs/pam[>=1.0.1] )
         pkcs11? ( dev-libs/pkcs11-helper[>=1.06] )
     run:
@@ -28,6 +28,10 @@ DEPENDENCIES="
         user/openvpn
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-2.1_rc15-plugin-makefiles.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--enable-ssl"
     "--enable-crypto"
@@ -37,6 +41,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "passwordsave password-save"
     "threads pthread"
     iproute2
+    lzo
     pkcs11
 )
 
@@ -45,6 +50,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 )
 
 compile_plugin() {
+    tc-export CC
     local plugdir=${1:-"plugin does not exist"}
     if pushd plugin/"${plugdir}" >/dev/null 2>&1 ; then
         emake || die "making plugin ${plugdir} failed"
