@@ -14,8 +14,12 @@ myexparam python_dep=
 myexparam -b has_lib=true
 myexparam -b has_bin=false
 
+exparam -v pydep python_dep
+exparam -v haslib has_lib
+exparam -v hasbin has_bin
+
 require multilib
-require python [ python_dep=$(exparam python_dep) has_lib=$(exparam has_lib) has_bin=$(exparam has_bin) ]
+require python [ python_dep=${pydep} has_lib=${haslib} has_bin=${hasbin} ]
 
 export_exlib_phases src_prepare src_compile src_install pkg_postinst pkg_postrm
 
