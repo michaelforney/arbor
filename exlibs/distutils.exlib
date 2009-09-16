@@ -10,16 +10,18 @@
 # It inherits python, multilib.
 
 myexparam python_dep=
+myexparam python_modules[]
 
 myexparam -b has_lib=true
 myexparam -b has_bin=false
 
-exparam -v pydep python_dep
-exparam -v haslib has_lib
-exparam -v hasbin has_bin
+exparam -v PYTHON_DEP python_dep
+exparam -v PYTHON_MODULES python_modules[@]
+exparam -v PYTHON_HAS_LIB has_lib
+exparam -v PYTHON_HAS_BIN has_bin
 
 require multilib
-require python [ python_dep=${pydep} has_lib=${haslib} has_bin=${hasbin} ]
+require python [ python_dep=${PYTHON_DEP} has_lib=${PYTHON_HAS_LIB} has_bin=${PYTHON_HAS_BIN} ]
 
 export_exlib_phases src_prepare src_compile src_install pkg_postinst pkg_postrm
 
@@ -60,20 +62,20 @@ distutils_src_install() {
 # Generic pyc/pyo cleanup script. This function is exported.
 distutils_pkg_postrm() {
     local moddir pylibdir pymod
-    if [[ -z "${PYTHON_MODNAME}" ]]; then
+    if [[ 0 == ${#PYTHON_MODULES[@]} ]]; then
         for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
             if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
-                PYTHON_MODNAME=${PN}
+                PYTHON_MODULES=( ${PN} )
             fi
         done
     fi
 
-    ebegin "Performing Python Module Cleanup .."
-    if [[ -n "${PYTHON_MODNAME}" ]]; then
-        for pymod in ${PYTHON_MODNAME}; do
+    ebegin "Performing python module cleanup..."
+    if [[ 0 < ${#PYTHON_MODULES[@]} ]]; then
+        for pymod in "${PYTHON_MODULES[@]}"; do
             for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
                 if [[ -d "${pylibdir}"/site-packages/${pymod} ]]; then
-                    python_mod_cleanup "${pylibdir#${ROOT}}"/site-packages/${pymod}
+                    python_mod_cleanup "${pylibdir#${ROOT}}"/site-packages/"${pymod}"
                 fi
             done
         done
@@ -87,18 +89,18 @@ distutils_pkg_postrm() {
 # installs things in another directory. This function is exported
 distutils_pkg_postinst() {
     local pylibdir pymod
-    if [[ -z "${PYTHON_MODNAME}" ]]; then
+
+    if [[ 0 == ${#PYTHON_MODULES[@]} ]]; then
         for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
             if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
-                PYTHON_MODNAME=${PN}
+                PYTHON_MODULES=( ${PN} )
             fi
         done
     fi
 
-    python_version
-    for pymod in ${PYTHON_MODNAME}; do
-        python_mod_optimize \
-            $(python_get_sitedir)/${pymod}
+    for pymod in "${PYTHON_MODULES[@]}"; do
+        einfo "Optimizing bytecode for module ${pymod}"
+        python_mod_optimize $(python_get_sitedir)/"${pymod}"
     done
 }
 
