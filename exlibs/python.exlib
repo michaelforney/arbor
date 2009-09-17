@@ -173,13 +173,28 @@ python_mod_compile() {
 }
 
 #
-# name:   python_mod_optimize
-# desc:   if no arguments supplied, it will recompile all modules under
-#     sys.path (eg. /usr/lib/python2.3, /usr/lib/python2.3/site-packages/ ..)
-#     no recursively
+# name:   python_mod_optimize [-l] [-f] [-q] [-d destdir] [-x regexp]
+#                             [file ...] [directory ...]
+# desc:   compiles the given files and directories, in the latter case
+#     recursing into subdirectories (unless the -l option is present)
 #
-#     if supplied with arguments, it will recompile all modules recursively
-#     in the supplied directory
+#     if no file or directory arguments are supplied, (re)compiles all modules
+#     on sys.path (/usr/lib/python2.6, /usr/lib/python2.6/site-packages, ...),
+#     without recursing into subdirectories
+#
+#     the following options are passed to compileall.py (they are ignored when
+#     the only arguments supplied are files):
+#         -l
+#             don't recurse into subdirectories
+#         -f
+#             force rebuild even if timestamps are up-to-date
+#         -q
+#             quiet operation
+#         -d destdir
+#             directory name to use in error messages if no directory
+#             arguments are given (default is sys.path with -l assumed)
+#         -x regexp
+#             skip files whose full path matches the given regular expression
 # exam:
 #     python_mod_optimize /usr/share/codegen
 #
@@ -234,15 +249,13 @@ python_mod_optimize() {
     # set additional opts
     myopts+=(-q)
 
-    ebegin "Byte compiling python modules for python-${PYVER} .."
-    if ((${#mydirs[@]})); then
-        python${PYVER} \
-            "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
-            "${myopts[@]}" "${mydirs[@]}"
-        python${PYVER} -O \
-            "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
-            "${myopts[@]}" "${mydirs[@]}"
-    fi
+    ebegin "Byte compiling python modules for python-${PYVER}"
+    python${PYVER} \
+        "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
+        "${myopts[@]}" "${mydirs[@]}"
+    python${PYVER} -O \
+        "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
+        "${myopts[@]}" "${mydirs[@]}"
 
     if ((${#myfiles[@]})); then
         python_mod_compile "${myfiles[@]}"
@@ -280,7 +293,7 @@ python_mod_cleanup() {
     fi
 
     for path in "${SEARCH_PATH[@]}"; do
-        einfo "Cleaning orphaned Python bytecode from ${path} .."
+        einfo "Cleaning orphaned Python bytecode from ${path} ..."
         while read -rd ''; do
             src_py="${REPLY%[co]}"
             [[ -f "${src_py}" ]] && continue
