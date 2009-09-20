@@ -13,11 +13,12 @@ start() {
 }
 
 stop() {
-    ebegin "Unloading fuse module"
-    modprobe -r fuse
-    eend $?
-
     ebegin "Unmounting fuse control filesystem"
     umount /sys/fs/fuse/connections
     eend $?
+
+    ebegin "Unloading fuse module"
+    modprobe -r fuse
+    eend $?
 }
+
