@@ -146,10 +146,11 @@ src_install() {
         find . -not -path './usr/include/*' -and \
                -not -path './usr/lib64/libstdc++.so.*' -and \
                -not -path './usr/lib64/libgcc_s.so*' -type f -delete || die "couldnt remove unwanted files"
-        find . -type d -empty -delete || die "couldn't remove empty directories"
 
         cd "${WORK}/compiler" || die "failed entering compiler"
         default
+
+        find "${IMAGE}" -type d -empty -delete || die "couldn't remove empty directories"
     else
         default
 
