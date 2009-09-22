@@ -232,6 +232,15 @@ src_install() {
         alternatives+=( /${x} ${bn}-${SLOT}.mo )
     done
 
+    # ada
+    if option ada; then
+        for x in gnat gnatbind gnatchop gnatclean gnatfind gnatkr gnatlink gnatls gnatmake gnatname gnatprep gnatxref; do
+            echo mv usr/bin/${x} usr/bin/${x}-${SLOT}
+            mv usr/bin/${x} usr/bin/${x}-${SLOT} || die "mv /usr/bin/${x} failed"
+            alternatives+=( /usr/bin/${x} ${x}-${SLOT} )
+        done
+    fi
+
     # java
     if ever at_least 4.3 && option java; then
         for x in usr/${libdir}/security/classpath.security usr/share/java/ecj.jar; do
