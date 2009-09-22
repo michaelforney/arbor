@@ -8,7 +8,7 @@ DOWNLOADS="mirror://apache/apr/${PNV}.tar.bz2"
 LICENCES="Apache-2.0"
 SLOT="1"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="berkdb gdbm sqlite"
+MYOPTIONS="berkdb gdbm ldap sqlite"
 
 DEPENDENCIES="
     build+run:
@@ -17,6 +17,7 @@ DEPENDENCIES="
         net-misc/neon
         berkdb? ( sys-libs/db:= )
         gdbm? ( sys-libs/gdbm )
+        ldap? ( net-directory/openldap )
         sqlite? ( dev-db/sqlite:3 )
 "
 
@@ -24,6 +25,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --with-apr=/usr --with-expat=/usr )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "berkdb berkeley-db"
     gdbm
+    ldap
     "sqlite sqlite3"
 )
 
