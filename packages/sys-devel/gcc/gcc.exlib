@@ -45,7 +45,7 @@ if ever at_least 4.3; then
         build+run:
             dev-libs/gmp[>=4.1]
             dev-libs/mpfr[>=2.3]
-            ada? ( dev-lang/gnat:${SLOT} )"
+            ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
 else
     DEPENDENCIES+="
         build:
@@ -53,7 +53,7 @@ else
         build+run:
             fortran? ( dev-libs/gmp[>=4.1]
                        dev-libs/mpfr[>=2.3] )
-            ada? ( dev-lang/gnat:${SLOT} )"
+            ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
 fi
 
 if ever at_least 4.4.0-r1; then
