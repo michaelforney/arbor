@@ -1,0 +1,29 @@
+Source:   http://patchwork.kernel.org/patch/37281/
+Upstream: Yes
+Reason:   glibc and kernel headers both export scsi.h, mismatches cause borkage
+
+diff --git a/include/scsi/scsi.h b/include/scsi/scsi.h
+index 084478e..689570e 100644
+--- a/include/scsi/scsi.h
++++ b/include/scsi/scsi.h
+@@ -156,7 +156,9 @@ scsi_varlen_cdb_length(const void *hdr)
+ 	return ((struct scsi_varlen_cdb_hdr *)hdr)->additional_cdb_length + 8;
+ }
+ 
++#ifdef __KERNEL__
+ extern const unsigned char scsi_command_size_tbl[8];
++#endif
+ #define COMMAND_SIZE(opcode) scsi_command_size_tbl[((opcode) >> 5) & 7]
+ 
+ static inline unsigned
+@@ -281,8 +283,10 @@ enum scsi_protocol {
+ 	SCSI_PROTOCOL_UNSPEC = 0xf, /* No specific protocol */
+ };
+ 
++#ifdef __KERNEL__
+ /* Returns a human-readable name for the device */
+ extern const char * scsi_device_type(unsigned type);
++#endif
+ 
+ /*
+  * standard mode-select header prepended to all mode-select commands
