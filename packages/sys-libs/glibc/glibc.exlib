@@ -2,6 +2,8 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+export_exlib_phases src_unpack src_prepare src_configure src_compile src_install
+
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 myexparam libidn_uri="mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2"
@@ -28,7 +30,7 @@ DEPENDENCIES="
         sys-apps/sed
         sys-apps/texinfo
         sys-kernel/linux-headers
-        sys-devel/gcc[bootstrap=]
+        bootstrap? ( sys-devel/bootstrap-gcc )
     run:
         sys-libs/timezone-data"
 
@@ -37,7 +39,7 @@ ECONF_SOURCE="${WORKBASE}/${PNV}"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
-src_unpack() {
+glibc_src_unpack() {
     default
 
     if [[ ${PV/_p*} != ${PV} ]] ; then
@@ -56,15 +58,19 @@ src_unpack() {
     mkdir "${WORK}" || die "mkdir ${WORK} failed"
 }
 
-src_prepare() {
+glibc_src_prepare() {
     if option bootstrap ; then
         sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig" || die "failed to remove gcc_eh linkage"
+        export PATH="/usr/bootstrap-gcc/bin:$PATH"
+        export GCC="bootstrap-gcc"
+    else
+        export GCC="gcc"
     fi
 
     default
 }
 
-src_configure() {
+glibc_src_configure() {
     for ABI in ${ABIS_C} ; do
         switch_abi_env C ${ABI}
 
@@ -75,7 +81,7 @@ src_configure() {
         echo "libc_cv_c_cleanup=yes" >> config.cache
         echo "libc_cv_slibdir=/${LIBDIR}" >> config.cache
 
-        CC="gcc -m${ABI}" CFLAGS="${CFLAGS} -O2 $([[ ${ARCH} == amd64 && ${ABI} == 32 ]] && echo -march=$(echo ${CTARGET} | awk -F- '{ print $1 }'))" \
+        CC="${GCC} -m${ABI}" CFLAGS="${CFLAGS} -O2 $([[ ${ARCH} == amd64 && ${ABI} == 32 ]] && echo -march=$(echo ${CTARGET} | awk -F- '{ print $1 }'))" \
         "${ECONF_SOURCE}/configure" --prefix=/usr \
                                     --sysconfdir=/etc \
                                     --localstatedir=/var/lib \
@@ -83,16 +89,16 @@ src_configure() {
                                     --mandir=/usr/share/man \
                                     --infodir=/usr/share/info \
                                     --datadir=/usr/share \
+                                    --cache-file=config.cache \
                                     --enable-kernel=2.6.22 \
-                                    '--cache-file=config.cache' \
-                                    '--with-headers=/usr/include' \
-                                    '--with-add-ons' '--with-crypt' \
-                                    '--without-gd' '--without-cvs' \
+                                    --with-headers=/usr/include \
+                                    --with-add-ons --with-crypt \
+                                    --without-gd --without-cvs \
                                     ${CTARGET} || die "configure failed"
     done
 }
 
-src_compile() {
+glibc_src_compile() {
     for ABI in ${ABIS_C} ; do
         switch_abi_env C ${ABI}
 
@@ -102,7 +108,7 @@ src_compile() {
     done
 }
 
-src_install() {
+glibc_src_install() {
     export LANGUAGE=C
 
     # Note: the default abi must always be staged last.  We do this as the last

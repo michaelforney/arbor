@@ -17,8 +17,6 @@ src_prepare() {
     expatch -p0 "${FILES}/${PNV}-disable-tst-mutex5.patch"
     expatch -p1 "${FILES}/${PNV}-amd64-memchr.patch"
 
-    if option bootstrap ; then
-        sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig" || die "failed to remove gcc_eh linkage"
-    fi
+    glibc_src_prepare
 }
 
