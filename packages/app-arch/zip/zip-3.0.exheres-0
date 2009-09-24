@@ -1,13 +1,9 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-MY_PV="$(ever delete_all ${PV})"
-
 SUMMARY="Zip is a compression and file packaging/archive utility."
 HOMEPAGE="http://www.info-zip.org/Zip.html"
-# ftp://ftp.info-zip.org/ has been dead since July. ftp.tex.ac.uk works.
-#DOWNLOADS="ftp://ftp.info-zip.org/pub/infozip/src/zip${MY_PV}.tar.gz"
-DOWNLOADS="ftp://ftp.tex.ac.uk/tex-archive/tools/zip/info-zip/src/zip${MY_PV}.tar.gz"
+DOWNLOADS="mirror://sourceforge/infozip/${PN}$(ever delete_all).tar.gz"
 
 LICENCES="Info-ZIP"
 SLOT="0"
@@ -17,6 +13,8 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 ECONF_SOURCE="${WORK}/unix/"
+
+WORK="${WORK%/*}/${PN}$(ever delete_all)"
 
 src_prepare() {
     sed -i \
