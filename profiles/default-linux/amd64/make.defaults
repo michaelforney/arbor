@@ -3,11 +3,20 @@
 # $Header: /var/cvsroot/gentoo-x86/profiles/default-linux/amd64/make.defaults,v 1.26 2007/05/15 15:52:29 welp Exp $
 
 ARCH="amd64"
-ACCEPT_KEYWORDS="${ARCH}"
 
 CHOST="x86_64-pc-linux-gnu"
 CFLAGS="-O2 -pipe"
-CXXFLAGS="${CFLAGS}"
+CXXFLAGS="-O2 -pipe"
+LIBDIR="lib64"
+
+ABIS_C="64"
+DEFAULT_ABI_C="64"
+
+CHOST_64="x86_64-pc-linux-gnu"
+CTARGET_64="x86_64-pc-linux-gnu"
+CFLAGS_64="-pipe -O2"
+CXXFLAGS_64="-pipe -O2"
+LIBDIR_64="lib64"
 
 PLATFORM="amd64"
 
@@ -18,32 +27,6 @@ USE="berkdb crypt ipv6 ncurses nls pam perl readline ssl tcpd zlib"
 # They are masked, but we can enable them anyway for those who have 
 # >=portage-2.1.2_pre3-r4
 USE="${USE} mmx sse sse2"
-
-# 2006/06/07 - Danny van Dyk <kugelfang@gentoo.org>
-# Multilib settings for all amd64 subprofiles.
-MULTILIB_ABIS="amd64 x86"
-DEFAULT_ABI="amd64"
-
-# 64bit specific settings.
-CHOST_amd64="x86_64-pc-linux-gnu"
-CDEFINE_amd64="__x86_64__"
-LIBDIR_amd64="lib64"
-
-# 32bit specific settings.
-CFLAGS_x86="-m32 -L/emul/linux/x86/lib -L/emul/linux/x86/usr/lib"
-LDFLAGS_x86="-m elf_i386 -L/emul/linux/x86/lib -L/emul/linux/x86/usr/lib"
-ASFLAGS_x86="--32"
-CHOST_x86="i686-pc-linux-gnu"
-CDEFINE_x86="__i386__"
-LIBDIR_x86="lib32"
-
-# FEATURES="multilib-strict" specific settings.
-MULTILIB_STRICT_DIRS="/lib /usr/lib /usr/kde/*/lib /usr/qt/*/lib /usr/X11R6/lib"
-MULTILIB_STRICT_DENY="64-bit.*shared object"
-MULTILIB_STRICT_EXEMPT="(perl5|gcc|gcc-lib|binutils|eclipse-3|debug|portage|ROX-CLib)"
-
-# Let sys-apps/baselayout create the lib symlink.
-SYMLINK_LIB="yes"
 
 # 2006/08/18 - Donnie Berkholz <dberkholz@gentoo.org>
 # Defaults for video drivers
