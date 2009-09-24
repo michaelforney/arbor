@@ -1,7 +1,7 @@
-# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
-# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
-# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008-2009 Ingmar Vanhassel
+# Copyright 2008-2009 Bo Ørsted Andresen
+# Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib versionator alternatives gnu
@@ -12,7 +12,7 @@ DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="$(ever range 1-2)"
 
-MYOPTIONS="ada bootstrap doc fortran objc obj-c++ nls propolice"
+MYOPTIONS="ada doc fortran objc obj-c++ nls propolice"
 
 REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
@@ -62,14 +62,6 @@ ECONF_SOURCE="${WORKBASE}"/${PNV}
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
-pkg_pretend() {
-    if option bootstrap && [[ ! -e /usr/include/gnu/stubs-32.h ]] ; then
-        ewarn "stubs-32.h was not found.  Please create an empty file at"
-        ewarn "${ROOT}usr/include/gnu/stubs-32.h."
-        die "no stubs-32.h"
-    fi
-}
-
 src_unpack() {
     if ever at_least 4.3 && option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
@@ -83,208 +75,163 @@ src_unpack() {
 
 src_prepare() {
     cd "${WORKBASE}/${PNV}" || die "entering ${WORKBASE}/${PNV} failed"
-    expatch "${FILES}/gcc-4.4.1-multilib-spec.patch"
+    expatch "${FILES}/${PNV}-multilib-spec.patch"
 
     cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
     default
 }
 
 src_configure() {
-    if option bootstrap ; then
-        mkdir "${WORK}/compiler" || die "failed creating compiler"
-        cd "${WORK}/compiler" || die "failed entering compiler"
+    local i LANGS="c++"
+    for i in ada fortran objc obj-c++; do
+        option ${i} && LANGS+=",${i}"
+    done
+    ever at_least 4.3 && option java && LANGS+=",java"
 
-        econf --without-headers --with-newlib --disable-shared --disable-nls \
-              --disable-decimal-float --disable-libgomp --disable-libmudflap \
-              --disable-libssp --disable-threads '--enable-languages=c' \
-              '--enable-multilib' --libdir=/usr/${LIBDIR}
-
-        mkdir "${WORK}/libstdcxx" || die "failed creating libstdcxx"
-        cd "${WORK}/libstdcxx" || die "failed entering libstdcxx"
-
-        econf --disable-multilib '--enable-languages=c++' '--enable-libstdcxx-pch'
-    else
-        local i LANGS="c++"
-        for i in ada fortran objc obj-c++; do
-            option ${i} && LANGS+=",${i}"
-        done
-        ever at_least 4.3 && option java && LANGS+=",java"
-
-        econf --libdir=/usr/${LIBDIR} \
-              --enable-languages="${LANGS}" \
-              --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
-              --program-suffix=-${SLOT} \
-              $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
-              $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
-              $(option_enable nls) \
-              $(option_enable propolice libssp)
-    fi
-}
-
-src_compile() {
-    if option bootstrap ; then
-        cd "${WORK}/compiler" || die "failed entering compiler"
-        default
-
-        cd "${WORK}/libstdcxx" || die "failed entering libstdcxx"
-        default
-    else
-        default
-    fi
+    econf \
+        --libdir=/usr/${LIBDIR} \
+        --enable-languages="${LANGS}" \
+        --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
+        --program-suffix=-${SLOT} \
+        $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
+        $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
+        $(option_enable nls) \
+        $(option_enable propolice libssp)
 }
 
 src_install() {
-    if option bootstrap ; then
-        # install libstdcxx first to allow us to cleanup after it and ensure
-        # that only the libraries we care about are installed
-        cd "${WORK}/libstdcxx" || die "failed entering libstdcxx"
-        emake DESTDIR="${IMAGE}" install-target-libstdc++-v3 install-target-libgcc
+    default
 
-        # We only care about the headers, and libstdc++, libgcc_s
-        cd "${IMAGE}" || die "failed entering ${IMAGE}"
+    # Precompiled headers, disable for cross-compiling
+    insinto /usr/include/c++/${PV}/${CHOST}/bits
+    doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
-        find . -not -path './usr/include/*' -and \
-               -not -path './usr/lib64/libstdc++.so.*' -and \
-               -not -path './usr/lib64/libgcc_s.so*' -type f -delete || die "couldnt remove unwanted files"
-
-        cd "${WORK}/compiler" || die "failed entering compiler"
-        default
-
-        find "${IMAGE}" -type d -empty -delete || die "couldn't remove empty directories"
-    else
-        default
-
-        # Precompiled headers, disable for cross-compiling
-        insinto /usr/include/c++/${PV}/${CHOST}/bits
-        doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
-
-        if option doc; then
-            insinto /usr/share/doc/${PNVR}/html
-            if ever at_least 4.3; then
-                pushd "${WORK}"/${CHOST}/libstdc++-v3/doc || die "Cound not enter libstdc++-v3/doc"
-                emake doc-html-doxygen
-                doins -r doxygen/html/*
-            else
-                pushd "${WORK}"/${CHOST}/libstdc++-v3 || die "Cound not enter libstdc++-v3"
-                emake doxygen
-                doins -r docs/doxygen/html_user/*
-            fi
-            popd
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/html
+        if ever at_least 4.3; then
+            pushd "${WORK}"/${CHOST}/libstdc++-v3/doc || die "Cound not enter libstdc++-v3/doc"
+            emake doc-html-doxygen
+            doins -r doxygen/html/*
+        else
+            pushd "${WORK}"/${CHOST}/libstdc++-v3 || die "Cound not enter libstdc++-v3"
+            emake doxygen
+            doins -r docs/doxygen/html_user/*
         fi
+        popd
+    fi
 
-        # nuke empty dir if applicable
-        if option !fortran && ever at_least 4.2; then
-            rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/finclude || die "rmdir finclude failed"
+    # nuke empty dir if applicable
+    if option !fortran && ever at_least 4.2; then
+        rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/finclude || die "rmdir finclude failed"
+    fi
+
+    ### slots handling
+    pushd "${IMAGE}" || die "Could not enter IMAGE"
+
+    local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
+
+    # binaries - slotted properly by upstream, manage with alternatives
+    for x in usr/bin/*-${SLOT}; do
+        bn=$(basename "${x}" -${SLOT})
+        alternatives+=( /usr/bin/${bn} ${bn}-${SLOT} )
+    done
+    alternatives+=( /usr/bin/cc gcc )
+
+    # libraries
+    for x in usr/${LIBDIR}/*.* usr/${LIBDIR}/debug/usr/${LIBDIR}/*.*; do
+        if [[ -L ${x} ]]; then
+            # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
+            echo rm "${x}"
+            rm "${x}" || die "rm /${x} failed"
+            removed+=( "/${x}" ) # just a sanity check
+        elif [[ -f ${x} ]]; then
+            bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
+            ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
+            case "${bn}" in
+                # always use newest available so version and create so symlinks
+                libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
+                    # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
+                    # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
+                    # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
+                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                    so_symlinks+=( "${x}" )
+                    ;;
+                # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
+                libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
+                    # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                    so_symlinks+=( "${x}" )
+                    ;;
+                # always use newest available version
+                *.a|*.la|*.spec|*.security|*.properties)
+                    # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
+                    # symlinks+=( usr/lib/libstdc++-4.3.la )
+                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                    ;;
+            esac
         fi
+    done
 
-        ### slots handling
-        pushd "${IMAGE}" || die "Could not enter IMAGE"
+    # info pages
+    for x in usr/share/info/*.info; do
+        bn=$(basename "${x}" .info)
+        mv usr/share/info/${bn}{,-${SLOT}}.info || die "mv /${x} failed"
+        alternatives+=( /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
+    done
 
-        local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
+    # man pages
+    for x in usr/share/man/man1/*-${SLOT}.1; do
+        bn=$(basename "${x}" -${SLOT}.1)
+        alternatives+=( /usr/share/man/man1/${bn}.1 ${bn}-${SLOT}.1 )
+    done
+    for x in usr/share/man/man7/*; do
+        bn=$(basename "${x}" .7)
+        mv "${x%.7}"{,-${SLOT}}.7 || die "mv /${x} failed"
+        alternatives+=( /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
+    done
 
-        # binaries - slotted properly by upstream, manage with alternatives
-        for x in usr/bin/*-${SLOT}; do
-            bn=$(basename "${x}" -${SLOT})
-            alternatives+=( /usr/bin/${bn} ${bn}-${SLOT} )
+    # locales
+    if option nls; then
+        for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
+            bn=$(basename "${x}" .mo)
+            mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
+            alternatives+=( /${x} ${bn}-${SLOT}.mo )
         done
-        alternatives+=( /usr/bin/cc gcc )
+    fi
 
-        # libraries
-        for x in usr/${LIBDIR}/*.* usr/${LIBDIR}/debug/usr/${LIBDIR}/*.*; do
-            if [[ -L ${x} ]]; then
-                # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
-                echo rm "${x}"
-                rm "${x}" || die "rm /${x} failed"
-                removed+=( "/${x}" ) # just a sanity check
-            elif [[ -f ${x} ]]; then
-                bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
-                ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
-                case "${bn}" in
-                    # always use newest available so version and create so symlinks
-                    libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
-                        # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
-                        # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
-                        # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
-                        echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                        mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-                        symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
-                        so_symlinks+=( "${x}" )
-                        ;;
-                    # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
-                    libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
-                        # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
-                        so_symlinks+=( "${x}" )
-                        ;;
-                    # always use newest available version
-                    *.a|*.la|*.spec|*.security|*.properties)
-                        # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
-                        # symlinks+=( usr/lib/libstdc++-4.3.la )
-                        echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                        mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-                        symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
-                        ;;
-                esac
-            fi
-        done
-
-        # info pages
-        for x in usr/share/info/*.info; do
-            bn=$(basename "${x}" .info)
-            mv usr/share/info/${bn}{,-${SLOT}}.info || die "mv /${x} failed"
-            alternatives+=( /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
-        done
-
-        # man pages
-        for x in usr/share/man/man1/*-${SLOT}.1; do
-            bn=$(basename "${x}" -${SLOT}.1)
-            alternatives+=( /usr/share/man/man1/${bn}.1 ${bn}-${SLOT}.1 )
-        done
-        for x in usr/share/man/man7/*; do
-            bn=$(basename "${x}" .7)
-            mv "${x%.7}"{,-${SLOT}}.7 || die "mv /${x} failed"
-            alternatives+=( /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
-        done
-
-        # locales
-        if option nls; then
-            for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
-                bn=$(basename "${x}" .mo)
-                mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
-                alternatives+=( /${x} ${bn}-${SLOT}.mo )
-            done
-        fi
-
-        # java
-        if ever at_least 4.3 && option java; then
+    # java
+    if ever at_least 4.3 && option java; then
 
         hereenvd 40gcj <<EOF
-    JAVAC=/usr/bin/gcj
-    JAVACMD=/usr/bin/gij
+JAVAC=/usr/bin/gcj
+JAVACMD=/usr/bin/gij
 EOF
 
-            for x in usr/${LIBDIR}/security/classpath.security usr/share/java/ecj.jar; do
-                bn=$(basename "${x}")
-                ext=${bn#*.}
-                echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-                alternatives+=( /${x} ${bn%.${ext}}-${SLOT}.${ext} )
-            done
-            alternatives+=( /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
-            alternatives+=( /usr/bin/java gij-${SLOT} )
-        fi
+        for x in usr/${LIBDIR}/security/classpath.security usr/share/java/ecj.jar; do
+            bn=$(basename "${x}")
+            ext=${bn#*.}
+            echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+            mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+            alternatives+=( /${x} ${bn%.${ext}}-${SLOT}.${ext} )
+        done
+        alternatives+=( /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
+        alternatives+=( /usr/bin/java gij-${SLOT} )
+    fi
 
-        alternatives_for "${alternatives[@]}"
-        popd
+    alternatives_for "${alternatives[@]}"
+    popd
 
-        # fix libstdc++.so symlink
-        mkdir "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
-        cp /usr/${LIBDIR}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
-        cp "${IMAGE}"/usr/${LIBDIR}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
-        fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
+    # fix libstdc++.so symlink
+    mkdir "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
+    cp /usr/${LIBDIR}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
+    cp "${IMAGE}"/usr/${LIBDIR}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
+    fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
 
-        if [[ -d "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/include-fixed ]]; then
-            find "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
-        fi
+    if [[ -d "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/include-fixed ]]; then
+        find "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
     fi
 }
 
@@ -299,8 +246,8 @@ pkg_preinst() {
     done
 
     # ease migration to proper slotting (i.e. prevent paludis from breaking before pkg_postinst, which would fix it)
-    if [[ -f ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 ]]; then
-        touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 || die "touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 failed"
+    if [[ -f ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 ]]; then
+        touch ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 || die "touch ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 failed"
     fi
 }
 
@@ -369,7 +316,7 @@ pkg_prerm() {
     alternatives_pkg_prerm
 
     # make sure libstdc++.so* symlinks are ok
-    fix_libstdcplusplus /usr/${libdir} "${ROOT}"
+    fix_libstdcplusplus /usr/${LIBDIR} "${ROOT}"
 }
 
 pkg_postrm() {
