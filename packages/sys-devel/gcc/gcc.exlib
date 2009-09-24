@@ -4,7 +4,7 @@
 # Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib versionator alternatives gnu
+require toolchain-funcs multilib versionator alternatives gnu
 
 SUMMARY="GNU Compiler Collection"
 DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
@@ -74,8 +74,14 @@ src_unpack() {
 }
 
 src_prepare() {
-    cd "${WORKBASE}/${PNV}" || die "entering ${WORKBASE}/${PNV} failed"
-    expatch "${FILES}/${PNV}-multilib-spec.patch"
+    local supported_abis=( ${ABIS_C} )
+    if [[ ${#supported_abis[@]} -gt 1 ]]; then
+        cd "${WORKBASE}/${PNV}" || die "entering ${WORKBASE}/${PNV} failed"
+        expatch "${FILES}/${PNV}-multilib-spec.patch"
+        multilib=--enable-multilib
+    else
+        multilib=--disable-multilib
+    fi
 
     cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
     default
@@ -89,6 +95,7 @@ src_configure() {
     ever at_least 4.3 && option java && LANGS+=",java"
 
     econf \
+        ${multilib} \
         --libdir=/usr/${LIBDIR} \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
