@@ -1,5 +1,8 @@
 # Copyright 2007 Bryan Østergaard
+# Copyright 2009 Daniel Mierswa
 # Distributed under the terms of the GNU General Public License v2
+
+require toolchain-funcs
 
 SUMMARY="BusyBox provides tiny replacements for many common UNIX utilities"
 HOMEPAGE="http://busybox.net/"
@@ -15,15 +18,26 @@ DEPENDENCIES=""
 #FIXME
 RESTRICT="test"
 
+bb_make() {
+    local hostcc=$(tc-getBUILD_CC)
+    local hostcxx=${hostcc%gcc}g++
+
+    emake AR=$(tc-getAR) AS=$(tc-getAS) CC=$(tc-getCC) \
+          CPP="$(tc-getCC) -E" LD="$(tc-getCC) -nostdlib" \
+          NM=$(tc-getNM) OBJCOPY=$(tc-getPROG OBJCOPY objcopy) \
+          OBJDUMP=$(tc-getPROG OBJDUMP objdump) \
+          HOSTCC=${hostcc} HOSTCXX=${hostcxx} "$@"
+}
+
 src_compile() {
-    emake defconfig
+    bb_make defconfig
 
     # Build dynamically linked executable and preserve it
-    emake busybox_unstripped
+    bb_make busybox_unstripped
     mv busybox_unstripped{,.dynamic} || die "mv failed"
 
     # Build statically linked executable and preserve it
-    emake busybox_unstripped CONFIG_STATIC=y
+    bb_make busybox_unstripped CONFIG_STATIC=y
     mv busybox_unstripped{,.static} || die "mv failed(2)"
 }
 
