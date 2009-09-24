@@ -40,11 +40,6 @@ create_device_node() {
     chmod ${perms} "${ROOT}dev/${node}" || die "chmod /dev/${node} failed"
 }
 
-src_install() {
-    insinto /etc
-    doins "${FILES}"/exherbo-release
-}
-
 pkg_pretend() {
     local x
 
@@ -53,6 +48,11 @@ pkg_pretend() {
             die "${x}: Expected a symlink but found a directory"
         fi
     done
+}
+
+src_install() {
+    insinto /etc
+    doins "${FILES}"/exherbo-release
 }
 
 pkg_postinst() {
@@ -102,8 +102,8 @@ pkg_postinst() {
             die "${x}: Expected a symlink but found a directory"
         fi
 
-        echo "ln -s ${LIBDIR} ${ROOT}${x}"
-        ln -s "${LIBDIR}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+        echo "ln -sfn ${LIBDIR} ${ROOT}${x}"
+        ln -sfn "${LIBDIR}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
     done
 }
 
