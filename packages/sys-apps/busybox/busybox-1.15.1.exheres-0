@@ -17,19 +17,20 @@ RESTRICT="test"
 
 src_compile() {
     emake defconfig
-    emake
 
-    # Preserve dynamically linked executable
+    # Build dynamically linked executable and preserve it
+    emake busybox_unstripped
     mv busybox_unstripped{,.dynamic} || die "mv failed"
-    emake CONFIG_STATIC=y busybox
-    mv busybox_unstripped bb || die "mv failed(2)"
-    mv busybox_unstripped{.dynamic,} || die "mv failed(3)"
+
+    # Build statically linked executable and preserve it
+    emake busybox_unstripped CONFIG_STATIC=y
+    mv busybox_unstripped{,.static} || die "mv failed(2)"
 }
 
 src_install() {
     into /
-    newbin busybox_unstripped busybox
-    dobin bb
+    newbin busybox_unstripped.dynamic busybox
+    newbin busybox_unstripped.static bb
 
     dodoc AUTHORS README TODO
     insinto /usr/share/doc/${PNVR}
