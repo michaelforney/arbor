@@ -41,13 +41,14 @@ create_device_node() {
 }
 
 pkg_pretend() {
-    local x
-
-    for x in {,usr/,usr/local/}lib ; do
-        if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
-            die "${x}: Expected a symlink but found a directory"
-        fi
-    done
+    if [[ ${LIBDIR} != lib ]]; then
+        local x
+        for x in {,usr/,usr/local/}lib ; do
+            if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
+                die "${x}: Expected a symlink but found a directory"
+            fi
+        done
+    fi
 }
 
 src_install() {
@@ -56,7 +57,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    local x ABI
+    local x abi
 
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
@@ -78,13 +79,6 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}"
     done
 
-    # library directories
-    for ABI in ${ABIS_C} ; do
-        create_root_owned_directory "${ROOT}lib${ABI}"
-        create_root_owned_directory "${ROOT}usr/lib${ABI}"
-        create_root_owned_directory "${ROOT}usr/local/lib${ABI}"
-    done
-
     # /var structure
     for x in var{,/cache,/empty,/lib,/local,/lock,/log,/run,/spool}; do
         create_root_owned_directory "${ROOT}${x}"
@@ -96,14 +90,22 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
-    # create lib symlinks
-    for x in {,usr/,usr/local/}lib ; do
-        if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
-            die "${x}: Expected a symlink but found a directory"
-        fi
+    # create lib${abi} dirs and lib symlinks if applicable
+    if [[ ${LIBDIR} != lib ]]; then
+        for abi in ${ABIS_C} ; do
+            create_root_owned_directory "${ROOT}lib${abi}"
+            create_root_owned_directory "${ROOT}usr/lib${abi}"
+            create_root_owned_directory "${ROOT}usr/local/lib${abi}"
+        done
 
-        echo "ln -sfn ${LIBDIR} ${ROOT}${x}"
-        ln -sfn "${LIBDIR}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
-    done
+        for x in {,usr/,usr/local/}lib ; do
+            if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
+                die "${x}: Expected a symlink but found a directory"
+            fi
+
+            echo "ln -sfn ${LIBDIR} ${ROOT}${x}"
+            ln -sfn "${LIBDIR}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+        done
+    fi
 }
 
