@@ -72,5 +72,8 @@ src_install() {
 
     rm -rf "${IMAGE}"/usr/share/{man,info}/ || die "removing unwanted man and info pages failed"
     rmdir "${IMAGE}"/usr/{${PN}/include,share} || die "removing empty dirs failed"
+    if [[ -d "${IMAGE}"/usr/${PN}/${LIBDIR}/gcc/${CHOST}/${PV}/include-fixed ]]; then
+        find "${IMAGE}"/usr/${PN}/${LIBDIR}/gcc/${CHOST}/${PV}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
+    fi
 }
 
