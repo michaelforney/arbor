@@ -13,8 +13,7 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es et fi fr he id it ja ko nl no pl pt_BR pt ru sv zh zh_TW"
-MYOPTIONS="dbus debug gnutls jpeg libusb pam perl png python ssl tcpd tiff
-threads xinetd
+MYOPTIONS="dbus debug gnutls libusb pam perl python ssl tcpd tiff threads xinetd
 
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
 tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
@@ -33,15 +32,15 @@ DEPENDENCIES="
     build+run:
         dbus? ( sys-apps/dbus )
         gnutls? ( dev-libs/gnutls )
-        jpeg? ( media-libs/jpeg )
         libusb? ( dev-libs/libusb:0.1 )
         pam? ( sys-libs/pam )
         perl? ( dev-lang/perl )
-        png? ( media-libs/libpng )
         python? ( dev-lang/python:* )
         ssl? ( dev-libs/openssl )
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff )
+        media-libs/jpeg
+        media-libs/libpng
         group/lpadmin
     post:
         xinetd? ( sys-apps/xinetd )
@@ -104,6 +103,8 @@ src_configure() {
     # XXX Enables: acl 'kerberos glssapi' ldap slp
     # XXX Withs: java php
     econf \
+        --enable-jpeg \
+        --enable-png \
         --enable-raw-printing \
         --enable-static \
         --libdir="/usr/$(get_libdir)" \
@@ -116,9 +117,7 @@ src_configure() {
         $(option_enable dbus) \
         $(option_enable gnutls) \
         $(option_enable gnutls ssl) \
-        $(option_enable jpeg) \
         $(option_enable pam) \
-        $(option_enable png) \
         $(option_enable ssl) \
         $(option_enable ssl openssl) \
         $(option_enable tiff) \
