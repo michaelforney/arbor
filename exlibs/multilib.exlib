@@ -10,10 +10,12 @@ get_abi_var()
 save_abi_env()
 {
     local class=$1
-    local oldabi=${CURRENT_ABI:-default}
+    local ca=CURRENT_ABI_${class}
+    local oldabi=${!ca:-default}
+    local lv=ABI_DEPENDENT_VARS_${class}
 
-    for v in ${ABI_DEPENDENT_VARS} ; do
-        eval ${v}_${oldabi}=${!v}
+    for v in ${!lv} ; do
+        eval "${v}_${oldabi}=\"${!v}\""
     done
 }
 
@@ -36,7 +38,7 @@ switch_abi_env()
     load_abi_env "$@"
 }
 
-load_abi_env C ${CURRENT_ABI_C:=${DEFAULT_ABI_C:-default}}
+switch_abi_env C ${CURRENT_ABI_C:=${DEFAULT_ABI_C:-default}}
 
 get_libdir()
 {
