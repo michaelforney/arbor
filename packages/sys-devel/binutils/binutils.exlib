@@ -85,6 +85,12 @@ binutils_src_install() {
 
         default
 
+        local maybe_empty_dir=( ${IMAGE}/usr/${LIBDIR}/* )
+        if [[ ! -e ${maybe_empty_dir[0]} ]] ; then
+            echo "rmdir ${IMAGE}/usr/${LIBDIR}"
+            rmdir "${IMAGE}/usr/${LIBDIR}" || die "rmdir ${IMAGE}/usr/${LIBDIR}"
+        fi
+
         insinto /etc/env.d/binutils
         hereins ${CTARGET}-${PV} << EOF
 TARGET="${CTARGET}"
