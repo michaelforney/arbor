@@ -46,3 +46,16 @@ get_libdir()
     echo "${LIBDIR}"
 }
 
+profile_sanity_checks() {
+    local v last_abi_c
+    for v in ABI_DEPENDENT_VARS_C ${ABI_DEPENDENT_VARS_C}; do
+        [[ -n ${!v} ]] || die "Invalid profile doesn't set ${v}"
+    done
+    for v in ${ABIS_C}; do
+        last_abi_c=${v}
+    done
+    [[ ${last_abi_c} == ${DEFAULT_ABI_C} ]] || die "Invalid profile doesn't build primary abi_c last"
+}
+
+[[ ${EXHERES_PHASE} == metadata ]] || profile_sanity_checks
+
