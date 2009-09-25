@@ -273,20 +273,6 @@ src_install() {
     done
 }
 
-pkg_preinst() {
-    local pch x y
-    for pch in extc++.h.gch stdc++.h.gch stdtr1c++.h.gch; do
-        if [[ -f ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} ]]; then
-            edo rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch}
-        fi
-    done
-
-    # ease migration to proper slotting (i.e. prevent paludis from breaking before pkg_postinst, which would fix it)
-    if [[ -f ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 ]]; then
-        edo touch "${ROOT}"/usr/${LIBDIR}/libgcc_s.so.1
-    fi
-}
-
 myln() {
     nonfatal edo ln -fs "${1}" "${2}" || { eerror "Creating ${2} symlink failed"; return $?; }
     return 0
