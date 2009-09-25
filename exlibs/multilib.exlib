@@ -46,6 +46,14 @@ get_libdir()
     echo "${LIBDIR}"
 }
 
+get_all_libdirs() {
+    local abi libdir
+    for abi in ${ABIS_C}; do
+        libdir=LIBDIR_${abi}
+        echo "${!libdir}"
+    done
+}
+
 profile_sanity_checks() {
     local v last_abi_c
     for v in ABI_DEPENDENT_VARS_C ${ABI_DEPENDENT_VARS_C}; do
