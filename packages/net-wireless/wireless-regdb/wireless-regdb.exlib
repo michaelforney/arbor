@@ -22,11 +22,18 @@ UPSTREAM_DOCUMENTATION="http://wireless.kernel.org/en/developers/Regulatory#Ther
 
 DEFAULT_SRC_INSTALL_PARAMS+=( CRDA_PATH=/usr/$(get_libdir)/crda )
 
-SKIP_FUNCTIONS="compile configure"
-
 src_prepare() {
     default
 
 #   sed "/^install: /s:regulatory.bin.5.gz::"
     sed "/regulatory.bin.5.gz/s:.gz::g" -i Makefile || die "Failed sed'ing Makefile"
 }
+
+src_configure() {
+    :
+}
+
+src_compile() {
+    :
+}
+
