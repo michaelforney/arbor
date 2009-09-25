@@ -64,8 +64,9 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
 )
 
 src_prepare() {
-    # remove default optimizations
+    # remove default optimizations and do not strip by default
     sed -e 's:OPTIM="-Os -g":OPTIM="":' \
+        -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
         -i config-scripts/cups-compiler.m4 \
         || die "sed config-scripts/cups-compiler.m4 failed"
 
