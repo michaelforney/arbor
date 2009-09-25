@@ -242,22 +242,6 @@ EOF
     fi
 }
 
-pkg_preinst() {
-    local pch x y
-    for pch in extc++.h.gch stdc++.h.gch stdtr1c++.h.gch; do
-        if [[ -f ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} ]]; then
-            echo rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch}
-            rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch} \
-                || die "Failed to remove ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} for a dir-over-file-merge"
-        fi
-    done
-
-    # ease migration to proper slotting (i.e. prevent paludis from breaking before pkg_postinst, which would fix it)
-    if [[ -f ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 ]]; then
-        touch ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 || die "touch ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 failed"
-    fi
-}
-
 generate_symlinks() {
     local newest=${1} source=${2} target=${3}
     if [[ -n ${newest} && -e ${target} ]]; then
