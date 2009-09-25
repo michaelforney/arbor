@@ -151,13 +151,30 @@ src_install() {
     local neededservices=
     option dbus && neededservices+=" dbus"
 
-    newinitd "${FILES}/cups.init.d" cupsd
-
     [[ -n "${neededservices}" ]] && neededservices="need${neededservices}"
 
-    sed -e "s:@neededservices@:${neededservices}:" \
-        -i "${IMAGE}"/etc/init.d/cupsd \
-        || die "sed cupsd failed"
+    hereinitd cupsd <<EOF
+#!/sbin/runscript
+
+depend() {
+    use net
+    $neededservices
+    before nfs
+    after logger
+}
+
+start() {
+    ebegin "Starting cupsd"
+    start-stop-daemon --start --quiet --exec /usr/sbin/cupsd
+    eend \$?
+}
+
+stop() {
+    ebegin "Stopping cupsd"
+    start-stop-daemon --stop --quiet --exec /usr/sbin/cupsd
+    eend \$?
+}
+EOF
 
     # Gentoo provides its own pdftops filter in ${FILES} which requires perl
     # at runtime and i couldn't find what's wrong with the one provided by
