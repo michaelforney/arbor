@@ -22,7 +22,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/binutils-2.19-arm.patch"
 )
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-serial-configure' )
 
 binutils_src_unpack() {
     local abi
@@ -59,7 +58,7 @@ binutils_src_configure() {
 
         cd "${WORK}/${abi}/${PNV}" || die "entering ${abi} failed"
 
-        default
+        econf --enable-serial-configure --libdir=/usr/${LIBDIR}
     done
 }
 
