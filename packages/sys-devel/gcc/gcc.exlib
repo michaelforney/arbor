@@ -74,16 +74,16 @@ src_unpack() {
 }
 
 src_prepare() {
+    cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
+
     local supported_abis=( ${ABIS_C} )
     if [[ ${#supported_abis[@]} -gt 1 ]]; then
-        cd "${WORKBASE}/${PNV}" || die "entering ${WORKBASE}/${PNV} failed"
         expatch "${FILES}/${PNV}-multilib-spec.patch"
         multilib=--enable-multilib
     else
         multilib=--disable-multilib
     fi
 
-    cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
     default
 }
 

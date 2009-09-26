@@ -1,0 +1,26 @@
+Author: Saleem Abdulrasool <compnerd@compnerd.org>
+Upstream: No - exherbo specific
+Reason: 32-bit libraries (including the dynamic linker) reside in /lib32
+--- 
+--- a/gcc-4.1.2/gcc/config/i386/linux64.h	2009-09-26 01:56:03.000000000 +0200
++++ b/gcc-4.1.2/gcc/config/i386/linux64.h	2009-09-26 02:01:27.000000000 +0200
+@@ -60,7 +60,7 @@
+   %{!shared: \
+     %{!static: \
+       %{rdynamic:-export-dynamic} \
+-      %{m32:%{!dynamic-linker:-dynamic-linker /lib/ld-linux.so.2}} \
++      %{m32:%{!dynamic-linker:-dynamic-linker /lib32/ld-linux.so.2}} \
+       %{!m32:%{!dynamic-linker:-dynamic-linker /lib64/ld-linux-x86-64.so.2}}} \
+     %{static:-static}}"
+ 
+--- a/gcc-4.1.2/gcc/config/i386/linux.h	2009-09-26 01:56:03.000000000 +0200
++++ b/gcc-4.1.2/gcc/config/i386/linux.h	2009-09-26 02:01:21.000000000 +0200
+@@ -105,7 +105,7 @@
+ /* If ELF is the default format, we should not use /lib/elf.  */
+ 
+ #define LINK_EMULATION "elf_i386"
+-#define DYNAMIC_LINKER "/lib/ld-linux.so.2"
++#define DYNAMIC_LINKER "/lib32/ld-linux.so.2"
+ 
+ #undef  SUBTARGET_EXTRA_SPECS
+ #define SUBTARGET_EXTRA_SPECS \
