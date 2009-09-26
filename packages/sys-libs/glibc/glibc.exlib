@@ -40,11 +40,7 @@ ECONF_SOURCE="${WORKBASE}/${PNV}"
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
 glibc_pkg_pretend() {
-    local abi supported_abis=( ${ABIS_C} )
-
-    if option bootstrap && [[ ${#supported_abis[@]} -lt 2 ]]; then
-        die "glibc[bootstrap] is for switching to a multilib profile. You have not selected a multilib profile."
-    fi
+    local abi
 
     for abi in ${ABIS_C} ; do
         switch_abi_env C ${abi}
