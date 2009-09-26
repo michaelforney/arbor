@@ -241,6 +241,8 @@ EOF
 
     # fix libstdc++.so symlink
     for libdir in ${all_libdirs}; do
+        local libs=( /usr/${libdir}/libstdc++.so.*.* )
+        [[ "${libs[*]}" == "/usr/${libdir}/libstdc++.so.*.*" ]] && continue # don't try to copy libraries that don't exist on /
         mkdir "${TEMP}"/${libdir}-libstdc++-hack || die "mkdir libstdc++-hack failed"
         cp /usr/${libdir}/libstdc++.so.*.* "${TEMP}"/${libdir}-libstdc++-hack/ || die "cp from / to ${libdir}-libstdc++-hack/ failed"
         cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*.* "${TEMP}"/${libdir}-libstdc++-hack/ || die "cp from image to ${libdir}-libstdc++-hack/ failed"
