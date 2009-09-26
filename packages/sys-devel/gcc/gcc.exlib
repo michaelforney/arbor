@@ -145,41 +145,45 @@ src_install() {
     alternatives+=( /usr/bin/cc gcc )
 
     # libraries
-    for x in usr/${LIBDIR}/*.* usr/${LIBDIR}/debug/usr/${LIBDIR}/*.*; do
-        if [[ -L ${x} ]]; then
-            # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
-            echo rm "${x}"
-            rm "${x}" || die "rm /${x} failed"
-            removed+=( "/${x}" ) # just a sanity check
-        elif [[ -f ${x} ]]; then
-            bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
-            ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
-            case "${bn}" in
-                # always use newest available so version and create so symlinks
-                libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
-                    # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
-                    # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
-                    # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
-                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
-                    so_symlinks+=( "${x}" )
-                    ;;
-                # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
-                libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
-                    # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
-                    so_symlinks+=( "${x}" )
-                    ;;
-                # always use newest available version
-                *.a|*.la|*.spec|*.security|*.properties)
-                    # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
-                    # symlinks+=( usr/lib/libstdc++-4.3.la )
-                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
-                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
-                    ;;
-            esac
-        fi
+    local libdir
+    all_libdirs=$(get_all_libdirs)
+    for libdir in ${all_libdirs}; do
+        for x in usr/${libdir}/*.* ; do
+            if [[ -L ${x} ]]; then
+                # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
+                echo rm "${x}"
+                rm "${x}" || die "rm /${x} failed"
+                removed+=( "/${x}" ) # just a sanity check
+            elif [[ -f ${x} ]]; then
+                bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
+                ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
+                case "${bn}" in
+                    # always use newest available so version and create so symlinks
+                    libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
+                        # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
+                        # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
+                        # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
+                        echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                        mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                        symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                        so_symlinks+=( "${x}" )
+                        ;;
+                    # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
+                    libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
+                        # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                        so_symlinks+=( "${x}" )
+                        ;;
+                    # always use newest available version
+                    *.a|*.la|*.spec|*.security|*.properties)
+                        # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
+                        # symlinks+=( usr/lib/libstdc++-4.3.la )
+                        echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                        mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                        symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                        ;;
+                esac
+            fi
+        done
     done
 
     # info pages
@@ -217,7 +221,11 @@ JAVAC=/usr/bin/gcj
 JAVACMD=/usr/bin/gij
 EOF
 
-        for x in usr/${LIBDIR}/security/classpath.security usr/share/java/ecj.jar; do
+        local classpaths=()
+        for libdir in ${all_libdirs}; do
+            classpaths+=( usr/${libdir}/security/classpath.security )
+        done
+        for x in "${classpaths[@]}" usr/share/java/ecj.jar; do
             bn=$(basename "${x}")
             ext=${bn#*.}
             echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
@@ -232,10 +240,12 @@ EOF
     popd
 
     # fix libstdc++.so symlink
-    mkdir "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
-    cp /usr/${LIBDIR}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
-    cp "${IMAGE}"/usr/${LIBDIR}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
-    fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
+    for libdir in ${all_libdirs}; do
+        mkdir "${TEMP}"/${libdir}-libstdc++-hack || die "mkdir libstdc++-hack failed"
+        cp /usr/${libdir}/libstdc++.so.*.* "${TEMP}"/${libdir}-libstdc++-hack/ || die "cp from / to ${libdir}-libstdc++-hack/ failed"
+        cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*.* "${TEMP}"/${libdir}-libstdc++-hack/ || die "cp from image to ${libdir}-libstdc++-hack/ failed"
+        fix_libstdcplusplus "${TEMP}"/${libdir}-libstdc++-hack "${IMAGE}"
+    done
 
     if [[ -d "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/include-fixed ]]; then
         find "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${PV}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
@@ -264,7 +274,7 @@ fix_libstdcplusplus() {
     versions_sorted=( $(version_sort "${versions[@]}") )
     latest=libstdc++.so.${versions_sorted[${#versions_sorted[@]}-1]}
     while [[ ${latest} == libstdc++.so.* ]]; do
-        generate_symlinks true ${latest} "${2}"usr/${LIBDIR}/${latest%.*}
+        generate_symlinks true ${latest} "${2}"usr/${libdir}/${latest%.*}
         latest=${latest%.*}
     done
 }
@@ -307,7 +317,10 @@ pkg_prerm() {
     alternatives_pkg_prerm
 
     # make sure libstdc++.so* symlinks are ok
-    fix_libstdcplusplus /usr/${LIBDIR} "${ROOT}"
+    local libdir
+    for libdir in ${all_libdirs}; do
+        fix_libstdcplusplus /usr/${libdir} "${ROOT}"
+    done
 }
 
 pkg_postrm() {
