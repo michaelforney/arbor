@@ -139,6 +139,12 @@ glibc_src_install() {
         default
     done
 
+    # make ld-linux.so.2 accessible to everything that expects to find things in /lib
+    local supported_abis=( ${ABIS_C} )
+    if [[ ${#supported_abis[@]} -gt 1 ]]; then
+        dosym ../lib32/ld-linux.so.2 /lib64/ld-linux.so.2
+    fi
+
     # localedef fails if /usr/lib/locale does not exist
     keepdir "/usr/${LIBDIR}/locale"
 
