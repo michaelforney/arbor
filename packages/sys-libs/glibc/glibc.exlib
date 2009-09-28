@@ -83,11 +83,11 @@ glibc_src_prepare() {
 }
 
 glibc_src_configure() {
-    for ABI in ${ABIS_C} ; do
-        switch_abi_env C ${ABI}
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
 
-        mkdir "${WORK}/${ABI}" || die "mkdir ${ABI} failed"
-        cd "${WORK}/${ABI}" || die "entering ${ABI} failed"
+        mkdir "${WORK}/${abi}" || die "mkdir ${abi} failed"
+        cd "${WORK}/${abi}" || die "entering ${abi} failed"
 
         echo "libc_cv_forced_unwind=yes" > config.cache
         echo "libc_cv_c_cleanup=yes" >> config.cache
@@ -115,10 +115,10 @@ glibc_src_configure() {
 }
 
 glibc_src_compile() {
-    for ABI in ${ABIS_C} ; do
-        switch_abi_env C ${ABI}
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
 
-        cd "${WORK}/${ABI}" || die "entering ${ABI} failed"
+        cd "${WORK}/${abi}" || die "entering ${abi} failed"
 
         default
     done
@@ -131,21 +131,13 @@ glibc_src_install() {
     # one to get staged will clobber all collisions.  In particular, this will
     # be all of the executables.  The supporting libraries (libc, nss, etc), are
     # installed into architecutre specific directories.
-    for ABI in ${ABIS_C} ; do
-        if [[ ${ABI} != ${DEFAULT_ABI_C} ]] ; then
-            switch_abi_env C ${ABI}
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
 
-            cd "${WORK}/${ABI}" || die "entering ${ABI} failed"
+        cd "${WORK}/${abi}" || die "entering ${abi} failed"
 
-            default
-        fi
+        default
     done
-
-    switch_abi_env C ${DEFAULT_ABI_C}
-
-    cd "${WORK}/${DEFAULT_ABI_C}" || die "entering ${DEFAULT_ABI_C} failed"
-
-    default
 
     # localedef fails if /usr/lib/locale does not exist
     keepdir "/usr/${LIBDIR}/locale"
