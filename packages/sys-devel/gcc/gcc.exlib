@@ -75,15 +75,6 @@ src_unpack() {
 
 src_prepare() {
     cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
-
-    local supported_abis=( ${ABIS_C} )
-    if [[ ${#supported_abis[@]} -gt 1 ]]; then
-        expatch "${FILES}/${PNV}-multilib-spec.patch"
-        multilib=--enable-multilib
-    else
-        multilib=--disable-multilib
-    fi
-
     default
 }
 
@@ -93,6 +84,13 @@ src_configure() {
         option ${i} && LANGS+=",${i}"
     done
     ever at_least 4.3 && option java && LANGS+=",java"
+
+    local supported_abis=( ${ABIS_C} )
+    if [[ ${#supported_abis[@]} -gt 1 ]]; then
+        multilib=--enable-multilib
+    else
+        multilib=--disable-multilib
+    fi
 
     econf \
         ${multilib} \
