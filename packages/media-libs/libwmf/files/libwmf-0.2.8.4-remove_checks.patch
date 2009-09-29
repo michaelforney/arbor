@@ -1,0 +1,41 @@
+From 991dfbbe45d13393847dca6a527f8333ace45bdc Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Tue, 29 Sep 2009 19:07:28 +0200
+Subject: [PATCH] Remove/disable useless checks for gtk+ and gd.
+Upstream: Dead.
+
+---
+ configure.ac |   10 +---------
+ 1 files changed, 1 insertions(+), 9 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 3cfe974..7a105a6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -650,7 +650,7 @@ if [ test "$search_for_gd" != "no" ]; then
+ 	AC_CHECK_HEADER(gd.h,[
+ 		AC_CHECK_LIB(gd,gdClipSetAdd,[
+ 			AC_CHECK_LIB(gd,gdft_draw_bitmap,[
+-				libwmf_gd="sys"
++				libwmf_gd="none"
+ 			],,$other_libs)
+ 		],,$other_libs)
+ 	])
+@@ -742,14 +742,6 @@ GDK_PIXBUF_CFLAGS=""
+ GDK_PIXBUF_LIBS=""
+ GDK_PIXBUF_DIR=""
+ 
+-if test $LIBWMF_BUILDSTYLE != lite; then
+-	PKG_CHECK_MODULES(GDK_PIXBUF,gdk-pixbuf-2.0 >= 2.1.2,[
+-		GTK_VERSION=`$PKG_CONFIG --variable=gtk_binary_version gtk+-2.0`
+-		GDK_PIXBUF_DIR="gtk-2.0/$GTK_VERSION/loaders"
+-		wmf_gdk_pixbuf=yes
+-	],[	wmf_gdk_pixbuf=no
+-	])
+-fi
+ AM_CONDITIONAL(LIBWMF_GDK_PIXBUF,[test $wmf_gdk_pixbuf = yes])
+ 
+ AC_SUBST(GDK_PIXBUF_CFLAGS)
+-- 
+1.6.4.4
+
