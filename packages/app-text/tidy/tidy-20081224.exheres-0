@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PV="${PV}cvs"
@@ -15,7 +15,10 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        dev-libs/libxslt
+"
 
 WORK="${WORKBASE}/${PN}-${MY_PV}"
 
@@ -36,9 +39,9 @@ src_test() {
 src_install() {
     default
 
-    doman "${FILES}"/${PN}.1
     # To update the manpage, thanks to debian:
-    #   ./console/tidy -xml-help > htmldoc/tidy-help.xml
-    #   /usr/bin/xsltproc -o tidy.1 htmldoc/tidy1.xsl htmldoc/tidy-help.xml
+    ./console/tidy -xml-help > htmldoc/tidy-help.xml || die "./console/tidy"
+    /usr/bin/xsltproc -o tidy.1 htmldoc/tidy1.xsl htmldoc/tidy-help.xml || die "xsltproc"
+    doman ${PN}.1
 }
 
