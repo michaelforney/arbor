@@ -1,6 +1,8 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require multilib
+
 SUMMARY="USB enumeration utilities"
 DESCRIPTION="
 "
@@ -13,6 +15,13 @@ src_install() {
     # this is provided by usbutils-data
     rm -f "${IMAGE}/usr/sbin/update-usbids.sh" || die "unable to remove update-usbids.sh"
     rm -f "${IMAGE}/usr/share/misc/usb.ids" || die "unable to remove usb.ids"
+
+    # yeah... usbutils installs .pc into $datadir/pkgconfig
+    dodir /usr/$(get_libdir)/pkgconfig
+    mv "${IMAGE}"/usr/share/misc/pkgconfig/usbutils.pc \
+       "${IMAGE}"/usr/$(get_libdir)/pkgconfig || die "unable to move .pc file"
+    rmdir "${IMAGE}"/usr/share/misc/pkgconfig/ || die "unable to remove pkgconfig directory"
+
     rmdir "${IMAGE}/usr/share/misc/" || die "unable to remove /usr/share/misc"
 }
 
