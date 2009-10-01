@@ -1,7 +1,5 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-# Based in part upon 'calibre-0.4.77.ebuild' from Gentoo, which is:
-#     Copyright 1999-2008 Gentoo Foundation
 
 require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib
 
@@ -35,10 +33,9 @@ DEPENDENCIES="
         dev-python/setuptools[>=0.6_rc5]
     build+run:
         app-text/podofo[>=0.7.0]
-        app-text/poppler[>=0.10.6][qt4]
+        app-text/poppler[>=0.12.0][qt4]
         dev-lang/python[sqlite]
         dev-libs/libusb:0.1[>=0.1.12]
-        media-gfx/ImageMagick[>=6.3.5]
         dev-python/BeautifulSoup[>=3.0.5]
         dev-python/dnspython[>=1.6.0]
         dev-python/python-dateutil[>=1.4.1]
@@ -47,6 +44,8 @@ DEPENDENCIES="
         dev-python/lxml[>=2.1.5]
         dev-python/mechanize[>=0.1.11]
         dev-python/PyQt4[>=4.5.1][webkit]
+        media-gfx/ImageMagick[>=6.3.5]
+        media-libs/libwmf[>=0.2.8.4]
         sys-apps/hal[>=0.5.11]
         x11-apps/xdg-utils[>=1.0.2]
     post,suggested:
@@ -59,12 +58,15 @@ DEPENDENCIES="
 # <@kovid> patched ones are odf cssutils and pypdf
 # dev-python/pyPdf[>=1.12]
 
-WORK="${WORKBASE}"
+WORK="${WORKBASE}"/${PN}
 
 calibre_src_prepare() {
-    # Removing the post_install call. We run it separately.
-    sed -i -e "/self.run_postinstall()/d" setup/install.py \
-        || die "couldn't remove post_install call"
+    # Don't try deleting the old udev rules from the live fs.
+    sed -i -e "s:\(old_udev = '\).*:\1':" "${WORK}"/src/calibre/linux.py || die "udev sed failed"
+
+    # Install the udev rules to the real libdir.
+    sed -e "s:\(base = \)\(.*\)lib\(.*\):\1\2$(get_libdir)\3:" \
+        -i "${WORK}"/src/calibre/linux.py || die "libdir sed failed"
 
     distutils_src_prepare
 }
@@ -77,14 +79,14 @@ calibre_src_compile() {
 }
 
 calibre_src_install() {
-    distutils_src_install \
-        --prefix="${IMAGE}" \
-        --bindir="${IMAGE}"/usr/bin \
-        --libdir="${IMAGE}"/usr/$(get_libdir)/calibre \
-        --sharedir="${IMAGE}"/usr/share/calibre
+    local old_XDG="${XDG_DATA_DIRS}"
+    local prefix="/usr"
+    local bindir="${prefix}/bin"
+    local sharedir="${prefix}/share"
+    export libdir="${prefix}/$(get_libdir)"
 
-    # We have to create these directories before running the post_install
-    # script because xdg-* needs to see them even if it doesn't use them...
+    # We have to create these directories before installing because xdg-* needs
+    # to see them even if it doesn't use them...
     dodir \
         /etc/xdg/menus \
         /usr/share/applications \
@@ -93,35 +95,46 @@ calibre_src_install() {
         /usr/share/icons/hicolor \
         /usr/share/mime/packages
 
-    # Running the post_install script.
-    KDEDIRS="${IMAGE}/usr" \
-    XDG_DATA_DIRS="${IMAGE}/usr/share" \
-    XDG_UTILS_INSTALL_MODE="system" \
-    DESTDIR="${IMAGE}" \
-    PYTHONPATH="${IMAGE}/usr/$(get_libdir)/calibre" \
-    ${python} "${IMAGE}"/usr/bin/calibre_postinstall \
-        --use-destdir \
-        --group-file="${ROOT}"/etc/group \
-        --dont-check-root \
-        || die "post-installation failed."
+    export \
+        KDEDIRS="${IMAGE}${prefix}" \
+        XDG_DATA_DIRS="${IMAGE}${sharedir}" \
+        XDG_UTILS_INSTALL_MODE="system" \
+        DESTDIR="${IMAGE}"
 
-    # Fix paths.
-    for file in $(grep -lr "${IMAGE}" ${IMAGE}); do
-        sed -i -e "s:${IMAGE}::g" "${file}"
-    done
+    distutils_src_install \
+        --prefix="${prefix}" \
+        --bindir="${bindir}" \
+        --libdir="${libdir}" \
+        --sharedir="${sharedir}" \
+        --root="${IMAGE}" \
+        --staging-bindir="${IMAGE}${bindir}" \
+        --staging-libdir="${IMAGE}${libdir}" \
+        --staging-sharedir="${IMAGE}${sharedir}" \
+
+    export XDG_DATA_DIRS="${old_XDG}"
+
+    dodir /usr/share/man/man1
+    mv "${IMAGE}${sharedir}"/calibre/man/man1/* "${IMAGE}${sharedir}"/man/man1/ \
+        || die "moving man pages failed"
 
     # Removing junk.
     rm -r \
-        "${IMAGE}"/usr/share/applications/{defaults.list,mimeinfo.cache} \
-        "${IMAGE}"/usr/share/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
-        "${IMAGE}"/usr/share/{applnk,desktop-directories} \
+        "${IMAGE}"${sharedir}/applications/{defaults.list,mimeinfo.cache} \
+        "${IMAGE}"${sharedir}/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
+        "${IMAGE}"${sharedir}/{applnk,desktop-directories} \
+        "${IMAGE}"/usr/bin/calibre-uninstall \
         || die "removing junk failed"
     find "${IMAGE}"/ -type d -empty -delete
 }
 
 calibre_pkg_postinst() {
+    local old_udev="/etc/udev/rules.d/95-calibre.rules"
+    if test -f "${old_udev}" ; then
+        rm "${old_udev}" || die "removing old udev rules failed"
+    fi
+
     freedesktop-mime_update_desktop_database
     freedesktop-mime_update_mime_database
 
-    python_mod_optimize /usr/$(get_libdir)/calibre
+    python_mod_optimize "${libdir}"/calibre
 }
