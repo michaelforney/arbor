@@ -14,50 +14,80 @@ DEPENDENCIES="
     build+run:
         gpm? ( sys-libs/gpm )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--with-shared' '--with-normal'
-'--without-termcap' "--libdir=/$(get_libdir)" '--without-hashed-db' )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--with-shared' '--with-normal' '--without-termcap' '--without-hashed-db' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gpm )
 
-ECONF_SOURCE="${WORK}"
-WORK_WIDE="${WORK}/wide"
-WORK="${WORK}/narrow/"
+WORK="${WORKBASE}/build"
+ECONF_SOURCE="${WORKBASE}/${PNV}"
 
 src_unpack() {
     default
-    mkdir "${WORK}" "${WORK_WIDE}" || die "Creating ${WORK}, ${WORK_WIDE} failed"
+    mkdir "${WORK}" || die "mkdir ${WORK} failed"
 }
 
 src_configure() {
-    default
+    local abi
 
-    if option unicode; then
-        cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
 
-        econf \
-            "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-            --includedir=/usr/include/ncursesw \
-            $(option_with gpm) \
-            $(option_enable unicode widec)
-    fi
+        mkdir "${WORK}/${abi}" || die "mkdir ${abi} failed"
+
+        mkdir "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
+        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+
+        if [[ ${abi} == ${DEFAULT_ABI_C} ]] ; then
+            CTARGET= default
+        else
+            default
+        fi
+
+        if option unicode ; then
+            mkdir "${WORK}/${abi}/wide" || die "mkdir wide failed"
+            cd "${WORK}/${abi}/wide" || die "entering wide failed"
+
+            if [[ ${abi} == ${DEFAULT_ABI_C} ]] ; then
+                CTARGET= econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"  \
+                               --includedir=/usr/include/ncursesw    \
+                               --enable-widec $(option_with gpm)
+            else
+                econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"  \
+                      --includedir=/usr/include/ncursesw    \
+                      --enable-widec $(option_with gpm)
+            fi
+        fi
+    done
 }
 
 src_compile() {
-    default
+    local abi
 
-    if option unicode ; then
-        cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
+
+        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
         default
-    fi
+
+        if option unicode ; then
+            cd "${WORK}/${abi}/wide" || die "entering wide failed"
+            default
+        fi
+    done
 }
 
 src_install() {
-    # Install narrow char version
-    default
+    local abi
 
-    # Install wide char version if unicode is enabled
-    if option unicode ; then
-        cd "${WORK_WIDE}" || die "cd ${WORK_WIDE} failed"
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
+
+        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
         default
-    fi
+
+        if option unicode ; then
+            cd "${WORK}/${abi}/wide" || die "entering wide failed"
+            default
+        fi
+    done
 }
 
