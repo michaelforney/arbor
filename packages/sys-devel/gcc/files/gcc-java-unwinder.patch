@@ -7,16 +7,16 @@ Subject: [PATCH] Prevent the unwinder from getting stuck in an infinite loop. cf
  libjava/stacktrace.cc |    3 +++
  1 files changed, 3 insertions(+), 0 deletions(-)
 
-diff --git a/gcc-4.3.2/libjava/stacktrace.cc b/libjava/stacktrace.cc
+diff --git a/libjava/stacktrace.cc b/libjava/stacktrace.cc
 index d8d1f38..9dfea75 100644
---- a/gcc-4.3.4/libjava/stacktrace.cc
-+++ b/gcc-4.3.4/libjava/stacktrace.cc
+--- a/libjava/stacktrace.cc
++++ b/libjava/stacktrace.cc
 @@ -111,6 +111,9 @@ _Jv_StackTrace::UnwindTraceFn (struct _Unwind_Context *context, void *state_ptr)
    if (pos == state->length)
      {
        int newLength = state->length * 2;
 +      if (newLength > 200)
-+	return _URC_END_OF_STACK;
++          return _URC_END_OF_STACK;
 +
        void *newFrames = _Jv_AllocBytes (newLength * sizeof(_Jv_StackFrame));
        memcpy (newFrames, state->frames, state->length * sizeof(_Jv_StackFrame));
