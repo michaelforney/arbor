@@ -101,7 +101,7 @@ src_install() {
     local libdir=$(get_libdir)
 
     # Precompiled headers, disable for cross-compiling
-    insinto /usr/include/c++/${PV}/${CHOST}/bits
+    insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
     doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
 
     if option doc; then
@@ -120,7 +120,7 @@ src_install() {
 
     # nuke empty dir if applicable
     if option !fortran && ever at_least 4.2; then
-        rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${PV}/finclude || die "rmdir finclude failed"
+        rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude || die "rmdir finclude failed"
     fi
 
     ### slots handling
@@ -228,8 +228,8 @@ EOF
     cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
     fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
 
-    if [[ -d "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${PV}/include-fixed ]]; then
-        find "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${PV}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
+    if [[ -d "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include-fixed ]]; then
+        find "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
     fi
 }
 

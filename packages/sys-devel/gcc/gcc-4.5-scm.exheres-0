@@ -1,0 +1,28 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="git://gcc.gnu.org/git/gcc.git"
+
+MY_PV="4.5.0" # FIXME Don't hardcode this
+
+require gcc scm-git
+
+DOWNLOADS=""
+
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+
+# http://gcc.gnu.org/install/prerequisites.html
+DEPENDENCIES="
+    build:
+        sys-apps/texinfo
+        sys-devel/flex
+        sys-devel/gettext
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-java-unwinder.patch )
+
+src_unpack() {
+    scm_src_unpack
+    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+}
+
