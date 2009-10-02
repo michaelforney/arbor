@@ -1,0 +1,20 @@
+Upstream: Yes (http://cups.org/str.php?L3360+P0+S-2+C0+I0+E0+M20+Q)
+Reason: Prevent install-locales to report failure if it shouldn't
+Source: Daniel Mierswa <impulze@impulze.org>
+
+Index: doc/Makefile
+===================================================================
+--- doc/Makefile	(revision 8833)
++++ doc/Makefile	(working copy)
+@@ -191,7 +191,9 @@
+ 		if test -d $$lang; then \
+ 			$(INSTALL_DIR) -m 755 $(DOCDIR)/$$lang; \
+ 			$(INSTALL_MAN) $$lang/index.html $(DOCDIR)/$$lang; \
+-			test -f $$lang/cups.css && $(INSTALL_MAN) $$lang/cups.css $(DOCDIR)/$$lang; \
++			if test -f $$lang/cups.css ; then \
++				$(INSTALL_MAN) $$lang/cups.css $(DOCDIR)/$$lang; \
++			fi ; \
+ 		fi; \
+ 	done
+ 
+
