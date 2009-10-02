@@ -8,7 +8,7 @@ SUMMARY="Free software emulation of curses using Terminfo formats"
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="gpm unicode"
+MYOPTIONS="gpm"
 
 DEPENDENCIES="
     build+run:
@@ -33,28 +33,30 @@ src_configure() {
 
         mkdir "${WORK}/${abi}" || die "mkdir ${abi} failed"
 
-        mkdir "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
-        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
-
         if [[ ${abi} == ${DEFAULT_ABI_C} ]] ; then
-            CTARGET= default
-        else
-            default
-        fi
+            mkdir "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
+            cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
 
-        if option unicode ; then
+            CTARGET= default
+
             mkdir "${WORK}/${abi}/wide" || die "mkdir wide failed"
             cd "${WORK}/${abi}/wide" || die "entering wide failed"
 
-            if [[ ${abi} == ${DEFAULT_ABI_C} ]] ; then
-                CTARGET= econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"  \
-                               --includedir=/usr/include/ncursesw    \
-                               --enable-widec $(option_with gpm)
-            else
-                econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"  \
-                      --includedir=/usr/include/ncursesw    \
-                      --enable-widec $(option_with gpm)
-            fi
+            CTARGET= econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"  \
+                           --includedir=/usr/include/ncursesw    \
+                           --enable-widec $(option_with gpm)
+        else
+            mkdir "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
+            cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+
+            default
+
+            mkdir "${WORK}/${abi}/wide" || die "mkdir wide failed"
+            cd "${WORK}/${abi}/wide" || die "entering wide failed"
+
+            econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"  \
+                  --includedir=/usr/include/ncursesw    \
+                  --enable-widec $(option_with gpm)
         fi
     done
 }
@@ -68,10 +70,8 @@ src_compile() {
         cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
         default
 
-        if option unicode ; then
-            cd "${WORK}/${abi}/wide" || die "entering wide failed"
-            default
-        fi
+        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        default
     done
 }
 
@@ -84,10 +84,8 @@ src_install() {
         cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
         default
 
-        if option unicode ; then
-            cd "${WORK}/${abi}/wide" || die "entering wide failed"
-            default
-        fi
+        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        default
     done
 }
 
