@@ -9,19 +9,18 @@ DESCRIPTION="
 HOMEPAGE="http://linux-usb.sourceforge.net/"
 DOWNLOADS="mirror://sourceforge/linux-usb/${PNV}.tar.gz"
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --datarootdir=/usr/share
+    --datadir=/usr/share/misc
+    --disable-zlib
+)
+
 src_install() {
     default
 
     # this is provided by usbutils-data
     rm -f "${IMAGE}/usr/sbin/update-usbids.sh" || die "unable to remove update-usbids.sh"
     rm -f "${IMAGE}/usr/share/misc/usb.ids" || die "unable to remove usb.ids"
-
-    # yeah... usbutils installs .pc into $datadir/pkgconfig
-    dodir /usr/$(get_libdir)/pkgconfig
-    mv "${IMAGE}"/usr/share/misc/pkgconfig/usbutils.pc \
-       "${IMAGE}"/usr/$(get_libdir)/pkgconfig || die "unable to move .pc file"
-    rmdir "${IMAGE}"/usr/share/misc/pkgconfig/ || die "unable to remove pkgconfig directory"
-
     rmdir "${IMAGE}/usr/share/misc/" || die "unable to remove /usr/share/misc"
 }
 
