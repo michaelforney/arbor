@@ -159,6 +159,7 @@ src_install() {
                 # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
                 libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
                     # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                    [[ ${x} == *.py ]] && continue
                     so_symlinks+=( "${x}" )
                     ;;
                 # always use newest available version
@@ -224,8 +225,8 @@ EOF
 
     # fix libstdc++.so symlink
     mkdir "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
-    cp /usr/${libdir}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
-    cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*.* "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
+    cp /usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
+    cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
     fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
 
     if [[ -d "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include-fixed ]]; then
@@ -265,7 +266,7 @@ generate_symlinks() {
 
 fix_libstdcplusplus() {
     local f versions=() versions_sorted latest
-    for f in "${1}"/libstdc++.so.*; do
+    for f in "${1}"/libstdc++.so.*([[:digit:].]) ; do
         versions+=( "${f##*/libstdc++.so.}" )
     done
     versions_sorted=( $(version_sort "${versions[@]}") )
