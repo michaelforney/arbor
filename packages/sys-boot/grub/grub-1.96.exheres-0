@@ -20,6 +20,8 @@ DEPENDENCIES="
         app-arch/lzo:2
         sys-devel/make
         sys-devel/bison
+    build+run:
+        !sys-boot/grub-static [[ note = [ /sbin/grub-install collides ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ )

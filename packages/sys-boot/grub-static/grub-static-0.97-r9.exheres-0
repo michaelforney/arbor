@@ -11,7 +11,9 @@ SLOT="0"
 PLATFORMS="~amd64"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        !sys-boot/grub [[ note = [ /sbin/grub-install collides ] ]]"
 
 WORK=${WORKBASE}
 GRUB_PNV="grub-0.97-r9"
