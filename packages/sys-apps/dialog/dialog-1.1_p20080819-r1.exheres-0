@@ -1,7 +1,6 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-
 SUMMARY="A tool to display dialog boxes from a shell"
 HOMEPAGE="http://invisible-island.net/dialog/dialog.html"
 UPSTREAM_CHANGELOG="http://invisible-island.net/dialog/CHANGES"
@@ -11,25 +10,19 @@ DOWNLOADS="ftp://invisible-island.net/${PN}/${PNV/_p/-}.tgz"
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="examples nls unicode"
+MYOPTIONS="examples nls"
 
 DEPENDENCIES="
     build:
         nls? ( sys-devel/gettext )
     build+run:
-        sys-libs/ncurses[unicode?]"
+        sys-libs/ncurses"
 
 WORK="${WORKBASE}/${PNV/_p/-}"
 
-
-src_configure() {
-    # The upstream configuration scripts doesn't respect
-    # --without-ncursesw, see #202
-    econf \
-        $(option_enable nls) \
-        $(option_enable unicode widec) \
-        --with-ncurses$(option unicode && echo w)
-}
+# The upstream configuration scripts doesn't respect # --without-ncursesw, see #202
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-widec' '--with-ncursesw' '--hates=docdir' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_install() {
     default
