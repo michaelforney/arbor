@@ -230,9 +230,11 @@ EOF
     cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
     fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
 
-    if [[ -d "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include-fixed ]]; then
-        find "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include-fixed -type d -empty -delete || die "Failed to remove empty directories."
-    fi
+    for dir in "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
+        if [[ -d ${dir} ]] ; then
+            find "${dir}" -type d -empty -delete || die "Failed to remove empty directories."
+        fi
+    done
 }
 
 pkg_preinst() {
