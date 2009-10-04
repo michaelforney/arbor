@@ -23,7 +23,7 @@ DOWNLOADS="
 LICENCES="ZSH
     gdbm? ( GPL-2 [[ note = [ Enabling gdbm means that the binary is covered by the GPL-2 ] ]] )"
 SLOT="0"
-MYOPTIONS="caps doc pcre unicode
+MYOPTIONS="caps doc pcre
     gdbm [[ description = [ Build gdbm bindings, allowing one to use a gdbm database like a zsh hash ] ]]"
 
 DEPENDENCIES="
@@ -53,10 +53,10 @@ zsh_src_configure() {
         --enable-ldflags="${LDFLAGS}" \
         --with-term-lib="ncursesw ncurses" \
         --with-tcsetpgrp \
+        --enable-multibyte \
         $(option_enable gdbm) \
         $(option_enable caps cap) \
-        $(option_enable pcre) \
-        $(option_enable unicode multibyte)
+        $(option_enable pcre)
 }
 
 zsh_src_test() {
