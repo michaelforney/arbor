@@ -11,7 +11,7 @@ DOWNLOADS="http://download.librdf.org/source/${PNV}.tar.gz"
 LICENCES="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="unicode"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build: 
@@ -20,8 +20,7 @@ DEPENDENCIES="
     build+run:
         dev-libs/libxml2
         dev-libs/libxslt
-        unicode? ( dev-libs/glib:2 )"
+        dev-libs/glib:2"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-www=xml --with-xml-parser=libxml )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "unicode nfc-check" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-www=xml --with-xml-parser=libxml '--enable-nfc-check' )
 
