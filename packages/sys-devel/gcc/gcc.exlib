@@ -128,6 +128,7 @@ src_install() {
 
     local p
     for p in usr/${libdir}/*-gdb.py ; do
+        [[ -f ${p} ]] || continue
         [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
 
         local p=${p##*/}
