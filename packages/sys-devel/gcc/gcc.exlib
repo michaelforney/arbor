@@ -235,7 +235,7 @@ EOF
     popd
 
     # fix libstdc++.so symlink
-    mkdir "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
+    mkdir -p "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
     cp /usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
     cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
     fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
