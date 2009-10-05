@@ -124,8 +124,19 @@ src_install() {
         rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude || die "rmdir finclude failed"
     fi
 
-    ### slots handling
     pushd "${IMAGE}" || die "Could not enter IMAGE"
+
+    local p
+    for p in usr/${libdir}/*-gdb.py ; do
+        [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
+
+        local p=${p##*/}
+        echo mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
+        mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}" ||
+            die "Couldn't move gdb python hook ${p}-gdb.py"
+    done
+
+    ### slots handling
 
     local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
 
@@ -160,7 +171,6 @@ src_install() {
                 # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
                 libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
                     # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
-                    [[ ${x} == *.py ]] && continue
                     so_symlinks+=( "${x}" )
                     ;;
                 # always use newest available version
