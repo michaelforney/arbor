@@ -172,6 +172,7 @@ src_install() {
                 # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
                 libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
                     # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                    [[ ${bn} == libstdc++.so.* ]] && libstdcpp="${bn}"
                     so_symlinks+=( "${x}" )
                     ;;
                 # always use newest available version
@@ -236,10 +237,7 @@ EOF
     popd
 
     # fix libstdc++.so symlink
-    mkdir -p "${TEMP}"/libstdc++-hack || die "mkdir libstdc++-hack failed"
-    cp /usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from / to libstdc++-hack/ failed"
-    cp "${IMAGE}"/usr/${libdir}/libstdc++.so.*([[:digit:].]) "${TEMP}"/libstdc++-hack/ || die "cp from image to libstdc++-hack/ failed"
-    fix_libstdcplusplus "${TEMP}"/libstdc++-hack "${IMAGE}"
+    rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir} || die "rewrite_so_symlink ${libstdcpp} failed"
 
     for dir in "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
         if [[ -d ${dir} ]] ; then
@@ -278,17 +276,29 @@ generate_symlinks() {
     fi
 }
 
-fix_libstdcplusplus() {
-    local f versions=() versions_sorted latest
-    for f in "${1}"/libstdc++.so.*([[:digit:].]) ; do
-        versions+=( "${f##*/libstdc++.so.}" )
+rewrite_so_symlink() {
+    local ret=0 d l ignore lib versions=() versions_sorted=() latest
+    if [[ ${1} == --ignore ]]; then
+        ignore=${2}; shift
+    fi
+    lib=${1%%*([[:digit:].])}; shift
+    for d in "$@"; do
+        for l in "${d}"/${lib}.*([[:digit:].]); do
+            [[ ! -f ${l} || ${l##*/} == ${ignore} ]] && continue
+            versions+=( "${l##*/${lib}.}" )
+        done
     done
+    if [[ ${#versions[@]} -le 0 ]]; then
+        eerror "Could not rewrite ${lib}, no other versions available"
+        return 127
+    fi
     versions_sorted=( $(version_sort "${versions[@]}") )
-    latest=libstdc++.so.${versions_sorted[${#versions_sorted[@]}-1]}
-    while [[ ${latest} == libstdc++.so.* ]]; do
-        generate_symlinks true ${latest} "${2}"usr/${libdir}/${latest%.*}
+    latest=${lib}.${versions_sorted[${#versions_sorted[@]}-1]}
+    while [[ ${latest} == ${lib}.* ]]; do
+        generate_symlinks true ${latest} "${1}"/${latest%.*} || ((++ret))
         latest=${latest%.*}
     done
+    return $ret
 }
 
 pkg_postinst() {
@@ -328,8 +338,11 @@ pkg_postinst() {
 pkg_prerm() {
     alternatives_pkg_prerm
 
-    # make sure libstdc++.so* symlinks are ok
-    fix_libstdcplusplus /usr/$(get_libdir) "${ROOT}"
+    local x ignore
+    [[ -n ${REPLACED_BY_ID} ]] || ignore=--ignore
+    for x in "${so_symlinks[@]}"; do
+        rewrite_so_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
+    done
 }
 
 pkg_postrm() {
