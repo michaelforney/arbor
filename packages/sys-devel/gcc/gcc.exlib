@@ -149,7 +149,7 @@ src_install() {
     alternatives+=( /usr/bin/cc gcc )
 
     # libraries
-    for x in usr/${libdir}/*.* usr/${libdir}/debug/usr/${libdir}/*.*; do
+    for x in usr/${libdir}/*.*; do
         if [[ -L ${x} ]]; then
             # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
             echo rm "${x}"
