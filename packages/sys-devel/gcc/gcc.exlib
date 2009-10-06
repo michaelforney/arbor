@@ -276,6 +276,27 @@ generate_symlinks() {
     fi
 }
 
+rewrite_symlink() {
+    local x ignore lib ext slot versions=() versions_sorted=() latest_slot
+    if [[ ${1} == --ignore ]]; then
+        ignore=${2}; shift
+    fi
+    lib=${1%-${SLOT}.*}
+    ext=${1#*-${SLOT}.}
+    for x in "${2}"/${lib}-*.${ext}; do
+        [[ ! -f ${x} || ${x##*/} == ${ignore} ]] && continue
+        slot=${x##*/${lib}-}
+        versions+=( "${slot%.${ext}}" )
+    done
+    if [[ ${#versions[@]} -le 0 ]]; then
+        eerror "Could not rewrite ${1/-${SLOT}}, no other versions available"
+        return 127
+    fi
+    versions_sorted=( $(version_sort "${versions[@]}") )
+    latest_slot=${versions_sorted[${#versions_sorted[@]}-1]}
+    generate_symlinks true ${lib}-${latest_slot}.${ext} "${2}"/${lib}.${ext}
+}
+
 rewrite_so_symlink() {
     local ret=0 d l ignore lib versions=() versions_sorted=() latest
     if [[ ${1} == --ignore ]]; then
@@ -340,6 +361,10 @@ pkg_prerm() {
 
     local x ignore
     [[ -n ${REPLACED_BY_ID} ]] || ignore=--ignore
+    for x in "${symlinks[@]}"; do
+        rewrite_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
+    done
+
     for x in "${so_symlinks[@]}"; do
         rewrite_so_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
     done
