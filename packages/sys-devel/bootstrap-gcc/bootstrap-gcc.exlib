@@ -59,14 +59,6 @@ src_unpack() {
     mkdir "${WORK}" || die "mkdir ${WORK} failed"
 }
 
-src_prepare() {
-    cd  "${WORKBASE}/${PNV#bootstrap-}" || die "Entering ${WORKBASE}/${PNV#bootstrap-} failed"
-    expatch "${FILES}/gcc-${PV}-multilib-spec.patch"
-
-    cd  "${WORKBASE}" || die "Entering ${WORKBASE} failed"
-    default
-}
-
 src_install() {
     default
 
