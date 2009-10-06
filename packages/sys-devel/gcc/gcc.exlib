@@ -316,19 +316,23 @@ rewrite_so_symlink() {
     return $ret
 }
 
-pkg_postinst() {
-    alternatives_pkg_postinst
-
-    local x ignore
+handle_symlinks() {
+    local x
     # generate symlinks for libraries that were manually slotted in src_install, e.g.: libffi.so.4.0.1 -> libffi-4.3.so.4.0.1
     for x in "${symlinks[@]}"; do
-        rewrite_symlink "${x##*/}" "${ROOT}${x%/*}"
+        rewrite_symlink ${1} "${x##*/}" "${ROOT}${x%/*}"
     done
 
     # generate so symlinks, e.g.: libffi.so -> libffi.so.4 -> libffi.so.4.0 -> libffi.so.4.0.1
     for x in "${so_symlinks[@]}"; do
-        rewrite_so_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
+        rewrite_so_symlink ${1} ${x##*/} "${ROOT}"/${x%/*}
     done
+}
+
+pkg_postinst() {
+    alternatives_pkg_postinst
+
+    handle_symlinks
 
     # get notification if symlinks were removed during src_install that wasn't handled above in pkg_postinst
     for x in "${removed[@]}"; do
@@ -339,15 +343,9 @@ pkg_postinst() {
 pkg_prerm() {
     alternatives_pkg_prerm
 
-    local x ignore
+    local ignore
     [[ -n ${REPLACED_BY_ID} ]] || ignore=--ignore
-    for x in "${symlinks[@]}"; do
-        rewrite_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
-    done
-
-    for x in "${so_symlinks[@]}"; do
-        rewrite_so_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
-    done
+    handle_symlinks ${ignore}
 }
 
 pkg_postrm() {
