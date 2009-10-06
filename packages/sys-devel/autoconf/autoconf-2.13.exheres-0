@@ -8,8 +8,8 @@ PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 
 src_prepare() {
     # DESTDIR support
-    sed -ri 's:(\$\(INSTALL_[^ ]+ [^ ]+ ):\1$(DESTDIR):' Makefile.in
+    sed -ri 's:(\$\(INSTALL_[^ ]+ [^ ]+ ):\1$(DESTDIR):' Makefile.in || die "DESTDIR sed failed"
     # Make all needed directories during installation
-    sed -ri 's:(^INSTALL.+=.+):\1 -D:' Makefile.in
+    sed -ri 's:(^INSTALL.+=.+):\1 -D:' Makefile.in || die "INSTALL sed failed"
 }
 
