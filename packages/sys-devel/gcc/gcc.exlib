@@ -262,18 +262,12 @@ pkg_preinst() {
     fi
 }
 
-generate_symlinks() {
-    local newest=${1} source=${2} target=${3}
-    if [[ -n ${newest} && -e ${target} ]]; then
-        # remove existing file if there is no newer version
-        echo rm "${target}"
-        rm "${target}" || eerror "rm ${target} failed"
-    fi
-    if [[ ! -e ${target} ]]; then
-        # create symlink if it is missing or dangling
-        echo ln -fs "${source}" "${target}"
-        ln -fs "${source}" "${target}" || eerror "Creating ${target} symlink failed"
-    fi
+myln() {
+    local ret=0
+    # create symlink if it is missing or dangling
+    echo ln -fs "${1}" "${2}"
+    ln -fs "${1}" "${2}" || { ret=$?; eerror "Creating ${2} symlink failed"; }
+    return $ret
 }
 
 rewrite_symlink() {
@@ -294,7 +288,7 @@ rewrite_symlink() {
     fi
     versions_sorted=( $(version_sort "${versions[@]}") )
     latest_slot=${versions_sorted[${#versions_sorted[@]}-1]}
-    generate_symlinks true ${lib}-${latest_slot}.${ext} "${2}"/${lib}.${ext}
+    myln ${lib}-${latest_slot}.${ext} "${2}"/${lib}.${ext}
 }
 
 rewrite_so_symlink() {
@@ -316,7 +310,7 @@ rewrite_so_symlink() {
     versions_sorted=( $(version_sort "${versions[@]}") )
     latest=${lib}.${versions_sorted[${#versions_sorted[@]}-1]}
     while [[ ${latest} == ${lib}.* ]]; do
-        generate_symlinks true ${latest} "${1}"/${latest%.*} || ((++ret))
+        myln ${latest} "${1}"/${latest%.*} || ((++ret))
         latest=${latest%.*}
     done
     return $ret
@@ -325,29 +319,15 @@ rewrite_so_symlink() {
 pkg_postinst() {
     alternatives_pkg_postinst
 
-    local x y newest
-
-    # upgrade existing, valid symlinks only if there isn't a newer version installed
-    newest=$(best_version ${CATEGORY}/${PN})
-    newest=${newest#${CATEGORY}/${PN}-}
-    if [[ -z ${newest%%:*} ]] || ever at_least ${newest%%:*}; then
-        newest=true
-    else
-        newest=
-    fi
-
+    local x ignore
     # generate symlinks for libraries that were manually slotted in src_install, e.g.: libffi.so.4.0.1 -> libffi-4.3.so.4.0.1
     for x in "${symlinks[@]}"; do
-        generate_symlinks "${newest}" "${x##*/}" "${ROOT}${x/-${SLOT}}"
+        rewrite_symlink "${x##*/}" "${ROOT}${x%/*}"
     done
 
+    # generate so symlinks, e.g.: libffi.so -> libffi.so.4 -> libffi.so.4.0 -> libffi.so.4.0.1
     for x in "${so_symlinks[@]}"; do
-        y=${x}
-        # generate so symlinks, e.g.: libffi.so -> libffi.so.4 -> libffi.so.4.0 -> libffi.so.4.0.1
-        while [[ ${y} == */*.so.* ]]; do
-            generate_symlinks "${newest}" "${y##*/}" "${ROOT}${y%.*}"
-            y=${y%.*}
-        done
+        rewrite_so_symlink ${ignore} ${x##*/} "${ROOT}"/${x%/*}
     done
 
     # get notification if symlinks were removed during src_install that wasn't handled above in pkg_postinst
