@@ -19,11 +19,11 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/${PN}-2.0.7-parallelfix.patch"
     -p1 "${FILES}/${PN}-2.0.7-ldflags.patch"
     "${FILES}/${PN}-2.0.7-sigstack.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( USERS )
 
 src_prepare() {
     default
     ht_fix_file aclocal.m4 configure
 }
-
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( USERS )
 
