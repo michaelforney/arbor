@@ -292,18 +292,20 @@ rewrite_symlink() {
 }
 
 rewrite_so_symlink() {
-    local ret=0 d l ignore lib versions=() versions_sorted=() latest
+    local ret=0 d l ignore ignored lib versions=() versions_sorted=() latest
     if [[ ${1} == --ignore ]]; then
         ignore=${2}; shift
     fi
     lib=${1%%*([[:digit:].])}; shift
     for d in "$@"; do
         for l in "${d}"/${lib}.*([[:digit:].]); do
-            [[ ! -f ${l} || ${l##*/} == ${ignore} ]] && continue
+            [[ ! -f ${l} ]] && continue
+            [[ ${l##*/} == ${ignore} ]] && ignored=true && continue
             versions+=( "${l##*/${lib}.}" )
         done
     done
     if [[ ${#versions[@]} -le 0 ]]; then
+        [[ -n ${ignore} && -n ${ignored} ]] && return 0
         eerror "Could not rewrite ${lib}, no other versions available"
         return 127
     fi
