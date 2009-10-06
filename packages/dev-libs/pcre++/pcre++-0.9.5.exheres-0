@@ -14,7 +14,10 @@ DEPENDENCIES="
     build+run:
         dev-libs/pcre"
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
+
 src_configure() {
     default
     sed -i -e 's:(prefix):(DESTDIR)/usr/share:' doc/Makefile
 }
+

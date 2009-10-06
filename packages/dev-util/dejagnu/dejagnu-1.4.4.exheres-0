@@ -26,6 +26,8 @@ DEPENDENCIES="
 #    test:
 #        dev-util/dejagnu
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
+
 src_test() {
     if ! has_version dev-util/dejagnu; then
         ewarn "You need to build dejagnu a second time to run the tests"
