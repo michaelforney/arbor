@@ -1,6 +1,8 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+myexparam -b htmldocs=true
+
 require multilib perl-module bash-completion elisp-module
 
 export_exlib_phases src_unpack src_configure src_compile src_test src_install pkg_postinst pkg_postrm
@@ -10,8 +12,9 @@ DESCRIPTION="Git is a fast, scalable, distributed revision control system with a
 that provides both high-level operations and full access to internals"
 HOMEPAGE="http://git-scm.com/ http://git.or.cz/index.html"
 DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV}.tar.bz2
-    mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV}.tar.bz2
-    doc? ( mirror://kernel/software/scm/${PN}/${PN}-htmldocs-${PV}.tar.bz2 )"
+    mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV}.tar.bz2"
+
+exparam -b htmldocs && DOWNLOADS+=" doc? ( mirror://kernel/software/scm/${PN}/${PN}-htmldocs-${PV}.tar.bz2 )"
 
 BUGS_TO="ferdy@exherbo.org ingmar@exherbo.org"
 
@@ -65,7 +68,8 @@ git_src_unpack() {
     unpack ${PNV}.tar.bz2
     cd "${WORK}"
     unpack ${PN}-manpages-${PV}.tar.bz2
-    if option doc; then
+
+    if exparam -b htmldocs && option doc; then
         cd Documentation && unpack ${PN}-htmldocs-${PV}.tar.bz2
     fi
 }
@@ -107,13 +111,14 @@ git_src_test() {
 git_src_install() {
     myemake install
 
-    doman man?/*
+    local mans=( man?/* )
+    [[ -f ${man[0]} ]] || myemake install-man
 
     dodoc README Documentation/{SubmittingPatches,CodingGuidelines}
     for d in / /howto/ /technical/ ; do
         docinto ${d}
         dodoc Documentation${d}*.txt
-        if option doc; then
+        if exparam -b htmldocs && option doc; then
             dodir /usr/share/doc/${PNVR}/html/
             insinto /usr/share/doc/${PNVR}/html/
             doins Documentation${d}*.html
