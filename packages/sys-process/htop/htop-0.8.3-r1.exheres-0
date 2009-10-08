@@ -12,17 +12,17 @@ DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="openvz unicode"
+MYOPTIONS="openvz"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/ncurses[unicode?]
+        sys-libs/ncurses
     post,suggested:
         sys-process/lsof [[ description = [ Display open files for a process ] ]]
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( openvz unicode )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-taskstats )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( openvz )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-taskstats --enable-unicode )
 
 src_install() {
     default

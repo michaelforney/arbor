@@ -77,7 +77,7 @@ src_install() {
     done
 
     keepdir /var/lib/postfix
-    fowners postfix:postfix /var/lib/postfix/
+    fowners -R postfix:postfix /var/lib/postfix/
 
     keepdir /var/spool/postfix
     rmdir "${IMAGE}"/var/spool/postfix/*

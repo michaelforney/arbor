@@ -8,20 +8,22 @@ require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.1
 # Make it more portable between straight releases and _p? releases.
 PARCH=${PNV/_/}
 
-X509_PATCH="${PARCH}+x509-6.1.1.diff.gz"
-HPN_PATCH="${PARCH}-hpn13v3.diff.gz"
+X509_VERSION="6.2.1" X509_PATCH="${PARCH}+x509-${X509_VERSION}.diff.gz"
+HPN_PATCH="${PARCH}-hpn13v6.diff.gz"
 
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
 HOMEPAGE="http://www.openssh.org/"
 DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
-    http://www.sxw.org.uk/computing/patches/${PARCH}-gsskex-20080404.patch
-    X509? ( http://roumenpetrov.info/${PN}/x509-6.1.1/${X509_PATCH} )
-    hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )"
+    X509? ( http://roumenpetrov.info/${PN}/x509-${X509_VERSION}/${X509_PATCH} )
+    hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )
+"
 
 LICENCES="BSD-3"
 SLOT="0"
-PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="hpn pam tcpd X X509"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="
+hpn pam tcpd X X509
+gtk [[ description = [ build gnome-ssh-askpass ] ]]"
 
 # Unfortunately, the tests need to be run as root.
 RESTRICT="userpriv"
@@ -35,12 +37,23 @@ DEPENDENCIES="
         pam? ( sys-libs/pam[>=0.78] )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
         X? ( x11-apps/xauth )
+        gtk? ( x11-libs/gtk+:2 )
     build:
         dev-util/pkg-config
         sys-kernel/linux-headers
 "
 
 WORK="${WORKBASE}/${PARCH}"
+
+pkg_pretend() {
+    local err=()
+    option hpn && err+=( "option=hpn: HPN patch disabled for ${PNVR}: Only a provisional patch is available" )
+    if (( ${#err} )) ; then
+        ewarn "Following options are disabled in this release:"
+        ewarn "${err[@]/#/$'\n'}"
+        die "Mask ${PNVR} or disable all of the above options"
+    fi
+}
 
 src_prepare() {
     sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
@@ -50,15 +63,12 @@ src_prepare() {
 
     if [[ -n ${X509_PATCH} ]] && option X509 ; then
         expatch \
-            -p1 "${WORKBASE}/${X509_PATCH/.gz}" \
-            -p0 "${FILES}/${PN}-4.9_p1-x509-hpn-glue.patch" \
+            -p1 "${WORKBASE}/${X509_PATCH%.gz}" \
             -p0 "${FILES}/${PN}-4.7_p1-GSSAPI-dns.patch"
-    else
-        expatch -p0 "${FETCHEDDIR}/${PARCH}-gsskex-20080404.patch"
     fi
 
     if [[ -n ${HPN_PATCH} ]] && option hpn ; then
-        expatch -p1 "${WORKBASE}/${HPN_PATCH/.gz}"
+        expatch -p1 "${WORKBASE}/${HPN_PATCH%.gz}"
     fi
 
     sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac} ||
@@ -81,6 +91,14 @@ src_configure() {
         --without-kerberos5 \
         $(option_with pam) \
         $(option_with tcpd tcp-wrappers)
+}
+
+src_compile() {
+    default
+
+    if option gtk ; then
+        emake -C contrib gnome-ssh-askpass2
+    fi
 }
 
 src_test() {
@@ -112,6 +130,10 @@ src_install() {
     diropts -m 0700
     dodir /etc/skel/.ssh
     rmdir "${IMAGE}"/var{/empty,}
+
+    if option gtk ; then
+        newbin contrib/gnome-ssh-askpass2 gnome-ssh-askpass
+    fi
 }
 
 pkg_postinst() {

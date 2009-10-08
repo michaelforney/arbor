@@ -23,7 +23,7 @@ PLATFORMS="~amd64 ~x86"
 
 MYOPTIONS="
     apache_modules:
-        authnz_ldap [[ requires = ldap ]]
+        authnz_ldap [[ requires = [ apache_modules: ldap ] ]]
         ( dav_fs dav_lock ) [[ requires = [ apache_modules: dav ] ]]
         ( proxy_ajp proxy_balancer proxy_connect proxy_ftp proxy_http ) [[ requires = [ apache_modules: proxy ] ]]
 "

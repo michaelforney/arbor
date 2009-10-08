@@ -3,18 +3,19 @@
 
 SUMMARY="NcFTP - Versatile ncurses based FTP client"
 HOMEPAGE="http://www.ncftp.com/ncftp/"
-DOWNLOADS="ftp://ftp.ncftp.com/ncftp/ncftp-${PV}-src.tar.bz2"
+DOWNLOADS="ftp://ftp.ncftp.com/${PN}/${PNV}-src.tar.bz2"
 
 LICENCES="ClarifiedArtistic"
 SLOT="0"
 PLATFORMS="~amd64 ~x86 ~ia64"
 MYOPTIONS="socks5 ipv6"
 
-DEPENDENCIES="build+run:
-                    sys-libs/ncurses"
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( "--with-ncurses" )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "socks5" "ipv6" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir --with-ncurses )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( socks5 ipv6 )
 
 src_prepare() {
     sed -i -e 's/"$DESTDIR"/"$(DESTDIR)"/p' \

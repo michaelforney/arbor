@@ -19,9 +19,7 @@ RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/76_all_use-new-ld-dtags.patch"
-    "${FILES}/binutils-2.19-arm.patch"
 )
-
 
 binutils_src_unpack() {
     local abi
@@ -58,7 +56,7 @@ binutils_src_configure() {
 
         cd "${WORK}/${abi}/${PNV}" || die "entering ${abi} failed"
 
-        econf --enable-serial-configure --libdir=/usr/${LIBDIR}
+        econf --enable-serial-configure --libdir=/usr/${LIBDIR} --hates=docdir
     done
 }
 

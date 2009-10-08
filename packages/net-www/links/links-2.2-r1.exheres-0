@@ -11,7 +11,7 @@ WORK="${WORKBASE}/${MY_PNV}"
 DOWNLOADS="http://links.twibright.com/download/${MY_PNV}.tar.bz2"
 
 SLOT="2"
-PLATFORMS="~amd64 ~x86"
+PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="
     X
     fbcon [[ requires = gpm ]]
@@ -62,6 +62,7 @@ src_configure() {
     fi
 
     econf \
+        --hates=docdir \
         ${graphics} \
         --with-bzip2 \
         --with-zlib \

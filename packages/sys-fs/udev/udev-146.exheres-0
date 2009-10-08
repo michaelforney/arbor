@@ -16,10 +16,12 @@ DEPENDENCIES="
         dev-libs/libxslt
         glib? ( dev-util/gperf )
     build+run:
-        glib? ( dev-libs/glib:2[>=2.7.0]
-                sys-apps/acl
-                dev-libs/libusb:0.1[>=0.1.12]
-                sys-apps/usbutils[>=0.82] )
+        glib? (
+            dev-libs/glib:2[>=2.7.0]
+            dev-libs/libusb:0.1[>=0.1.12]
+            sys-apps/acl
+            sys-apps/usbutils[>=0.82]
+        )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
 
 "
@@ -29,6 +31,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--with-rootlibdir=/$(get_libdir)"
     "--libexecdir=/$(get_libdir)/udev/"
     '--without-selinux'
+    "--docdir=/usr/share/doc/${PNVR}"
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib extras' 'gobject-introspection introspection' )
 
@@ -91,8 +94,9 @@ src_install() {
     # }}}
 
     # config protect {{{
-    echo "CONFIG_PROTECT_MASK=\"/$(get_libdir)/udev/rules.d\"" > "${WORK}/20udev"
-    doenvd "${WORK}/20udev"
+    hereenvd 20udev <<EOT
+CONFIG_PROTECT_MASK=\"/$(get_libdir)/udev/rules.d\"
+EOT
     # }}}
 
     keepdir "/etc/udev/rules.d"

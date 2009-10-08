@@ -3,7 +3,6 @@
 # Based in part upon 'eject-2.1.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-
 SUMMARY="A command to eject a disc from the CD-ROM drive"
 HOMEPAGE="http://eject.sourceforge.net/ http://ca.geocities.com/jefftranter@rogers.com/eject.html"
 DOWNLOADS="http://www.ibiblio.org/pub/Linux/utils/disk-management/${PNV}.tar.gz
@@ -23,7 +22,8 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}/${PN}"-2.1.4-scsi-rdwr.patch
     -p0 "${FILES}/${PN}"-2.1.5-handle-spaces.patch #151257
     "${FILES}/${PN}"-2.1.5-man-typo.patch #165248
-    )
+)
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 

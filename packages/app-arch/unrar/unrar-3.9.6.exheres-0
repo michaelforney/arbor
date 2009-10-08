@@ -27,9 +27,8 @@ WORK="${WORKBASE}"/unrar
 src_compile() {
     export CXXFLAGS="${CXXFLAGS}"
     export CXX="$(tc-getCXX)"
-    export STRIP="true"
 
-    emake -f makefile.unix unrar
+    emake -f makefile.unix unrar STRIP="true"
     mv unrar "${TEMP}"
     emake -f makefile.unix clean
 

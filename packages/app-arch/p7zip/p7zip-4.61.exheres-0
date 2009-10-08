@@ -28,6 +28,7 @@ src_prepare() {
         -e "/^DEST_MAN/s:man:share/&:" \
         -e "/Rar/d" \
         -i makefile* || die "Failed to replace upstream flags"
+    sed -i -e "/strip/d" install.sh || die "removing strip calls failed"
     rm -rf CPP/7zip/Compress/Rar || die "Failed to remove non-GPL Rar source-code"
 }
 

@@ -1,0 +1,71 @@
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib gnu [ suffix=gz ]
+
+SUMMARY="Free software emulation of curses using Terminfo formats"
+
+LICENCES="as-is"
+MYOPTIONS="gpm"
+
+DEPENDENCIES="
+    build+run:
+        gpm? ( sys-libs/gpm )"
+
+ECONF_SOURCE="${WORK}"
+WORK="${WORKBASE}/build"
+
+src_unpack() {
+    default
+    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+}
+
+src_configure() {
+    local abi myconf="--hates=docdir --with-shared --with-normal
+              --without-termcap --without-hashed-db $(option_with gpm)"
+
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
+
+        mkdir -p "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
+        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+
+        econf --libdir=/usr/${LIBDIR} ${myconf}
+
+        mkdir -p "${WORK}/${abi}/wide" || die "mkdir wide failed"
+        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+
+        econf --libdir=/usr/${LIBDIR} ${myconf} \
+              --includedir=/usr/include/ncursesw \
+              --enable-widec $(option_with gpm)
+    done
+}
+
+src_compile() {
+    local abi
+
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
+
+        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+        default
+
+        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        default
+    done
+}
+
+src_install() {
+    local abi
+
+    for abi in ${ABIS_C} ; do
+        switch_abi_env C ${abi}
+
+        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+        default
+
+        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        default
+    done
+}
+

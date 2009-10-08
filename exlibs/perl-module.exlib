@@ -14,12 +14,14 @@ require multilib
 export_exlib_phases src_configure src_compile src_test src_install
 
 myexparam module_author=
+myexparam module_extension=.tar.gz
 
 exparam -v MODULE_AUTHOR module_author
+exparam -v MODULE_EXTENSION module_extension
 
 if [[ -z ${HOMEPAGE} && -z ${DOWNLOADS} && -n ${MODULE_AUTHOR} ]]; then
     HOMEPAGE="http://search.cpan.org/~${MODULE_AUTHOR//\/*}/"
-    DOWNLOADS="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${MY_PNV:-${PNV}}${MODULE_EXTENSION:-.tar.gz}"
+    DOWNLOADS="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${MY_PNV:-${PNV}}${MODULE_EXTENSION}"
     BUGS_TO="arkanoid@exherbo.org ingmar@exherbo.org pioto@exherbo.org"
     REMOTE_IDS="cpan:${MY_PN:-${PN}}"
     UPSTREAM_CHANGELOG="http://search.cpan.org/src/${MODULE_AUTHOR}/${MY_PNV:-${PNV}}/Changes"
