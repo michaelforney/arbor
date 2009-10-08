@@ -14,6 +14,7 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~x86"
 MYOPTIONS=""
+DOWNLOADS="ftp://alpha.gnu.org/gnu/grub/grub-${PV/-/~}.tar.gz"
 
 DEPENDENCIES="
     build:
@@ -27,6 +28,8 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ )
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( DISTLIST )
+
+WORK="${WORKBASE}/grub-${PV/-/~}/"
 
 src_install() {
     default
