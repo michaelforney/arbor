@@ -22,12 +22,5 @@ MYOPTIONS="doc"
 
 DEPENDENCIES=""
 
-src_install() {
-    default
-
-    if option !doc; then
-        # FIXME, install apidox to /usr/share/doc/${PNVR}, don't disable building them if option !doc.
-        rm -r "${IMAGE}"/usr/share/doc/${PN/++}-2.0/ || die 'Failed to remove apidox.'
-    fi
-}
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "doc documentation" )
 
