@@ -27,6 +27,7 @@ src_prepare() {
            -e "/^LIBDIR=/cLIBDIR=/usr/$(get_libdir)" \
            -e '/^IDSDIR=/cIDSDIR=/usr/share/misc' \
            -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
+           -e '/^STRIP=-s/cSTRIP=' \
            Makefile || die "failed to update makefile"
 }
 
