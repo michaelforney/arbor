@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 myexparam -b htmldocs=true
+myexparam -b manpages=true
 
 require multilib perl-module bash-completion elisp-module
 
@@ -11,10 +12,9 @@ SUMMARY="A distributed VCS focused on speed, effectivity and real-world usabilit
 DESCRIPTION="Git is a fast, scalable, distributed revision control system with an unusually rich command set
 that provides both high-level operations and full access to internals"
 HOMEPAGE="http://git-scm.com/ http://git.or.cz/index.html"
-DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV}.tar.bz2
-    mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV}.tar.bz2"
-
+DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV}.tar.bz2"
 exparam -b htmldocs && DOWNLOADS+=" doc? ( mirror://kernel/software/scm/${PN}/${PN}-htmldocs-${PV}.tar.bz2 )"
+exparam -b manpages && DOWNLOADS+=" mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV}.tar.bz2"
 
 BUGS_TO="ferdy@exherbo.org ingmar@exherbo.org"
 
@@ -30,8 +30,9 @@ UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${P
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="curl doc emacs ipv6 threads tk webdav xinetd
+MYOPTIONS="curl emacs ipv6 threads tk webdav xinetd
     webdav [[ requires = curl ]]"
+exparam -b htmldocs && MYOPTIONS+=" doc"
 
 DEPENDENCIES="
     build+run:
@@ -67,7 +68,7 @@ DEPENDENCIES="
 git_src_unpack() {
     unpack ${PNV}.tar.bz2
     cd "${WORK}"
-    unpack ${PN}-manpages-${PV}.tar.bz2
+    exparam -b manpages && unpack ${PN}-manpages-${PV}.tar.bz2
 
     if exparam -b htmldocs && option doc; then
         cd Documentation && unpack ${PN}-htmldocs-${PV}.tar.bz2
@@ -111,8 +112,11 @@ git_src_test() {
 git_src_install() {
     myemake install
 
-    local mans=( man?/* )
-    [[ -f ${man[0]} ]] || myemake install-man
+    if exparam -b manpages ; then
+        doman man?/*
+    else
+        myemake install-man
+    fi
 
     dodoc README Documentation/{SubmittingPatches,CodingGuidelines}
     for d in / /howto/ /technical/ ; do
