@@ -1,7 +1,7 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib
+require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib bash-completion
 
 export_exlib_phases src_prepare src_compile src_install pkg_postinst
 
@@ -14,12 +14,9 @@ library management, format conversion, news-feeds-to-ebook conversion as well as
 e-book reader sync features.
 "
 HOMEPAGE="http://${PN}.kovidgoyal.net"
-# Upstream suggests using pypi for DOWNLOADS.
-DOWNLOADS="http://pypi.python.org/packages/source/c/${PN}/${PNV}.tar.gz"
-# ${HOMEPAGE}/downloads/${PNV}.tar.gz"
-
+DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz ${HOMEPAGE}/downloads/${PNV}.tar.gz"
 BUGS_TO="philantrop@exherbo.org"
-REMOTE_IDS="pypi:${PN}"
+REMOTE_IDS="sourceforge:${PN}"
 
 UPSTREAM_CHANGELOG="${HOMEPAGE}/wiki/Changelog"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/user_manual/ [[ lang = en ]]"
@@ -48,7 +45,7 @@ DEPENDENCIES="
         media-libs/libwmf[>=0.2.8.4]
         sys-apps/hal[>=0.5.11]
         x11-apps/xdg-utils[>=1.0.2]
-    post,suggested:
+    suggestion:
         app-arch/unrar [[ description = [ for unpacking compressed ebooks ] ]]
         app-arch/unzip [[ description = [ for unpacking compressed ebooks ] ]]
 "
@@ -117,8 +114,11 @@ calibre_src_install() {
     mv "${IMAGE}${sharedir}"/calibre/man/man1/* "${IMAGE}${sharedir}"/man/man1/ \
         || die "moving man pages failed"
 
+    dobashcompletion "${IMAGE}"/etc/bash_completion.d/calibre
+
     # Removing junk.
     rm -r \
+        "${IMAGE}"/etc/bash_completion.d \
         "${IMAGE}"${sharedir}/applications/{defaults.list,mimeinfo.cache} \
         "${IMAGE}"${sharedir}/mime/{subclasses,XMLnamespaces,globs{,2},mime.cache,{tree,}magic,aliases,{generic-,}icons,types} \
         "${IMAGE}"${sharedir}/{applnk,desktop-directories} \
@@ -128,10 +128,12 @@ calibre_src_install() {
 }
 
 calibre_pkg_postinst() {
-    local old_udev="/etc/udev/rules.d/95-calibre.rules"
-    if test -f "${old_udev}" ; then
-        rm "${old_udev}" || die "removing old udev rules failed"
-    fi
+    local cruft=( /etc/udev/rules.d/95-calibre.rules /etc/bash_completion.d/calibre )
+    for file in ${cruft[@]}; do
+        if test -f "${file}" ; then
+            rm "${file}" || die "removing ${file} failed"
+        fi
+    done
 
     freedesktop-mime_update_desktop_database
     freedesktop-mime_update_mime_database

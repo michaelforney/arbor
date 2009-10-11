@@ -9,7 +9,7 @@ DOWNLOADS="mirror://sourceware/${PN}/releases/${PNV}.tar.bz2"
 
 LICENCES="GPL-2 LGPL-2"
 SLOT="0"
-MYOPTIONS="nls"
+MYOPTIONS="python"
 
 # Don't want to harddepend on dejagnu (-> tcl, expect)
 RESTRICT=test
@@ -17,15 +17,24 @@ RESTRICT=test
 #       dev-util/dejagnu
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
+        dev-libs/expat
         sys-libs/ncurses[>=5.2]
-        nls? ( sys-devel/gettext )"
+        python? ( dev-lang/python:= )
+"
 
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-gold
     --disable-werror
-    --with-system-readline
+    --hates=docdir
+    --with-curses
+    --with-expat
+    # FIXME Still breaks with readline-6.0*
+    #--with-system-readline
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( gdb sim )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CONTRIBUTE )
 

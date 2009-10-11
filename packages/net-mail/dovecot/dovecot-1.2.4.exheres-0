@@ -54,7 +54,7 @@ DEPENDENCIES="
     run:
         group/dovecot
         user/dovecot
-    post,suggested:
+    suggestion:
         net-mail/dovecot-sieve [[ description = [ Sieve plugin for deliver. ] ]]
 "
 
@@ -88,6 +88,7 @@ remove_example() {
 
 src_install() {
     default
+    newinitd "${FILES}"/dovecot.init-r2 dovecot
     keepdir /usr/$(get_libdir)/dovecot/auth
 
     if option doc ; then

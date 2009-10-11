@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'bzr-1.10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
-
+require launchpad
 require python [ python_dep=2.5 ] bash-completion
 require distutils [ python_modules=[ bzrlib ] ]
 
@@ -19,7 +19,6 @@ from the branches that they branched from.
 If you have a choice, use dev-scm/git instead.
 "
 HOMEPAGE="http://bazaar-vcs.org"
-DOWNLOADS="http://launchpad.net/${PN}/$(ever range 1-2)/${MY_PV}/+download/${PN}-${MY_PV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN} launchpad:${PN}"
@@ -33,9 +32,9 @@ MYOPTIONS=""
 RESTRICT="test"
 
 DEPENDENCIES="
-    post,recommended:
+    recommendation:
         dev-scm/git [[ description = [ A much better SCM ] ]]
-    post,suggested:
+    suggestion:
         dev-python/paramiko [[ description = [ Provides sftp support ] ]]
         dev-scm/bzrtools [[ description = [ Provides rsync support, and other useful extra functionality ] ]]
 "

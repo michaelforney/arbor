@@ -48,7 +48,7 @@ DEPENDENCIES+="
     build:
         sys-apps/sed[>=4]
         sys-devel/autoconf:2.5
-    run+build:
+    build+run:
         dev-util/ctags
         sys-libs/ncurses[>=5.2-r2]"
 
@@ -82,7 +82,7 @@ if [[ ${PN} != vim-runtime ]]; then
                     x11-proto/xproto )
             run:
                 X? ( x11-libs/libXt )
-            post+suggested:
+            suggestion:
                 app-vim/securemodelines [[ description = [ the built in modelines support is insecure ] ]]
             "
         ;;

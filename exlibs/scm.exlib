@@ -323,7 +323,7 @@ scm_global_stuff() {
 
 SCM_HOME=${FETCHEDDIR}/scm
 scm_finalise() {
-    DEPENDENCIES+="( build,host,required: sys-apps/util-linux-ng[>=2.13_pre2]"
+    DEPENDENCIES+="( build+fetch: sys-apps/util-linux-ng[>=2.13_pre2]"
     scm_{for_each,global_stuff}
     DEPENDENCIES+=" )"
 }
