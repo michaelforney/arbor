@@ -27,11 +27,11 @@ myexparam script_type=
 exparam -v VIM_SCRIPT_TYPE script_type
 
 DEPENDENCIES="
-build,run:
-    || (
-        app-editors/vim[>=${VIM_PLUGIN_VIM_VERSION}]
-        app-editors/gvim[>=${VIM_PLUGIN_VIM_VERSION}]
-    )
+    build+run:
+        || (
+            app-editors/vim[>=${VIM_PLUGIN_VIM_VERSION}]
+            app-editors/gvim[>=${VIM_PLUGIN_VIM_VERSION}]
+        )
 "
 
 if [[ -n "${VIM_SCRIPT_ID}" ]] ; then
