@@ -57,7 +57,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    local x multibuild_c_target
+    local x
 
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
@@ -90,12 +90,13 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
-    # create lib${multibuild_c_target} dirs and lib symlinks if applicable
+    # create LIBDIRs and lib symlinks if applicable
     if [[ ${LIBDIR} != lib ]]; then
+        local multibuild_c_target
         for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-            create_root_owned_directory "${ROOT}lib${multibuild_c_target}"
-            create_root_owned_directory "${ROOT}usr/lib${multibuild_c_target}"
-            create_root_owned_directory "${ROOT}usr/local/lib${multibuild_c_target}"
+            create_root_owned_directory "${ROOT}${LIBDIR}"
+            create_root_owned_directory "${ROOT}usr/${LIBDIR}"
+            create_root_owned_directory "${ROOT}usr/local/${LIBDIR}"
         done
 
         for x in {,usr/,usr/local/}lib ; do
