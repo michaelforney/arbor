@@ -85,8 +85,8 @@ src_configure() {
     done
     ever at_least 4.3 && option java && LANGS+=",java"
 
-    local supported_abis=( ${ABIS_C} )
-    if [[ ${#supported_abis[@]} -gt 1 ]]; then
+    local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )
+    if [[ ${#supported_c_build_targets[@]} -gt 1 ]]; then
         multilib=--enable-multilib
     else
         multilib=--disable-multilib

@@ -22,63 +22,63 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 binutils_src_unpack() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        mkdir -p "${WORK}/${abi}" || die "mkdir ${abi} failed"
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        mkdir -p "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
         default
     done
 }
 
 binutils_src_prepare() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}/${PNV}" || die "entering ${abi}/${PNV} failed"
+        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target}/${PNV} failed"
 
         default
 
-        if [[ ${abi} != ${DEFAULT_ABI_C} ]] ; then
+        if [[ ${multibuild_c_target} != ${MULTIBUILD_C_DEFAULT_TARGET} ]] ; then
             sed -e "s,^LIB_PATH = @LIB_PATH@,LIB_PATH = /usr/local/${LIBDIR}:/${LIBDIR}:/usr/${LIBDIR}:@LIB_PATH@," \
-                -i "ld/Makefile.in" || die "failed to fix LIBDIR for non-default ABI (${abi})"
+                -i "ld/Makefile.in" || die "failed to fix LIBDIR for non-default C build target (${multibuild_c_target})"
         fi
     done
 }
 
 binutils_src_configure() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}/${PNV}" || die "entering ${abi} failed"
+        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target} failed"
 
         econf --enable-serial-configure --libdir=/usr/${LIBDIR} --hates=docdir
     done
 }
 
 binutils_src_compile() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}/${PNV}" || die "entering ${abi} failed"
+        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
 }
 
 binutils_src_install() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}/${PNV}" || die "entering ${abi} failed"
+        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target} failed"
 
         default
 
@@ -105,7 +105,7 @@ EOF
         fi
     done
 
-    switch_abi_env C ${DEFAULT_ABI_C}
+    multibuild_switch_build_target C ${MULTIBUILD_C_DEFAULT_TARGET}
 
     for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
         target=${f#${IMAGE}}

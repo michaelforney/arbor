@@ -57,7 +57,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    local x abi
+    local x multibuild_c_target
 
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
@@ -90,12 +90,12 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
-    # create lib${abi} dirs and lib symlinks if applicable
+    # create lib${multibuild_c_target} dirs and lib symlinks if applicable
     if [[ ${LIBDIR} != lib ]]; then
-        for abi in ${ABIS_C} ; do
-            create_root_owned_directory "${ROOT}lib${abi}"
-            create_root_owned_directory "${ROOT}usr/lib${abi}"
-            create_root_owned_directory "${ROOT}usr/local/lib${abi}"
+        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            create_root_owned_directory "${ROOT}lib${multibuild_c_target}"
+            create_root_owned_directory "${ROOT}usr/lib${multibuild_c_target}"
+            create_root_owned_directory "${ROOT}usr/local/lib${multibuild_c_target}"
         done
 
         for x in {,usr/,usr/local/}lib ; do

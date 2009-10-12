@@ -33,37 +33,37 @@ src_unpack() {
 }
 
 src_configure() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        mkdir "${WORK}/${abi}" || die "mkdir ${abi} failed"
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+        mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
 }
 
 src_compile() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
 }
 
 src_install() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         emake DESTDIR="${IMAGE}" install-target-libstdc++-v3
     done

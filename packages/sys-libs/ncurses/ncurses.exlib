@@ -21,19 +21,19 @@ src_unpack() {
 }
 
 src_configure() {
-    local abi myconf="--hates=docdir --with-shared --with-normal
+    local multibuild_c_target myconf="--hates=docdir --with-shared --with-normal
               --without-termcap --without-hashed-db $(option_with gpm)"
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        mkdir -p "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
-        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+        mkdir -p "${WORK}/${multibuild_c_target}/narrow" || die "mkdir narrow failed"
+        cd "${WORK}/${multibuild_c_target}/narrow" || die "entering narrow failed"
 
         econf --libdir=/${LIBDIR} ${myconf}
 
-        mkdir -p "${WORK}/${abi}/wide" || die "mkdir wide failed"
-        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        mkdir -p "${WORK}/${multibuild_c_target}/wide" || die "mkdir wide failed"
+        cd "${WORK}/${multibuild_c_target}/wide" || die "entering wide failed"
 
         econf --libdir=/${LIBDIR} ${myconf} \
               --includedir=/usr/include/ncursesw \
@@ -42,29 +42,29 @@ src_configure() {
 }
 
 src_compile() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+        cd "${WORK}/${multibuild_c_target}/narrow" || die "entering narrow failed"
         default
 
-        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        cd "${WORK}/${multibuild_c_target}/wide" || die "entering wide failed"
         default
     done
 }
 
 src_install() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
+        cd "${WORK}/${multibuild_c_target}/narrow" || die "entering narrow failed"
         default
 
-        cd "${WORK}/${abi}/wide" || die "entering wide failed"
+        cd "${WORK}/${multibuild_c_target}/wide" || die "entering wide failed"
         default
     done
 }
