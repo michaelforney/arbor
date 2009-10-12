@@ -78,6 +78,14 @@ multibuild_switch_build_target()
     multibuild_load_build_target "${@}"
 }
 
+multibuild_load_default_targets() {
+    local class target
+    for class in ${MULTIBUILD_CLASSES}; do
+        x=MULTIBUILD_${class}_DEFAULT_TARGET
+        multibuild_load_build_target ${class} ${!x:-DEFAULT}
+    done
+}
+
 multibuild_sanity_check_profile()
 {
     local x var class target
@@ -117,5 +125,5 @@ get_all_libdirs()
     done
 }
 
-[[ ${EXHERES_PHASE} == metadata ]] || multibuild_load_build_target C ${MULTIBUILD_C_DEFAULT_TARGET:-DEFAULT}
+[[ ${EXHERES_PHASE} == metadata ]] || multibuild_load_default_targets
 
