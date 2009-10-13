@@ -64,7 +64,8 @@ e2fsprogs_src_compile() {
 e2fsprogs_src_test() {
     # The test script uses $IMAGE for its own purposes.
     local IMAGE
-    default
+    # the default blkid file is /etc/blkid.tab which results in sydbox violations
+    BLKID_FILE="${HOME}/blkid.tab" default
 }
 
 e2fsprogs_src_install() {
