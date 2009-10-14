@@ -30,12 +30,12 @@ src_configure() {
         mkdir -p "${WORK}/${abi}/narrow" || die "mkdir narrow failed"
         cd "${WORK}/${abi}/narrow" || die "entering narrow failed"
 
-        econf --libdir=/usr/${LIBDIR} ${myconf}
+        econf --libdir=/${LIBDIR} ${myconf}
 
         mkdir -p "${WORK}/${abi}/wide" || die "mkdir wide failed"
         cd "${WORK}/${abi}/wide" || die "entering wide failed"
 
-        econf --libdir=/usr/${LIBDIR} ${myconf} \
+        econf --libdir=/${LIBDIR} ${myconf} \
               --includedir=/usr/include/ncursesw \
               --enable-widec $(option_with gpm)
     done
