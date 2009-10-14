@@ -43,5 +43,9 @@ automake_src_install() {
     if [[ -e ${slotslot[0]} ]]; then
         rm "${slotslot[@]}" || die "rm failed"
     fi
+    cd "${IMAGE}"/usr/share/info || die 'cd /usr/share/info failed'
+    for info in automake.info* ; do
+        mv ${info} automake-${SLOT}.${info##*.} || die "slotting ${info} failed"
+    done
 }
 
