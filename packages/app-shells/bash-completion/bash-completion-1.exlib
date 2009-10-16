@@ -8,6 +8,7 @@
 
 SUMMARY="Programmable Completion for bash"
 HOMEPAGE="http://bash-completion.alioth.debian.org/"
+DOWNLOADS="${HOMEPAGE}/files/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 MYOPTIONS=""
@@ -27,5 +28,10 @@ bash-completion-1_src_install() {
 
     exeinto /etc/bash/bashrc.d
     newexe "${FILES}/bash-completion-1.sh" "bash-completion.sh"
+
+    if [[ -f "${IMAGE}"/etc/profile.d/bash_completion.sh ]] ; then
+        rm "${IMAGE}"/etc/profile.d/bash_completion.sh || die "failed to rm unused profile.d file"
+        rmdir "${IMAGE}"/etc/profile.d || die "failed to rmdir empty profile.d"
+    fi
 }
 

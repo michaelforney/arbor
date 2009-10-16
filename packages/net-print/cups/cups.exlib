@@ -39,12 +39,13 @@ DEPENDENCIES="
         ssl? ( dev-libs/openssl )
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff )
+        app-text/poppler [[ note = [ pdftops ] ]]
         media-libs/jpeg
         media-libs/libpng
         group/lpadmin
     post:
         xinetd? ( sys-apps/xinetd )
-        app-text/ghostscript[cups]
+        app-text/ghostscript[cups] [[ note = [ pstoraster, pdftoraster ] ]]
 "
 
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation.php"
@@ -112,7 +113,7 @@ src_configure() {
         --with-cups-{group,user}=lp \
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
         --with-languages="${CUPSLANGS}" \
-        --with-pdftops=gs \
+        --with-pdftops=pdftops \
         --with-system-groups=lpadmin \
         $(option_enable dbus) \
         $(option_enable gnutls) \

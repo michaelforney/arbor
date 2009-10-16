@@ -276,7 +276,7 @@ rewrite_symlink() {
     fi
     lib=${1%-${SLOT}.*}
     ext=${1#*-${SLOT}.}
-    for x in "${2}"/${lib}-*.${ext}; do
+    for x in "${2}"/${lib}-+([[:digit:].]).${ext}; do
         [[ ! -f ${x} || ${x##*/} == ${ignore} ]] && continue
         slot=${x##*/${lib}-}
         versions+=( "${slot%.${ext}}" )
@@ -295,9 +295,9 @@ rewrite_so_symlink() {
     if [[ ${1} == --ignore ]]; then
         ignore=${2}; shift
     fi
-    lib=${1%%*([[:digit:].])}; shift
+    lib=${1%%+([[:digit:].])}; shift
     for d in "$@"; do
-        for l in "${d}"/${lib}.*([[:digit:].]); do
+        for l in "${d}"/${lib}.+([[:digit:].]); do
             [[ ! -f ${l} ]] && continue
             [[ ${l##*/} == ${ignore} ]] && ignored=true && continue
             versions+=( "${l##*/${lib}.}" )
@@ -317,6 +317,16 @@ rewrite_so_symlink() {
     return $ret
 }
 
+cleanup_dangling_libstdcpp_symlinks() {
+    local l
+    for l in "${ROOT}"/usr/libstdc++.so*; do
+        if [[ -L ${l} && ! -f ${l} ]]; then
+            echo rm "${l}"
+            rm "${l}" || eerror "Failed to clean up ${l}"
+        fi
+    done
+}
+
 handle_symlinks() {
     local x
     # generate symlinks for libraries that were manually slotted in src_install, e.g.: libffi.so.4.0.1 -> libffi-4.3.so.4.0.1
@@ -328,6 +338,8 @@ handle_symlinks() {
     for x in "${so_symlinks[@]}"; do
         rewrite_so_symlink ${1} ${x##*/} "${ROOT}"/${x%/*}
     done
+
+    cleanup_dangling_libstdcpp_symlinks
 }
 
 pkg_postinst() {

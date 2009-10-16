@@ -6,15 +6,18 @@
 require multilib toolchain-funcs
 
 SUMMARY="Console-based mouse driver"
-HOMEPAGE="http://linux.schottelius.org/${PN}"
-DOWNLOADS="${HOMEPAGE}/archives/${PNV}.tar.bz2"
+HOMEPAGE="http://www.nico.schottelius.org/software/${PN}"
+DOWNLOADS="${HOMEPAGE}/archives/${PNV}.tar.lzma"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        app-arch/xz
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( "--libdir=/$(get_libdir)" "--sysconfdir=/etc/${PN}" )
 DEFAULT_SRC_COMPILE_PARAMS=( EMACS=: ELISP= )
