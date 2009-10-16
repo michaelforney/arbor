@@ -277,7 +277,7 @@ rewrite_symlink() {
     fi
     lib=${1%-${SLOT}.*}
     ext=${1#*-${SLOT}.}
-    for x in "${2}"/${lib}-@([[:digit:].]).${ext}; do
+    for x in "${2}"/${lib}-+([[:digit:].]).${ext}; do
         [[ ! -f ${x} || ${x##*/} == ${ignore} ]] && continue
         slot=${x##*/${lib}-}
         versions+=( "${slot%.${ext}}" )
@@ -296,9 +296,9 @@ rewrite_so_symlink() {
     if [[ ${1} == --ignore ]]; then
         ignore=${2}; shift
     fi
-    lib=${1%%*([[:digit:].])}; shift
+    lib=${1%%+([[:digit:].])}; shift
     for d in "$@"; do
-        for l in "${d}"/${lib}.*([[:digit:].]); do
+        for l in "${d}"/${lib}.+([[:digit:].]); do
             [[ ! -f ${l} ]] && continue
             [[ ${l##*/} == ${ignore} ]] && ignored=true && continue
             versions+=( "${l##*/${lib}.}" )
