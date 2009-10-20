@@ -40,13 +40,13 @@ ECONF_SOURCE="${WORKBASE}/${PNV}"
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
 glibc_pkg_pretend() {
-    local abi
+    local multibuild_c_target
 
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
 
         if ! echo ${CFLAGS} | grep -q -- -march ; then
-            ewarn "-march setting not specified for target ABI: ${abi}; defaulting to native"
+            ewarn "-march setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to native"
         fi
     done
 }
@@ -83,11 +83,13 @@ glibc_src_prepare() {
 }
 
 glibc_src_configure() {
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    local multibuild_c_target
 
-        mkdir "${WORK}/${abi}" || die "mkdir ${abi} failed"
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         echo "libc_cv_forced_unwind=yes" > config.cache
         echo "libc_cv_c_cleanup=yes" >> config.cache
@@ -97,7 +99,7 @@ glibc_src_configure() {
             append-flags -march=native
         fi
         append-flags -O2
-        CC="${GCC} -m${abi}" econf \
+        CC="${GCC} -m${multibuild_c_target}" econf \
             --libdir="/usr/${LIBDIR}" \
             --cache-file=config.cache \
             --enable-kernel=2.6.22 \
@@ -108,10 +110,12 @@ glibc_src_configure() {
 }
 
 glibc_src_compile() {
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    local multibuild_c_target
 
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
@@ -124,17 +128,19 @@ glibc_src_install() {
     # one to get staged will clobber all collisions.  In particular, this will
     # be all of the executables.  The supporting libraries (libc, nss, etc), are
     # installed into architecutre specific directories.
-    for abi in ${ABIS_C} ; do
-        switch_abi_env C ${abi}
+    local multibuild_c_target
 
-        cd "${WORK}/${abi}" || die "entering ${abi} failed"
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
 
     # make ld-linux.so.2 accessible to everything that expects to find things in /lib
-    local supported_abis=( ${ABIS_C} )
-    if [[ ${#supported_abis[@]} -gt 1 ]]; then
+    local supported_c_targets=( ${MULTIBUILD_C_TARGETS} )
+    if [[ ${#supported_c_targets[@]} -gt 1 ]]; then
         dosym ../lib32/ld-linux.so.2 /lib64/ld-linux.so.2
     fi
 
