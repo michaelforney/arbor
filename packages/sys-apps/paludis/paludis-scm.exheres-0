@@ -10,7 +10,7 @@ DOWNLOADS=""
 SCM_REPOSITORY="git://git.pioto.org/paludis"
 require scm-git
 
-MYOPTIONS="cran doc inquisitio pink python qa ruby vim-syntax xml"
+MYOPTIONS="cran doc inquisitio pink python ruby vim-syntax xml"
 LICENCES="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -40,11 +40,6 @@ DEPENDENCIES="
             dev-lang/python:=
             dev-libs/boost
         )
-        qa? (
-            app-crypt/gnupg
-            dev-libs/libxml2[>=2.6]
-            dev-libs/pcre[>=7.8]
-        )
         ruby? ( dev-lang/ruby )
         xml? ( dev-libs/libxml2[>=2.6] )
     run:
@@ -71,7 +66,6 @@ src_configure() {
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
         $(option_enable pink) \
-        $(option_enable qa) \
         $(option_enable ruby) \
         $(option_enable python) \
         $(option_enable vim-syntax vim ) \
@@ -108,15 +102,13 @@ src_install() {
     default
 
     local bashcomp bashcompletions
-    bashcompletions="accerso adjutrix
-        importare $(optionv inquisitio) instruo
-        $(optionq qa && echo qualudis) paludis reconcilio"
+    bashcompletions="accerso adjutrix importare $(optionv inquisitio) instruo paludis reconcilio"
     for bashcomp in ${bashcompletions}; do
         dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
     done
 
     for zshcomp in _adjutrix _cave _importare _paludis{,_packages} _reconcilio \
-        $(option inquisitio && echo '_inquisitio') # $(option qa && echo '_qualudis')
+        $(option inquisitio && echo '_inquisitio')
     do
         dozshcompletion "${WORK}/zsh-completion/${zshcomp}"
     done
