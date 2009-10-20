@@ -1,4 +1,4 @@
-# Copyright 2007 Bo Ørsted Andresen
+# Copyright 2007-2009 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Colour-highlighted diff output"
@@ -10,8 +10,11 @@ SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES="build:
+DEPENDENCIES="
+    build:
         sys-apps/diffutils"
+
+UPSTREAM_CHANGELOG="http://colordiff.sourceforge.net/changes.html [[ lang = en ]]"
 
 src_compile() {
     # has a Makefile with various targets, but none we want here
@@ -19,10 +22,11 @@ src_compile() {
 }
 
 src_install() {
-    newbin colordiff.pl colordiff
-    newbin cdiff.sh cdiff
+    newbin colordiff{.pl,}
+    newbin cdiff{.sh,}
+    doman c{,olor}diff.1
     insinto /etc
-    doins colordiffrc colordiffrc-lightbg
+    doins colordiffrc{,-lightbg}
     dodoc BUGS CHANGES README TODO
-    doman colordiff.1
 }
+
