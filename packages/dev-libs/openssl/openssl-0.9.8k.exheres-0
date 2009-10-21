@@ -20,6 +20,8 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     )
 # Parallel build is broken
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+# Tests don't run in parallel
+DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
 src_prepare() {
     default
