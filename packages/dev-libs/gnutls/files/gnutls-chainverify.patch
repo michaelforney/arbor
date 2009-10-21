@@ -1,0 +1,30 @@
+Source: upstream, http://git.savannah.gnu.org/gitweb/?p=gnutls.git;a=commitdiff;h=4f214970374c474692dd18032246a14b2e3686c5
+From 4f214970374c474692dd18032246a14b2e3686c5 Mon Sep 17 00:00:00 2001
+From: Simon Josefsson <simon@josefsson.org>
+Date: Tue, 20 Oct 2009 11:27:13 +0200
+Subject: [PATCH] Fix expired cert.
+
+---
+ tests/chainverify.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/tests/chainverify.c b/tests/chainverify.c
+index f394a28..19b27eb 100644
+--- a/tests/chainverify.c
++++ b/tests/chainverify.c
+@@ -701,8 +701,11 @@ static struct
+   { "rsa-md5 not ok", mayfirst_chain, &mayfirst_chain[1],
+     GNUTLS_VERIFY_ALLOW_SIGN_RSA_MD2,
+     GNUTLS_CERT_INSECURE_ALGORITHM | GNUTLS_CERT_INVALID },
++  { "rsa-md5 not ok2", mayfirst_chain, &mayfirst_chain[1],
++    GNUTLS_VERIFY_ALLOW_SIGN_RSA_MD5,
++    GNUTLS_CERT_EXPIRED | GNUTLS_CERT_INVALID },
+   { "rsa-md5 ok", mayfirst_chain, &mayfirst_chain[1],
+-    GNUTLS_VERIFY_ALLOW_SIGN_RSA_MD5, 0 },
++    GNUTLS_VERIFY_DISABLE_TIME_CHECKS | GNUTLS_VERIFY_ALLOW_SIGN_RSA_MD5, 0 },
+   { "v1ca fail", v1ca, &v1ca[2],
+     0, GNUTLS_CERT_SIGNER_NOT_CA | GNUTLS_CERT_INVALID },
+   { "v1ca expired", v1ca, &v1ca[2],
+-- 
+1.6.3.3
+
