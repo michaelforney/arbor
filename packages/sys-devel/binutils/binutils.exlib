@@ -24,22 +24,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --host=${CHOST} --hates=docdir )
 binutils_src_install() {
     default
 
-    insinto /etc/env.d/binutils
-    hereins ${CHOST}-${PV} <<EOF
-TARGET="${CHOST}"
-VER="${PV}"
-LIBPATH="/usr/$(get_libdir)/${PN}/${CHOST}-${PV}"
-FAKE_TARGETS="${CHOST}"
-EOF
-
-    # Make sure a binutils version is selected for ${CHOST}
-    if [[ ! -e "${IMAGE}/etc/env.d/${PN}/config-${CHOST}" ]]; then
-        insinto /etc/env.d/${PN}
-        hereins config-${CHOST} <<EOF
-CURRENT="${PV}"
-EOF
-    fi
-
     for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
         target=${f#${IMAGE}}
         name=${f##*/}
