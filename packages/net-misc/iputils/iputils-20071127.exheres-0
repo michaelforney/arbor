@@ -15,17 +15,11 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=(-p0
-    "${FILES}/${PNV}-linux-headers-types.patch"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILES}/${PNV}-linux-headers-types.patch"
+    "${FILES}/${PNV}-no-open-max.patch"
     "${FILES}/${PNV}-kernel-ifaddr.patch"
-    "${FILES}/${PNV}-no-open-max.patch")
-
-src_compile() {
-    default
-# Need docbook for html and man targets to work
-#   emake html
-#   emake man
-}
+)
 
 src_install() {
     into /
