@@ -9,20 +9,24 @@ SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
 DOWNLOADS="ftp://pkg-${PN}.alioth.debian.org/pub/pkg-${PN}/${PNV}.tar.bz2"
 
+UPSTREAM_RELEASE_NOTES="ftp://pkg-shadow.alioth.debian.org/pub/pkg-${PN}/${PNV}.NEWS"
+
 LICENCES="|| ( BSD-3 GPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls pam"
+MYOPTIONS="pam"
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         sys-libs/cracklib[>=2.8.3]
-        nls? ( sys-devel/gettext )
         pam? ( sys-libs/pam[>=1.0.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-4.1.2-login.defs.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-login.defs.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
     --enable-shadowgrp
     --enable-shared=no
     --enable-static=yes
@@ -32,7 +36,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-sha-crypt
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'pam libpam' )
 DEFAULT_SRC_INSTALL_PARAMS=( suidperms=4711 )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
@@ -41,8 +44,8 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 src_prepare() {
     default
 
-    sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs \
-        || die "sed for setting libdir failed"
+    sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs ||
+        die "sed for setting libdir failed"
 }
 
 src_install() {
