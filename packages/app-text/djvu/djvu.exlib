@@ -8,7 +8,7 @@ MY_PN="djvulibre"
 WORK="${WORKBASE}/${MY_PN}-${PV}"
 
 SUMMARY="DjVu viewers, encoders and utilities"
-HOMEPAGE="http://${PN}.sourceforge.org/"
+HOMEPAGE="http://${PN}.sourceforge.net/"
 DOWNLOADS="mirror://sourceforge/${PN}/${MY_PN}-${PV}.tar.gz"
 
 LICENCES="GPL-2"
@@ -17,7 +17,7 @@ SLOT="0"
 
 DEPENDENCIES="
     build+run:
-      media-libs/jpeg[>=6b]
+        media-libs/jpeg[>=6b]
         media-libs/tiff
 "
 
@@ -29,5 +29,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-threads
     # Use djview4 if you need a djvu viewer http://djvu.sourceforge.net/djview4.html
     --disable-djview --without-qt --disable-desktopfiles --disable-i18n --disable-xmltools
+    --without-x
 )
 

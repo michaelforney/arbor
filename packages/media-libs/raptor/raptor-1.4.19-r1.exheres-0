@@ -23,4 +23,6 @@ DEPENDENCIES="
         dev-libs/glib:2"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-www=xml --with-xml-parser=libxml '--enable-nfc-check' )
+# Tests don't run in parallel
+DEFAULT_SRC_TEST_PARAMS=( -j1 )
 

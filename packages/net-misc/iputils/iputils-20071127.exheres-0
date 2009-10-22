@@ -6,7 +6,8 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Small useful utilities for networking"
 HOMEPAGE="http://www.skbuff.net/iputils/"
-DOWNLOADS="http://www.skbuff.net/${PN}/${MY_PNV}.tar.bz2"
+DOWNLOADS="http://www.skbuff.net/${PN}/${MY_PNV}.tar.bz2
+    http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}-manpages.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -15,17 +16,11 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=(-p0
-    "${FILES}/${PNV}-linux-headers-types.patch"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILES}/${PNV}-linux-headers-types.patch"
+    "${FILES}/${PNV}-no-open-max.patch"
     "${FILES}/${PNV}-kernel-ifaddr.patch"
-    "${FILES}/${PNV}-no-open-max.patch")
-
-src_compile() {
-    default
-# Need docbook for html and man targets to work
-#   emake html
-#   emake man
-}
+)
 
 src_install() {
     into /
@@ -45,6 +40,7 @@ src_install() {
         fperms +s /usr/sbin/traceroute6
     fi
 
+    doman doc/*.?
     dodoc RELNOTES
 }
 
