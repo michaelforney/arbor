@@ -6,7 +6,8 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Small useful utilities for networking"
 HOMEPAGE="http://www.skbuff.net/iputils/"
-DOWNLOADS="http://www.skbuff.net/${PN}/${MY_PNV}.tar.bz2"
+DOWNLOADS="http://www.skbuff.net/${PN}/${MY_PNV}.tar.bz2
+    http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}-manpages.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -39,6 +40,7 @@ src_install() {
         fperms +s /usr/sbin/traceroute6
     fi
 
+    doman doc/*.?
     dodoc RELNOTES
 }
 
