@@ -13,8 +13,11 @@ DOWNLOADS="ftp://www.xmlsoft.org/${PN}/${PNV}.tar.gz
     ${SCHEMA_TEST_URI}${TAR1}/xsts-${TAR1}.tar.gz
     ${SCHEMA_TEST_URI}${TAR2}/xsts-${TAR2}.tar.gz"
 
+UPSTREAM_NEWS="${HOMEPAGE}/news.html"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog.html"
+
 LICENCES="MIT"
-SLOT="0"
+SLOT="2.0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="ipv6 python readline"
 
@@ -24,6 +27,7 @@ DEPENDENCIES="
         readline? ( sys-libs/readline )
 "
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-threads )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'ipv6' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python readline "readline history" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
@@ -37,7 +41,7 @@ src_unpack() {
 }
 
 src_prepare() {
-    ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ || \
+    ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ ||
         die "Failed to install test tarballs"
 }
 
