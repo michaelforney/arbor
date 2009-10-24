@@ -14,10 +14,11 @@ Objective-C, and C++ programs, using front-ends derived from GCC 4.0, GCC 4.2,
 and a custom new front-end, 'clang'. It supports x86, x86_64, ia64, PowerPC,
 and SPARC, with support for Alpha and ARM under development."
 HOMEPAGE="http://llvm.org/"
-DOWNLOADS="${HOMEPAGE}/releases/${PV}/${PNV}.tar.gz
-    ${HOMEPAGE}/releases/${PV}/${PN}-gcc-4.2-${PV}.source.tar.gz
-    ${HOMEPAGE}/releases/${PV}/${PN}-test-${PV}.tar.gz
+DOWNLOADS="
+    ${HOMEPAGE}/releases/${PV}/${PNV}.tar.gz
 "
+# Tests are RESTRICT
+#    ${HOMEPAGE}/releases/${PV}/${PN}-test-${PV}.tar.gz
 
 LICENCES="UoI-NCSA"
 SLOT="0"
@@ -28,9 +29,10 @@ RESTRICT="test"
 DEPENDENCIES="
     build:
         dev-lang/perl:*
-        dev-lang/python:* [[ description = [ Used for Clang's testrunner ] ]]
         sys-devel/flex
 "
+# Tests are RESTRICTed
+#       dev-lang/python:* [[ description = [ Used for Clang's testrunner ] ]]
 
 BUGS_TO="ingmar@exherbo.org"
 
