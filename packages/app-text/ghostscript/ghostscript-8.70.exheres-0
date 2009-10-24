@@ -41,8 +41,8 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_prepare() {
-    rm -r ./{expat,jasper,jpeg,libpng,Resource/Font,zlib} \
-        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng,urw-fonts & zlib"
+    rm -r ./{expat,jasper,jpeg,libpng,zlib} \
+        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng & zlib"
 
     if option !gtk; then
         sed -e 's:\$(GSSOX)::' \
