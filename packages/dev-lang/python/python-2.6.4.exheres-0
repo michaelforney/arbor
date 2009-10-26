@@ -6,8 +6,8 @@ require python-build
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 
 src_test() {
-    # Remove failing test, fails because it can't find windozy things
-    rm Lib/test/test_distutils.py || die "Couldn't remove Lib/test/test_distutils.py"
+    # Hangs under sydbox
+    edo rm Lib/test/test_threading.py
 
     python-build_src_test
 }
