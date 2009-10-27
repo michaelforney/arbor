@@ -15,7 +15,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index f712658..45e5469 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -319,16 +319,21 @@ if(LLVM_BUILD_EXAMPLES)
+@@ -319,16 +319,23 @@ if(LLVM_BUILD_EXAMPLES)
    add_subdirectory(examples)
  endif ()
  
@@ -30,6 +30,7 @@ index f712658..45e5469 100644
 +  FILES_MATCHING
 +  PATTERN "*.h"
 +  PATTERN "*.td"
++  PATTERN ".svn" EXCLUDE
    )
  
 -install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include
@@ -42,6 +43,7 @@ index f712658..45e5469 100644
 +  PATTERN "*.gen"
 +  # Exclude include/llvm/CMakeFiles/intrinsics_gen.dir, matched by "*.def"
 +  PATTERN "CMakeFiles" EXCLUDE
++  PATTERN ".svn" EXCLUDE
    )
  
  # TODO: make and install documentation.

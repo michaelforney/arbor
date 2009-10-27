@@ -49,6 +49,8 @@ llvm_src_install() {
     cmake_src_install
 
     insinto /usr/share/doc/${PNVR}/
+    find docs/{img,HistoricalNotes} -type d -name .svn -print0 | xargs -0 rm -r ||
+        die "Couldn't remove .svn/ cruft"
     doins -r docs/*.{css,html} docs/img/ docs/HistoricalNotes
 }
 
