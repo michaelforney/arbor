@@ -18,15 +18,16 @@ DEPENDENCIES=""
 
 src_install() {
     # Although the Makefile has an install target, it installs everything
-    # into /usr and include which.
+    # into /usr and includes which.
 
     into /
     dobin tempfile run-parts
     dosbin installkernel
 
     into /usr
-    dosbin savelog mkboot
+    dosbin savelog
 
-    doman tempfile.1 run-parts.8 savelog.8 installkernel.8 mkboot.8
+    doman tempfile.1 run-parts.8 savelog.8 installkernel.8
     dodoc debian/{changelog,control}
 }
+
