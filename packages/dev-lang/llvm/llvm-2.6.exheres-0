@@ -5,11 +5,7 @@ require llvm
 
 PLATFORMS="~amd64"
 
-src_compile() {
-    cmake_src_compile
-}
-
-src_install() {
-    cmake_src_install
-}
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/0001-CMake-Explicitly-list-extensions-of-files-that-shoul.patch"
+)
 

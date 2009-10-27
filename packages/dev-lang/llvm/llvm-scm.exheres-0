@@ -3,27 +3,17 @@
 
 SCM_REPOSITORY="http://llvm.org/svn/llvm-project/llvm/"
 
-SCM_SECONDARY_REPOSITORIES="clang"
-SCM_clang_REPOSITORY="http://llvm.org/svn/llvm-project/cfe/"
-SCM_clang_UNPACK_TO="${WORK}/tools/clang/"
-
 require llvm scm-svn
 
 DOWNLOADS=""
 
 PLATFORMS="~amd64"
 
-# FIXME Some bad globbing in CMake buildsystem:
-#   /usr/include/llvm/(CMakeFiles|Makefile)
-#   /usr/include/clang/**/(CMakeLists.txt|Makefile)
-#   /usr/./include (though purely cosmetic)
-# FIXME Clang installs into /usr/Headers, add a CMake switch for this, plus include it in system include paths by default
-# FIXME Support for building & installing documentation
-
-# Doesn't currently build, shared libs aren't recommended by upstream
-# CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
-
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-Exherbo-includes.patch"
+    "${FILES}/0001-CMake-Explicitly-list-extensions-of-files-that-shoul.patch"
 )
+
+# FIXME Support for building & installing documentation
+# FIXME Shared libraries don't build currently, shared libs aren't recommended by upstream
+# CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
 

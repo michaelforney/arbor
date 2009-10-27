@@ -1,0 +1,50 @@
+Upstream: http://llvm.org/bugs/show_bug.cgi?id=5321
+
+From 7b3658a693e7272616ccdaaf6fdb845ff4218b94 Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Tue, 27 Oct 2009 18:44:09 +0100
+Subject: [PATCH] CMake: Explicitly list extensions of files that should be installed into include/
+
+Rather than excluding quite some things, and still installing CMakeLists.txt,
+Makefiles, ... it's better to whitelist what we really want to install.
+---
+ CMakeLists.txt |   21 +++++++++++++--------
+ 1 files changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f712658..45e5469 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -319,16 +319,21 @@ if(LLVM_BUILD_EXAMPLES)
+   add_subdirectory(examples)
+ endif ()
+ 
+-install(DIRECTORY include
+-  DESTINATION .
+-  PATTERN ".svn" EXCLUDE
+-  PATTERN "*.cmake" EXCLUDE
+-  PATTERN "*.in" EXCLUDE
+-  PATTERN "*.tmp" EXCLUDE
++install(DIRECTORY include/
++  DESTINATION include
++  FILES_MATCHING
++  PATTERN "*.h"
++  PATTERN "*.td"
+   )
+ 
+-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include
+-  DESTINATION .
++install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/
++  DESTINATION include
++  FILES_MATCHING
++  PATTERN "*.def"
++  PATTERN "*.h"
++  PATTERN "*.gen"
++  # Exclude include/llvm/CMakeFiles/intrinsics_gen.dir, matched by "*.def"
++  PATTERN "CMakeFiles" EXCLUDE
+   )
+ 
+ # TODO: make and install documentation.
+-- 
+1.6.5.2.181.gd6f41
+
