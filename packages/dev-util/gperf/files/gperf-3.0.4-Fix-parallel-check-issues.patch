@@ -1,0 +1,87 @@
+Source: Written by Bryan Østergaard <kloeri@gentoo.org>
+Upstream: Yes, http://lists.gnu.org/archive/html/bug-gperf/2009-09/index.html
+Reason: Fix parallel make check
+
+From aa0e04966b8645241ed409ea50b4c3d7a97a33c9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bryan=20=C3=98stergaard?= <kloeri@exherbo.org>
+Date: Tue, 27 Oct 2009 20:26:27 +0000
+Subject: [PATCH] Fix parallel check issues.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Bryan Østergaard <kloeri@exherbo.org>
+---
+ tests/Makefile.in |   16 ++++++++--------
+ 1 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/tests/Makefile.in b/tests/Makefile.in
+index 25890a6..8dddb9b 100644
+--- a/tests/Makefile.in
++++ b/tests/Makefile.in
+@@ -70,11 +70,11 @@ check-link-c: force
+ 	@echo "performing some tests of the perfect hash generator"
+ 	$(CC) -c $(CFLAGS) $(srcdir)/test.c
+ 	$(GPERF) -c -l -S1 -I -o $(srcdir)/c.gperf > cinset.c
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o cout cinset.c test.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o cout cinset.c test.c
+ 
+ check-link-c++: force
+ 
+-check-c:
++check-c: check-link-c
+ 	@echo "testing ANSI C reserved words, all items should be found in the set"
+ 	./cout -v < $(srcdir)/c.gperf | LC_ALL=C tr -d '\r' > c.out
+ 	diff $(srcdir)/c.exp c.out
+@@ -82,26 +82,26 @@ check-c:
+ check-ada:
+ 	$(GPERF) -k1,4,'$$' -I $(srcdir)/ada.gperf > adainset.c
+ # double '$$' is only there since make gets confused; program wants only 1 '$'
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o aout adainset.c test.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o aout adainset.c test.c
+ 	@echo "testing Ada reserved words, all items should be found in the set"
+ 	./aout -v < $(srcdir)/ada.gperf | LC_ALL=C tr -d '\r' > ada-res.out
+ 	diff $(srcdir)/ada-res.exp ada-res.out
+ 	$(GPERF) -D -k1,'$$' -s 2 -I -o $(srcdir)/adadefs.gperf > preinset.c
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o preout preinset.c test.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o preout preinset.c test.c
+ 	@echo "testing Ada predefined words, all items should be found in the set"
+ 	./preout -v < $(srcdir)/adadefs.gperf | LC_ALL=C tr -d '\r' > ada-pred.out
+ 	diff $(srcdir)/ada-pred.exp ada-pred.out
+ 
+ check-modula3:
+ 	$(GPERF) -k1,2,'$$' -I -o $(srcdir)/modula3.gperf > m3inset.c
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o m3out m3inset.c test.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o m3out m3inset.c test.c
+ 	@echo "testing Modula3 reserved words, all items should be found in the set"
+ 	./m3out -v < $(srcdir)/modula3.gperf | LC_ALL=C tr -d '\r' > modula.out
+ 	diff $(srcdir)/modula.exp modula.out
+ 
+ check-pascal:
+ 	$(GPERF) -o -S2 -I < $(srcdir)/pascal.gperf > pinset.c
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o pout pinset.c test.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o pout pinset.c test.c
+ 	@echo "testing Pascal reserved words, all items should be found in the set"
+ 	./pout -v < $(srcdir)/pascal.gperf | LC_ALL=C tr -d '\r' > pascal.out
+ 	diff $(srcdir)/pascal.exp pascal.out
+@@ -109,7 +109,7 @@ check-pascal:
+ # check for 8-bit cleanliness
+ check-lang-utf8:
+ 	$(GPERF) -k1 -t -I -K foreign_name < $(srcdir)/lang-utf8.gperf > lu8inset.c
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o lu8out lu8inset.c test.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o lu8out lu8inset.c test.c
+ 	@echo "testing UTF-8 encoded languages, all items should be found in the set"
+ 	sed -e '1,6d' -e 's/,.*//' < $(srcdir)/lang-utf8.gperf | ./lu8out -v | LC_ALL=C tr -d '\r' > lang-utf8.out
+ 	diff $(srcdir)/lang-utf8.exp lang-utf8.out
+@@ -118,7 +118,7 @@ check-lang-utf8:
+ check-lang-ucs2:
+ 	$(CC) -c $(CFLAGS) $(srcdir)/test2.c
+ 	$(GPERF) -k4 -t -l -I -K foreign_name < $(srcdir)/lang-ucs2.gperf > lu2inset.c
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o lu2out lu2inset.c test2.$(OBJEXT)
++	$(CC) $(CFLAGS) $(LDFLAGS) -o lu2out lu2inset.c test2.c
+ 	@echo "testing UCS-2 encoded languages, all items should be found in the set"
+ 	./lu2out -v < $(srcdir)/lang-ucs2.in | LC_ALL=C tr -d '\r' > lang-ucs2.out
+ 	diff $(srcdir)/lang-ucs2.exp lang-ucs2.out
+-- 
+1.6.5.2
+
