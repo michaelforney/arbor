@@ -1,10 +1,10 @@
 # Copyright 2008 Wulf C. Krueger
-# Copyright 2008 Ingmar Vanhassel
+# Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require toolchain-funcs multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
+require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
 
 SUMMARY="Core file, shell and text utilities expected to be on any system."
 
@@ -54,11 +54,7 @@ src_configure() {
 
 src_install() {
     default
-    
-    # Linker script in /usr
-    gen_usr_ldscript libattr.so
-    # Static archives in /usr
-    mv "${IMAGE}"/{,usr/}$(get_libdir)/libattr.a || die "Failed moving static archives to /usr"
+
     # Part of sys-apps/man-pages
     rm -r "${IMAGE}"/usr/share/man/man2 || die 'Failed to remove man2 pages from man-pages'
 }

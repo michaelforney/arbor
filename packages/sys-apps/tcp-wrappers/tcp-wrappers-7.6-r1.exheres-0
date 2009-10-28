@@ -26,7 +26,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${PATCHDIR}/${PNV}-makefile.patch"
     "${PATCHDIR}/${PNV}-shared.patch"
     "${PATCHDIR}/generic"
-    )
+)
 
 src_prepare() {
     default
@@ -63,14 +63,12 @@ src_install() {
     insinto /usr/include
     doins tcpd.h
 
-    into /usr
-    dolib.a libwrap.a
-
     into /
+    dolib.a libwrap.a
     newlib.so libwrap.so libwrap.so.0.${PV}
     dosym libwrap.so.0.${PV} /$(get_libdir)/libwrap.so.0
     dosym libwrap.so.0 /$(get_libdir)/libwrap.so
-    gen_usr_ldscript libwrap.so
 
     dodoc BLURB CHANGES DISCLAIMER README* "${FILES}"/hosts.allow.example
 }
+

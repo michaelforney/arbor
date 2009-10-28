@@ -42,6 +42,7 @@ e2fsprogs_src_configure() {
     econf \
         --bindir=/bin \
         --sbindir=/sbin \
+        --libdir=/$(get_libdir) \
         --enable-elf-shlibs \
         --enable-tls \
         --enable-verbose-makecmds \
@@ -71,17 +72,6 @@ e2fsprogs_src_test() {
 e2fsprogs_src_install() {
     default
 
-    # Move shared libraries to /lib/, install static libraries to /usr/lib/,
-    # and install linker scripts to /usr/lib/.
-    dodir /$(get_libdir)
-    mv "${IMAGE}"/usr/$(get_libdir)/*.so* "${IMAGE}"/$(get_libdir)/
-    dolib.a lib/*.a
-    local x
-    cd "${IMAGE}"/$(get_libdir)
-    for x in *.so ; do
-        gen_usr_ldscript ${x}
-    done
-
     # Move 'useless' stuff to /usr/
     dosbin "${IMAGE}"/sbin/mklost+found
     rm -f "${IMAGE}"/sbin/mklost+found || die "removing binaries failed"
@@ -96,8 +86,8 @@ e2fsprogs_src_install() {
 
     if option static ; then
         for bin in "${STATIC_BINARIES[@]}" ; do
-            dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})" \
-            || die "Failed to install static binaries"
+            dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})" ||
+                die "Failed to install static binaries"
         done
     fi
 }

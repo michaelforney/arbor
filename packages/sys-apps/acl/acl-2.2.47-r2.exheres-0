@@ -3,7 +3,7 @@
 # Based in part upon 'acl-2.2.47.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] multilib toolchain-funcs
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] multilib
 
 MY_PNV="${PN}_${PV}-1"
 SUMMARY="Access control list utilities, libraries and headers"
@@ -32,6 +32,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
+    --libdir=/$(get_libdir)
     --libexecdir=/usr/$(get_libdir)
 )
 
@@ -65,14 +66,11 @@ src_configure() {
 src_install() {
     emake -j1 DIST_ROOT="${IMAGE}" install install-dev install-lib
 
-    # we don't install static libraries
-    rm "${IMAGE}/usr/$(get_libdir)"/libacl.{a,la}
+    # We don't install static libraries, remove symlink to /$(get_libdir)
+    edo rm "${IMAGE}"/usr/$(get_libdir)/libacl.{a,la,so}
 
-    # move shared libs to /
-    dodir /$(get_libdir)
-    mv "${IMAGE}"/usr/$(get_libdir)/libacl.so* "${IMAGE}"/$(get_libdir)/ || die "moving libs to / failed"
-    gen_usr_ldscript libacl.so
-
-    # fix circular linking
-    ln -sf "/$(get_libdir)/libacl.so.1" "${IMAGE}/$(get_libdir)/libacl.so"
+    # Fix circular linking
+    into /
+    dosym /$(get_libdir)/libacl.so.1 /$(get_libdir)/libacl.so
 }
+
