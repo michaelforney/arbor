@@ -8,7 +8,7 @@ PATCH_LEVEL=${PNV##*_p}
 
 require multilib toolchain-funcs gnu [ suffix=gz ]
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_prepare
 
 SUMMARY="GNU command line editing and history library"
 DESCRIPTION="
@@ -37,7 +37,7 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/usr/$(get_libdir) )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/$(get_libdir) )
 
 readline_src_prepare() {
     local i patches=( -p0 )
@@ -48,15 +48,5 @@ readline_src_prepare() {
 
     # Gentoo #71420
     sed -e 's:^SHLIB_LIBS=:SHLIB_LIBS=-lncurses:' -i support/shobj-conf || die "Couldn't force curses linking"
-}
-
-readline_src_install() {
-    default
-
-    local libdir=$(get_libdir)
-    dodir /${libdir}
-    mv "${IMAGE}"/usr/${libdir}/*.so* "${IMAGE}"/${libdir}/
-
-    gen_usr_ldscript libreadline.so libhistory.so
 }
 
