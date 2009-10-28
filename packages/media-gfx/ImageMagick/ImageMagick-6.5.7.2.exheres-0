@@ -37,8 +37,8 @@ DEPENDENCIES="
         )
         tiff? ( media-libs/tiff[>=3.5.5] )
         truetype? (
+            fonts/corefonts
             media-libs/freetype:2
-            media-fonts/corefonts
         )
         xml? ( dev-libs/libxml2[>=2.4.10] )
 "
@@ -51,7 +51,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static=no' '--enable-shared=yes'
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'cxx magick-plus-plus' 'djvu'
 'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
-'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
+'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/share/fonts/X11/fonts/corefonts'
 'xml' )
 
 src_configure() {
