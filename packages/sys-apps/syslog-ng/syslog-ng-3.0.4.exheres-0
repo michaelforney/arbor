@@ -15,25 +15,28 @@ MYOPTIONS="caps ipv6 pcre tcpd vim-syntax"
 RESTRICT="test"
 
 DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    test:
+        dev-lang/python:*
     build+run:
-        dev-libs/glib
-        dev-libs/openssl
-        sys-apps/eventlog
+        dev-libs/glib:2[>=2.10.1]
+        dev-libs/openssl[>=0.9.8]
+        sys-apps/eventlog[>=0.2]
         sys-devel/bison
         caps? ( sys-libs/libcap )
         pcre? ( dev-libs/pcre )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
-    build:
-        dev-util/pkg-config
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )
 "
 
-# If someone wants to use the new SQL logging option directly, please find me
-# some good docs about.
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-pidfile-dir=/var/run
     --sysconfdir=/etc/syslog-ng
+    # If someone wants to use the new SQL logging option directly, please find me some good docs
+    # about it.
+    --disable-sql
     --disable-env-wrapper
     --disable-spoof-source
     --disable-sql
@@ -41,7 +44,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-ssl
     --without-libnet
 )
-
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "caps linux-caps"
     ipv6
@@ -52,15 +54,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     contrib/syslog-ng.conf.doc
 )
-
-src_test() {
-    if ! has_version dev-lang/python; then
-        ewarn 'dev-lang/python is required to run tests'
-        return 0
-    fi
-
-    default
-}
 
 src_install() {
     default
@@ -80,3 +73,4 @@ src_install() {
     newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
     newconfd "${FILES}"/syslog-ng.confd syslog-ng
 }
+

@@ -1,9 +1,9 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon exim-4.69-r1.ebuild from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require fixheadtails multilib alternatives
+require multilib alternatives
 
 SUMMARY="A highly configurable, drop-in replacement for sendmail"
 HOMEPAGE="http://www.exim.org"
@@ -60,8 +60,6 @@ src_prepare() {
     mv "${WORKBASE}"/${PN}-texinfo-${PV}/doc/*.texinfo "${WORK}"/doc/ || die "Failed to move .texinfo files"
 
     default
-
-    ht_fix_file scripts/Configure-config.h
 
     cp "${WORK}/src/EDITME" Local/Makefile || die "Couldn't copy to Local/Makefile"
     # XXX option X && cp ../exim_monitor/EDITME eximon.conf || die "Couldn't copy eximon.conf"

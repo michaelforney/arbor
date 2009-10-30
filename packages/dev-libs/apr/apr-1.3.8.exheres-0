@@ -13,6 +13,8 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sydbox.patch )
+# Tests don't run in parallel
+DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
 src_configure() {
     default

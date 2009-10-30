@@ -7,6 +7,7 @@ The formats supported include:
 gzip (read and write, uses zlib)
 bzip2 (read and write, uses bzlib)
 compress (read and write, uses an internal implementation)
+cpio (read and write, including odc and newc variants)
 separate command-line compressors (no auto-detect for these)
 tar (read and write, including GNU extensions)
 pax (read and write, including GNU and star extensions)
@@ -16,26 +17,24 @@ mtree (read and write)
 shar (write only)
 ar (read and write, including BSD and GNU/SysV variants)
 "
-# XXX: cpio (read and write, including odc and newc variants)
 HOMEPAGE="http://code.google.com/p/${PN} http://people.freebsd.org/~kientzle/${PN}"
 DOWNLOADS="http://${PN}.googlecode.com/files/${PNV}.tar.gz"
 
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="acl xattr"
+MYOPTIONS="acl ssl xattr"
 
 DEPENDENCIES="
     build+run:
         app-arch/gzip
         app-arch/bzip2
         app-arch/xz
-        dev-libs/openssl
         acl? ( sys-apps/acl )
+        ssl? ( dev-libs/openssl )
         xattr? ( sys-apps/attr )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-bsdcpio-tests-sgid-bit.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     --enable-bsdcpio=shared
@@ -45,6 +44,5 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-lzmadec
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl xattr )
-# On 2.7 branch, past 2.7.0 tag:
-# DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ssl openssl' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ssl openssl' )
 

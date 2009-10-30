@@ -2,7 +2,7 @@
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
-require fixheadtails gnu [ suffix=gz ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] gnu [ suffix=gz ]
 
 SUMMARY="GNU Portable Threads"
 
@@ -18,12 +18,14 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/${PN}-2.0.7-parallelfix.patch"
     -p1 "${FILES}/${PN}-2.0.7-ldflags.patch"
-    "${FILES}/${PN}-2.0.7-sigstack.patch" )
+    "${FILES}/${PN}-2.0.7-sigstack.patch"
+)
 DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( USERS )
 
 src_prepare() {
     default
-    ht_fix_file aclocal.m4 configure
+    # pth doesn't use automake
+    eautoconf
 }
 

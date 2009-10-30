@@ -88,21 +88,6 @@ binutils_src_install() {
             rmdir "${IMAGE}/usr/${LIBDIR}" || die "rmdir ${IMAGE}/usr/${LIBDIR}"
         fi
 
-        insinto /etc/env.d/binutils
-        hereins ${CTARGET}-${PV} << EOF
-TARGET="${CTARGET}"
-VER="${PV}"
-LIBPATH="/usr/${CTARGET}"
-FAKE_TARGETS="${CTARGET}"
-EOF
-
-        # Make sure a binutils version is selected for ${CHOST}
-        if [[ ! -e "${IMAGE}/etc/env.d/${PN}/config-${CHOST}" ]] ; then
-            insinto /etc/env.d/${PN}
-            hereins config-${CHOST} << EOF
-CURRENT="${PV}"
-EOF
-        fi
     done
 
     multibuild_switch_build_target C ${MULTIBUILD_C_DEFAULT_TARGET}

@@ -9,20 +9,24 @@ SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
 DOWNLOADS="ftp://pkg-${PN}.alioth.debian.org/pub/pkg-${PN}/${PNV}.tar.bz2"
 
+UPSTREAM_RELEASE_NOTES="ftp://pkg-shadow.alioth.debian.org/pub/pkg-${PN}/${PNV}.NEWS"
+
 LICENCES="|| ( BSD-3 GPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls pam"
+MYOPTIONS="pam"
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         sys-libs/cracklib[>=2.8.3]
-        nls? ( sys-devel/gettext )
         pam? ( sys-libs/pam[>=1.0.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-4.1.2-login.defs.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-login.defs.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
     --enable-shadowgrp
     --enable-shared=no
     --enable-static=yes
@@ -32,7 +36,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-sha-crypt
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'pam libpam' )
 DEFAULT_SRC_INSTALL_PARAMS=( suidperms=4711 )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
@@ -41,12 +44,13 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 src_prepare() {
     default
 
-    sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs \
-        || die "sed for setting libdir failed"
+    sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs ||
+        die "sed for setting libdir failed"
 }
 
 src_install() {
     default
+
     dosym useradd /usr/sbin/adduser
 
     # Remove libshadow and libmisc; see Gentoo bug 37725 and the following
@@ -54,17 +58,19 @@ src_install() {
     #   Currently, libshadow.a is for internal use only, so if you see
     #   -lshadow in a Makefile of some other package, it is safe to
     #   remove it.
-    rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la}
+    rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la} ||
+        die "Couldn't remove libmisc, libshadow"
 
     insinto /etc
-    insopts -m0600 ; doins "${FILES}"/securetty
+    insopts -m0600
+    doins "${FILES}"/securetty
 
     # needed for 'adduser -D'
     insinto /etc/default
     insopts -m0600 ; doins "${FILES}"/useradd
 
     # move passwd to / to help recover broken systems. cf. Gentoo bug 64441.
-    mv "${IMAGE}"/usr/bin/passwd "${IMAGE}"/bin/
+    mv "${IMAGE}"/usr/bin/passwd "${IMAGE}"/bin/ || die "Moving passwd to /bin failed"
     dosym /bin/passwd /usr/bin/passwd
 
     insinto /etc
@@ -79,26 +85,24 @@ src_install() {
         done
 
         # comment out login.defs options that pam hates
-        sed -i -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs
+        sed -i  -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs ||
+            die "login.defs sed failed"
 
         # remove manpages that pam will install for us
         # and/or don't apply when using pam
-        find "${IMAGE}"/usr/share/man \
-            '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete \
-            || die "rm manpages that don't apply when using pam failed"
+        find "${IMAGE}"/usr/share/man '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete ||
+            die "rm manpages that don't apply when using pam failed"
     fi
 
     # Remove manpages that are handled by other packages
-    find "${IMAGE}"/usr/share/man \
-        '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete \
-        || die "rm manpages that collide with other packages failed"
+    find "${IMAGE}"/usr/share/man '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete ||
+        die "rm manpages that collide with other packages failed"
 
-    find "${IMAGE}" -type d -empty -delete
+    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories"
 }
 
 pkg_postinst() {
-    # Enable shadow groups (we need ROOT=/ here, as grpconv only
-    # operate on / ...).
+    # Enable shadow groups (we need ROOT=/ here, as grpconv only operates on / ...).
     if [[ ${ROOT} == / && ! -f /etc/gshadow ]] ; then
         if grpck -r ; then
             grpconv
@@ -108,3 +112,4 @@ pkg_postinst() {
         fi
     fi
 }
+
