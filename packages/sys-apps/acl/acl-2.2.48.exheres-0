@@ -3,13 +3,11 @@
 # Based in part upon 'acl-2.2.47.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] multilib
+require multilib
 
-MY_PNV="${PN}_${PV}-1"
 SUMMARY="Access control list utilities, libraries and headers"
 HOMEPAGE="http://oss.sgi.com/projects/xfs/"
-DOWNLOADS="ftp://oss.sgi.com/projects/xfs/cmd_tars/${MY_PNV}.tar.gz
-    nfs? ( http://www.citi.umich.edu/projects/nfsv4/linux/acl-patches/2.2.42-2/acl-2.2.42-CITI_NFS4_ALL-2.dif )"
+DOWNLOADS="ftp://oss.sgi.com/projects/xfs/cmd_tars/${PNV}.src.tar.gz"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -41,9 +39,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 )
 
 src_prepare() {
-    if option nfs ; then
-        expatch "${FETCHEDDIR}"/acl-2.2.42-CITI_NFS4_ALL-2.dif
-    fi
     sed -i \
         -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
         -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
@@ -51,7 +46,6 @@ src_prepare() {
         || die "failed to update builddefs"
     # libtool will clobber install-sh which is really a custom file
     mv install-sh acl.install-sh || die "saving install-sh failed"
-    AT_M4DIR="m4" eautoreconf
     mv acl.install-sh install-sh || die "restoring install-sh failed"
 }
 
