@@ -43,20 +43,13 @@ src_compile() {
 
 src_install() {
     default
-    
+
     # Install shared libraries to /$(get_libdir)
     into /
     dolib.so libbz2.so.${PV}
     for v in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
         dosym libbz2.so.${PV} /$(get_libdir)/${v}
     done
-
-    # Linker script in /usr/$(get_libdir)
-    gen_usr_ldscript libbz2.so
-
-    # Static archive goes in /usr/$(get_libdir)
-    dodir /usr/$(get_libdir)
-    mv "${IMAGE}"/{,usr/}$(get_libdir)/libbz2.a || die 'Moving static archive to /usr failed'
 
     # Fix symlinks linking to ${IMAGE}
     dosym bzgrep /bin/bzegrep

@@ -1,9 +1,9 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'gpm-1.20.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="Console-based mouse driver"
 HOMEPAGE="http://www.nico.schottelius.org/software/${PN}"
@@ -31,10 +31,6 @@ src_compile() {
 
 src_install() {
     default
-
-    dodir /usr/$(get_libdir)
-    mv "${IMAGE}"/{,usr/}$(get_libdir)/libgpm.a || die 'Moving static archive to /usr failed'
-    gen_usr_ldscript libgpm.so.2
 
     insinto /etc/${PN}
     doins conf/gpm-*.conf
