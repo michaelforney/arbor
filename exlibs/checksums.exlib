@@ -20,6 +20,7 @@ src_fetch_extra() {
     local x f s
     for x in "${CHECKSUMS_SHA1[@]}" ; do
         f="${x%=*}" ; s="${x#*=}"
+        has "${f}" ${ARCHIVES} || continue
         if [[ "$(sha1sum "${FETCHEDDIR}/${f}")" == "${s}  ${FETCHEDDIR}/${f}" ]] ; then
             einfo "${f}... SHA1 OK"
         else

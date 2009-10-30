@@ -23,7 +23,7 @@ BUGS_TO="ingmar@exherbo.org"
 REMOTE_IDS="freshmeat:${PN} sourceforge:${PN}"
 
 UPSTREAM_CHANGELOG="${HOMEPAGE}/Changelog.html"
-UPSTREAM_NEWS="${HOMEPAGE}/NEWS.html"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/NEWS.html"
 UPSTREAM_DOCUMENTATION="
 ${HOMEPAGE}/FAQ.html [[ lang = en description = [ FAQ ] ]]
 "
@@ -50,7 +50,6 @@ DEPENDENCIES="
         sci-apps/gnuplot   [[ description = [ Support for reading GNUPlot files ] ]]
 "
 # TODO
-# - perl? ( >=dev-lang/perl-5.8.1:= )
 # - configure.ac also has checks for: rst2html, txt2html p7zip, zip, but none of these are required
 
 RESTRICT=test
@@ -60,7 +59,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-threads
-    --disable-openmp
+    --enable-openmp
     # Disable OpenMP for algorithms which sometimes run slower
     --disable-openmp-slow
     --with-modules --enable-shared
@@ -68,8 +67,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-included-ltdl
     # C++
     --with-magick-plus-plus
-    # Doesn't build
-    --without-perl
     --with-bzlib
     # libdps
     --without-dps

@@ -8,13 +8,16 @@ require ImageMagick multilib
 
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="X cxx djvu fontconfig fpx graphviz jpeg2000 jpeg openexr lcms perl png svg tiff truetype xml"
+MYOPTIONS="X cxx djvu fontconfig fpx graphviz jpeg2000 openexr lcms perl svg tiff truetype xml"
 
 DEPENDENCIES="
     build:
+        app-arch/xz
         X? ( x11-proto/xextproto )
     build+run:
         app-text/ghostscript
+        media-libs/jpeg[>=6b]
+        media-libs/libpng[>=1.2.4]
         X?  (
             x11-libs/libSM
             x11-libs/libICE
@@ -26,19 +29,17 @@ DEPENDENCIES="
         fpx? ( media-libs/libfpx )
         graphviz? ( media-gfx/graphviz )
         jpeg2000? ( media-libs/jasper )
-        jpeg? ( media-libs/jpeg[>=6b] )
         lcms? ( media-libs/lcms )
         openexr? ( media-libs/openexr )
         perl? ( dev-lang/perl[>=5.8.6] )
-        png? ( media-libs/libpng[>=1.2.4] )
         svg? (
             gnome-desktop/librsvg[>=2.9.0]
             x11-libs/cairo
         )
         tiff? ( media-libs/tiff[>=3.5.5] )
         truetype? (
+            fonts/corefonts
             media-libs/freetype:2
-            media-fonts/corefonts
         )
         xml? ( dev-libs/libxml2[>=2.4.10] )
 "
@@ -47,11 +48,13 @@ RESTRICT="test" # Multiple failures, possibly caused by sandbox
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static=no' '--enable-shared=yes'
 '--disable-openmp' '--without-included-ltdl' '--with-quantum-depth=16'
-'--with-threads' '--with-modules' '--enable-hdri' '--with-bzlib' '--with-gslib' '--with-zlib' )
+'--with-threads' '--with-modules' '--enable-hdri' '--with-bzlib' '--with-gslib' '--with-zlib'
+'--with-jpeg' '--with-png'
+)
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'cxx magick-plus-plus' 'djvu'
-'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'jpeg' 'lcms' 'openexr' 'perl' 'png' 'svg rsvg'
-'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/lib/X11/fonts/corefonts'
+'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'lcms' 'openexr' 'perl' 'svg rsvg'
+'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/share/fonts/X11/fonts/corefonts'
 'xml' )
 
 src_configure() {

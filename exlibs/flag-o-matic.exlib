@@ -90,30 +90,6 @@ setup-allowed-flags() {
     return 0
 }
 
-# inverted filters for hardened compiler.  This is trying to unpick
-# the hardened compiler defaults.
-_filter-hardened() {
-    illegal_in_global_scope
-
-    local f
-    for f in "$@" ; do
-        case "${f}" in
-            # Ideally we should only concern ourselves with PIE flags,
-            # not -fPIC or -fpic, but too many places filter -fPIC without
-            # thinking about -fPIE.
-            -fPIC|-fpic|-fPIE|-fpie|-Wl,pie|-pie)
-                gcc-specs-pie || continue
-                is-flagq -nopie || append-flags -nopie;;
-            -fstack-protector)
-                gcc-specs-ssp || continue
-                is-flagq -fno-stack-protector || append-flags -fno-stack-protector;;
-            -fstack-protector-all)
-                gcc-specs-ssp-to-all || continue
-                is-flagq -fno-stack-protector-all || append-flags -fno-stack-protector-all;;
-        esac
-    done
-}
-
 # Remove occurrences of strings from variable given in $1
 # Strings removed are matched as globs, so for example
 # '-O*' would remove -O1, -O2 etc.
@@ -139,7 +115,6 @@ _filter-var() {
 filter-flags() {
     illegal_in_global_scope
 
-    _filter-hardened "$@"
     _filter-var CFLAGS "$@"
     _filter-var CPPFLAGS "$@"
     _filter-var CXXFLAGS "$@"

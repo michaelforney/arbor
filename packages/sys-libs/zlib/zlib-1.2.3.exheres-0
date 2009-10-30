@@ -30,3 +30,9 @@ DEFAULT_SRC_INSTALL_PARAMS=(
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
+src_prepare() {
+    default
+    # Don't run ldconfig
+    sed -e '/ldconfig/d' -i Makefile.in || die "ldconfig sed failed"
+}
+
