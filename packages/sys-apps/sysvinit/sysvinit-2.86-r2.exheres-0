@@ -3,7 +3,7 @@
 # Based in part upon 'sysvinit-2.86-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs flag-o-matic
+require toolchain-funcs flag-o-matic alternatives
 
 PATCHTBZ2_VER="1.0"
 
@@ -21,8 +21,6 @@ MYOPTIONS="static"
 DEPENDENCIES="
     build:
         sys-kernel/linux-headers
-    build+run:
-        !sys-apps/upstart
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -66,6 +64,21 @@ src_install() {
     doins "${WORKBASE}"/inittab
 
     doinitd "${WORKBASE}"/{reboot,shutdown}.sh
+
+    # alternatives
+    local a t alternatives=( init ${PN} 10 )
+    for a in halt init poweroff reboot runlevel shutdown telinit; do
+        if [[ -L "${IMAGE}"/sbin/${a} ]]; then
+            t=$(readlink "${IMAGE}"/sbin/${a})
+            edo rm "${IMAGE}"/sbin/${a}
+        else
+            t=${a}
+        fi
+        alternatives+=( /sbin/${a} ${PN}.${t}
+                        /usr/share/man/man8/${a}.8 ${PN}.${a}.8 )
+    done
+    alternatives+=( /usr/share/man/man5/inittab.5 ${PN}.inittab.5 )
+    alternatives_for "${alternatives[@]}"
 }
 
 pkg_postinst() {
@@ -76,4 +89,5 @@ pkg_postinst() {
         # Do not return an error if this fails
         /sbin/telinit U &>/dev/null
     fi
+    alternatives_pkg_postinst
 }
