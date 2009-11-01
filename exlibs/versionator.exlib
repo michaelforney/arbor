@@ -6,45 +6,6 @@
 
 # This exlib is obsolete, use ever functions instead
 
-get_all_version_components() {
-    die "get_all_version_components sucks, use ever split_all"
-}
-
-get_version_components() {
-    die "get_version_components sucks, use ever split"
-}
-
-get_major_version() {
-    die "get_major_version sucks, use ever major"
-}
-
-get_version_component_range() {
-    die "get_version_component_range sucks, use ever range"
-}
-
-get_after_major_version() {
-    die "get_after_major_version sucks, use ever remainder"
-}
-
-replace_version_separator() {
-    die "replace_version_separator sucks, use ever replace"
-}
-
-replace_all_version_separators() {
-    die "replace_all_version_separator sucks, use ever replace_all"
-}
-
-delete_version_separator() {
-    die "delete_version_separator sucks, use ever delete"
-}
-
-delete_all_version_separators() {
-    die "delete_all_version_separator sucks, use ever delete"
-}
-
-get_version_component_count() {
-    die "get_version_component_count sucks, add it to ever if you need it, or count the number of words returned by ever split"
-}
 
 # What is the index of the last version component in $1 (defaults to $PV)?
 #     1.0.1   ->  3
@@ -54,14 +15,6 @@ get_last_version_component_index() {
     local a
     a=( $(ever split "${1:-${PV}}" ) )
     echo $(( ${#a[@]} - 1 ))
-}
-
-version_is_at_least() {
-    die "version_is_at_least sucks, use ever at_least"
-}
-
-version_compare() {
-    die "version_compare sucks, use ever at_least"
 }
 
 # Returns its parameters sorted, highest version last.

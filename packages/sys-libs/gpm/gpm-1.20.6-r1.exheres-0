@@ -1,0 +1,41 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gpm-1.20.5.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require multilib
+
+SUMMARY="Console-based mouse driver"
+HOMEPAGE="http://www.nico.schottelius.org/software/${PN}"
+DOWNLOADS="${HOMEPAGE}/archives/${PNV}.tar.lzma"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        app-arch/xz
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( "--libdir=/$(get_libdir)" "--sysconfdir=/etc/${PN}" )
+DEFAULT_SRC_COMPILE_PARAMS=( EMACS=: ELISP= )
+DEFAULT_SRC_INSTALL_PARAMS=( EMACS=: ELISP= )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
+
+src_compile() {
+    emake clean # Broken release, ships *.o files.
+    emake
+}
+
+src_install() {
+    default
+
+    insinto /etc/${PN}
+    doins conf/gpm-*.conf
+
+    newinitd "${FILES}"/${PN}.init.d ${PN}
+    newconfd "${FILES}"/${PN}.conf.d ${PN}
+}
+

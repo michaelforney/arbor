@@ -1,0 +1,50 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+TZCODE_PV="${PV/p/k}"
+TZDATA_PV="${PV}"
+
+SUMMARY="Timezone data"
+HOMEPAGE="ftp://elsie.nci.nih.gov/pub"
+DOWNLOADS="mirror://timezone-data/tzcode${TZCODE_PV}.tar.gz
+           mirror://timezone-data/tzdata${TZDATA_PV}.tar.gz"
+
+LICENCES="GPL-2 public-domain"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+WORK=${WORKBASE}
+
+DEFAULT_SRC_COMPILE_PARAMS=(
+    CFLAGS="${CFLAGS}"
+    TZDIR="/usr/share/zoneinfo"
+)
+DEFAULT_SRC_INSTALL_PARAMS=(
+    TZDIR="${IMAGE}/usr/share/zoneinfo"
+    ETCDIR="${IMAGE}/usr/bin"
+    LIBDIR="${IMAGE}/usr/$(get_libdir)"
+    MANDIR="${IMAGE}/usr/share/man"
+    TOPDIR="${IMAGE}"
+)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
+
+src_test() {
+    # Don't validate webpages as that requires dependencies on open{jade,sp}
+    sed -i -e '/^check:/ s/ check_web//' Makefile || die "sed failed"
+
+    emake AWK=awk check
+}
+
+src_install() {
+    # Fix weird installation paths
+    sed -i -e 's:-posix:/posix:' \
+           -e 's:-leaps:/leaps:' Makefile || die "sed failed"
+
+    default
+}
+

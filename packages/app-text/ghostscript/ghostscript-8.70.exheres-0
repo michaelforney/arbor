@@ -1,0 +1,101 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+SUMMARY="An interpreter for the PostScript language and for PDF"
+HOMEPAGE="http://ghostscript.com/"
+DOWNLOADS="http://ghostscript.com/releases/${PNV}.tar.xz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="cairo cups gtk jpeg2000 X
+    gtk [[ requires = [ cairo X ] ]]"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        X? ( x11-proto/xextproto )
+    build+run:
+        media-libs/fontconfig
+        media-libs/jpeg
+        media-libs/libpng
+        media-libs/tiff
+        cairo? ( x11-libs/cairo )
+        cups? ( net-print/cups )
+        gtk? ( x11-libs/gtk+:2 )
+        jpeg2000? ( media-libs/jasper )
+        X? (
+            x11-libs/libXext
+            x11-libs/libXt
+        )
+    run:
+        fonts/ghostscript-fonts-std
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-fPIC.patch
+)
+
+src_prepare() {
+    rm -r ./{expat,jasper,jpeg,libpng,zlib} \
+        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng & zlib"
+
+    if option !gtk; then
+        sed -e 's:\$(GSSOX)::' \
+            -e 's:.*\$(GSSOX_XENAME)$::' \
+            -i base/*.mak ||
+            die 'GSSOX sed failed'
+    fi
+
+    sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak || die 'docdir sed failed'
+
+    default
+    eautoreconf
+    cd "${WORK}/ijs"
+    eautoreconf
+}
+
+src_configure() {
+    econf \
+        --with-fontpath=/usr/share/fonts/default/ghostscript \
+        --disable-compile-inits \
+        --enable-dynamic \
+        --enable-fontconfig \
+        --with-drivers=ALL \
+        --with-ijs \
+        --with-jbig2dec \
+        $(option_enable cairo) \
+        $(option_enable cups) \
+        $(option_enable gtk) \
+        $(option_with X x) \
+        --without-jasper
+        # Doesn't compile:
+        # $(option_with jpeg2000 jasper) \
+
+    cd "${WORK}/ijs"
+    econf
+}
+
+src_compile() {
+    # Parallel make is broken
+    emake -j1 so all
+
+    cd "${WORK}/ijs"
+    emake
+}
+
+src_install() {
+    emake -j1 DESTDIR="${IMAGE}" install-so install
+
+    cd "${WORK}/ijs"
+    default
+
+    if option !X && option !gtk; then
+        rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}{/${PV},}
+    fi
+}
+

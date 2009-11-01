@@ -3,7 +3,7 @@
 
 export_exlib_phases src_prepare src_install
 
-UPSTREAM_BUILD="1477"
+MY_UPSTREAM_BUILD="1477"
 
 DESCRIPTION="
 Firewall Builder is a GUI firewall configuration and management tool that supports
@@ -14,7 +14,7 @@ using simple drag-and-drop operations.
 "
 # Note to myself: Don't use PN here because libfwbuilder uses this exlib, too.
 HOMEPAGE="http://www.fwbuilder.org"
-DOWNLOADS="mirror://sourceforge/fwbuilder/${PNV}.tar.gz -> ${PNV}${UPSTREAM_BUILD}.tar.gz"
+DOWNLOADS="mirror://sourceforge/fwbuilder/${PNV}.tar.gz -> ${PNV}${MY_UPSTREAM_BUILD}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:fwbuilder"
@@ -41,3 +41,4 @@ fwbuilder_src_install() {
         "${IMAGE}"usr/share/doc/${PNV}/INSTALL \
         || die "removing cruft failed"
 }
+

@@ -1,0 +1,47 @@
+# Copyright 2007-2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="XML C Parser and Toolkit v2"
+HOMEPAGE="http://www.xmlsoft.org/"
+BASE_URI="http://www.w3.org/XML"
+SCHEMA_TEST_URI="${BASE_URI}/2004/xml-schema-test-suite/xmlschema"
+TEST_VERSION="20080827"
+TAR1="2002-01-16"
+TAR2="2004-01-14"
+DOWNLOADS="ftp://www.xmlsoft.org/${PN}/${PNV}.tar.gz
+    ${BASE_URI}/Test/xmlts${TEST_VERSION}.tar.gz
+    ${SCHEMA_TEST_URI}${TAR1}/xsts-${TAR1}.tar.gz
+    ${SCHEMA_TEST_URI}${TAR2}/xsts-${TAR2}.tar.gz"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news.html"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog.html"
+
+LICENCES="MIT"
+SLOT="2.0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="ipv6 python readline"
+
+DEPENDENCIES="
+    build+run:
+        python? ( dev-lang/python:= )
+        readline? ( sys-libs/readline )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-threads )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'ipv6' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python readline "readline history" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
+
+src_unpack() {
+    unpack ${PNV}.tar.gz
+
+    # test suite
+    unpack xmlts${TEST_VERSION}.tar.gz
+    mv "${WORKBASE}/xmlconf" "${WORK}" || die "Failed to move test suite in place"
+}
+
+src_prepare() {
+    ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ ||
+        die "Failed to install test tarballs"
+}
+

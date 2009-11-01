@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu
+require multilib gnu alternatives
 
 export_exlib_phases src_unpack src_prepare src_configure src_compile src_install
 
@@ -9,7 +9,7 @@ SUMMARY="Collection of binary tools including ld and as"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="gold [[ description = [ Build gold, an experimental linker for ELF files. ] ]]"
 
 DEPENDENCIES=""
 
@@ -20,6 +20,7 @@ RESTRICT="test"
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/76_all_use-new-ld-dtags.patch"
 )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-werror )
 
 binutils_src_unpack() {
     local multibuild_c_target
@@ -54,9 +55,29 @@ binutils_src_configure() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target} failed"
+        mkdir "${WORKBASE}"/builddir-${multibuild_c_target}-{gold,gnu} || die "Couldn't create build directories for ${multibuild_c_target}"
+        cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
 
-        econf --enable-serial-configure --libdir=/usr/${LIBDIR} --hates=docdir
+        ECONF_SOURCE="${WORK}/${multibuild_c_target}/${PNV}" \
+        econf \
+            "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
+            --enable-serial-configure \
+            --libdir=/usr/${LIBDIR}
+        emake configure-host
+
+        if option gold ; then
+            cd "${WORKBASE}"/builddir-${multibuild_c_target}-gold || die "Couldn't enter builddir-${multibuild_c_target}-gold"
+            ECONF_SOURCE="${WORK}/${multibuild_c_target}/${PNV}" \
+            econf \
+                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
+                --enable-serial-configure \
+                --libdir=/usr/${LIBDIR} \
+                --enable-gold \
+                --enable-plugins \
+                --enable-threads \
+                --program-transform-name='s/ld/gold/'
+            emake configure-host
+        fi
     done
 }
 
@@ -66,9 +87,14 @@ binutils_src_compile() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target} failed"
+        cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
 
         default
+
+        if option gold ; then
+            emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold/bfd" headers
+            emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold"
+        fi
     done
 }
 
@@ -78,7 +104,13 @@ binutils_src_install() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target} failed"
+        if option gold ; then
+            emake -j1 -C "${WORKBASE}/builddir-${multibuild_c_target}-gold/gold" DESTDIR="${IMAGE}" install
+            edo mv "${IMAGE}"/usr/${CHOST}/bin/{ld,gold} || die "edo mv failed, is paludis up to date?"
+            edo rm "${IMAGE}"/usr/bin/gold
+        fi
+
+        cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
 
         default
 
@@ -92,11 +124,28 @@ binutils_src_install() {
 
     multibuild_switch_build_target C ${MULTIBUILD_C_DEFAULT_TARGET}
 
+    local f target name
     for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
         target=${f#${IMAGE}}
         name=${f##*/}
-        dosym ${target} /usr/bin/${CHOST}-${name}
-        dosym ${target} /usr/bin/${name}
-    done
-}
 
+        case ${name} in
+            ld) ;;
+            *)
+                echo dosym ${target} /usr/bin/${CHOST}-${name}
+                dosym ${target} /usr/bin/${CHOST}-${name}
+                echo dosym ${target} /usr/bin/${name}
+                dosym ${target} /usr/bin/${name}
+                ;;
+        esac
+    done
+
+    alternatives_for ld gnu 100 \
+        /usr/bin/ld /usr/${CHOST}/bin/ld \
+        /usr/bin/${CHOST}-ld /usr/${CHOST}/bin/ld
+    if option gold ; then
+        alternatives_for ld gold 10 \
+            /usr/bin/ld /usr/${CHOST}/bin/gold \
+            /usr/bin/${CHOST}-ld /usr/${CHOST}/bin/gold
+    fi
+}

@@ -43,5 +43,7 @@ linux-headers_src_install() {
 
     # DRM headers are installed by x11-dri/libdrm
     rm -r "${IMAGE}"/usr/include/drm || die "Couldn't remove /usr/include/drm headers"
+    # scsi.h is installed by sys-libs/glibc
+    rm "${IMAGE}"/usr/include/scsi/scsi.h || die "Couldn't remove /usr/include/scsi/scsi.h header"
 }
 
