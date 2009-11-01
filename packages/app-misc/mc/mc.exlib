@@ -16,24 +16,20 @@ Also included is Virtual Filesystem (VFS), that allows files on remote systems
 (e.g. FTP servers) and files inside archives to be manipulated like real files.
 "
 HOMEPAGE="http://www.midnight-commander.org"
-DOWNLOADS="
-    ${HOMEPAGE}/downloads/${PNV}.tar.gz
-    mirror://debian/pool/main/m/${PN}/${PN}_${PV}-2.diff.gz
-"
-#    ${HOMEPAGE}/downloads/${PNV}-utf8.patch.gz
+DOWNLOADS="${HOMEPAGE}/downloads/${PNV/_/-}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:midnightcommander"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="gpm nls samba X"
+MYOPTIONS="gpm samba X"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
         sys-devel/automake:1.10
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
     build+run:
         dev-libs/glib[>=2]
         sys-libs/slang[>=2.1.3]
@@ -50,17 +46,13 @@ DEPENDENCIES="
         app-arch/unzip
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${WORKBASE}"/${PN}_${PV}-2.diff
-)
-#    "${WORKBASE}"/${PNV}-utf8.patch
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-background
     --enable-charset
     --enable-extcharset
     --enable-largefile
     --enable-netcode
+    --enable-nls
     --with-configdir=/etc/samba
     --with-codepagedir=/usr/$(get_libdir)/samba/charset
     --with-edit
@@ -71,13 +63,13 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-mcfs
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
-
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "gpm gpm-mouse"
     "X x"
     samba
 )
+
+WORK="${WORKBASE}/${PNV/_/-}"
 
 mc_src_prepare() {
     default

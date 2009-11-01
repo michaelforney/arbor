@@ -13,12 +13,10 @@ DEPENDENCIES="
 ewaf() {
     illegal_in_global_scope
 
-    echo ./waf "${@}"
-    ./waf \
+    edo ./waf \
         --verbose --verbose \
         --nocache \
-        "${@}" ||
-        die "./waf ${@}: returned exit status: $?"
+        "${@}"
 }
 
 waf_src_configure() {
