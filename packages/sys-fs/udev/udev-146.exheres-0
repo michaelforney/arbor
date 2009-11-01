@@ -9,7 +9,8 @@ require udev
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="glib [[ description = [ build extra utilities for usb, acl, etc and gudev to integrate with glib main-loop ] ]]
-           gobject-introspection [[ description = [ build data for gobject introspection ] ]]"
+           gobject-introspection [[ description = [ build data for gobject introspection ] ]]
+           platform: ia64" # ppc s390
 
 DEPENDENCIES="
     build:
@@ -23,7 +24,6 @@ DEPENDENCIES="
             sys-apps/usbutils[>=0.82]
         )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
-
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -42,10 +42,8 @@ src_install() {
     doins rules/gentoo/??-*.rules
     doins rules/packages/40-alsa.rules
 
-    # Adding arch specific rules
-    if [[ -f rules/packages/40-${ARCH}.rules ]] ; then
-        doins "rules/packages/40-${ARCH}.rules"
-    fi
+    # Adding arch specific rules (ppc and s390 are not supported)
+    option platform:ia64 && doins "rules/packages/40-ia64.rules"
     # }}}
 
     # hooks {{{
