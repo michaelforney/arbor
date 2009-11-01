@@ -327,7 +327,7 @@ scm_finalise() {
     scm_{for_each,global_stuff}
     DEPENDENCIES+=" )"
 }
-[[ -n ${SCM_REPOSITORY} ]] && scm_finalise
+[[ -n ${SCM_REPOSITORY} && -z ${SCM_NO_AUTOMATIC_FINALISE} ]] && scm_finalise
 
 #export_exlib_phases src_fetch_extra pkg_scm_revision src_unpack pkg_info
 export_exlib_phases src_fetch_extra src_unpack pkg_info
