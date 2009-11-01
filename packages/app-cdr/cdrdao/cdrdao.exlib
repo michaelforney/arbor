@@ -5,7 +5,7 @@
 
 require flag-o-matic
 
-export_exlib_phases src_prepare
+export_exlib_phases src_configure src_prepare
 
 SUMMARY="${PN} records CDs DAO-mode based on a toc-file"
 DESCRIPTION="
@@ -56,3 +56,9 @@ cdrdao_src_prepare() {
     sed -i -e 's:HAVE_SCANSTACK:NO_FRIGGING_SCANSTACK:g' xmconfig.h
     sed -i -e 's:HAVE_SCANSTACK:NO_FRIGGING_SCANSTACK:g' mconfig.h
 }
+
+cdrdao_src_configure() {
+    default
+    emake -C scsilib config
+}
+
