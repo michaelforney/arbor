@@ -8,24 +8,19 @@ SUMMARY="GNU Multiple Precision arithmetic library"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="platform: amd64 ppc64 x86"
 
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-cxx --hates=docdir )
 
 src_configure() {
-    case ${ARCH} in
-        amd64)
-            ABI=64
-            ;;
-        ppc64)
-            ABI=mode64
-            ;;
-        x86)
-            ABI=32
-            ;;
-    esac
+    local a platform_to_abi=( amd64:64 ppc64:mode64 x86:32 )
+    for a in "${platform_to_abi[@]}"; do
+        if option platform:${a%:*}; then
+            ABI=${a#*:}
+        fi
+    done
 
     default
 }

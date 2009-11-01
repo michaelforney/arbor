@@ -58,6 +58,7 @@ src_install() {
 
     # We don't install static libraries, remove symlink to /$(get_libdir)
     edo rm "${IMAGE}"/usr/$(get_libdir)/libacl.{a,la,so}
+    edo rmdir "${IMAGE}"/usr/$(get_libdir)
 
     # Fix circular linking
     into /

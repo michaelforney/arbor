@@ -5,6 +5,8 @@
 
 require flag-o-matic
 
+export_exlib_phases src_prepare
+
 SUMMARY="${PN} records CDs DAO-mode based on a toc-file"
 DESCRIPTION="
 Recording in disk-at-once mode writes the complete disc, i.e. lead-in, one or more
@@ -28,16 +30,11 @@ UPSTREAM_DOCUMENTATION="http://${PN}.sourceforge.net/example.html [[ lang = en ]
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-excl.patch
-    "${FILES}"/${PNV}-gcc43.patch
-    "${FILES}/${PNV}-glibc-2.10.patch"
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.2.2-glibc-2.10.patch )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --hates=docdir
@@ -51,7 +48,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 
-src_prepare() {
+cdrdao_src_prepare() {
     default
 
     # Display better SCSI messages (advice from Bug 43003)
@@ -59,4 +56,3 @@ src_prepare() {
     sed -i -e 's:HAVE_SCANSTACK:NO_FRIGGING_SCANSTACK:g' xmconfig.h
     sed -i -e 's:HAVE_SCANSTACK:NO_FRIGGING_SCANSTACK:g' mconfig.h
 }
-
