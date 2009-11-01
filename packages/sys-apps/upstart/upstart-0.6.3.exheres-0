@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require launchpad
+require launchpad alternatives
 
 SUMMARY="Event-based replacement for the /sbin/init daemon"
 HOMEPAGE="http://upstart.ubuntu.com/ ${HOMEPAGE}"
@@ -14,7 +14,6 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        !sys-apps/sysvinit
         sys-apps/dbus[>=1.2.16]
 "
 
@@ -26,5 +25,20 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
 src_install() {
     default
     find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories"
+
+    # alternatives
+    local a t alternatives=( init ${PN} 5 )
+    for a in halt init poweroff reboot runlevel shutdown telinit; do
+        if [[ -L "${IMAGE}"/sbin/${a} ]]; then
+            t=$(readlink "${IMAGE}"/sbin/${a})
+            edo rm "${IMAGE}"/sbin/${a}
+        else
+            t=${a}
+        fi
+        alternatives+=( /sbin/${a} ${PN}.${t}
+                        /usr/share/man/man8/${a}.8 ${PN}.${a}.8 )
+    done
+    alternatives+=( /usr/share/man/man5/inittab.5 ${PN}.inittab.5 )
+    alternatives_for "${alternatives[@]}"
 }
 
