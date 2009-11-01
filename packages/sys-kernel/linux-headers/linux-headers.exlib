@@ -12,6 +12,7 @@ HOMEPAGE="http://www.kernel.org"
 
 LICENCES="GPL-2"
 SLOT="0"
+MYOPTIONS="platform: amd64 arm ia64 ppc64 x86"
 
 WORK="${WORKBASE}/linux-${PV}"
 
@@ -19,20 +20,21 @@ WORK="${WORKBASE}/linux-${PV}"
 
 linux-headers_src_compile() {
     # Fix ARCH to match linux-headers values
-    case ${ARCH} in
-        arm)
-            ARCH=arm
-            ;;
-        x86)
-            ARCH=i386
-            ;;
-        amd64)
-            ARCH=x86_64
-            ;;
-        ppc64)
-            ARCH=powerpc
-            ;;
-    esac
+    local x myarch platform_to_arch_map=(
+        #alpha mips sparc
+        amd64:x86_64
+        arm
+        ia64
+        ppc64:powerpc
+        x86:i386
+    )
+    for x in "${platform_to_arch_map[@]}"; do
+        if option platform:${x%:*}; then
+            ARCH=${x#*:}
+            break
+        fi
+    done
+    [[ -z ${ARCH} ]] && die "Your platform is not supported by linux-headers.exlib"
 
     emake mrproper
     emake headers_check
