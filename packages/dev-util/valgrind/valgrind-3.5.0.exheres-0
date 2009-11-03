@@ -20,10 +20,8 @@ MYOPTIONS="platform: amd64"
 DEPENDENCIES=""
 
 src_prepare() {
-    sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' \
-        -i configure.in #|| die "CFLAGS sed failed"
-    sed -e "s:doc/${PN}:doc/${PNV}:" \
-        -i docs/Makefile.am || "docs sed failed"
+    edo sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
+    edo sed -e "s:doc/${PN}:doc/${PNV}:" -i docs/Makefile.am
 
     autotools_src_prepare
 }
