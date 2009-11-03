@@ -281,7 +281,7 @@ scm-svn_do_update() {
     if [[ $(scm-svn_uri) != $(scm-svn_info URL) ]]; then
         scm-svn_svn switch "$(scm-svn_uri)@${rev}" "${dir}"
     else
-        scm-svn_svn update ${rev:+-r${rev}} "${dir}"
+        scm-svn_svn update ${rev:+-r${rev}} "${dir}@"
     fi
 }
 
