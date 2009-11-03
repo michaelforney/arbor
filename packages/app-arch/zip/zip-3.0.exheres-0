@@ -26,6 +26,7 @@ src_prepare() {
         -e  "/^echo /$(configure_string CPP ${CPP})" \
         -e  "/^echo /$(configure_string CFLAGS "\${CFLAGS} ${CFLAGS}")" \
         -e "/^      /$(configure_string LFLAGS2 "\${LFLAGS2} ${LDFLAGS}")" \
+        -e 's:^\[ -f .* \] && CPP=.*::' \
         unix/configure \
         || die "sed unix/configure failed"
 
