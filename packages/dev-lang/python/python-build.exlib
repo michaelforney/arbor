@@ -76,6 +76,7 @@ python-build_src_configure() {
     export PYTHON_DISABLE_MODULES="${disable}"
 
     export OPT="${CFLAGS}"
+    export CPPFLAGS="$(pkg-config --cflags-only-I libffi) ${CPPFLAGS}"
 
     # export CXX so it ends up in /usr/lib/pythonx.y/config/Makefile
     tc-export CXX
