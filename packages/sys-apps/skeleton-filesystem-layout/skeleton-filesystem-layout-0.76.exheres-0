@@ -94,6 +94,7 @@ pkg_postinst() {
     if [[ ${LIBDIR} != lib ]]; then
         local multibuild_c_target
         for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            multibuild_switch_build_target C ${multibuild_c_target}
             create_root_owned_directory "${ROOT}${LIBDIR}"
             create_root_owned_directory "${ROOT}usr/${LIBDIR}"
             create_root_owned_directory "${ROOT}usr/local/${LIBDIR}"
