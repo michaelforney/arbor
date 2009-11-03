@@ -53,13 +53,12 @@ src_install() {
 
     insinto /etc
     newins "${WORK}"/multipath.conf.annotated multipath.conf
-    fperms 644 /etc/udev/rules.d/65-multipath.rules
-    fperms 644 /etc/udev/rules.d/66-kpartx.rules
+    fperms 644 /etc/udev/rules.d/{65-multipath,66-kpartx}.rules
 
     # This is the monitoring daemon
     newinitd "${FILES}"/rc-multipathd multipathd
     # Handle early-boot startup as well as shutdown of multipath devices
     insinto /$(get_libdir)/rcscripts/addons
-    doins "${FILES}"/multipath-start.sh
-    doins "${FILES}"/multipath-stop.sh
+    doins "${FILES}"/multipath-{start,stop}.sh
 }
+
