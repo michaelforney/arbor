@@ -69,7 +69,7 @@ src_install() {
     newexe "${FILES}/shell-compat-addon-136.sh" shell-compat-addon.sh
 
     # multilib our scripts
-    sed -i -e "s:/lib/udev:/$(get_libdir)/udev:"                    \
+    edo sed -i -e "s:/lib/udev:/$(get_libdir)/udev:"                \
         "${IMAGE}/$(get_libdir)/udev/move_tmp_persistent_rules.sh"  \
         "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-start.sh"     \
         "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-stop.sh"      \
@@ -79,13 +79,12 @@ src_install() {
         "${IMAGE}/etc/init.d/udev-postmount"                        \
         "${IMAGE}/etc/init.d/udev-dev-tarball"                      \
         "${IMAGE}/etc/modprobe.d/pnp-aliases.conf"                  \
-        "${IMAGE}/etc/modprobe.d/blacklist.conf"                    \
-        || die "failed to fix up libdir in scripts"
+        "${IMAGE}/etc/modprobe.d/blacklist.conf"
     # }}}
 
     # documentation {{{
-    cd "${WORK}/docs/writing_udev_rules"
-    mv index.html writing_udev_rules.html
+    edo cd "${WORK}/docs/writing_udev_rules"
+    edo mv index.html writing_udev_rules.html
     insinto /usr/share/doc/${PNVR}/html
     doins *.html
     # }}}
@@ -96,18 +95,12 @@ CONFIG_PROTECT_MASK=\"/$(get_libdir)/udev/rules.d\"
 EOT
     # }}}
 
-    keepdir "/etc/udev/rules.d"
-    keepdir "/$(get_libdir)/udev/state"
-    keepdir "/$(get_libdir)/udev/devices"
+    keepdir /etc/udev/rules.d /$(get_libdir)/udev/{devices,state}
 
     if [[ $(get_libdir) != lib ]] ; then
-        if option glib ; then
-            mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit || die "fixing ConsoleKit path failed"
-        fi
-        if option gobject-introspection ; then
-            mv "${IMAGE}"/usr/{lib,$(get_libdir)}/girepository-1.0 || die "fixing girepository path failed"
-        fi
-        [ -d "${IMAGE}"/usr/lib ] && (rmdir "${IMAGE}"/usr/lib || die "removing empty dir failed")
+        option glib && edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit
+        option gobject-introspection && edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/girepository-1.0
+        [[ -d "${IMAGE}"/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 }
 
