@@ -19,6 +19,11 @@ DEPENDENCIES="
         sys-apps/pciutils-data
 "
 
+DEFAULT_SRC_COMPILE_PARAMS=(
+    ZLIB="no" DNS="no" OPT="${CFLAGS} -fPIC" STRIP=""
+    CC=$(tc-getCC) AR=$(tc-getAR) RANLIB=$(tc-getRANLIB)
+)
+
 DEFAULT_SRC_INSTALL_PARAMS=( install-lib )
 
 src_prepare() {
@@ -29,12 +34,6 @@ src_prepare() {
            -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
            -e '/^STRIP=-s/cSTRIP=' \
            Makefile || die "failed to update makefile"
-}
-
-src_compile() {
-    tc-export AR CC RANLIB
-    emake ZLIB="no" DNS="no" \
-          OPT="${CFLAGS} -fPIC" STRIP=""
 }
 
 src_install() {

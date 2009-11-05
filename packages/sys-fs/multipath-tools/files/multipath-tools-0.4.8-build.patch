@@ -1,3 +1,7 @@
+Source: Gentoo.
+Upstream: No.
+Reason: Respect LDFLAGS. Respect CFLAGS. Don't prestrip. Order udev rules. Don't fail on missing dir.
+
 diff -Nuar multipath-tools-0.4.8.orig/devmap_name/Makefile multipath-tools-0.4.8/devmap_name/Makefile
 --- multipath-tools-0.4.8.orig/devmap_name/Makefile	2007-08-02 14:05:37.000000000 -0700
 +++ multipath-tools-0.4.8/devmap_name/Makefile	2008-06-20 16:20:19.342920167 -0700
@@ -232,7 +236,11 @@ diff -Nuar multipath-tools-0.4.8.orig/path_priority/pp_random/Makefile multipath
 diff -Nuar multipath-tools-0.4.8.orig/path_priority/pp_rdac/Makefile multipath-tools-0.4.8/path_priority/pp_rdac/Makefile
 --- multipath-tools-0.4.8.orig/path_priority/pp_rdac/Makefile	2007-08-02 14:05:37.000000000 -0700
 +++ multipath-tools-0.4.8/path_priority/pp_rdac/Makefile	2008-06-20 16:28:32.708817275 -0700
-@@ -17,6 +17,7 @@
+@@ -14,9 +14,11 @@
+ 	$(CC) -static -o $(EXEC) $(OBJS)
+ 
+ install: $(EXEC)
++	install -d $(DESTDIR)$(bindir)
  	$(INSTALL_PROGRAM) -m 755 $(EXEC) $(DESTDIR)$(bindir)/$(EXEC)
  
  uninstall:

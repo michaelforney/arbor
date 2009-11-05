@@ -9,7 +9,6 @@ LICENCES="LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="expat ssl"
-RESTRICT="test"
 
 DEPENDENCIES="
     build:
@@ -17,7 +16,7 @@ DEPENDENCIES="
     build+run:
         sys-libs/zlib
         ssl? ( dev-libs/openssl )
-        !expat? ( dev-libs/libxml2 )
+       !expat? ( dev-libs/libxml2 )
         expat? ( dev-libs/expat )"
 
 src_configure() {
