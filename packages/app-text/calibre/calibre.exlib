@@ -132,7 +132,7 @@ calibre_pkg_postinst() {
     local cruft=( /etc/udev/rules.d/95-calibre.rules /etc/bash_completion.d/calibre )
     for file in ${cruft[@]}; do
         if test -f "${file}" ; then
-            rm "${file}" || die "removing ${file} failed"
+            rm "${file}" || eerror "removing ${file} failed"
         fi
     done
 
