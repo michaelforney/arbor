@@ -11,8 +11,10 @@ DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="$(ever range 1-2)"
 
-MYOPTIONS="ada doc fortran objc obj-c++ nls propolice"
-
+MYOPTIONS="ada doc fortran nls propolice
+    objc   [[ description = [ Build support for the Objective C code language ] ]]
+    obj-c++ [[ description = [ Build support for the Objective C++ language ] ]]
+"
 REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
@@ -50,7 +52,7 @@ else
 fi
 
 if ever at_least 4.4.0-r1; then
-    MYOPTIONS+=" graphite"
+    MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
     DEPENDENCIES+="
         build:
             graphite? ( dev-libs/cloog-ppl )"

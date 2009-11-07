@@ -11,7 +11,9 @@ DOWNLOADS="http://libgd.org/releases/${PNV}.tar.bz2"
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="fontconfig jpeg png truetype xpm"
+MYOPTIONS="fontconfig jpeg png truetype xpm
+    fontconfig [[ description = [ Support for managing custom fonts via fontconfig ] ]]
+"
 
 DEPENDENCIES="
     build+run:
@@ -29,5 +31,5 @@ src_prepare() {
     find . -type f -print0 | xargs -0 touch -r configure || die "Can't fix mtimes"
 }
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( fontconfig png "truetype freetype" jpeg xpm )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( fontconfig jpeg png "truetype freetype" xpm )
 

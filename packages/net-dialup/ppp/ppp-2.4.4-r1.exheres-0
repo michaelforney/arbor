@@ -27,8 +27,12 @@ DOWNLOADS="ftp://ftp.samba.org/pub/ppp/${PNV}.tar.gz
 LICENCES="BSD-3 GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="activefilter atm dhcp eap-tls ipv6 pam radius"
-
+MYOPTIONS="ipv6 pam radius
+    activefilter [[ description = [ Enables activefilter support ] ]]
+    atm          [[ description = [ Enables support for PPP over ATM (PPPoA) ] ]]
+    dhcp         [[ description = [ Enables the DHCP plugin ] ]]
+    eap-tls      [[ description = [ Enables support for Extensible Authentication Protocol and Transport Level Security (EAP-TLS) ] ]]
+"
 DEPENDENCIES="
     build+run:
         activefilter? ( dev-libs/libpcap[>=0.9.8] )
@@ -212,7 +216,7 @@ pkg_postinst() {
     elog "You should make sure you've enabled the following options (or a subset"
     elog "thereof) in your kernel. The options are listed in descending order of"
     elog "importance."
-    echo 
+    echo
     elog "CONFIG_PPP            (REQUIRED)"
     if option activefilter ; then
         elog "CONFIG_PPP_FILTER     (REQUIRED by activefilter)"
