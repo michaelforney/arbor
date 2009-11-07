@@ -18,17 +18,18 @@ http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="big-tables debug embedded-server logrotate ssl
+MYOPTIONS="big-tables debug embedded-server ssl
     big-tables      [[ description = [ Make tables contain up to 1.844E+19 rows ] ]]
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
 "
 
 DEPENDENCIES="
     build+run:
-        logrotate? ( app-admin/logrotate )
         ssl? ( dev-libs/openssl )
         group/${PN}
         user/${PN}
+    suggestion:
+        app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
@@ -114,10 +115,8 @@ mysql_src_install() {
 LDPATH=/usr/$(get_libdir)/${PN}
 EOF
 
-    if option logrotate ; then
-        insinto /etc/logrotate.d
-        newins "${FILES}"/logrotate.mysql mysql
-    fi
+    insinto /etc/logrotate.d
+    newins "${FILES}"/logrotate.mysql mysql
 
     newinitd "${FILES}"/mysql.rc6 mysql
     newconfd "${FILES}"/mysql.conf.d mysql
