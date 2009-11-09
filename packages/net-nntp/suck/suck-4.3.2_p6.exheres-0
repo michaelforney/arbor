@@ -16,7 +16,7 @@ that are used by your favorite news reader (like tin, knews, trn) such as POST
 and ARTICLE. If you can use tin or knews against an NNTP site, than you can use
 suck/rpost and have multiple site feeds.
 NOTE: Suck will not work with obsolete NNTP servers that can't handle the xhdr
-command. 
+command.
 "
 # If someone finds a real, new homepage, please let me know.
 HOMEPAGE="http://packages.debian.org/sid/${PN}"
@@ -28,8 +28,8 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="public-domain"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="logrotate"
-# FIXME: Test if INN history checking makes sense and possibly make it work. 
+MYOPTIONS=""
+# FIXME: Test if INN history checking makes sense and possibly make it work.
 
 DEPENDENCIES="
     build+run:
@@ -38,6 +38,8 @@ DEPENDENCIES="
     run:
         group/news
         user/news
+    suggestion:
+        app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -61,13 +63,13 @@ WORK="${WORKBASE}/${MY_PNV/_/-}"
 src_prepare() {
     default
 
-    # Fix the paths to point to locations where I'm going to put them. :-)     
+    # Fix the paths to point to locations where I'm going to put them. :-)
     sed -i \
         -e 's:/usr/lib/news/rnews:/usr/$(get_libdir)/news/bin/rnews:' \
         -e 's:/usr/news/db/history:/var/spool/news/db/history:' \
         suck_config.h || die "fixing paths failed"
 
-    # Set the patchlevel to correspond to Debian's.        
+    # Set the patchlevel to correspond to Debian's.
     sed -i -e "s:@PATCHLEVEL@:${PATCHLEVEL}:" Makefile.in \
         || die "setting patchlevel failed."
 }
@@ -102,12 +104,10 @@ src_install() {
     done
 
     insopts -m0644
-    if option logrotate ; then
-        insinto /etc/logrotate.d
-        newins debian/suck.logrotate suck
-    fi
+    insinto /etc/logrotate.d
+    newins debian/suck.logrotate suck
 
     keepdir /var/{lib,log,spool}/suck
-    fowners news:news /var/{lib,log,spool}/suck 
+    fowners news:news /var/{lib,log,spool}/suck
     fperms 770 /var/{lib,log,spool}/suck
 }

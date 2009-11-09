@@ -10,7 +10,7 @@ DESCRIPTION="
 ${PN} is a userspace logging daemon for netfilter/iptables related logging. This
 includes per-packet logging of security violations, per-packet logging for
 accounting purpose as well as per-flow logging.
-" 
+"
 HOMEPAGE="http://netfilter.org/projects/${PN}/"
 DOWNLOADS="http://netfilter.org/projects/${PN}/files/${PNV}.tar.bz2"
 
@@ -20,7 +20,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="logrotate pcap sqlite"
+MYOPTIONS="pcap sqlite"
 # FIXME: mysql and postgres could be added but only if requested.
 
 DEPENDENCIES="
@@ -29,7 +29,8 @@ DEPENDENCIES="
         pcap? ( dev-libs/libpcap[>=0.9.8] )
     run:
         net-firewall/iptables[>=1.4.1]
-        logrotate? ( app-admin/logrotate[>=3.7.7] )
+    suggestion:
+        app-admin/logrotate[>=3.7.7] [[ description = [ Use logrotate for rotating logs ] ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -52,7 +53,7 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 
 src_prepare() {
     default
-    
+
     eautoconf
 }
 
@@ -64,17 +65,15 @@ src_configure() {
 
     # Configure uses incorrect syntax for ld
 #    option mysql && sed -i -e "s:-Wl,::g" Rules.make
-}    
+}
 
 src_install() {
     default
 
     newinitd "${FILES}"/${PNV}.init ulogd
 
-    if option logrotate ; then
-        insinto /etc/logrotate.d
-        doins ulogd.logrotate
-    fi
+    insinto /etc/logrotate.d
+    doins ulogd.logrotate
 
     insinto /usr/share/doc/${PNVR}/contrib
     doins -r contrib
