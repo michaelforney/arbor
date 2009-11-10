@@ -11,7 +11,7 @@ exparam -v EASY_MULTIBUILD_CLASSES classes[@]
 export_exlib_phases src_configure src_compile src_test src_install
 
 # TODO: use less evil haxx to do this
-easy_multibuild_check_classes() {
+easy-multibuild_check_classes() {
     local a
     for a in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
         has "${a}" ${MULTIBUILD_CLASSES} \
@@ -23,7 +23,7 @@ easy-multibuild_run_phase() {
     local targetsv
 
     # TODO: when paludis handles it better, move this to global scope.
-    easy_multibuild_check_classes
+    easy-multibuild_check_classes
 
     for MULTIBUILD_CLASS in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
         targetsv="MULTIBUILD_${MULTIBUILD_CLASS}_TARGETS"
