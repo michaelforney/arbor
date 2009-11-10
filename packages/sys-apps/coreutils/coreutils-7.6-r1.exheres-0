@@ -8,13 +8,13 @@ SUMMARY="Core file, shell and text utilities expected to be on any system."
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="acl caps gmp nls xattr
+MYOPTIONS="acl caps gmp xattr
     gmp [[ description = [ The utilities time, factor and expr support arbitrarily large numbers ] ]]
 "
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
     build+run:
         acl? ( sys-apps/acl )
         caps? ( sys-libs/libcap )
@@ -26,7 +26,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-sydbox.patch
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' nls xattr )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' xattr )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gmp )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-install-program=arch
