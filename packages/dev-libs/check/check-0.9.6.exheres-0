@@ -1,6 +1,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
+require easy-multibuild
+
 SUMMARY="A unit testing framework for C"
 HOMEPAGE="http://sourceforge.net/projects/check/"
 REMOTE_IDS="sourceforge:${PN}"
@@ -14,6 +16,9 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 src_install() {
-    default
-    mv "${IMAGE}"/usr/share/doc/{${PN},${PNVR}} || die "Moving docs failed"
+    easy-multibuild_src_install
+
+    edo mv "${IMAGE}"/usr/share/doc/${PN}/* "${IMAGE}"/usr/share/doc/${PNVR}/
+    edo rmdir "${IMAGE}"/usr/share/doc/${PN}/
 }
+
