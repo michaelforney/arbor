@@ -37,13 +37,15 @@ easy-multibuild_run_phase() {
                 "${EXHERES_PHASE}_prepare_one_multibuild"
             fi
 
-            edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+            edo pushd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
 
             if [[ "$(type -t "${EXHERES_PHASE}_one_multibuild")" == "function" ]] ; then
                 "${EXHERES_PHASE}_one_multibuild"
             else
                 default
             fi
+
+            edo popd
         done
     done
 }
@@ -54,18 +56,19 @@ configure_prepare_one_multibuild() {
 }
 
 easy-multibuild_src_configure() {
-    easy-multibuild_run_phase "$@"
+    easy-multibuild_run_phase
 }
 
 easy-multibuild_src_compile() {
-    easy-multibuild_run_phase "$@"
+    easy-multibuild_run_phase
 }
 
 easy-multibuild_src_test() {
-    easy-multibuild_run_phase "$@"
+    easy-multibuild_run_phase
 }
 
 easy-multibuild_src_install() {
-    easy-multibuild_run_phase "$@"
+    easy-multibuild_run_phase
+    emagicdocs
 }
 
