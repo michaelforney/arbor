@@ -57,8 +57,8 @@ pkg_pretend() {
 }
 
 src_prepare() {
-    sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
-        || die "sed to fix the xauth path failed"
+    edo sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
+        || die "edo failed. old paludis?"
 
     default
 
@@ -72,8 +72,7 @@ src_prepare() {
         expatch -p1 "${WORKBASE}/${HPN_PATCH%.gz}"
     fi
 
-    sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac} ||
-        die "sed to fix linking to openssl failed"
+    edo sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac}
 
     eautoreconf
 }
@@ -116,12 +115,12 @@ src_install() {
     keepdir /etc/ssh/ca
     keepdir /etc/skel/.ssh
     keepdir /var/run
+    edo rmdir "${IMAGE}"/var/empty
 
     if option pam ; then
-        sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config \
-            || die "sed for UsePAM failed"
-        sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
-            "${IMAGE}"/etc/ssh/sshd_config || die "sed for passwd auth failed"
+        edo sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config
+        edo sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
+            "${IMAGE}"/etc/ssh/sshd_config
         newpamd "${FILES}"/sshd.pam_include.1 sshd
     fi
 
@@ -130,7 +129,6 @@ src_install() {
 
     diropts -m 0700
     dodir /etc/skel/.ssh
-    rmdir "${IMAGE}"/var{/empty,}
 
     if option gtk ; then
         newbin contrib/gnome-ssh-askpass2 gnome-ssh-askpass
@@ -146,3 +144,4 @@ pkg_postinst() {
     ewarn "Please be aware users need a valid shell in /etc/passwd"
     ewarn "in order to be allowed to login."
 }
+
