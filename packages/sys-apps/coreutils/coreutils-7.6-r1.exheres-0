@@ -39,16 +39,17 @@ src_test() {
 }
 
 src_test_expensive() {
-    local -a ts; ts=(
+    local -a ts
+    ts=(
         cp/{link-heap,perm}
         du/{2g,fd-leak}
         mv/leak-fd
         rm/{ext3-perf,hash}
         tail-2/{assert,assert-2,big-4gb}
     )
-    cd tests \
-        && emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${ts[*]}" \
-        || die "emake failed for expensive tests"
+    edo cd tests
+    emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${ts[*]}" ||
+        die "emake failed for expensive tests"
 }
 
 src_install() {
