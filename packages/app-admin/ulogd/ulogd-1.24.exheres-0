@@ -51,12 +51,6 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     "-j1" # cf. Gentoo bug 128976
 )
 
-src_prepare() {
-    default
-
-    eautoconf
-}
-
 src_configure() {
     # enables logfiles over 2G (cf. Gentoo bug 74924)
     append-lfs-flags
@@ -81,3 +75,4 @@ src_install() {
     doman ulogd.8
     dodoc doc/*
 }
+
