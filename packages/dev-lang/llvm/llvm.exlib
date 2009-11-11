@@ -21,8 +21,6 @@ DOWNLOADS="
 LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS=""
-# FIXME Some tests fail to find stdlib includes
-RESTRICT="test"
 
 DEPENDENCIES="
     build:
@@ -42,7 +40,7 @@ libsuffix=${libsuffix##lib}
 CMAKE_SRC_CONFIGURE_PARAMS=( -DLLVM_LIBDIR_SUFFIX="${libsuffix}" )
 
 llvm_src_test() {
-    _cmake_run nonfatal emake clang-test
+    _cmake_run nonfatal emake check
 }
 
 llvm_src_install() {
