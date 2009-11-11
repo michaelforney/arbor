@@ -20,6 +20,20 @@ export_exlib_phases src_configure src_compile src_test src_install
 ECMAKE_BUILD_DIR="${WORKBASE}"/build
 DEFAULT_SRC_TEST_PARAMS+=( ARGS="--verbose" )
 
+# Used to enter the correct build dir and run a command in
+# cmake_src_{compile,test,install}.
+cmake_run() {
+    illegal_in_global_scope
+
+    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+        pushd "${ECMAKE_BUILD_DIR}"
+    fi
+    "${@}"
+    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+        popd
+    fi
+}
+
 # Similar to option_enable for cmake. A few examples:
 #   `cmake_enable Foo`     -> foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
 #   `cmake_enable FOO`     -> foo ? -DENABLE_FOO=ON : -DENABLE_FOO=OFF
@@ -151,19 +165,19 @@ cmake_src_configure() {
 # Function for building the package. Automatically detects the correct build
 # dir.  All arguments including CMAKE_SRC_COMPILE_PARAMS are passed to emake.
 cmake_src_compile() {
-    _cmake_run emake "${CMAKE_SRC_COMPILE_PARAMS[@]}" "$@"
+    cmake_run emake "${CMAKE_SRC_COMPILE_PARAMS[@]}" "$@"
 }
 
 # Function for testing the package. Automatically detects the build dir. Uses
 # default_src_test.
 cmake_src_test() {
-    _cmake_run default_src_test
+    cmake_run default_src_test
 }
 
 # Function for installing the package. Automatically detects the build dir.
 # Uses default_src_install.
 cmake_src_install() {
-    _cmake_run default_src_install
+    cmake_run default_src_install
     # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
     [[ -d ${ECMAKE_BUILD_DIR} ]] && emagicdocs
 }
@@ -182,19 +196,5 @@ _cmake_option() {
         flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
     fi
     echo "-D${1:+${1}_}${3:-$(optionfmt ${2})}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
-}
-
-# Used to enter the correct build dir and run a command in
-# cmake_src_{compile,test,install}.
-_cmake_run() {
-    illegal_in_global_scope
-
-    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        pushd "${ECMAKE_BUILD_DIR}"
-    fi
-    "${@}"
-    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        popd
-    fi
 }
 
