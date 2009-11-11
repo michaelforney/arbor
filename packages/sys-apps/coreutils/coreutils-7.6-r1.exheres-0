@@ -8,27 +8,25 @@ SUMMARY="Core file, shell and text utilities expected to be on any system."
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="acl caps gmp nls
+MYOPTIONS="acl caps gmp xattr
     gmp [[ description = [ The utilities time, factor and expr support arbitrarily large numbers ] ]]
 "
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
     build+run:
-        acl? (
-            sys-apps/acl
-            sys-apps/attr
-        )
+        acl? ( sys-apps/acl )
         caps? ( sys-libs/libcap )
         gmp? ( dev-libs/gmp )
+        xattr? ( sys-apps/attr )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-sydbox.patch
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' nls )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' xattr )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gmp )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-install-program=arch
@@ -41,16 +39,17 @@ src_test() {
 }
 
 src_test_expensive() {
-    local -a ts; ts=(
+    local -a ts
+    ts=(
         cp/{link-heap,perm}
         du/{2g,fd-leak}
         mv/leak-fd
         rm/{ext3-perf,hash}
         tail-2/{assert,assert-2,big-4gb}
     )
-    cd tests \
-        && emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${ts[*]}" \
-        || die "emake failed for expensive tests"
+    edo cd tests
+    emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${ts[*]}" ||
+        die "emake failed for expensive tests"
 }
 
 src_install() {

@@ -1,7 +1,7 @@
 # Copyright 2008 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="libcdio is a library for CD access."
 DESCRIPTION="The GNU Compact Disc Input and Control library contains a library for CD-ROM and CD image access."
@@ -23,7 +23,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=(
 )
 
 DEFAULT_SRC_PREPARE_PATCHES+=(
-    "${FILES}/${PNV}-fix-pkgconfig.patch"
     -p0 "${FILES}/${PNV}-automagic-cddb.patch"
 )
 

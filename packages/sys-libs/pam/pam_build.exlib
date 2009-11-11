@@ -3,7 +3,7 @@
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic multilib pam toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require flag-o-matic multilib pam toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
@@ -20,6 +20,7 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build:
+        sys-devel/flex
         sys-devel/gettext
     build+run:
         sys-libs/cracklib[>=2.8.3]

@@ -56,7 +56,7 @@ DEPENDENCIES="
         dev-lang/python:*           [[ description = [ Dependency for 'git p4' ] ]]
         dev-scm/subversion[perl]    [[ description = [ Dependency for 'git svn' ] ]]
         dev-perl/libwww-perl        [[ description = [ Dependency for 'git svn' ] ]]
-        dev-perl/TermReadKey        [[ description = [ Dependency for 'git add --interactive, git send-email, git svn' ] ]]
+        dev-perl/TermReadKey        [[ description = [ Dependency for 'git add --interactive, git svn' ] ]]
         dev-perl/Authen-SASL        [[ description = [ Dependency for 'git send-email' ] ]]
         dev-perl/Net-SMTP-SSL       [[ description = [ Dependency for 'git send-email' ] ]]
         virtual/mta                 [[ description = [ Dependency for 'git send-email' ] ]]
@@ -100,7 +100,7 @@ myemake() {
 
 git_src_compile() {
     perlinfo
-    myemake all
+    myemake V=1 all
     option emacs && elisp-compile contrib/emacs/*.el
 }
 

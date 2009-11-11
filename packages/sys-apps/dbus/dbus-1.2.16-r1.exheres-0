@@ -12,7 +12,7 @@ DOWNLOADS="${HOMEPAGE}/releases/${PN}/${PNV}.tar.gz"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="debug doc"
+MYOPTIONS="debug doc X"
 
 DEPENDENCIES="
     build:
@@ -20,11 +20,17 @@ DEPENDENCIES="
         sys-devel/gettext
         dev-util/pkg-config[>=0.20]
         doc? ( app-doc/doxygen )
+        X? ( x11-proto/xproto )
     build+run:
         dev-libs/expat[>=1.95.8]
         group/messagebus
         user/messagebus
         group/plugdev
+        X? (
+            x11-libs/libICE
+            x11-libs/libSM
+            x11-libs/libX11
+        )
     recommendation:
         sys-auth/ConsoleKit
 "
@@ -39,6 +45,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 '--disable-tests' '--disable-selinux' '--disable-libaudit' )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'debug asserts' 'debug verbose-mode' 'doc doxygen-docs' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )

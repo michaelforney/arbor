@@ -3,7 +3,7 @@
 # Based in part upon 'cups-1.3.8-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] pam
+require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam
 
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
@@ -65,33 +65,25 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
 
 src_prepare() {
     # remove default optimizations and do not strip by default
-    sed -e 's:OPTIM="-Os -g":OPTIM="":' \
-        -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
-        -i config-scripts/cups-compiler.m4 \
-        || die "sed config-scripts/cups-compiler.m4 failed"
+    edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
+            -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
+            -i config-scripts/cups-compiler.m4 \
+            || die "edo failed. old paludis?"
 
     # do not overwrite libdir if lib64 is found on the system and
     # don't use the library dir as server directory, since that'll
     # break multilib
-    sed -e 's#libdir=".*"#:#' \
-        -e '/CUPS_SERVERBIN="/s:lib/cups:libexec/cups:' \
-        -i config-scripts/cups-directories.m4 \
-        || die "sed config-scripts/cups-directories.m4 failed"
+    edo sed -e 's#libdir=".*"#:#' \
+            -e '/CUPS_SERVERBIN="/s:lib/cups:libexec/cups:' \
+            -i config-scripts/cups-directories.m4
 
     # do not gzip manpages by default
-    sed -e '/MAN[0-9]EXT=/s:\.gz::g' \
-        -i config-scripts/cups-manpages.m4 \
-        || die "sed config-scripts/cups-manpages.m4 failed"
+    edo sed -i -e '/MAN[0-9]EXT=/s:\.gz::g' config-scripts/cups-manpages.m4
 
     # disable the xinetd service by default
-    if option xinetd ; then
-        sed -e "s:^{:{\n\tdisable = yes:" \
-            -i init/cups-lpd.in \
-            || die "sed init/cups-lpd.in failed"
-    fi
+    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" init/cups-lpd.in
 
-    AT_M4DIR=config-scripts
-    autotools_src_prepare
+    AT_M4DIR=config-scripts autotools_src_prepare
 }
 
 src_configure() {
@@ -139,11 +131,11 @@ src_install() {
 
     keepdir /etc/cups/{interfaces,ppd,ssl}
 
-    rm -r "${IMAGE}/etc"/{rc{0,2,3,5},init}.d
+    edo rm -r "${IMAGE}/etc"/{rc{0,2,3,5},init}.d
 
     # provide our own pam script
     if option pam ; then
-        rm -f "${IMAGE}/etc/pam.d/cups"
+        edo rm -f "${IMAGE}/etc/pam.d/cups"
         pamd_mimic_system cups auth account
     fi
 
@@ -196,12 +188,14 @@ echo_crypt() {
 src_test() {
     # 1 = medium testsuite
     emake unittests
-    cd test && USER=paludisbuild ./run-stp-tests.sh 1 $(echo_crypt) n
+    edo cd test
+    USER=paludisbuild edo ./run-stp-tests.sh 1 $(echo_crypt) n
 }
 
 RESTRICT_src_test_expensive() {
     # 4 = torture testsuite :P
     emake unittests
-    cd test && USER=paludisbuild ./run-stp-tests.sh 4 $(echo_crypt) n
+    edo cd test
+    USER=paludisbuild edo ./run-stp-tests.sh 4 $(echo_crypt) n
 }
 

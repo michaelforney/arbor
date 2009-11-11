@@ -21,16 +21,6 @@ require toolchain-funcs multilib
 # Replace march/mcpu flags that specify <old.cpus>
 # with flags that specify <new.cpu>
 #
-#### is-flag[q] <flag> ####
-# Returns "true" if flag is set in C[XX]FLAGS
-# Matches only complete a flag
-# q version sets return code but doesn't echo
-#
-#### is-ldflag[q] <flag> ####
-# Returns "true" if flag is set in LDFLAGS
-# Matches only complete a flag
-# q version sets return code but doesn't echo
-#
 #### strip-flags ####
 # Strip C[XX]FLAGS of everything except known
 # good options.
@@ -191,42 +181,6 @@ replace-cpu-flags() {
         shift
     done
     return 0
-}
-
-_is_flagq() {
-    illegal_in_global_scope
-
-    local x
-    for x in ${!1} ; do
-        [[ ${x} == $2 ]] && return 0
-    done
-    return 1
-}
-
-is-flagq() {
-    illegal_in_global_scope
-
-    [[ -n $2 ]] && die "Usage: is-flag <flag>"
-    _is_flagq CFLAGS $1 || _is_flagq CXXFLAGS $1
-}
-
-is-flag() {
-    illegal_in_global_scope
-
-    is-flagq "$@" && echo true
-}
-
-is-ldflagq() {
-    illegal_in_global_scope
-
-    [[ -n $2 ]] && die "Usage: is-ldflag <flag>"
-    _is_flagq LDFLAGS $1
-}
-
-is-ldflag() {
-    illegal_in_global_scope
-
-    is-ldflagq "$@" && echo true
 }
 
 filter-mfpmath() {
@@ -472,15 +426,6 @@ raw-ldflags() {
 #   LDFLAGS="-l -m -n=3"
 #
 #   die() { exit 1; }
-#   (is-flag 1 2 3) && die
-#   (is-ldflag 1 2 3) && die
-#
-#   is-flagq -l && die
-#   is-ldflagq -a && die
-#   is-flagq -a || die
-#   is-flagq -x || die
-#   is-ldflagq -n=* || die
-#   is-ldflagq -n && die
 #
 #   strip-unsupported-flags
 #   [[ ${CFLAGS} == "-c=1" ]] || die
