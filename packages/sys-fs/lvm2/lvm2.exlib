@@ -4,7 +4,7 @@
 
 require multilib
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_install
 
 SUMMARY="Userspace toolset providing logical volume management facilities"
 DESCRIPTION="
@@ -36,6 +36,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
     --libdir=/$(get_libdir)
     --enable-cmdlib
+    --disable-nls
     --enable-readline
     --enable-static_link
     --disable-selinux
@@ -51,13 +52,6 @@ DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 WORK="${WORKBASE}"/LVM2.${PV}
 
-lvm2_src_prepare() {
-    # Broken and only for German. Das braucht niemand.
-    sed -i -e '/LANGS=/cLANGS=' "${WORK}"/po/Makefile.in || die "failed to remove translations"
-
-    default
-}
-
 lvm2_src_install() {
     default
 
@@ -67,3 +61,4 @@ lvm2_src_install() {
     insinto /$(get_libdir)/udev/rules.d
     doins "${FILES}/64-device-mapper.rules"
 }
+
