@@ -11,9 +11,11 @@
 
 require multilib toolchain-funcs
 
+myexparam cmake_minimum_version=2.6.2
+
 DEPENDENCIES="
     build:
-        sys-devel/cmake[>=2.6.2]"
+        sys-devel/cmake[>=$(exparam cmake_minimum_version)]"
 
 export_exlib_phases src_configure src_compile src_test src_install
 
