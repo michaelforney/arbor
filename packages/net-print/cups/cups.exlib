@@ -168,12 +168,6 @@ stop() {
 }
 EOF
 
-    # Gentoo provides its own pdftops filter in ${FILES} which requires perl
-    # at runtime and i couldn't find what's wrong with the one provided by
-    # ghostscript, so let's see where this takes us :P
-#    exeinto "/usr/$(get_libdir)/cups/filter"
-#    newexe "${FILES}"/pdftops-1.20.gentoo pdftops
-
     echo "ServerName localhost" >> "${IMAGE}"/etc/cups/client.conf
 }
 
