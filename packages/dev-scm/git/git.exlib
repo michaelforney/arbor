@@ -115,7 +115,7 @@ git_src_install() {
     if exparam -b manpages ; then
         doman man?/*
     else
-        myemake install-man
+        myemake ASCIIDOC8=YesPlease ASCIIDOC_NO_ROFF=YesPlease install-man
     fi
 
     dodoc README Documentation/{SubmittingPatches,CodingGuidelines}
