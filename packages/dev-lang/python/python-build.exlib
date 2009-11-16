@@ -23,7 +23,9 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/download/releases/${PV}/"
 
 LICENCES="PSF-2.2"
 SLOT="$(ever range 1-2)"
-MYOPTIONS="berkdb gdbm examples ipv6 readline sqlite tk
+MYOPTIONS="dbm examples ipv6 readline sqlite tk
+( berkdb gdbm ) [[ requires = dbm ]]
+dbm? ( ( berkdb gdbm ) [[ number-selected = at-least-one ]] )
 "
 
 # FIXME: Internal copy of dev-libs/expat
