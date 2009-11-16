@@ -130,7 +130,6 @@ git_src_install() {
     done
     docinto /
 
-    [[ ${PV} == scm ]] && option bash-completion && emake -C contrib/completion/
     dobashcompletion contrib/completion/git-completion.bash
     if option emacs; then
         elisp-install ${PN} contrib/emacs/*.el{,c}
