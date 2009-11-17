@@ -1,11 +1,14 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+myexparam branch=$(ever range 1-2)
+myexparam suffix=gz
+
 HOMEPAGE="http://launchpad.net/${LAUNCHPAD_PROJECT:-${PN}}/"
 
-DOWNLOADS="${HOMEPAGE}$(ever range 1-2)/${PV}/+download/${PNV}.tar.gz"
+DOWNLOADS="${HOMEPAGE}$(exparam branch)/${PV}/+download/${PNV}.tar.$(exparam suffix)"
 
-# See RDF data @ ${HOMEPAGE}$(ever range 1-2)/${PV}/+rdf
+# See RDF data @ ${HOMEPAGE}$(exparam branch)/${PV}/+rdf
 REMOTE_IDS="launchpad:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(ever range 1-2)/${PV}"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(exparam branch)/${PV}"
 
