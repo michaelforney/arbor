@@ -63,6 +63,11 @@ e2fsprogs_src_compile() {
 }
 
 e2fsprogs_src_test() {
+    if [[ ! -e /etc/mtab ]] ; then
+        ewarn "${PN} tests skipped: /etc/mtab doesn't exist"
+        return
+    fi
+
     # The test script uses $IMAGE for its own purposes.
     local IMAGE
     # the default blkid file is /etc/blkid.tab which results in sydbox violations
