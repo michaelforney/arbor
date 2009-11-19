@@ -66,6 +66,24 @@ autotools_select_versions() {
     fi
 }
 
+autotools_must_require() {
+    local f=${1}
+    shift
+    while [[ -n ${1} ]]; do
+        case "${1}" in
+            autoconf)
+                has none "${SUPPORTED_AUTOCONF[@]}" &&
+                    die "${f} requires ${1} but supported_${1}=[ none ] was specified" ;;
+            automake)
+                has none "${SUPPORTED_AUTOMAKE[@]}" &&
+                    die "${f} requires ${1} but supported_${1}=[ none ] was specified" ;;
+            *)
+                die "unrecognised argument ${1} for ${FUNCNAME}" ;;
+        esac
+        shift
+    done
+}
+
 # Variables:
 #
 #   AT_M4DIR          - Additional director(y|ies) aclocal should search
@@ -92,6 +110,8 @@ autotools_select_versions() {
 # eauto* functions to run the tools. It doesn't take any parameters.
 eautoreconf() {
     illegal_in_global_scope
+
+    autotools_must_require ${FUNCNAME} autoconf automake
 
     autotools_select_versions
     local pwd=$(pwd) x auxdir
@@ -124,6 +144,8 @@ eautoreconf() {
 # They also force installing the support files for safety.
 eaclocal() {
     illegal_in_global_scope
+
+    autotools_must_require ${FUNCNAME} automake
 
     autotools_select_versions
     local aclocal_opts=()
@@ -168,6 +190,8 @@ _elibtoolize() {
 eautoheader() {
     illegal_in_global_scope
 
+    autotools_must_require ${FUNCNAME} autoconf
+
     autotools_select_versions
     # Check if we should run autoheader
     [[ -n $(autotools_check_macro "AC_CONFIG_HEADERS") ]] || return 0
@@ -176,6 +200,8 @@ eautoheader() {
 
 eautoconf() {
     illegal_in_global_scope
+
+    autotools_must_require ${FUNCNAME} autoconf
 
     autotools_select_versions
     if [[ ! -f configure.ac && ! -f configure.in ]] ; then
@@ -191,6 +217,8 @@ eautoconf() {
 eautotest() {
     illegal_in_global_scope
 
+    autotools_must_require ${FUNCNAME} autoconf
+
     autotools_select_versions
     if [[ ! -f testsuite.at ]] ; then
         echo
@@ -204,6 +232,8 @@ eautotest() {
 
 eautomake() {
     illegal_in_global_scope
+
+    autotools_must_require ${FUNCNAME} automake
 
     autotools_select_versions
     local extra_opts
