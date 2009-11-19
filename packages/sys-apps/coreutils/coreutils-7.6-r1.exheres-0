@@ -39,17 +39,11 @@ src_test() {
 }
 
 src_test_expensive() {
-    local -a ts
-    ts=(
-        cp/{link-heap,perm}
-        du/{2g,fd-leak}
-        mv/leak-fd
-        rm/{ext3-perf,hash}
-        tail-2/{assert,assert-2,big-4gb}
-    )
+    local -a expensive_tests
     edo cd tests
-    emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${ts[*]}" ||
-        die "emake failed for expensive tests"
+    expensive_tests=($( find . -type f | xargs grep -E --files-with-matches '^(very_|)expensive_$' | sed -e 's:^\./::g'))
+    expensive_tests=("${expensive_tests[@]:-expensive_tests_grep_broke}")
+    emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${expensive_tests[*]}"
 }
 
 src_install() {
