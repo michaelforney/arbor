@@ -8,6 +8,11 @@ PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 # Sandbox causes numerous test failures
 RESTRICT=test
 
+DEPENDENCIES="
+    build:
+        app-arch/xz
+"
+
 src_prepare() {
     cd "${WORKBASE}/${PNV}"
     expatch -p0 "${FILES}/${PN}-2.10.1-disable-tst-cpuclock2.patch"
