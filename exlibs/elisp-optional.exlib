@@ -1,0 +1,42 @@
+# Copyright 2009 Elias Pipping <elias@pipping.org>
+# Distributed under the terms of the GNU General Public License v2
+#
+# This is a wrapper around elisp-module.exlib that automates
+# compilation and installation even further, meant for packages
+# that contain nothing optional emacs support
+
+require elisp-module
+
+export_exlib_phases pkg_postinst pkg_postrm
+
+myexparam source_directory=
+
+exparam -v ELISP_SOURCE_DIRECTORY source_directory
+
+MYOPTIONS="emacs"
+
+DEPENDENCIES="
+    build+run:
+        emacs? ( app-editors/emacs )
+"
+
+elisp-optional_src_compile() {
+    option emacs && elisp-compile "${WORK}/${ELISP_SOURCE_DIRECTORY}"/*.el
+}
+
+elisp-optional_src_install() {
+    if option emacs; then
+        elisp-install ${PN} \
+            "${WORK}/${ELISP_SOURCE_DIRECTORY}"/*.el "${WORK}/${ELISP_SOURCE_DIRECTORY}"/*.elc
+        elisp-install-site-file
+    fi
+}
+
+elisp-optional_pkg_postinst() {
+    option emacs && elisp-module_pkg_postinst
+}
+
+elisp-optional_pkg_postrm() {
+    option emacs && elisp-module_pkg_postrm
+}
+
