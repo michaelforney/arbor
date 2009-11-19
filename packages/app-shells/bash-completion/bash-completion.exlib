@@ -11,6 +11,7 @@ HOMEPAGE="http://bash-completion.alioth.debian.org/"
 DOWNLOADS="${HOMEPAGE}/files/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
+SLOT="0"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -20,18 +21,17 @@ DEPENDENCIES="
 
 export_exlib_phases src_install
 
-bash-completion-1_src_install() {
+bash-completion_src_install() {
     default
 
-    mv -v "${IMAGE}"/{etc/bash_completion.d,usr/share/bash-completion} \
-        || die "mv failed"
+    edo mv "${IMAGE}"/{etc/bash_completion.d,usr/share/bash-completion}
 
     exeinto /etc/bash/bashrc.d
     newexe "${FILES}/bash-completion-1.sh" "bash-completion.sh"
 
     if [[ -f "${IMAGE}"/etc/profile.d/bash_completion.sh ]] ; then
-        rm "${IMAGE}"/etc/profile.d/bash_completion.sh || die "failed to rm unused profile.d file"
-        rmdir "${IMAGE}"/etc/profile.d || die "failed to rmdir empty profile.d"
+        edo rm "${IMAGE}"/etc/profile.d/bash_completion.sh
+        edo rmdir "${IMAGE}"/etc/profile.d
     fi
 }
 
