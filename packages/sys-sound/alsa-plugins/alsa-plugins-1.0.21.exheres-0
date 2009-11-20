@@ -28,6 +28,11 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-automagic-speex.patch" )
 
+src_prepare() {
+    default
+    eautoconf
+ }
+
 src_configure() {
     econf \
         $(option_enable ffmpeg avcodec) \
