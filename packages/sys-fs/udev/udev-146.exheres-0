@@ -99,7 +99,6 @@ EOT
 
     if [[ $(get_libdir) != lib ]] ; then
         option glib && edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit
-        option gobject-introspection && edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/girepository-1.0
         [[ -d "${IMAGE}"/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 }
