@@ -24,6 +24,10 @@ DEPENDENCIES="
             sys-apps/usbutils[>=0.82]
         )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
+    suggestion:
+        glib? (
+            sys-auth/ConsoleKit[>=0.4.1]
+        )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -40,7 +44,6 @@ src_install() {
     # rules {{{
     insinto /$(get_libdir)/udev/rules.d/
     doins rules/gentoo/??-*.rules
-    doins rules/packages/40-alsa.rules
 
     # Adding arch specific rules (ppc and s390 are not supported)
     option platform:ia64 && doins "rules/packages/40-ia64.rules"
@@ -48,12 +51,12 @@ src_install() {
 
     # hooks {{{
     insinto /$(get_libdir)/rcscripts/addons
-    newins "${FILES}/udev-start-136-r1.sh" udev-start.sh
+    newins "${FILES}/udev-start-147.sh" udev-start.sh
     newins "${FILES}/udev-stop-136.sh" udev-stop.sh
 
-    newinitd "${FILES}/udev-initd-136" udev
-    newinitd "${FILES}/udev-mount-initd-136-r1" udev-mount
-    newinitd "${FILES}/udev-postmount-initd-136" udev-postmount
+    newinitd "${FILES}/udev-initd-147" udev
+    newinitd "${FILES}/udev-mount-initd-147" udev-mount
+    newinitd "${FILES}/udev-postmount-initd-147" udev-postmount
     newinitd "${FILES}/udev-dev-tarball-initd-136" udev-dev-tarball
 
     insinto /etc/modprobe.d
@@ -66,7 +69,7 @@ src_install() {
     newexe "${FILES}/net-130-r1.sh" net.sh
     newexe "${FILES}/move_tmp_persistent_rules-128.sh" move_tmp_persistent_rules.sh
     newexe "${FILES}/write_root_link_rule-128" write_root_link_rule
-    newexe "${FILES}/shell-compat-addon-136.sh" shell-compat-addon.sh
+    newexe "${FILES}/shell-compat-addon-147.sh" shell-compat-addon.sh
 
     # multilib our scripts
     edo sed -i -e "s:/lib/udev:/$(get_libdir)/udev:"                \
