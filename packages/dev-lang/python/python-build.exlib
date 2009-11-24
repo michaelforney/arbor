@@ -19,6 +19,7 @@ DOWNLOADS="http://${PN}.org/ftp/${PN}/${PV}/${MY_PNV}.tar.bz2"
 UPSTREAM_DOCUMENTATION="
 http://docs.${PN}.org/$(ever range 1-2)/
 "
+UPSTREAM_CHANGELOG="${HOMEPAGE}/download/releases/${PV}/NEWS.txt"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/download/releases/${PV}/"
 
 LICENCES="PSF-2.2"
@@ -93,18 +94,25 @@ python-build_src_test() {
 
     # rerun failed tests in verbose mode (regrtest -w)
     EXTRATESTOPTS="-w" emake test
+
+    python_disable_pyc
 }
 
 python-build_src_install() {
     default
 
-    mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a ||
-        die "Couldn't move libpython${SLOT}.a to libdir"
+    edo mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a
+
+    # NOTE regarding alternatives:
+    # python[=2*] & py3k don't collide, except for /usr/bin/2to3, which would be easy to fix.
+    # Therefore there should probably be seperate alternative modules for both branches
+    # (eclectic python, eclectic py3k?)
 }
 
 python-build_pkg_postinst() {
     python_version
 
+    # FIXME When installing python[=3.1.1], the code below byte-compiles for python 2.6
     python_mod_optimize
     python_mod_optimize -x site-packages \
                         -x test /usr/$(get_libdir)/python${PYVER}

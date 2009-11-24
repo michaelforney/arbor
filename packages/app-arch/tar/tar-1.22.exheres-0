@@ -16,9 +16,14 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
+src_compile() {
+    default
+    perl "${FILES}"/tarman > tar.1
+}
+
 src_install() {
     default
-    doman "${FILES}/${PN}.1"
+    doman tar.1
     rmdir "${IMAGE}"/usr/sbin || die "rmdir failed"
 }
 

@@ -1,19 +1,19 @@
 # Copyright 2007, 2009 Bryan Østergaard <kloeri@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ] elisp-module
+require gnu [ suffix=gz ] elisp-optional
 
 SUMMARY="GNU localization utilties"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="emacs glib"
+MYOPTIONS="glib"
 
 DEPENDENCIES="
     build+run:
         glib? ( dev-libs/glib:2 )
-        emacs? ( app-editors/emacs )"
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-java' '--disable-csharp' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' '!glib included-glib' )
@@ -22,13 +22,5 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sydbox.patch )
 src_install() {
     default
     option emacs && elisp-install-site-file
-}
-
-pkg_postinst() {
-    option emacs && elisp-module_pkg_postinst
-}
-
-pkg_postrm() {
-    option emacs && elisp-module_pkg_postrm
 }
 

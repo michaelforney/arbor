@@ -4,9 +4,10 @@
 myexparam -b htmldocs=true
 myexparam -b manpages=true
 
-require multilib perl-module bash-completion elisp-module
+require multilib perl-module bash-completion elisp-optional [ source_directory=contrib/emacs ]
 
-export_exlib_phases src_unpack src_configure src_compile src_test src_install pkg_postinst pkg_postrm
+
+export_exlib_phases src_unpack src_configure src_compile src_test src_install
 
 SUMMARY="A distributed VCS focused on speed, effectivity and real-world usability on large projects"
 DESCRIPTION="Git is a fast, scalable, distributed revision control system with an unusually rich command set
@@ -30,7 +31,7 @@ UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${P
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="curl emacs ipv6 threads tk webdav xinetd
+MYOPTIONS="curl ipv6 threads tk webdav xinetd
     webdav [[ requires = curl description = [ Adds support for push'ing to HTTP repositories via DAV ] ]]"
 exparam -b htmldocs && MYOPTIONS+=" doc"
 
@@ -40,7 +41,6 @@ DEPENDENCIES="
         dev-libs/openssl
         sys-libs/zlib
         curl? ( net-misc/curl )
-        emacs? ( app-editors/emacs )
         tk? (
           dev-lang/tcl[>=8.4]
           dev-lang/tk[>=8.4]
@@ -101,7 +101,7 @@ myemake() {
 git_src_compile() {
     perlinfo
     myemake V=1 all
-    option emacs && elisp-compile contrib/emacs/*.el
+    elisp-optional_src_compile
 }
 
 git_src_test() {
@@ -131,10 +131,7 @@ git_src_install() {
     docinto /
 
     dobashcompletion contrib/completion/git-completion.bash
-    if option emacs; then
-        elisp-install ${PN} contrib/emacs/*.el{,c}
-        elisp-install-site-file
-    fi
+    elisp-optional_src_install
 
     exeinto /usr/libexec/${PN}
     doexe contrib/fast-import/git-p4
@@ -158,13 +155,5 @@ git_src_install() {
     fi
 
     keepdir /usr/share/${PN}/templates/branches
-}
-
-git_pkg_postinst() {
-    option emacs && elisp-module_pkg_postinst
-}
-
-git_pkg_postrm() {
-    option emacs && elisp-module_pkg_postrm
 }
 

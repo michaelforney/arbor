@@ -39,9 +39,7 @@ REMOTE_IDS="pypi:${PN}"
 src_test() {
     cd tests || die "Couldn't enter tests"
 
-    ${python} ./run-tests.py -j${EXJOBS} \
-        --tmpdir="${TEMP}" \
-        --verbose || die "${python} .run-tests.py --tmpdir=\"${TEMP}\" failed"
+    edo ${python} ./run-tests.py -j${EXJOBS} --verbose
 }
 
 src_install() {

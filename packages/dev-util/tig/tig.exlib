@@ -15,11 +15,13 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-      dev-scm/git[>=1.5.4]
-        sys-libs/ncurses"
+        sys-libs/ncurses
+    run:
+        dev-scm/git[>=1.5.4]
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libiconv )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ${PN}{.1,rc.5}.{html,txt} contrib/tigrc )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( {tig.1,tigrc.5,tigmanual.7}.{html,txt} contrib/tigrc )
 
 src_install() {
     default
