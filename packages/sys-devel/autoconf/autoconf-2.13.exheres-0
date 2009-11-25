@@ -9,11 +9,3 @@ PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-destdir.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS+=( --hates=docdir )
 
-src_prepare() {
-    default
-    # DESTDIR support
-    sed -ri 's:(\$\(INSTALL_[^ ]+ [^ ]+ ):\1$(DESTDIR):' Makefile.in || die "DESTDIR sed failed"
-    # Make all needed directories during installation
-    sed -ri 's:(^INSTALL.+=.+):\1 -D:' Makefile.in || die "INSTALL sed failed"
-}
-
