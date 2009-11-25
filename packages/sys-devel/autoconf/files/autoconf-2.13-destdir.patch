@@ -1,0 +1,15 @@
+Source: Bo Ørsted Andresen.
+Upstream: No.
+Reason: DESTDIR support.
+
+--- autoconf-2.13/Makefile.in	2009-11-24 04:07:48.197223476 +0000
++++ autoconf-2.13/Makefile.in	2009-11-24 04:09:35.345223412 +0000
+@@ -137,7 +137,7 @@
+ 	cd testsuite && ${MAKE} AUTOCONF=${bindir}/autoconf $@
+ 
+ installdirs:
+-	$(SHELL) ${srcdir}/mkinstalldirs $(bindir) $(infodir) $(acdatadir)
++	$(SHELL) ${srcdir}/mkinstalldirs $(DESTDIR)$(bindir) $(DESTDIR)$(infodir) $(DESTDIR)$(acdatadir)
+ 
+ install: all $(M4FILES) acconfig.h installdirs install-info
+ 	for p in $(ASCRIPTS); do \
