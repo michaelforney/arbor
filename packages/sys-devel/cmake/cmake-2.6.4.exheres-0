@@ -57,7 +57,7 @@ src_prepare() {
 
 src_configure() {
     bootstrap \
-        --parallel=${EXJOBS} \
+        --parallel=${EXJOBS:-1} \
         --$(option qt4 || echo "no-")qt-gui \
         --system-libs \
         --prefix=/usr \
