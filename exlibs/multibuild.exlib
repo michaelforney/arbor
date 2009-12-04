@@ -5,10 +5,10 @@
 # multibuild_get_var $class $target $var
 multibuild_get_var()
 {
-    local x class=${1} target=${2} var=${3}
+    local merged class=${1} target=${2} var=${3}
 
-    x=MULTIBUILD_${class}_${target}_MERGED_${var}
-    echo "${!x}"
+    merged=MULTIBUILD_${class}_${target}_MERGED_${var}
+    echo "${!merged}"
 }
 
 # multibuild_get_all_var $class $var
@@ -29,8 +29,8 @@ multibuild_load_build_target()
     local x var merged
 
     # if profile and user vars have not been merged, merge them
-    x=MULTIBUILD_${class}_${target}_MERGED
-    if [[ -z ${!x} ]]; then
+    merged=MULTIBUILD_${class}_${target}_MERGED
+    if [[ -z ${!merged} ]]; then
         for x in $(eval echo \${!MULTIBUILD_${class}_${target}_PROFILE_*} \
                              \${!MULTIBUILD_${class}_${target}_USER_*}); do
             var=${x#MULTIBUILD_${class}_${target}_@(PROFILE|USER)_}
@@ -40,16 +40,17 @@ multibuild_load_build_target()
         export MULTIBUILD_${class}_${target}_MERGED=true
     fi
 
-    # load merged vars
-    for x in $(eval echo \${!MULTIBUILD_${class}_${target}_MERGED_*}); do
-        export MULTIBUILD_${class}_${target}_CURRENT_${x#MULTIBUILD_${class}_${target}_MERGED_}="${!x}"
-        export ${x#MULTIBUILD_${class}_${target}_MERGED_}="${!x}"
+    # load _MERGED_ variables
+    for merged in $(eval echo \${!MULTIBUILD_${class}_${target}_MERGED_*}); do
+        export MULTIBUILD_${class}_${target}_CURRENT_${merged#MULTIBUILD_${class}_${target}_MERGED_}="${!merged}"
+        export ${merged#MULTIBUILD_${class}_${target}_MERGED_}="${!merged}"
     done
 
-    # enforce locked vars
-    for x in $(eval echo \${MULTIBUILD_${class}_LOCKED_VARS}) ; do
-        var=MULTIBUILD_${class}_${target}_PROFILE_${x}
-        [[ ${!x} == ${!var} ]] || eerror "${x} was changed to ${!x}, should remain ${!var}"
+    # enforce _LOCKED_ variables
+    var=MULTIBUILD_${CLASS}_LOCKED_VARS
+    for var in ${!var}; do
+        x=MULTIBUILD_${class}_${target}_PROFILE_${var}
+        [[ ${!var} == ${!x} ]] || eerror "someone attempted to set ${var}=${!var}, but it is locked to ${var}=${!x}"
         export ${var}="${!x}"
     done
 
