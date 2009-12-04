@@ -7,6 +7,8 @@ multibuild_get_var()
 {
     local merged class=${1} target=${2} var=${3}
 
+    multibuild_merge_build_target_vars ${class} ${target}
+
     merged=MULTIBUILD_${class}_${target}_MERGED_${var}
     echo "${!merged}"
 }
@@ -16,8 +18,7 @@ multibuild_get_all_var() {
     local x target class=${1} var=${2}
     x=MULTIBUILD_${class}_TARGETS
     for target in ${!x}; do
-        x=MULTIBUILD_${class}_${target}_MERGED_${var}
-        echo "${!x}"
+        multibuild_get_var ${class} ${target} ${var}
     done
 }
 
