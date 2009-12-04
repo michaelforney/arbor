@@ -44,6 +44,7 @@ multibuild_save_build_target()
 {
     local x var class=${1} target=MULTIBUILD_${class}_CURRENT_TARGET
     target=${!target}
+    [[ -n ${target} ]] || die "Could not determine current build target"
 
     for x in $(eval echo \${!MULTIBUILD_${class}_${target}_CURRENT_*}); do
         var=${x#MULTIBUILD_${class}_${target}_CURRENT_}
