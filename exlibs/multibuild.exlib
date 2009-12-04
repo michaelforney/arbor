@@ -47,12 +47,7 @@ multibuild_load_build_target()
     done
 
     # enforce _LOCKED_ variables
-    var=MULTIBUILD_${CLASS}_LOCKED_VARS
-    for var in ${!var}; do
-        x=MULTIBUILD_${class}_${target}_PROFILE_${var}
-        [[ ${!var} == ${!x} ]] || eerror "someone attempted to set ${var}=${!var}, but it is locked to ${var}=${!x}"
-        export ${var}="${!x}"
-    done
+    multibuild_enforce_locked_vars ${class} ${target}
 
     # set current target
     export MULTIBUILD_${class}_CURRENT_TARGET="${target}"
@@ -77,6 +72,20 @@ multibuild_switch_build_target()
 {
     multibuild_save_build_target "${@}"
     multibuild_load_build_target "${@}"
+}
+
+# multibuild_enforce_locked_vars $class $target
+multibuild_enforce_locked_vars()
+{
+    local var locked_var class=${1} target=${2}
+
+    var=MULTIBUILD_${class}_LOCKED_VARS
+    for var in ${!var}; do
+        locked_var=MULTIBUILD_${class}_${target}_PROFILE_${var}
+        [[ ${!var} == ${!locked_var} ]] ||
+            die "someone attempted to set ${var}=${!var}, but it is locked to ${var}=${!locked_var}"
+        export ${var}="${!locked_var}"
+    done
 }
 
 multibuild_load_default_targets() {
