@@ -2,16 +2,6 @@
 # Copyright 2009 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-# multibuild_get_all_var $class $var
-multibuild_get_all_var() {
-    local x target class=${1} var=${2}
-    x=MULTIBUILD_${class}_TARGETS
-    for target in ${!x}; do
-        x=MULTIBUILD_${class}_${target}_MERGED_${var}
-        echo "${!x}"
-    done
-}
-
 # multibuild_get_var $class $target $var
 multibuild_get_var()
 {
@@ -21,17 +11,13 @@ multibuild_get_var()
     echo "${!x}"
 }
 
-# multibuild_save_build_target $class
-multibuild_save_build_target()
-{
-    local class=${1}
-    local target=MULTIBUILD_${class}_CURRENT_TARGET
-    target=${!target}
-    local x var
-
-    for x in $(eval echo \${!MULTIBUILD_${class}_${target}_CURRENT_*}); do
-        var=${x#MULTIBUILD_${class}_${target}_CURRENT_}
-        export MULTIBUILD_${class}_${target}_MERGED_${var}="${!var}"
+# multibuild_get_all_var $class $var
+multibuild_get_all_var() {
+    local x target class=${1} var=${2}
+    x=MULTIBUILD_${class}_TARGETS
+    for target in ${!x}; do
+        x=MULTIBUILD_${class}_${target}_MERGED_${var}
+        echo "${!x}"
     done
 }
 
@@ -69,6 +55,20 @@ multibuild_load_build_target()
 
     # set current target
     export MULTIBUILD_${class}_CURRENT_TARGET="${target}"
+}
+
+# multibuild_save_build_target $class
+multibuild_save_build_target()
+{
+    local class=${1}
+    local target=MULTIBUILD_${class}_CURRENT_TARGET
+    target=${!target}
+    local x var
+
+    for x in $(eval echo \${!MULTIBUILD_${class}_${target}_CURRENT_*}); do
+        var=${x#MULTIBUILD_${class}_${target}_CURRENT_}
+        export MULTIBUILD_${class}_${target}_MERGED_${var}="${!var}"
+    done
 }
 
 # multibuild_switch_build_target $class $target
