@@ -34,9 +34,6 @@ multibuild_load_build_target()
         export ${merged#MULTIBUILD_${class}_${target}_MERGED_}="${!merged}"
     done
 
-    # enforce _LOCKED_ variables
-    multibuild_enforce_locked_vars ${class} ${target}
-
     # set current target
     export MULTIBUILD_${class}_CURRENT_TARGET="${target}"
 }
@@ -51,6 +48,9 @@ multibuild_save_build_target()
         var=${x#MULTIBUILD_${class}_${target}_CURRENT_}
         export MULTIBUILD_${class}_${target}_MERGED_${var}="${!var}"
     done
+
+    # enforce _LOCKED_ variables
+    multibuild_enforce_locked_vars ${class} ${target}
 }
 
 # multibuild_switch_build_target $class $target
@@ -76,19 +76,23 @@ multibuild_merge_build_target_vars()
         done
         export MULTIBUILD_${class}_${target}_MERGED=true
     fi
+
+    # enforce _LOCKED_ variables
+    multibuild_enforce_locked_vars ${class} ${target}
 }
 
 # multibuild_enforce_locked_vars $class $target
 multibuild_enforce_locked_vars()
 {
-    local var locked_var class=${1} target=${2}
+    local var locked_var merged class=${1} target=${2}
 
     var=MULTIBUILD_${class}_LOCKED_VARS
     for var in ${!var}; do
         locked_var=MULTIBUILD_${class}_${target}_PROFILE_${var}
-        [[ ${!var} == ${!locked_var} ]] ||
-            die "someone attempted to set ${var}=${!var}, but it is locked to ${var}=${!locked_var}"
-        export ${var}="${!locked_var}"
+        merged=MULTIBUILD_${class}_${target}_MERGED_${var}
+        [[ ${!merged} == ${!locked_var} ]] ||
+            die "someone attempted to set ${var}=${!merged}, but it is locked to ${var}=${!locked_var}"
+        export ${merged}="${!locked_var}"
     done
 }
 
