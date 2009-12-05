@@ -13,8 +13,7 @@ multibuild_get_all_var() {
 }
 
 # multibuild_get_var $class $target $var
-multibuild_get_var()
-{
+multibuild_get_var() {
     local x class=${1} target=${2} var=${3}
 
     x=MULTIBUILD_${class}_${target}_MERGED_${var}
@@ -22,8 +21,7 @@ multibuild_get_var()
 }
 
 # multibuild_save_build_target $class
-multibuild_save_build_target()
-{
+multibuild_save_build_target() {
     local class=${1}
     local target=MULTIBUILD_${class}_CURRENT_TARGET
     target=${!target}
@@ -36,8 +34,7 @@ multibuild_save_build_target()
 }
 
 # multibuild_load_build_target $class $target
-multibuild_load_build_target()
-{
+multibuild_load_build_target() {
     local class=${1}
     local target=${2}
     local x var merged
@@ -72,8 +69,7 @@ multibuild_load_build_target()
 }
 
 # multibuild_switch_build_target $class $target
-multibuild_switch_build_target()
-{
+multibuild_switch_build_target() {
     multibuild_save_build_target "${@}"
     multibuild_load_build_target "${@}"
 }
@@ -86,8 +82,7 @@ multibuild_load_default_targets() {
     done
 }
 
-multibuild_sanity_check_profile()
-{
+multibuild_sanity_check_profile() {
     local x var class target
 
     for class in ${MULTIBUILD_CLASSES} ; do
@@ -107,14 +102,12 @@ multibuild_sanity_check_profile()
 
 [[ ${EXHERES_PHASE} == metadata ]] || multibuild_sanity_check_profile
 
-get_libdir()
-{
+get_libdir() {
     ewarn "get_libdir is deprecated"
     echo "${LIBDIR}"
 }
 
-get_all_libdirs()
-{
+get_all_libdirs() {
     ewarn "get_all_libdirs is deprecated"
 
     local target libdir
