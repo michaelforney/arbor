@@ -42,7 +42,9 @@ multibuild_load_build_target()
 # multibuild_save_build_target $class
 multibuild_save_build_target()
 {
-    local x var class=${1} target=MULTIBUILD_${class}_CURRENT_TARGET
+    local x var class=${1}
+    local target=MULTIBUILD_${class}_CURRENT_TARGET
+
     target=${!target}
     [[ -n ${target} ]] || die "Could not determine current build target"
 
@@ -81,13 +83,13 @@ multibuild_merge_build_target_vars()
             all=MULTIBUILD_${class}_ALL_${var}
             [[ unset == ${!all-unset} ]] && export ${all}="${!var}"
             merged=MULTIBUILD_${class}_${target}_MERGED_${var}
-            export ${merged}="${!merged}${!x:+ ${!x}}"
+            export ${merged}="${!merged}${!x:+${!merged:+ }${!x}}"
         done
         # append the MULTIBUILD_C_ALL_CFLAGS
-        for x in $(eval echo \${!MULTIBUILD_${class}_${target}_MERGED_*}); do
-            var=${x#MULTIBUILD_${class}_${target}_MERGED_}
+        for merged in $(eval echo \${!MULTIBUILD_${class}_${target}_MERGED_*}); do
+            var=${merged#MULTIBUILD_${class}_${target}_MERGED_}
             all=MULTIBUILD_${class}_ALL_${var}
-            export ${merged}="${!merged}${!all:+ ${!all}}"
+            export ${merged}="${!merged}${!all:+${!merged:+ }${!all}}"
         done
         export MULTIBUILD_${class}_${target}_MERGED=true
     fi
