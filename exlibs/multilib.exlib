@@ -5,7 +5,7 @@ require multibuild
 
 get_libdir() {
     ewarn "get_libdir is deprecated"
-    [[ -n ${LIBDIR} ]] || die "LIBDIR is unset, invalid profile"
+    [[ ${EXHERES_PHASE} == metadata || -n ${LIBDIR} ]] || die "LIBDIR is unset, invalid profile"
     echo "${LIBDIR}"
 }
 
