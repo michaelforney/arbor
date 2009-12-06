@@ -77,7 +77,7 @@ multibuild_merge_build_target_vars()
         #
         # if MULTIBUILD_C_ALL_CFLAGS is unset store the value of CFLAGS in it so it can be appended
         # for all build targets.
-        stacked=MULTIBUILD_${class}_${target}_STACKED_VARS
+        stacked=MULTIBUILD_${class}_STACKED_VARS
         for x in $(eval echo \${!MULTIBUILD_${class}_${target}_PROFILE_*} \
                              \${!MULTIBUILD_${class}_${target}_USER_*}); do
             var=${x#MULTIBUILD_${class}_${target}_@(PROFILE|USER)_}
@@ -86,7 +86,7 @@ multibuild_merge_build_target_vars()
             merged=MULTIBUILD_${class}_${target}_MERGED_${var}
             if has ${var} ${!stacked}; then
                 export ${merged}="${!merged}${!x:+${!merged:+ }${!x}}"
-            else
+            elif [[ -n ${!x} ]] ; then
                 export ${merged}="${!x}"
             fi
         done
@@ -96,8 +96,8 @@ multibuild_merge_build_target_vars()
             all=MULTIBUILD_${class}_ALL_${var}
             if has ${var} ${!stacked}; then
                 export ${merged}="${!merged}${!all:+${!merged:+ }${!all}}"
-            else
-                export ${merged}="${!all}"
+            elif [[ -n ${!all} ]] ; then
+	        export ${merged}="${!all}"
             fi
         done
         export MULTIBUILD_${class}_${target}_MERGED=true
@@ -117,7 +117,7 @@ multibuild_enforce_locked_vars()
         locked_var=MULTIBUILD_${class}_${target}_PROFILE_${var}
         merged=MULTIBUILD_${class}_${target}_MERGED_${var}
         [[ ${!merged} == ${!locked_var} ]] ||
-            die "someone attempted to set ${var}=${!merged}, but it is locked to ${var}=${!locked_var}"
+            die "In ${class} target ${target}, someone attempted to set ${var}='${!merged}', but it is locked to ${var}='${!locked_var}'"
         export ${merged}="${!locked_var}"
     done
 }
