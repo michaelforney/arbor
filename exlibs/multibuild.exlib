@@ -138,5 +138,8 @@ multibuild_sanity_check_profile()
     [[ ${target} == ${!x} ]] || die "Invalid profile sets ${target} target last, should be ${!x}"
 }
 
-[[ ${EXHERES_PHASE} != metadata ]] && multibuild_sanity_check_profile && multibuild_load_default_targets
+if [[ ${EXHERES_PHASE} != metadata ]] ; then
+    multibuild_sanity_check_profile
+    multibuild_load_default_targets
+fi
 
