@@ -5,7 +5,8 @@
 # Based in part upon 'alsa-plugins-1.0.19.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
+# automake is required; we need to run aclocal
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.9 ] ]
 
 SUMMARY="Plugins for ALSA"
 HOMEPAGE="http://www.alsa-project.org"
@@ -26,24 +27,25 @@ DEPENDENCIES="
         speex? ( media-libs/speex[>=1.2_rc] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-automagic-speex.patch" )
+AT_M4DIR=( m4 )
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-automagic-speex.patch"
+                              "${FILES}/${PNV}-quote-quote-quote-quote.patch" )
 
 src_prepare() {
     default
+
+    eaclocal
+    _elibtoolize
     eautoconf
- }
+}
 
 src_configure() {
-    econf \
-        $(option_enable ffmpeg avcodec) \
-        $(option_enable pulseaudio) \
-        $(option_enable jack) \
-        $(option_enable samplerate) \
-        $(if option speex ; then
-            echo --with-speex=lib
-          else
-            echo --with-speex=no
-          fi)
+    econf $(option_enable ffmpeg avcodec) \
+          $(option_enable pulseaudio) \
+          $(option_enable jack) \
+          $(option_enable samplerate) \
+          --with-speex=$(option speex && echo lib || echo no)
 }
 
 src_install() {

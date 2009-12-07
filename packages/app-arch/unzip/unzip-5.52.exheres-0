@@ -15,7 +15,7 @@ DOWNLOADS="mirror://sourceforge/infozip/${MY_PNV}.tar.gz"
 LICENCES="Info-ZIP"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="platform: x86"
 
 DEPENDENCIES=""
 
@@ -26,7 +26,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_prepare() {
-    sed -i \
+    edo sed -i \
         -e 's:-O3:$(CFLAGS) $(CPPFLAGS):' \
         -e 's:-O :$(CFLAGS) $(CPPFLAGS) :' \
         -e "s:CC=gcc :CC=$(tc-getCC) :" \
@@ -36,8 +36,7 @@ src_prepare() {
         -e 's:SL = :SL = $(LDFLAGS) :' \
         -e 's:FL = :FL = $(LDFLAGS) :' \
         -e 's:MANDIR = $(prefix):&/share:' \
-        unix/Makefile \
-        || die "sed unix/Makefile failed"
+        unix/Makefile
 
     append-lfs-flags # https://bugs.gentoo.org/104315
 
@@ -45,14 +44,11 @@ src_prepare() {
 }
 
 src_compile() {
-    local target
-    case ${CHOST} in
-        i?86*-linux*) target=linux_asm ;;
-        *-linux*)     target=linux_noasm ;;
-        *)            die "Unknown target" ;;
-    esac
+    local target=linux_noasm
+    option platform:x86 && target=linux_asm
 
     emake -f unix/Makefile ${target}
 }
 
 DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )
+

@@ -27,6 +27,8 @@ ELISP_COMPILE_FLAGS=( --directory . )
 
 # Byte-compile the given set of files
 elisp-compile() {
+    illegal_in_global_scope
+
     ${EMACS} "${ELISP_FLAGS[@]}" "${ELISP_COMPILE_FLAGS[@]}" \
         -f batch-byte-compile "$@" \
         || die "failed to compile elisp files"
@@ -35,6 +37,8 @@ elisp-compile() {
 # Install the given set of files (arguments #2-) to the given location
 # (argument #1), relative to ELISP_SITE_LISP
 elisp-install() {
+    illegal_in_global_scope
+
     (
         insinto ${ELISP_SITE_LISP}/$1;
         shift;
@@ -44,6 +48,8 @@ elisp-install() {
 
 # Install a site-file
 elisp-install-site-file() {
+    illegal_in_global_scope
+
     local esf=${ELISP_SITE_FILE:-${FILES}/${PN}-exherbo.el.in}
     einfo "Installing emacs lisp site file"
     if [[ ${esf##*/} != *-exherbo.el.in ]]; then
@@ -59,6 +65,8 @@ elisp-install-site-file() {
 
 # Concatenate all the site-files into a single file, in no particular order
 elisp-generate-global-site-file() {
+    illegal_in_global_scope
+
     einfo "Generating global emacs lisp site file"
     local gsf=${ROOT}${ELISP_GLOBAL_SITE_FILE} file reset_shopts=`shopt -p nullglob`
     rm -f "${gsf}"

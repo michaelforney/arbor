@@ -16,8 +16,13 @@ fi
 
 HOMEPAGE="http://${PN}.rubyforge.org"
 
-exparam -b has_rdoc && MYOPTIONS="doc"
 DEPENDENCIES="
+    build+run:
+        dev-lang/ruby:=
+"
+
+exparam -b has_rdoc && MYOPTIONS="doc"
+DEPENDENCIES+="
     build+run:
         dev-ruby/rubygems[>=1.2.0]
 "
