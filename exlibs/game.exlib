@@ -11,6 +11,8 @@ DEPENDENCIES="
 "
 
 dovarlibgames() {
+    illegal_in_global_scope
+
     local R=
     if [[ ${1} == -R ]]; then
         R=-R
@@ -33,6 +35,8 @@ dovarlibgames() {
 }
 
 preserve_scores() {
+    illegal_in_global_scope
+
     local f
     for f in "${@}"; do
         [[ ${f} == ${IMAGE%+(/)}/* ]] && f=${f#${IMAGE%+(/)}}
