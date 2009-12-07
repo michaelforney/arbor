@@ -35,24 +35,6 @@ elif exparam -b has_lib; then
 "
 fi
 
-__python_eclass_test() {
-    __python_version_extract 2.3
-    echo -n "2.3 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.3.4
-    echo -n "2.3.4 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.3.5
-    echo -n "2.3.5 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.4
-    echo -n "2.4 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.5b3
-    echo -n "2.5b3 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-}
-
 #
 # name:   python_disable/enable_pyc
 # desc:   tells python not to automatically recompile modules to .pyc/.pyo
@@ -73,31 +55,16 @@ python_enable_pyc() {
     unset PYTHONDONTWRITEBYTECODE
 }
 
-#
-# name:   python_version
-# desc:   run without arguments and it will export the version of python
-#     currently in use as $PYVER
-#
-
-__python_version_extract() {
-    verstr=$1
-    export PYVER_MAJOR=${verstr:0:1}
-    export PYVER_MINOR=${verstr:2:1}
-    if [[ ${verstr:3:1} == . ]]; then
-        export PYVER_MICRO=${verstr:4}
-    fi
-    export PYVER="${PYVER_MAJOR}.${PYVER_MINOR}"
-}
-
 python_version() {
     illegal_in_global_scope
 
     [[ -n "${PYVER}" ]] && return 0
-    local tmpstr
-    python=${python:-/usr/bin/python}
-    tmpstr="$(${python} -V 2>&1 )"
-    export PYVER_ALL="${tmpstr#Python }"
-    __python_version_extract $PYVER_ALL
+
+    PYVER=$(/usr/bin/python -V 2>&1)
+    PYVER=${PYVER#Python }
+    PYVER=$(ever range 1-2 ${PYVER})
+
+    export PYVER
 }
 
 # Run without arguments, returns the python library directory.
