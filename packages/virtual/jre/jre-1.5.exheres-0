@@ -4,11 +4,14 @@
 SUMMARY="Virtual for Java Runtime Environments"
 
 LICENCES="as-is"
-SLOT="1.6"
+SLOT="1.5"
 PLATFORMS="~amd64 ~x86"
 
 DEPENDENCIES="
     build+run:
-        virtual/jdk:1.6
+        || (
+            virtual/jdk:1.5
+            sys-devel/gcc[java(-)]:4.4
+        )
 "
 
