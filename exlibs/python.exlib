@@ -9,8 +9,6 @@
 #
 # - Features:
 # python_get_abi()        - returns the current python abi
-# python_mod_compile()    - Compiles a .py file to a .pyc/.pyo
-# python_mod_optimize()   - Generates .pyc/.pyo precompiled scripts
 # python_mod_cleanup()    - Goes through /usr/lib*/python* to remove
 #               orphaned *.pyc *.pyo
 
@@ -79,121 +77,18 @@ python_get_sitedir() {
     echo -n "$(python_get_libdir)/site-packages"
 }
 
-#
-# name:   python_mod_compile
-# desc:   given a filename, it will pre-compile the module's .pyc and .pyo.
-#     should only be run in pkg_postinst()
-# exam:
-#     python_mod_compile /usr/lib/python2.3/site-packages/pygoogle.py
-#
-python_mod_compile() {
+# Byte-compiles all .py files in ${IMAGE}$(python_get_libdir). Changing the mtime of a .py file
+# invalidates the byte-compiled versions. python_bytecompile() should thus be run at the end of
+# src_install(). Both .pyc & .pyo (optimized & byte-compiled) files are generated.
+python_bytecompile() {
     illegal_in_global_scope
 
-    local f myroot myfiles=()
+    [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
-    # Check if phase is pkg_postinst()
-    [[ ${EXHERES_PHASE} != postinst ]] && die "${FUNCNAME} should only be run in pkg_postinst()"
+    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
 
-    local python_abi=$(python_get_abi)
-
-    # strip trailing slash
-    myroot="${ROOT%/}"
-
-    # respect ROOT
-    for f in "${@}" ; do
-        [[ -f "${myroot}/${f}" ]] && myfiles+=("${myroot}/${f}")
-    done
-
-    if (( ${#myfiles[@]} )) ; then
-        python${python_abi} ${myroot}/usr/$(get_libdir)/python${python_abi}/py_compile.py "${myfiles[@]}"
-        python${python_abi} -O ${myroot}/usr/$(get_libdir)/python${python_abi}/py_compile.py "${myfiles[@]}"
-    else
-        ewarn "No files to compile!"
-    fi
-}
-
-#
-# name:   python_mod_optimize [-l] [-f] [-q] [-d destdir] [-x regexp]
-#                             [file ...] [directory ...]
-# desc:   compiles the given files and directories, in the latter case
-#     recursing into subdirectories (unless the -l option is present)
-#
-#     if no file or directory arguments are supplied, (re)compiles all modules
-#     on sys.path (/usr/lib/python2.6, /usr/lib/python2.6/site-packages, ...),
-#     without recursing into subdirectories
-#
-#     the following options are passed to compileall.py (they are ignored when
-#     the only arguments supplied are files):
-#         -l
-#             don't recurse into subdirectories
-#         -f
-#             force rebuild even if timestamps are up-to-date
-#         -q
-#             quiet operation
-#         -d destdir
-#             directory name to use in error messages if no directory
-#             arguments are given (default is sys.path with -l assumed)
-#         -x regexp
-#             skip files whose full path matches the given regular expression
-# exam:
-#     python_mod_optimize /usr/share/codegen
-#
-python_mod_optimize() {
-    illegal_in_global_scope
-
-    local myroot mydirs=() myfiles=() myopts=() python_abi=$(python_get_abi)
-
-    # Check if phase is pkg_postinst()
-    [[ ${EXHERES_PHASE} != postinst ]] && die "${FUNCNAME} should only be run in pkg_postinst()"
-
-    # strip trailing slash
-    myroot="${ROOT%/}"
-
-    # respect ROOT and options passed to compileall.py
-    while (($#)); do
-        case $1 in
-            -l|-f|-q)
-                myopts+=("$1")
-                ;;
-            -d|-x)
-                myopts+=("$1" "$2")
-                shift
-                ;;
-            -*)
-                ewarn "${FUNCNAME}: Ignoring compile option $1"
-                ;;
-            *)
-                if [[ -d "${myroot}"/$1 ]]; then
-                    mydirs+=("${myroot}/$1")
-                elif [[ -f "${myroot}"/$1 ]]; then
-                    # Files are passed to python_mod_compile which is ROOT-aware
-                    myfiles+=("$1")
-                elif [[ -e "${myroot}/$1" ]]; then
-                    ewarn "${myroot}/$1 is not a file or directory!"
-                else
-                    ewarn "${myroot}/$1 doesn't exist!"
-                fi
-                ;;
-        esac
-        shift
-    done
-
-    # set additional opts
-    myopts+=(-q)
-
-    ebegin "Byte compiling python modules for python-${python_abi}"
-    python${python_abi} \
-        "${myroot}"/usr/$(get_libdir)/python${python_abi}/compileall.py \
-        "${myopts[@]}" "${mydirs[@]}"
-    python${python_abi} -O \
-        "${myroot}"/usr/$(get_libdir)/python${python_abi}/compileall.py \
-        "${myopts[@]}" "${mydirs[@]}"
-
-    if ((${#myfiles[@]})); then
-        python_mod_compile "${myfiles[@]}"
-    fi
-
-    eend $?
+    edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
+    edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
 }
 
 #
