@@ -4,11 +4,8 @@
 # Based in part upon 'distutils.eclass' from Gentoo, which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-# The distutils eclass is designed to allow easier installation of
-# distutils-based python modules and their incorporation into
-# the Exherbo Linux system.
-#
-# It inherits python, multilib.
+# The distutils eclass is designed to allow easier installation of distutils-based python modules
+# and their incorporation into Exherbo.
 
 myexparam python_dep=
 myexparam python_modules=[ ]
@@ -26,7 +23,6 @@ require python [ python_dep=${PYTHON_DEP} has_lib=${PYTHON_HAS_LIB} has_bin=${PY
 
 export_exlib_phases src_prepare src_compile src_install
 
-# The distutils src_prepare function, this function is exported
 distutils_src_prepare() {
     default
 
@@ -36,14 +32,10 @@ distutils_src_prepare() {
     echo "def use_setuptools(*args, **kwargs): pass" > ez_setup.py
 }
 
-# The distutils src_compile function, this function is exported
 distutils_src_compile() {
     ${PYTHON} -B setup.py build "$@" || die "compilation failed"
 }
 
-# The distutils src_install function, this function is exported.
-# It also installs the "standard docs" (CHANGELOG, Change*, KNOWN_BUGS, MAINTAINERS,
-# PKG-INFO, CONTRIBUTORS, TODO, NEWS, MANIFEST*, README*, and AUTHORS)
 distutils_src_install() {
     # need this for python-2.5 + setuptools in cases where
     # a package uses distutils but does not install anything
