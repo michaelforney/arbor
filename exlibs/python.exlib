@@ -8,7 +8,7 @@
 # Python or Python modules.
 #
 # - Features:
-# python_version()    - sets PYVER/PYVER_MAJOR/PYVER_MINOR
+# python_get_abi()        - returns the current python abi
 # python_tkinter_exists() - Checks for tkinter support in python
 # python_mod_exists()     - Checks if a python module exists
 # python_mod_compile()    - Compiles a .py file to a .pyc/.pyo
@@ -55,24 +55,23 @@ python_enable_pyc() {
     unset PYTHONDONTWRITEBYTECODE
 }
 
-python_version() {
+python_get_abi() {
     illegal_in_global_scope
 
-    [[ -n "${PYVER}" ]] && return 0
+    local python_abi
 
-    PYVER=$(/usr/bin/python -V 2>&1)
-    PYVER=${PYVER#Python }
-    PYVER=$(ever range 1-2 ${PYVER})
+    python_abi=$(/usr/bin/python -V 2>&1)
+    python_abi=${python_abi#Python }
+    python_abi=$(ever range 1-2 ${python_abi})
 
-    export PYVER
+    echo -n "${python_abi}"
 }
 
 # Run without arguments, returns the python library directory.
 python_get_libdir() {
     illegal_in_global_scope
 
-    python_version
-    echo -n "/usr/$(get_libdir)/python${PYVER}"
+    echo -n "/usr/$(get_libdir)/python$(python_get_abi)"
 }
 
 # Run without arguments, returns the python site-packages directory.
@@ -116,12 +115,7 @@ python_mod_compile() {
     [[ ${EXHERES_PHASE} != postinst ]] &&\
         die "${FUNCNAME} should only be run in pkg_postinst()"
 
-    # allow compiling for older python versions
-    if [[ -n "${PYTHON_OVERRIDE_PYVER}" ]]; then
-        PYVER=${PYTHON_OVERRIDE_PYVER}
-    else
-        python_version
-    fi
+    local python_abi=$(python_get_abi)
 
     # strip trailing slash
     myroot="${ROOT%/}"
@@ -132,8 +126,8 @@ python_mod_compile() {
     done
 
     if ((${#myfiles[@]})); then
-        python${PYVER} ${myroot}/usr/$(get_libdir)/python${PYVER}/py_compile.py "${myfiles[@]}"
-        python${PYVER} -O ${myroot}/usr/$(get_libdir)/python${PYVER}/py_compile.py "${myfiles[@]}"
+        python${python_abi} ${myroot}/usr/$(get_libdir)/python${python_abi}/py_compile.py "${myfiles[@]}"
+        python${python_abi} -O ${myroot}/usr/$(get_libdir)/python${python_abi}/py_compile.py "${myfiles[@]}"
     else
         ewarn "No files to compile!"
     fi
@@ -168,7 +162,7 @@ python_mod_compile() {
 python_mod_optimize() {
     illegal_in_global_scope
 
-    local myroot mydirs=() myfiles=() myopts=()
+    local myroot mydirs=() myfiles=() myopts=() python_abi=$(python_get_abi)
 
     # Check if phase is pkg_postinst()
     [[ ${EXHERES_PHASE} != postinst ]] &&\
@@ -206,22 +200,15 @@ python_mod_optimize() {
         shift
     done
 
-    # allow compiling for older python versions
-    if [ -n "${PYTHON_OVERRIDE_PYVER}" ]; then
-        PYVER=${PYTHON_OVERRIDE_PYVER}
-    else
-        python_version
-    fi
-
     # set additional opts
     myopts+=(-q)
 
-    ebegin "Byte compiling python modules for python-${PYVER}"
-    python${PYVER} \
-        "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
+    ebegin "Byte compiling python modules for python-${python_abi}"
+    python${python_abi} \
+        "${myroot}"/usr/$(get_libdir)/python${python_abi}/compileall.py \
         "${myopts[@]}" "${mydirs[@]}"
-    python${PYVER} -O \
-        "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
+    python${python_abi} -O \
+        "${myroot}"/usr/$(get_libdir)/python${python_abi}/compileall.py \
         "${myopts[@]}" "${mydirs[@]}"
 
     if ((${#myfiles[@]})); then
