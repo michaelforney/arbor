@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'gamin-0.1.9-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -46,15 +46,13 @@ src_install() {
 
 pkg_postinst() {
     if option python; then
-        python_version
-        python_mod_optimize "${ROOT}"/usr/$(get_libdir)/python${PYVER}/site-packages
+        python_mod_optimize "${ROOT}$(python_get_sitedir)"
     fi
 }
 
 pkg_postrm() {
     if option python; then
-        python_version
-        python_mod_cleanup /usr/$(get_libdir)/python${PYVER}/site-packages
+        python_mod_cleanup "${ROOT}$(python_get_sitedir)"
     fi
 }
 
