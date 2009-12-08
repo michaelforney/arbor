@@ -31,6 +31,8 @@ elif exparam -b has_lib; then
 "
 fi
 
+export PYTHON="/usr/bin/python"
+
 #
 # name:   python_disable/enable_pyc
 # desc:   tells python not to automatically recompile modules to .pyc/.pyo
@@ -56,7 +58,7 @@ python_get_abi() {
 
     local python_abi
 
-    python_abi=$(/usr/bin/python -V 2>&1)
+    python_abi=$(${PYTHON} -V 2>&1)
     python_abi=${python_abi#Python }
     python_abi=$(ever range 1-2 ${python_abi})
 
