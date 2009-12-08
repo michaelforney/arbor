@@ -30,7 +30,8 @@ DEPENDENCIES="
 AT_M4DIR=( m4 )
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-automagic-speex.patch"
-                              "${FILES}/${PNV}-quote-quote-quote-quote.patch" )
+                              "${FILES}/${PNV}-quote-quote-quote-quote.patch"
+                              -p0 "${FILES}/${PNV}-missing-avutil.patch" )
 
 src_prepare() {
     default
