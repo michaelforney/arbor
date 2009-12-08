@@ -1,4 +1,5 @@
 # Copyright 2008, 2009 Ali Polatel
+# Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'distutils.eclass' from Gentoo, which is:
 #   Copyright 1999-2008 Gentoo Foundation
@@ -23,7 +24,7 @@ exparam -v PYTHON_HAS_BIN has_bin
 require multilib
 require python [ python_dep=${PYTHON_DEP} has_lib=${PYTHON_HAS_LIB} has_bin=${PYTHON_HAS_BIN} ]
 
-export_exlib_phases src_prepare src_compile src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_compile src_install
 
 # The distutils src_prepare function, this function is exported
 distutils_src_prepare() {
@@ -57,51 +58,8 @@ distutils_src_install() {
     ${python} -B setup.py install --root="${IMAGE}" --no-compile "$@" || die
 
     emagicdocs
-}
 
-# Generic pyc/pyo cleanup script. This function is exported.
-distutils_pkg_postrm() {
-    local moddir pylibdir pymod
-    if [[ -z ${PYTHON_MODULES[@]} ]]; then
-        for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
-            if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
-                PYTHON_MODULES=( ${PN} )
-            fi
-        done
-    fi
-
-    ebegin "Performing python module cleanup..."
-    if [[ -n ${PYTHON_MODULES[@]} ]]; then
-        for pymod in "${PYTHON_MODULES[@]}"; do
-            for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
-                if [[ -d "${pylibdir}"/site-packages/${pymod} ]]; then
-                    python_mod_cleanup "${pylibdir#${ROOT}}"/site-packages/"${pymod}"
-                fi
-            done
-        done
-    else
-        python_mod_cleanup
-    fi
-    eend 0
-}
-
-# This is a generic optimization, you should override it if your package
-# installs things in another directory. This function is exported
-distutils_pkg_postinst() {
-    local pylibdir pymod
-
-    if [[ -z ${PYTHON_MODULES[@]} ]]; then
-        for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
-            if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
-                PYTHON_MODULES=( ${PN} )
-            fi
-        done
-    fi
-
-    for pymod in "${PYTHON_MODULES[@]}"; do
-        einfo "Optimizing bytecode for module ${pymod}"
-        python_mod_optimize $(python_get_sitedir)/"${pymod}"
-    done
+    python_bytecompile
 }
 
 # Calls python_version, so that you can use something like
