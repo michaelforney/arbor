@@ -2,7 +2,7 @@
 # Based on work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases src_install pkg_preinst
+export_exlib_phases src_install
 
 SUMMARY="Sandbox gives some security assurance when installing packages"
 HOMEPAGE="http://gentoo.org/"
@@ -28,10 +28,5 @@ sandbox_src_install() {
     keepdir /var/log/sandbox
     fowners root:paludisbuild /var/log/sandbox
     fperms 0770 /var/log/sandbox
-}
-
-sandbox_pkg_preinst() {
-    chown root:paludisbuild "${IMAGE}"/var/log/sandbox
-    chmod 0770 "${IMAGE}"/var/log/sandbox
 }
 
