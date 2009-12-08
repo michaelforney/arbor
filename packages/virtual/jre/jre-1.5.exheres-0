@@ -1,7 +1,7 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="Virtual for Java Development Kits"
+SUMMARY="Virtual for Java Runtime Environments"
 
 LICENCES="as-is"
 SLOT="1.5"
@@ -9,6 +9,9 @@ PLATFORMS="~amd64 ~x86"
 
 DEPENDENCIES="
     build+run:
-        dev-lang/gcj-jdk:4.4
+        || (
+            virtual/jdk:1.5
+            sys-devel/gcc[java(-)]:4.4
+        )
 "
 
