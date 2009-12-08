@@ -3,8 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 # multibuild_get_var $class $target $var
-multibuild_get_var()
-{
+multibuild_get_var() {
     local merged class=${1} target=${2} var=${3}
 
     multibuild_merge_build_target_vars ${class} ${target}
@@ -23,8 +22,7 @@ multibuild_get_all_var() {
 }
 
 # multibuild_load_build_target $class $target
-multibuild_load_build_target()
-{
+multibuild_load_build_target() {
     local merged class=${1} target=${2}
 
     multibuild_merge_build_target_vars ${class} ${target}
@@ -40,8 +38,7 @@ multibuild_load_build_target()
 }
 
 # multibuild_save_build_target $class
-multibuild_save_build_target()
-{
+multibuild_save_build_target() {
     local x var class=${1}
     local target=MULTIBUILD_${class}_CURRENT_TARGET
 
@@ -58,15 +55,13 @@ multibuild_save_build_target()
 }
 
 # multibuild_switch_build_target $class $target
-multibuild_switch_build_target()
-{
+multibuild_switch_build_target() {
     multibuild_save_build_target "${@}"
     multibuild_load_build_target "${@}"
 }
 
 # multibuild_merge_build_target_vars $class $target
-multibuild_merge_build_target_vars()
-{
+multibuild_merge_build_target_vars() {
     local merged stacked x var all class=${1} target=${2}
 
     # if profile and user vars have not been merged, merge them
@@ -97,7 +92,7 @@ multibuild_merge_build_target_vars()
             if has ${var} ${!stacked}; then
                 export ${merged}="${!merged}${!all:+${!merged:+ }${!all}}"
             elif [[ -n ${!all} ]] ; then
-	        export ${merged}="${!all}"
+                export ${merged}="${!all}"
             fi
         done
         export MULTIBUILD_${class}_${target}_MERGED=true
@@ -108,8 +103,7 @@ multibuild_merge_build_target_vars()
 }
 
 # multibuild_enforce_locked_vars $class $target
-multibuild_enforce_locked_vars()
-{
+multibuild_enforce_locked_vars() {
     local var locked_var merged class=${1} target=${2}
 
     var=MULTIBUILD_${class}_LOCKED_VARS
@@ -130,8 +124,7 @@ multibuild_load_default_targets() {
     done
 }
 
-multibuild_sanity_check_profile()
-{
+multibuild_sanity_check_profile() {
     local x var class target
 
     for class in ${MULTIBUILD_CLASSES} ; do
