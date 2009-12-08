@@ -38,24 +38,21 @@ distutils_src_prepare() {
 
 # The distutils src_compile function, this function is exported
 distutils_src_compile() {
-    python_version
-    ${python} -B setup.py build "$@" || die "compilation failed"
+    ${PYTHON} -B setup.py build "$@" || die "compilation failed"
 }
 
 # The distutils src_install function, this function is exported.
 # It also installs the "standard docs" (CHANGELOG, Change*, KNOWN_BUGS, MAINTAINERS,
 # PKG-INFO, CONTRIBUTORS, TODO, NEWS, MANIFEST*, README*, and AUTHORS)
 distutils_src_install() {
-
-    python_version
     # need this for python-2.5 + setuptools in cases where
     # a package uses distutils but does not install anything
     # in site-packages. (eg. dev-java/java-config-2.x)
     # - liquidx (14/08/2006)
-    pylibdir="$(${python} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
+    pylibdir="$(${PYTHON} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
     [[ -n "${pylibdir}" ]] && dodir "${pylibdir}"
 
-    ${python} -B setup.py install --root="${IMAGE}" --no-compile "$@" || die
+    ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "$@" || die
 
     emagicdocs
 
