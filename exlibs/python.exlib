@@ -9,8 +9,6 @@
 #
 # - Features:
 # python_get_abi()        - returns the current python abi
-# python_tkinter_exists() - Checks for tkinter support in python
-# python_mod_exists()     - Checks if a python module exists
 # python_mod_compile()    - Compiles a .py file to a .pyc/.pyo
 # python_mod_optimize()   - Generates .pyc/.pyo precompiled scripts
 # python_mod_cleanup()    - Goes through /usr/lib*/python* to remove
@@ -82,24 +80,6 @@ python_get_sitedir() {
 }
 
 #
-# name:   python_mod_exists
-# desc:   run with the module name as an argument. it will check if a
-#     python module is installed and loadable. it will return
-#     TRUE(0) if the module exists, and FALSE(1) if the module does
-#     not exist.
-# exam:
-#     if python_mod_exists gtk; then
-#         echo "gtk support enabled"
-#     fi
-#
-python_mod_exists() {
-    illegal_in_global_scope
-
-    [[ "$1" ]] || die "${FUNCNAME} requires an argument!"
-    python -B -c "import $1" >/dev/null 2>&1
-}
-
-#
 # name:   python_mod_compile
 # desc:   given a filename, it will pre-compile the module's .pyc and .pyo.
 #     should only be run in pkg_postinst()
@@ -112,8 +92,7 @@ python_mod_compile() {
     local f myroot myfiles=()
 
     # Check if phase is pkg_postinst()
-    [[ ${EXHERES_PHASE} != postinst ]] &&\
-        die "${FUNCNAME} should only be run in pkg_postinst()"
+    [[ ${EXHERES_PHASE} != postinst ]] && die "${FUNCNAME} should only be run in pkg_postinst()"
 
     local python_abi=$(python_get_abi)
 
@@ -121,11 +100,11 @@ python_mod_compile() {
     myroot="${ROOT%/}"
 
     # respect ROOT
-    for f in "$@"; do
+    for f in "${@}" ; do
         [[ -f "${myroot}/${f}" ]] && myfiles+=("${myroot}/${f}")
     done
 
-    if ((${#myfiles[@]})); then
+    if (( ${#myfiles[@]} )) ; then
         python${python_abi} ${myroot}/usr/$(get_libdir)/python${python_abi}/py_compile.py "${myfiles[@]}"
         python${python_abi} -O ${myroot}/usr/$(get_libdir)/python${python_abi}/py_compile.py "${myfiles[@]}"
     else
@@ -165,8 +144,7 @@ python_mod_optimize() {
     local myroot mydirs=() myfiles=() myopts=() python_abi=$(python_get_abi)
 
     # Check if phase is pkg_postinst()
-    [[ ${EXHERES_PHASE} != postinst ]] &&\
-        die "${FUNCNAME} should only be run in pkg_postinst()"
+    [[ ${EXHERES_PHASE} != postinst ]] && die "${FUNCNAME} should only be run in pkg_postinst()"
 
     # strip trailing slash
     myroot="${ROOT%/}"
