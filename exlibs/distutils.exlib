@@ -32,7 +32,7 @@ distutils_src_prepare() {
 }
 
 distutils_src_compile() {
-    edo ${PYTHON} -B setup.py build "$@"
+    edo ${PYTHON} -B setup.py build "${DISTUTILS_SRC_COMPILE_PARAMS[@]}"
 }
 
 distutils_src_install() {
@@ -43,7 +43,7 @@ distutils_src_install() {
     pylibdir="$(${PYTHON} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
     [[ -n "${pylibdir}" ]] && dodir "${pylibdir}"
 
-    edo ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "$@"
+    edo ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "${DISTUTILS_SRC_INSTALL_PARAMS[@]}"
 
     emagicdocs
 
