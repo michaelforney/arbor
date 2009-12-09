@@ -87,6 +87,8 @@ python_bytecompile() {
 
     [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
 
+    edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
+
     edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
     edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
 }
