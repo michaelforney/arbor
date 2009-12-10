@@ -1,7 +1,8 @@
 # Copyright 2007 Bryan Østergaard
+# Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require easy-multibuild flag-o-matic toolchain-funcs
 
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net"
@@ -14,25 +15,55 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
-
-src_configure() {
-    ./configure \
-        --prefix=/usr \
-        --libdir=/usr/$(get_libdir) \
-        --shared \
-        || die "configure failed"
-}
-
-DEFAULT_SRC_INSTALL_PARAMS=(
-    prefix="${IMAGE}/usr"
-    libdir="${IMAGE}/usr/$(get_libdir)"
-)
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
-src_prepare() {
+WORK="${WORKBASE}"
+
+unpack_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
+
+unpack_one_multibuild() {
     default
+    edo mv ${PNV}/* .
+}
+
+src_unpack() {
+    easy-multibuild_run_phase
+}
+
+prepare_one_multibuild() {
     # Don't run ldconfig
     sed -e '/ldconfig/d' -i Makefile.in || die "ldconfig sed failed"
+}
+
+src_prepare() {
+    easy-multibuild_run_phase
+}
+
+configure_prepare_one_multibuild() { :; }
+
+configure_one_multibuild() {
+    export CC="$(tc-getCC)"
+    export AR="$(tc-getAR)"
+    append-flags -fPIC
+    # this actually works, but makes me cry. the gist of this is taken from debian.
+    if [[ "${CFLAGS}" == *-m32* ]] ; then
+        export CFLAGS="${CFLAGS/-m32 /}"
+        export CC="${CC} -m32"
+    fi
+    edo ./configure \
+        --prefix=/usr \
+        --libdir=/usr/${LIBDIR} \
+        --shared
+    unset CC AR
+}
+
+install_one_multibuild() {
+    emake install \
+        prefix="${IMAGE}/usr" \
+        libdir="${IMAGE}/usr/${LIBDIR}"
+
+    emagicdocs
 }
 
