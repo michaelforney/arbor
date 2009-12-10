@@ -4,7 +4,7 @@
 
 require gnu [ suffix=xz ]
 
-export_exlib_phases src_test src_test_expensive src_install
+export_exlib_phases src_configure src_test src_test_expensive src_install
 
 SUMMARY="Core file, shell and text utilities expected to be on any system."
 
@@ -30,6 +30,13 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-install-program=arch
     --enable-largefile
 )
+
+coreutils_src_configure() {
+    # Configuration takes a million years without this hack.
+    sydboxcmd nowrap/lstat
+    default
+    sydboxcmd wrap/lstat
+}
 
 coreutils_src_test() {
     addwrite /dev/full
