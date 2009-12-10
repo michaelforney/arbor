@@ -5,7 +5,6 @@
 # Based in part upon 'alsa-plugins-1.0.19.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-# automake is required; we need to run aclocal
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.9 ] ]
 
 SUMMARY="Plugins for ALSA"
@@ -32,14 +31,6 @@ AT_M4DIR=( m4 )
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-automagic-speex.patch"
                               "${FILES}/${PNV}-quote-quote-quote-quote.patch"
                               -p0 "${FILES}/${PNV}-missing-avutil.patch" )
-
-src_prepare() {
-    default
-
-    eaclocal
-    _elibtoolize
-    eautoconf
-}
 
 src_configure() {
     econf $(option_enable ffmpeg avcodec) \
