@@ -226,12 +226,6 @@ src_install() {
 
     # java
     if ever at_least 4.3 && option java; then
-
-    hereenvd 40gcj <<EOF
-JAVAC=/usr/bin/gcj
-JAVACMD=/usr/bin/gij
-EOF
-
         for x in usr/${libdir}/security/classpath.security usr/share/java/ecj.jar; do
             bn=$(basename "${x}")
             ext=${bn#*.}
