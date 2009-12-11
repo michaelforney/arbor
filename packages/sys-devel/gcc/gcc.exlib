@@ -101,6 +101,7 @@ src_configure() {
        "$(ever at_least 4.3.0 && echo --with-pkgversion="Exherbo ${PNVR}")" \
         $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
         $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
+        $(ever at_least 4.4.0 && echo --with-system-zlib) \
         $(option_enable nls) \
         $(option_enable propolice libssp)
 }
