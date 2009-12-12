@@ -32,17 +32,7 @@ LICENCES="${LICENCES:-|| ( Artistic GPL GPL-2 GPL-3 )}"
 
 DEPENDENCIES="build+run: dev-lang/perl:="
 
-
-PERL_VERSION=""
-SITE_ARCH=""
-SITE_LIB=""
-VENDOR_LIB=""
-VENDOR_ARCH=""
-ARCH_LIB=""
-POD_DIR=""
-BUILDER_VER=""
 PREFER_BUILDPL="yes"
-pm_echovar=""
 
 perl-module_src_configure() {
     perlinfo
@@ -54,12 +44,12 @@ perl-module_src_configure() {
     if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
         einfo "Using Module::Build"
         perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
-            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
+            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" ||
             die "Unable to build!"
     elif [[ -f Makefile.PL && ${PN} != "module-build" ]]; then
         einfo "Using ExtUtils::MakeMaker"
         perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
-            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
+            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" ||
             die "Unable to build!"
     fi
 
