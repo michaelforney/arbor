@@ -55,16 +55,16 @@ coreutils_src_install() {
     default
 
     # Note: We don't install hostname into /bin, since it'd collide with net-tools.
-    local binfiles="basename cat chgrp chmod chown cp chroot cut date df dir
-                    dirname du echo env expr false head ln ls mkdir
-                    mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort
-                    stty sync tail touch tr true tty uname vdir wc yes"
+    local binfiles=(
+        basename cat chgrp chmod chown cp chroot cut date df dir dirname du echo env expr false head
+        ln ls mkdir mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort stty sync tail touch
+        tr true tty uname vdir wc yes
+    )
 
     dodir /bin
-    for binfile in ${binfiles}; do
-        mv "${IMAGE}"/usr/bin/${binfile} "${IMAGE}"/bin/${binfile} ||
-            die "Moving ${binfile} to /bin/ failed"
-        dosym /bin/${binfile} /usr/bin/${binfile}
+    for binfile in "${binfiles[@]}" ; do
+        edo mv "${IMAGE}"/usr/bin/${binfile} "${IMAGE}"/bin/${binfile}
+        edo dosym /bin/${binfile} /usr/bin/${binfile}
     done
 
     insinto /etc

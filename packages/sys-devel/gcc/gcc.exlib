@@ -56,7 +56,14 @@ if ever at_least 4.4.0-r1; then
     MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
     DEPENDENCIES+="
         build:
-            graphite? ( dev-libs/cloog-ppl )"
+            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
+fi
+
+if ever at_least 4.5.0 ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/libelf         [[ note = [ Enable link-time optimisation ] ]]
+            dev-libs/mpc[>=0.7.0]"
 fi
 
 WORK="${WORKBASE}/build"
@@ -104,6 +111,8 @@ src_configure() {
        "$(ever at_least 4.3.0 && echo --with-pkgversion="Exherbo ${PNVR}")" \
         $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
         $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
+        $(ever at_least 4.4.0 && echo --with-system-zlib) \
+        $(ever at_least 4.5.0 && echo --with-libelf) \
         $(option_enable nls) \
         $(option_enable propolice libssp)
 }
@@ -228,12 +237,6 @@ src_install() {
 
     # java
     if ever at_least 4.3 && option java; then
-
-        hereenvd 40gcj <<EOF
-JAVAC=/usr/bin/gcj
-JAVACMD=/usr/bin/gij
-EOF
-
         local classpaths=()
         for libdir in ${all_libdirs}; do
             classpaths+=( usr/${libdir}/security/classpath.security )
