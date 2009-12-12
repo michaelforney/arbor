@@ -41,11 +41,11 @@ perl-module_src_configure() {
     # Disable ExtUtils::AutoInstall from prompting
     export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
 
-    if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
+    if [[ "${PREFER_BUILDPL}" == "yes" && -f Build.PL ]]; then
         einfo "Using Module::Build"
         edo perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
-    elif [[ -f Makefile.PL && ${PN} != "module-build" ]]; then
+    elif [[ -f Makefile.PL ]]; then
         einfo "Using ExtUtils::MakeMaker"
         edo perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
@@ -125,14 +125,9 @@ perlinfo() {
     VENDOR_ARCH=${installvendorarch}
 
     if [[ "${PREFER_BUILDPL}" == "yes" ]]; then
-        if [[ ! -f ${WORK}/Makefile.PL ]] || [[ ${PN} == "module-build" ]]; then
+        if [[ ! -f ${WORK}/Makefile.PL ]]; then
             if [[ -f ${WORK}/Build.PL ]]; then
-                if [[ ${PN} == "module-build" ]]; then
-                    # A bootstrapping if you will
-                    BUILDER_VER="1"
-                else
-                    BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
-                fi
+                BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
             fi
         fi
     fi
