@@ -32,8 +32,6 @@ LICENCES="${LICENCES:-|| ( Artistic GPL GPL-2 GPL-3 )}"
 
 DEPENDENCIES="build+run: dev-lang/perl:="
 
-PREFER_BUILDPL="yes"
-
 perl-module_src_configure() {
     perlinfo
 
@@ -41,7 +39,7 @@ perl-module_src_configure() {
     # Disable ExtUtils::AutoInstall from prompting
     export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
 
-    if [[ "${PREFER_BUILDPL}" == "yes" && -f Build.PL ]]; then
+    if [[ -f Build.PL ]]; then
         einfo "Using Module::Build"
         edo perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
@@ -124,11 +122,9 @@ perlinfo() {
     VENDOR_LIB=${installvendorlib}
     VENDOR_ARCH=${installvendorarch}
 
-    if [[ "${PREFER_BUILDPL}" == "yes" ]]; then
-        if [[ ! -f ${WORK}/Makefile.PL ]]; then
-            if [[ -f ${WORK}/Build.PL ]]; then
-                BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
-            fi
+    if [[ ! -f ${WORK}/Makefile.PL ]]; then
+        if [[ -f ${WORK}/Build.PL ]]; then
+            BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
         fi
     fi
 }
