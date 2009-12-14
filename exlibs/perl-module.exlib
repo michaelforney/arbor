@@ -34,23 +34,18 @@ DEPENDENCIES="build+run: dev-lang/perl:="
 
 perl-module_src_configure() {
     perlinfo
-
-    export PERL_MM_USE_DEFAULT="1"
-    # Disable ExtUtils::AutoInstall from prompting
-    export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
-
     if [[ -f Build.PL ]]; then
         einfo "Using Module::Build"
+
         edo perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
     elif [[ -f Makefile.PL ]]; then
         einfo "Using ExtUtils::MakeMaker"
+
+        export PERL_MM_USE_DEFAULT="1"
+
         edo perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
-    fi
-
-    if [[ ! -f Build.PL && ! -f Makefile.PL ]]; then
-        einfo "No Make or Build file detected..."
     fi
 }
 
