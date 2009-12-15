@@ -1,7 +1,8 @@
 # Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require sourceforge [ suffix=tar.gz project=xmlstar ] \
+        autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 
 SUMMARY="Command line tools to transform, query, validate, and edit XML documents"
 DESCRIPTION="
@@ -10,14 +11,12 @@ query, validate, and edit XML documents and files using a simple set of shell
 commands, similar to the way it is done for plain text files using grep/sed/awk/
 tr/diff/patch.
 "
-HOMEPAGE="http://xmlstar.sourceforge.net/"
-DOWNLOADS="mirror://sourceforge/xmlstar/${PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
-REMOTE_IDS="freshmeat:${PN} sourceforge:xmlstar"
+REMOTE_IDS="freshmeat:${PN}"
 
 UPSTREAM_RELEASE_NOTES="http://sourceforge.net/forum/forum.php?forum_id=453900"
-UPSTREAM_DOCUMENTATION="http://xmlstar.sourceforge.net/docs.php [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.php [[ lang = en ]]"
 
 LICENCES="MIT"
 SLOT="0"

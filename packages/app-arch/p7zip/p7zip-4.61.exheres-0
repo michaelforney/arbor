@@ -1,11 +1,10 @@
 # Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+MY_PNV="${PNV/-/_}"
+require multilib sourceforge [ pnv="${MY_PNV}_src_all" ]
 
 SUMMARY="A UNIX port of 7z"
-HOMEPAGE="http://sourceforge.net/projects/${PN}"
-DOWNLOADS="mirror://sourceforge/${PN}/${PNV/-/_}_src_all.tar.bz2"
 
 LICENCES="|| ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
@@ -14,7 +13,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-WORK="${WORKBASE}/${PNV/-/_}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_COMPILE_PARAMS=( -f makefile.parallel_jobs all3 )
 DEFAULT_SRC_INSTALL_PARAMS=( -f makefile.parallel_jobs DEST_HOME="${IMAGE}/usr" )
