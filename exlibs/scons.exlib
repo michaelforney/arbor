@@ -18,7 +18,8 @@ escons() {
 scons_src_configure() {
     echo -e "clean \n exit" | escons \
         --config=force \
-        --interactive
+        --interactive \
+        "${SCONS_SRC_CONFIGURE_PARAMS[@]}"
 }
 
 scons_src_compile() {
