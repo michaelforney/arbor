@@ -3,7 +3,6 @@
 # Based in part upon 'rasqal-0.9.15.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-
 SUMMARY="library that handles Resource Description Framework (RDF)"
 HOMEPAGE="http://librdf.org/rasqal"
 DOWNLOADS="http://download.librdf.org/source/${PNV}.tar.gz"
@@ -28,6 +27,7 @@ DEPENDENCIES="
 
 src_configure() {
     econf \
+        --disable-shave \
         --enable-xml2 \
         --with-decimal=$(option gmp && echo "gmp" || echo "mpfr") \
         --with-regex-library=$(option pcre && echo "pcre" || echo "posix") \
