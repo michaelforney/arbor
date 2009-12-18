@@ -59,7 +59,7 @@ src_install() {
 NTPD_OPTS="$(option caps && echo '-u ntp:ntp')"
 EOF
 
-    find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
+    find "${IMAGE}"/usr/ -type d -empty -delete
 }
 
 pkg_postinst() {
