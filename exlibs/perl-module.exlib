@@ -119,5 +119,7 @@ fixlocalpod() {
     for perldir in "${IMAGE}${ARCH_LIB}" "${IMAGE}${SITE_LIB}" "${IMAGE}${VENDOR_LIB}"; do
         [[ -f ${perldir}/perllocal.pod ]] && edo rm -f "${perldir}/perllocal.pod"
     done
+
+    [[ -d "${IMAGE}/usr/$(get_libdir)" ]] && edo find "${IMAGE}/usr/$(get_libdir)" -depth -type d -empty -delete
 }
 
