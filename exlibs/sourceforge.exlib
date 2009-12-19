@@ -1,7 +1,7 @@
 # Copyright 2009 Yury G. Kudryashov <urkud@ya.ru>
 # Distributed under the terms of the GNU General Public License v2
 
-myexparam suffix=bz2
+myexparam suffix=tar.bz2
 
 myexparam pn=${MY_PN:-${PN}}
 # Sourceforge project name.
@@ -10,12 +10,12 @@ myexparam pv=${MY_PV:-${PV}}
 myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
 
 HOMEPAGE="http://$(exparam project).sourceforge.net/"
-DOWNLOADS="mirror://sourceforge/$(exparam project)/$(exparam pnv).tar.$(exparam suffix)"
+DOWNLOADS="mirror://sourceforge/$(exparam project)/$(exparam pnv).$(exparam suffix)"
 
 #FIXME: handle project != pn if remote ids gets extended to allow it
 REMOTE_IDS+=" sourceforge:$(exparam project) "
 
-if has $(exparam suffix) lzma xz; then
+if has $(exparam suffix) tar.lzma tar.xz; then
     DEPENDENCIES+="
         build:
             app-arch/xz"

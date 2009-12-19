@@ -3,9 +3,8 @@
 # Based in part upon 'redland-1.0.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib sourceforge [ project=librdf suffix=gz ] \
-        autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-
+require multilib sourceforge [ project=librdf suffix=tar.gz ] \
+        autotools [ deps_var=autotools_dependencies supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="High-level interface for the Resource Description Framework"
 HOMEPAGE="http://librdf.org"
@@ -13,33 +12,40 @@ HOMEPAGE="http://librdf.org"
 LICENCES="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="berkdb mysql postgresql sqlite ssl"
-RESTRICT="test" # Some tests segfault: rdf_init_test
+MYOPTIONS="berkdb mysql postgresql sqlite ssl virtuoso"
 
 DEPENDENCIES="
     build:
-        dev-doc/gtk-doc
         dev-util/pkg-config
+        virtuoso? (
+            dev-doc/gtk-doc
+            ${autotools_dependencies}
+        )
     build+run:
         dev-libs/libxml2
         dev-libs/rasqal[>=0.9.16&<=0.9.99]
         media-libs/raptor[>=1.4.17]
-        berkdb? ( sys-libs/db:= )
+        berkdb? ( sys-libs/db:=[>=3.1&<=4.8] )
         mysql? ( dev-db/mysql )
         postgresql? ( dev-db/postgresql )
         sqlite? ( dev-db/sqlite:3 )
         ssl? ( dev-libs/openssl )
+        virtuoso? (
+            dev-db/libiodbc
+            dev-db/virtuoso-opensource
+        )
 "
 
+AT_M4DIR=( "${WORK}/build" )
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-sqlite.patch"
-    "${FILES}/${PNV}-undefined-symbols-when-dlopening.patch"
+    "${FILES}/0001-Add-librdf.la-to-librdf_storage_virtuoso_la_LIBADD.patch"
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-xml-parser=libxml
-    --with-threads
+    # Breaks tests
+    --without-threads
+    --disable-shave
     --enable-modular
-    #--enable-storages=all ?
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "berkdb bdb"
@@ -48,12 +54,19 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "ssl openssl-digests"
     "sqlite"
     "sqlite sqlite-version 3"
+    "virtuoso"
+    "virtuoso iodbc"
 )
+
+src_prepare() {
+    option virtuoso && autotools_src_prepare
+}
 
 src_install() {
     default
 
-    if ! option mysql && ! option postgresql && ! option sqlite; then
-        rmdir "${IMAGE}"/usr/$(get_libdir)/redland || die "Removing empty directories failed"
+    if ! option mysql && ! option postgresql && ! option sqlite && !option virtuoso; then
+        edo rmdir "${IMAGE}"/usr/$(get_libdir)/redland
     fi
 }
+

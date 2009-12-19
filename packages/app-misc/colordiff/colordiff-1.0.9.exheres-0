@@ -1,9 +1,10 @@
 # Copyright 2007-2009 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
+require sourceforge
+
 SUMMARY="Colour-highlighted diff output"
-HOMEPAGE="http://colordiff.sourceforge.net/"
-DOWNLOADS="http://${PN}.sourceforge.net/${PNV}.tar.gz"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -14,7 +15,7 @@ DEPENDENCIES="
     build:
         sys-apps/diffutils"
 
-UPSTREAM_CHANGELOG="http://colordiff.sourceforge.net/changes.html [[ lang = en ]]"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changes.html [[ lang = en ]]"
 
 src_compile() {
     # has a Makefile with various targets, but none we want here
