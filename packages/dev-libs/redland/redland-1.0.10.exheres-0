@@ -3,7 +3,8 @@
 # Based in part upon 'redland-1.0.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib sourceforge [ project=librdf suffix=gz ]
+require multilib sourceforge [ project=librdf suffix=tar.gz ] \
+        autotools [ deps_var=autotools_dependencies supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="High-level interface for the Resource Description Framework"
 HOMEPAGE="http://librdf.org"
@@ -16,6 +17,10 @@ MYOPTIONS="berkdb mysql postgresql sqlite ssl virtuoso"
 DEPENDENCIES="
     build:
         dev-util/pkg-config
+        virtuoso? (
+            dev-doc/gtk-doc
+            ${autotools_dependencies}
+        )
     build+run:
         dev-libs/libxml2
         dev-libs/rasqal[>=0.9.16&<=0.9.99]
@@ -31,9 +36,14 @@ DEPENDENCIES="
         )
 "
 
+AT_M4DIR=( "${WORK}/build" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/0001-Add-librdf.la-to-librdf_storage_virtuoso_la_LIBADD.patch"
+)
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-xml-parser=libxml
-    --with-threads
+    # Breaks tests
+    --without-threads
     --disable-shave
     --enable-modular
 )
@@ -47,6 +57,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "virtuoso"
     "virtuoso iodbc"
 )
+
+src_prepare() {
+    option virtuoso && autotools_src_prepare
+}
 
 src_install() {
     default

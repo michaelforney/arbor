@@ -1,0 +1,30 @@
+Source: Upstream, r15924
+Upstream: Yes
+Reason: Undefined symbols when dlopening virtuoso storage backend
+
+From afdde3c513ac61d1f917e2e7ea58ed9cb5d2556a Mon Sep 17 00:00:00 2001
+From: dajobe <dajobe@27353237-cb09-0410-ac87-bdc2a03cb76d>
+Date: Fri, 18 Dec 2009 16:03:31 +0000
+Subject: [PATCH] Add librdf.la to librdf_storage_virtuoso_la_LIBADD
+
+git-svn-id: http://svn.librdf.org/repository/librdf/trunk@15924 27353237-cb09-0410-ac87-bdc2a03cb76d
+---
+ src/Makefile.am |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 6bb4aa0..fcbe149 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -152,7 +152,7 @@ if STORAGE_VIRTUOSO
+ plugin_LTLIBRARIES += librdf_storage_virtuoso.la 
+ librdf_storage_virtuoso_la_SOURCES = rdf_storage_virtuoso.c rdf_storage_virtuoso_internal.h
+ librdf_storage_virtuoso_la_CPPFLAGS = @ODBC_CFLAGS@
+-librdf_storage_virtuoso_la_LIBADD = @ODBC_LIBS@
++librdf_storage_virtuoso_la_LIBADD = @ODBC_LIBS@ librdf.la
+ librdf_storage_virtuoso_la_LDFLAGS = -module -avoid-version
+ endif
+ 
+-- 
+1.6.6.rc3.271.g3d40f
+
