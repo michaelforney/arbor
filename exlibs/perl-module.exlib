@@ -109,12 +109,6 @@ perlinfo() {
     ARCH_LIB=${installarchlib}
     VENDOR_LIB=${installvendorlib}
     VENDOR_ARCH=${installvendorarch}
-
-    if [[ ! -f ${WORK}/Makefile.PL ]]; then
-        if [[ -f ${WORK}/Build.PL ]]; then
-            BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
-        fi
-    fi
 }
 
 fixlocalpod() {
