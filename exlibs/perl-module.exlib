@@ -77,14 +77,9 @@ perl-module_src_install() {
         emagicdocs
     fi
 
-    einfo "Cleaning out stray man files"
-    local file stat
-    find "${IMAGE}" -type f -name "*.3pm*" | while read file
-    do
-        rm -f "${file}"
-    done
-    if [[ -d ${IMAGE}/usr/share/man ]]; then
-        find "${IMAGE}"/usr/share/man -depth -type d -empty -delete
+    if [[ -d ${IMAGE}/usr/share/man ]] ; then
+        edo find "${IMAGE}"/usr/share/man -type f -name "*.3pm*" -delete
+        edo find "${IMAGE}"/usr/share/man -depth -type d -empty -delete
     fi
 
     fixlocalpod
@@ -97,8 +92,10 @@ perl-module_src_install() {
         fi
     done
 
-    find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete || die "Couldn't remove .packlist files"
-    find "${IMAGE}/usr/$(get_libdir)" -type d -empty -delete || die "Couldn't remove empty directories in ${IMAGE}/usr/$(get_libdir)"
+    if [[ -d "${IMAGE}/usr/$(get_libdir)" ]] ; then
+        edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
+        edo find "${IMAGE}/usr/$(get_libdir)" -depth -type d -empty -delete
+    fi
 }
 
 perlinfo() {
@@ -130,11 +127,7 @@ fixlocalpod() {
     perlinfo
 
     for perldir in "${IMAGE}${ARCH_LIB}" "${IMAGE}${SITE_LIB}" "${IMAGE}${VENDOR_LIB}"; do
-        if [[ -f ${perldir}/perllocal.pod ]]; then
-            rm -f "${perldir}/perllocal.pod"
-            # Don't leave empty directories behind.
-            rmdir "${perldir}" "$(dirname "${perldir}")" "$(dirname "$(dirname "${perldir}")")" 2>/dev/null
-        fi
+        [[ -f ${perldir}/perllocal.pod ]] && edo rm -f "${perldir}/perllocal.pod"
     done
 }
 
