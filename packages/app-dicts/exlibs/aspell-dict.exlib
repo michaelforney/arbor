@@ -14,14 +14,15 @@ myexparam major_pv=
 
 require versionator
 
+# replace last separator
+myexparam pv=$(ever replace $(get_last_version_component_index) '-' $PV)
+
 export_exlib_phases src_configure
 
 SPELL_LANG=${PN/aspell-/}
-# replace last separator
-MY_PV=$(ever replace $(get_last_version_component_index) '-' $PV)
 
 # With APOSTFIX=6 aspell-en-6.0.0 becomes aspell6-en-6.0-0
-MY_PNV=aspell$(exparam major_pv)-${SPELL_LANG}-${MY_PV}
+MY_PNV=aspell$(exparam major_pv)-${SPELL_LANG}-$(exparam pv)
 WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="$(exparam desc) language dictionary for aspell"
