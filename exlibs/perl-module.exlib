@@ -32,78 +32,50 @@ LICENCES="${LICENCES:-|| ( Artistic GPL GPL-2 GPL-3 )}"
 
 DEPENDENCIES="build+run: dev-lang/perl:="
 
-
-PERL_VERSION=""
-SITE_ARCH=""
-SITE_LIB=""
-VENDOR_LIB=""
-VENDOR_ARCH=""
-ARCH_LIB=""
-POD_DIR=""
-BUILDER_VER=""
-PREFER_BUILDPL="yes"
-pm_echovar=""
-
 perl-module_src_configure() {
     perlinfo
-
-    export PERL_MM_USE_DEFAULT="1"
-    # Disable ExtUtils::AutoInstall from prompting
-    export PERL_EXTUTILS_AUTOINSTALL="--skipdeps"
-
-    if [[ "${PREFER_BUILDPL}" == "yes" && ( -f Build.PL || ${PN} == "module-build" ) ]]; then
+    if [[ -f Build.PL ]]; then
         einfo "Using Module::Build"
-        perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
-            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
-            die "Unable to build!"
-    elif [[ -f Makefile.PL && ${PN} != "module-build" ]]; then
-        einfo "Using ExtUtils::MakeMaker"
-        perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
-            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}" <<< ${pm_echovar} ||
-            die "Unable to build!"
-    fi
 
-    if [[ ! -f Build.PL && ! -f Makefile.PL ]]; then
-        einfo "No Make or Build file detected..."
+        edo perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
+            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
+    elif [[ -f Makefile.PL ]]; then
+        einfo "Using ExtUtils::MakeMaker"
+
+        export PERL_MM_USE_DEFAULT="1"
+
+        edo perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \
+            "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
     fi
 }
 
 perl-module_src_compile() {
-    perlinfo
     if [[ -f Makefile ]]; then
         default
     elif [[ -f Build ]]; then
-        perl Build build || die "Compilation failed"
+        edo perl Build build
     fi
 }
 
 perl-module_src_test() {
-    perlinfo
     if [[ -f Makefile ]]; then
         default
     elif [[ -f Build ]]; then
-        perl Build test || die "Test failed"
+        edo perl Build test
     fi
 }
 
 perl-module_src_install() {
-    perlinfo
-
     if [[ -f Makefile ]]; then
         default
     elif [[ -f Build ]]; then
-        perl "${WORK}/Build" install
-        default
+        edo perl "${WORK}/Build" install
+        emagicdocs
     fi
 
-    einfo "Cleaning out stray man files"
-    local file stat
-    find "${IMAGE}" -type f -name "*.3pm*" | while read file
-    do
-        rm -f "${file}"
-    done
-    if [[ -d ${IMAGE}/usr/share/man ]]; then
-        find "${IMAGE}"/usr/share/man -depth -type d -empty -delete
+    if [[ -d ${IMAGE}/usr/share/man ]] ; then
+        edo find "${IMAGE}"/usr/share/man -type f -name "*.3pm*" -delete
+        edo find "${IMAGE}"/usr/share/man -depth -type d -empty -delete
     fi
 
     fixlocalpod
@@ -116,8 +88,10 @@ perl-module_src_install() {
         fi
     done
 
-    find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete || die "Couldn't remove .packlist files"
-    find "${IMAGE}/usr/$(get_libdir)" -type d -empty -delete || die "Couldn't remove empty directories in ${IMAGE}/usr/$(get_libdir)"
+    if [[ -d "${IMAGE}/usr/$(get_libdir)" ]] ; then
+        edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
+        edo find "${IMAGE}/usr/$(get_libdir)" -depth -type d -empty -delete
+    fi
 }
 
 perlinfo() {
@@ -135,19 +109,6 @@ perlinfo() {
     ARCH_LIB=${installarchlib}
     VENDOR_LIB=${installvendorlib}
     VENDOR_ARCH=${installvendorarch}
-
-    if [[ "${PREFER_BUILDPL}" == "yes" ]]; then
-        if [[ ! -f ${WORK}/Makefile.PL ]] || [[ ${PN} == "module-build" ]]; then
-            if [[ -f ${WORK}/Build.PL ]]; then
-                if [[ ${PN} == "module-build" ]]; then
-                    # A bootstrapping if you will
-                    BUILDER_VER="1"
-                else
-                    BUILDER_VER=$(perl -MModule::Build -e 'print "$Module::Build::VERSION;"')
-                fi
-            fi
-        fi
-    fi
 }
 
 fixlocalpod() {
@@ -156,11 +117,9 @@ fixlocalpod() {
     perlinfo
 
     for perldir in "${IMAGE}${ARCH_LIB}" "${IMAGE}${SITE_LIB}" "${IMAGE}${VENDOR_LIB}"; do
-        if [[ -f ${perldir}/perllocal.pod ]]; then
-            rm -f "${perldir}/perllocal.pod"
-            # Don't leave empty directories behind.
-            rmdir "${perldir}" "$(dirname "${perldir}")" "$(dirname "$(dirname "${perldir}")")" 2>/dev/null
-        fi
+        [[ -f ${perldir}/perllocal.pod ]] && edo rm -f "${perldir}/perllocal.pod"
     done
+
+    [[ -d "${IMAGE}/usr/$(get_libdir)" ]] && edo find "${IMAGE}/usr/$(get_libdir)" -depth -type d -empty -delete
 }
 

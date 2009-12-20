@@ -65,7 +65,7 @@ src_prepare() {
 src_install() {
     default
 
-    if ! option mysql && ! option postgresql && ! option sqlite && !option virtuoso; then
+    if ! option mysql && ! option postgresql && ! option sqlite && ! option virtuoso; then
         edo rmdir "${IMAGE}"/usr/$(get_libdir)/redland
     fi
 }
