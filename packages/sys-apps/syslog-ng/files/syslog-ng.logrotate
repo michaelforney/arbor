@@ -1,0 +1,7 @@
+/var/log/auth.log /var/log/cron.log /var/log/daemon.log /var/log/debug /var/log/kernel.log /var/log/lpr.log /var/log/mail.log /var/log/mail.err /var/log/mail.info /var/log/mail.warn /var/log/messages /var/log/news/news.crit /var/log/news/news.err /var/log/news/news.notice /var/log/ppp.log /var/log/syslog /var/log/user.log /var/log/uucp.log {
+    missingok
+    sharedscripts
+    postrotate
+        /etc/init.d/syslog-ng reload > /dev/null 2>&1 || true
+    endscript
+}

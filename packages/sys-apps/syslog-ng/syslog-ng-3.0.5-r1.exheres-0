@@ -72,5 +72,7 @@ src_install() {
 
     newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
     newconfd "${FILES}"/syslog-ng.confd syslog-ng
-}
 
+    insinto /etc/logrotate.d
+    newins "${FILES}"/syslog-ng.logrotate syslog-ng
+}
