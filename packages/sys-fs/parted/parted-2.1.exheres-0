@@ -8,24 +8,24 @@ SUMMARY="Create, destroy, resize, check, copy partitions and file systems"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="nls device-mapper"
+MYOPTIONS="device-mapper"
 
-# FIXME
-# FAIL: t2000-mkfs.sh
-# FAIL: t7000-scripting.sh
-RESTRICT="test"
-
-# Tests need dev-libs/check[0.9.3]
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
+    test:
+        dev-libs/check[>=0.9.3]
     build+run:
         sys-fs/e2fsprogs
         sys-libs/ncurses
         sys-libs/readline[>=5.2]
         device-mapper? ( sys-fs/lvm2 )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-Werror "--with-readline=/$(get_libdir)" )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( device-mapper nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-Werror
+    --enable-nls
+    --with-readline=/$(get_libdir)
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( device-mapper )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/{API,FAT,USER.jp} )
 
