@@ -1,31 +1,35 @@
-# Copyright 2007 Bryan Østergaard
+# Copyright 2009 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ alpha=true suffix=gz ]
+
+export_exlib_phases src_configure src_install
 
 SUMMARY="Basic directory searching utilities."
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-d_type-optimisation
+    --enable-leaf-optimisation
     --enable-nls
+    --disable-assert
     --libexecdir=/usr/libexec/${PN}
+    --without-included-regex
 )
 
-src_configure() {
+findutils_src_configure() {
     # Configuration takes a million years without this hack.
     sydboxcmd nowrap/lstat
     default
     sydboxcmd wrap/lstat
 }
 
-src_install() {
+findutils_src_install() {
     default
     rmdir "${IMAGE}"/var{/lib,} || die "Cleaning up empty directories failed"
 }
-
