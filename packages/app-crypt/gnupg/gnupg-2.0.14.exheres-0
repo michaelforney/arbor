@@ -9,13 +9,13 @@ DOWNLOADS="mirror://gnupg/gnupg/${PNV}.tar.bz2"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc nls"
+MYOPTIONS="doc"
 
 DEPENDENCIES="
     build:
-        dev-libs/libassuan  [[ note = [ Static library, build dependency only ] ]]
+        dev-libs/libassuan[=1*] [[ note = [ Static library, build dependency only ] ]]
+        sys-devel/gettext
         doc? ( sys-apps/texinfo )
-        nls? ( sys-devel/gettext )
     build+run:
         app-arch/bzip2
         app-crypt/pinentry
@@ -28,6 +28,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
     --enable-symcryptrun
     --enable-gpg
     --enable-gpgsm
@@ -37,7 +38,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # Needs a kernel patch
     --without-capabilities
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( DETAILS KEYSERVER OpenPGP TRANSLATE)
 
