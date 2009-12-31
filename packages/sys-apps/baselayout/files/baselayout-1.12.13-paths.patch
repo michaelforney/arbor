@@ -1,0 +1,41 @@
+From d9bd9fb1eb564d4416c50f4e752b788942f9985b Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Thu, 31 Dec 2009 04:27:06 +0100
+Subject: [PATCH 1/2] Changed path for awk.
+
+---
+ sbin/depscan.sh |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/sbin/depscan.sh b/sbin/depscan.sh
+index 7187b41..f6c21d6 100755
+--- a/sbin/depscan.sh
++++ b/sbin/depscan.sh
+@@ -6,6 +6,8 @@ if [[ ${BOOT} == "yes" ]] ; then
+ 	trap ":" INT QUIT TSTP
+ fi
+ 
++_GAWK=$(type -p gawk)
++
+ argv0=${0##*/}
+ source /etc/init.d/functions.sh || {
+ 	echo "${argv0}: Could not source /etc/init.d/functions.sh!" 1>&2
+@@ -133,13 +135,13 @@ export SVCDIR DEPTYPES ORDTYPES
+ 
+ cd /etc/init.d
+ 
+-/bin/gawk \
++${_GAWK} \
+ 	-f ${svclib}/awk/functions.awk \
+ 	-f ${svclib}/awk/cachedepends.awk || \
+ 	retval=1
+ 
+ bash "${mysvcdir}/depcache" | \
+-/bin/gawk \
++${_GAWK} \
+ 	-f ${svclib}/awk/functions.awk \
+ 	-f ${svclib}/awk/gendepends.awk || \
+ 	retval=1
+-- 
+1.6.6
+

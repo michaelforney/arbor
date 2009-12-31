@@ -1,0 +1,186 @@
+From ffc9f4091af2759700e98da052cdc6368ee4f687 Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Thu, 31 Dec 2009 01:09:21 +0100
+Subject: [PATCH] Updates to user Exherbo information.
+
+This update changes several references from Gentoo to Exherbo where
+appropriate (and user-visible) to make sure that bugs get filed at our
+Bugzilla and not Gentoo's for example.
+Other changes include the removal of issue.logo and making it possible
+to use the "exherbo" boot parameter instead of "gentoo".
+---
+ etc/issue.logo    |   13 -------------
+ man/rc-status.8   |    5 +++--
+ man/rc-update.8   |    7 ++++---
+ sbin/depscan.sh   |    2 +-
+ sbin/functions.sh |   10 +++++-----
+ sbin/rc-help.sh   |    5 +++--
+ sbin/runscript.sh |    2 +-
+ 7 files changed, 17 insertions(+), 27 deletions(-)
+ delete mode 100644 etc/issue.logo
+
+diff --git a/etc/issue.logo b/etc/issue.logo
+deleted file mode 100644
+index d8e20ef..0000000
+--- a/etc/issue.logo
++++ /dev/null
+@@ -1,13 +0,0 @@
+-[0;35;40m                                           .
+-[0;35;40m     .vir.                                d$b
+-[0;35;40m  .d$$$$$$b.    .cd$$b.     .d$$b.   d$$$$$$$$$$$b  .d$$b.      .d$$b.
+-[0;35;40m  $$$$( )$$$b d$$$()$$$.   d$$$$$$$b Q$$$$$$$P$$$P.$$$$$$$b.  .$$$$$$$b.
+-[0;35;40m  Q$$$$$$$$$$B$$$$$$$$P"  d$$$PQ$$$$b.   $$$$.   .$$$P' `$$$ .$$$P' `$$$
+-[0;35;40m    "$$$$$$$P Q$$$$$$$b  d$$$P   Q$$$$b  $$$$b   $$$$b..d$$$ $$$$b..d$$$
+-[0;35;40m   d$$$$$$P"   "$$$$$$$$ Q$$$     Q$$$$  $$$$$   `Q$$$$$$$P  `Q$$$$$$$P
+-[0;35;40m  $$$$$$$P       `"""""   ""        ""   Q$$$P     "Q$$$P"     "Q$$$P"
+-[0;35;40m  `Q$$P"                                  """
+-[0;37;40m
+-
+-This is \n.\O (\s \m \r) \t
+-
+diff --git a/man/rc-status.8 b/man/rc-status.8
+index c91e872..4fd0ae9 100644
+--- a/man/rc-status.8
++++ b/man/rc-status.8
+@@ -7,7 +7,8 @@ rc-status \- show status info about runlevels
+ \fBrc-status\fR gathers and displays information about the status of init 
+ scripts in different runlevels.  The default behavior is to show information 
+ about the current runlevel, but any runlevel can be quickly examined.
+-directory.  They must also conform to the Gentoo runscript standard.
++directory.  They must also conform to the Gentoo runscript standard to work
++on Exherbo.
+ .SH OPTIONS
+ .TP
+ \fB\-\-all (\-a)\fR
+@@ -28,7 +29,7 @@ Show services not assigned to any runlevel
+ \fB[runlevel]\fR
+ Show information only for the named \fBrunlevel\fR
+ .SH "REPORTING BUGS"
+-Please report bugs via http://bugs.gentoo.org/
++Please report bugs via https://bugs.exherbo.org/
+ .SH "SEE ALSO"
+ .BR rc-update (8)
+ 
+diff --git a/man/rc-update.8 b/man/rc-update.8
+index 47db9ad..2cee2ce 100644
+--- a/man/rc-update.8
++++ b/man/rc-update.8
+@@ -8,12 +8,13 @@ rc-update \- add and remove init scripts to a runlevel
+ .br
+ \fBrc-update\fR \fIshow\fR \fI[\-\-verbose]\fR \fI[runlevels]\fR
+ .SH DESCRIPTION
+-Gentoo's init system uses named runlevels.  Rather than editing some obscure 
++Baselayout-1 uses named runlevels.  Rather than editing some obscure 
+ file or managing a directory of symlinks, \fBrc-update\fR exists to quickly 
+ add or delete init scripts from different runlevels.
+ 
+ All scripts specified with this utility must reside in the \fI/etc/init.d\fR 
+-directory.  They must also conform to the Gentoo runscript standard.
++directory.  They must also conform to the Gentoo runscript standard to work
++on Exherbo.
+ .SH OPTIONS
+ .TP
+ \fBadd (\-a)\fR \fIscript\fR \fI<runlevels>\fR
+@@ -36,7 +37,7 @@ view all init scripts, run with the \fI\-\-verbose\fR option.
+ 
+ Example: rc-update show
+ .SH "REPORTING BUGS"
+-Please report bugs via http://bugs.gentoo.org/
++Please report bugs via https://bugs.exherbo.org/
+ .SH "SEE ALSO"
+ .BR rc-status (8)
+ 
+diff --git a/sbin/depscan.sh b/sbin/depscan.sh
+index 1539e65..551e37c 100755
+--- a/sbin/depscan.sh
++++ b/sbin/depscan.sh
+@@ -17,7 +17,7 @@ usage() {
+ 	cat <<-EOF
+ 	Usage: ${argv0} [options]
+ 
+-	Rebuild Gentoo init.d service dependency tree.
++	Rebuild Baselayout-1 init.d service dependency tree.
+ 
+ 	Options:
+ 	  -d, --debug       Turn on debug output
+diff --git a/sbin/functions.sh b/sbin/functions.sh
+index 0724560..bb351d3 100755
+--- a/sbin/functions.sh
++++ b/sbin/functions.sh
+@@ -489,7 +489,7 @@ get_KV() {
+ 
+ # bool get_bootparam(param)
+ #
+-#   return 0 if gentoo=param was passed to the kernel
++#   return 0 if exherbo=param was passed to the kernel
+ #
+ #   EXAMPLE:  if get_bootparam "nodevfs" ; then ....
+ #
+@@ -499,7 +499,7 @@ get_bootparam() {
+ 	[[ ! -r /proc/cmdline ]] && return 1
+ 
+ 	for copt in $(< /proc/cmdline) ; do
+-		if [[ ${copt%=*} == "gentoo" ]] ; then
++		if [[ ${copt%=*} == "exherbo" ]] ; then
+ 			params=$(gawk -v PARAMS="${copt##*=}" '
+ 				BEGIN {
+ 					split(PARAMS, nodes, ",")
+@@ -507,7 +507,7 @@ get_bootparam() {
+ 						print nodes[x]
+ 				}')
+ 
+-			# Parse gentoo option
++			# Parse exherbo option
+ 			for x in ${params} ; do
+ 				if [[ ${x} == "$1" ]] ; then
+ #					echo "YES"
+@@ -591,8 +591,8 @@ add_suffix() {
+ #    get the version of baselayout that this system is running
+ #
+ get_base_ver() {
+-	[[ ! -r /etc/gentoo-release ]] && return 0
+-	local ver="$(</etc/gentoo-release)"
++	[[ ! -r /etc/exherbo-release ]] && return 0
++	local ver="$(</etc/exherbo-release)"
+ 	echo "${ver##* }"
+ }
+ 
+diff --git a/sbin/rc-help.sh b/sbin/rc-help.sh
+index a1d5be2..ead8bc9 100755
+--- a/sbin/rc-help.sh
++++ b/sbin/rc-help.sh
+@@ -39,7 +39,8 @@ extra_opts=$(source "${myscript}" 2>/dev/null ; echo ${opts})
+ 
+ if [[ ${BE_VERBOSE} == "yes" ]] ; then
+ echo -e "
+-${GREEN}Gentoo RC-Scripts; ${BLUE}http://www.gentoo.org/${OFF}
++${GREEN}Exherbo RC-Scripts; ${BLUE}http://www.exherbo.org/${OFF}
++ Based upon Gentoo RC-Scripts which are:
+  Copyright 1999-2007 Gentoo Foundation; Distributed under the GPL
+ "
+ fi
+@@ -127,7 +128,7 @@ if [[ ${BE_VERBOSE} == "yes" ]] ; then
+ echo -e "
+ ${CYAN}Dependencies:${OFF}
+ 
+-    This is the heart of the Gentoo RC-Scripts, as it determines the order
++    This is the heart of the Exherbo RC-Scripts, as it determines the order
+     in which services gets started, and also to some extend what services
+     get started in the first place.
+ 
+diff --git a/sbin/runscript.sh b/sbin/runscript.sh
+index c53a185..c6bfd78 100755
+--- a/sbin/runscript.sh
++++ b/sbin/runscript.sh
+@@ -717,7 +717,7 @@ for arg in "$@" ; do
+ 	--quiet|--nocolor|--nodeps|--verbose|--debug)
+ 		;;
+ 	-V|--version)
+-		exec cat "${ROOT}"/etc/gentoo-release
++		exec cat "${ROOT}"/etc/exherbo-release
+ 		exit 1
+ 		;;
+ 	help|-h|--help)
+-- 
+1.6.6
+

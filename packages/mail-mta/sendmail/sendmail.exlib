@@ -1,21 +1,34 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2009 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'sendmail-8.14.2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require common-metadata multilib alternatives
+require multilib alternatives
+
+export_exlib_phases src_prepare src_compile src_install
+
+SUMMARY="Widely-used Mail Transfer Agent (MTA)"
+HOMEPAGE="http://www.${PN}.org/"
+DOWNLOADS="ftp://ftp.${PN}.org/pub/${PN}/${PN}.${PV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+BUGS_TO="philantrop@exherbo.org"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/releases/${PV} [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}#RS"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation"
+
+LICENCES="Sendmail"
 
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ssl sasl tcpd mbox ipv6 nis sockets"
-# FIXME: ldap
+MYOPTIONS="ipv6 ldap mbox nis sasl sockets ssl tcpd"
 
 DEPENDENCIES="
     build+run:
-        sasl? ( net-libs/cyrus-sasl[>=2.1.22] )
-        tcpd? ( sys-apps/tcp-wrappers )
-        ssl? ( dev-libs/openssl )
         sys-libs/db[>=4.6]
+        ldap? ( net-directory/openldap[>=2.4] )
+        sasl? ( net-libs/cyrus-sasl[>=2.1.22] )
+        ssl? ( dev-libs/openssl )
+        tcpd? ( sys-apps/tcp-wrappers )
         group/mail
         group/smmsp
         user/mail
@@ -24,7 +37,6 @@ DEPENDENCIES="
     post:
         !mbox? ( mail-filter/procmail )
 "
-# FIXME: Add openldap once we have it.
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/sendmail-delivered_hdr.patch"
@@ -52,12 +64,13 @@ COMMON_SENDMAIL_INSTALL_PARAMS=(
     CFGRP=root
 )
 
-src_prepare() {
+sendmail_src_prepare() {
     default
 
-    confCCOPTS="${CFLAGS}"
-    confMAPDEF="-DMAP_REGEX"
-    conf_sendmail_LIBS=""
+    local confCCOPTS="${CFLAGS}"
+    local confLDOPTS="${LDFLAGS}"
+    local confMAPDEF="-DMAP_REGEX"
+    local conf_sendmail_LIBS=""
 
     option sasl \
         && confLIBS="${confLIBS} -lsasl2"  \
@@ -83,7 +96,11 @@ src_prepare() {
     option sockets \
         && confENVDEF="${confENVDEF} -DSOCKETMAP"
 
+    option ldap && confMAPDEF="${confMAPDEF} -DLDAPMAP" \
+        && confLIBS="${confLIBS} -lldap -llber"
+
     sed -e "s:@@confCCOPTS@@:${confCCOPTS}:" \
+        -e "s/@@confLDOPTS@@/${confLDOPTS}/" \
         -e "s/@@confMAPDEF@@/${confMAPDEF}/" \
         -e "s/@@confENVDEF@@/${confENVDEF}/" \
         -e "s/@@confLIBS@@/${confLIBS}/" \
@@ -91,14 +108,14 @@ src_prepare() {
         "${FILES}"/site.config.m4 > "${WORK}"/devtools/Site/site.config.m4
 }
 
-src_compile() {
+sendmail_src_compile() {
     sh Build || die "compilation failed in main build script"
-    pushd libmilter
+    pushd libmilter >/dev/null
     sh Build || die "libmilter compilation failed"
-    popd
+    popd >/dev/null
 }
 
-src_install() {
+sendmail_src_install() {
     OBJDIR="obj.`uname -s`.`uname -r`.`uname -m`"
 
     dodir /etc/mail
@@ -143,10 +160,10 @@ src_install() {
     dosym /usr/sbin/makemap /usr/bin/makemap
 
     dodoc FAQ KNOWNBUGS README RELEASE_NOTES doc/op/op.me doc/op/op.ps
-    cp -pPR contrib "${IMAGE}/usr/share/doc/${PNVR}/" \
+    cp -pPR contrib "${IMAGE}"/usr/share/doc/${PNVR}/ \
         || die "copying contrib failed"
     dodir /usr/share/doc/${PNVR}/libmilter
-    cp -pPR libmilter/docs "${IMAGE}/usr/share/doc/${PNVR}/libmilter/" \
+    cp -pPR libmilter/docs "${IMAGE}"/usr/share/doc/${PNVR}/libmilter/ \
         || die "copying libmilter docs failed"
 
     newdoc libmilter/README README.libmilter
