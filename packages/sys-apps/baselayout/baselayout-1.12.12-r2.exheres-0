@@ -35,6 +35,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-branding.patch"
     "${FILES}/${PNV}-update-modules.patch"
     "${FILES}/${PNV}-dhcpcd-4.x-compability.patch"
+    "${FILES}/${PNV}-exherbify.patch"
 )
 
 pkg_pretend() {
@@ -158,6 +159,13 @@ pkg_preinst() {
 
 pkg_postinst() {
     local x y
+    local cruft=( "${ROOT}"/etc/issue.logo )
+    for file in ${cruft[@]}; do
+        if test -f "${file}" ; then
+            rm "${file}" || eerror "removing ${file} failed"
+        fi
+    done
+
     if [[ -z $(ls "${ROOT}"/etc/runlevels 2>/dev/null) ]]; then
         for x in "${ROOT}"/usr/share/baselayout/*; do
             mkdir -p "${ROOT}"/etc/runlevels/${x##*/} || die "mkdir ${x##*/} failed"
