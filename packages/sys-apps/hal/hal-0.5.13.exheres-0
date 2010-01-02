@@ -15,7 +15,17 @@ DOWNLOADS="http://hal.freedesktop.org/releases/${PNV}.tar.bz2
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="acpi apm parted [[ description = [ Use parted library ] ]] policykit verbose platform: amd64 ia64 x86"
+MYOPTIONS="
+    acpi
+    apm
+    partition-data [[ description = [ Allows HAL to use libparted from sys-apps/parted to read raw partition data from your disks and process that data. Future versions of HAL (possibly 0.5.11 and higher) will allow you to create, modify, delete and format partitions from a GUI interface agnostic of your desktop environment. ] ]]
+    policykit
+    verbose
+    platform:
+        amd64
+        ia64
+        x86
+"
 
 DEPENDENCIES="
     build:
@@ -35,7 +45,7 @@ DEPENDENCIES="
         sys-apps/pciutils[>=2.2.7]
         sys-apps/util-linux-ng[>=2.15]
         sys-kernel/linux-headers[>=2.6.22]
-        parted? ( sys-fs/parted[>=1.8] )
+        partition-data? ( sys-fs/parted[>=1.8] )
         platform:amd64? ( sys-apps/dmidecode[>=2.7] )
         platform:ia64? ( sys-apps/dmidecode[>=2.7] )
         platform:x86? ( sys-apps/dmidecode[>=2.7] )
@@ -80,8 +90,15 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     '--disable-docbook-docs'
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acpi 'acpi acpi-proc' apm parted
-'policykit console-kit' 'policykit policy-kit' 'verbose verbose-mode' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    acpi
+    'acpi acpi-proc'
+    apm
+    'partition-data parted'
+    'policykit console-kit'
+    'policykit policy-kit'
+    'verbose verbose-mode'
+)
 
 src_install() {
     default
