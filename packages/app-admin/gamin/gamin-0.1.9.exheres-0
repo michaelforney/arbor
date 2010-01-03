@@ -42,17 +42,7 @@ src_install() {
     dodir /usr/share/doc/${PNVR}/html
     insinto /usr/share/doc/${PNVR}/html
     doins -r doc/*
-}
 
-pkg_postinst() {
-    if option python; then
-        python_mod_optimize "${ROOT}$(python_get_sitedir)"
-    fi
-}
-
-pkg_postrm() {
-    if option python; then
-        python_mod_cleanup "${ROOT}$(python_get_sitedir)"
-    fi
+    option python && python_bytecompile
 }
 

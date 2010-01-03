@@ -6,7 +6,7 @@
 
 require python [ python_dep=2.3 ]
 
-export_exlib_phases src_configure src_install pkg_postinst pkg_postrm
+export_exlib_phases src_configure src_install pkg_postinst
 
 SUMMARY="HP Linux Imaging and Printing System"
 DESCRIPTION="
@@ -101,8 +101,6 @@ hplip_src_install() {
 }
 
 hplip_pkg_postinst() {
-    python_mod_optimize /usr/share/${PN}
-
     if option scanner ; then
         # Merging hplip's dll.conf entry into the original one.
         cp "${ROOT}"etc/sane.d/dll.conf "${TEMP}" || die "copying dll.conf failed"
@@ -113,6 +111,3 @@ hplip_pkg_postinst() {
     fi
 }
 
-hplip_pkg_postrm() {
-        python_mod_cleanup /usr/share/${PN}
-}
