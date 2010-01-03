@@ -7,7 +7,11 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 require gnu [ suffix=gz ]
 
-PATCH_LEVEL=${PNV##*_p}
+if [[ ${PV} == *_p* ]] ; then
+    PATCH_LEVEL=${PNV##*_p}
+else
+    PATCH_LEVEL=0
+fi
 
 SUMMARY="Bash shell"
 DESCRIPTION="
@@ -20,8 +24,8 @@ both programming and interactive use. In addition, most sh scripts can
 be run by Bash without modification.
 "
 
-if [[ ${PV} != *rc* ]] ; then
-DOWNLOADS+="
+if (( PATCH_LEVEL )) ; then
+    DOWNLOADS+="
     $(for ((i=1; i<=PATCH_LEVEL; i++)); do
         printf "mirror://gnu/bash/${MY_PNV}-patches/${MY_PNV//[.-]}-%03d\n" ${i}
     done)"
@@ -51,9 +55,8 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc )
 
 src_prepare() {
-    if [[ ${PV} != *rc* ]] ; then
-        local i patches
-        patches=(-p0)
+    if (( PATCH_LEVEL )) ; then
+        local i patches=( -p0 )
         for ((i=1; i<=PATCH_LEVEL; i++)); do
             patches+=("${FETCHEDDIR}/${MY_PNV//[.-]}-$(printf "%03d" ${i})")
         done
