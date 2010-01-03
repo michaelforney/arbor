@@ -25,14 +25,11 @@ fi
 
 export PYTHON="/usr/bin/python"
 
+
+# Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
+# stamps don't match. this is done to protect sandbox.
 #
-# name:   python_disable/enable_pyc
-# desc:   tells python not to automatically recompile modules to .pyc/.pyo
-#     even if the timestamps/version stamps don't match. this is
-#     done to protect sandbox.
-#
-# note:   supported by dev-lang/python[>=2.6] only.
-#
+# NOTE: Supported by dev-lang/python[>=2.6] only.
 python_disable_pyc() {
     illegal_in_global_scope
 
@@ -45,6 +42,7 @@ python_enable_pyc() {
     unset PYTHONDONTWRITEBYTECODE
 }
 
+# Returns the current python abi
 python_get_abi() {
     illegal_in_global_scope
 
