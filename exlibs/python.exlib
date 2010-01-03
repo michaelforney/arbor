@@ -1,20 +1,8 @@
-# Copyright 1999-2004 Gentoo Foundation
+# Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/eclass/python.eclass,v 1.32 2007/05/06 22:11:12 kloeri Exp $
-#
-# Author: Alastair Tse <liquidx@gentoo.org>
-#
-# A Utility Eclass that should be inherited by anything that deals with
-# Python or Python modules.
-#
-# - Features:
-# python_version()    - sets PYVER/PYVER_MAJOR/PYVER_MINOR
-# python_tkinter_exists() - Checks for tkinter support in python
-# python_mod_exists()     - Checks if a python module exists
-# python_mod_compile()    - Compiles a .py file to a .pyc/.pyo
-# python_mod_optimize()   - Generates .pyc/.pyo precompiled scripts
-# python_mod_cleanup()    - Goes through /usr/lib*/python* to remove
-#               orphaned *.pyc *.pyo
+
+# Based in part upon 'python.eclass' v1.32 from Gentoo, which is:
+#   Copyright 1999-2004 Gentoo Foundation
 
 require multilib
 
@@ -35,32 +23,13 @@ elif exparam -b has_lib; then
 "
 fi
 
-__python_eclass_test() {
-    __python_version_extract 2.3
-    echo -n "2.3 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.3.4
-    echo -n "2.3.4 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.3.5
-    echo -n "2.3.5 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.4
-    echo -n "2.4 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-    __python_version_extract 2.5b3
-    echo -n "2.5b3 -> PYVER: $PYVER PYVER_MAJOR: $PYVER_MAJOR"
-    echo " PYVER_MINOR: $PYVER_MINOR PYVER_MICRO: $PYVER_MICRO"
-}
+export PYTHON="/usr/bin/python"
 
+
+# Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
+# stamps don't match. this is done to protect sandbox.
 #
-# name:   python_disable/enable_pyc
-# desc:   tells python not to automatically recompile modules to .pyc/.pyo
-#     even if the timestamps/version stamps don't match. this is
-#     done to protect sandbox.
-#
-# note:   supported by >=dev-lang/python-2.2.3-r3 only.
-#
+# NOTE: Supported by dev-lang/python[>=2.6] only.
 python_disable_pyc() {
     illegal_in_global_scope
 
@@ -73,39 +42,24 @@ python_enable_pyc() {
     unset PYTHONDONTWRITEBYTECODE
 }
 
-#
-# name:   python_version
-# desc:   run without arguments and it will export the version of python
-#     currently in use as $PYVER
-#
-
-__python_version_extract() {
-    verstr=$1
-    export PYVER_MAJOR=${verstr:0:1}
-    export PYVER_MINOR=${verstr:2:1}
-    if [[ ${verstr:3:1} == . ]]; then
-        export PYVER_MICRO=${verstr:4}
-    fi
-    export PYVER="${PYVER_MAJOR}.${PYVER_MINOR}"
-}
-
-python_version() {
+# Returns the current python abi
+python_get_abi() {
     illegal_in_global_scope
 
-    [[ -n "${PYVER}" ]] && return 0
-    local tmpstr
-    python=${python:-/usr/bin/python}
-    tmpstr="$(${python} -V 2>&1 )"
-    export PYVER_ALL="${tmpstr#Python }"
-    __python_version_extract $PYVER_ALL
+    local python_abi
+
+    python_abi=$(${PYTHON} -V 2>&1)
+    python_abi=${python_abi#Python }
+    python_abi=$(ever range 1-2 ${python_abi})
+
+    echo -n "${python_abi}"
 }
 
 # Run without arguments, returns the python library directory.
 python_get_libdir() {
     illegal_in_global_scope
 
-    python_version
-    echo -n "/usr/$(get_libdir)/python${PYVER}"
+    echo -n "/usr/$(get_libdir)/python$(python_get_abi)"
 }
 
 # Run without arguments, returns the python site-packages directory.
@@ -115,196 +69,19 @@ python_get_sitedir() {
     echo -n "$(python_get_libdir)/site-packages"
 }
 
-#
-# name:   python_mod_exists
-# desc:   run with the module name as an argument. it will check if a
-#     python module is installed and loadable. it will return
-#     TRUE(0) if the module exists, and FALSE(1) if the module does
-#     not exist.
-# exam:
-#     if python_mod_exists gtk; then
-#         echo "gtk support enabled"
-#     fi
-#
-python_mod_exists() {
+# Byte-compiles all .py files in ${IMAGE}$(python_get_libdir). Changing the mtime of a .py file
+# invalidates the byte-compiled versions. python_bytecompile() should thus be run at the end of
+# src_install(). Both .pyc & .pyo (optimized & byte-compiled) files are generated.
+python_bytecompile() {
     illegal_in_global_scope
 
-    [[ "$1" ]] || die "${FUNCNAME} requires an argument!"
-    python -B -c "import $1" >/dev/null 2>&1
-}
+    [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
-#
-# name:   python_mod_compile
-# desc:   given a filename, it will pre-compile the module's .pyc and .pyo.
-#     should only be run in pkg_postinst()
-# exam:
-#     python_mod_compile /usr/lib/python2.3/site-packages/pygoogle.py
-#
-python_mod_compile() {
-    illegal_in_global_scope
+    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
 
-    local f myroot myfiles=()
+    edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
 
-    # Check if phase is pkg_postinst()
-    [[ ${EXHERES_PHASE} != postinst ]] &&\
-        die "${FUNCNAME} should only be run in pkg_postinst()"
-
-    # allow compiling for older python versions
-    if [[ -n "${PYTHON_OVERRIDE_PYVER}" ]]; then
-        PYVER=${PYTHON_OVERRIDE_PYVER}
-    else
-        python_version
-    fi
-
-    # strip trailing slash
-    myroot="${ROOT%/}"
-
-    # respect ROOT
-    for f in "$@"; do
-        [[ -f "${myroot}/${f}" ]] && myfiles+=("${myroot}/${f}")
-    done
-
-    if ((${#myfiles[@]})); then
-        python${PYVER} ${myroot}/usr/$(get_libdir)/python${PYVER}/py_compile.py "${myfiles[@]}"
-        python${PYVER} -O ${myroot}/usr/$(get_libdir)/python${PYVER}/py_compile.py "${myfiles[@]}"
-    else
-        ewarn "No files to compile!"
-    fi
-}
-
-#
-# name:   python_mod_optimize [-l] [-f] [-q] [-d destdir] [-x regexp]
-#                             [file ...] [directory ...]
-# desc:   compiles the given files and directories, in the latter case
-#     recursing into subdirectories (unless the -l option is present)
-#
-#     if no file or directory arguments are supplied, (re)compiles all modules
-#     on sys.path (/usr/lib/python2.6, /usr/lib/python2.6/site-packages, ...),
-#     without recursing into subdirectories
-#
-#     the following options are passed to compileall.py (they are ignored when
-#     the only arguments supplied are files):
-#         -l
-#             don't recurse into subdirectories
-#         -f
-#             force rebuild even if timestamps are up-to-date
-#         -q
-#             quiet operation
-#         -d destdir
-#             directory name to use in error messages if no directory
-#             arguments are given (default is sys.path with -l assumed)
-#         -x regexp
-#             skip files whose full path matches the given regular expression
-# exam:
-#     python_mod_optimize /usr/share/codegen
-#
-python_mod_optimize() {
-    illegal_in_global_scope
-
-    local myroot mydirs=() myfiles=() myopts=()
-
-    # Check if phase is pkg_postinst()
-    [[ ${EXHERES_PHASE} != postinst ]] &&\
-        die "${FUNCNAME} should only be run in pkg_postinst()"
-
-    # strip trailing slash
-    myroot="${ROOT%/}"
-
-    # respect ROOT and options passed to compileall.py
-    while (($#)); do
-        case $1 in
-            -l|-f|-q)
-                myopts+=("$1")
-                ;;
-            -d|-x)
-                myopts+=("$1" "$2")
-                shift
-                ;;
-            -*)
-                ewarn "${FUNCNAME}: Ignoring compile option $1"
-                ;;
-            *)
-                if [[ -d "${myroot}"/$1 ]]; then
-                    mydirs+=("${myroot}/$1")
-                elif [[ -f "${myroot}"/$1 ]]; then
-                    # Files are passed to python_mod_compile which is ROOT-aware
-                    myfiles+=("$1")
-                elif [[ -e "${myroot}/$1" ]]; then
-                    ewarn "${myroot}/$1 is not a file or directory!"
-                else
-                    ewarn "${myroot}/$1 doesn't exist!"
-                fi
-                ;;
-        esac
-        shift
-    done
-
-    # allow compiling for older python versions
-    if [ -n "${PYTHON_OVERRIDE_PYVER}" ]; then
-        PYVER=${PYTHON_OVERRIDE_PYVER}
-    else
-        python_version
-    fi
-
-    # set additional opts
-    myopts+=(-q)
-
-    ebegin "Byte compiling python modules for python-${PYVER}"
-    python${PYVER} \
-        "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
-        "${myopts[@]}" "${mydirs[@]}"
-    python${PYVER} -O \
-        "${myroot}"/usr/$(get_libdir)/python${PYVER}/compileall.py \
-        "${myopts[@]}" "${mydirs[@]}"
-
-    if ((${#myfiles[@]})); then
-        python_mod_compile "${myfiles[@]}"
-    fi
-
-    eend $?
-}
-
-#
-# name:   python_mod_cleanup
-# desc:   run with optional arguments, where arguments are directories of
-#     python modules. if none given, it will look in /usr/lib/python[0-9].[0-9]
-#
-#     it will recursively scan all compiled python modules in the directories
-#     and determine if they are orphaned (eg. their corresponding .py is missing.)
-#     if they are, then it will remove their corresponding .pyc and .pyo
-#
-python_mod_cleanup() {
-    illegal_in_global_scope
-
-    local SEARCH_PATH=() myroot src_py
-
-    # Check if phase is pkg_postrm()
-    [[ ${EXHERES_PHASE} != postrm ]] &&\
-        die "${FUNCNAME} should only be run in pkg_postrm()"
-
-    # strip trailing slash
-    myroot="${ROOT%/}"
-
-    if (($#)); then
-        SEARCH_PATH=("${@#/}")
-        SEARCH_PATH=("${SEARCH_PATH[@]/#/$myroot/}")
-    else
-        SEARCH_PATH=("${myroot}"/usr/lib*/python*/site-packages)
-    fi
-
-    for path in "${SEARCH_PATH[@]}"; do
-        einfo "Cleaning orphaned Python bytecode from ${path} ..."
-        while read -rd ''; do
-            src_py="${REPLY%[co]}"
-            [[ -f "${src_py}" ]] && continue
-            einfo "Purging ${src_py}[co]"
-            rm -f "${src_py}"[co]
-        done < <(find "${path}" -name '*.py[co]' -print0)
-
-        # attempt to remove directories that maybe empty
-        while read -r dir; do
-            rmdir "${dir}" 2>/dev/null
-        done < <(find "${path}" -type d | sort -r)
-    done
+    edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
+    edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
 }
 

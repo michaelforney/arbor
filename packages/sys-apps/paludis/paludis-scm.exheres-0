@@ -1,7 +1,7 @@
 # Copyright 1999-2008 Ciaran McCreesh
 # Distributed under the terms of the GNU General Public License v2
 
-require bash-completion flag-o-matic zsh-completion
+require python bash-completion flag-o-matic zsh-completion
 
 SUMMARY="Paludis, the one true package mangler"
 HOMEPAGE="http://paludis.pioto.org/"
@@ -104,6 +104,8 @@ src_test() {
 
 src_install() {
     default
+
+    option python && python_bytecompile
 
     local bashcomp bashcompletions
     bashcompletions="accerso adjutrix importare $(optionv inquisitio) instruo paludis reconcilio"

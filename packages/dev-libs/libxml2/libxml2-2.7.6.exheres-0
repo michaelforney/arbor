@@ -1,6 +1,8 @@
 # Copyright 2007-2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
+require python
+
 SUMMARY="XML C Parser and Toolkit v2"
 HOMEPAGE="http://www.xmlsoft.org/"
 BASE_URI="http://www.w3.org/XML"
@@ -43,5 +45,10 @@ src_unpack() {
 src_prepare() {
     ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ ||
         die "Failed to install test tarballs"
+}
+
+src_install() {
+    default
+    option python && python_bytecompile
 }
 

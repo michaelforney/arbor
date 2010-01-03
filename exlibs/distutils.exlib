@@ -1,31 +1,25 @@
 # Copyright 2008, 2009 Ali Polatel
+# Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'distutils.eclass' from Gentoo, which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-# The distutils eclass is designed to allow easier installation of
-# distutils-based python modules and their incorporation into
-# the Exherbo Linux system.
-#
-# It inherits python, multilib.
+# The distutils eclass is designed to allow easier installation of distutils-based python modules
+# and their incorporation into Exherbo.
 
 myexparam python_dep=
-myexparam python_modules=[ ]
 
 myexparam -b has_lib=true
 myexparam -b has_bin=false
 
 exparam -v PYTHON_DEP python_dep
-exparam -v PYTHON_MODULES python_modules[@]
 exparam -v PYTHON_HAS_LIB has_lib
 exparam -v PYTHON_HAS_BIN has_bin
 
-require multilib
-require python [ python_dep=${PYTHON_DEP} has_lib=${PYTHON_HAS_LIB} has_bin=${PYTHON_HAS_BIN} ]
+require multilib python [ python_dep="${PYTHON_DEP}" has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" ]
 
-export_exlib_phases src_prepare src_compile src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_compile src_install
 
-# The distutils src_prepare function, this function is exported
 distutils_src_prepare() {
     default
 
@@ -35,80 +29,22 @@ distutils_src_prepare() {
     echo "def use_setuptools(*args, **kwargs): pass" > ez_setup.py
 }
 
-# The distutils src_compile function, this function is exported
 distutils_src_compile() {
-    python_version
-    ${python} -B setup.py build "$@" || die "compilation failed"
+    edo ${PYTHON} -B setup.py build "${DISTUTILS_SRC_COMPILE_PARAMS[@]}"
 }
 
-# The distutils src_install function, this function is exported.
-# It also installs the "standard docs" (CHANGELOG, Change*, KNOWN_BUGS, MAINTAINERS,
-# PKG-INFO, CONTRIBUTORS, TODO, NEWS, MANIFEST*, README*, and AUTHORS)
 distutils_src_install() {
-
-    python_version
     # need this for python-2.5 + setuptools in cases where
     # a package uses distutils but does not install anything
     # in site-packages. (eg. dev-java/java-config-2.x)
     # - liquidx (14/08/2006)
-    pylibdir="$(${python} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
+    pylibdir="$(${PYTHON} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
     [[ -n "${pylibdir}" ]] && dodir "${pylibdir}"
 
-    ${python} -B setup.py install --root="${IMAGE}" --no-compile "$@" || die
+    edo ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "${DISTUTILS_SRC_INSTALL_PARAMS[@]}"
 
     emagicdocs
-}
 
-# Generic pyc/pyo cleanup script. This function is exported.
-distutils_pkg_postrm() {
-    local moddir pylibdir pymod
-    if [[ -z ${PYTHON_MODULES[@]} ]]; then
-        for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
-            if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
-                PYTHON_MODULES=( ${PN} )
-            fi
-        done
-    fi
-
-    ebegin "Performing python module cleanup..."
-    if [[ -n ${PYTHON_MODULES[@]} ]]; then
-        for pymod in "${PYTHON_MODULES[@]}"; do
-            for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
-                if [[ -d "${pylibdir}"/site-packages/${pymod} ]]; then
-                    python_mod_cleanup "${pylibdir#${ROOT}}"/site-packages/"${pymod}"
-                fi
-            done
-        done
-    else
-        python_mod_cleanup
-    fi
-    eend 0
-}
-
-# This is a generic optimization, you should override it if your package
-# installs things in another directory. This function is exported
-distutils_pkg_postinst() {
-    local pylibdir pymod
-
-    if [[ -z ${PYTHON_MODULES[@]} ]]; then
-        for pylibdir in "${ROOT}"/usr/$(get_libdir)/python*; do
-            if [[ -d "${pylibdir}"/site-packages/${PN} ]]; then
-                PYTHON_MODULES=( ${PN} )
-            fi
-        done
-    fi
-
-    for pymod in "${PYTHON_MODULES[@]}"; do
-        einfo "Optimizing bytecode for module ${pymod}"
-        python_mod_optimize $(python_get_sitedir)/"${pymod}"
-    done
-}
-
-# Calls python_version, so that you can use something like
-#  e.g. insinto /usr/include/python${PYVER}
-distutils_python_version() {
-    illegal_in_global_scope
-
-    python_version
+    python_bytecompile
 }
 

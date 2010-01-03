@@ -82,7 +82,7 @@ subversion_src_compile() {
     option ruby && emake swig-rb
 }
 
-src_test_expensive() {
+subversion_src_test_expensive() {
     if has_version 'dev-lang/python:*[>=2.2]' ; then
         emake check
     else
@@ -99,15 +99,11 @@ subversion_src_install() {
     fi
 
     if option python; then
-        python_version
-        PYTHON_DIR=/usr/$(get_libdir)/python${PYVER}
-
         emake DESTDIR="${IMAGE}" DISTUTIL_PARAM="--prefix=${IMAGE}" LD_LIBRARY_PATH="-L${IMAGE}/usr/$(get_libdir)" install-swig-py
 
-        dodir "${PYTHON_DIR}/site-packages"
-        mv "${IMAGE}"/usr/$(get_libdir)/svn-python/svn "${IMAGE}${PYTHON_DIR}/site-packages"
-        mv "${IMAGE}"/usr/$(get_libdir)/svn-python/libsvn "${IMAGE}${PYTHON_DIR}/site-packages"
-        rm -Rf "${IMAGE}"/usr/$(get_libdir)/svn-python
+        dodir $(python_get_sitedir)
+        mv "${IMAGE}"/usr/$(get_libdir)/svn-python/{,lib}svn "${IMAGE}"/$(python_get_sitedir)
+        rm -rf "${IMAGE}"/usr/$(get_libdir)/svn-python
     fi
 
     if option ruby; then
