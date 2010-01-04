@@ -27,7 +27,7 @@ HOMEPAGE="http://cnswww.cns.cwru.edu/php/chet/${PN}/rltop.html"
 
 if (( PATCH_LEVEL )) ; then
     DOWNLOADS+="
-    $(for ((i=0; i<=PATCH_LEVEL; ++i)); do
+    $(for ((i=1; i<=PATCH_LEVEL; i++)); do
         printf "ftp://ftp.cwru.edu/pub/bash/${MY_PNV}-patches/${PN}$(ever delete_all ${MY_PV})-%03d\n" ${i}
     done)"
 fi
