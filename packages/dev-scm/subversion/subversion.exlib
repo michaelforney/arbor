@@ -19,7 +19,7 @@ UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-1.1"
 SLOT="0"
-MYOPTIONS="berkdb nls perl python ruby"
+MYOPTIONS="berkdb kde nls perl python ruby"
 RESTRICT="test" # Expensive tests
 
 #   test:
@@ -30,16 +30,23 @@ DEPENDENCIES="
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
+        kde? ( dev-util/pkg-config )
     build+run:
       dev-db/sqlite[>=3.4.0]
-        dev-libs/apr-util[berkdb?]
+        dev-libs/apr-util[>=0.9.7][berkdb?]
         net-misc/neon[>=0.25&<0.30]
         berkdb? ( sys-libs/db:=[>=4.0.14] )
+        kde? (
+            kde/kdelibs:4
+            sys-apps/dbus[>=1.0]
+            x11-libs/qt:4[dbus][X]
+            )
         perl? ( dev-lang/perl:= )
         python? ( dev-lang/python:= )
         ruby? ( dev-lang/ruby:= )
     run:
         perl? ( dev-perl/URI )
+        kde? ( kde/kdebase-runtime:4 )
     suggestion:
         net-misc/neon[ssl] [[ description = [ Enables support for https:// URIs ] ]]
         net-misc/openssh [[ description = [ Enables support for svn+ssh:// URIs ] ]]"
@@ -72,6 +79,7 @@ subversion_src_configure() {
         --disable-mod-activation \
         ${myconf} \
         $(option_with berkdb berkeley-db "db.h:$(berkdb_includedir)::db-$(berkdb_slot)") \
+        $(option_with kde kwallet) \
         $(option_enable nls)
 }
 
