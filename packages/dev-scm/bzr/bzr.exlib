@@ -44,7 +44,7 @@ WORK="${WORKBASE}"/${PN}-${MY_PV}
 bzr_src_test_expensive() {
     # Some tests expect the usual pyc compiling behaviour.
     python_enable_pyc
-    "${python}" bzr --no-plugins selftest || die "bzr selftest failed"
+    "${PYTHON}" bzr --no-plugins selftest || die "bzr selftest failed"
     # Just to make sure we don't hit any errors on later stages.
     python_disable_pyc
 }
