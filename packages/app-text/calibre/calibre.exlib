@@ -1,4 +1,4 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require distutils [ python_dep=2.6 ] freedesktop-desktop freedesktop-mime multilib bash-completion
@@ -57,6 +57,11 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}"/${PN}
 
+prefix="/usr"
+bindir="${prefix}/bin"
+sharedir="${prefix}/share"
+libdir="${prefix}/$(get_libdir)"
+
 DISTUTILS_SRC_INSTALL_PARAMS=(
     --prefix="${prefix}"
     --bindir="${bindir}"
@@ -88,10 +93,6 @@ calibre_src_compile() {
 
 calibre_src_install() {
     local old_XDG="${XDG_DATA_DIRS}"
-    local prefix="/usr"
-    local bindir="${prefix}/bin"
-    local sharedir="${prefix}/share"
-    export libdir="${prefix}/$(get_libdir)"
 
     # We have to create these directories before installing because xdg-* needs
     # to see them even if it doesn't use them...
