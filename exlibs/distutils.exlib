@@ -30,10 +30,13 @@ distutils_src_prepare() {
 }
 
 distutils_src_compile() {
+    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
     edo ${PYTHON} -B setup.py build "${DISTUTILS_SRC_COMPILE_PARAMS[@]}"
 }
 
 distutils_src_install() {
+    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
     # need this for python-2.5 + setuptools in cases where
     # a package uses distutils but does not install anything
     # in site-packages. (eg. dev-java/java-config-2.x)
