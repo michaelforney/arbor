@@ -1,5 +1,7 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases src_test_expensive src_install
 
 SUMMARY="PHP is a general-purpose scripting language especially suited for web development"
 DESCRIPTION="
@@ -15,7 +17,6 @@ DOWNLOADS="${HOMEPAGE}/distributions/${PNV}.tar.bz2"
 
 LICENCES="PHP-3"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     debug
     ipv6
@@ -116,13 +117,13 @@ DEPENDENCIES="
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
 
-UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog-$(ever major).php [[ lang = en ]]"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog-$(ever major).php#${PV}"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.php"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/$(ever replace_all _).php [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/$(ever replace_all _).php"
 
-# 98,3% of the tests pass but 1,5% fail. Most of those fail because things like
-# ODBC are not configured and/or running. If someone really wants to look into
-# that, be my guest. I won't but I reported the test failures upstream.
+# Most of the gazillions of tests pass but a few fail. Most of those fail because
+# things like ODBC are not configured and/or running. If someone really wants to
+# look into that, be my guest. I won't but I reported the test failures upstream.
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -250,6 +251,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:mcrypt mcrypt"
     "php_extensions:mssql mssql"
     "php_extensions:mysql mysql"
+    "php_extensions:mysql mysql-sock=/var/run/mysqld/mysqld.sock"
     "php_extensions:ncurses ncurses"
     "php_extensions:pcre pcre-dir /usr"
     "php_extensions:pcre pcre-regex /usr"
@@ -284,7 +286,7 @@ DEFAULT_SRC_INSTALL_EXCLUDE=(
     README.Zeus
 )
 
-src_test() {
+php_src_test_expensive() {
     # We enable safe mode by default but for the tests, it must be disabled. Thus,
     # we make sure the standard php.ini-dist (which disables safe mode) gets used
     # here.
@@ -294,7 +296,11 @@ src_test() {
     emake -j1 test
 }
 
-src_install() {
+php_src_install() {
+    export PHP_PEAR_TEMP_DIR="/tmp"
+    export PHP_PEAR_CACHE_DIR="/var/cache/pear"
+    export PHP_PEAR_DOWNLOAD_DIR="/tmp"
+
     # Needed but useless because we'll remove it later.
     if option apache; then
         mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
@@ -316,12 +322,20 @@ src_install() {
 
     if option pear; then
         keepdir /usr/share/pear/.registry/.channel.__uri
-        keepdir /usr/share/pear/.registry/.channel.pecl.php.net
+        keepdir /usr/share/pear/.registry/.channel.{doc,pecl}.php.net
     fi
 
     dodir /etc/${PN}
     insinto /etc/${PN}
     newins php.ini-recommended php.ini
+    if option pear; then
+        edo sed -i -e 's|^;\(include_path =\).*|\1 ".:/usr/share/pear:/usr/share/php:"|' "${IMAGE}"/etc/php/php.ini
+        keepdir "${PHP_PEAR_CACHE_DIR}"
+    fi
+
+    if option php_extensions:mysql ; then
+        edo sed -i -e 's:.*\(mysql.default_socket =\).*:\1 "/var/run/mysqld/mysqld.sock":' "${IMAGE}"/etc/php/php.ini
+    fi
 
     if option apache; then
        dodir /etc/apache2/modules.d
