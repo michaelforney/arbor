@@ -164,16 +164,16 @@ glibc_src_install() {
     doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
 
     hereenvd 02locale <<EOF
-LANG=en_US.utf8
+LANG=en_GB.utf8
 EOF
 }
 
 pkg_postinst() {
     mkdir -p "${ROOT}usr/$(get_libdir)/locale" || eerror "failed to create /usr/$(get_libdir)/locale"
 
-    echo "${ROOT}usr/bin/localedef --prefix=${ROOT} -i en_US -f UTF-8 en_US.UTF-8"
+    echo "${ROOT}usr/bin/localedef --prefix=${ROOT} -i en_GB -f UTF-8 en_GB.UTF-8"
     I18NPATH="${ROOT}usr/share/i18n" "${ROOT}usr/bin/localedef" \
-        --prefix="${ROOT}" -i en_US -f UTF-8 en_US.UTF-8 || \
-            eerror "failed to generate locale data for en_US.UTF-8"
+        --prefix="${ROOT}" -i en_GB -f UTF-8 en_GB.UTF-8 || \
+            eerror "failed to generate locale data for en_GB.UTF-8"
 }
 

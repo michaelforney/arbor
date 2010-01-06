@@ -24,7 +24,7 @@ DEPENDENCIES="
         pam? ( sys-libs/pam[>=1.0.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-login.defs.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-login.defs.patch "${FILES}"/${PN}-groupmod.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
     --enable-shadowgrp

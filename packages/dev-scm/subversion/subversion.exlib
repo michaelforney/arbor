@@ -1,5 +1,5 @@
 # Copyright 2008 Bryan Østergaard <kloeri@exherbo.org>
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'subversion-1.4.6-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -19,27 +19,36 @@ UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-1.1"
 SLOT="0"
-MYOPTIONS="berkdb nls perl python ruby"
+MYOPTIONS="berkdb nls perl python ruby
+    kde [[ description = [ Adds support to store passwords in kwallet ] ]]
+"
 RESTRICT="test" # Expensive tests
 
 #   test:
 #       dev-lang/python:*[>=2.2] [[ description = [ Expensive tests ] ]]
 DEPENDENCIES="
     build:
+        kde? ( dev-util/pkg-config )
         nls? ( sys-devel/gettext )
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
     build+run:
-      dev-db/sqlite[>=3.4.0]
-        dev-libs/apr-util[berkdb?]
+        dev-db/sqlite[>=3.4.0]
+        dev-libs/apr-util[>=0.9.7][berkdb?]
         net-misc/neon[>=0.25&<0.30]
         berkdb? ( sys-libs/db:=[>=4.0.14] )
+        kde? (
+            kde/kdelibs:4
+            sys-apps/dbus[>=1.0]
+            x11-libs/qt:4[dbus][X]
+        )
         perl? ( dev-lang/perl:= )
         python? ( dev-lang/python:= )
         ruby? ( dev-lang/ruby:= )
     run:
         perl? ( dev-perl/URI )
+        kde? ( kde/kdebase-runtime:4 )
     suggestion:
         net-misc/neon[ssl] [[ description = [ Enables support for https:// URIs ] ]]
         net-misc/openssh [[ description = [ Enables support for svn+ssh:// URIs ] ]]"
@@ -72,6 +81,7 @@ subversion_src_configure() {
         --disable-mod-activation \
         ${myconf} \
         $(option_with berkdb berkeley-db "db.h:$(berkdb_includedir)::db-$(berkdb_slot)") \
+        $(option_with kde kwallet) \
         $(option_enable nls)
 }
 
@@ -112,4 +122,3 @@ subversion_src_install() {
 
     dobashcompletion tools/client-side/bash_completion
 }
-

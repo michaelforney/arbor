@@ -75,6 +75,16 @@ src_prepare() {
         -i bin/rc-status \
         || die "Dependancies, Gentoo can't spell it. :-)"
 
+    sed -e '/nano/s:^:#:' \
+        -e '/vim/s:^#::' \
+        -i etc/rc.conf || die "Couldn't switch default editor to vim"
+
+    sed -e 's:/bin/nano:/usr/bin/vim:' \
+        -i etc/profile || die 'Failed to make EDITOR default to vim'
+
+    sed -e '/LESSOPEN/d' -i etc/env.d/00basic ||
+        die "Couldn't remove lesspipe references"
+
     default
 }
 
@@ -133,12 +143,6 @@ src_install() {
 
     cd "${WORK}/src"
     emake DESTDIR="${IMAGE}" LIBDIR="${libdir}" install
-
-    sed -e 's:/bin/nano:/usr/bin/vim:' \
-        -i "${IMAGE}"/etc/profile || die 'Failed to make EDITOR default to vim'
-
-    sed -e '/LESSOPEN/d' -i "${IMAGE}"/etc/env.d/00basic ||
-        die "Couldn't remove lesspipe references"
 
     rm -rf "${IMAGE}"/dev/pts || die "rm /dev/pts failed"
     rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4 || die "rm ${IMAGE}/etc/modules.autoload.d/kernel-2.4 failed"
