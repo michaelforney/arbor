@@ -3,7 +3,7 @@
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require toolchain-funcs pam
+require pam
 
 PATCH_VER="1.0"
 
@@ -38,7 +38,7 @@ src_prepare() {
 
     option pam && expatch -p1 "${WORKBASE}"/${PNV}-pam.patch
 
-    sed -i -e "s:gcc \(-Wall.*\):$(tc-getCC) \1 ${CFLAGS}:" \
+    sed -i -e "s:gcc \(-Wall.*\):${CC} \1 ${CFLAGS}:" \
         -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile \
         || die "sed Makefile failed"
 }

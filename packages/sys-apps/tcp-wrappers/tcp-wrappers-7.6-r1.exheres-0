@@ -3,7 +3,7 @@
 # Based in part upon 'tcp-wrappers-7.6-r8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib toolchain-funcs
+require multilib
 
 MY_PNV="${PNV//-/_}"
 PATCH_VER="1.1"
@@ -35,8 +35,6 @@ src_prepare() {
 }
 
 src_compile() {
-    tc-export AR CC RANLIB
-
     local myconf="-DHAVE_WEAKSYMS"
     option ipv6 && myconf+=" -DINET6=1 -Dss_family=__ss_family -Dss_len=__ss_len"
 

@@ -3,7 +3,7 @@
 # Based in part upon 'libcap-2.08-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib toolchain-funcs pam
+require multilib pam
 
 export_exlib_phases src_compile src_install
 
@@ -26,7 +26,6 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_PARAMS=( lib=$(get_libdir) )
 
 libcap_src_compile() {
-    tc-export BUILD_CC CC AR RANLIB
     export PAM_CAP=$(option pam && echo yes || echo no)
 
     default

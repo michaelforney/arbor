@@ -6,7 +6,7 @@
 # Based in part upon 'baselayout-1.12.12.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic multilib toolchain-funcs
+require flag-o-matic multilib
 
 SUMMARY="Filesystem baselayout and init scripts"
 HOMEPAGE="http://www.gentoo.org/"
@@ -75,8 +75,8 @@ src_compile() {
 
     cd "${WORK}/src" || die "Could not enter src/"
     emake \
-        CC="$(tc-getCC)" \
-        LD="$(tc-getCC) ${LDFLAGS}" \
+        CC="${CC}" \
+        LD="${CC} ${LDFLAGS}" \
         CFLAGS="${CFLAGS}" \
         LIBDIR="${libdir}"
 }

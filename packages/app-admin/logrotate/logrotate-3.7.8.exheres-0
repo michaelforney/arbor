@@ -3,8 +3,6 @@
 # Based in part upon 'logrotate-3.7.2.ebuild' from Gentoo, which is:
 #       Copyright 1999-2007 Gentoo Foundation
 
-require toolchain-funcs
-
 SUMMARY="Rotates, compresses and mails system logs"
 HOMEPAGE="https://fedorahosted.org/${PN}"
 DOWNLOADS="https://fedorahosted.org/releases/l/o/${PN}/${PNV}.tar.gz"
@@ -20,7 +18,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_COMPILE_PARAMS=(
-    "CC=$(tc-getCC)"
+    "CC=${CC}"
     "WITH_SELINUX=no"
 )
 

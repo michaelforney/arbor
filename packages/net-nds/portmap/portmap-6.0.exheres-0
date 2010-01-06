@@ -3,8 +3,6 @@
 # Based in part upon 'portmap-6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs
-
 SUMMARY="daemon for implementing remote procedure calls between computer programs"
 HOMEPAGE="http://neil.brown.name/portmap/"
 DOWNLOADS="${HOMEPAGE}/${PNV}.tgz"
@@ -26,7 +24,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_compile() {
-    tc-export CC
     emake NO_TCP_WRAPPER="$(option tcpd || echo NO)"
 }
 

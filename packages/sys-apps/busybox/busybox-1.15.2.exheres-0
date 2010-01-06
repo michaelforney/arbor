@@ -2,8 +2,6 @@
 # Copyright 2009 Daniel Mierswa
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 SUMMARY="BusyBox provides tiny replacements for many common UNIX utilities"
 HOMEPAGE="http://busybox.net/"
 DOWNLOADS="http://busybox.net/downloads/${PNV}.tar.gz"
@@ -19,14 +17,9 @@ DEPENDENCIES=""
 RESTRICT="test"
 
 bb_make() {
-    local hostcc=$(tc-getBUILD_CC)
-    local hostcxx=${hostcc%gcc}g++
-
-    emake AR=$(tc-getAR) AS=$(tc-getAS) CC=$(tc-getCC) \
-          CPP="$(tc-getCC) -E" LD="$(tc-getCC) -nostdlib" \
-          NM=$(tc-getNM) OBJCOPY=$(tc-getPROG OBJCOPY objcopy) \
-          OBJDUMP=$(tc-getPROG OBJDUMP objdump) \
-          HOSTCC=${hostcc} HOSTCXX=${hostcxx} "$@"
+    emake AR="${AR}" AS="${AS}" CC="${CC}" \
+          CPP="${CC} -E" LD="${CC} -nostdlib" NM="${NM}" \
+          "$@"
 }
 
 src_compile() {

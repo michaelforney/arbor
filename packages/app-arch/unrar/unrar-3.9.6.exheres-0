@@ -3,8 +3,6 @@
 # Based in part upon 'unrar-3.7.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require toolchain-funcs
-
 MY_PN=${PN}src
 SUMMARY="Uncompress rar files"
 HOMEPAGE="http://www.rarlab.com/rar_add.htm"
@@ -26,7 +24,6 @@ WORK="${WORKBASE}"/unrar
 
 src_compile() {
     export CXXFLAGS="${CXXFLAGS}"
-    export CXX="$(tc-getCXX)"
 
     emake -f makefile.unix unrar STRIP="true"
     mv unrar "${TEMP}"

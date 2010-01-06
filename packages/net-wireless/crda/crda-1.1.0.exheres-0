@@ -1,7 +1,7 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="Central Regulatory Domain Agent"
 DESCRIPTION="
@@ -67,7 +67,7 @@ src_compile() {
 
     emake REG_BIN=${CRDA_DIR}/regulatory.bin \
           PUBKEY_DIR=${CRDA_DIR}/pubkeys \
-          CC=$(tc-getCC) \
+          CC="${CC}" \
           ${mymake[@]} \
           crda verify
 }

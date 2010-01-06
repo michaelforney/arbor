@@ -3,7 +3,7 @@
 # Based in part upon 'linux-atm-2.5.0.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 SUMMARY="Tools for ATM in Linux"
 DESCRIPTION="
@@ -31,7 +31,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    "CC=$(tc-getCC)"
+    "CC=${CC}"
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( "doc/" )

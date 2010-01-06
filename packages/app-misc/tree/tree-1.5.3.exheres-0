@@ -1,7 +1,5 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-
-require toolchain-funcs
 
 SUMMARY="Lists directories recursively"
 HOMEPAGE="http://mama.indstate.edu/users/ice/tree/"
@@ -18,7 +16,7 @@ DEPENDENCIES=""
 
 src_compile() {
     emake \
-        CC="$(tc-getCC)" \
+        CC="${CC}" \
         CFLAGS="${CFLAGS} -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64" \
         LDFLAGS="${LDFLAGS}"
 }

@@ -3,7 +3,7 @@
 # Based in part upon 'sysvinit-2.86-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs flag-o-matic alternatives
+require flag-o-matic alternatives
 
 PATCHTBZ2_VER="1.0"
 
@@ -45,7 +45,7 @@ src_unpack() {
 src_compile() {
     option static && append-ldflags -static
     emake -C src \
-        CC="$(tc-getCC)" \
+        CC="${CC}" \
         all change_console
 }
 

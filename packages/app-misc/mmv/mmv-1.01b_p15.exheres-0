@@ -3,8 +3,6 @@
 # Based in part upon 'mmv-1.01b_p14.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs
-
 DEB_PATCH_VER=${PV#*_p}
 MY_PNV=${PN}_${PV%_p*}
 
@@ -36,7 +34,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=(
-    CC="$(tc-getCC)"
+    CC="${CC}"
     CFLAGS+="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE"
     LDFLAGS="${LDFLAGS}"
 )

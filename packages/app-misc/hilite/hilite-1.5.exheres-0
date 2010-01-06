@@ -1,8 +1,6 @@
 # Copyright 2007 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 SUMMARY="Highlights stderr output in red"
 HOMEPAGE="http://sourceforge.net/projects/${PN}"
 DOWNLOADS="mirror://sourceforge/${PN}/${PN}.c -> ${PNV}.c"
@@ -21,7 +19,7 @@ src_unpack() {
 }
 
 src_compile() {
-    $(tc-getCC) ${CFLAGS} -o ${PN} ${PNV}.c || die "compile failed"
+    ${CC} ${CFLAGS} -o ${PN} ${PNV}.c || die "compile failed"
 }
 
 src_install() {

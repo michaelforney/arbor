@@ -1,7 +1,7 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require common-metadata qmake4 [ no_qt_dependency=true ] multilib toolchain-funcs
+require common-metadata qmake4 [ no_qt_dependency=true ] multilib
 
 PLATFORMS="~amd64 ~x86"
 
@@ -155,7 +155,7 @@ src_configure() {
     option qt4 && eqmake4 -o wpa_gui-qt4/{Makefile,wpa_gui.pro}
 }
 
-DEFAULT_SRC_COMPILE_PARAMS+=( CC=$(tc-getCC) BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) )
+DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) )
 
 src_compile() {
     default

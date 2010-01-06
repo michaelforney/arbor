@@ -8,7 +8,7 @@ MY_PNV="${PN}-${MY_PV}"
 MY_PVR="${PVR/_p/-}"
 MY_PNVR="${PN}-${MY_PVR}"
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux."
 HOMEPAGE="http://www.linuxfoundation.org/en/Net:Iproute2"
@@ -47,7 +47,7 @@ src_prepare() {
     rm -r include/linux include/netinet || die "failed to remove system headers"
 
     # fix hardcoded gcc
-    sed -i -e "s:^gcc:$(tc-getCC):" configure || die "sed configure failed"
+    sed -i -e "s:^gcc:${CC}:" configure || die "sed configure failed"
 
     # fix hardcoded -O2 and allow user CFLAGS
     # The -DRTPROT_DHCP is an evil hack, but I'm not sure of a better
@@ -69,7 +69,7 @@ src_prepare() {
 }
 
 src_compile() {
-    emake CC=$(tc-getCC) AR=$(tc-getAR) HOSTCC=$(tc-getBUILD_CC) LIBDIR=/usr/$(get_libdir)
+    emake CC="${CC}" AR="${AR}" LIBDIR=/usr/$(get_libdir)
 }
 
 src_install() {

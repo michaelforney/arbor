@@ -3,7 +3,7 @@
 # Based in part upon 'e2fsprogs-1.40.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require toolchain-funcs multilib
+require multilib
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -37,7 +37,6 @@ e2fsprogs_src_configure() {
     # Keep the package from doing silly things
     export ac_cv_path_LDCONFIG=:
     export STRIP=:
-    tc-export CC
 
     econf \
         --bindir=/bin \

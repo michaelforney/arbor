@@ -3,7 +3,7 @@
 # Based in part upon 'postfix-2.5.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib toolchain-funcs pam alternatives
+require multilib pam alternatives
 
 SUMMARY="Fast, easy to administer and secure mail transport agent."
 HOMEPAGE="http://www.postfix.org"
@@ -45,7 +45,7 @@ src_compile() {
     ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PNVR}'/readme\"'
     ccargs+=' -DDEF_HTML_DIR=\"/usr/share/doc/'${PNVR}'/html\"'
 
-    emake CC="$(tc-getCC)" OPT="${CFLAGS}" \
+    emake CC="${CC}" OPT="${CFLAGS}" \
         CCARGS="${ccargs}" AUXLIBS="${auxlibs}" makefiles
     emake
 }

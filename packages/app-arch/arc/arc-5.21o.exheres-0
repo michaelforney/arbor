@@ -1,7 +1,7 @@
 # Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs sourceforge [ suffix=tgz ]
+require sourceforge [ suffix=tgz ]
 
 SUMMARY="Tool to manage archives in the .arc format"
 DESCRIPTION="
@@ -43,7 +43,7 @@ src_prepare() {
     sed -i -e "s:^\(OPT = \).*:\1 ${CFLAGS} ${LDFLAGS}:" Makefile \
         || die "flags sed failed."
     # Set the compiler
-    sed -i -e "s:^\(CC = \).*:\1 $(tc-getCC):" Makefile \
+    sed -i -e "s:^\(CC = \).*:\1 ${CC}:" Makefile \
         || die "cc sed failed."
     # Add a fake install target
     echo -e "\ninstall:\n" >> Makefile

@@ -3,7 +3,7 @@
 # Based in part upon 'pciutils-2.2.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="a collection of programs for inspecting and manipulating configuration of PCI devices"
 HOMEPAGE="http://mj.ucw.cz/pciutils.shtml"
@@ -21,7 +21,7 @@ DEPENDENCIES="
 
 DEFAULT_SRC_COMPILE_PARAMS=(
     ZLIB="no" DNS="no" OPT="${CFLAGS} -fPIC" STRIP=""
-    CC=$(tc-getCC) AR=$(tc-getAR) RANLIB=$(tc-getRANLIB)
+    CC="${CC}" AR="${AR}" RANLIB="${RANLIB}"
 )
 
 DEFAULT_SRC_INSTALL_PARAMS=( install-lib )

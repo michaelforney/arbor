@@ -6,7 +6,7 @@
 #  Copyright 1999-2008 Gentoo Foundation
 
 # TODO: alternatives
-require flag-o-matic multilib toolchain-funcs autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] python
+require flag-o-matic multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] python
 
 export_exlib_phases src_prepare src_configure src_test src_install
 
@@ -82,9 +82,6 @@ python-build_src_configure() {
 
     export OPT="${CFLAGS}"
     export CPPFLAGS="$(pkg-config --cflags-only-I libffi) ${CPPFLAGS}"
-
-    # export CXX so it ends up in /usr/lib/pythonx.y/config/Makefile
-    tc-export CXX
 
     default
 }
