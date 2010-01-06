@@ -1,4 +1,4 @@
-Source: Ali Polatel <polatel@gmail.com>
+Source: Ali Polatel <alip@exherbo.org>
 Source: Radoslaw Szkodzinski <astralstorm@gen2.org>
 Upstream: No (TODO)
 Reason: Binding to 0.0.0.0 is bad, mmkay?
@@ -32,3 +32,47 @@ Reason: Binding to 0.0.0.0 is bad, mmkay?
                              LocalPort => $tport,
                              ReuseAddr => 1,
                             ) or die;
+--- libwww-perl-5.833/talk-to-ourself	2010-01-06 12:01:03.000000000 +0200
++++ libwww-perl-5.833/talk-to-ourself	2010-01-06 12:01:47.000000000 +0200
+@@ -32,7 +32,7 @@
+ }
+ 
+ # server code
+-my $socket = IO::Socket::INET->new(Listen => 1, Timeout => 5);
++my $socket = IO::Socket::INET->new(LocalAddr => 'localhost', Listen => 1, Timeout => 5);
+ my $port = $socket->sockport;
+ open(CLIENT, qq("$^X" "$0" --port $port |)) || die "Can't run $^X $0: $!\n";
+ 
+--- libwww-perl-5.833/t/robot/ua.t	2010-01-06 12:40:35.000000000 +0200
++++ libwww-perl-5.833/t/robot/ua.t	2010-01-06 12:40:52.000000000 +0200
+@@ -17,7 +17,7 @@
+ 
+     require HTTP::Daemon;
+ 
+-    my $d = new HTTP::Daemon Timeout => 10;
++    my $d = new HTTP::Daemon LocalAddr => 'localhost', Timeout => 10;
+ 
+     print "Please to meet you at: <URL:", $d->url, ">\n";
+     open(STDOUT, $^O eq 'MSWin32' ?  ">nul" : $^O eq 'VMS' ? ">NL:"  : ">/dev/null");
+--- libwww-perl-5.833/t/robot/ua-get.t	2010-01-06 12:40:41.000000000 +0200
++++ libwww-perl-5.833/t/robot/ua-get.t	2010-01-06 12:41:04.000000000 +0200
+@@ -17,7 +17,7 @@
+ 
+     require HTTP::Daemon;
+ 
+-    my $d = new HTTP::Daemon Timeout => 10;
++    my $d = new HTTP::Daemon LocalAddr => 'localhost', Timeout => 10;
+ 
+     print "Please to meet you at: <URL:", $d->url, ">\n";
+     open(STDOUT, $^O eq 'MSWin32' ?  ">nul" : $^O eq 'VMS' ? ">NL:"  : ">/dev/null");
+--- libwww-perl-5.833/t/local/http.t	2010-01-06 12:43:24.000000000 +0200
++++ libwww-perl-5.833/t/local/http.t	2010-01-06 12:43:35.000000000 +0200
+@@ -18,7 +18,7 @@
+ 
+     require HTTP::Daemon;
+ 
+-    my $d = HTTP::Daemon->new(Timeout => 10);
++    my $d = HTTP::Daemon->new(LocalAddr => 'localhost', Timeout => 10);
+ 
+     print "Please to meet you at: <URL:", $d->url, ">\n";
+     open(STDOUT, $^O eq 'VMS'? ">nl: " : ">/dev/null");
