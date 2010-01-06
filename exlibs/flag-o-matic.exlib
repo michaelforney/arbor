@@ -4,8 +4,6 @@
 #
 # Maintainer: toolchain@gentoo.org
 
-require toolchain-funcs
-
 #
 #### filter-flags <flags> ####
 # Remove particular flags from C[XX]FLAGS
@@ -269,7 +267,7 @@ test-flag-PROG() {
     [[ -z ${comp} || -z ${flags} ]] && \
         return 1
 
-    local PROG=$(tc-get${comp})
+    local PROG="${!comp}"
     ${PROG} ${flags} -S -o /dev/null -xc /dev/null \
         > /dev/null 2>&1
 }
