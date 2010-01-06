@@ -321,16 +321,6 @@ test_flag() {
     test-flags-CC "$@"
 }
 
-test_version_info() {
-    illegal_in_global_scope
-
-    if [[ $($(tc-getCC) --version 2>&1) == *$1* ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 strip-unsupported-flags() {
     illegal_in_global_scope
 
