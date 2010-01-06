@@ -9,8 +9,6 @@ SUMMARY="A highly configurable, drop-in replacement for sendmail"
 HOMEPAGE="http://www.exim.org"
 REMOTE_IDS="freshmeat:${PN}"
 DOWNLOADS="ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PNV}.tar.bz2
-    ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PN}-texinfo-${PV}.tar.bz2
-    http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}-internal-pcre.patch.bz2
     doc? ( ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PN}-html-${PV}.tar.bz2 )"
 
 LICENCES="GPL-2"
@@ -51,21 +49,15 @@ EXIMON="
             x11-libs/libXt
         )
 "
-#       sqlite? ( dev-db/sqlite:3 )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     # Use maildir by default
-    "${FILES}"/${PNV}-maildir.patch
-    # No internal pcre, see http://bugs.exim.org/show_bug.cgi?id=657
-    "${FETCHEDDIR}"/${PNV}-internal-pcre.patch.bz2
-    "${FILES}"/${PNV}-parallel-make.patch
-    "${FILES}"/${PNV}-exherbo-defaults.patch
+    "${FILES}"/${PN}-maildir.patch
+    "${FILES}"/${PN}-exherbo-defaults.patch
 )
 DEFAULT_SRC_COMPILE_PARAMS=( build=Exim-Exherbo )
 
 src_prepare() {
-    edo mv "${WORKBASE}"/${PN}-texinfo-${PV}/doc/*.texinfo "${WORK}"/doc/
-
     default
 
     edo cp "${WORK}/src/EDITME" Local/Makefile
