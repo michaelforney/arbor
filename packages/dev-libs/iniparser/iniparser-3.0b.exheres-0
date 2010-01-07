@@ -1,7 +1,7 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs multilib
+require multilib
 
 MY_PNV="${PN}${PV}"
 
@@ -30,9 +30,9 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
     sed \
-        -e "s:^\(CC .*=\) .*:\1 $(tc-getCC):" \
+        -e "s:^\(CC .*=\) .*:\1 ${CC}:" \
         -e "s:^\(CFLAGS .*=\) -O2:\1 ${CFLAGS}:" \
-        -e "s:^\(AR\t .*=\) .*:\1 $(tc-getAR):" \
+        -e "s:^\(AR\t .*=\) .*:\1 ${AR}:" \
         -e "s:^\(LDFLAGS = .*\):\1 ${LDFLAGS}:" \
         -e "s:/usr/lib:/usr/$(get_libdir):g" \
         -i Makefile \

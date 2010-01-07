@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 MY_PNV="${PN}$(ever delete_all)"
 SUMMARY="Zip is a compression and file packaging/archive utility."
 HOMEPAGE="http://www.info-zip.org/Zip.html"
@@ -24,8 +22,8 @@ configure_string() {
 
 src_prepare() {
     sed -i \
-        -e  "/^echo /$(configure_string CC $(tc-getCC))" \
-        -e  "/^echo /$(configure_string CPP $(tc-getCPP))" \
+        -e  "/^echo /$(configure_string CC ${CC})" \
+        -e  "/^echo /$(configure_string CPP ${CPP})" \
         -e  "/^echo /$(configure_string CFLAGS "\${CFLAGS} ${CFLAGS}")" \
         -e "/^      /$(configure_string LFLAGS2 "\${LFLAGS2} ${LDFLAGS}")" \
         unix/configure \

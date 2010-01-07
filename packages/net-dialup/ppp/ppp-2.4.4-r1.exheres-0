@@ -3,7 +3,7 @@
 # Based in part upon 'ppp-2.4.4-r21.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require multilib toolchain-funcs pam
+require multilib pam
 
 PATCH_VER="20080922"
 SCRIPT_VER="20080922"
@@ -123,13 +123,6 @@ src_prepare() {
             pppd/plugins/radius/etc/* ||
             die "radius config dir sed failed"
     fi
-}
-
-src_configure() {
-    export CC="$(tc-getCC)"
-    export AR="$(tc-getAR)"
-
-    default
 }
 
 src_install() {

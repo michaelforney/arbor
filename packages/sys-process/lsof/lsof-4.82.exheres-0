@@ -1,8 +1,6 @@
 # Copyright 2007 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 MY_PNV="${PNV/-/_}"
 
 SUMMARY="List open files for running UNIX processes"
@@ -30,7 +28,7 @@ src_unpack() {
 }
 
 src_configure() {
-    LSOF_CC=$(tc-getCC) ./Configure -n linux || die "Configure failed"
+    LSOF_CC="${CC}" ./Configure -n linux || die "Configure failed"
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( DEBUG="" )

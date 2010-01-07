@@ -1,8 +1,6 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 SUMMARY="The Squashfs tools for creating compressed filesystems"
 DESCRIPTION="
 Squashfs is a highly compressed read-only filesystem for Linux. It uses zlib to
@@ -32,7 +30,7 @@ DEPENDENCIES="
 WORK="${WORKBASE}"/squashfs${PV}/squashfs-tools
 
 DEFAULT_SRC_COMPILE_PARAMS=(
-    CC="$(tc-getCC)"
+    CC="${CC}"
     LDFLAGS="${LDFLAGS}"
 )
 

@@ -72,13 +72,14 @@ src_prepare() {
         expatch -p1 "${WORKBASE}/${HPN_PATCH%.gz}"
     fi
 
-    sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure{,.ac} ||
-        die "sed to fix linking to openssl failed"
+    edo sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure.ac
 
     eautoreconf
 }
 
 src_configure() {
+    export LD="${CC}"
+
     econf \
         --with-ldflags="${LDFLAGS}" \
         --disable-strip \

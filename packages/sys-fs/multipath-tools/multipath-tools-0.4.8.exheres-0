@@ -3,7 +3,7 @@
 # Based in part upon 'multipath-tools-0.4.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="Userland tools for the device Mapper multipathing driver"
 DESCRIPTION="
@@ -45,7 +45,7 @@ src_prepare() {
 }
 
 src_compile() {
-    emake -j1 CC="$(tc-getCC)"
+    emake -j1 CC="${CC}"
 }
 
 src_install() {

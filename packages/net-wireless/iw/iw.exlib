@@ -1,8 +1,6 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 SUMMARY="A new nl80211 based CLI configuration utility for wireless devices"
 DESCRIPTION="
 The future replacement for wireless-tools. It contains an utility to configure
@@ -24,7 +22,7 @@ DEPENDENCIES="
         net-libs/libnl
 "
 
-DEFAULT_SRC_COMPILE_PARAMS+=( CC=$(tc-getCC) )
+DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" )
 DEFAULT_SRC_INSTALL_PARAMS+=( BINDIR=/usr/sbin )
 
 src_prepare() {

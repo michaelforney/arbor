@@ -1,8 +1,6 @@
 # Copyright 2008 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs
-
 SUMMARY="Utilities to create and check MS-DOS filesystems under Linux"
 HOMEPAGE="ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/${PN}"
 DOWNLOADS="ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/${PN}/${PNV}.src.tar.gz"
@@ -19,7 +17,7 @@ DEFAULT_SRC_PREPARE_PATCHES+=(
         "${FILES}/${PNV}-verify-double-count-fix.patch"
         "${FILES}/${PNV}-fat32size.patch"
 )
-DEFAULT_SRC_COMPILE_PARAMS=( CC=$(tc-getCC) )
+DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( mkdosfs dosfsck )
 

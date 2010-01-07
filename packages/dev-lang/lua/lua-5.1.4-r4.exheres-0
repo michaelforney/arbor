@@ -6,7 +6,7 @@
 
 V=$(ever range 1-2)
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="An Extensible Extension Language"
 HOMEPAGE="http://www.lua.org/"
@@ -50,7 +50,7 @@ src_prepare() {
 
 src_compile() {
     ARGS=(
-        CC=$(tc-getCC)
+        CC="${CC}"
         PLAT="linux"
         RPATH="/usr/$(get_libdir)"
     )

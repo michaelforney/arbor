@@ -3,7 +3,7 @@
 # Based in part upon 'lm_sensors-3.0.2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require toolchain-funcs multilib
+require multilib
 
 SUMMARY="Hardware Monitoring user-space utilities"
 HOMEPAGE="http://www.lm-sensors.org/"
@@ -44,7 +44,7 @@ src_prepare() {
 }
 
 src_compile() {
-    emake CC="$(tc-getCC)"
+    emake CC="${CC}"
 }
 
 src_install() {

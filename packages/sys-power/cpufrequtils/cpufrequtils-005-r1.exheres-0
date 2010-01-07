@@ -3,7 +3,7 @@
 # Based in part upon 'cpufrequtils-002-r3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib toolchain-funcs
+require multilib
 
 SUMMARY="Userspace utilities for the Linux kernel cpufreq subsystem"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufrequtils.html"
@@ -19,10 +19,10 @@ DEPENDENCIES="
         sys-fs/sysfsutils"
 
 src_compile() {
-    emake V=true CC=$(tc-getCC) LD=$(tc-getCC) AR=$(tc-getAR) \
+    emake V=true CC="${CC}" LD="${CC}" AR="${AR}" \
         DEBUG=$(option debug && echo true || echo false) \
         NLS=$(option nls && echo true || echo false) \
-        STRIP=echo RANLIB=$(tc-getRANLIB)
+        STRIP=echo RANLIB="${RANLIB}"
 }
 
 src_install() {

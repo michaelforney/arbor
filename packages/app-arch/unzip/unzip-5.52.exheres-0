@@ -3,7 +3,7 @@
 # Based in part upon 'unzip-5.52-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic toolchain-funcs
+require flag-o-matic
 
 MY_PV="$(ever delete_all ${PV})"
 MY_PNV="${PN}${MY_PV}"
@@ -29,8 +29,8 @@ src_prepare() {
     edo sed -i \
         -e 's:-O3:$(CFLAGS) $(CPPFLAGS):' \
         -e 's:-O :$(CFLAGS) $(CPPFLAGS) :' \
-        -e "s:CC=gcc :CC=$(tc-getCC) :" \
-        -e "s:LD=gcc :LD=$(tc-getCC) :" \
+        -e "s:CC=gcc :CC=${CC} :" \
+        -e "s:LD=gcc :LD=${CC} :" \
         -e 's:LF2 = -s:LF2 = :' \
         -e 's:LF = :LF = $(LDFLAGS) :' \
         -e 's:SL = :SL = $(LDFLAGS) :' \

@@ -7,85 +7,6 @@
 # This eclass contains (or should) functions to get common info
 # about the toolchain (libc/compiler/binutils/etc...)
 
-tc-getPROG() {
-    local var=$1
-    local prog=$2
-
-    if [[ -n ${!var} ]] ; then
-        echo "${!var}"
-        return 0
-    fi
-
-    local search=
-    [[ -n $3 ]] && search=$(type -p "$3-${prog}")
-    [[ -z ${search} && -n ${CHOST} ]] && search=$(type -p "${CHOST}-${prog}")
-    [[ -n ${search} ]] && prog=${search##*/}
-
-    export ${var}=${prog}
-    echo "${!var}"
-}
-
-# Returns the name of the archiver
-tc-getAR() { tc-getPROG AR ar "$@"; }
-# Returns the name of the assembler
-tc-getAS() { tc-getPROG AS as "$@"; }
-# Returns the name of the C compiler
-tc-getCC() { tc-getPROG CC gcc "$@"; }
-# Returns the name of the C preprocessor
-tc-getCPP() { tc-getPROG CPP cpp "$@"; }
-# Returns the name of the C++ compiler
-tc-getCXX() { tc-getPROG CXX g++ "$@"; }
-# Returns the name of the linker
-tc-getLD() { tc-getPROG LD ld "$@"; }
-# Returns the name of the strip prog
-tc-getSTRIP() { tc-getPROG STRIP strip "$@"; }
-# Returns the name of the symbol/object thingy
-tc-getNM() { tc-getPROG NM nm "$@"; }
-# Returns the name of the archiver indexer
-tc-getRANLIB() { tc-getPROG RANLIB ranlib "$@"; }
-# Returns the name of the fortran 77 compiler
-tc-getF77() { tc-getPROG F77 f77 "$@"; }
-# Returns the name of the fortran 90 compiler
-tc-getF90() { tc-getPROG F90 gfortran "$@"; }
-# Returns the name of the fortran compiler
-tc-getFORTRAN() { tc-getPROG FORTRAN gfortran "$@"; }
-# Returns the name of the java compiler
-tc-getGCJ() { tc-getPROG GCJ gcj "$@"; }
-
-# Returns the name of the C compiler for build
-tc-getBUILD_CC() {
-    illegal_in_global_scope
-
-    local v
-    for v in CC_FOR_BUILD BUILD_CC HOSTCC ; do
-        if [[ -n ${!v} ]] ; then
-            export BUILD_CC=${!v}
-            echo "${!v}"
-            return 0
-        fi
-    done
-
-    local search=
-    if [[ -n ${CBUILD} ]] ; then
-        search=$(type -p ${CBUILD}-gcc)
-        search=${search##*/}
-    fi
-    search=${search:-gcc}
-
-    export BUILD_CC=${search}
-    echo "${search}"
-}
-
-# Quick way to export a bunch of vars at once
-tc-export() {
-    illegal_in_global_scope
-
-    local var
-    for var in "$@" ; do
-        eval tc-get${var} > /dev/null
-    done
-}
-
 # A simple way to see if we're using a cross-compiler ...
 tc-is-cross-compiler() {
     illegal_in_global_scope
@@ -97,7 +18,7 @@ tc-is-cross-compiler() {
 gcc-fullversion() {
     illegal_in_global_scope
 
-    $(tc-getCC "$@") -dumpversion
+    "${CC}" "$@" -dumpversion
 }
 # Returns the version, but only the <major>.<minor>
 gcc-version() {
@@ -129,6 +50,6 @@ has_visibility() {
     illegal_in_global_scope
 
     # We need >=sys-devel/gcc-4.1
-    [[ $(tc-getBUILD_CC) == *gcc* && $(gcc-major-version)$(gcc-minor-version) -ge 41 ]] || return 1
+    [[ "${CC}" == *gcc* && $(gcc-major-version)$(gcc-minor-version) -ge 41 ]] || return 1
 }
 

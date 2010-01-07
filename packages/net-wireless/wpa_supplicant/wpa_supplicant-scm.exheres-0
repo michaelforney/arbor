@@ -4,7 +4,7 @@
 
 SCM_REPOSITORY="git://w1.fi/srv/git/hostap.git"
 
-require common-metadata qmake4 [ no_qt_dependency=true ] multilib toolchain-funcs scm-git
+require common-metadata qmake4 [ no_qt_dependency=true ] multilib scm-git
 
 DOWNLOADS=""
 PLATFORMS="~amd64 ~x86"
@@ -157,7 +157,7 @@ src_configure() {
     option qt4 && eqmake4 -o wpa_gui-qt4/{Makefile,wpa_gui.pro}
 }
 
-DEFAULT_SRC_COMPILE_PARAMS+=( CC=$(tc-getCC) BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) )
+DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) )
 
 src_compile() {
     default
