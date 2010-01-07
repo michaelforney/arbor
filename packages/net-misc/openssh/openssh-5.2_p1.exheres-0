@@ -79,6 +79,8 @@ src_prepare() {
 }
 
 src_configure() {
+    export LD="${CC}"
+
     econf \
         --with-ldflags="${LDFLAGS}" \
         --disable-strip \
