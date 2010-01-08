@@ -100,7 +100,7 @@ python-build_src_test() {
 python-build_src_install() {
     default
 
-    edo rm "${IMAGE}"/usr/bin/smtpd.py
+    ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
     edo mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a
 
     # Byte-compile using the executable we just built
