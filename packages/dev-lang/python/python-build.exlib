@@ -103,17 +103,6 @@ python-build_src_install() {
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
     edo mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a
 
-    # Byte-compile using the executable we just built
-    export PYTHON=${IMAGE}/usr/bin/python${SLOT}
-    # Let aforementioned binary find its libpython*.so
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}${LD_LIBRARY_PATH:+:}${IMAGE}/usr/$(get_libdir)/"
-
-    find "${IMAGE}" -type f -name '*.py' -exec touch {} +
-    # Some files like /usr/lib64/python2.6/test/bad{_coding,syntax}* cause errors when
-    # bytecompiling, -x regex ignores those
-    edo "${PYTHON}"    -mcompileall -f -q -d $(python_get_libdir) -x "$(python_get_libdir)/test/bad.*.py" "${IMAGE}$(python_get_libdir)"
-    edo "${PYTHON}" -O -mcompileall -f -q -d $(python_get_libdir) -x "$(python_get_libdir)/test/bad.*.py" "${IMAGE}$(python_get_libdir)"
-
     # NOTE regarding alternatives:
     # python[=2*] & py3k don't collide, except for /usr/bin/2to3, which would be easy to fix.
     # Therefore there should probably be seperate alternative modules for both branches
