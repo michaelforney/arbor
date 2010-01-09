@@ -2,7 +2,7 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild flag-o-matic toolchain-funcs
+require easy-multibuild flag-o-matic
 
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net"
@@ -44,19 +44,16 @@ src_prepare() {
 configure_prepare_one_multibuild() { :; }
 
 configure_one_multibuild() {
-    export CC="$(tc-getCC)"
-    export AR="$(tc-getAR)"
     append-flags -fPIC
-    # this actually works, but makes me cry. the gist of this is taken from debian.
-    if [[ "${CFLAGS}" == *-m32* ]] ; then
-        export CFLAGS="${CFLAGS/-m32 /}"
-        export CC="${CC} -m32"
-    fi
+    filter-flags -m32
+    case "${MULTIBUILD_TARGET}" in
+        32) export CC="${CC} -m32";;
+        64) export CC="${CC/ -m32/}";;
+    esac
     edo ./configure \
         --prefix=/usr \
         --libdir=/usr/${LIBDIR} \
         --shared
-    unset CC AR
 }
 
 install_one_multibuild() {
