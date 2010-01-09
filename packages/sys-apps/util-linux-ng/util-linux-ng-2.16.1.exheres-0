@@ -15,11 +15,11 @@ UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range
 LICENCES="GPL-2 GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls pam"
+MYOPTIONS="pam"
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext[>=0.14.1] )
+        sys-devel/gettext[>=0.14.1]
     build+run:
         dev-lang/perl:*
         sys-fs/udev[>=112]
@@ -30,9 +30,8 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-cramfs' '--enable-libblkid' '--without-selinux' "--libdir=/$(get_libdir)" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-cramfs' '--enable-libblkid' '--enable-nls' '--without-selinux' "--libdir=/$(get_libdir)" )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 

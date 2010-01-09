@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require autotools [ deps_var=autotools_deps supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
@@ -17,11 +17,11 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/wiki/Release${PNV//.}"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="nls python"
+MYOPTIONS="python"
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
         python? ( ${autotools_deps} )
     build+run:
         python? (
@@ -34,7 +34,8 @@ RESTRICT="python? ( test )"
 
 AT_M4DIR="m4"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls python 'python python-bindings' )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python 'python python-bindings' )
 
 src_prepare() {
     if option python; then

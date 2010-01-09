@@ -11,14 +11,16 @@ UPSTREAM_RELEASE_NOTES="http://cvs.savannah.gnu.org/viewvc/*checkout*/texinfo/te
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         sys-libs/ncurses"
 
 WORK="${WORKBASE}/${PN}-$(ever range 1-2)"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( INTRODUCTION )
 

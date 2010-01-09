@@ -40,8 +40,8 @@ BUGS_TO="pioto@exherbo.org ciaran.mccreesh@googlemail.com"
 
 ### DEPENDENCIES and MYOPTIONS
 DEPENDENCIES="
-    build+run:
-        nls? ( sys-devel/gettext )"
+    build:
+        sys-devel/gettext"
 # ctags dependency allows help tags to be rebuilt properly, along
 # with detection of exuberant-ctags by configure.
 DEPENDENCIES+="
@@ -52,8 +52,8 @@ DEPENDENCIES+="
         dev-util/ctags
         sys-libs/ncurses[>=5.2-r2]"
 
-#MYOPTIONS="nls acl"
-MYOPTIONS="nls"
+#MYOPTIONS="acl"
+MYOPTIONS=""
 
 if [[ ${PN} != vim-runtime ]]; then
     MYOPTIONS+=" gpm perl python ruby
@@ -267,7 +267,7 @@ vim_src_configure() {
         myconf+=" --disable-nls --disable-multibyte --disable-acl"
     else
        #myconf+=" $(option_enable nls) $(option_enable acl)"
-        myconf+=" $(option_enable nls) --disable-acl"
+        myconf+=" --enable-nls --disable-acl"
     fi
 
     # Note: If USE=gpm, then ncurses will still be required. See bug #93970

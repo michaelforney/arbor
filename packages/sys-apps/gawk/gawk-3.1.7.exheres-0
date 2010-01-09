@@ -9,17 +9,20 @@ SUMMARY="GNU awk implementation"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+"
 
-# install binaries outside /usr
+# Install binaries outside /usr
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
     # Internal copy of libsigsegv fails its tests
     --disable-libsigsegv
+    --enable-nls
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FUTURES LIMITATIONS POSIX.STD )
 

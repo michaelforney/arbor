@@ -8,12 +8,16 @@ DOWNLOADS="http://www.tazenda.demon.co.uk/phil/${PN}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="ipv6 nls"
+MYOPTIONS="ipv6"
 
-DEPENDENCIES="build:
-    nls? ( sys-devel/gettext )"
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/net-tools-syntax.patch" )
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" )
 
 src_prepare() {
     default
@@ -27,12 +31,8 @@ src_prepare() {
 src_configure() {
     sedit() { sed -i -e "${@}" || die "Sed ${@} failed" ; }
     # We provide a static config and sed some options instead.
-    option nls && sedit 's:I18N 0:I18N 1:' config.h
     option ipv6 && sedit 's:HAVE_AFINET6 0:HAVE_AFINET6 1:' config.h
     # The file config.h needs to be more recent than the Makefile
     touch config.h
 }
-
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" )
 

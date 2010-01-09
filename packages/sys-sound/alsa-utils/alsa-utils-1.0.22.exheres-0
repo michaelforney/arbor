@@ -8,17 +8,21 @@ DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         sys-libs/ncurses
         sys-sound/alsa-lib
     run:
         sys-apps/dialog [[ note = [ Used by alsaconf ] ]]"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-xmlto )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-xmlto
+    --enable-nls
+)
 
 src_install() {
     default

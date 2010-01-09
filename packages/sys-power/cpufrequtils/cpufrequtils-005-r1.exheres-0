@@ -12,22 +12,23 @@ DOWNLOADS="mirror://kernel/linux/utils/kernel/cpufreq/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug nls"
+MYOPTIONS="debug"
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         sys-fs/sysfsutils"
 
 src_compile() {
     emake V=true CC="${CC}" LD="${CC}" AR="${AR}" \
         DEBUG=$(option debug && echo true || echo false) \
-        NLS=$(option nls && echo true || echo false) \
+        NLS=true \
         STRIP=echo RANLIB="${RANLIB}"
 }
 
 src_install() {
-    emake DESTDIR="${IMAGE}" mandir=/usr/share/man libdir=/usr/$(get_libdir) \
-        NLS=$(option nls && echo true || echo false) install
+    emake DESTDIR="${IMAGE}" mandir=/usr/share/man libdir=/usr/$(get_libdir) NLS=true install
     newinitd "${FILES}"/${PN}-init.d ${PN}
     newconfd "${FILES}"/${PN}-conf.d ${PN}
 }

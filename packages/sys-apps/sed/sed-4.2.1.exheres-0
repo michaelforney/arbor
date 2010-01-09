@@ -1,5 +1,5 @@
 # Copyright 2007 Bryan Østergaard
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu
@@ -9,17 +9,17 @@ SUMMARY="GNU sed stream editor"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
+    --enable-nls
     --without-included-gettext
 )
-
 DEFAULT_SRC_PREPARE_PATCHES=( ${FILES}/${PN}-lc-all.patch )
+

@@ -1,7 +1,7 @@
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="spell checker, stemmer and morphological analyzer"
+SUMMARY="Spell checker, stemmer and morphological analyzer"
 DESCRIPTION="
 Hunspell is a spell checker and morphological analyzer library and program
 designed for languages with rich morphology and complex word compounding or
@@ -16,7 +16,7 @@ UPSTREAM_RELEASE_NOTES="http://sourceforge.net/project/shownotes.php?group_id=14
 LICENCES="|| ( MPL-1.1 GPL-2 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ncurses nls"
+MYOPTIONS="ncurses"
 
 DEPENDENCIES="
     build:
@@ -25,9 +25,11 @@ DEPENDENCIES="
         ncurses? ( sys-libs/ncurses )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-readline )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
+    --with-readline
+)
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'ncurses ui' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_install() {
     default

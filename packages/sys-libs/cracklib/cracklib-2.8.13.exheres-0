@@ -8,14 +8,18 @@ DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls python"
+MYOPTIONS="python"
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         python? ( dev-lang/python:= )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-default-dict=/var/cache/cracklib/cracklib_dict )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
+    --with-default-dict=/var/cache/cracklib/cracklib_dict
+)
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 
 src_install() {
