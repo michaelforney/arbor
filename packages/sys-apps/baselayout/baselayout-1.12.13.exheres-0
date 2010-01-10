@@ -74,8 +74,10 @@ src_prepare() {
         -i bin/rc-status
 
     # Switch default editor to vim
+    # /etc/conf.d/xdm now called /etc/conf.d/displaymanager
     edo sed -e '/nano/s:^:#:' \
         -e '/vim/s:^#::' \
+        -e '/# DISPLAYMANAGER has moved to/s:xdm:displaymanager:' \
         -i etc/rc.conf
 
     # Make EDITOR default to vim
