@@ -10,7 +10,7 @@ DOWNLOADS="mirror://debian/pool/main/${PN:0:1}/${PN}/${PN}_${MY_PV}.orig.tar.gz"
 #    http://tidy.cvs.sourceforge.net/tidy/tidy/src/version.h?view=log
 # We use the debian source tarball instead.
 
-LICENCES=""
+LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
@@ -27,21 +27,20 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --includedir=/usr/include/${PN} )
 src_prepare() {
     default
 
-    sed -e 's:../bin/tidy:../console/tidy:' \
-        -i test/testone.sh || die 'Sed fixing testone.sh failed.'
+    edo sed -e 's:../bin/tidy:../console/tidy:' -i test/testone.sh
 }
 
 src_test() {
-    cd test
-    ./testall.sh || die 'Test failures encountered'
+    edo cd test
+    edo ./testall.sh
 }
 
 src_install() {
     default
 
     # To update the manpage, thanks to debian:
-    ./console/tidy -xml-help > htmldoc/tidy-help.xml || die "./console/tidy"
-    /usr/bin/xsltproc -o tidy.1 htmldoc/tidy1.xsl htmldoc/tidy-help.xml || die "xsltproc"
+    edo ./console/tidy -xml-help > htmldoc/tidy-help.xml
+    edo /usr/bin/xsltproc -o tidy.1 htmldoc/tidy1.xsl htmldoc/tidy-help.xml
     doman ${PN}.1
 }
 
