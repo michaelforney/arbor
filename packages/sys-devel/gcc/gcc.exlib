@@ -224,13 +224,11 @@ src_install() {
     done
 
     # locales
-    if option nls; then
-        for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
-            bn=$(basename "${x}" .mo)
-            mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
-            alternatives+=( /${x} ${bn}-${SLOT}.mo )
-        done
-    fi
+    for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
+        bn=$(basename "${x}" .mo)
+        mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
+        alternatives+=( /${x} ${bn}-${SLOT}.mo )
+    done
 
     # java
     if ever at_least 4.3 && option java; then
