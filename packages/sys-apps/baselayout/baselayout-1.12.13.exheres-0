@@ -56,34 +56,33 @@ pkg_pretend() {
 src_prepare() {
     libdir=$(get_libdir)
     # Use correct path to filefuncs.so on multilib systems
-    sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:g" \
+    edo sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:g" \
         -i "${WORK}"/src/awk/cachedepends.awk \
         -i "${WORK}"/sbin/functions.sh \
         -i "${WORK}"/init.d/halt.sh \
         -i "${WORK}"/lib/rcscripts/net/udhcpc.sh \
         -i "${WORK}"/sbin/functions.sh \
-        -i "${WORK}"/sbin/rc \
-        || die 'libdir sed failed'
+        -i "${WORK}"/sbin/rc
 
     # Use correct paths for wpa_cli, wpa_supplicant
-    sed -e "s:/sbin/wpa_supplicant:/usr/sbin/wpa_supplicant:" \
+    edo sed -e "s:/sbin/wpa_supplicant:/usr/sbin/wpa_supplicant:" \
         -e "s:/bin/wpa_cli:/usr/bin/wpa_cli:" \
-        -i lib/rcscripts/net/wpa_supplicant.sh || die "wpa_supplicant sed failed"
+        -i lib/rcscripts/net/wpa_supplicant.sh
 
-    sed -e 's/dependancies/dependencies/g' \
+    edo sed -e 's/dependancies/dependencies/g' \
         -i lib/rcscripts/net/*.sh \
-        -i bin/rc-status \
-        || die "Dependancies, Gentoo can't spell it. :-)"
+        -i bin/rc-status
 
-    sed -e '/nano/s:^:#:' \
+    # Switch default editor to vim
+    edo sed -e '/nano/s:^:#:' \
         -e '/vim/s:^#::' \
-        -i etc/rc.conf || die "Couldn't switch default editor to vim"
+        -i etc/rc.conf
 
-    sed -e 's:/bin/nano:/usr/bin/vim:' \
-        -i etc/profile || die 'Failed to make EDITOR default to vim'
+    # Make EDITOR default to vim
+    edo sed -e 's:/bin/nano:/usr/bin/vim:' -i etc/profile
 
-    sed -e '/LESSOPEN/d' -i etc/env.d/00basic ||
-        die "Couldn't remove lesspipe references"
+    # Remove lesspipe references
+    edo sed -e '/LESSOPEN/d' -i etc/env.d/00basic
 
     default
 }
@@ -91,7 +90,7 @@ src_prepare() {
 src_compile() {
     append-ldflags -static
 
-    cd "${WORK}/src" || die "Could not enter src/"
+    edo cd "${WORK}/src"
     emake \
         CC="${CC}" \
         LD="${CC} ${LDFLAGS}" \
@@ -113,7 +112,7 @@ src_install() {
 
     dodir /etc/init.d
     # doinitd doesnt respect symlinks
-    cp -P "${WORK}"/init.d/* "${IMAGE}"/etc/init.d/ || die "doinitd"
+    edo cp -P "${WORK}"/init.d/* "${IMAGE}"/etc/init.d/
 
     insinto /usr/share/baselayout
     doins "${WORK}"/rc-lists/*
@@ -130,7 +129,7 @@ src_install() {
 
     insinto ${rcscripts_dir}/net
     doins "${WORK}"/lib/rcscripts/net/*
-    chown -R root:0 "${IMAGE}"${rcscripts_dir}
+    edo chown -R root:0 "${IMAGE}"${rcscripts_dir}
 
     doman "${WORK}"/man/*.*
     dodoc "${WORK}"/ChangeLog
@@ -141,11 +140,11 @@ src_install() {
     dosym ../../sbin/runscript.sh /etc/init.d/runscript.sh
     dosym ../../sbin/functions.sh /etc/init.d/functions.sh
 
-    cd "${WORK}/src"
+    edo cd "${WORK}/src"
     emake DESTDIR="${IMAGE}" LIBDIR="${libdir}" install
 
-    rm -rf "${IMAGE}"/dev/pts || die "rm /dev/pts failed"
-    rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4 || die "rm ${IMAGE}/etc/modules.autoload.d/kernel-2.4 failed"
+    edo rm -rf "${IMAGE}"/dev/pts
+    edo rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4
 }
 
 pkg_preinst() {
@@ -153,15 +152,15 @@ pkg_preinst() {
     # of CONTENTS in 1.12.12 and below (before sys-apps/skeleton-filesystem-layout)
     local x target
     for x in /boot /dev/shm /var/lock; do
-        touch "${ROOT}"${x}/.keep_do_not_break_me || die "Could not touch ${x}/.keep_do_not_break_me"
+        edo touch "${ROOT}"${x}/.keep_do_not_break_me
     done
 
     if [[ ${SYMLINK_LIB} == yes ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -L ${ROOT}${x} ]]; then
                 target=$(readlink "${ROOT}${x}") || die "rewriting ${ROOT}${x} failed"
-                rm "${ROOT}${x}" || die "rm ${ROOT}${x} failed"
-                ln -s "${target}" "${ROOT}${x}" || die "ln -s ${target} ${ROOT}${x} failed"
+                edo rm "${ROOT}${x}"
+                edo ln -s "${target}" "${ROOT}${x}"
             fi
         done
     fi
@@ -172,28 +171,27 @@ pkg_postinst() {
     local cruft=( "${ROOT}"/etc/issue.logo )
     for file in ${cruft[@]}; do
         if test -f "${file}" ; then
-            rm "${file}" || eerror "removing ${file} failed"
+            nonfatal edo rm "${file}" || eerror "removing ${file} failed"
         fi
     done
 
     if [[ -z $(ls "${ROOT}"/etc/runlevels 2>/dev/null) ]]; then
         for x in "${ROOT}"/usr/share/baselayout/*; do
-            mkdir -p "${ROOT}"/etc/runlevels/${x##*/} || die "mkdir ${x##*/} failed"
+            edo mkdir -p "${ROOT}"/etc/runlevels/${x##*/}
             for y in $(<"${x}"); do
                 if [[ ! -e ${ROOT}/etc/init.d/${y} ]]; then
                     die "/etc/init.d/${y} not found"
                 else
-                    echo ln -sfn ../../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/}
-                    ln -sfn ../../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/} || \
-                        die "Linking ${y} into runlevel ${x##*/} failed"
+                    edo ln -sfn ../../init.d/${y} "${ROOT}"/etc/runlevels/${x##*/}
                 fi
             done
         done
     fi
 
     if [[ ${ROOT} == / ]]; then
-        /sbin/depscan.sh --update &>/dev/null
+        edo /sbin/depscan.sh --update &>/dev/null
     else
-        rm -f "${ROOT}"/etc/modules.conf
+        edo rm -f "${ROOT}"/etc/modules.conf
     fi
 }
+
