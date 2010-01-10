@@ -1,4 +1,4 @@
-# Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
@@ -10,22 +10,22 @@ LICENCES="LGPL-2.1 [[ description = [ Applies to the library ] ]]
       GPL-2 [[ description = [ Applies to the manual & tools ] ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
     build+run:
-      dev-libs/libgpg-error[>=1.4]
+        dev-libs/libgpg-error[>=1.4]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
     # Alpha code, needs kernel patches
     --without-capabilities
     # Suggested by upstream, also see Gentoo #201917
     --disable-padlock-support
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
 
 src_install() {
     default

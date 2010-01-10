@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'graphviz-2.18.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -12,13 +12,13 @@ DOWNLOADS="${HOMEPAGE}/pub/${PN}/ARCHIVE/${PNV}.tar.gz"
 LICENCES="CPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="jpeg nls png" # perl python ruby"
+MYOPTIONS="jpeg png" # perl python ruby"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config[>=0.20]
         sys-devel/flex
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
     build+run:
         dev-libs/expat[>=2.0.0]
         dev-libs/glib:2[>=2.11]
@@ -53,6 +53,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --htmldir=/usr/share/doc/${PNVR}/html
     --pdfdir=/usr/share/doc/${PNVR}/pdf
     --enable-ltdl
+    --enable-nls
     --with-fontconfig
     --with-freetype2
     --with-libgd
@@ -82,10 +83,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 )
 
 src_prepare() {
-    if option !nls; then
-        sed -e '/^AM_ICONV/d' -i configure.ac || die "Couldn't disable nls."
-    fi
-
     rm -rf libltdl || die "Failed to remove internal libtool."
     sed -e '/libltdl/d' -i configure.ac || die "Failed to remove internal libtool."
 

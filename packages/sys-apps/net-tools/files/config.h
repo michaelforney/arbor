@@ -19,7 +19,7 @@
  * internationalization on your system.
  * 
  */
-#define I18N 0
+#define I18N 1
 
 /* 
  * 

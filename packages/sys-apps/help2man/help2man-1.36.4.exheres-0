@@ -8,22 +8,16 @@ SUMMARY="Tool for automatically generating manual pages from program output"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="nls"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        nls? (
-            dev-perl/Locale-gettext
-            sys-devel/gettext
-         )"
+        dev-perl/Locale-gettext
+        sys-devel/gettext
+"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --enable-nls
+)
 
-src_install() {
-    default
-
-    if ! option nls; then
-        rmdir "${IMAGE}"/usr/$(get_libdir) || die "rmdir /usr/$(get_libdir) failed"
-    fi
-}

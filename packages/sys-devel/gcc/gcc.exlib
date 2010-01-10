@@ -1,5 +1,5 @@
 # Copyright 2007 Bryan Østergaard
-# Copyright 2008-2009 Ingmar Vanhassel
+# Copyright 2008-2010 Ingmar Vanhassel
 # Copyright 2008-2009 Bo Ørsted Andresen
 # Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
@@ -12,7 +12,7 @@ DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="$(ever range 1-2)"
 
-MYOPTIONS="ada doc fortran nls propolice
+MYOPTIONS="ada doc fortran propolice
     objc   [[ description = [ Build support for the Objective C code language ] ]]
     obj-c++ [[ description = [ Build support for the Objective C++ language ] ]]
 "
@@ -26,7 +26,9 @@ RESTRICT="test"
 
 DEPENDENCIES="
     build:
-        sys-devel/make"
+        sys-devel/gettext
+        sys-devel/make
+"
 
 if ever at_least 4.3; then
     MYOPTIONS+=" java"
@@ -111,13 +113,13 @@ src_configure() {
         --hates=docdir \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
+        --enable-nls \
         --program-suffix=-${SLOT} \
        "$(ever at_least 4.3.0 && echo --with-pkgversion="Exherbo ${PNVR}")" \
         $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
         $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
         $(ever at_least 4.4.0 && echo --with-system-zlib) \
         $(ever at_least 4.5.0 && echo --with-libelf) \
-        $(option_enable nls) \
         $(option_enable propolice libssp)
 }
 

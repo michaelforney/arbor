@@ -23,19 +23,22 @@ option_expand_dependencies() {
 # there's plenty of these to add
 MY_LINGUAS="de en nl ru"
 
-MYOPTIONS="doc examples nls
+MYOPTIONS="doc examples
 linguas: ${MY_LINGUAS}"
 
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
         sys-libs/ncurses
-        nls? ( sys-devel/gettext )
     post:
         $(option_expand_dependencies linguas ${MY_LINGUAS})
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-docdir=/usr/share/doc/${PNVR} )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-docdir=/usr/share/doc/${PNVR}
+    --enable-nls
+)
 
 src_install() {
     default

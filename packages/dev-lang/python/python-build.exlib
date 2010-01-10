@@ -1,6 +1,6 @@
 # Copyright 2007-2007 Bryan Østergaard
 # Copyright 2008 Ali Polatel
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'python-2.5.2-r4.ebuild' from Gentoo, which is:
 #  Copyright 1999-2008 Gentoo Foundation
@@ -47,7 +47,7 @@ DEPENDENCIES="
 WORK="${WORKBASE}/${MY_PNV}"
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
-    --enable-unicode=ucs4
+    $(ever at_least 3 || echo --enable-unicode=ucs4)
     --with-system-ffi
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
@@ -100,19 +100,8 @@ python-build_src_test() {
 python-build_src_install() {
     default
 
-    edo rm "${IMAGE}"/usr/bin/smtpd.py
+    ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
     edo mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a
-
-    # Byte-compile using the executable we just built
-    export PYTHON=${IMAGE}/usr/bin/python${SLOT}
-    # Let aforementioned binary find its libpython*.so
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}${LD_LIBRARY_PATH:+:}${IMAGE}/usr/$(get_libdir)/"
-
-    find "${IMAGE}" -type f -name '*.py' -exec touch {} +
-    # Some files like /usr/lib64/python2.6/test/bad{_coding,syntax}* cause errors when
-    # bytecompiling, -x regex ignores those
-    edo "${PYTHON}"    -mcompileall -f -q -d $(python_get_libdir) -x "$(python_get_libdir)/test/bad.*.py" "${IMAGE}$(python_get_libdir)"
-    edo "${PYTHON}" -O -mcompileall -f -q -d $(python_get_libdir) -x "$(python_get_libdir)/test/bad.*.py" "${IMAGE}$(python_get_libdir)"
 
     # NOTE regarding alternatives:
     # python[=2*] & py3k don't collide, except for /usr/bin/2to3, which would be easy to fix.

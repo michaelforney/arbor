@@ -11,14 +11,18 @@ LICENCES="GPL-3             [[ description = [ Command line tool, self tests, ex
     || ( LGPL-3 LGPL-2.1 )  [[ description = [ C, Java libraries ] ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc nls"
+MYOPTIONS="doc"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+"
 
 # FIXME: Add java, mono and emacs support.
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-csharp
     --disable-java
+    --enable-nls
     --with-packager="Exherbo"
     --with-packager-version="${PNVR}"
     --with-packager-bug-reports="http://bugs.exherbo.org/"

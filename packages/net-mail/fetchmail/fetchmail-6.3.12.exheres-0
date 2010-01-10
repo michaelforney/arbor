@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'fetchmail-6.3.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -10,11 +10,11 @@ DOWNLOADS="mirror://berlios/${PN}/${PNV}.tar.bz2"
 LICENCES="GPL-2 public-domain"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ipv6 nls ssl tk"
+MYOPTIONS="ipv6 ssl tk"
 
 DEPENDENCIES="
     build:
-        nls? ( sys-devel/gettext )
+        sys-devel/gettext
     build+run:
         tk? ( dev-lang/python:=[tk] )"
 
@@ -24,12 +24,13 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-        --enable-RPA
-        --enable-NTLM
-        --enable-SDPS
-        --without-gssapi --without-kerberos5 --without-kerberos --without-hesiod
+    --enable-nls
+    --enable-RPA
+    --enable-NTLM
+    --enable-SDPS
+    --without-gssapi --without-kerberos5 --without-kerberos --without-hesiod
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nls ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ssl )
 # Don't run t.validate-xhtml, always fails to load DTDs here
 DEFAULT_SRC_TEST_PARAMS=( TESTS=t.smoke )
