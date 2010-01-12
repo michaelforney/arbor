@@ -133,6 +133,8 @@ scm_check_timestamp() {
 scm_perform_fetch() {
     illegal_in_global_scope
 
+    sydboxcheck >/dev/null 2>&1 && sydboxcmd sandunbox/net
+
     local dir=$(scm_get_var CHECKOUT_TO)
 
     local whynot status
@@ -196,6 +198,8 @@ scm_perform_fetch() {
     else
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
     fi
+
+    sydboxcheck >/dev/null 2>&1 && sydboxcmd sandbox/net
 }
 
 scm_fetch_one() {
