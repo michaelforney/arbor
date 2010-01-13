@@ -14,12 +14,14 @@ PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="ipv6 tcpd vim-syntax"
 
 DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    test:
+        dev-lang/python:*
     build+run:
         dev-libs/glib
         sys-apps/eventlog
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
-    build:
-        dev-util/pkg-config
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )
 "
@@ -37,15 +39,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     contrib/syslog-ng.conf.doc
     doc/reference/syslog-ng.txt
 )
-
-src_test() {
-    if ! has_version dev-lang/python; then
-        ewarn 'dev-lang/python is required to run tests'
-        return 0
-    fi
-
-    default
-}
 
 src_install() {
     default
