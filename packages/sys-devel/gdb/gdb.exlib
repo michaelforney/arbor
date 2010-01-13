@@ -11,14 +11,13 @@ LICENCES="GPL-2 LGPL-2"
 SLOT="0"
 MYOPTIONS="python"
 
-# Don't want to harddepend on dejagnu (-> tcl, expect)
-RESTRICT=test
-#   build,test:
-#       dev-util/dejagnu
+RESTRICT="test"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
+    test:
+        dev-util/dejagnu
     build+run:
         dev-libs/expat
         sys-libs/ncurses[>=5.2]
@@ -37,4 +36,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( gdb sim )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CONTRIBUTE )
+
+src_test() {
+    # make --dry-run check fails
+    emake check
+}
 
