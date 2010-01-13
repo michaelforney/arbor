@@ -29,8 +29,10 @@ UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
 
 DEPENDENCIES=""
 
-# The tests would need userpriv, some loving and we *really* want them in src_test_expensive...
-RESTRICT="test"
+# Lots of test failures, tests could usesome loving.
+# We *really* want them in src_test_expensive().
+# The tests need to run as root.
+RESTRICT="test userpriv"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
