@@ -1,0 +1,15 @@
+Source: timothy@redaelli.eu
+Upstream: no
+Reason: nfs test want an nfs-mounted filesystem that is no good for us
+
+--- lsof_4.82_src/tests/Makefile.orig	2010-01-14 10:47:09.959781986 +0000
++++ lsof_4.82_src/tests/Makefile	2010-01-14 11:05:03.395538680 +0000
+@@ -19,7 +19,7 @@
+ 
+ BASTST=	LTbasic
+ STDTST=	LTnlink LTsock LTszoff LTunix
+-OPTTST=	LTbigf LTdnlc LTlock LTnfs 
++OPTTST=	LTbigf LTdnlc LTlock
+ 
+ all:	${CKTSTDB} ${BASTST} ${STDTST} FRC
+ 	@./${CKTSTDB}; xv=$$?; \
