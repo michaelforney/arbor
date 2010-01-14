@@ -20,7 +20,10 @@ DEPENDENCIES="
       dev-libs/gmp[>=4.1]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-DESTDIR.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PNV}-DESTDIR.patch"
+    "${FILES}/${PNV}-libtool.patch"
+)
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     # Exherbo has no proper emacs support yet
     --disable-elisp
