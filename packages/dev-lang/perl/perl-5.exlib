@@ -1,6 +1,6 @@
 # Copyright 2007, 2008 Bryan Østergaard
 # Copyright 2008 Anders Ossowicki
-# Copyright 2008, 2009 Ingmar Vanhassel
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel
 # Copyright 2008, 2009 Mike Kelly
 # Copyright 2010 Ali Polatel
 # Distributed under the terms of the GNU General Public License v2
@@ -151,11 +151,6 @@ perl-5_src_install() {
     done
 
     keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}-linux
-
-    insinto /etc/env.d/${PN}
-    hereins ${PV} <<EOF
-LDPATH="${perllibdir}"
-EOF
 
     # Save a list of what executables & man-pages we're installing
     cd "${IMAGE}"
