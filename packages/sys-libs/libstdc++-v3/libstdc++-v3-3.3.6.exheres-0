@@ -1,4 +1,4 @@
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Compatibility package for running binaries linked against a pre gcc 3.4 libstdc++"
@@ -10,10 +10,12 @@ SLOT="5"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-# Needs expect, a few test failures
 RESTRICT="test"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    test-expensive:
+        dev-tcl/expect
+"
 
 WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}/gcc-${PV}"
@@ -28,6 +30,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 src_unpack() {
     default
     mkdir "${WORK}" || die "mkdir ${WORK} failed"
+}
+
+src_test_expensive() {
+    emake check
 }
 
 src_install() {
