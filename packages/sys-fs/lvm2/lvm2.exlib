@@ -1,5 +1,5 @@
 # Copyright 2008 Kim Højgaard-Hansen
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -38,13 +38,13 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
     --libdir=/$(get_libdir)
     --enable-cmdlib
-    --disable-nls
+    --enable-pkgconfig
     --enable-readline
     --enable-static_link
-    --disable-selinux
-    --enable-pkgconfig
-    --with-udevdir=/$(get_libdir)/udev/rules.d
     --enable-udev_rules
+    --disable-nls
+    --disable-selinux
+    --with-udevdir=/$(get_libdir)/udev/rules.d
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
@@ -63,4 +63,3 @@ lvm2_src_install() {
     doins "${FILES}/lvm-start.sh"
     doins "${FILES}/lvm-stop.sh"
 }
-
