@@ -1,0 +1,54 @@
+Source: written by Pierre Lejeune <superheron@gmail.com>
+Upstream: no
+Reason: add several missing variables in Makefile
+--- gpm-1.20.6.orig/src/Makefile.in	2009-02-09 10:58:53.000000000 +0100
++++ gpm-1.20.6/src/Makefile.in	2009-12-03 21:57:21.916671951 +0100
+@@ -62,7 +62,7 @@
+ 	$(CC) -Iheaders @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
+ 
+ prog/%:	prog/%.o
+-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
++	$(CC) @CFLAGS@ @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) @SHARED_LIBS@
+ 
+ %.o: %.c
+ 	$(CC) @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
+@@ -71,7 +71,7 @@
+ 	$(CC) @CPPFLAGS@ $(CPPFLAGS) @PICFLAGS@ @CFLAGS@ $(CFLAGS) -c -o $@ $<
+ 
+ %:	%.o
+-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
++	$(CC) @CFLAGS @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
+ 
+ # old, unused, but good rule [dependings]
+ #%.d: $(srcdir)/%.c
+@@ -82,7 +82,7 @@
+ all:	gpm lib/libgpm.so.@abi_lev@ lib/libgpm.a $(PROG)
+ 
+ gpm:	$(GOBJ)
+-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
++	$(CC) @CFLAGS@ @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) @SHARED_LIBS@ -lm
+ 
+ # construct dependings of sourcefiles and link sourcefiles
+ $(DEPFILE) dep: prog/gpm-root.c
+@@ -149,10 +149,10 @@
+ # gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
+ prog/gpm-root: prog/gpm-root.c lib/libgpm.so.@abi_lev@
+ 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
+-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so.@abi_lev@
++	$(CC) @CFLAGS@ @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) @SHARED_LIBS@ lib/libgpm.so.@abi_lev@
+ 
+ prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o
+-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
++	$(CC) @CFLAGS@ @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) @SHARED_LIBS@ -lm
+ 
+ $(PROG):	lib/libgpm.so.@abi_lev@
+ 
+@@ -162,7 +162,7 @@
+ 	$(RANLIB) lib/libgpm.a
+ 
+ lib/libgpm.so.@abi_full@:	$(PICS)
+-	$(CC) @SOLDFLAGS@libgpm.so.@abi_lev@ \
++	$(CC) @SOLDFLAGS@libgpm.so.@abi_lev@ @CFLAGS@ \
+ 	@LDFLAGS@ $(LDFLAGS) -o lib/libgpm.so.@abi_full@ $^ @LIBS@ @SHARED_LIBS@ $(LIBS)	
+ lib/libgpm.so.@abi_lev@:	lib/libgpm.so.@abi_full@
+ 	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so.@abi_lev@
