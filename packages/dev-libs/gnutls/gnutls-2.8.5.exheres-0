@@ -20,7 +20,10 @@ DEPENDENCIES="
 "
 
 AT_M4DIR=( "${WORK}/lib/m4/" "${WORK}/lib/gl/m4/" "${WORK}/libextra/m4/" "${WORK}/libextra/gl/m4/" "${WORK}/gl/m4/"  )
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-Fix-disable-valgrind-tests.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/0001-Fix-disable-valgrind-tests.patch"
+    "${FILES}/${PN}-sydbox.patch"
+)
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-guile
     --disable-valgrind-tests
