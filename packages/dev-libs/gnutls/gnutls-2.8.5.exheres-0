@@ -1,7 +1,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require gnu
+require gnu autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
 
@@ -19,10 +19,17 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3]
 "
 
+AT_M4DIR=( "${WORK}/lib/m4/" "${WORK}/lib/gl/m4/" "${WORK}/libextra/m4/" "${WORK}/libextra/gl/m4/" "${WORK}/gl/m4/"  )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-Fix-disable-valgrind-tests.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-guile
     --disable-valgrind-tests
     --with-zlib
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
+
+_src_prepare() {
+    default
+    emake -j1 autoreconf
+}
 
