@@ -1,5 +1,5 @@
 # Copyright 2008 Bryan Østergaard
-# Copyright 2008, 2009 Ingmar Vanhassel
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PNV=${PV%_p*}
@@ -7,7 +7,7 @@ PATCH_LEVEL=${PNV##*_p}
 
 require multilib alternatives
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_prepare src_test_expensive src_install
 
 SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
@@ -18,11 +18,15 @@ DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PNV}.tar.gz
 
 LICENCES="as-is"
 SLOT="$(ever range 1-2)"
-MYOPTIONS="doc"
+MYOPTIONS="doc
+    tcl [[ description = [ Build tcl bindings. Should be enabled if you want to run expensive tests ] ]]"
 
 DEPENDENCIES="
+    test-expensive:
+        dev-lang/tcl
     build+run:
         !sys-libs/db:0 [[ description = [ Uninstall sys-libs/db:0 before installing slotted versions of Berkely DB ] ]]
+        tcl? ( dev-lang/tcl )
 "
 
 ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PNV}/dist"
@@ -34,12 +38,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-compat185
     --enable-cxx
     --disable-java
-    --disable-tcl
-    --disable-test
 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( tcl 'tcl test' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcl tcl /usr/$(get_libdir)" )
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
-src_prepare() {
+db_src_prepare() {
     cd "${WORKBASE}/${PN}-${MY_PNV}/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/"
 
     local patches=()
@@ -58,7 +62,21 @@ src_prepare() {
         -i ./Makefile.in || die "Program-transform-suffix sed"
 }
 
-src_install() {
+db_src_test_expensive() {
+    if option !tcl ; then
+        ewarn "${CATEGORY}/${PN} needs the 'tcl' option enabled to run expensive tests"
+        return
+    fi
+
+cat <<EOF > testrunner.tcl
+source ../test/test.tcl
+run_std
+EOF
+    tclsh testrunner.tcl
+    grep -qs '^FAIL' ALL.OUT && die "Some tests failed, see ${WORK}/ALL.OUT"
+}
+
+db_src_install() {
     default
 
     if option !doc ; then
