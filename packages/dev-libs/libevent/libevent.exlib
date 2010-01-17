@@ -21,10 +21,9 @@ WORK="${WORKBASE}/${MY_PNV}"
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-1.4.3-test.patch" )
 
 libevent_src_test() {
-    pushd test >/dev/null
-    einfo "Running tests"
-    ./test.sh > "${TEMP}"/tests
+    pushd test
+    edo ./test.sh > "${TEMP}"/tests
     cat "${TEMP}"/tests
-    grep FAILED "${TEMP}"/tests &>/dev/null && die "1 or more tests failed"
-    popd >/dev/null
+    grep -q FAILED "${TEMP}"/tests && die "1 or more tests failed"
+    popd
 }

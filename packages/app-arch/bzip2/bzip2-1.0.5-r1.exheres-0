@@ -36,8 +36,14 @@ src_prepare() {
 }
 
 src_compile() {
-    emake -f Makefile-libbz2_so
-    emake
+    local myemake=(
+        CC="${CC}"
+        AR="${AR}"
+        RANLIB="${RANLIB}"
+    )
+
+    emake "${myemake[@]}" -f Makefile-libbz2_so
+    emake "${myemake[@]}"
 }
 
 

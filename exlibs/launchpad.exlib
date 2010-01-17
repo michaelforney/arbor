@@ -1,14 +1,24 @@
 # Copyright 2009 Ingmar Vanhassel
+# Copyright 2010 Jan Meier <jan@codejunky.org>
 # Distributed under the terms of the GNU General Public License v2
 
+myexparam suffix=tar.gz
 myexparam branch=$(ever range 1-2)
-myexparam suffix=gz
+myexparam pn=${MY_PN:-${PN}}
+myexparam project=$(exparam pn)
+myexparam pv=${MY_PV:-${PV}}
+myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
 
-HOMEPAGE="http://launchpad.net/${LAUNCHPAD_PROJECT:-${PN}}/"
-
-DOWNLOADS="${HOMEPAGE}$(exparam branch)/${PV}/+download/${PNV}.tar.$(exparam suffix)"
+HOMEPAGE="http://launchpad.net/$(exparam project)/"
+DOWNLOADS="${HOMEPAGE}$(exparam branch)/$(exparam pv)/+download/$(exparam pnv).$(exparam suffix)"
 
 # See RDF data @ ${HOMEPAGE}$(exparam branch)/${PV}/+rdf
-REMOTE_IDS="launchpad:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(exparam branch)/${PV}"
+REMOTE_IDS+=" launchpad:$(exparam project) "
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(exparam branch)/$(exparam pv)/"
+
+if has $(exparam suffix) tar.lzma tar.xz; then
+    DEPENDENCIES+="
+        build:
+            app-arch/xz"
+fi
 

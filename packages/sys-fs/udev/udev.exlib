@@ -25,6 +25,9 @@ pkg_postinst() {
         # Change the wait mode to wait/eldest so
         # sydbox doesn't wait for udevd to exit.
         sydboxcmd wait/eldest
+        # Allow network access for udevd
+        sydboxcmd net/whitelist/bind/unix-abstract:///org/kernel/udev/udevd
+        sydboxcmd net/whitelist/connect/unix:///dev/log
         /sbin/udevd --daemon
     fi
 }

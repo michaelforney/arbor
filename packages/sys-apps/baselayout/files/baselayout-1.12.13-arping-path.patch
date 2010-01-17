@@ -1,0 +1,27 @@
+Upstream: Gentoo uses /sbin/arping, Exherbo uses /usr/sbin/arping
+Source: timothy@redaelli.eu
+Summary: Use the correct path for arping
+
+--- baselayout-1.12.13/lib/rcscripts/net/arping.sh.orig	2010-01-11 10:42:32.043005530 +0000
++++ baselayout-1.12.13/lib/rcscripts/net/arping.sh	2010-01-11 10:43:25.250014864 +0000
+@@ -13,9 +13,9 @@
+ #
+ # Returns 0 if arping or arping2 is installed, otherwise 1
+ arping_check_installed() {
+-	[[ -x /sbin/arping || -x /usr/sbin/arping2 ]] && return 0
++	[[ -x /usr/sbin/arping || -x /usr/sbin/arping2 ]] && return 0
+ 	if ${1:-false}; then
+-		eerror "For arping support emerge net-misc/iputils or net-analyzer/arping"
++		eerror "For arping support install net-misc/iputils or net-analyzer/arping"
+ 	fi
+ 	return 1
+ }
+@@ -65,7 +65,7 @@
+ 	w="${!w}"
+ 	[[ -z ${w} ]] && w="${arping_wait:-3}"
+ 
+-	if [[ -x /sbin/arping ]] ; then
++	if [[ -x /usr/sbin/arping ]] ; then
+ 		foundmac=$(arping -c 2 -w "${w}" -D -f -I "${iface}" \
+ 			"${ip}" 2>/dev/null \
+ 			| sed -n 's/.*\[\([^]]*\)\].*/\U\1/p')

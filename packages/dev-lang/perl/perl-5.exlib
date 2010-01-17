@@ -1,7 +1,8 @@
 # Copyright 2007, 2008 Bryan Østergaard
 # Copyright 2008 Anders Ossowicki
-# Copyright 2008, 2009 Ingmar Vanhassel
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel
 # Copyright 2008, 2009 Mike Kelly
+# Copyright 2010 Ali Polatel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -20,7 +21,7 @@ REMOTE_IDS="cpan:${PN} freshmeat:${PN}"
 UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${PN}/pod/${PN}${PV//.}delta.pod"
 UPSTREAM_DOCUMENTATION=
 
-LICENCES="|| ( Artistic GPL GPL-2 GPL-3 )"
+LICENCES="|| ( Artistic GPL-1 GPL-2 GPL-3 )"
 SLOT="$(ever range 1-2)"
 MYOPTIONS="dbm
 ( berkdb gdbm ) [[ requires = dbm ]]
@@ -70,6 +71,7 @@ perl-5_src_configure() {
     cmd=(
         "${WORKBASE}/${PNV}/Configure"
         -des
+        -Dcc="${CC}"
         -Dcf_by='Exherbo'
         -Dprefix=/usr
         -Dvendorprefix=/usr
@@ -103,11 +105,17 @@ perl-5_src_test() {
     echo ln -s libperl.so{.1,}
     ln -s libperl.so{.1,}
 
+    # This is necessary for ext/IO/t/io_unix.t
+    sydboxcmd "net/whitelist/bind/unix://${WORK}/t/sock-*"
+    # This is necessary for Net/Ping/t/510_ping_udp.t
+    sydboxcmd "net/whitelist/connect/inet://127.0.0.1@7"
     if ever at_least 5.10.1 ; then
         TEST_JOBS="${EXJOBS:-1}" emake test_harness
     else
         emake test
     fi
+    sydboxcmd "net/unwhitelist/bind/unix://${WORK}/t/sock-*"
+    sydboxcmd "net/unwhitelist/connect/inet://127.0.0.1@7"
 }
 
 perl-5_src_install() {
@@ -144,11 +152,6 @@ perl-5_src_install() {
     done
 
     keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}-linux
-
-    insinto /etc/env.d/${PN}
-    hereins ${PV} <<EOF
-LDPATH="${perllibdir}"
-EOF
 
     # Save a list of what executables & man-pages we're installing
     cd "${IMAGE}"

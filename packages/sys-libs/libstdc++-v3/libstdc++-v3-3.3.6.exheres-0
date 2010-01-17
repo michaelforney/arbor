@@ -1,4 +1,4 @@
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -12,10 +12,12 @@ SLOT="5"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-# Needs expect, a few test failures
 RESTRICT="test"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    test-expensive:
+        dev-tcl/expect
+"
 
 WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}/gcc-${PV}"
@@ -55,6 +57,10 @@ src_compile() {
 
         default
     done
+}
+
+src_test_expensive() {
+    emake check
 }
 
 src_install() {

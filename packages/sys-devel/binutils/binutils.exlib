@@ -3,7 +3,7 @@
 
 require multilib gnu alternatives
 
-export_exlib_phases src_unpack src_prepare src_configure src_compile src_install
+export_exlib_phases src_unpack src_prepare src_configure src_compile src_test_expensive src_install
 
 SUMMARY="Collection of binary tools including ld and as"
 
@@ -11,11 +11,12 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="gold [[ description = [ Build gold, an experimental linker for ELF files. ] ]]"
 
-DEPENDENCIES=""
-
-# Tests require expect
-# Tests run, and fail if expect is installed
 RESTRICT="test"
+
+DEPENDENCIES="
+    test-expensive:
+        dev-tcl/expect
+"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/76_all_use-new-ld-dtags.patch"
@@ -96,6 +97,10 @@ binutils_src_compile() {
             emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold"
         fi
     done
+}
+
+binutils_src_test_expensive() {
+    emake -C "${WORKBASE}/builddir-gnu" check
 }
 
 binutils_src_install() {

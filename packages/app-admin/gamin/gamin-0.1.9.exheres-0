@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'gamin-0.1.9-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -15,11 +15,12 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug python"
 
 DEPENDENCIES="
-build:
-    dev-util/pkg-config
-build+run:
-    dev-libs/glib:2
-    python? ( dev-lang/python:= )"
+    build:
+        dev-util/pkg-config
+    build+run:
+        dev-libs/glib:2
+        python? ( dev-lang/python:= )
+"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PNV}-user-cflags.patch" )
 

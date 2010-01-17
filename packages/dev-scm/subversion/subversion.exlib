@@ -24,8 +24,6 @@ MYOPTIONS="berkdb perl python ruby
 "
 RESTRICT="test" # Expensive tests
 
-#   test:
-#       dev-lang/python:*[>=2.2] [[ description = [ Expensive tests ] ]]
 DEPENDENCIES="
     build:
         sys-devel/gettext
@@ -33,6 +31,8 @@ DEPENDENCIES="
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
+    test-expensive:
+        dev-lang/python:*[>=2.2]
     build+run:
         dev-db/sqlite[>=3.4.0]
         dev-libs/apr-util[>=0.9.7][berkdb?]
@@ -92,11 +92,7 @@ subversion_src_compile() {
 }
 
 subversion_src_test_expensive() {
-    if has_version 'dev-lang/python:*[>=2.2]' ; then
-        emake check
-    else
-        ewarn "Subversion needs dev-lang/python:*[>=2.2] to run its tests"
-    fi
+    emake check
 }
 
 subversion_src_install() {
@@ -121,3 +117,4 @@ subversion_src_install() {
 
     dobashcompletion tools/client-side/bash_completion
 }
+

@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require python
+
 SUMMARY="A proactive password sanity library"
 HOMEPAGE="http://sourceforge.net/projects/cracklib"
 DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.gz"
@@ -31,11 +33,13 @@ src_install() {
 
     dodir /var/cache/cracklib
     keepdir /var/cache/cracklib
+
+    option python && python_bytecompile
 }
 
 pkg_postinst() {
     cracklib-format "${ROOT}/usr/share/dict/cracklib-small" \
-        | cracklib-packer "${ROOT}/var/cache/${PN}/cracklib_dict" \
-        || die "Failed to create cracklib dictionary"
+        | cracklib-packer "${ROOT}/var/cache/${PN}/cracklib_dict" ||
+        die "Failed to create cracklib dictionary"
 }
 

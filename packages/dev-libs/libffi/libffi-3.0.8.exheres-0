@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require common-metadata
@@ -8,7 +8,10 @@ SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="debug"
 
-DEPENDENCIES="" # build: dev-util/dejagnu [[ note = [ Necessary for test suite ] ]]
+DEPENDENCIES="
+    test:
+        dev-util/dejagnu
+"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 

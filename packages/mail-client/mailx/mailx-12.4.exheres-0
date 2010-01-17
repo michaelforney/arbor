@@ -1,4 +1,5 @@
 # Copyright 2008 Wulf C. Krueger
+# Copyright 2010 Ali Polatel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'nail-11.25-r3.ebuild' from Gentoo, which is:
 #       Copyright 1999-2007 Gentoo Foundation
@@ -23,7 +24,7 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     "MAILRC=/etc/mailxrc"
     "MAILSPOOL=/var/spool/mail"
     "SENDMAIL=/usr/sbin/sendmail"
-    "UCBINSTALL=$(type -p install)"
+    "UCBINSTALL=$(type -P install)"
 )
 
 DEFAULT_SRC_INSTALL_PARAMS=( "${DEFAULT_SRC_COMPILE_PARAMS[@]}" )
@@ -32,8 +33,7 @@ src_prepare() {
     default
 
     # Do not strip the binary
-    sed -i -e 's:STRIP = strip:STRIP = /usr/bin/true:' Makefile \
-        || "sed to avoid stripping failed." 
+    edo sed -i -e "s:STRIP = strip:STRIP = $(type -P true):" Makefile
 }
 
 src_install() {

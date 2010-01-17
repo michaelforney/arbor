@@ -13,14 +13,18 @@ DOWNLOADS="
 
 LICENCES="lsof"
 SLOT="0"
-PLATFORMS="~amd64 ~ia64 ~x86"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
 
 WORK="${WORKBASE}/${MY_PNV}_src"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}.patch
+    "${FILES}"/${PNV}-exit-on-test-failure.patch
+    "${FILES}"/${PNV}-disable-nfs-test.patch
+)
 
 src_unpack() {
     unpack ${ARCHIVES}
@@ -35,7 +39,9 @@ DEFAULT_SRC_COMPILE_PARAMS=( DEBUG="" )
 
 src_test() {
     cd tests
+    sydboxcmd "net/whitelist/bind/unix://${WORK}/tests/config.*"
     emake -j1 test opt
+    sydboxcmd "net/unwhitelist/bind/unix://${WORK}/tests/config.*"
 }
 
 src_install() {
