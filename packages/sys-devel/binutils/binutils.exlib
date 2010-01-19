@@ -3,7 +3,7 @@
 
 require multilib gnu alternatives
 
-export_exlib_phases src_unpack src_prepare src_configure src_compile src_test_expensive src_install
+export_exlib_phases src_unpack src_prepare src_configure src_compile src_test src_install
 
 SUMMARY="Collection of binary tools including ld and as"
 
@@ -11,10 +11,8 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="gold [[ description = [ Build gold, an experimental linker for ELF files. ] ]]"
 
-RESTRICT="test"
-
 DEPENDENCIES="
-    test-expensive:
+    test:
         dev-tcl/expect
 "
 
@@ -99,8 +97,18 @@ binutils_src_compile() {
     done
 }
 
-binutils_src_test_expensive() {
-    emake -C "${WORKBASE}/builddir-gnu" check
+binutils_src_test() {
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gnu" check
+
+        if option gold ; then
+            emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold" check
+        fi
+    done
 }
 
 binutils_src_install() {
