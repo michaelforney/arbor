@@ -89,9 +89,9 @@ EOF
 pkg_postinst() {
     mkdir -p "${ROOT}usr/$(get_libdir)/locale" || eerror "failed to create /usr/$(get_libdir)/locale"
 
-    echo "${ROOT}usr/bin/localedef --prefix=${ROOT} -i en_GB -f UTF-8 en_GB.UTF-8"
-    I18NPATH="${ROOT}usr/share/i18n" "${ROOT}usr/bin/localedef" \
-        --prefix="${ROOT}" -i en_GB -f UTF-8 en_GB.UTF-8 || \
-            eerror "failed to generate locale data for en_GB.UTF-8"
+    for lang in en_US en_GB ; do
+        I18NPATH="${ROOT}usr/share/i18n" \
+            edo "${ROOT}usr/bin/localedef" --prefix="${ROOT}" -i ${lang} -f UTF-8 ${lang}.UTF-8
+    done
 }
 
