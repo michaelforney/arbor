@@ -104,8 +104,14 @@ src_compile() {
 }
 
 src_test() {
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/ssh-*/agent.*'
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
+
     option X509 && export SSH_X509TESTS="blob_auth"
     emake -j1 tests
+
+    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/ssh-*/agent.*'
+    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
 }
 
 src_install() {
