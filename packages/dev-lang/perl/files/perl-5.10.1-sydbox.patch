@@ -44,24 +44,3 @@ Reason: Fix sydbox access violations for perl tests
      print "not ";
  print "ok 16\n";
  die if( !defined( $listen));
---- perl-5.10.1/ext/IO/t/io_unix.t	2010-01-14 13:44:34.000000000 +0200
-+++ perl-5.10.1/ext/IO/t/io_unix.t	2010-01-14 14:39:14.614783514 +0200
-@@ -8,6 +8,7 @@
- }
- 
- use Config;
-+use Cwd;
- 
- BEGIN {
-     my $reason;
-@@ -36,7 +37,9 @@
-     }
- }
- 
--$PATH = "sock-$$";
-+my $dir;
-+$dir = getcwd;
-+$PATH = "$dir/sock-$$";
- 
- if ($^O eq 'os2') {	# Can't create sockets with relative path...
-   require Cwd;
