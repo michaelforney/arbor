@@ -1,4 +1,4 @@
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases src_prepare src_compile src_install
@@ -65,11 +65,11 @@ DEFAULT_SRC_INSTALL_PARAMS=( STRIP="" )
 openldap_src_prepare() {
     default
 
-    sed -e '/^#define LDAPI_SOCK/s/ldapi/openldap" LDAP_DIRSEP "slapd.sock/' -i ./include/ldap_defaults.h ||
-        die "Couldn't fix default SLAPI path"
+    edo sed -e '/^#define LDAPI_SOCK/s/ldapi/openldap" LDAP_DIRSEP "slapd.sock/' -i ./include/ldap_defaults.h
+    edo sed -re '/^(pidfile|argsfile)/s:run/:run/openldap/:' -i ./servers/slapd/slapd.conf
 
-    sed -re '/^(pidfile|argsfile)/s:run/:run/openldap/:' -i ./servers/slapd/slapd.conf ||
-        die "Couldn't fix default pidfile/argsfile"
+    # Shared objects should have a+rx,u+w permissions
+    edo sed -e '/LTINSTALL/s/-m 644/-m 755/' -i ./libraries/*/Makefile.in
 }
 
 openldap_src_compile() {
