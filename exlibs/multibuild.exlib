@@ -110,8 +110,6 @@ multibuild_enforce_locked_vars() {
     for var in ${!var}; do
         locked_var=MULTIBUILD_${class}_${target}_PROFILE_${var}
         merged=MULTIBUILD_${class}_${target}_MERGED_${var}
-        [[ ${!merged} == ${!locked_var} ]] ||
-            die "In ${class} target ${target}, someone attempted to set ${var}='${!merged}', but it is locked to ${var}='${!locked_var}'"
         export ${merged}="${!locked_var}"
     done
 }
