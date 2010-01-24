@@ -15,26 +15,25 @@ MYOPTIONS=""
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
-
-src_configure() {
-    AR+=" rc"
-
-    ./configure \
-        --prefix=/usr \
-        --libdir=/usr/$(get_libdir) \
-        --shared \
-        || die "configure failed"
-}
-
 DEFAULT_SRC_INSTALL_PARAMS=(
     prefix="${IMAGE}/usr"
     libdir="${IMAGE}/usr/$(get_libdir)"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
+
+src_configure() {
+    AR+=" rc"
+
+    edo ./configure \
+        --prefix=/usr \
+        --libdir=/usr/$(get_libdir) \
+        --shared
+}
+
 src_prepare() {
     default
     # Don't run ldconfig
-    sed -e '/ldconfig/d' -i Makefile.in || die "ldconfig sed failed"
+    edo sed -e '/ldconfig/d' -i Makefile.in
 }
 
