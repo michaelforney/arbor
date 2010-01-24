@@ -15,9 +15,11 @@ MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
-
 WORK="${WORKBASE}"
+
+DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
 unpack_prepare_one_multibuild() {
     edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
@@ -34,7 +36,7 @@ src_unpack() {
 
 prepare_one_multibuild() {
     # Don't run ldconfig
-    sed -e '/ldconfig/d' -i Makefile.in || die "ldconfig sed failed"
+    edo sed -e '/ldconfig/d' -i Makefile.in
 }
 
 src_prepare() {
@@ -50,6 +52,9 @@ configure_one_multibuild() {
         32) export CC="${CC} -m32";;
         64) export CC="${CC/ -m32/}";;
     esac
+
+    AR+=" rc"
+
     edo ./configure \
         --prefix=/usr \
         --libdir=/usr/${LIBDIR} \
