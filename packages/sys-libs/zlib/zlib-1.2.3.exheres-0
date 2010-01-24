@@ -17,6 +17,8 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
 
 src_configure() {
+    AR+=" rc"
+
     ./configure \
         --prefix=/usr \
         --libdir=/usr/$(get_libdir) \
