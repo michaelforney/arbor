@@ -90,7 +90,7 @@ src_prepare() {
     cd  "${WORKBASE}/${PNV}" || die "Entering ${WORKBASE}/${PNV} failed"
     default
     # patch can't apply a binary diff. git apply can.
-    option java && [[ ${SLOT} == 4.4 ]] &&
+    option java && [[ ${SLOT} == 4.4 ]] && ! ever at_least 4.4.3 &&
         edo git apply "${FILES}"/${PN}-${SLOT}-jar-fix.patch
 }
 
