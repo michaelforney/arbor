@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib cmake
@@ -22,10 +22,12 @@ LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS=""
 
+GCC_VERSION="4.4.3"
+
 DEPENDENCIES="
     build:
         dev-lang/perl:*
-        sys-devel/gcc[~4.4.2]
+        sys-devel/gcc[~${GCC_VERSION}]
         sys-devel/flex
 "
 
@@ -40,7 +42,7 @@ libsuffix=$(get_libdir)
 libsuffix=${libsuffix##lib}
 CMAKE_SRC_CONFIGURE_PARAMS=(
     -DCXX_INCLUDE_ARCH="${CHOST}"
-    -DCXX_INCLUDE_ROOT="/usr/include/c++/4.4.2/"
+    -DCXX_INCLUDE_ROOT="/usr/include/c++/${GCC_VERSION}/"
     -DLLVM_LIBDIR_SUFFIX="${libsuffix}"
 )
 
