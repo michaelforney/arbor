@@ -18,25 +18,19 @@ WORK="${WORKBASE}"
 
 create_root_owned_directory() {
     if [[ ! -e "${1}" ]]; then
-        echo "mkdir -p ${1}"
-        mkdir -p "${1}" || die "mkdir ${1} failed"
+        edo mkdir -p "${1}"
     fi
-    echo "chown root:root ${1}"
-    chown root:root "${1}" || die "chown root:root ${1} failed"
-    echo "chmod ${2:-0755} ${1}"
-    chmod ${2:-0755} "${1}" || die "chmod ${2:-0755} ${1} failed"
+    edo chown root:root "${1}"
+    edo chmod ${2:-0755} "${1}"
 }
 
 create_device_node() {
     local node=${1} major=${2} minor=${3} owner=${4} perms=${5}
     if [[ ! -e ${ROOT}dev/${node} ]]; then
-        echo "mknod ${ROOT}dev/${node} c ${major} ${minor}"
-        mknod "${ROOT}dev/${node}" c ${major} ${minor} || die "mknod /dev/${node} failed"
+        edo mknod "${ROOT}dev/${node}" c ${major} ${minor}
     fi
-    echo "chown ${owner} ${ROOT}dev/${node}"
-    chown ${owner} "${ROOT}dev/${node}" || die "chown /dev/${node} failed"
-    echo "chmod ${perms} ${ROOT}dev/${node}"
-    chmod ${perms} "${ROOT}dev/${node}" || die "chmod /dev/${node} failed"
+    edo chown ${owner} "${ROOT}dev/${node}"
+    edo chmod ${perms} "${ROOT}dev/${node}"
 }
 
 src_install() {
@@ -95,8 +89,7 @@ pkg_postinst() {
     if [[ ${SYMLINK_LIB} == yes ]]; then
         for x in {,usr/,usr/local/}lib; do
             if [[ ! -e "${ROOT}${x}" ]]; then
-                echo "ln -s ${libdir} ${ROOT}${x}"
-                ln -s "${libdir}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+                edo ln -s "${libdir}" "${ROOT}${x}"
             elif [[ ! -L "${ROOT}${x}" ]]; then
                 die "${x}: Expected a symlink but found a directory"
             fi
