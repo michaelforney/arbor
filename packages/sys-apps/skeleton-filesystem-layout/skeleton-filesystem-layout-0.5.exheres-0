@@ -55,7 +55,7 @@ pkg_postinst() {
     local x
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
-    for x in bin boot dev{,/pts,/shm} etc{,/opt} home ${libdir} mnt \
+    for x in bin boot dev{,/pts,/shm} etc home ${libdir} mnt \
         opt proc sbin sys; do
             create_root_owned_directory "${ROOT}${x}"
     done
