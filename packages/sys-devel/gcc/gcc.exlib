@@ -153,7 +153,7 @@ src_install() {
     fi
 
     # nuke empty dir if applicable
-    if option !fortran && ever at_least 4.2; then
+    if option openmp && option !fortran && ever at_least 4.2; then
         rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude || die "rmdir finclude failed"
     fi
 
