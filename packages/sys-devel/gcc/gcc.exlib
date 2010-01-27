@@ -126,8 +126,10 @@ src_install() {
     local libdir=$(get_libdir)
 
     # Precompiled headers, disable for cross-compiling
-    insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
-    doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
+    if ! tc-is-cross-compiler ; then
+        insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
+        doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
+    fi
 
     if option doc; then
         insinto /usr/share/doc/${PNVR}/html
