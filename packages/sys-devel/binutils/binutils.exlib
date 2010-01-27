@@ -3,7 +3,7 @@
 
 require multilib gnu alternatives
 
-export_exlib_phases src_unpack src_prepare src_configure src_compile src_test src_install
+export_exlib_phases src_configure src_compile src_test_expensive src_install
 
 SUMMARY="Collection of binary tools including ld and as"
 
@@ -11,131 +11,59 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="gold [[ description = [ Build gold, an experimental linker for ELF files. ] ]]"
 
+RESTRICT="test"
+
 DEPENDENCIES="
-    test:
+    test-expensive:
         dev-tcl/expect
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/76_all_use-new-ld-dtags.patch"
 )
+ECONF_SOURCE="${WORK}"
 DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-werror )
 
-binutils_src_unpack() {
-    local multibuild_c_target
-
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        mkdir -p "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
-        default
-    done
-}
-
-binutils_src_prepare() {
-    local multibuild_c_target
-
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        cd "${WORK}/${multibuild_c_target}/${PNV}" || die "entering ${multibuild_c_target}/${PNV} failed"
-
-        default
-
-        if [[ ${multibuild_c_target} != ${MULTIBUILD_C_DEFAULT_TARGET} ]] ; then
-            sed -e "s,^LIB_PATH = @LIB_PATH@,LIB_PATH = /usr/local/${LIBDIR}:/${LIBDIR}:/usr/${LIBDIR}:@LIB_PATH@," \
-                -i "ld/Makefile.in" || die "failed to fix LIBDIR for non-default C build target (${multibuild_c_target})"
-        fi
-    done
-}
-
 binutils_src_configure() {
-    local multibuild_c_target
+    edo mkdir "${WORKBASE}"/builddir-{gnu,gold}
 
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
+    edo cd "${WORKBASE}"/builddir-gnu
+    default
+    emake configure-host
 
-        edo mkdir "${WORKBASE}"/builddir-${multibuild_c_target}-{gold,gnu} || die "Couldn't create build directories for ${multibuild_c_target}"
-        edo cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
-
-        ECONF_SOURCE="${WORK}/${multibuild_c_target}/${PNV}" \
+    if option gold ; then
+        edo cd "${WORKBASE}"/builddir-gold
         econf \
             "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-            --enable-serial-configure \
-            --libdir=/usr/${LIBDIR}
+            --enable-gold \
+            --enable-plugins \
+            --enable-threads \
+            --program-transform-name='s/ld/gold/'
         emake configure-host
-
-        if option gold ; then
-            cd "${WORKBASE}"/builddir-${multibuild_c_target}-gold || die "Couldn't enter builddir-${multibuild_c_target}-gold"
-            ECONF_SOURCE="${WORK}/${multibuild_c_target}/${PNV}" \
-            econf \
-                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-                --enable-serial-configure \
-                --libdir=/usr/${LIBDIR} \
-                --enable-gold \
-                --enable-plugins \
-                --enable-threads \
-                --program-transform-name='s/ld/gold/'
-            emake configure-host
-        fi
-    done
+    fi
 }
 
 binutils_src_compile() {
-    local multibuild_c_target
+    emake -C "${WORKBASE}/builddir-gnu"
 
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
-
-        default
-
-        if option gold ; then
-            emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold/bfd" headers
-            emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold"
-        fi
-    done
+    if option gold ; then
+        emake -C "${WORKBASE}/builddir-gold/bfd" headers
+        emake -C "${WORKBASE}/builddir-gold"
+    fi
 }
 
-binutils_src_test() {
-    local multibuild_c_target
-
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gnu" check
-
-        if option gold ; then
-            emake -C "${WORKBASE}/builddir-${multibuild_c_target}-gold" check
-        fi
-    done
+binutils_src_test_expensive() {
+    emake -C "${WORKBASE}/builddir-gnu" check
 }
 
 binutils_src_install() {
-    local multibuild_c_target
+    if option gold ; then
+        emake -j1 -C "${WORKBASE}/builddir-gold/gold" DESTDIR="${IMAGE}" install
+        edo mv "${IMAGE}"/usr/${CHOST}/bin/{ld,gold}
+        edo rm "${IMAGE}"/usr/bin/gold
+    fi
 
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        if option gold ; then
-            emake -j1 -C "${WORKBASE}/builddir-${multibuild_c_target}-gold/gold" DESTDIR="${IMAGE}" install
-            edo mv "${IMAGE}"/usr/${CHOST}/bin/{ld,gold} || die "edo mv failed, is paludis up to date?"
-            edo rm "${IMAGE}"/usr/bin/gold
-        fi
-
-        cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
-
-        default
-
-        local maybe_empty_dir=( ${IMAGE}/usr/${LIBDIR}/* )
-        if [[ ! -e ${maybe_empty_dir[0]} ]] ; then
-            echo "rmdir ${IMAGE}/usr/${LIBDIR}"
-            rmdir "${IMAGE}/usr/${LIBDIR}" || die "rmdir ${IMAGE}/usr/${LIBDIR}"
-        fi
-
-    done
-
-    multibuild_switch_build_target C ${MULTIBUILD_C_DEFAULT_TARGET}
+    emake -j1 -C "${WORKBASE}/builddir-gnu" DESTDIR="${IMAGE}" install
 
     local f target name
     for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
@@ -162,3 +90,4 @@ binutils_src_install() {
             /usr/bin/${CHOST}-ld /usr/${CHOST}/bin/gold
     fi
 }
+
