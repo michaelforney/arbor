@@ -86,13 +86,6 @@ src_install() {
         "${IMAGE}/etc/modprobe.d/blacklist.conf"
     # }}}
 
-    # documentation {{{
-    edo cd "${WORK}/docs/writing_udev_rules"
-    edo mv index.html writing_udev_rules.html
-    insinto /usr/share/doc/${PNVR}/html
-    doins *.html
-    # }}}
-
     # config protect {{{
     hereenvd 20udev <<EOT
 CONFIG_PROTECT_MASK=\"/$(get_libdir)/udev/rules.d\"
