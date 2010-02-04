@@ -54,8 +54,8 @@ binutils_src_configure() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        mkdir "${WORKBASE}"/builddir-${multibuild_c_target}-{gold,gnu} || die "Couldn't create build directories for ${multibuild_c_target}"
-        cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
+        edo mkdir "${WORKBASE}"/builddir-${multibuild_c_target}-{gold,gnu} || die "Couldn't create build directories for ${multibuild_c_target}"
+        edo cd "${WORKBASE}"/builddir-${multibuild_c_target}-gnu || die "Couldn't enter builddir-${multibuild_c_target}-gnu"
 
         ECONF_SOURCE="${WORK}/${multibuild_c_target}/${PNV}" \
         econf \

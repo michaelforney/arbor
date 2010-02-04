@@ -1,7 +1,7 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require luaforge flag-o-matic
+require multilib flag-o-matic
 
 SUMMARY="a lua filesystem library"
 DESCRIPTION="
@@ -12,12 +12,14 @@ distribution.
 LuaFileSystem offers a portable way to access the underlying directory
 structure and file attributes.
 "
-HOMEPAGE+=" http://www.keplerproject.org/luafilesystem/"
+HOMEPAGE="http://keplerproject.github.com/luafilesystem/"
 
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
+
+DOWNLOADS="http://cloud.github.com/downloads/keplerproject/${PN}/${PNV}.tar.gz"
 
 DEPENDENCIES="
     build:
@@ -29,10 +31,10 @@ DEPENDENCIES="
 DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 
 src_prepare() {
-    luaforge_src_prepare
-
     append-flags $(pkg-config --cflags lua)
     sed -e "s:\(CFLAGS=\):\1 ${CFLAGS}:" \
+        -e "s|/usr/local|${IMAGE}/usr|" \
+        -e "s,/lib/,/$(get_libdir)/," \
         -i "${WORK}"/config || die "sed config failed"
 }
 
