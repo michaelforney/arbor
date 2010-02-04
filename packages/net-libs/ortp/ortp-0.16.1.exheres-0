@@ -26,7 +26,7 @@ src_install() {
 
     # There's no option to disable building apidocs, so remove them if not requested
     if option !doc; then
-        rm -rf "${IMAGE}/usr/share/doc/${PNV}/html" || die "Couldn't remove api documentation"
+        edo rm -rf "${IMAGE}/usr/share/doc/${PNV}/html"
     fi
 }
 

@@ -1,5 +1,5 @@
 # Copyright 2007, 2008 Richard Brown
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -10,7 +10,6 @@ export_exlib_phases src_configure src_test src_install
 
 MY_PNV="${PN}-$(ever replace 3 '-')"
 SLOT=$(ever range 1-2)
-MY_SUFFIX=$(ever delete 1 ${SLOT})
 
 SUMMARY="An object-oriented scripting language"
 DESCRIPTION="A dynamic, open source programming language with a focus on
@@ -60,7 +59,7 @@ ruby_src_configure() {
     # --disable-socks, --disable-threads, --without-tk, --disable-debug, --without-dbm,
     # --without-gdbm, --with-openssl, --with-lookup-order-hack=INET, --enable-ipv6
     econf \
-        --program-suffix=${MY_SUFFIX} \
+        --program-suffix=${SLOT} \
         --enable-shared \
         --disable-socks \
         --disable-threads \
@@ -125,12 +124,12 @@ ruby_src_install() {
 
     pushd "${IMAGE}"
     if ever at_least "1.9"; then
-        rm usr/bin/{gem19,rake19} || die "Failed to remove unwanted bins"
-        rm usr/share/man/man1/rake19.1 || die "Failed to remove unwanted mans"
+        rm usr/bin/{gem,rake}${SLOT} || die "Failed to remove unwanted bins"
+        rm usr/share/man/man1/rake${SLOT}.1 || die "Failed to remove unwanted mans"
     fi
     local src target alternatives=()
-    for src in usr/bin/*${MY_SUFFIX} usr/share/man/man1/*${MY_SUFFIX}.1; do
-        target=${src/${MY_SUFFIX}}
+    for src in usr/bin/*${SLOT} usr/share/man/man1/*${SLOT}.1; do
+        target=${src/${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"

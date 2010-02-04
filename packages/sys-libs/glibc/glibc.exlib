@@ -1,5 +1,5 @@
 # Copyright 2007-2008 Bryan Østergaard <kloeri@exherbo.org>
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases pkg_pretend src_unpack src_prepare src_configure src_compile src_install
@@ -171,9 +171,9 @@ EOF
 pkg_postinst() {
     mkdir -p "${ROOT}usr/$(get_libdir)/locale" || eerror "failed to create /usr/$(get_libdir)/locale"
 
-    echo "${ROOT}usr/bin/localedef --prefix=${ROOT} -i en_GB -f UTF-8 en_GB.UTF-8"
-    I18NPATH="${ROOT}usr/share/i18n" "${ROOT}usr/bin/localedef" \
-        --prefix="${ROOT}" -i en_GB -f UTF-8 en_GB.UTF-8 || \
-            eerror "failed to generate locale data for en_GB.UTF-8"
+    for lang in en_US en_GB ; do
+        I18NPATH="${ROOT}usr/share/i18n" \
+            nonfatal edo "${ROOT}usr/bin/localedef" --prefix="${ROOT}" -i ${lang} -f UTF-8 ${lang}.UTF-8
+    done
 }
 

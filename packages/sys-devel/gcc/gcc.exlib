@@ -135,8 +135,7 @@ src_install() {
     default
 
     # Precompiled headers, disable for cross-compiling
-    local precompiled_headers=( "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch )
-    if [[ -f ${precompiled_headers[0]} ]] ; then
+    if ! tc-is-cross-compiler ; then
         insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
         doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
     fi

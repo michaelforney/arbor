@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 #
 # Based in part upon autotools.eclass which is:
@@ -52,7 +52,7 @@ autotools_select_versions() {
                 && break
         done
         [[ -z ${WANT_AUTOCONF} ]] && die "No autoconf installed"
-        einfo "Using autoconf:${WANT_AUTOCONF}"
+        echo "Using autoconf:${WANT_AUTOCONF}"
     fi
     if [[ -z ${WANT_AUTOMAKE} && ${SUPPORTED_AUTOMAKE[@]} != none ]]; then
         sorted_slots=( $(version_sort ${SUPPORTED_AUTOMAKE[@]}) )
@@ -62,7 +62,7 @@ autotools_select_versions() {
                 && break
         done
         [[ -z ${WANT_AUTOMAKE} ]] && die "No automake installed"
-        einfo "Using automake:${WANT_AUTOMAKE}"
+        echo "Using automake:${WANT_AUTOMAKE}"
     fi
 }
 

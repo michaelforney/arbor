@@ -86,6 +86,8 @@ db_src_install() {
     rm "${IMAGE}"/usr/$(get_libdir)/libdb{,_cxx}{.so,.a,-$(ever major).so} ||
         die "Couldn't remove unversioned libraries"
 
+    option tcl && edo rm "${IMAGE}"/usr/$(get_libdir)/libdb_tcl.so
+
     local alternatives=() replace_me
     pushd "${IMAGE}" || die "Couldn't enter IMAGE"
 

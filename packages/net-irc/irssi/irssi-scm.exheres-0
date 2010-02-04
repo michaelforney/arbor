@@ -1,4 +1,4 @@
-# Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SCM_REPOSITORY="git://git.irssi.org/irssi"
@@ -11,8 +11,11 @@ DOWNLOADS=""
 PLATFORMS="~amd64 ~x86"
 
 DEPENDENCIES="
-    suggestion:
-        net-www/lynx [[ description = [ used for .html -> .txt documentation at build time ] ]]
+    build:
+        (
+            net-www/elinks
+            net-www/lynx
+        ) [[ description = [ Used for .html -> .txt documentation at build time ] ]]
 "
 
 src_prepare() {

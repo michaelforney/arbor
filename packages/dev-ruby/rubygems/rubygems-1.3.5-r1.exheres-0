@@ -23,8 +23,7 @@ src_install() {
     vendor_dir=$(ruby -rrbconfig -e 'print Config::CONFIG["vendorlibdir"]')
     vendor_gem_dir=${vendor_dir/vendor_ruby/vendor_gems}
     site_gem_dir=${vendor_dir/vendor_ruby/gems}
-    ver=$(basename ${site_gem_dir})
-    ver_stripped=${ver/./}
+    ruby_version=$(basename ${site_gem_dir})
 
     keepdir {${site_gem_dir},${vendor_gem_dir}}/{doc,gems,cache,specifications}
     #Set this to avoid installer upsetting sandbox
@@ -37,7 +36,7 @@ src_install() {
 
     ruby setup.rb ${myconf} --vendor --destdir="${IMAGE}" || die "setup.rb failed"
 
-    dosym "gem${ver_stripped}" /usr/bin/gem
+    dosym "gem${ruby_version}" /usr/bin/gem
 
     # Release Notes missing in 1.3.5
     #dodoc README doc/release_notes/rel_$(ever replace_all '_').rdoc

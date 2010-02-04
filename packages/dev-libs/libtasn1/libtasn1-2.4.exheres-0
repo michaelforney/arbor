@@ -1,11 +1,15 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require gnu [ suffix=gz ]
+
 SUMMARY="ASN.1 parser for GNUTLS"
 HOMEPAGE="http://www.gnutls.org/"
-DOWNLOADS="mirror://gnu/gnutls/${PNV}.tar.gz"
 
-LICENCES="GPL-3"
+LICENCES="
+    LGPL-2.1    [[ description = [ libtasn1.* ] ]]
+    GPL-3       [[ description = [ command line tools, self tests, examples & auxilliary files ] ]]
+"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="doc"
@@ -15,5 +19,6 @@ DEPENDENCIES="
         doc? ( dev-doc/gtk-doc[>=1.2] )
 "
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-valgrind-tests )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
