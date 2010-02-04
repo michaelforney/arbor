@@ -190,12 +190,12 @@ cmake_src_install() {
 _cmake_option() {
     illegal_in_global_scope
 
-    [[ -n ${2} ]] || die "cmake_$(tr '[:upper:]' '[:lower:]' <<< "${1}") <option flag> [<flag name>]"
+    [[ -n ${2} ]] || die "cmake_${1,,} <option flag> [<flag name>]"
     local flag
     if [[ -n ${3} ]]; then
         flag=${2}
     else
-        flag=$(tr '[:upper:]' '[:lower:]' <<< "${2}")
+        flag=${2,,}
     fi
     echo "-D${1:+${1}_}${3:-$(optionfmt ${2})}:BOOL=$(option ${flag} && echo TRUE || echo FALSE)"
 }
