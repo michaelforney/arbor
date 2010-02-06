@@ -4,12 +4,13 @@
 # Based in part upon 'udev-120.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require udev
+require udev easy-multibuild
 
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="glib [[ description = [ build extra utilities for usb, acl, etc and gudev to integrate with glib main-loop ] ]]
            gobject-introspection [[ description = [ build data for gobject introspection ] ]]
+           multibuild_c: 32 64
            platform: ia64" # ppc s390
 
 DEPENDENCIES="
@@ -31,19 +32,21 @@ DEPENDENCIES="
         )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    '--sbindir=/sbin'
-    "--with-rootlibdir=/$(get_libdir)"
-    "--libexecdir=/$(get_libdir)/udev/"
-    '--without-selinux'
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib extras' 'gobject-introspection introspection' )
+configure_one_multibuild() {
+    econf \
+        --sbindir=/sbin \
+        --with-rootlibdir=/${LIBDIR} \
+        --libexecdir=/${LIBDIR}/udev/ \
+        --without-selinux \
+        $(option_enable glib extras) \
+        $(option_enable gobject-introspection introspection)
+}
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     # rules {{{
-    insinto /$(get_libdir)/udev/rules.d/
+    insinto /${LIBDIR}/udev/rules.d/
     doins rules/gentoo/??-*.rules
 
     # Adding arch specific rules (ppc and s390 are not supported)
@@ -51,7 +54,7 @@ src_install() {
     # }}}
 
     # hooks {{{
-    insinto /$(get_libdir)/rcscripts/addons
+    insinto /${LIBDIR}/rcscripts/addons
     newins "${FILES}/udev-start-147.sh" udev-start.sh
     newins "${FILES}/udev-stop-136.sh" udev-stop.sh
 
@@ -66,18 +69,18 @@ src_install() {
     # }}}
 
     # helper scripts {{{
-    exeinto /$(get_libdir)/udev
+    exeinto /${LIBDIR}/udev
     newexe "${FILES}/net-130-r1.sh" net.sh
     newexe "${FILES}/move_tmp_persistent_rules-128.sh" move_tmp_persistent_rules.sh
     newexe "${FILES}/write_root_link_rule-128" write_root_link_rule
     newexe "${FILES}/shell-compat-addon-147.sh" shell-compat-addon.sh
 
     # multilib our scripts
-    edo sed -i -e "s:/lib/udev:/$(get_libdir)/udev:"                \
-        "${IMAGE}/$(get_libdir)/udev/move_tmp_persistent_rules.sh"  \
-        "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-start.sh"     \
-        "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-stop.sh"      \
-        "${IMAGE}/$(get_libdir)/udev/write_root_link_rule"          \
+    edo sed -i -e "s:/lib/udev:/${LIBDIR}/udev:"                    \
+        "${IMAGE}/${LIBDIR}/udev/move_tmp_persistent_rules.sh"      \
+        "${IMAGE}/${LIBDIR}/rcscripts/addons/udev-start.sh"         \
+        "${IMAGE}/${LIBDIR}/rcscripts/addons/udev-stop.sh"          \
+        "${IMAGE}/${LIBDIR}/udev/write_root_link_rule"              \
         "${IMAGE}/etc/init.d/udev"                                  \
         "${IMAGE}/etc/init.d/udev-mount"                            \
         "${IMAGE}/etc/init.d/udev-postmount"                        \
@@ -88,14 +91,14 @@ src_install() {
 
     # config protect {{{
     hereenvd 20udev <<EOT
-CONFIG_PROTECT_MASK=\"/$(get_libdir)/udev/rules.d\"
+CONFIG_PROTECT_MASK=\"/${LIBDIR}/udev/rules.d\"
 EOT
     # }}}
 
-    keepdir /etc/udev/rules.d /$(get_libdir)/udev/{devices,state}
+    keepdir /etc/udev/rules.d /${LIBDIR}/udev/{devices,state}
 
-    if [[ $(get_libdir) != lib ]] ; then
-        option glib && edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit
+    if [[ ${LIBDIR} != lib ]] ; then
+        option glib && edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
         [[ -d "${IMAGE}"/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 }
