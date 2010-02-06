@@ -116,7 +116,7 @@ ecmake() {
     # CMAKE_C_FLAGS, CMAKE_CXX_FLAGS if a given build type is used. Thus they override users' settings,
     # and mustn't be used.
     cmakeargs=(
-        ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE:BOOL=TRUE}
+        ${CMAKE_NO_COLOR:--DCMAKE_COLOR_MAKEFILE:BOOL=TRUE}
         -DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE
         ${CMAKE_SILENT:+-DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE}
         -DCMAKE_BUILD_TYPE:STRING='None'
