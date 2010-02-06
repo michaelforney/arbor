@@ -7,22 +7,22 @@ require common-metadata
 
 SLOT="0"
 
-MYOPTIONS="caps debug ipv6 parse-clocks ssl"
+MYOPTIONS="caps debug ipv6 parse-clocks"
 
 DEPENDENCIES="
     build+run:
+        dev-libs/openssl
         sys-libs/ncurses[>=5.2]
         sys-libs/readline[>=4.1]
         caps? ( sys-libs/libcap )
-        ssl? ( dev-libs/openssl )
         group/${PN}
         user/${PN}
 "
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "caps linuxcaps" "parse-clocks" "ipv6" "debug debugging" "ssl crypto" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--hates=docdir' '--enable-crypto' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "caps linuxcaps" "parse-clocks" "ipv6" "debug debugging" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( WHERE-TO-START )
 
 src_install() {
@@ -65,3 +65,4 @@ EOF
 pkg_postinst() {
     elog "You can find an example ${PN}.conf in /usr/share/ntp/"
 }
+
