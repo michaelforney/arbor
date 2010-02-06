@@ -18,7 +18,7 @@ read and easy to write."
 HOMEPAGE="http://www.ruby-lang.org/"
 DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
-MYOPTIONS="berkdb debug doc examples ipv6 gdbm ssl"
+MYOPTIONS="berkdb debug doc examples ipv6 gdbm"
 
 BUGS_TO="rbrown@exherbo.org"
 
@@ -30,9 +30,9 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}en/documentation/"
 
 DEPENDENCIES="
     build+run:
+        dev-libs/openssl[>=0.9.8g]
         berkdb? ( sys-libs/db:= )
         gdbm? ( sys-libs/gdbm )
-        ssl? ( dev-libs/openssl[>=0.9.8g] )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV} )
@@ -64,11 +64,11 @@ ruby_src_configure() {
         --disable-socks \
         --disable-threads \
         --without-tk \
+        --with-openssl \
         $(option_enable doc install-doc) \
         $(option_enable debug) \
         $(option_with berkdb dbm) \
         $(option_with gdbm) \
-        $(option_with ssl openssl) \
         "${myconf[@]}"
 }
 
