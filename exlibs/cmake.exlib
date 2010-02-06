@@ -80,11 +80,10 @@ cmake_with() {
     _cmake_option WITH "$@"
 }
 
-# Calls cmake with default arguments. If CMAKE_NO_COLOR is set it disables
-# colours. If CMAKE_SILENT is set it generates almost silent makefiles instead of verbose.
-# You MUST unset CMAKE_SILENT before posting build log.
-# It also respects the following variables similarly to
-# default_src_configure and econf:
+# Calls cmake with default arguments. If CMAKE_NO_COLOR is set it disables colours. If CMAKE_SILENT
+# is set it generates silent makefiles instead of verbose. If you use CMAKE_SILENT you MUST unset it
+# and rebuild before posting a build log.
+# It also respects the following variables similarly to default_src_configure and econf:
 #    CMAKE_SRC_CONFIGURE_PARAMS
 #    CMAKE_SRC_CONFIGURE_OPTION_BUILDS
 #    CMAKE_SRC_CONFIGURE_OPTION_ENABLES
