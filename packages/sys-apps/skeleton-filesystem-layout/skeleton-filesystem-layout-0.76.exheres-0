@@ -100,8 +100,7 @@ pkg_postinst() {
                 die "${x}: Expected a symlink but found a directory"
             fi
 
-            echo "ln -sfn ${LIBDIR} ${ROOT}${x}"
-            ln -sfn "${LIBDIR}" "${ROOT}${x}" || die "creation of symlink ${x} failed"
+            edo ln -sfn "${LIBDIR}" "${ROOT}${x}"
         done
     fi
 }
