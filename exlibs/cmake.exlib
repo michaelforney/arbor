@@ -80,10 +80,10 @@ cmake_with() {
     _cmake_option WITH "$@"
 }
 
-# Calls cmake with default arguments. If CMAKE_NO_COLOR is set it disables
-# colours. If debug is in MYOPTIONS and enabled it sets build type to Debug
-# rather than Release. It also respects the following variables similarly to
-# default_src_configure and econf:
+# Calls cmake with default arguments. If CMAKE_NO_COLOR is set it disables colours. If CMAKE_SILENT
+# is set it generates silent makefiles instead of verbose. If you use CMAKE_SILENT you MUST unset it
+# and rebuild before posting a build log.
+# It also respects the following variables similarly to default_src_configure and econf:
 #    CMAKE_SRC_CONFIGURE_PARAMS
 #    CMAKE_SRC_CONFIGURE_OPTION_BUILDS
 #    CMAKE_SRC_CONFIGURE_OPTION_ENABLES
@@ -116,8 +116,9 @@ ecmake() {
     # CMAKE_C_FLAGS, CMAKE_CXX_FLAGS if a given build type is used. Thus they override users' settings,
     # and mustn't be used.
     cmakeargs=(
-        ${CMAKE_NO_COLOR:+-DCMAKE_COLOR_MAKEFILE:BOOL=TRUE}
+        ${CMAKE_NO_COLOR:--DCMAKE_COLOR_MAKEFILE:BOOL=TRUE}
         -DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE
+        ${CMAKE_SILENT:+-DCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE}
         -DCMAKE_BUILD_TYPE:STRING='None'
         -DCMAKE_C_FLAGS:STRING="${CFLAGS}"
         -DCMAKE_CXX_FLAGS:STRING="${CXXFLAGS}"

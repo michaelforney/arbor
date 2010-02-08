@@ -1,0 +1,28 @@
+# Copyright 2010 Yury G. Kudryashov <urkud@ya.ru>
+# Distributed under the terms of the GNU General Public License v2
+
+myexparam suffix=tar.bz2
+
+myexparam pn=${MY_PN:-${PN}}
+# Google code project name.
+myexparam project=$(exparam pn)
+myexparam pv=${MY_PV:-${PV}}
+myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
+
+HOMEPAGE="http://code.google.com/p/$(exparam project)"
+if ! ever at_least scm ; then
+    DOWNLOADS="http://$(exparam project).googlecode.com/files/$(exparam pnv).$(exparam suffix)"
+else
+    DOWNLOADS=""
+fi
+
+if has $(exparam suffix) tar.lzma tar.xz; then
+    DEPENDENCIES+="
+        build:
+            app-arch/xz"
+elif has $(exparam suffix) zip; then
+    DEPENDENCIES+="
+        build:
+            app-arch/unzip"
+fi
+
