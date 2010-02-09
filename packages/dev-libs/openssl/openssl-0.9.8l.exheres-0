@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require easy-multibuild
 
 SUMMARY="Open source SSL and TLS implementation and cryptographic library"
 HOMEPAGE="http://www.openssl.org"
@@ -10,7 +10,7 @@ DOWNLOADS="http://www.openssl.org/source/${PNV}.tar.gz"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="platform: ppc64"
+MYOPTIONS="platform: ppc64 multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
@@ -23,30 +23,53 @@ DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 # Tests don't run in parallel
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
-src_prepare() {
+WORK="${WORKBASE}"
+
+unpack_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
+
+unpack_one_multibuild() {
+    default
+    edo mv ${PNV}/* .
+}
+
+src_unpack() {
+    easy-multibuild_run_phase
+}
+
+prepare_one_multibuild() {
     default
 
     # Fix libdir
-    edo sed -e "s:\(\$(INSTALL_PREFIX)\$(INSTALLTOP)\)/lib:\1/$(get_libdir):g" \
-            -e "/libdir=/s:/lib:/$(get_libdir):g" \
+    edo sed -e "s:\(\$(INSTALL_PREFIX)\$(INSTALLTOP)\)/lib:\1/${LIBDIR}:g" \
+            -e "/libdir=/s:/lib:/${LIBDIR}:g" \
             -i Makefile.org engines/Makefile
 
     # Fix manpath
     edo sed -e 's:^MANDIR=.*$:MANDIR=/usr/share/man:' -i Makefile.org
 }
 
-src_configure() {
+src_prepare() {
+    easy-multibuild_run_phase
+}
+
+configure_prepare_one_multibuild() { :; }
+
+configure_one_multibuild() {
     edo ./config --test-sanity
 
     # ppc64 needs to be configured manually with Configure instead of config.
     if option platform:ppc64; then
         edo ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl shared threads
+    elif option multibuild_c:32 && [[ "${MULTIBUILD_CLASS}${MULTIBUILD_TARGET}" == "C32" ]]; then
+        edo ./Configure linux-elf --prefix=/usr --openssldir=/etc/ssl shared threads
     else
         edo ./config --prefix=/usr --openssldir=/etc/ssl shared threads
     fi
 }
 
-src_install() {
+install_one_multibuild() {
     emake -j1 INSTALL_PREFIX="${IMAGE}" install
     keepdir /etc/ssl/{certs,private}
     emagicdocs
