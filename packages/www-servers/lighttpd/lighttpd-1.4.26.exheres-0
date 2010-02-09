@@ -69,13 +69,17 @@ src_install() {
         dodoc doc/*.txt
     fi
 
-    insinto /etc/lighttpd
-    doins "${FILES}"/lighttpd.conf
+    dodir /etc/lighttpd
+    edo sed -e '/^#server.pid-file[ \t]*=/s:^#::' \
+            -e '/^#server.username[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
+            -e '/^#server.groupname[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
+            doc/lighttpd.conf > "${IMAGE}"/etc/lighttpd/lighttpd.conf
+
     newinitd "${FILES}"/lighttpd.initd lighttpd
     newconfd "${FILES}"/lighttpd.confd lighttpd
 
     keepdir /var/{log,run}/lighttpd
-    keepdir /var/www/localhost/htdocs
+    keepdir /srv/www/htdocs
 
     fowners lighttpd:lighttpd /var/{log,run}/lighttpd
     fperms 0750 /var/log/lighttpd
