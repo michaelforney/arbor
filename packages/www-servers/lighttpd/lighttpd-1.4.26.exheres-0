@@ -11,7 +11,7 @@ Its advanced feature-set (FastCGI, CGI, Auth, Output-Compression,
 URL-Rewriting and many more) make lighttpd the perfect webserver-software
 for every server that is suffering load problems."
 HOMEPAGE="http://www.lighttpd.net"
-DOWNLOADS="http://www.lighttpd.net/download/${PNV}.tar.gz"
+DOWNLOADS="http://download.lighttpd.net/lighttpd/releases-$(ever range 1-2).x/${PNV}.tar.gz"
 
 UPSTREAM_CHANGELOG="http://redmine.lighttpd.net/repositories/entry/lighttpd/tags/${PNV}/NEWS"
 UPSTREAM_DOCUMENTATION="http://redmine.lighttpd.net/wiki/lighttpd"
@@ -69,13 +69,17 @@ src_install() {
         dodoc doc/*.txt
     fi
 
-    insinto /etc/lighttpd
-    doins "${FILES}"/lighttpd.conf
+    dodir /etc/lighttpd
+    edo sed -e '/^#server.pid-file[ \t]*=/s:^#::' \
+            -e '/^#server.username[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
+            -e '/^#server.groupname[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
+            doc/lighttpd.conf > "${IMAGE}"/etc/lighttpd/lighttpd.conf
+
     newinitd "${FILES}"/lighttpd.initd lighttpd
     newconfd "${FILES}"/lighttpd.confd lighttpd
 
     keepdir /var/{log,run}/lighttpd
-    keepdir /var/www/localhost/htdocs
+    keepdir /srv/www/htdocs
 
     fowners lighttpd:lighttpd /var/{log,run}/lighttpd
     fperms 0750 /var/log/lighttpd
