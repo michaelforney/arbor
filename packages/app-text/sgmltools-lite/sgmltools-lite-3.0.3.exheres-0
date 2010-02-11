@@ -35,33 +35,34 @@ SGML_CATALOG=( "/etc/sgml/sgml-lite.cat
 
 src_prepare() {
     # Remove CVS directories from the tree
-    find . -name CVS | xargs rm -rf
+    edo find . -name CVS | xargs rm -rf || die "rm -rf failed"
 }
 
 src_install() {
     #FIXME
     einstall etcdir="${IMAGE}"/etc/sgml
 
-    dodoc ChangeLog POSTINSTALL README*
+    emagicdocs
+    dodoc POSTINSTALL
     #TODO
     # dohtml -r .
 
-    cd "${WORKBASE}"/nw-eps-icons-0.0.1/images
+    edo cd "${WORKBASE}"/nw-eps-icons-0.0.1/images
     insinto /usr/share/sgml/docbook/dsssl-stylesheets/images
     doins *.eps
 
-    cd callouts
+    edo cd callouts
     insinto /usr/share/sgml/docbook/dsssl-stylesheets/images/callouts
     doins *.eps
 
-    rm "${IMAGE}"/etc/sgml/catalog.{suse,rh62}
+    edo rm "${IMAGE}"/etc/sgml/catalog.{suse,rh62}
 
     # Remove file provided by sgml-common
-    rm "${IMAGE}"/usr/bin/sgmlwhich
+    edo rm "${IMAGE}"/usr/bin/sgmlwhich
 
     # Remove the backends that require tetex
     # option tetex || \
-    rm "${IMAGE}"/usr/share/sgml/misc/sgmltools/python/backends/{Dvi,Ps,Pdf,JadeTeX}.py
+    edo rm "${IMAGE}"/usr/share/sgml/misc/sgmltools/python/backends/{Dvi,Ps,Pdf,JadeTeX}.py
 
     # List of backends to alias with sgml2*
     # Do not provide sgml2{txt,rtf,html} anymore, they are part of
@@ -71,22 +72,17 @@ src_install() {
 
     # Create simple alias scripts that people are used to
     # And make the manpages for those link to the sgmltools-lite manpage
-    mandir="${IMAGE}"/usr/share/man/man1
     ScripTEXT="#!/bin/sh\n/usr/bin/sgmltools --backend="
     for back in ${BACKENDS} ; do
-        echo -e ${ScripTEXT}${back} '$*' > sgml2${back}
+        edo echo -e ${ScripTEXT}${back} '$*' > sgml2${back}
         exeinto /usr/bin
         doexe sgml2${back}
 
-        #FIXME
-        cd "${mandir}"
-        ln -sf sgmltools-lite.1.gz sgml2${back}.1.gz
+        dosym sgmltools-lite.1.gz /usr/share/man/man1/sgml2${back}.1.gz
     done
 
     keepdir /usr/share/sgml/misc/sgmltools/site-backends
     keepdir /etc/sgml/catalog.d
-
-
 }
 
 pkg_postinst() {
