@@ -16,13 +16,13 @@ MYOPTIONS="cyrus ssl"
 
 DEPENDENCIES="
     dev-libs/pcre
-    sys-libs/db:=
-    cyrus? ( net-libs/cyrus-sasl )
-    ssl? ( dev-libs/openssl )
-    sys-libs/pam
     group/postdrop
     group/postfix
+    sys-libs/db:=
+    sys-libs/pam
     user/postfix
+    cyrus? ( net-libs/cyrus-sasl )
+    ssl? ( dev-libs/openssl )
 "
 
 src_compile() {
@@ -89,10 +89,12 @@ src_install() {
     pamd_mimic_system smtp auth account
 
     dodir /etc/postfix
-    cp "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{master.cf,post*-*} "${IMAGE}"/etc/postfix/
-    cp "${FILES}"/main.cf.example-0 "${IMAGE}"/etc/postfix/main.cf.example
+    insinto /etc/postfix
+    doins "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{master.cf,post*-*}
+    newins "${FILES}"/main.cf.example-0 main.cf.example
 
-    mv "${WORK}"/examples "${IMAGE}"/usr/share/doc/${PNVR}
+    insinto /usr/share/doc/${PNVR}
+    doins -r "${WORK}"/examples
 
     dosym /usr/share/doc/${PNVR} /usr/share/doc/${PN}
 
