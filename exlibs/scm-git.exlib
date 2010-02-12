@@ -13,7 +13,7 @@ fi
 scm-git_do_dependencies() {
     local git='dev-scm/git[>=1.6.0]'
     if [[ $(scm_get_var REPOSITORY) == https://* ]]; then
-        echo "${git}[curl] net-misc/curl[ssl]"
+        echo "${git}[curl] net-misc/curl[ssl(+)]"
     elif [[ $(scm_get_var REPOSITORY) == http://* || $(scm_get_var REPOSITORY) == ftp://* ]]; then
         echo "${git}[curl]"
     elif [[ $(scm_get_var REPOSITORY) == rsync://* ]]; then
