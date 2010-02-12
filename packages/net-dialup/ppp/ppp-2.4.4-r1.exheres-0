@@ -193,8 +193,8 @@ src_install() {
     insopts -m0644
     newins "${FILES}"/modules.ppp ppp.conf
 
-    dodoc FAQ PLUGINS README* SETUP
-    dodoc "${FILES}"/README.mpls
+    emagicdocs
+    dodoc PLUGINS SETUP "${FILES}"/README.mpls
     cp -pPR {contrib,scripts} "${IMAGE}/usr/share/doc/${PNVR}/" ||
         die "copying contrib and scripts failed."
 

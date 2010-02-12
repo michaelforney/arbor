@@ -159,7 +159,8 @@ sendmail_src_install() {
     fperms 700 /var/spool/mqueue
     dosym /usr/sbin/makemap /usr/bin/makemap
 
-    dodoc FAQ KNOWNBUGS README RELEASE_NOTES doc/op/op.me doc/op/op.ps
+    emagicdocs
+    dodoc KNOWNBUGS doc/op/op.{me,ps}
     cp -pPR contrib "${IMAGE}"/usr/share/doc/${PNVR}/ \
         || die "copying contrib failed"
     dodir /usr/share/doc/${PNVR}/libmilter
@@ -222,3 +223,4 @@ sendmail_src_install() {
         alternatives_for mta ${PN} 5 /usr/share/man/${x} ${PN}.${x##*/}
     done
 }
+
