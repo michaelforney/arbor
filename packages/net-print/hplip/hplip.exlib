@@ -94,10 +94,10 @@ hplip_src_install() {
 
     if option scanner ; then
         # Moving dll.conf which originally belongs to sane-backends out of the way.
-        mv "${IMAGE}"etc/sane.d/dll.conf "${TEMP}"hplip_dll.conf || die "moving dll.conf failed"
-        rmdir "${IMAGE}"etc/sane.d || die "removing empty /etc/sane.d failed"
+        edo mv "${IMAGE}"etc/sane.d/dll.conf "${TEMP}"hplip_dll.conf
+        edo rmdir "${IMAGE}"etc/sane.d
     fi
-    find "${IMAGE}"/usr -type d -empty -delete || die "removing empty dirs failed"
+    edo find "${IMAGE}"/usr -type d -empty -delete
 }
 
 hplip_pkg_postinst() {

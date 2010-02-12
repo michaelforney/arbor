@@ -11,8 +11,7 @@ DEPENDENCIES="
 escons() {
     illegal_in_global_scope
 
-    echo scons ${@}
-    scons "${@}" || die_unless_nonfatal "scons: returned exit status: $?"
+    edo scons "${@}"
 }
 
 scons_src_configure() {

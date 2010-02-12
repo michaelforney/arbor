@@ -38,9 +38,8 @@ src_prepare() {
 
     option pam && expatch -p1 "${WORKBASE}"/${PNV}-pam.patch
 
-    sed -i -e "s:gcc \(-Wall.*\):${CC} \1 ${CFLAGS}:" \
-        -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile \
-        || die "sed Makefile failed"
+    edo sed -i -e "s:gcc \(-Wall.*\):${CC} \1 ${CFLAGS}:" \
+               -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile
 }
 
 src_install() {
@@ -73,3 +72,4 @@ src_install() {
     doman crontab.1 crontab.5 cron.8
     dodoc CHANGES CONVERSION FEATURES MAIL README THANKS
 }
+

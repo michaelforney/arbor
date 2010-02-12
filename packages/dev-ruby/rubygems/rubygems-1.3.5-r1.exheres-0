@@ -34,7 +34,7 @@ src_install() {
         myconf+="--no-rdoc --no-ri"
     fi
 
-    ruby setup.rb ${myconf} --vendor --destdir="${IMAGE}" || die "setup.rb failed"
+    edo ruby setup.rb ${myconf} --vendor --destdir="${IMAGE}"
 
     dosym "gem${ruby_version}" /usr/bin/gem
 
@@ -48,7 +48,7 @@ src_install() {
 
 pkg_postinst() {
     if [[ -e ${site_gem_dir}/source_cache ]]; then
-        rm ${site_gem_dir}/source_cache || die "unable to remove src_cache"
+        edo rm ${site_gem_dir}/source_cache
     fi
 }
 

@@ -33,8 +33,7 @@ src_prepare() {
 
     # Do not build documentation if not needed, saves a ton of X dependencies
     if option !doc ; then
-        sed -i -e '/SUBDIRS =/s/doc//' {,Watchdog/}Makefile.in ||
-            die "sed doc failed"
+        edo sed -i -e '/SUBDIRS =/s/doc//' {,Watchdog/}Makefile.in
     fi
 }
 

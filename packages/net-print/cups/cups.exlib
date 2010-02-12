@@ -67,8 +67,7 @@ src_prepare() {
     # remove default optimizations and do not strip by default
     edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
             -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
-            -i config-scripts/cups-compiler.m4 \
-            || die "edo failed. old paludis?"
+            -i config-scripts/cups-compiler.m4
 
     # do not overwrite libdir if lib64 is found on the system and
     # don't use the library dir as server directory, since that'll

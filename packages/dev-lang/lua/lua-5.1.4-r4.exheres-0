@@ -28,22 +28,22 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-Build-a-shared-liblua.patch" )
 src_prepare() {
     # Doing this here instead of passing relevant options in src_{compile,install} is cleaner
     # Set install paths, don't create empty directories.
-    sed -e "/^INSTALL_TOP/s:= .*:= ${IMAGE}/usr:" \
-        -e "/^INSTALL_INC/s:= .*:= ${IMAGE}/usr/include/${PN}$(ever range 1-2):" \
-        -e "/^INSTALL_MAN/s:= .*:= ${IMAGE}/usr/share/man/man1:" \
-        -e "/^INSTALL/s:lib:$(get_libdir):" \
-        -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
-        -i Makefile || die "sedding Makefile failed"
+    edo sed -e "/^INSTALL_TOP/s:= .*:= ${IMAGE}/usr:" \
+            -e "/^INSTALL_INC/s:= .*:= ${IMAGE}/usr/include/${PN}$(ever range 1-2):" \
+            -e "/^INSTALL_MAN/s:= .*:= ${IMAGE}/usr/share/man/man1:" \
+            -e "/^INSTALL/s:lib:$(get_libdir):" \
+            -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
+            -i Makefile
 
-    sed -e "/^prefix/s:/.*$:/usr:" \
-        -e "/^includedir/s:$:/${PN}$(ever range 1-2):" \
-        -e "/^Libs/s:-llua:&$(ever range 1-2):" \
-        -e "s:/lib:/$(get_libdir):" \
-        -i etc/${PN}.pc || die "sedding etc/${PN}.pc failed"
+    edo sed -e "/^prefix/s:/.*$:/usr:" \
+            -e "/^includedir/s:$:/${PN}$(ever range 1-2):" \
+            -e "/^Libs/s:-llua:&$(ever range 1-2):" \
+            -e "s:/lib:/$(get_libdir):" \
+            -i etc/${PN}.pc
 
-    sed -e 's:/usr/local/:/usr/:' \
-        -e "s:lib/:$(get_libdir)/:" \
-        -i src/luaconf.h || die "sedding src/luaconf.h failed"
+    edo sed -e 's:/usr/local/:/usr/:' \
+            -e "s:lib/:$(get_libdir)/:" \
+            -i src/luaconf.h
 
     default
 }
@@ -81,8 +81,7 @@ src_install() {
 
     for executable in lua{,c}${V} ; do
         echo mv "${IMAGE}"/usr/bin/{${executable},${executable/${V}}}
-        mv "${IMAGE}"/usr/bin/{${executable},${executable/${V}}} ||
-            die "Couldn't unversion executables"
+        edo mv "${IMAGE}"/usr/bin/{${executable},${executable/${V}}}
     done
 
     insinto /usr/$(get_libdir)/pkgconfig

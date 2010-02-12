@@ -21,18 +21,18 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 src_prepare() {
     default
 
-    sed -e '/^CFLAGS/s/=/+=/' \
-        -e '/^CFLAGS/s/-O.//' \
-        -e '/^CFLAGS/s/-g//' \
-        -i Makefile Makefile-libbz2_so || die 'Sed for CFLAGS failed'
+    edo sed -e '/^CFLAGS/s/=/+=/' \
+            -e '/^CFLAGS/s/-O.//' \
+            -e '/^CFLAGS/s/-g//' \
+            -i Makefile Makefile-libbz2_so
 
-    sed -e "s:1\.0\.4:${PV}:" \
-        -i bzip2.1 bzip2.txt Makefile-libbz2_so manual.{html,ps,xml} || die 'Sed for broken versioning failed'
+    edo sed -e "s:1\.0\.4:${PV}:" \
+            -i bzip2.1 bzip2.txt Makefile-libbz2_so manual.{html,ps,xml}
 
-    sed -e 's:$(PREFIX)/lib:$(PREFIX)/$(LIBDIR):g' \
-        -e 's:$(PREFIX)/include:$(PREFIX)/usr/include:g' \
-        -e 's:$(PREFIX)/man:$(PREFIX)/usr/share/man:g' \
-        -i Makefile || die 'Sed for manpath failed'
+    edo sed -e 's:$(PREFIX)/lib:$(PREFIX)/$(LIBDIR):g' \
+            -e 's:$(PREFIX)/include:$(PREFIX)/usr/include:g' \
+            -e 's:$(PREFIX)/man:$(PREFIX)/usr/share/man:g' \
+            -i Makefile
 }
 
 src_compile() {

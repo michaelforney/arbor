@@ -29,7 +29,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 src_unpack() {
     default
-    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+    edo mkdir "${WORK}"
 }
 
 src_test_expensive() {
@@ -40,9 +40,9 @@ src_install() {
     emake -j1 -C "${WORK}" DESTDIR="${IMAGE}" install-target-libstdc++-v3
 
     # We only care about the shared library
-    pushd "${IMAGE}"
-    rm -rf usr/[^l]* || die "Couldn't remove /usr/[^l]*"
-    rm -rf usr/lib*/*.{a,la,so} || die "Couldn't remove /usr/[^l]*"
-    popd
+    edo pushd "${IMAGE}"
+    edo rm -rf usr/[^l]*
+    edo rm -rf usr/lib*/*.{a,la,so}
+    edo popd
 }
 

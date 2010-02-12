@@ -44,11 +44,11 @@ automake_src_install() {
 
     local slotslot=( "${IMAGE}"/usr/bin/*-${SLOT}-${SLOT} )
     if [[ -e ${slotslot[0]} ]]; then
-        rm "${slotslot[@]}" || die "rm failed"
+        edo rm "${slotslot[@]}"
     fi
-    cd "${IMAGE}"/usr/share/info || die 'cd /usr/share/info failed'
+    edo cd "${IMAGE}"/usr/share/info
     for info in automake.info* ; do
-        mv ${info} automake-${SLOT}.${info##*.} || die "slotting ${info} failed"
+        edo mv ${info} automake-${SLOT}.${info##*.}
     done
 }
 

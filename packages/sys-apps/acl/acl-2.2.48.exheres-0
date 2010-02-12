@@ -35,14 +35,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 src_prepare() {
-    sed -i \
-        -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
-        -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
-        include/builddefs.in \
-        || die "failed to update builddefs"
+    edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
+            -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
+            -i include/builddefs.in
     # libtool will clobber install-sh which is really a custom file
-    mv install-sh acl.install-sh || die "saving install-sh failed"
-    mv acl.install-sh install-sh || die "restoring install-sh failed"
+    edo mv install-sh acl.install-sh
+    edo mv acl.install-sh install-sh
 }
 
 src_configure() {

@@ -68,8 +68,7 @@ config_eap() {
 src_prepare() {
     default
 
-    sed -e 's:/usr/local/sbin/:/usr/bin/:g' \
-        -i Makefile || die "sed Makefile failed"
+    edo sed -i -e 's:/usr/local/sbin/:/usr/bin/:g' Makefile
 
     config_driver ATMEL
     config_driver HOSTAP
@@ -171,7 +170,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( eap_testing.txt wpa_supplicant.conf )
 src_install() {
     default
 
-
     ### INTERFACES
     option qt4 && dobin wpa_gui-qt4/wpa_gui
 
@@ -181,18 +179,15 @@ src_install() {
         insinto /etc/dbus-1/system.d/
         newins {dbus-,}wpa_supplicant.conf
 
-        sed -e 's:/sbin:/usr/sbin:' \
-            -i "${service_file}" || die "Failed to change hardcoded binary path."
+        edo sed -i -e 's:/sbin:/usr/sbin:' "${service_file}"
 
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
         newins "${service_file}" "${service_name}.service"
     fi
 
-
     ### DOCUMENTATION
     doman doc/docbook/*.{5,8}
-
 
     ### CONFIGURATION FILES
     exeinto /etc/wpa_supplicant
@@ -209,7 +204,7 @@ network={
 EOF
 
     dodir /usr/sbin
-    mv "${IMAGE}/usr"/{,s}bin/wpa_supplicant ||die "failed to move wpa_supplicant to /usr/sbin"
+    edo mv "${IMAGE}/usr"/{,s}bin/wpa_supplicant
 
     ### PRIVILEGE SEPARATION
     ### TODO once genesis handling is known
@@ -251,3 +246,4 @@ EOF
 #    einfo "Please add the system-wide wpa_supplicant user to that group:"
 #    einfo " usermod -a -G <control_interface_group> wpa_supplicant"
 #}
+

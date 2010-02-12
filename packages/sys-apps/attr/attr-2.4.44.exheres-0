@@ -34,15 +34,14 @@ DEFAULT_SRC_INSTALL_PARAMS=( DIST_ROOT="${IMAGE}" install-lib install-dev )
 src_prepare() {
     default
 
-    sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
-        -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
-        -i include/builddefs.in \
-        || die "failed to update builddefs"
+    edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
+            -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
+            -i include/builddefs.in
 
     # libtool will clobber install-sh which is really a custom file
-    mv install-sh ${PN}.install-sh || die "backing up install-sh failed"
+    edo mv install-sh ${PN}.install-sh
     AT_M4DIR="m4" eautoconf # attr doesn't use automake
-    mv ${PN}.install-sh install-sh || die "restoring install-sh failed"
+    edo mv ${PN}.install-sh install-sh
 }
 
 src_configure() {
@@ -54,6 +53,6 @@ src_install() {
     default
 
     # Part of sys-apps/man-pages
-    rm -r "${IMAGE}"/usr/share/man/man2 || die 'Failed to remove man2 pages from man-pages'
+    edo rm -r "${IMAGE}"/usr/share/man/man2
 }
 

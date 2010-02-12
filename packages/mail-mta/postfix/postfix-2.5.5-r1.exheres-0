@@ -51,18 +51,15 @@ src_compile() {
 }
 
 src_install() {
-    /bin/sh postfix-install \
+    edo /bin/sh postfix-install \
         -non-interactive \
         install_root="${IMAGE}" \
         config_directory="/usr/share/doc/${PNVR}/defaults" \
-        readme_directory="/usr/share/doc/${PNVR}/readme" \
-        || die 'postfix-install failed'
+        readme_directory="/usr/share/doc/${PNVR}/readme"
 
-    echo /usr/sbin/{,${PN}.}sendmail
-    mv "${IMAGE}"/usr/sbin/{,${PN}.}sendmail || die "mv /usr/sbin/sendmail failed"
-    echo rm /usr/bin/{mailq,newaliases}
-    rm "${IMAGE}"/usr/bin/{mailq,newaliases} || die "rm /usr/bin/{mailq,newaliases} failed"
-    rmdir "${IMAGE}"/usr/bin || die "rmdir /usr/bin failed"
+    edo mv "${IMAGE}"/usr/sbin/{,${PN}.}sendmail
+    edo rm "${IMAGE}"/usr/bin/{mailq,newaliases}
+    edo rmdir "${IMAGE}"/usr/bin
 
     alternatives_for mta ${PN} 9 /usr/sbin/sendmail ${PN}.sendmail
     alternatives_for mta ${PN} 9 /usr/$(get_libdir)/sendmail ../sbin/sendmail
@@ -71,8 +68,7 @@ src_install() {
 
     local manpage
     for manpage in man1/{mailq.1,newaliases.1} man5/aliases.5; do
-        echo mv /usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/}
-        mv "${IMAGE}"/usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/} || die "mv ${manpage} failed"
+        edo mv "${IMAGE}"/usr/share/man/${manpage%/*}/{,${PN}.}${manpage##*/}
         alternatives_for mta ${PN} 9 /usr/share/man/${manpage} ${PN}.${manpage##*/}
     done
 

@@ -26,7 +26,7 @@ src_compile() {
 
     if option doc; then
         emake doc
-        find doc/doxygen/html -type f -print0 | xargs -0 sed -i -e "s:${WORK}::g" ||
+        edo find doc/doxygen/html -type f -print0 | xargs -0 sed -i -e "s:${WORK}::g" ||
             die "sed to strip ${WORK} from api docs failed"
     fi
 }

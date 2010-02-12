@@ -84,7 +84,7 @@ DEPENDENCIES="
 "
 
 lesspipe_set() {
-    sed -i -e '/^__END__/,${s/^\('"${1}"'[ \t]\+\)[yYnN]\([ \t].*\)$/\1'"${2}"'\2/}' configure || die "setting option ${1} to ${2} failed"
+    edo sed -i -e '/^__END__/,${s/^\('"${1}"'[ \t]\+\)[yYnN]\([ \t].*\)$/\1'"${2}"'\2/}' configure
 }
 
 src_configure() {
@@ -96,8 +96,7 @@ src_configure() {
     option hilight || lesspipe_set HILITE N
 
     # Can't use econf as it's not autotools, just a hand-written perl script
-    ./configure --prefix="${IMAGE}"/usr --fixed || \
-        die "failed to configure lesspipe"
+    edo ./configure --prefix="${IMAGE}"/usr --fixed
 }
 
 src_compile() {

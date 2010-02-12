@@ -27,6 +27,6 @@ DEFAULT_SRC_INSTALL_PARAMS=( docdir=/usr/share/doc/${PNVR}/ )
 
 src_install() {
     default
-    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty dirs"
+    edo find "${IMAGE}" -type d -empty -delete
 }
 

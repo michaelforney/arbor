@@ -32,7 +32,7 @@ src_install() {
     default
 
     # Don't install emacs things without proper support for it
-    rm -rf "${IMAGE}"/usr/share/emacs || die "Removing emacsy things failed"
+    edo rm -rf "${IMAGE}"/usr/share/emacs
 
     if option doc ; then
         dodir /usr/share/doc/${PNVR}

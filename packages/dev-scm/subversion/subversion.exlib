@@ -107,8 +107,8 @@ subversion_src_install() {
         emake DESTDIR="${IMAGE}" DISTUTIL_PARAM="--prefix=${IMAGE}" LD_LIBRARY_PATH="-L${IMAGE}/usr/$(get_libdir)" install-swig-py
 
         dodir $(python_get_sitedir)
-        mv "${IMAGE}"/usr/$(get_libdir)/svn-python/{,lib}svn "${IMAGE}"/$(python_get_sitedir)
-        rm -rf "${IMAGE}"/usr/$(get_libdir)/svn-python
+        edo mv "${IMAGE}"/usr/$(get_libdir)/svn-python/{,lib}svn "${IMAGE}"/$(python_get_sitedir)
+        edo rm -rf "${IMAGE}"/usr/$(get_libdir)/svn-python
     fi
 
     if option ruby; then

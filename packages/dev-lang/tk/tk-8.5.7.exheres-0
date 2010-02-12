@@ -54,15 +54,13 @@ src_install() {
     local v1=$(ever range 1-2)
     # Fix the tkConfig.sh to eliminate references to the build directory
     local mylibdir=$(get_libdir) ; mylibdir=${mylibdir//\/}
-    sed -i \
-        -e "s,^\(TK_BUILD_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \
-        -e "s,^\(TK_SRC_DIR='\)${WORK%%/}',\1/usr/${mylibdir}/${PN}${v1}/include'," \
-        -e "s,^\(TK_BUILD_STUB_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \
-        -e "s,^\(TK_BUILD_STUB_LIB_PATH='\)${WORK%%/},\1/usr/${mylibdir}," \
-        -e "s,^\(TK_CC_SEARCH_FLAGS='.*\)',\1:/usr/${mylibdir}'," \
-        -e "s,^\(TK_LD_SEARCH_FLAGS='.*\)',\1:/usr/${mylibdir}'," \
-        "${IMAGE}"/usr/${mylibdir}/tkConfig.sh \
-        || die "sed to remove build dir references in /usr/${mylibdir}/tclConfig.sh failed"
+    edo sed -e "s,^\(TK_BUILD_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \
+            -e "s,^\(TK_SRC_DIR='\)${WORK%%/}',\1/usr/${mylibdir}/${PN}${v1}/include'," \
+            -e "s,^\(TK_BUILD_STUB_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \
+            -e "s,^\(TK_BUILD_STUB_LIB_PATH='\)${WORK%%/},\1/usr/${mylibdir}," \
+            -e "s,^\(TK_CC_SEARCH_FLAGS='.*\)',\1:/usr/${mylibdir}'," \
+            -e "s,^\(TK_LD_SEARCH_FLAGS='.*\)',\1:/usr/${mylibdir}'," \
+            -i "${IMAGE}"/usr/${mylibdir}/tkConfig.sh
 
     dosym libtk${v1}.so /usr/${mylibdir}/libtk.so
     dosym libtkstub${v1}.a /usr/${mylibdir}/libtkstub.a

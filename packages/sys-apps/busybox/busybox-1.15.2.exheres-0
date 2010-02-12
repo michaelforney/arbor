@@ -27,11 +27,11 @@ src_compile() {
 
     # Build dynamically linked executable and preserve it
     bb_make busybox_unstripped
-    mv busybox_unstripped{,.dynamic} || die "mv failed"
+    edo mv busybox_unstripped{,.dynamic}
 
     # Build statically linked executable and preserve it
     bb_make busybox_unstripped CONFIG_STATIC=y
-    mv busybox_unstripped{,.static} || die "mv failed(2)"
+    edo mv busybox_unstripped{,.static}
 }
 
 src_install() {

@@ -44,27 +44,27 @@ WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
     # use system headers
-    rm -r include/linux include/netinet || die "failed to remove system headers"
+    edo rm -r include/linux include/netinet
 
     # fix hardcoded gcc
-    sed -i -e "s:^gcc:${CC}:" configure || die "sed configure failed"
+    edo sed -i -e "s:^gcc:${CC}:" configure
 
     # fix hardcoded -O2 and allow user CFLAGS
     # The -DRTPROT_DHCP is an evil hack, but I'm not sure of a better
     # fix for now.
-    sed -e '/^CCOPTS =/s: -O2 : :' \
-        -e 's:^CFLAGS =:CFLAGS += -DRTPROT_DHCP=16:' \
-        -i Makefile || die "sed Makefile (2) failed"
+    edo sed -e '/^CCOPTS =/s: -O2 : :' \
+            -e 's:^CFLAGS =:CFLAGS += -DRTPROT_DHCP=16:' \
+            -i Makefile
 
-    sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' \
-        -i netem/Makefile || die "sed netem/Makefile failed"
+    edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' \
+            -i netem/Makefile
 
-    sed -e "s:/usr/local/lib:/usr/$(get_libdir):" \
-        -i include/iptables.h || die "sed include/iptables.h failed"
+    edo sed -e "s:/usr/local/lib:/usr/$(get_libdir):" \
+            -i include/iptables.h
 
     if ! option berkdb ; then
-        sed -e '/TARGETS/s:arpd::' \
-            -i misc/Makefile || die "sed s:arpd:: failed"
+        edo sed -e '/TARGETS/s:arpd::' \
+                -i misc/Makefile
     fi
 }
 
@@ -81,7 +81,7 @@ src_install() {
         keepdir /var/lib/arpd
 
         dodir /usr/sbin
-        mv "${IMAGE}"/{,usr/}sbin/arpd
+        edo mv "${IMAGE}"/{,usr/}sbin/arpd
     fi
 }
 

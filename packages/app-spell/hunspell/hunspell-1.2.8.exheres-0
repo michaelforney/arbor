@@ -36,7 +36,6 @@ src_install() {
 
     # these binaries are rarely used and have very generic names. move them to a separate dir.
     dodir /usr/libexec/${PN}
-    mv "${IMAGE}"/usr/bin/{analyze,chmorph,example,hzip,hunzip} "${IMAGE}"/usr/libexec/${PN}/ \
-        || die "mv failed"
+    edo mv "${IMAGE}"/usr/bin/{analyze,chmorph,example,hzip,hunzip} "${IMAGE}"/usr/libexec/${PN}/
 }
 

@@ -105,13 +105,12 @@ src_install() {
     default
 
     # Empty directories
-    rmdir "${IMAGE}"/usr/share/hal/fdi/{information,preprobe,policy}/20thirdparty \
-          "${IMAGE}"/usr/share/hal/fdi/information/{10freedesktop,}               \
-          "${IMAGE}"/usr/share/hal/fdi/preprobe/{10osvendor,}                     \
-    || die "failed to cleanup empty directories"
+    edo rmdir "${IMAGE}"/usr/share/hal/fdi/{information,preprobe,policy}/20thirdparty \
+              "${IMAGE}"/usr/share/hal/fdi/information/{10freedesktop,}               \
+              "${IMAGE}"/usr/share/hal/fdi/preprobe/{10osvendor,}
 
     # useless directories
-    find "${IMAGE}"/var/run -depth -type d -print0 2> /dev/null | xargs -0 -r rmdir
+    edo find "${IMAGE}"/var/run -type d -empty -delete
 
     # hal unmount helper for unclean unmounts
     exeinto /$(get_libdir)/udev

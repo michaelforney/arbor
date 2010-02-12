@@ -35,8 +35,7 @@ SGML_CATALOGS=(
 
 docbook-xml-dtd_src_prepare() {
     # Prepend OVERRIDE directive
-    sed -e '1i\\OVERRIDE YES' \
-        -i docbook.cat || die "sed in docbook.cat failed"
+    edo sed -i -e '1i\\OVERRIDE YES' docbook.cat
 }
 
 docbook-xml-dtd_src_install() {

@@ -37,14 +37,11 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 
 src_prepare() {
     # Fixing the version
-    sed -i -e 's:\(VERSION =\).*:\1 5.21o:' Makefile \
-        || die "version sed failed."
+    edo sed -i -e 's:\(VERSION =\).*:\1 5.21o:' Makefile
     # Respect the user's flags
-    sed -i -e "s:^\(OPT = \).*:\1 ${CFLAGS} ${LDFLAGS}:" Makefile \
-        || die "flags sed failed."
+    edo sed -i -e "s:^\(OPT = \).*:\1 ${CFLAGS} ${LDFLAGS}:" Makefile
     # Set the compiler
-    sed -i -e "s:^\(CC = \).*:\1 ${CC}:" Makefile \
-        || die "cc sed failed."
+    edo sed -i -e "s:^\(CC = \).*:\1 ${CC}:" Makefile
     # Add a fake install target
     echo -e "\ninstall:\n" >> Makefile
 
@@ -57,3 +54,4 @@ src_install() {
     dobin arc marc
     doman arc.1
 }
+

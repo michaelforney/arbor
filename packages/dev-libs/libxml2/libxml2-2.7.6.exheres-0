@@ -39,12 +39,11 @@ src_unpack() {
 
     # test suite
     unpack xmlts${TEST_VERSION}.tar.gz
-    mv "${WORKBASE}/xmlconf" "${WORK}" || die "Failed to move test suite in place"
+    edo mv "${WORKBASE}/xmlconf" "${WORK}"
 }
 
 src_prepare() {
-    ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/ ||
-        die "Failed to install test tarballs"
+    edo ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/
 }
 
 src_install() {

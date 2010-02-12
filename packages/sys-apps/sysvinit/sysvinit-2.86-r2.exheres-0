@@ -38,8 +38,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 src_unpack() {
     default
 
-    cp "${WORKBASE}"/change_console.{c,8} "${WORK}"/src/ \
-        || die "copying extra sources failed."
+    edo cp "${WORKBASE}"/change_console.{c,8} "${WORK}"/src/
 }
 
 src_compile() {
@@ -91,3 +90,4 @@ pkg_postinst() {
     fi
     alternatives_pkg_postinst
 }
+

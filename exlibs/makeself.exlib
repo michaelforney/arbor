@@ -9,18 +9,18 @@ unpack_makeself() {
     local input v skip=0
     input=${1:-${ARCHIVES}}
 
-    v=$(grep -a '#.*Makeself' "${FETCHEDDIR}/${input}" | awk '{print $NF}')
-    skip=$(grep -a ^skip= "${FETCHEDDIR}/${input}" | cut -d= -f2)
+    v=$(edo grep -a '#.*Makeself' "${FETCHEDDIR}/${input}" | edo awk '{print $NF}')
+    skip=$(edo grep -a ^skip= "${FETCHEDDIR}/${input}" | edo cut -d= -f2)
 
     case ${v} in
         1.6.0-nv) : ;;
         *) die "makeself sanity check failed" ;;
     esac
 
-    tail -n +${skip} "${FETCHEDDIR}/${input}" > ./${PNV}.tar.gz
+    edo tail -n +${skip} "${FETCHEDDIR}/${input}" > ./${PNV}.tar.gz
 
-    mkdir "${WORK}" || die "Couldn't create WORK"
-    cd "${WORK}" || die "Couldn't enter WORK"
+    edo mkdir "${WORK}"
+    edo cd "${WORK}"
 
     unpack ./../${PNV}.tar.gz
 }

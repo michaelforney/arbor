@@ -31,9 +31,9 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 src_prepare() {
     default
 
-    sed -e "s:LOCKINGTEST=__defaults__:#&:" \
-        -e "/LOCKINGTEST=\/tmp/s:^#::" \
-        -i Makefile || die "Sed failed."
+    edo sed -e "s:LOCKINGTEST=__defaults__:#&:" \
+            -e "/LOCKINGTEST=\/tmp/s:^#::" \
+            -i Makefile
 }
 
 src_install() {

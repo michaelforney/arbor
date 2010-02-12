@@ -26,7 +26,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( index.html )
 
 src_prepare() {
     default
-    sed -e '/^CX*FLAGS/s/-O2//' \
-        -i Makefile.m4 || die "Removing '-O2' from Makefile.m4 flags failed"
+    edo sed -i -e '/^CX*FLAGS/s/-O2//' Makefile.m4
 }
 

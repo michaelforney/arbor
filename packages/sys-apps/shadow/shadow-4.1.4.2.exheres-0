@@ -44,8 +44,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 src_prepare() {
     default
 
-    sed -i "s:@LIBDIR@:$(get_libdir):" etc/login.defs ||
-        die "sed for setting libdir failed"
+    edo sed -i -e "s:@LIBDIR@:$(get_libdir):" etc/login.defs
 }
 
 src_install() {
@@ -58,8 +57,7 @@ src_install() {
     #   Currently, libshadow.a is for internal use only, so if you see
     #   -lshadow in a Makefile of some other package, it is safe to
     #   remove it.
-    rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la} ||
-        die "Couldn't remove libmisc, libshadow"
+    edo rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la}
 
     insinto /etc
     insopts -m0600
@@ -70,11 +68,12 @@ src_install() {
     insopts -m0600 ; doins "${FILES}"/useradd
 
     # move passwd to / to help recover broken systems. cf. Gentoo bug 64441.
-    mv "${IMAGE}"/usr/bin/passwd "${IMAGE}"/bin/ || die "Moving passwd to /bin failed"
+    edo mv "${IMAGE}"/usr/bin/passwd "${IMAGE}"/bin/
     dosym /bin/passwd /usr/bin/passwd
 
     insinto /etc
-    insopts -m0644 ; newins etc/login.defs login.defs
+    insopts -m0644
+    newins etc/login.defs login.defs
 
     if option pam ; then
         dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
@@ -85,20 +84,17 @@ src_install() {
         done
 
         # comment out login.defs options that pam hates
-        sed -i  -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs ||
-            die "login.defs sed failed"
+        edo sed -i -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs
 
         # remove manpages that pam will install for us
         # and/or don't apply when using pam
-        find "${IMAGE}"/usr/share/man '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete ||
-            die "rm manpages that don't apply when using pam failed"
+        edo find "${IMAGE}"/usr/share/man '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete
     fi
 
     # Remove manpages that are handled by other packages
-    find "${IMAGE}"/usr/share/man '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete ||
-        die "rm manpages that collide with other packages failed"
+    edo find "${IMAGE}"/usr/share/man '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete
 
-    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories"
+    edo find "${IMAGE}" -type d -empty -delete
 }
 
 pkg_postinst() {

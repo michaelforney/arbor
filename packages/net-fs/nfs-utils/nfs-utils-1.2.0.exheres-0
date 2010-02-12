@@ -34,12 +34,12 @@ src_install() {
     # versions somewhere safe...  more info in pkg_postinst
     dodir /usr/$(get_libdir)/nfs
     keepdir /var/lib/nfs/{sm,sm.bak}
-    mv "${IMAGE}"/var/lib/nfs/* "${IMAGE}"/usr/$(get_libdir)/nfs
+    edo mv "${IMAGE}"/var/lib/nfs/* "${IMAGE}"/usr/$(get_libdir)/nfs
     keepdir /var/lib/nfs
 
     # Install some client-side binaries in /sbin
     dodir /sbin
-    mv "${IMAGE}"/usr/sbin/rpc.statd "${IMAGE}"/sbin/ || die "mv failed"
+    edo mv "${IMAGE}"/usr/sbin/rpc.statd "${IMAGE}"/sbin/
 
     insinto /etc
     doins "${FILES}"/exports

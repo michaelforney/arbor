@@ -55,7 +55,7 @@ pam_build_pkg_pretend() {
 pam_build_src_prepare() {
     mkdir -p doc/txt
     for readme in modules/pam_*/README; do
-        cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | \
+        edo cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | \
             sed -e 's|^modules/||')
     done
 
@@ -90,5 +90,6 @@ pam_build_src_install() {
     # Need to be suid
     fperms u+s /sbin/unix_chkpwd
 
-    find "${IMAGE}"/var -type d -empty -delete || die "removing empty dirs failed"
+    edo find "${IMAGE}"/var -type d -empty -delete
 }
+

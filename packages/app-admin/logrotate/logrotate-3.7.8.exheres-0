@@ -26,10 +26,9 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 src_prepare() {
     default
 
-    sed -i \
-        -e "s:CFLAGS += -g:CFLAGS += -g ${CFLAGS}:" \
-        -e "s:LDFLAGS = -g:LDFLAGS = -g ${LDFLAGS}:" \
-        Makefile || die "sed failed"
+    edo sed -e "s:CFLAGS += -g:CFLAGS += -g ${CFLAGS}:" \
+            -e "s:LDFLAGS = -g:LDFLAGS = -g ${LDFLAGS}:" \
+            -i Makefile
 }
 
 src_install() {
@@ -46,3 +45,4 @@ src_install() {
 
     keepdir /etc/logrotate.d
 }
+

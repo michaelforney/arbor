@@ -28,7 +28,7 @@ src_install() {
         if [[ -f ${IMAGE}/bin/${fname} ]]; then
             dosym /bin/${fname} /usr/bin/${fname}
         else
-            rm "${IMAGE}"/usr/share/man/man1/${fname}.1 || die "Couldn't remove ${fname}.1"
+            edo rm "${IMAGE}"/usr/share/man/man1/${fname}.1
         fi
     done
 }

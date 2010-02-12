@@ -34,7 +34,7 @@ src_prepare() {
     # .moc files should be generated with the Qt version that's used, otherwise things break
     if option qt4 ; then
         for moc_crap_thing in qt4/*.moc ; do
-            moc ${moc_crap_thing/.moc/.h} > ${moc_crap_thing} || die "moc ${moc_crap_thing} failed"
+            edo moc ${moc_crap_thing/.moc/.h} > ${moc_crap_thing}
         done
     fi
 }

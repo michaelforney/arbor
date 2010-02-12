@@ -66,11 +66,12 @@ DEPENDENCIES="
 
 git_src_unpack() {
     unpack ${PNV}.tar.bz2
-    cd "${WORK}"
+    edo cd "${WORK}"
     exparam -b manpages && unpack ${PN}-manpages-${PV}.tar.bz2
 
     if exparam -b htmldocs && option doc; then
-        cd Documentation && unpack ${PN}-htmldocs-${PV}.tar.bz2
+        edo cd Documentation
+        unpack ${PN}-htmldocs-${PV}.tar.bz2
     fi
 }
 

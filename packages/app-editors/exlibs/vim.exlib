@@ -134,11 +134,10 @@ vim_src_prepare() {
     expatch "${patches[@]}"
 
     # Fixup a script to use awk instead of nawk
-    sed -i '1s|.*|#!/usr/bin/awk -f|' "${WORK}"/runtime/tools/mve.awk \
-        || die "mve.awk sed failed"
+    edo sed -i -e '1s|.*|#!/usr/bin/awk -f|' "${WORK}"/runtime/tools/mve.awk
 
     # Patch to build with ruby-1.8.0_pre5 and following
-    sed -i 's/defout/stdout/g' "${WORK}"/src/if_ruby.c || die "defout->stdout sed broke"
+    edo sed -i -e 's/defout/stdout/g' "${WORK}"/src/if_ruby.c
 
     # Read vimrc and gvimrc from /etc/vim
     echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> "${WORK}"/src/feature.h
@@ -174,8 +173,8 @@ END
 
     # Try to avoid sandbox problems. Bug #114475.
     if [[ -d ${WORK}/src/po ]] ; then
-        sed -e '/-S check.vim/s,..VIM.,ln -s $(VIM) testvim \; ./testvim -X,' \
-            -i "${WORK}/src/po/Makefile" || die "sed in src/po failed"
+        edo sed -e '/-S check.vim/s,..VIM.,ln -s $(VIM) testvim \; ./testvim -X,' \
+                -i "${WORK}/src/po/Makefile"
     fi
 }
 
@@ -193,8 +192,8 @@ vim_src_configure() {
     # (3) Notice auto/configure is newer than auto/config.mk
     # (4) Run ./configure (with wrong args) to remake auto/config.mk
     ebegin "Creating configure script"
-    sed -i 's/ auto.config.mk:/:/' src/Makefile || die "Makefile sed failed"
-    rm -f src/auto/configure
+    edo sed -i -e 's/ auto.config.mk:/:/' src/Makefile
+    edo rm -f src/auto/configure
     # vim-6.2 changed the name of this rule from auto/configure to autoconf
     confrule=auto/configure
     grep -q ^autoconf: src/Makefile && confrule=autoconf
@@ -235,8 +234,7 @@ vim_src_configure() {
         # --with-features=huge forces on cscope even if we --disable it. We need
         # to sed this out to avoid screwiness. (1 Sep 2004 ciaranm)
         #if option !cscope ; then
-            sed -i -e '/# define FEAT_CSCOPE/d' src/feature.h \
-                || die "couldn't disable cscope"
+            edo sed -i -e '/# define FEAT_CSCOPE/d' src/feature.h
         #fi
 
         case "${PN}" in
@@ -288,7 +286,7 @@ vim_src_compile() {
 
     if [[ "${PN}" == "vim-runtime" ]] ; then
         nonfatal emake tools || die "emake tools failed"
-        rm -f src/vim
+        edo rm -f src/vim
     else
         if ! nonfatal emake ; then
             eerror "If the above messages seem to be talking about perl"
@@ -324,7 +322,7 @@ vim_src_test() {
     if [[ "${PN}" == "gvim" ]] ; then
        # Make gvim not try to connect to X. See :help gui-x11-start
        # in vim for how this evil trickery works.
-       ln -s "${WORK}"/src/{gvim,testvim}
+       edo ln -s "${WORK}"/src/{gvim,testvim}
        testprog="${WORK}/src/testvim"
     else
         testprog="${WORK}/src/vim"
@@ -332,17 +330,16 @@ vim_src_test() {
 
     # We've got to call make test from within testdir, since the Makefiles
     # don't pass through our VIMPROG argument
-    cd "${WORK}"/src/testdir
+    edo cd "${WORK}"/src/testdir
 
     # Test 49 still doesn't work right for gvim. Not sure why.
     if [[ "${PN}" == "gvim" ]] ; then
         echo "Test 49 isn't gvim-friendly, so it will be skipped."
-        sed -i -e 's~test49.out~~g' Makefile
+        edo sed -i -e 's~test49.out~~g' Makefile
     fi
 
     # We don't want to rebuild vim before running the tests
-    sed -i -e 's,: \$(VIMPROG),: ,' Makefile \
-        || die "sedding out vimprog failed"
+    edo sed -i -e 's,: \$(VIMPROG),: ,' Makefile
 
     # Don't try to do the additional GUI test
     emake -j1 VIMPROG=${testprog} TERM=dumb nongui
@@ -351,7 +348,7 @@ vim_src_test() {
 vim_src_install() {
     if [[ "${PN}" == "vim-runtime" ]] ; then
         dodir /usr/{bin,share/{man/man1,vim}}
-        cd src || die "cd src failed"
+        edo cd src
         emake \
             installruntime \
             installmanlinks \
@@ -416,9 +413,9 @@ vim_src_install() {
 
     # We shouldn't be installing the ex or view man page symlinks, as they
     # are managed by eclectic
-    rm -f "${IMAGE}"/usr/share/man/man1/{ex,view}.1
+    edo rm -f "${IMAGE}"/usr/share/man/man1/{ex,view}.1
     # Same for these /usr/bin symlinks
-    rm -f "${IMAGE}"/usr/bin/{ex,view}
+    edo rm -f "${IMAGE}"/usr/bin/{ex,view}
 
     if [[ "${PN}" != 'vim-runtime' ]] ; then
         local importance

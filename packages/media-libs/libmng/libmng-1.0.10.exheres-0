@@ -23,7 +23,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.examples doc/{${PN}.txt,doc.readme} )
 src_prepare() {
     #upstream does not handle autotools anymore
     #moved to unmaintained - we use it anyway
-    cp makefiles/configure.in makefiles/Makefile.am . || die "cp failed"
+    edo cp makefiles/configure.in makefiles/Makefile.am .
     eautoreconf
 }
 

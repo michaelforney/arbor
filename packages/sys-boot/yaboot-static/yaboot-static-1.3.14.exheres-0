@@ -16,7 +16,7 @@ WORK=${WORKBASE}
 
 src_install() {
     # don't blow away the user's old conf file
-    mv "${WORKBASE}/etc/yaboot.conf" "${WORKBASE}/etc/yaboot.conf.unconfigured" \
-        || die "mv failed"
-    cp -a "${WORKBASE}"/* "${IMAGE}" || die "cp failed"
+    edo mv "${WORKBASE}/etc/yaboot.conf" "${WORKBASE}/etc/yaboot.conf.unconfigured"
+    edo cp -a "${WORKBASE}"/* "${IMAGE}"
 }
+

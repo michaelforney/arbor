@@ -18,8 +18,7 @@ DEPENDENCIES="
 WORK="${WORKBASE}"
 
 src_fetch_extra() {
-    wget -O "${FETCHEDDIR}"/pci.ids http://pciids.sourceforge.net/v2.2/pci.ids ||
-        die "Failed to fetch pci.ids"
+    edo wget -O "${FETCHEDDIR}"/pci.ids http://pciids.sourceforge.net/v2.2/pci.ids
 }
 
 src_unpack() {
@@ -31,3 +30,4 @@ src_install() {
     insinto /usr/share/misc
     doins pci.ids
 }
+

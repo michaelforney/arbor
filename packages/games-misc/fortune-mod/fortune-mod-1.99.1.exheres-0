@@ -20,13 +20,13 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/01_all_fortune_all-fix.patch")
 
 src_configure() {
-    sed -i \
-        -e 's:/games::' \
-        -e 's:/fortunes:/fortune:' \
-        -e '/^FORTDIR=/s:=.*:=$(prefix)/usr/bin:' \
-        -e '/^all:/s:$: fortune/fortune.man:' \
-        Makefile || die "sed Makefile failed"
+    edo sed -e 's:/games::' \
+            -e 's:/fortunes:/fortune:' \
+            -e '/^FORTDIR=/s:=.*:=$(prefix)/usr/bin:' \
+            -e '/^all:/s:$: fortune/fortune.man:' \
+            -i Makefile
 }
 
 DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( INDEX Offensive cookie-files )
+

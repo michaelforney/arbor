@@ -42,13 +42,12 @@ WORK=${WORKBASE}/${PN}-$(ever range 1-3)
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 src_prepare() {
-    sed -e "/^INS_BASE/s:/opt/schily:/usr:" \
-        -e "/^LDPATH/s:/opt/schily:/usr:" \
-        -e "/^RUNPATH/s:-R/opt/schily/lib::" \
-        -e "/^LDPATH/s:lib:$(get_libdir):" \
-        -e "/^RUNPATH/s:lib:$(get_libdir):" \
-        -i DEFAULTS/Defaults.linux \
-        || die "Failed to fix installation paths"
+    edo sed -e "/^INS_BASE/s:/opt/schily:/usr:" \
+            -e "/^LDPATH/s:/opt/schily:/usr:" \
+            -e "/^RUNPATH/s:-R/opt/schily/lib::" \
+            -e "/^LDPATH/s:lib:$(get_libdir):" \
+            -e "/^RUNPATH/s:lib:$(get_libdir):" \
+            -i DEFAULTS/Defaults.linux
 }
 
 # ./configure is a shell script that notifies people not to use ./configure anymore, and fails
@@ -60,12 +59,12 @@ src_install() {
     default
 
     if [[ $(get_libdir) != lib ]]; then
-        mv "${IMAGE}"/usr/{lib,$(get_libdir)} || die "Failed to move libs into the correct libdir"
+        edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}
     fi
 
-    mv "${IMAGE}"/usr/{,share/}man || die "Failed to move manual pages into /usr/share"
+    edo mv "${IMAGE}"/usr/{,share/}man
 
-    # Don't install man-pages that related to the buildsystem
-    rm -r "${IMAGE}"/usr/share/man/man5 || die "Failed to remove silly manual pages"
+    # Don't install man-pages that are related to the buildsystem
+    edo rm -r "${IMAGE}"/usr/share/man/man5
 }
 

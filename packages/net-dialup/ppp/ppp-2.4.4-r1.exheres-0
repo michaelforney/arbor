@@ -77,51 +77,41 @@ src_prepare() {
     fi
 
     if option atm ; then
-        sed -i "s/^#HAVE_LIBATM=yes/HAVE_LIBATM=yes/" pppd/plugins/pppoatm/Makefile.linux ||
-            die "PPPoATM sed failed"
+        edo sed -i "s/^#HAVE_LIBATM=yes/HAVE_LIBATM=yes/" pppd/plugins/pppoatm/Makefile.linux
     fi
 
     if option !activefilter ; then
-        sed -i "s/^FILTER=y/#FILTER=y/" pppd/Makefile.linux ||
-            die "activefilter sed failed"
+        edo sed -i "s/^FILTER=y/#FILTER=y/" pppd/Makefile.linux
     fi
 
     if option pam ; then
-        sed -i "s/^#USE_PAM=y/USE_PAM=y/" pppd/Makefile.linux ||
-            die "PAM sed failed"
+        edo sed -i "s/^#USE_PAM=y/USE_PAM=y/" pppd/Makefile.linux
     fi
 
     if option ipv6 ; then
-        sed -i "s/#HAVE_INET6/HAVE_INET6/" pppd/Makefile.linux ||
-            die "IPV6 sed failed"
+        edo sed -i "s/#HAVE_INET6/HAVE_INET6/" pppd/Makefile.linux
     fi
 
-    sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux ||
-        die "CBCP sed failed"
+    edo sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux
 
     if option dhcp ; then
-        mv "${WORKBASE}/dhcp" "${WORK}/pppd/plugins/" || die "moving ppp-dhcp plugin failed"
-        sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux ||
-            die "ppp-dhcp plugin addition failed"
+        edo mv "${WORKBASE}/dhcp" "${WORK}/pppd/plugins/"
+        edo sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux
         expatch -p1 "${WORKBASE}/patch/dhcp-make-vars.patch"
         expatch -p1 "${WORKBASE}/patch/dhcp-sys_error_to_strerror.patch"
     fi
 
     # Set correct libdir
-    sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8} ||
-        die "libdir sed failed"
+    edo sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8}
 
     if option radius ; then
         # set the right paths in radiusclient.conf
-        sed -i -e "s:/usr/local/etc:/etc:" \
-            -e "s:/usr/local/sbin:/usr/sbin:" pppd/plugins/radius/etc/radiusclient.conf ||
-            die "radiusclient.conf sed failed"
+        edo sed -i -e "s:/usr/local/etc:/etc:" \
+                -e "s:/usr/local/sbin:/usr/sbin:" pppd/plugins/radius/etc/radiusclient.conf
 
         # set config dir to /etc/ppp/radius
-        sed -i -e "s:/etc/radiusclient:/etc/ppp/radius:g" \
-            pppd/plugins/radius/{*.8,*.c,*.h} \
-            pppd/plugins/radius/etc/* ||
-            die "radius config dir sed failed"
+        edo sed -e "s:/etc/radiusclient:/etc/ppp/radius:g" \
+                -i pppd/plugins/radius/{*.8,*.c,*.h,etc/*}
     fi
 }
 
@@ -135,9 +125,9 @@ src_install() {
     fperms u+s-w /usr/sbin/pppd
 
     # Install pppd header files
-    pushd pppd
-    emake -j1 INSTROOT="${IMAGE}" install-devel || die "emake install-devel failed"
-    popd
+    edo pushd pppd
+    emake -j1 INSTROOT="${IMAGE}" install-devel
+    edo popd
 
     dosbin pppd/plugins/rp-pppoe/pppoe-discovery
 
@@ -162,11 +152,7 @@ src_install() {
 
     insinto /usr/$(get_libdir)/pppd/${PV}
     insopts -m0755
-    doins pppd/plugins/minconn.so
-    doins pppd/plugins/passprompt.so
-    doins pppd/plugins/passwordfd.so
-    doins pppd/plugins/winbind.so
-    doins pppd/plugins/rp-pppoe/rp-pppoe.so
+    doins pppd/plugins/{minconn,passprompt,passwordfd,winbind,rp-pppoe/rp-pppoe}.so
 
     if option atm; then
         doins pppd/plugins/pppoatm/pppoatm.so
@@ -195,8 +181,7 @@ src_install() {
 
     emagicdocs
     dodoc PLUGINS SETUP "${FILES}"/README.mpls
-    cp -pPR {contrib,scripts} "${IMAGE}/usr/share/doc/${PNVR}/" ||
-        die "copying contrib and scripts failed."
+    edo cp -pPR {contrib,scripts} "${IMAGE}/usr/share/doc/${PNVR}/"
 
     dosbin scripts/pon
     dosbin scripts/poff
@@ -229,7 +214,8 @@ pkg_postinst() {
     fi
 
     # lib name has changed
-    sed -i -e "s:^pppoe.so:rp-pppoe.so:" "${ROOT}/etc/ppp/options"
+    sed -i -e "s:^pppoe.so:rp-pppoe.so:" "${ROOT}/etc/ppp/options" ||
+        eerror "sed /etc/ppp/options failed"
 
     echo
     elog "Pon, poff and plog scripts have been supplied for experienced users."

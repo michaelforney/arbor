@@ -21,8 +21,7 @@ export_exlib_phases src_prepare src_install
 
 luaforge_src_prepare() {
     if [[ -f config ]] ; then
-        sed -e "s,/lib/,/$(get_libdir)/," \
-            -i config || die "config sed failed"
+        edo sed -i -e "s,/lib/,/$(get_libdir)/," config
     fi
 }
 

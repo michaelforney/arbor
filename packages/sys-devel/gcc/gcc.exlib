@@ -78,16 +78,15 @@ DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 src_unpack() {
     if ever at_least 4.3 && option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
-        cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar \
-            || die "copying ecj.jar failed."
+        edo cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar
     else
         default
     fi
-    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+    edo mkdir "${WORK}"
 }
 
 src_prepare() {
-    cd  "${WORKBASE}/${PNV}" || die "Entering ${WORKBASE}/${PNV} failed"
+    edo cd  "${WORKBASE}/${PNV}"
     default
     # patch can't apply a binary diff. git apply can.
     option java && [[ ${SLOT} == 4.4 ]] && ! ever at_least 4.4.3 &&
@@ -134,23 +133,23 @@ src_install() {
     if option doc; then
         insinto /usr/share/doc/${PNVR}/html
         if ever at_least 4.3; then
-            pushd "${WORK}"/${CHOST}/libstdc++-v3/doc || die "Cound not enter libstdc++-v3/doc"
+            edo pushd "${WORK}"/${CHOST}/libstdc++-v3/doc
             emake doc-html-doxygen
             doins -r doxygen/html/*
         else
-            pushd "${WORK}"/${CHOST}/libstdc++-v3 || die "Cound not enter libstdc++-v3"
+            edo pushd "${WORK}"/${CHOST}/libstdc++-v3
             emake doxygen
             doins -r docs/doxygen/html_user/*
         fi
-        popd
+        edo popd
     fi
 
     # nuke empty dir if applicable
     if option !fortran && ever at_least 4.2; then
-        rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude || die "rmdir finclude failed"
+        edo rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
     fi
 
-    pushd "${IMAGE}" || die "Could not enter IMAGE"
+    edo pushd "${IMAGE}"
 
     local p
     for p in usr/${libdir}/*-gdb.py ; do
@@ -158,9 +157,7 @@ src_install() {
         [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
 
         local p=${p##*/}
-        echo mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
-        mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}" ||
-            die "Couldn't move gdb python hook ${p}-gdb.py"
+        edo mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
     done
 
     ### slots handling
@@ -178,8 +175,7 @@ src_install() {
     for x in usr/${libdir}/*.*; do
         if [[ -L ${x} ]]; then
             # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
-            echo rm "${x}"
-            rm "${x}" || die "rm /${x} failed"
+            edo rm "${x}" || die "rm /${x} failed"
             removed+=( "/${x}" ) # just a sanity check
         elif [[ -f ${x} ]]; then
             bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
@@ -190,8 +186,7 @@ src_install() {
                     # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
                     # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
                     # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
-                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                    edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
                     symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
                     so_symlinks+=( "${x}" )
                     ;;
@@ -205,8 +200,7 @@ src_install() {
                 *.a|*.la|*.spec|*.security|*.properties)
                     # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
                     # symlinks+=( usr/lib/libstdc++-4.3.la )
-                    echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                    mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+                    edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
                     symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
                     ;;
             esac
@@ -216,7 +210,7 @@ src_install() {
     # info pages
     for x in usr/share/info/*.info; do
         bn=$(basename "${x}" .info)
-        mv usr/share/info/${bn}{,-${SLOT}}.info || die "mv /${x} failed"
+        edo mv usr/share/info/${bn}{,-${SLOT}}.info
         alternatives+=( /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
     done
 
@@ -227,14 +221,14 @@ src_install() {
     done
     for x in usr/share/man/man7/*; do
         bn=$(basename "${x}" .7)
-        mv "${x%.7}"{,-${SLOT}}.7 || die "mv /${x} failed"
+        edo mv "${x%.7}"{,-${SLOT}}.7
         alternatives+=( /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
     done
 
     # locales
     for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
         bn=$(basename "${x}" .mo)
-        mv "${x%.mo}"{,-${SLOT}}.mo || die "mv /${x} failed"
+        edo mv "${x%.mo}"{,-${SLOT}}.mo
         alternatives+=( /${x} ${bn}-${SLOT}.mo )
     done
 
@@ -243,22 +237,21 @@ src_install() {
         for x in usr/${libdir}/security/classpath.security usr/share/java/ecj.jar; do
             bn=$(basename "${x}")
             ext=${bn#*.}
-            echo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-            mv "${x%.${ext}}"{,-${SLOT}}.${ext} || die "mv /${x} failed"
+            edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
             alternatives+=( /${x} ${bn%.${ext}}-${SLOT}.${ext} )
         done
         alternatives+=( /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
     fi
 
     alternatives_for "${alternatives[@]}"
-    popd
+    edo popd
 
     # fix libstdc++.so symlink
-    rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir} || die "rewrite_so_symlink ${libstdcpp} failed"
+    edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir}
 
     for dir in "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
         if [[ -d ${dir} ]] ; then
-            find "${dir}" -type d -empty -delete || die "Failed to remove empty directories."
+            edo find "${dir}" -type d -empty -delete
         fi
     done
 }
@@ -267,15 +260,13 @@ pkg_preinst() {
     local pch x y
     for pch in extc++.h.gch stdc++.h.gch stdtr1c++.h.gch; do
         if [[ -f ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} ]]; then
-            echo rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch}
-            rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch} \
-                || die "Failed to remove ${ROOT}/usr/include/c++/${PV}/${CHOST}/bits/${pch} for a dir-over-file-merge"
+            edo rm "${ROOT}"/usr/include/c++/${PV}/${CHOST}/bits/${pch}
         fi
     done
 
     # ease migration to proper slotting (i.e. prevent paludis from breaking before pkg_postinst, which would fix it)
     if [[ -f ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 ]]; then
-        touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 || die "touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 failed"
+        edo touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1
     fi
 }
 

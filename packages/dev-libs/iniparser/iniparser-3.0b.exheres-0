@@ -29,23 +29,20 @@ DEPENDENCIES=""
 WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
-    sed \
-        -e "s:^\(CC .*=\) .*:\1 ${CC}:" \
-        -e "s:^\(CFLAGS .*=\) -O2:\1 ${CFLAGS}:" \
-        -e "s:^\(AR\t .*=\) .*:\1 ${AR}:" \
-        -e "s:^\(LDFLAGS = .*\):\1 ${LDFLAGS}:" \
-        -e "s:/usr/lib:/usr/$(get_libdir):g" \
-        -i Makefile \
-        -i test/Makefile \
-        || die "sed to change the Makefile failed"
+    edo sed -e "s:^\(CC .*=\) .*:\1 ${CC}:" \
+            -e "s:^\(CFLAGS .*=\) -O2:\1 ${CFLAGS}:" \
+            -e "s:^\(AR\t .*=\) .*:\1 ${AR}:" \
+            -e "s:^\(LDFLAGS = .*\):\1 ${LDFLAGS}:" \
+            -e "s:/usr/lib:/usr/$(get_libdir):g" \
+            -i Makefile test/Makefile
 }
 
 src_test() {
     emake -j1 check
-    pushd test >/dev/null
-    ./iniexample || die "iniexample test failed"
-    ./parse || die "parser torture test failed"
-    popd >/dev/null
+    edo pushd test >/dev/null
+    edo ./iniexample
+    edo ./parse
+    edo popd >/dev/null
 }
 
 src_install() {
@@ -60,3 +57,4 @@ src_install() {
 
     emagicdocs
 }
+

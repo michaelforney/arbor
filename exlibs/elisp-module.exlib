@@ -29,9 +29,8 @@ ELISP_COMPILE_FLAGS=( --directory . )
 elisp-compile() {
     illegal_in_global_scope
 
-    ${EMACS} "${ELISP_FLAGS[@]}" "${ELISP_COMPILE_FLAGS[@]}" \
-        -f batch-byte-compile "$@" \
-        || die "failed to compile elisp files"
+    edo ${EMACS} "${ELISP_FLAGS[@]}" "${ELISP_COMPILE_FLAGS[@]}" \
+        -f batch-byte-compile "$@"
 }
 
 # Install the given set of files (arguments #2-) to the given location

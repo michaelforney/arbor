@@ -28,11 +28,11 @@ cmake_run() {
     illegal_in_global_scope
 
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        pushd "${ECMAKE_BUILD_DIR}"
+        edo pushd "${ECMAKE_BUILD_DIR}"
     fi
-    "${@}"
+    edo "${@}"
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        popd
+        edo popd
     fi
 }
 
@@ -100,10 +100,8 @@ ecmake() {
         in-source)
             ;;
         out-of-source)
-            mkdir -p "${ECMAKE_BUILD_DIR}" || \
-                die_unless_nonfatal "Failed to create ${PN}_build" || return 1
-            pushd "${ECMAKE_BUILD_DIR}" || \
-                die_unless_nonfatal "Could not enter ${PN}_build" || return 1
+            edo mkdir -p "${ECMAKE_BUILD_DIR}" || return 1
+            edo pushd "${ECMAKE_BUILD_DIR}" || return 1
             ;;
         *)
             die "Invalid value for ECMAKE_BUILD_TYPE, ${ECMAKE_BUILD_TYPE}"
@@ -129,11 +127,10 @@ ecmake() {
         -DLIB_SUFFIX:STRING=${tmp_libdir/lib}
     )
 
-    echo cmake "${cmakeargs[@]}" "$@" "${EXTRA_ECONF}" "${WORK}"
-    cmake "${cmakeargs[@]}" "$@" "${EXTRA_ECONF}" "${WORK}" || die_unless_nonfatal "Cmake failed" || return 1
+    edo cmake "${cmakeargs[@]}" "$@" "${EXTRA_ECONF}" "${WORK}" || return 1
 
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        popd
+        edo popd
     fi
 }
 

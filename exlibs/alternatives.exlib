@@ -75,7 +75,7 @@ alternatives_for() {
             if [[ -e ${IMAGE}${src} ]]; then
                 local fulltarget=${target}
                 [[ ${fulltarget} != /* ]] && fulltarget=${src%/*}/${fulltarget}
-                mv "${IMAGE}${src}" "${IMAGE}${fulltarget}" || die "mv ${src} failed"
+                edo mv "${IMAGE}${src}" "${IMAGE}${fulltarget}"
             fi
         fi
         shift 2

@@ -28,23 +28,23 @@ DEFAULT_SRC_INSTALL_PARAMS=( install-lib )
 
 src_prepare() {
     default
-    sed -i -e '/^PREFIX=/cPREFIX=/usr' \
-           -e "/^LIBDIR=/cLIBDIR=/usr/$(get_libdir)" \
-           -e '/^IDSDIR=/cIDSDIR=/usr/share/misc' \
-           -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
-           -e '/^STRIP=-s/cSTRIP=' \
-           Makefile || die "failed to update makefile"
+    edo sed -e '/^PREFIX=/cPREFIX=/usr' \
+            -e "/^LIBDIR=/cLIBDIR=/usr/$(get_libdir)" \
+            -e '/^IDSDIR=/cIDSDIR=/usr/share/misc' \
+            -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
+            -e '/^STRIP=-s/cSTRIP=' \
+            -i Makefile
 }
 
 src_install() {
     default
 
     # provided by pciutils-data
-    rm -f "${IMAGE}/usr/share/misc/pci.ids" || die "unable to remove pci.ids"
-    rmdir "${IMAGE}/usr/share/misc" || die "unable to remove /usr/share/misc"
+    edo rm -f "${IMAGE}/usr/share/misc/pci.ids"
+    edo rmdir "${IMAGE}/usr/share/misc"
 
     # not needed
-    rm -f "${IMAGE}/usr/sbin/update-pciids" || die "unable to remove update-pciids"
-    rm -f "${IMAGE}/usr/share/man/man8/update-pciids.8" || die "unable to remove update-pciids manpage"
+    edo rm -f "${IMAGE}/usr/sbin/update-pciids"
+    edo rm -f "${IMAGE}/usr/share/man/man8/update-pciids.8"
 }
 

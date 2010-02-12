@@ -36,19 +36,16 @@ DEFAULT_SRC_CONFIGURE_PARAMS+=(
 src_prepare() {
     default
 
-    sed -i \
-        -e "s:^\(DAEMONDIR = \):\1${IMAGE}:" \
-        -e "s:^\(MANDIR = \):\1${IMAGE}:" \
-        -e 's:$(BINDIR)::' \
-        Makefile.in || die "sed Makefile.in (1) failed"
+    edo sed -e "s:^\(DAEMONDIR = \):\1${IMAGE}:" \
+            -e "s:^\(MANDIR = \):\1${IMAGE}:" \
+            -e 's:$(BINDIR)::' \
+            -i Makefile.in
 
     if optionq perl ; then
-        sed -i -e 's:.*xconv.pl.*::' Makefile.in || die "sed Makefile.in (2) failed"
+        edo sed -i -e 's:.*xconv.pl.*::' Makefile.in
     fi
 
-    sed -i \
-        -e 's:^#\(\s*only_from\s*=\):\1 localhost:' contrib/xinetd.conf \
-        || die "sed contrib/xinetd.conf failed"
+    edo sed -i -e 's:^#\(\s*only_from\s*=\):\1 localhost:' contrib/xinetd.conf
 }
 
 src_install() {
@@ -61,3 +58,4 @@ src_install() {
     doins -r "${WORK}"/contrib/xinetd.d
     doins "${WORK}"/contrib/xinetd.conf
 }
+

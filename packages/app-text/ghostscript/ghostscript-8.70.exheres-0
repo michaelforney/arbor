@@ -41,21 +41,19 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_prepare() {
-    rm -r ./{expat,jasper,jpeg,libpng,zlib} \
-        || die "Couldn't remove internal copies of expat,jasper,jpeg,libpng & zlib"
+    edo rm -r ./{expat,jasper,jpeg,libpng,zlib}
 
     if option !gtk; then
-        sed -e 's:\$(GSSOX)::' \
-            -e 's:.*\$(GSSOX_XENAME)$::' \
-            -i base/*.mak ||
-            die 'GSSOX sed failed'
+        edo sed -e 's:\$(GSSOX)::' \
+                -e 's:.*\$(GSSOX_XENAME)$::' \
+                -i base/*.mak
     fi
 
-    sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak || die 'docdir sed failed'
+    edo sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak
 
     default
     eautoreconf
-    cd "${WORK}/ijs"
+    edo cd "${WORK}/ijs"
     eautoreconf
 }
 
@@ -76,7 +74,7 @@ src_configure() {
         # Doesn't compile:
         # $(option_with jpeg2000 jasper) \
 
-    cd "${WORK}/ijs"
+    edo cd "${WORK}/ijs"
     econf
 }
 
@@ -84,14 +82,14 @@ src_compile() {
     # Parallel make is broken
     emake -j1 so all
 
-    cd "${WORK}/ijs"
+    edo cd "${WORK}/ijs"
     emake
 }
 
 src_install() {
     emake -j1 DESTDIR="${IMAGE}" install-so install
 
-    cd "${WORK}/ijs"
+    edo cd "${WORK}/ijs"
     default
 
     if option !X && option !gtk; then
