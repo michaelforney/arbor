@@ -2,7 +2,7 @@
 # Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require easy-multibuild flag-o-matic
 
 SUMMARY="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
@@ -11,11 +11,10 @@ DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" LIBDIR=$(get_libdir) MANPREFIX="${IMAGE}"/usr/share )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 
 src_prepare() {
@@ -35,7 +34,18 @@ src_prepare() {
             -i Makefile
 }
 
-src_compile() {
+configure_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+    edo cp "${WORK}"/* "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
+
+compile_one_multibuild() {
+    filter-flags -m32
+    case "${MULTIBUILD_TARGET}" in
+        32) export CC="${CC} -m32";;
+        64) export CC="${CC/ -m32/}";;
+    esac
+
     local myemake=(
         CC="${CC}"
         AR="${AR}"
@@ -43,24 +53,35 @@ src_compile() {
     )
 
     emake "${myemake[@]}" -f Makefile-libbz2_so
-    emake "${myemake[@]}"
+    emake "${myemake[@]}" $([[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]] || echo libbz2.a)
 }
 
+test_one_multibuild() {
+    [[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]] && default
+}
 
-src_install() {
-    default
+install_one_multibuild() {
+    if [[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]]; then
+        emake PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANPREFIX="${IMAGE}"/usr/share install
+        emagicdocs
+    else
+        into /
+        dolib.a libbz2.a
+    fi
 
-    # Install shared libraries to /$(get_libdir)
+    # Install shared libraries to /${LIBDIR}
     into /
     dolib.so libbz2.so.${PV}
     for v in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
-        dosym libbz2.so.${PV} /$(get_libdir)/${v}
+        dosym libbz2.so.${PV} /${LIBDIR}/${v}
     done
 
-    # Fix symlinks linking to ${IMAGE}
-    dosym bzgrep /bin/bzegrep
-    dosym bzgrep /bin/bzfgrep
-    dosym bzmore /bin/bzless
-    dosym bzdiff /bin/bzcmp
+    if [[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]]; then
+        # Fix symlinks linking to ${IMAGE}
+        dosym bzgrep /bin/bzegrep
+        dosym bzgrep /bin/bzfgrep
+        dosym bzmore /bin/bzless
+        dosym bzdiff /bin/bzcmp
+    fi
 }
 
