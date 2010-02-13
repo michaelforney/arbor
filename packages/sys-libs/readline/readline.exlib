@@ -45,6 +45,7 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${MY_PNV}"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-examples-srcdir.patch )
 DEFAULT_SRC_INSTALL_PARAMS=(
     htmldir="/usr/share/doc/${PNVR}/html"
 
@@ -63,6 +64,8 @@ readline_src_prepare() {
 
     # Gentoo #71420
     edo sed -e 's:^SHLIB_LIBS=:SHLIB_LIBS=-lncurses:' -i support/shobj-conf
+
+    default
 }
 
 configure_one_multibuild() {
