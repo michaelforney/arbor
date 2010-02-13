@@ -28,5 +28,6 @@ DEFAULT_SRC_INSTALL_PARAMS+=( BINDIR=/usr/sbin )
 src_prepare() {
     default
 
-    sed /iw.8.gz/s:.gz::g -i Makefile || die "Failed sed'ing Makefile"
+    edo sed -i -e /iw.8.gz/s:.gz::g Makefile
 }
+

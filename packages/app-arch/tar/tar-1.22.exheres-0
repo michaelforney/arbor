@@ -20,12 +20,12 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
 src_compile() {
     default
-    perl "${FILES}"/tarman > tar.1
+    edo perl "${FILES}"/tarman > tar.1
 }
 
 src_install() {
     default
     doman tar.1
-    rmdir "${IMAGE}"/usr/sbin || die "rmdir failed"
+    edo rmdir "${IMAGE}"/usr/sbin
 }
 

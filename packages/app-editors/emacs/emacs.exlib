@@ -81,8 +81,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 
 emacs_src_prepare() {
     # Compressing *.el files saves 25MB diskspace, which is not worth it on modern systems
-    sed -e 's/@GZIP_PROG@//' \
-        -i {.,leim}/Makefile.in || die 'Sed to disable elisp compression failed'
+    edo sed -i -e 's/@GZIP_PROG@//' {.,leim}/Makefile.in
     default
 }
 
@@ -97,20 +96,20 @@ EOF
     keepdir /var/lib/games/emacs
     dovarlibgames -R
     # they lose group write permission anyway after being updated
-    chmod g-w "${IMAGE}"/var/lib/games/emacs/* || die "chmod failed"
+    edo chmod g-w "${IMAGE}"/var/lib/games/emacs/*
     preserve_scores "${IMAGE}"/var/lib/games/emacs/*
     fowners wizard:games /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
     fperms ug+s /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
 
     # Handle slotting:
-    rm "${IMAGE}/usr/bin/${PN}-${EMACS_SCM_REAL_VERSION:-${PV}}-${SLOT}" || die 'Failed to remove duplicate emacs binary'
+    edo rm "${IMAGE}/usr/bin/${PN}-${EMACS_SCM_REAL_VERSION:-${PV}}-${SLOT}"
 
     local i m
     for m in "${IMAGE}"/usr/share/man/man?/*; do
-        mv "${m}" "${m%.?}-${SLOT}${m: -2}" || die "mv man ${m} failed"
+        edo mv "${m}" "${m%.?}-${SLOT}${m: -2}"
     done
     for i in "${IMAGE}"/usr/share/info/${PN}-${SLOT}/*; do
-        mv "${i}" "${i}.info" || die "mv info ${i} failed"
+        edo mv "${i}" "${i}.info"
     done
 
     # Compile a list of everything we install that needs the alternatives treatment:
@@ -119,10 +118,10 @@ EOF
     local unique src target alternatives=() alternatives_ctags=()
     for src in usr/bin/*-${SLOT} usr/share/man/man?/* ; do
         if [[ ${src} == usr/bin/ctags-${SLOT} ]]; then
-            mv ${src} ${src/${SLOT}/${PN}-${SLOT}} || die "mv ctags failed"
+            edo mv ${src} ${src/${SLOT}/${PN}-${SLOT}}
             alternatives_ctags+=( /usr/bin/ctags ctags-${PN}-${SLOT} )
         elif [[ ${src} == usr/share/man/man1/ctags-${SLOT}.1 ]]; then
-            mv ${src} ${src/${SLOT}/${PN}-${SLOT}} || die "mv ctags.1 failed"
+            edo mv ${src} ${src/${SLOT}/${PN}-${SLOT}}
             alternatives_ctags+=( /usr/share/man/man1/ctags.1 ctags-${PN}-${SLOT}.1 )
         else
             target=${src/-${SLOT}}

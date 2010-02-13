@@ -290,8 +290,8 @@ php_src_test_expensive() {
     # We enable safe mode by default but for the tests, it must be disabled. Thus,
     # we make sure the standard php.ini-dist (which disables safe mode) gets used
     # here.
-    cp php.ini-dist tmp-php.ini
-    sed -i -e 's:\(echo >\) \($(top_builddir)/tmp-php.ini;\):\1> \2 :' Makefile
+    edo cp php.ini-dist tmp-php.ini
+    edo sed -i -e 's:\(echo >\) \($(top_builddir)/tmp-php.ini;\):\1> \2 :' Makefile
 
     emake -j1 test
 }
@@ -303,21 +303,21 @@ php_src_install() {
 
     # Needed but useless because we'll remove it later.
     if option apache; then
-        mkdir -p "${IMAGE}"/etc/apache2 || die "creating dir failed"
-        cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2 || die "copying httpd.conf failed"
+        edo mkdir -p "${IMAGE}"/etc/apache2
+        edo cp /etc/apache2/httpd.conf "${IMAGE}"/etc/apache2
     fi
 
     default
 
     # Cleaning up.
     if option pear; then
-        rm -r "${IMAGE}"/.{channels,registry} || die "removing obsolete dirs failed"
-        rm "${IMAGE}"/.{depdb,depdblock,filemap,lock} || die "removing cruft failed"
+        edo rm -r "${IMAGE}"/.{channels,registry}
+        edo rm "${IMAGE}"/.{depdb,depdblock,filemap,lock}
     fi
-    rmdir "${IMAGE}"/usr/include/php/include || die "removing empty dirs failed"
+    edo rmdir "${IMAGE}"/usr/include/php/include
 
     if option apache; then
-        rm "${IMAGE}"/etc/apache2/* || die "removing apache files failed"
+        edo rm "${IMAGE}"/etc/apache2/*
     fi
 
     if option pear; then
@@ -343,3 +343,4 @@ php_src_install() {
        doins "${FILES}"/70_mod_php.conf
     fi
 }
+

@@ -87,20 +87,19 @@ apache_src_install() {
     fowners apache:apache /var/lib/dav /var/{cache,log,run}/apache2
     fperms 0755 /var/lib/dav /var/{cache,log,run}/apache2
 
-    rm -r "${IMAGE}"/etc/apache2/original || die "Failed to remove duplicate config files"
-    # rm -r "${IMAGE}"/usr/share/apache2/build || die "Removing junk failed"
+    edo rm -r "${IMAGE}"/etc/apache2/original
+    # edo rm -r "${IMAGE}"/usr/share/apache2/build
 
-    find "${IMAGE}"/usr/share/doc/${PNVR}/manual/ -type d -empty -delete ||
-        die "Couldn't remove empty directories under /usr/share/manual/"
+    edo find "${IMAGE}"/usr/share/doc/${PNVR}/manual/ -type d -empty -delete
 
     newconfd "${FILES}"/apache-confd apache2
     newinitd "${FILES}"/apache-initd apache2
 
     # Fix user/group.
-    sed -i -e "s:^\(.* \)daemon$:\1 ${PN}:" "${IMAGE}"/etc/apache2/httpd.conf
+    edo sed -i -e "s:^\(.* \)daemon$:\1 ${PN}:" "${IMAGE}"/etc/apache2/httpd.conf
 
     # Add modules.d config part.
-    cat "${FILES}"/apache-modules.d.conf >> "${IMAGE}"/etc/apache2/httpd.conf
+    edo cat "${FILES}"/apache-modules.d.conf >> "${IMAGE}"/etc/apache2/httpd.conf
     keepdir /etc/apache2/modules.d
 }
 
@@ -134,3 +133,4 @@ add-exherbo-layout() {
 </Layout>
 EOF
 }
+

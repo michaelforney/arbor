@@ -27,28 +27,28 @@ src_prepare() {
     default
 
     # Fix libdir
-    sed -e "s:\(\$(INSTALL_PREFIX)\$(INSTALLTOP)\)/lib:\1/$(get_libdir):g" \
-        -e "/libdir=/s:/lib:/$(get_libdir):g" \
-        -i Makefile.org engines/Makefile || die "Libdir sed failed"
+    edo sed -e "s:\(\$(INSTALL_PREFIX)\$(INSTALLTOP)\)/lib:\1/$(get_libdir):g" \
+            -e "/libdir=/s:/lib:/$(get_libdir):g" \
+            -i Makefile.org engines/Makefile
 
     # Fix manpath
-    sed -e 's:^MANDIR=.*$:MANDIR=/usr/share/man:' -i Makefile.org || die "Manual path sed failed"
+    edo sed -e 's:^MANDIR=.*$:MANDIR=/usr/share/man:' -i Makefile.org
 }
 
 src_configure() {
-    ./config --test-sanity || die "Sanity test failed"
+    edo ./config --test-sanity
 
     # ppc64 needs to be configured manually with Configure instead of config.
     if option platform:ppc64; then
-        ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl shared threads \
-            || die "Configure failed (ppc64)"
+        edo ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl shared threads
     else
-        ./config --prefix=/usr --openssldir=/etc/ssl shared threads || die "Configure failed"
+        edo ./config --prefix=/usr --openssldir=/etc/ssl shared threads
     fi
 }
 
 src_install() {
     emake -j1 INSTALL_PREFIX="${IMAGE}" install
     keepdir /etc/ssl/{certs,private}
+    emagicdocs
 }
 

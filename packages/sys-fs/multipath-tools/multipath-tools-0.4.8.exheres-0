@@ -40,8 +40,8 @@ src_prepare() {
     default
 
     local my_libdir=$(get_libdir)
-    sed -i -e '/KRNLLIB/s:/lib/:/'${my_libdir}'/:' Makefile || die "sed 1 failed"
-    sed -i -e '/libudevdir/s:/lib/:/'${my_libdir}'/:' Makefile.inc || die "sed 2 failed"
+    edo sed -i -e '/KRNLLIB/s:/lib/:/'${my_libdir}'/:' Makefile
+    edo sed -i -e '/libudevdir/s:/lib/:/'${my_libdir}'/:' Makefile.inc
 }
 
 src_compile() {

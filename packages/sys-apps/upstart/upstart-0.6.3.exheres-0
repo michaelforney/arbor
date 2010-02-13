@@ -24,7 +24,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --exec-prefix=/ )
 
 src_install() {
     default
-    find "${IMAGE}" -type d -empty -delete || die "Couldn't remove empty directories"
+    edo find "${IMAGE}" -type d -empty -delete
 
     # alternatives
     local a t alternatives=( init ${PN} 5 )

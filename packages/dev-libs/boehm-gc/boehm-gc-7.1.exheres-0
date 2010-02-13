@@ -23,7 +23,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_prepare() {
-    sed -i -e '/^SUBDIRS/s/doc//' Makefile.in || die
+    edo sed -i -e '/^SUBDIRS/s/doc//' Makefile.in
     default
 }
 
@@ -41,7 +41,7 @@ src_configure() {
 src_install() {
     default
 
-    rm -r "${IMAGE}"/usr/share/gc || die
+    edo rm -r "${IMAGE}"/usr/share/gc
 
     # dist_noinst_HEADERS
     insinto /usr/include/gc

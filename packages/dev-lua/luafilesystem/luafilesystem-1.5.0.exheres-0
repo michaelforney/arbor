@@ -32,9 +32,9 @@ DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 
 src_prepare() {
     append-flags $(pkg-config --cflags lua)
-    sed -e "s:\(CFLAGS=\):\1 ${CFLAGS}:" \
-        -e "s|/usr/local|${IMAGE}/usr|" \
-        -e "s,/lib/,/$(get_libdir)/," \
-        -i "${WORK}"/config || die "sed config failed"
+    edo sed -e "s:\(CFLAGS=\):\1 ${CFLAGS}:" \
+            -e "s|/usr/local|${IMAGE}/usr|" \
+            -e "s,/lib/,/$(get_libdir)/," \
+            -i "${WORK}"/config
 }
 

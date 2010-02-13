@@ -21,19 +21,14 @@ configure_string() {
 }
 
 src_prepare() {
-    sed -i \
-        -e  "/^echo /$(configure_string CC ${CC})" \
-        -e  "/^echo /$(configure_string CPP ${CPP})" \
-        -e  "/^echo /$(configure_string CFLAGS "\${CFLAGS} ${CFLAGS}")" \
-        -e "/^      /$(configure_string LFLAGS2 "\${LFLAGS2} ${LDFLAGS}")" \
-        -e 's:^\[ -f .* \] && CPP=.*::' \
-        unix/configure \
-        || die "sed unix/configure failed"
+    edo sed -e  "/^echo /$(configure_string CC ${CC})" \
+            -e  "/^echo /$(configure_string CPP ${CPP})" \
+            -e  "/^echo /$(configure_string CFLAGS "\${CFLAGS} ${CFLAGS}")" \
+            -e "/^      /$(configure_string LFLAGS2 "\${LFLAGS2} ${LDFLAGS}")" \
+            -e 's:^\[ -f .* \] && CPP=.*::' \
+            -i unix/configure
 
-    sed -i \
-        -e 's:MANDIR = $(prefix):&/share:' \
-        unix/Makefile \
-        || die "sed unix/Makefile failed"
+    edo sed -i -e 's:MANDIR = $(prefix):&/share:' unix/Makefile
 }
 
 src_configure() {

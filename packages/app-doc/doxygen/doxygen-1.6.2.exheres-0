@@ -46,17 +46,17 @@ src_prepare() {
     default
 
     # Respect *FLAGS
-    sed -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
-        -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
-        -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
-        -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
-        -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
-        -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
-        -i tmake/lib/linux*/tmake.conf || die "Failed to use user's *FLAGS"
+    edo sed -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
+            -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
+            -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
+            -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
+            -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
+            -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
+            -i tmake/lib/linux*/tmake.conf
 
     # DESTDIR issues with the doxywizard binary
-    sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
-        -i addon/doxywizard/Makefile.in || die "DESTDIR fixing failed"
+    edo sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
+            -i addon/doxywizard/Makefile.in
 
     option qt4 && eqmake4 addon/doxywizard/doxywizard.pro
 }
@@ -70,13 +70,12 @@ src_configure() {
     option qt4 && export QTDIR=/usr
 
 
-    ./configure \
+    edo ./configure \
         --docdir /usr/share/doc/${PNVR} \
         --prefix /usr \
         --shared \
         $(option qt4 && option_with qt4 doxywizard) \
-        ${myconf} ||
-        die "./configure failed"
+        ${myconf}
 }
 
 src_compile() {
@@ -86,22 +85,22 @@ src_compile() {
         dodoc "${WORKBASE}"/${PN}_manual-${PV}.pdf
 
         if option !dot; then
-            sed -e '/HAVE_DOT/s:YES:NO:' \
-                -i $(find -name Doxyfile) || die "Disabling dot failed"
+            edo sed -e '/HAVE_DOT/s:YES:NO:' \
+                    -i $(find -name Doxyfile)
         fi
 
         # Disable latex support.
-        cp doc/Doxyfile{,.orig} || die "cp doc/Makefile{,.orig} failed"
-        cp doc/Makefile{,.orig} || die "cp doc/Makefile{,.orig} failed"
+        edo cp doc/Doxyfile{,.orig}
+        edo cp doc/Makefile{,.orig}
 
-        sed -e '/GENERATE_LATEX/s:YES:NO:' \
-            -e '/USE_PDFLATEX/s:YES:NO:' \
-            -i doc/Doxyfile || die "Disabling latex failed"
+        edo sed -e '/GENERATE_LATEX/s:YES:NO:' \
+                -e '/USE_PDFLATEX/s:YES:NO:' \
+                -i doc/Doxyfile
 
-        sed -e '/@epstopdf/s:^:#DONOTWANT :' \
-            -e '/@cp Makefile.latex/s:^:#DONOTWANT :' \
-            -e '/@sed/s:^:#DONOTWANT :' \
-            -i doc/Makefile || die "Disabling latex failed"
+        edo sed -e '/@epstopdf/s:^:#DONOTWANT :' \
+                -e '/@cp Makefile.latex/s:^:#DONOTWANT :' \
+                -e '/@sed/s:^:#DONOTWANT :' \
+                -i doc/Makefile
 
         emake docs
     fi

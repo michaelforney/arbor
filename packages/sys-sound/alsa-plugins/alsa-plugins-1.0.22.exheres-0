@@ -43,7 +43,7 @@ src_configure() {
 src_install() {
     default
 
-    cd doc || die "Could not enter doc dir"
+    edo cd doc
     dodoc README-pcm-oss upmix.txt vdownmix.txt
     option ffmpeg && dodoc a52.txt lavcrate.txt
     option jack && dodoc README-jack

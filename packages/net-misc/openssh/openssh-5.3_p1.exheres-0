@@ -57,8 +57,7 @@ pkg_pretend() {
 }
 
 src_prepare() {
-    edo sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h \
-        || die "edo failed. old paludis?"
+    edo sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h
 
     default
 
@@ -133,7 +132,8 @@ src_install() {
     fi
 
     doman contrib/ssh-copy-id.1
-    dodoc ChangeLog CREDITS OVERVIEW README* TODO sshd_config
+    emagicdocs
+    dodoc OVERVIEW sshd_config
 
     diropts -m 0700
     dodir /etc/skel/.ssh

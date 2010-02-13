@@ -38,14 +38,13 @@ src_prepare() {
     append-flags -fPIC
 
     # Modifications so we can build it correctly.
-    sed \
-        -e "s:BASECFLAGS=\".*\":BASECFLAGS=:g" \
-        -e 's:SSLDIR=/usr/local/ssl:SSLDIR=/usr:g' \
-        -e 's:SSLCERTS=$(SSLDIR)/certs:SSLCERTS=/etc/ssl/certs:g' \
-        -i src/osdep/unix/Makefile || die "Makefile sed fixing failed"
+    edo sed -e "s:BASECFLAGS=\".*\":BASECFLAGS=:g" \
+            -e 's:SSLDIR=/usr/local/ssl:SSLDIR=/usr:g' \
+            -e 's:SSLCERTS=$(SSLDIR)/certs:SSLCERTS=/etc/ssl/certs:g' \
+            -i src/osdep/unix/Makefile
 
     # Remove the pesky checks about SSL stuff
-    sed -e '/read.*exit/d' -i Makefile
+    edo sed -e '/read.*exit/d' -i Makefile
 }
 
 src_compile() {
@@ -67,18 +66,18 @@ src_install() {
     dolib.so c-client/libc-client.so.1.0.0
 
     # Headers
-    pushd c-client
+    edo pushd c-client
     insinto /usr/include/imap
     for header in *.h ; do
         doins $(canonicalise ${header})
     done
     doins $(canonicalise linkage.c)
-    popd
+    edo popd
     # We need to use the correct header for our OS. The rest gets deleted.
-    cp "${IMAGE}"/usr/include/imap/os_lnx.h "${TEMP}" || die "saving header failed"
-    rm "${IMAGE}"/usr/include/imap/os_*.h || die "removing cruft failed"
-    cp "${TEMP}"/os_lnx.h "${IMAGE}"/usr/include/imap/osdep.h || die "restoring header failed"
+    edo mv "${IMAGE}"/usr/include/imap/os{_lnx,dep}.h
+    edo rm "${IMAGE}"/usr/include/imap/os_*.h
 
     # Docs
     dodoc README docs/*.txt docs/CONFIG docs/RELNOTES
 }
+

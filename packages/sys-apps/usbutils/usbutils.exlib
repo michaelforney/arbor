@@ -14,7 +14,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 src_prepare() {
-    sed -i '/^pkgconfigdir/s:datadir:datarootdir:' Makefile.in || die "pkgconfigdir sed"
+    edo sed -i -e '/^pkgconfigdir/s:datadir:datarootdir:' Makefile.in
     default
 }
 
@@ -22,8 +22,8 @@ src_install() {
     default
 
     # this is provided by usbutils-data
-    rm -f "${IMAGE}/usr/sbin/update-usbids.sh" || die "unable to remove update-usbids.sh"
-    rm -f "${IMAGE}/usr/share/misc/usb.ids" || die "unable to remove usb.ids"
-    rmdir "${IMAGE}/usr/share/misc/" || die "unable to remove /usr/share/misc"
+    edo rm -f "${IMAGE}/usr/sbin/update-usbids.sh"
+    edo rm -f "${IMAGE}/usr/share/misc/usb.ids"
+    edo rmdir "${IMAGE}/usr/share/misc/"
 }
 

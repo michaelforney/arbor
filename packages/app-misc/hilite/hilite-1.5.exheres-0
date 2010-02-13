@@ -15,13 +15,14 @@ DEPENDENCIES=""
 WORK="${WORKBASE}"
 
 src_unpack() {
-    cp "${FETCHEDDIR}/${ARCHIVES}" "${WORKBASE}" || die "cp failed"
+    edo cp "${FETCHEDDIR}/${ARCHIVES}" "${WORKBASE}"
 }
 
 src_compile() {
-    ${CC} ${CFLAGS} -o ${PN} ${PNV}.c || die "compile failed"
+    edo ${CC} ${CFLAGS} -o ${PN} ${PNV}.c
 }
 
 src_install() {
     dobin ${PN}
 }
+

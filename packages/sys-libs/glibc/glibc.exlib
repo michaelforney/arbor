@@ -55,19 +55,19 @@ glibc_src_unpack() {
     default
 
     if [[ ${PV/_p*} != ${PV} ]] ; then
-        mv glibc-${PV/_p*}-2* glibc-${PV}
-        mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
+        edo mv glibc-${PV/_p*}-2* glibc-${PV}
+        edo mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
     fi
 
     if [[ -n ${libidn_uri} ]] ; then
-        mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn || die "Moving glibc-libidn-${PV} failed"
+        edo mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn
     fi
 
     if [[ -n ${ports_uri} ]] ; then
-        mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports || die "Moving glibc-ports-${PV} failed"
+        edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
     fi
 
-    mkdir "${WORK}" || die "mkdir ${WORK} failed"
+    edo mkdir "${WORK}"
 }
 
 glibc_src_prepare() {
@@ -151,12 +151,12 @@ glibc_src_install() {
     # don't install /etc/{ld.so.cache,localtime}
     for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
         if [[ -f ${file} ]] ; then
-            rm "${file}" || die "couldn't remove ${file##${IMAGE}}"
+            edo rm "${file}"
         fi
     done
 
     # don't install bundled timezone info
-    rm -r "${IMAGE}/usr/share/zoneinfo" || die "couldn't remove bundled timezone info"
+    edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
     cd "${WORKBASE}/${PNV}"
 

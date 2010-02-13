@@ -29,7 +29,7 @@ src_install() {
     default
 
     dodir /usr/sbin
-    mv "${IMAGE}"/usr/bin/{ntpd,ntpdate} "${IMAGE}"/usr/sbin/ || die "move to sbin failed."
+    edo mv "${IMAGE}"/usr/bin/{ntpd,ntpdate} "${IMAGE}"/usr/sbin/
 
     doman "${WORKBASE}"/man/*.[58]
     insinto /usr/share/doc/${PNVR}/html/
@@ -39,7 +39,7 @@ src_install() {
     doins "${FILES}"/ntp.conf
     doins -r scripts/*
     fperms -R go-wx /usr/share/ntp
-    find "${IMAGE}"/usr/share/ntp \
+    edo find "${IMAGE}"/usr/share/ntp \
         '(' \
         -name '*.in' -o \
         -name 'Makefile*' -o \
@@ -59,7 +59,7 @@ src_install() {
 NTPD_OPTS="$(option caps && echo '-u ntp:ntp')"
 EOF
 
-    find "${IMAGE}"/usr/ -type d -empty -delete
+    edo find "${IMAGE}"/usr/ -type d -empty -delete
 }
 
 pkg_postinst() {

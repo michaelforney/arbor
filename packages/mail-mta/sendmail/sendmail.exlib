@@ -99,20 +99,20 @@ sendmail_src_prepare() {
     option ldap && confMAPDEF="${confMAPDEF} -DLDAPMAP" \
         && confLIBS="${confLIBS} -lldap -llber"
 
-    sed -e "s:@@confCCOPTS@@:${confCCOPTS}:" \
-        -e "s/@@confLDOPTS@@/${confLDOPTS}/" \
-        -e "s/@@confMAPDEF@@/${confMAPDEF}/" \
-        -e "s/@@confENVDEF@@/${confENVDEF}/" \
-        -e "s/@@confLIBS@@/${confLIBS}/" \
-        -e "s/@@conf_sendmail_LIBS@@/${conf_sendmail_LIBS}/" \
-        "${FILES}"/site.config.m4 > "${WORK}"/devtools/Site/site.config.m4
+    edo sed -e "s:@@confCCOPTS@@:${confCCOPTS}:" \
+            -e "s/@@confLDOPTS@@/${confLDOPTS}/" \
+            -e "s/@@confMAPDEF@@/${confMAPDEF}/" \
+            -e "s/@@confENVDEF@@/${confENVDEF}/" \
+            -e "s/@@confLIBS@@/${confLIBS}/" \
+            -e "s/@@conf_sendmail_LIBS@@/${conf_sendmail_LIBS}/" \
+            "${FILES}"/site.config.m4 > "${WORK}"/devtools/Site/site.config.m4
 }
 
 sendmail_src_compile() {
-    sh Build || die "compilation failed in main build script"
-    pushd libmilter >/dev/null
-    sh Build || die "libmilter compilation failed"
-    popd >/dev/null
+    edo sh Build || die "compilation failed in main build script"
+    edo pushd libmilter >/dev/null
+    edo sh Build || die "libmilter compilation failed"
+    edo popd >/dev/null
 }
 
 sendmail_src_install() {
@@ -136,21 +136,16 @@ sendmail_src_install() {
     dodir /var/spool/{mqueue,clientmqueue} /etc/conf.d
     keepdir /var/spool/{clientmqueue,mqueue}
 
-    for dir in libsmutil sendmail mailstats praliases smrsh makemap vacation editmap
-    do
-        emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/${dir} \
-            || die "main installation failed"
+    for dir in libsmutil sendmail mailstats praliases smrsh makemap vacation editmap; do
+        emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/${dir}
     done
 
-    for dir in rmail mail.local
-    do
-        emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" force-install -C ${OBJDIR}/${dir} \
-            || die "rmail installation failed"
+    for dir in rmail mail.local; do
+        emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" force-install -C ${OBJDIR}/${dir}
     done
 
     dodir /usr/include/libmilter
-    emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/libmilter \
-            || die "libmilter installation failed"
+    emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/libmilter
 
     fowners root:smmsp /usr/sbin/sendmail
     fperms 2555 /usr/sbin/sendmail
@@ -159,12 +154,11 @@ sendmail_src_install() {
     fperms 700 /var/spool/mqueue
     dosym /usr/sbin/makemap /usr/bin/makemap
 
-    dodoc FAQ KNOWNBUGS README RELEASE_NOTES doc/op/op.me doc/op/op.ps
-    cp -pPR contrib "${IMAGE}"/usr/share/doc/${PNVR}/ \
-        || die "copying contrib failed"
+    emagicdocs
+    dodoc KNOWNBUGS doc/op/op.{me,ps}
+    edo cp -pPR contrib "${IMAGE}"/usr/share/doc/${PNVR}/
     dodir /usr/share/doc/${PNVR}/libmilter
-    cp -pPR libmilter/docs "${IMAGE}"/usr/share/doc/${PNVR}/libmilter/ \
-        || die "copying libmilter docs failed"
+    edo cp -pPR libmilter/docs "${IMAGE}"/usr/share/doc/${PNVR}/libmilter/
 
     newdoc libmilter/README README.libmilter
     newdoc libsm/README README.libsm
@@ -176,11 +170,10 @@ sendmail_src_install() {
     newdoc cf/README README.cf
     newdoc cf/cf/README README.install-cf
 
-    cp -pPR cf/* "${IMAGE}"/usr/share/sendmail-cf || die "copying cf failed"
+    edo cp -pPR cf/* "${IMAGE}"/usr/share/sendmail-cf
 
     insinto /etc/mail
-    if option mbox
-    then
+    if option mbox; then
         newins "${FILES}"/sendmail-mbox.mc sendmail.mc
     else
         newins "${FILES}"/sendmail-procmail.mc sendmail.mc
@@ -189,12 +182,12 @@ sendmail_src_install() {
     # Redirecting stderr because the inclusion of cf.m4 will fail if it's not
     # yet installed. Since we're using cf.m4 from ${IMAGE} directly this doesn't
     # matter and can be hidden.
-    m4 "${IMAGE}"/usr/share/sendmail-cf/m4/cf.m4 "${IMAGE}"/etc/mail/sendmail.mc \
+    edo m4 "${IMAGE}"/usr/share/sendmail-cf/m4/cf.m4 "${IMAGE}"/etc/mail/sendmail.mc \
         > "${IMAGE}"/etc/mail/sendmail.cf 2>/dev/null
 
     echo "include(\`/usr/share/sendmail-cf/m4/cf.m4')dnl" \
         > "${IMAGE}"/etc/mail/submit.mc
-    cat "${IMAGE}"/usr/share/sendmail-cf/cf/submit.mc >> "${IMAGE}"/etc/mail/submit.mc
+    edo cat "${IMAGE}"/usr/share/sendmail-cf/cf/submit.mc >> "${IMAGE}"/etc/mail/submit.mc
     echo "# local-host-names - include all aliases for your machine here" \
         > "${IMAGE}"/etc/mail/local-host-names
 
@@ -203,22 +196,20 @@ sendmail_src_install() {
     keepdir /usr/adm/sm.bin
 
     # mta alternatives handling
-    echo mv /usr/sbin/{,${PN}.}sendmail
-    mv "${IMAGE}"/usr/sbin/{,${PN}.}sendmail || die "mv /usr/sbin/sendmail failed"
+    edo mv "${IMAGE}"/usr/sbin/{,${PN}.}sendmail
 
     alternatives_for mta ${PN} 5 /usr/sbin/sendmail ${PN}.sendmail
     alternatives_for mta ${PN} 5 /etc/mail/aliases ${PN}.aliases
 
     local x
     for x in hoststat mailq newaliases purgestat; do
-        echo rm /usr/bin/${x}
-        rm "${IMAGE}"/usr/bin/${x} || die "rm /usr/bin/${x} failed"
+        edo rm "${IMAGE}"/usr/bin/${x}
         alternatives_for mta ${PN} 5 /usr/bin/${x} ../sbin/sendmail
     done
 
     for x in man1/{mailq.1,newaliases.1} man5/aliases.5; do
-        echo mv /usr/share/man/${x%/*}/{,${PN}.}${x##*/}
-        mv "${IMAGE}"/usr/share/man/${x%/*}/{,${PN}.}${x##*/} || die "mv ${x} failed"
+        edo mv "${IMAGE}"/usr/share/man/${x%/*}/{,${PN}.}${x##*/}
         alternatives_for mta ${PN} 5 /usr/share/man/${x} ${PN}.${x##*/}
     done
 }
+

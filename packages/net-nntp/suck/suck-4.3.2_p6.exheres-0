@@ -64,14 +64,12 @@ src_prepare() {
     default
 
     # Fix the paths to point to locations where I'm going to put them. :-)
-    sed -i \
-        -e 's:/usr/lib/news/rnews:/usr/$(get_libdir)/news/bin/rnews:' \
-        -e 's:/usr/news/db/history:/var/spool/news/db/history:' \
-        suck_config.h || die "fixing paths failed"
+    edo sed -e 's:/usr/lib/news/rnews:/usr/$(get_libdir)/news/bin/rnews:' \
+            -e 's:/usr/news/db/history:/var/spool/news/db/history:' \
+            -i suck_config.h
 
     # Set the patchlevel to correspond to Debian's.
-    sed -i -e "s:@PATCHLEVEL@:${PATCHLEVEL}:" Makefile.in \
-        || die "setting patchlevel failed."
+    edo sed -i -e "s:@PATCHLEVEL@:${PATCHLEVEL}:" Makefile.in
 }
 
 src_compile() {
@@ -111,3 +109,4 @@ src_install() {
     fowners news:news /var/{lib,log,spool}/suck
     fperms 770 /var/{lib,log,spool}/suck
 }
+

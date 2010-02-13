@@ -56,7 +56,7 @@ e2fsprogs_src_compile() {
     default
     if option static ; then
         for bin in "${STATIC_BINARIES[@]}" ; do
-            make -C $(dirname ${bin}) $(basename ${bin}) || die "Failed to build static binaries"
+            emake -C $(dirname ${bin}) $(basename ${bin})
         done
     fi
 }
@@ -78,20 +78,19 @@ e2fsprogs_src_install() {
 
     # Move 'useless' stuff to /usr/
     dosbin "${IMAGE}"/sbin/mklost+found
-    rm -f "${IMAGE}"/sbin/mklost+found || die "removing binaries failed"
+    edo rm -f "${IMAGE}"/sbin/mklost+found
     dobin "${IMAGE}"/bin/{compile_et,mk_cmds}
-    rm -f "${IMAGE}"/bin/{compile_et,mk_cmds} || die "removing binaries failed"
+    edo rm -f "${IMAGE}"/bin/{compile_et,mk_cmds}
 
     # e2fsprogs has references to the build directory here
-    sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' \
-        "${IMAGE}"/usr/bin/compile_et || die "Fixing et path failed"
-    sed -i -e '/^SS_DIR=/s:=.*:=/usr/share/ss:' \
-        "${IMAGE}"/usr/bin/mk_cmds || die "Fixing ss path failed"
+    edo sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' \
+        "${IMAGE}"/usr/bin/compile_et
+    edo sed -i -e '/^SS_DIR=/s:=.*:=/usr/share/ss:' \
+        "${IMAGE}"/usr/bin/mk_cmds
 
     if option static ; then
         for bin in "${STATIC_BINARIES[@]}" ; do
-            dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})" ||
-                die "Failed to install static binaries"
+            dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})"
         done
     fi
 }

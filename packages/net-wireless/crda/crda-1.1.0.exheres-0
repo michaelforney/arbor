@@ -48,16 +48,16 @@ src_prepare() {
     default
 
     # do not add debug symbols by default, uncompressed manuals
-    sed -e /'^CFLAGS +='/s:-g:: \
-        -e /crda.8.gz/s:.gz::g \
-        -e /regdbdump.8.gz/s:.gz::g \
-        -i Makefile || die "Failed to sanitize CFLAGS."
+    edo sed -e /'^CFLAGS +='/s:-g:: \
+            -e /crda.8.gz/s:.gz::g \
+            -e /regdbdump.8.gz/s:.gz::g \
+            -i Makefile
 
     # remove hardcoded search paths
-    sed -e /"\"\/usr\/local\/lib\/crda\/regulatory.bin\","/d \
-        -e /"\"\/usr\/lib\/crda\/regulatory.bin\","/d \
-        -e /"\"\/lib\/crda\/regulatory.bin\","/d \
-        -i crda.c || die "Failed to remove regulatory search paths."
+    edo sed -e /"\"\/usr\/local\/lib\/crda\/regulatory.bin\","/d \
+            -e /"\"\/usr\/lib\/crda\/regulatory.bin\","/d \
+            -e /"\"\/lib\/crda\/regulatory.bin\","/d \
+            -i crda.c
 }
 
 src_compile() {

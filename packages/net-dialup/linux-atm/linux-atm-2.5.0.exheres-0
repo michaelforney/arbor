@@ -44,12 +44,11 @@ src_prepare() {
     default
 
     # Useless cruft.
-    rm doc/README || die "removing doc/README failed" || die "removing cruft failed"
+    edo rm doc/README
 
-    sed -i -e '/#define _LINUX_NETDEVICE_H/d' \
-        src/arpd/*.c || die "sed command on arpd/*.c files failed"
-    sed -i -e 's:cp hosts.atm /etc:cp hosts.atm ${DESTDIR}/etc:' \
-        src/config/Makefile.am || die "sed command on Makefile.am failed"
+    edo sed -i -e '/#define _LINUX_NETDEVICE_H/d' src/arpd/*.c
+    edo sed -i -e 's:cp hosts.atm /etc:cp hosts.atm ${DESTDIR}/etc:' src/config/Makefile.am
 
     eautoreconf
 }
+

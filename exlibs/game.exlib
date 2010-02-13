@@ -28,7 +28,7 @@ dovarlibgames() {
         if [[ -d "${IMAGE}/${f}" ]]; then
             fperms g+s "${f}"
             if [[ -n ${R} ]]; then
-                find "${IMAGE}/${f}" -type d -exec chmod g+s '{}' + || die "find failed"
+                edo find "${IMAGE}/${f}" -type d -exec chmod g+s '{}' +
             fi
         fi
     done
@@ -47,12 +47,12 @@ preserve_scores() {
 
 game_pkg_preinst() {
     local staging="${TEMP}"/game.exlib-scores
-    mkdir "${staging}" || die "mkdir failed"
+    edo mkdir "${staging}"
 
     local f
     for f in "${GAME_SCORES[@]}"; do
-        mkdir -p "${staging}/${f%/*}" || die "mkdir failed"
-        mv {"${IMAGE}","${staging}"}/"${f}" || die "mv failed"
+        edo mkdir -p "${staging}/${f%/*}"
+        edo mv {"${IMAGE}","${staging}"}/"${f}"
     done
 }
 

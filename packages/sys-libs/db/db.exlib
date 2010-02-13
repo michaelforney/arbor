@@ -44,7 +44,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcl tcl /usr/$(get_libdir)" )
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
 db_src_prepare() {
-    cd "${WORKBASE}/${PN}-${MY_PNV}/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/"
+    edo cd "${WORKBASE}/${PN}-${MY_PNV}/"
 
     local patches=()
     for ((i=1; i<=PATCH_LEVEL; i++)); do
@@ -52,14 +52,14 @@ db_src_prepare() {
     done
     expatch -p0 "${patches[@]}"
 
-    cd "${WORKBASE}/${PN}-${MY_PNV}/dist/" || die "Couldn't enter ${WORKBASE}/${PN}-${MY_PNV}/dist/"
+    edo cd "${WORKBASE}/${PN}-${MY_PNV}/dist/"
 
     # Allow --docdir to work
-    sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in || die "Docdir sed"
+    edo sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in
     # Hack in something similar --program-transform-name, simplifies slotting
-    sed -e '/INSTALLER.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
-        -e     '/CHMOD.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
-        -i ./Makefile.in || die "Program-transform-suffix sed"
+    edo sed -e '/INSTALLER.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
+            -e '/CHMOD.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
+            -i ./Makefile.in
 }
 
 db_src_test_expensive() {
@@ -80,16 +80,15 @@ db_src_install() {
     default
 
     if option !doc ; then
-        rm -r "${IMAGE}"/usr/share || die 'Failed to remove api docs'
+        edo rm -r "${IMAGE}"/usr/share
     fi
 
-    rm "${IMAGE}"/usr/$(get_libdir)/libdb{,_cxx}{.so,.a,-$(ever major).so} ||
-        die "Couldn't remove unversioned libraries"
+    edo rm "${IMAGE}"/usr/$(get_libdir)/libdb{,_cxx}{.so,.a,-$(ever major).so}
 
     option tcl && edo rm "${IMAGE}"/usr/$(get_libdir)/libdb_tcl.so
 
     local alternatives=() replace_me
-    pushd "${IMAGE}" || die "Couldn't enter IMAGE"
+    edo pushd "${IMAGE}"
 
     # Binaries,     /usr/bin/${PN}_*                -> /usr/bin/${PN}${SLOT}_*
     for src in usr/bin/${PN}${SLOT}_* ; do
@@ -117,7 +116,7 @@ db_src_install() {
         target=${src/${replace_me}/-${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done
-    popd || die "Couldn't leave IMAGE"
+    edo popd
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
 }

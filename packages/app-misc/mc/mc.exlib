@@ -76,8 +76,8 @@ mc_src_prepare() {
 
     # Upstream's fooloishly using symbolic links into the live fs which would
     # cause sandbox violations
-    rm "${WORK}"/config/{config{.guess,.sub},depcomp,install-sh,missing,mkinstalldirs} || die "removing obsolete files failed"
-    cp /usr/share/automake-1.10/{config{.guess,.sub},depcomp,install-sh,missing,mkinstalldirs} "${WORK}"/config/ || die "copying files failed"
+    edo rm "${WORK}"/config/{config{.guess,.sub},depcomp,install-sh,missing,mkinstalldirs}
+    edo cp /usr/share/automake-1.10/{config{.guess,.sub},depcomp,install-sh,missing,mkinstalldirs} "${WORK}"/config/
 }
 
 mc_src_install() {
@@ -86,5 +86,6 @@ mc_src_install() {
     # Install cons.saver setuid to make it actually work
     fperms u+s /usr/libexec/mc/cons.saver
 
-    find "${IMAGE}"/usr/ -type d -empty | xargs --no-run-if-empty rmdir
+    edo find "${IMAGE}"/usr/ -type d -empty -delete
 }
+

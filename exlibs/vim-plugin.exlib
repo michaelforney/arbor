@@ -68,15 +68,15 @@ vim-plugin_src_install() {
         rm -f "${f}"
     done
 
-    rm -rf ${WORK}/.git* || die "Couldn't remove git things"
+    edo rm -rf ${WORK}/.git*
 
     # Install remainder of plugin
     cd "${WORKBASE}"
     dodir /usr/share/vim
-    mv "${WORK}" "${IMAGE}"/usr/share/vim/vimfiles || die "Couldn't move remaining files to /usr/share/vim/vimfiles"
+    edo mv "${WORK}" "${IMAGE}"/usr/share/vim/vimfiles
 
     # Fix remaining bad permissions
-    chmod -R -x+X "${IMAGE}"/usr/share/vim/vimfiles/ || die "chmod failed"
+    edo chmod -R -x+X "${IMAGE}"/usr/share/vim/vimfiles/
 }
 
 vim-plugin_pkg_postinst() {

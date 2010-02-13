@@ -31,7 +31,7 @@ WORK="${WORKBASE}/${PNV%a}"
 
 src_prepare() {
     # Force regeneration of broken infopages
-    rm doc/libtool.info{,-{1,2}} || die "failed to remove info pages"
+    edo rm doc/libtool.info{,-{1,2}}
     default
 }
 
@@ -39,8 +39,8 @@ src_install() {
     default
 
     for f in $(find "${IMAGE}" -type f -name config.guess -o -name config.sub); do
-        rm ${f} || die "Couldn't remove ${f}"
-        ln -s /usr/share/gnuconfig/${f##*/} "${f}" || die "Updating ${f} failed."
+        edo rm ${f}
+        edo ln -s /usr/share/gnuconfig/${f##*/} "${f}"
     done
 }
 

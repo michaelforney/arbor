@@ -95,23 +95,18 @@ cyrus-imapd_src_prepare() {
 
     # Fix master(8)->cyrusmaster(8) manpage.
     for i in $(grep -rl -e 'master\.8' -e 'master(8)' "${WORK}") ; do
-        sed -i \
-            -e 's:master\.8:cyrusmaster.8:g' \
-            -e 's:master(8):cyrusmaster(8):g' \
-            "${i}" \
-            || die "sed 1 failed" || die "sed failed"
+        edo sed -i -e 's:master\.8:cyrusmaster.8:g' \
+                   -e 's:master(8):cyrusmaster(8):g' "${i}"
     done
-    mv man/master.8 man/cyrusmaster.8 || die "mv failed"
-    sed -i \
-        -e "s:MASTER:CYRUSMASTER:g" \
-        -e "s:Master:Cyrusmaster:g" \
-        -e "s:master:cyrusmaster:g" \
-        man/cyrusmaster.8 \
-        || die "sed 2 failed"
+    edo mv man/{,cyrus}master.8
+    edo sed -e "s:MASTER:CYRUSMASTER:g" \
+            -e "s:Master:Cyrusmaster:g" \
+            -e "s:master:cyrusmaster:g" \
+            -i man/cyrusmaster.8
 
     if option platform:amd64 ; then
-        sed -i -e "s:^\(CFLAGS = .*\):\1 -fPIC:" lib/Makefile.in || die "First -fPIC sed failed"
-        sed -i -e "s:^\(CFLAGS = .*\):\1 -fPIC:" perl/sieve/lib/Makefile.in || die "Second -fPIC sed failed"
+        edo sed -i -e "s:^\(CFLAGS = .*\):\1 -fPIC:" lib/Makefile.in
+        edo sed -i -e "s:^\(CFLAGS = .*\):\1 -fPIC:" perl/sieve/lib/Makefile.in
     fi
 
     AT_M4DIR="cmulocal" eautoreconf
@@ -123,13 +118,12 @@ cyrus-imapd_src_install() {
     # Link master to cyrusmaster (postfix has a master too)
     dosym /usr/$(get_libdir)/cyrus/master /usr/$(get_libdir)/cyrus/cyrusmaster
 
-    rm \
+    edo rm \
         man/fetchnews.8 \
         man/syncnews.8 \
         man/nntpd.8 \
         man/nntptest.1 \
-        "${IMAGE}"/usr/bin/nntptest \
-        || die "removing nntp stuff failed."
+        "${IMAGE}"/usr/bin/nntptest
 
     doman man/*.[0-8]
 
@@ -140,20 +134,18 @@ cyrus-imapd_src_install() {
         doc/cyrusv2.mc
     docinto text
     dodoc doc/text/*
-    cp -r contrib tools "${IMAGE}"/usr/share/doc/${PNVR}
-    find "${IMAGE}"/usr/share/doc -name CVS -print0 | xargs -0 rm -rf
+    edo cp -r contrib tools "${IMAGE}"/usr/share/doc/${PNVR}
+    edo find "${IMAGE}"/usr/share/doc -name CVS -print0 | xargs -0 rm -rf
 
     insinto /etc
-    doins \
-        "${FILES}/cyrus.conf" \
-        "${FILES}/imapd.conf"
+    doins "${FILES}"/{cyrus,imapd}.conf
 
     newinitd "${FILES}"/${PN}.initd cyrus
     newconfd "${FILES}"/${PN}.confd cyrus
     option pam && newpamd "${FILES}"/${PN}.pam sieve
 
     # Set the correct libdir in the init script.
-    sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/etc/init.d/cyrus || die "setting libdir failed"
+    edo sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/etc/init.d/cyrus
 
     for subdir in imap/{,db,log,msg,proc,socket,sieve} spool/imap/{,stage.} ; do
         keepdir "/var/${subdir}"
@@ -168,7 +160,7 @@ cyrus-imapd_src_install() {
         done
     done
 
-    find "${IMAGE}"/usr -type d -empty -delete || die "removing empty dirs failed"
+    edo find "${IMAGE}"/usr -type d -empty -delete
 }
 
 cyrus-imapd_pkg_postinst() {
@@ -197,3 +189,4 @@ cyrus-imapd_pkg_postinst() {
     elog "You have to add the cyrus user to the sasl database:"
     elog "    saslpasswd2 cyrus"
 }
+

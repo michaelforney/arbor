@@ -21,18 +21,16 @@ DEFAULT_SRC_INSTALL_PARAMS=( BASEDIR="${IMAGE}" )
 
 src_prepare() {
     default
-    cp "${FILES}/config.h" "${WORK}"
-    sed -i \
-        -e "/^COPTS = /s~=~= ${CFLAGS} ~" \
-        -e "/^LOPTS = /s~=~= ${LDFLAGS} ~" \
-        Makefile || die "sed failed"
+    edo cp "${FILES}/config.h" "${WORK}"
+    edo sed -e "/^COPTS = /s~=~= ${CFLAGS} ~" \
+            -e "/^LOPTS = /s~=~= ${LDFLAGS} ~" \
+            -i Makefile
 }
 
 src_configure() {
-    sedit() { sed -i -e "${@}" || die "Sed ${@} failed" ; }
     # We provide a static config and sed some options instead.
-    option ipv6 && sedit 's:HAVE_AFINET6 0:HAVE_AFINET6 1:' config.h
+    option ipv6 && edo sed -i -e 's:HAVE_AFINET6 0:HAVE_AFINET6 1:' config.h
     # The file config.h needs to be more recent than the Makefile
-    touch config.h
+    edo touch config.h
 }
 

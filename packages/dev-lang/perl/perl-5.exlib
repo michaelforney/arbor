@@ -45,11 +45,11 @@ db_define() {
 
 perl-5_src_unpack() {
     default
-    mkdir "${WORK}" || die "mkdir failed"
+    edo mkdir "${WORK}"
 }
 
 perl-5_src_prepare() {
-    cd "${WORKBASE}/${PNV}"
+    edo cd "${WORKBASE}/${PNV}"
     default
 }
 
@@ -68,42 +68,37 @@ perl-5_src_configure() {
     # -O3 breaks ext/XS/APItest/t/exception.t and maybe other stuff
     replace-flags -O3 -O2
 
-    cmd=(
-        "${WORKBASE}/${PNV}/Configure"
-        -des
-        -Dcc="${CC}"
-        -Dcf_by='Exherbo'
-        -Dprefix=/usr
-        -Dvendorprefix=/usr
-        -Dsiteprefix=/usr
-        -Doptimize="${CFLAGS}"
-        -Darchname="${CHOST%%-*}-linux"
-        -Dlibperl="libperl.so.1.${PV}"
-        -Dprivlib="/usr/$(get_libdir)/perl5/${PV}"
-        -Darchlib="/usr/$(get_libdir)/perl5/${PV}/$archname"
-        -Dsitelib="/usr/$(get_libdir)/perl5/site_perl/${PV}"
-        -Dsitearch="/usr/$(get_libdir)/perl5/site_perl/${PV}/$archname"
-        -Dvendorlib="/usr/$(get_libdir)/perl5/vendor_perl/${PV}"
-        -Dvendorarch="/usr/$(get_libdir)/perl5/vendor_perl/${PV}/$archname"
-        -Uinstallusrbinperl=
-        -Duseshrplib
-        -Dmksymlinks
-        -Duselargefiles
-        -Ui_ndbm
-        -$(db_define gdbm)i_gdbm
-        -$(db_define berkdb)i_db
+    edo sh \
+        "${WORKBASE}/${PNV}/Configure" \
+        -des \
+        -Dcc="${CC}" \
+        -Dcf_by='Exherbo' \
+        -Dprefix=/usr \
+        -Dvendorprefix=/usr \
+        -Dsiteprefix=/usr \
+        -Doptimize="${CFLAGS}" \
+        -Darchname="${CHOST%%-*}-linux" \
+        -Dlibperl="libperl.so.1.${PV}" \
+        -Dprivlib="/usr/$(get_libdir)/perl5/${PV}" \
+        -Darchlib="/usr/$(get_libdir)/perl5/${PV}/$archname" \
+        -Dsitelib="/usr/$(get_libdir)/perl5/site_perl/${PV}" \
+        -Dsitearch="/usr/$(get_libdir)/perl5/site_perl/${PV}/$archname" \
+        -Dvendorlib="/usr/$(get_libdir)/perl5/vendor_perl/${PV}" \
+        -Dvendorarch="/usr/$(get_libdir)/perl5/vendor_perl/${PV}/$archname" \
+        -Uinstallusrbinperl= \
+        -Duseshrplib \
+        -Dmksymlinks \
+        -Duselargefiles \
+        -Ui_ndbm \
+        -$(db_define gdbm)i_gdbm \
+        -$(db_define berkdb)i_db \
         "${PERL5_CONFIGURE_PARAMS[@]}"
-    )
-    echo sh "${cmd[@]}" >&2
-    sh "${cmd[@]}" || die "Configure failed"
 }
 
 perl-5_src_test() {
     # This is necessary for the ExtUtils::Embed tests
-    echo ln -s libperl.so.1{.${PV},}
-    ln -s libperl.so.1{.${PV},}
-    echo ln -s libperl.so{.1,}
-    ln -s libperl.so{.1,}
+    edo ln -s libperl.so.1{.${PV},}
+    edo ln -s libperl.so{.1,}
 
     # This is necessary for ext/IO/t/io_unix.t
     sydboxcmd "net/whitelist/bind/unix://${WORK}/t/sock-*"
@@ -129,32 +124,31 @@ perl-5_src_install() {
     # We only want /usr/bin/perl5.8.8, not /usr/bin/perl (without the dash, standard across distros)
     # with -Uinstallusrbinperl this shouldn't even get installed, but it does happen anyway, for some reason..
     if [[ -f "${IMAGE}"/usr/bin/${PN} ]]; then
-        rm "${IMAGE}"/usr/bin/${PN} || die "Couldn't remove /usr/bin/${PN}"
+        edo rm "${IMAGE}"/usr/bin/${PN}
     fi
 
     # Version executables
     local executable
     for executable in "${IMAGE}"/usr/bin/*; do
         if egrep -q '^#!/usr/bin/perl( +.*)?$' "${executable}"; then
-            sed -i "/^#!\/usr\/bin\/perl/s/perl/perl${PV%-RC*}/" "${executable}" \
-                || die "shebang sed failed for ${executable}"
+            edo sed -i -e "/^#!\/usr\/bin\/perl/s/perl/perl${PV%-RC*}/" "${executable}"
         fi
         if [[ ${executable##*/} != *${PV%-RC*} ]]; then
-            mv "${executable}" "${executable}-${PV}" || die "Failed to version ${executable/${IMAGE}}"
+            edo mv "${executable}" "${executable}-${PV}"
         fi
     done
 
     # Version man1 manpages, discard man3 manpages (use perldoc)
-    rm -r "${IMAGE}"/usr/share/man/man3 || die "Couldn't remove man 3 manpages"
+    edo rm -r "${IMAGE}"/usr/share/man/man3
     local manpage
     for manpage in "${IMAGE}"/usr/share/man/man1/*.1; do
-        mv "${manpage}" "${manpage/%.1/-${PV}.1}" || die "Failed to version ${manpage/${IMAGE}}"
+        edo mv "${manpage}" "${manpage/%.1/-${PV}.1}"
     done
 
     keepdir /usr/$(get_libdir)/${PN}${PV%%.*}/{site,vendor}_perl/${PV}/${CHOST%%-*}-linux
 
     # Save a list of what executables & man-pages we're installing
-    cd "${IMAGE}"
+    edo cd "${IMAGE}"
     local src target alternatives=() Module_Build_pv Module_Build_importance
     exparam -v Module_Build_pv Module_Build_pv
     if [[ -n ${Module_Build_pv} ]]; then
@@ -169,12 +163,12 @@ perl-5_src_install() {
     for src in usr/bin/*${PV} usr/share/man/man1/*${PV}.1; do
         if [[ ${src} == usr/bin/config_data-${PV} ]]; then
             [[ -n ${Module_Build_pv} ]] || die "Module_Build_pv not set"
-            mv ${src} usr/bin/config_data-perl-${PV} || die "mv failed"
+            edo mv ${src} usr/bin/config_data-perl-${PV}
             alternatives_for config_data ${Module_Build_pv}_perl-${SLOT} ${Module_Build_importance} \
                 /usr/bin/config_data config_data-perl-${PV}
         elif [[ ${src} == usr/share/man/man1/config_data-${PV}.1 ]]; then
             [[ -n ${Module_Build_pv} ]] || die "Module_Build_pv not set"
-            mv ${src} usr/share/man/man1/config_data-perl-${PV}.1 || die "mv failed"
+            edo mv ${src} usr/share/man/man1/config_data-perl-${PV}.1
             alternatives_for config_data ${Module_Build_pv}_perl-${SLOT} ${Module_Build_importance} \
                 /usr/share/man/man1/config_data.1 config_data-perl-${PV}.1
         else

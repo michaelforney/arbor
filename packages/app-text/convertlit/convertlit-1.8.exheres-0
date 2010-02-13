@@ -34,12 +34,12 @@ WORK=${WORKBASE}
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-respectflags.patch )
 
 src_compile() {
-    pushd lib || die "Could not enter lib dir"
+    edo pushd lib
     emake
-    popd
-    pushd ${MY_P} || die "Could not enter ${MY_P} dir"
+    edo popd
+    edo pushd ${MY_P}
     emake
-    popd
+    edo popd
 }
 
 src_install() {

@@ -32,13 +32,13 @@ src_unpack() {
 }
 
 src_configure() {
-    LSOF_CC="${CC}" ./Configure -n linux || die "Configure failed"
+    LSOF_CC="${CC}" edo ./Configure -n linux
 }
 
 DEFAULT_SRC_COMPILE_PARAMS=( DEBUG="" )
 
 src_test() {
-    cd tests
+    edo cd tests
     sydboxcmd "net/whitelist/bind/unix://${WORK}/tests/config.*"
     emake -j1 test opt
     sydboxcmd "net/unwhitelist/bind/unix://${WORK}/tests/config.*"

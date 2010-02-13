@@ -26,15 +26,14 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=${IMAGE} )
 
 src_prepare() {
-    sed -i \
-        -e "s:^\(CC\) = gcc:\1 = ${CC}:" \
-        -e "s:^\(AR\) = ar:\1 = ${AR}:" \
-        -e "s:^\(RANLIB\) = ranlib:\1 = ${RANLIB}:" \
-        -e "/^CFLAGS=/s:^:#:" \
-        -e "s:^\(@\$(LDCONFIG).*\):#\1:" \
-        -e "s:^\(INSTALL_MAN= \$(PREFIX)\)/man/:\1/usr/share/man:" \
-        -e "s:^\(INSTALL_INC= \$(PREFIX)\)/include/:\1/usr/include:" \
-        -e "s:^\(INSTALL_LIB= \$(PREFIX)\)/lib/:\1/$(get_libdir)/:" \
-        Makefile || die "sed failed"
+    edo sed -e "s:^\(CC\) = gcc:\1 = ${CC}:" \
+            -e "s:^\(AR\) = ar:\1 = ${AR}:" \
+            -e "s:^\(RANLIB\) = ranlib:\1 = ${RANLIB}:" \
+            -e "/^CFLAGS=/s:^:#:" \
+            -e "s:^\(@\$(LDCONFIG).*\):#\1:" \
+            -e "s:^\(INSTALL_MAN= \$(PREFIX)\)/man/:\1/usr/share/man:" \
+            -e "s:^\(INSTALL_INC= \$(PREFIX)\)/include/:\1/usr/include:" \
+            -e "s:^\(INSTALL_LIB= \$(PREFIX)\)/lib/:\1/$(get_libdir)/:" \
+            -i Makefile
 }
 

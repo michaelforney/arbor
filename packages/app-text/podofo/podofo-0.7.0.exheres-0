@@ -58,14 +58,15 @@ CMAKE_SRC_CONFIGURE_OPTION_WANTS=(
 CMAKE_SRC_CONFIGURE_OPTION_WITHS=( "lua LUA" )
 
 src_test() {
-    pushd "${WORKBASE}"/build/test
-    ./DeviceTest/DeviceTest || die "test 1 failed"
-    ./FilterTest/FilterTest || die "test 2 failed"
-    ./ParserTest/ParserTest ./CreationTest/resources/Illust.pdf lala.pdf || die "test 3 failed"
-    ./PdfError_Test || die "test 4 failed"
-    ./TokenizerTest/TokenizerTest ./CreationTest/resources/Illust.pdf || die "test 5 failed"
-    ./VariantTest/VariantTest || die "test 6 failed"
-    ./WatermarkTest/WatermarkTest ./CreationTest/resources/Illust.pdf lala.pdf || die "test 7 failed"
-    ./unit/podofo-test || die "podofo-test failed"
-    popd
+    edo pushd "${WORKBASE}"/build/test
+    edo ./DeviceTest/DeviceTest
+    edo ./FilterTest/FilterTest
+    edo ./ParserTest/ParserTest ./CreationTest/resources/Illust.pdf lala.pdf
+    edo ./PdfError_Test
+    edo ./TokenizerTest/TokenizerTest ./CreationTest/resources/Illust.pdf
+    edo ./VariantTest/VariantTest
+    edo ./WatermarkTest/WatermarkTest ./CreationTest/resources/Illust.pdf lala.pdf
+    edo ./unit/podofo-test
+    edo popd
 }
+

@@ -50,18 +50,15 @@ src_prepare() {
     export LADD=${LDFLAGS}
 
     # Respect the user's CFLAGS/CXXFLAGS.
-    sed -i -e "/CFLAGS_COMMON/s:-g -O3$:${CFLAGS}:" Makefile.common \
-        || die "sed to respect CFLAGS failed"
-    sed -i -e "/CXXFLAGS_COMMON/s:-g$:${CXXFLAGS}:" Makefile.common \
-        || die "sed to respect CXXLAGS failed"
+    edo sed -i -e "/CFLAGS_COMMON/s:-g -O3$:${CFLAGS}:" \
+               -e "/CXXFLAGS_COMMON/s:-g$:${CXXFLAGS}:" Makefile.common
 
     # Use the correct libdir.
-    sed -i -e "/LIBINST_DIR/s:lib:$(get_libdir):" Makefile.config.in \
-        || die "sed to set the correct libdir failed"
+    edo sed -i -e "/LIBINST_DIR/s:lib:$(get_libdir):" Makefile.config.in
 
-    sed -i -e "/libxmlrpc_server_abyss++/d" src/cpp/Makefile \
-        || die "removing the remains of the abyss failed"
+    edo sed -i -e "/libxmlrpc_server_abyss++/d" src/cpp/Makefile
 
     # We need to filter this. cf. Gentoo bug 214137.
     unset SRCDIR
 }
+

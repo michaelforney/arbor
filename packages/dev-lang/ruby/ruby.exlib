@@ -113,7 +113,7 @@ ruby_src_install() {
     default
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
-    ${MINIRUBY} -e "p 'Hello world from miniruby.'" || die "miniruby fails to run"
+    edo ${MINIRUBY} -e "p 'Hello world from miniruby.'"
     keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
             "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
 
@@ -122,10 +122,10 @@ ruby_src_install() {
         doins -r sample
     fi
 
-    pushd "${IMAGE}"
+    edo pushd "${IMAGE}"
     if ever at_least "1.9"; then
-        rm usr/bin/{gem,rake}${SLOT} || die "Failed to remove unwanted bins"
-        rm usr/share/man/man1/rake${SLOT}.1 || die "Failed to remove unwanted mans"
+        edo rm usr/bin/{gem,rake}${SLOT}
+        edo rm usr/share/man/man1/rake${SLOT}.1
     fi
     local src target alternatives=()
     for src in usr/bin/*${SLOT} usr/share/man/man1/*${SLOT}.1; do
@@ -133,7 +133,7 @@ ruby_src_install() {
         alternatives+=( /${target} ${src##*/} )
     done
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
-    popd
+    edo popd
 
 }
 

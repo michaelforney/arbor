@@ -28,7 +28,7 @@ DEPENDENCIES="
 
 src_prepare() {
     # ./configure runs twice without this.
-    find . -type f -print0 | xargs -0 touch -r configure || die "Can't fix mtimes"
+    edo find . -type f -print0 | xargs -0 touch -r configure || die "touch configure failed"
 }
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( fontconfig jpeg png "truetype freetype" xpm )

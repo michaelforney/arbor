@@ -60,15 +60,16 @@ DEFAULT_SRC_INSTALL_PARAMS=(
 src_compile() {
     default
 
-    pushd slsh >/dev/null 2>&1
-    emake -j1 slsh || die "emake slsh failed."
-    popd >/dev/null 2>&1
+    edo pushd slsh >/dev/null 2>&1
+    emake -j1 slsh
+    edo popd >/dev/null 2>&1
 }
 
 src_install() {
     default
 
-    rm -rf "${IMAGE}"/usr/share/doc/{slang,slsh}
+    edo rm -rf "${IMAGE}"/usr/share/doc/{slang,slsh}
     dodoc *.txt doc/{,internal,text}/*.txt doc/slangdoc.html slsh/doc/html/*.html
     keepdir /usr/share/slsh/local-packages
 }
+

@@ -42,8 +42,8 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 )
 
 src_prepare() {
-    sed -i \
-        -e 's:-O2:$(CFLAGS):' \
-        -e 's:$(CC):$(CC) $(LDFLAGS):' \
-        Makefile || die "sed failed"
+    edo sed -e 's:-O2:$(CFLAGS):' \
+            -e 's:$(CC):$(CC) $(LDFLAGS):' \
+            -i Makefile
 }
+

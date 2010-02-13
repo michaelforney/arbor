@@ -66,8 +66,8 @@ src_configure() {
     default
 
     if option perl; then
-        cd PerlMagick
-        perl Makefile.PL
+        edo cd PerlMagick
+        edo perl Makefile.PL
     fi
 }
 
@@ -75,15 +75,14 @@ src_install() {
     default
 
     if option !cxx ; then
-        rmdir "${IMAGE}"/usr/include/ImageMagick/Magick++/  \
-            || die 'empty dirs rmdir failed'
+        edo rmdir "${IMAGE}"/usr/include/ImageMagick/Magick++/
     fi
 
     if option perl ; then
         local perllocal=( "${IMAGE}"/usr/$(get_libdir)/perl5/*/*/perllocal.pod )
-        rm "${perllocal[0]}" || die 'rm perllocal.pod failed'
-        rmdir "${perllocal[0]%/*}" || die 'rmdir empty dir failed'
-        rmdir "${perllocal[0]%/*/*}" || die 'rmdir empty dir failed'
+        edo rm "${perllocal[0]}"
+        edo rmdir "${perllocal[0]%/*}"
+        edo rmdir "${perllocal[0]%/*/*}"
     fi
 }
 

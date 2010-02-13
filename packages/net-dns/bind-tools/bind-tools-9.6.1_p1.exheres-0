@@ -32,8 +32,8 @@ WORK="${WORKBASE}"/${MY_PNV}
 
 src_compile() {
     for subdir in lib bin/dig lib/lwres bin/nsupdate bin/dnssec ; do
-        cd "${WORK}"/${subdir}
-        emake -j1 || die "making ${subdir} failed."
+        edo cd "${WORK}"/${subdir}
+        emake -j1
     done
 }
 
@@ -46,3 +46,4 @@ src_install() {
     doman bin/dnssec/dnssec-keygen.8
     doman bin/nsupdate/nsupdate.1
 }
+

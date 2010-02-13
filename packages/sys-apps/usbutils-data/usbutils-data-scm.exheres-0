@@ -18,8 +18,7 @@ DEPENDENCIES="
 WORK="${WORKBASE}"
 
 src_fetch_extra() {
-    wget -O "${FETCHEDDIR}"/usb.ids http://www.linux-usb.org/usb.ids ||
-        die "Failed to fetch usb.ids"
+    edo wget -O "${FETCHEDDIR}"/usb.ids http://www.linux-usb.org/usb.ids
 }
 
 src_unpack() {
@@ -31,3 +30,4 @@ src_install() {
     insinto /usr/share/misc/
     doins usb.ids
 }
+

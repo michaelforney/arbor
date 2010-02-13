@@ -36,15 +36,15 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
 
 src_test() {
     # Don't validate webpages as that requires dependencies on open{jade,sp}
-    sed -i -e '/^check:/ s/ check_web//' Makefile || die "sed failed"
+    edo sed -i -e '/^check:/ s/ check_web//' Makefile
 
     emake AWK=awk check
 }
 
 src_install() {
     # Fix weird installation paths
-    sed -i -e 's:-posix:/posix:' \
-           -e 's:-leaps:/leaps:' Makefile || die "sed failed"
+    edo sed -i -e 's:-posix:/posix:' \
+               -e 's:-leaps:/leaps:' Makefile
 
     default
 }

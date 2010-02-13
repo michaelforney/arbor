@@ -57,7 +57,7 @@ CMAKE_SRC_CONFIGURE_OPTION_BUILDS=(
 )
 
 src_compile() {
-    pushd "${ECMAKE_BUILD_DIR}" || die "Could not enter ${PN}_build"
+    edo pushd "${ECMAKE_BUILD_DIR}"
 
     # See https://svn.boost.org/trac/boost/ticket/2189
     emake modularize
@@ -73,16 +73,15 @@ src_compile() {
 src_install() {
     cmake_src_install
 
-    rmdir "${IMAGE}"/usr/include/boost/interprocess/containers/detail || die "Couldn't nuke empty dir"
+    edo rmdir "${IMAGE}"/usr/include/boost/interprocess/containers/detail
 
     if option doc ; then
         # FIXME Should really be handled by boosts buildsystem
         local f
         find doc/ libs/ -depth -iname 'test' -o -iname 'src' -o -iname 'CMakeLists.txt' -o -iname '*.cmake' -o -iname 'Jamfile.v2' -o -iname 'proj' -o -iname '*.vcproj' | while read f ; do
-            echo "rm -r ${f}"
-            rm -r "${f}" || die "Couldn't delete ${f}"
+            edo rm -r "${f}"
         done
-        find . -type d -empty -delete || die "Couldn't remove empty directories"
+        edo find . -type d -empty -delete
 
         insinto /usr/share/doc/${PNVR}/html
         doins -r doc libs more people wiki

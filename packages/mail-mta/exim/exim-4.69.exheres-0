@@ -64,20 +64,20 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 DEFAULT_SRC_COMPILE_PARAMS=( build=Exim-Exherbo )
 
 src_prepare() {
-    mv "${WORKBASE}"/${PN}-texinfo-${PV}/doc/*.texinfo "${WORK}"/doc/ || die "Failed to move .texinfo files"
+    edo mv "${WORKBASE}"/${PN}-texinfo-${PV}/doc/*.texinfo "${WORK}"/doc/
 
     default
 
-    cp "${WORK}/src/EDITME" Local/Makefile || die "Couldn't copy to Local/Makefile"
-    # XXX option X && cp ../exim_monitor/EDITME eximon.conf || die "Couldn't copy eximon.conf"
+    edo cp "${WORK}/src/EDITME" Local/Makefile
+    # XXX option X && edo cp ../exim_monitor/EDITME eximon.conf
 
-    echo "CFLAGS += ${CFLAGS}" >> Local/Makefile || die "Using user's CFLAGS failed"
-    echo "LFLAGS += ${LDFLAGS}" >> Local/Makefile || die "Using user's LDFLAGS failed"
+    edo echo "CFLAGS += ${CFLAGS}" >> Local/Makefile
+    edo echo "LFLAGS += ${LDFLAGS}" >> Local/Makefile
 
-    sed -e 's/^buildname=.*/buildname=Exim-Exherbo/g' -i Makefile || die "Configuring build dir failed"
+    edo sed -e 's/^buildname=.*/buildname=Exim-Exherbo/g' -i Makefile
 
     uncomment_if_option_enabled() {
-        option ${1} && ! sed -e "/${2}/s/^#[[:space:]]*//" -i Local/Makefile && die "Sed for option ${1} failed"
+        option ${1} && edo sed -e "/${2}/s/^#[[:space:]]*//" -i Local/Makefile
     }
 
     uncomment_if_option_enabled dnsdb   LOOKUP_DNSDB=yes
@@ -136,7 +136,7 @@ src_install() {
     default
 
     alternatives_for mta ${PN} 10 /usr/sbin/sendmail ${PN}
-    mv "${IMAGE}"/etc/mail/{,${PN}.}aliases || die "mv /etc/mail/aliases failed"
+    edo mv "${IMAGE}"/etc/mail/{,${PN}.}aliases
     alternatives_for mta ${PN} 10 /etc/mail/aliases ${PN}.aliases
 
     dodoc "${WORK}"/doc/*

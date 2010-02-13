@@ -38,8 +38,7 @@ src_prepare() {
     expatch "${FILES}"/${PNV}-sensors-detect.patch
 
     if option sensord; then
-        sed -e 's:^# \(PROG_EXTRA\):\1:' -i "${WORK}"/Makefile ||
-            die "Activating sensord failed"
+        edo sed -e 's:^# \(PROG_EXTRA\):\1:' -i "${WORK}"/Makefile
     fi
 }
 

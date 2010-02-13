@@ -58,7 +58,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 src_install() {
     default
 
-    rmdir "${IMAGE}"/usr/libexec || die "nuking empty dir failed"
+    edo rmdir "${IMAGE}"/usr/libexec
     if option vim-syntax ; then
         insinto /usr/share/vim/vimfiles/syntax/
         doins "${WORK}"/contrib/syslog-ng.vim
@@ -76,3 +76,4 @@ src_install() {
     insinto /etc/logrotate.d
     newins "${FILES}"/syslog-ng.logrotate syslog-ng
 }
+

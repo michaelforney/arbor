@@ -32,7 +32,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( DISTLIST )
 src_install() {
     default
     dodoc "${FILES}"/grub.cfg.example
-    rmdir "${IMAGE}"/usr/share/grub || die "rmdir /usr/share/grub failed"
+    edo rmdir "${IMAGE}"/usr/share/grub
 }
 
 pkg_postinst() {

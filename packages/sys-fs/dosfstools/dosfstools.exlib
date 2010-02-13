@@ -24,17 +24,16 @@ DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( mkdosfs dosfsck )
 src_prepare() {
     default
 
-    sed -i \
-        -e 's:^OPTFLAGS = -O2 -fomit-frame-pointer :OPTFLAGS = :' \
-        -e 's:^MANDIR = $(PREFIX)/usr:&/share:' \
-        -e 's:^CFLAGS = :CFLAGS += :' \
-        Makefile || die "sed Makefile failed"
+    edo sed -e 's:^OPTFLAGS = -O2 -fomit-frame-pointer :OPTFLAGS = :' \
+            -e 's:^MANDIR = $(PREFIX)/usr:&/share:' \
+            -e 's:^CFLAGS = :CFLAGS += :' \
+            -i Makefile
 }
 
 src_install() {
     default
 
     dodir /usr/sbin
-    mv "${IMAGE}"/sbin/*fsck* "${IMAGE}"/usr/sbin 
+    edo mv "${IMAGE}"/sbin/*fsck* "${IMAGE}"/usr/sbin
 }
 
