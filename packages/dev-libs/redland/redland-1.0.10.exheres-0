@@ -62,6 +62,18 @@ src_prepare() {
     option virtuoso && autotools_src_prepare
 }
 
+src_test() {
+    # Test 'rdf_model_test' fails when sys-libs/db not installed.
+    # See Gentoo bug #279179.
+    if ! option berkdb ; then
+        export REDLAND_TEST_CLONING_STORAGE_TYPE=hashes
+        export REDLAND_TEST_CLONING_STORAGE_NAME=test
+        export REDLAND_TEST_CLONING_STORAGE_OPTIONS="hash-type='memory',dir='.',write='yes',new='yes',contexts='yes'"
+    fi
+
+    default
+}
+
 src_install() {
     default
 
