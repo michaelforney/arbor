@@ -1,8 +1,10 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PV=${PV/_p/-P}
 MY_PNV=${PN//-tools}-${MY_PV}
+
+export_exlib_phases src_compile src_install
 
 SUMMARY="Tools from the bind package: dig, dnssec-keygen, host, nslookup, nsupdate"
 DESCRIPTION="
@@ -17,7 +19,6 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="as-is"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS="idn ipv6"
 
 DEPENDENCIES="
@@ -28,16 +29,16 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( idn )
 
-WORK="${WORKBASE}"/${MY_PNV}
+WORK=${WORKBASE}/${MY_PNV}
 
-src_compile() {
+bind-tools_src_compile() {
     for subdir in lib bin/dig lib/lwres bin/nsupdate bin/dnssec ; do
         edo cd "${WORK}"/${subdir}
         emake -j1
     done
 }
 
-src_install() {
+bind-tools_src_install() {
     dobin bin/dig/{dig,host,nslookup}
     dobin bin/dnssec/dnssec-keygen
     dobin bin/nsupdate/nsupdate
@@ -46,4 +47,3 @@ src_install() {
     doman bin/dnssec/dnssec-keygen.8
     doman bin/nsupdate/nsupdate.1
 }
-
