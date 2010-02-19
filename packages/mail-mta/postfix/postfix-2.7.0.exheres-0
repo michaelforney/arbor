@@ -86,8 +86,7 @@ src_install() {
 
     dodir /etc/postfix
     insinto /etc/postfix
-    doins "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{master.cf,post*-*}
-    newins "${FILES}"/main.cf.example-0 main.cf.example
+    doins "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{main,master}.cf
 
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/examples
