@@ -34,7 +34,7 @@ src_prepare() {
 src_install() {
     into /
     dobin ping
-    fperms +s /bin/ping
+    edo chmod +s /bin/ping
 
     into /usr
     dosbin arping clockdiff ipg rarpd rdisc tftpd tracepath
@@ -42,11 +42,11 @@ src_install() {
     if option ipv6; then
         into /
         dobin ping6
-        fperms +s /bin/ping6
+        edo chmod +s /bin/ping6
 
         into /usr
         dosbin tracepath6 traceroute6
-        fperms +s /usr/sbin/traceroute6
+        edo chmod +s /usr/sbin/traceroute6
     fi
 
     doman doc/*.?

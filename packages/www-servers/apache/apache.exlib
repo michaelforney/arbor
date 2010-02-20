@@ -84,8 +84,8 @@ apache_src_install() {
     default
 
     keepdir /var/lib/dav /var/{cache,log,run}/apache2
-    fowners apache:apache /var/lib/dav /var/{cache,log,run}/apache2
-    fperms 0755 /var/lib/dav /var/{cache,log,run}/apache2
+    edo chown apache:apache /var/lib/dav /var/{cache,log,run}/apache2
+    edo chmod 0755 /var/lib/dav /var/{cache,log,run}/apache2
 
     edo rm -r "${IMAGE}"/etc/apache2/original
     # edo rm -r "${IMAGE}"/usr/share/apache2/build

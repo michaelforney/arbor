@@ -86,7 +86,7 @@ postgresql_src_install() {
     default
 
     keepdir /var/run/postgresql
-    fowners postgres:postgres /var/run/postgresql
-    fperms 0770 /var/run/postgresql
+    edo chown postgres:postgres /var/run/postgresql
+    edo chmod 0770 /var/run/postgresql
 }
 

@@ -107,7 +107,7 @@ bind_src_install() {
     default
 
     keepdir /etc/${PN} /var/${PN}/{pri,sec} /var/run/named
-    fowners named:named /var/${PN}/{pri,sec} /var/run/named
+    edo chown named:named /var/${PN}/{pri,sec} /var/run/named
 
     # Install a basic configuration.
     insinto /etc/${PN}

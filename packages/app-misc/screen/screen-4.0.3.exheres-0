@@ -36,7 +36,7 @@ src_install() {
 EOF
 
     if ! option 'setuid'; then
-        fowners root:utmp /usr/bin/${PNV}
-        fperms 2755 /usr/bin/${PNV}
+        edo chown root:utmp /usr/bin/${PNV}
+        edo chmod 2755 /usr/bin/${PNV}
     fi
 }

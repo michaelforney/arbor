@@ -128,8 +128,8 @@ sendmail_src_install() {
     doins "${FILES}"/mailcap
 
     keepdir /var/spool/mail
-    fowners root:mail /var/spool/mail
-    fperms 0775 /var/spool/mail
+    edo chown root:mail /var/spool/mail
+    edo chmod 0775 /var/spool/mail
     dosym /var/spool/mail /var/mail
     dodir /usr/bin /usr/$(get_libdir)
     dodir /usr/share/man/man{1,5,8} /usr/sbin /usr/share/sendmail-cf
@@ -147,11 +147,11 @@ sendmail_src_install() {
     dodir /usr/include/libmilter
     emake -j1 "${COMMON_SENDMAIL_INSTALL_PARAMS[@]}" install -C ${OBJDIR}/libmilter
 
-    fowners root:smmsp /usr/sbin/sendmail
-    fperms 2555 /usr/sbin/sendmail
-    fowners smmsp:smmsp /var/spool/clientmqueue
-    fperms 770 /var/spool/clientmqueue
-    fperms 700 /var/spool/mqueue
+    edo chown root:smmsp /usr/sbin/sendmail
+    edo chmod 2555 /usr/sbin/sendmail
+    edo chown smmsp:smmsp /var/spool/clientmqueue
+    edo chmod 770 /var/spool/clientmqueue
+    edo chmod 700 /var/spool/mqueue
     dosym /usr/sbin/makemap /usr/bin/makemap
 
     emagicdocs

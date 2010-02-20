@@ -53,7 +53,7 @@ src_install() {
 
     insinto /etc
     newins "${WORK}"/multipath.conf.annotated multipath.conf
-    fperms 644 /etc/udev/rules.d/{65-multipath,66-kpartx}.rules
+    edo chmod 644 /etc/udev/rules.d/{65-multipath,66-kpartx}.rules
 
     # This is the monitoring daemon
     newinitd "${FILES}"/rc-multipathd multipathd
