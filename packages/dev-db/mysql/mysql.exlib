@@ -106,12 +106,12 @@ mysql_src_install() {
     sed -i -e "/socket/s:=.*:= /var/run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf || die "fixing socket path failed"
 
     keepdir /var/{lib,log}/mysql
-    fowners mysql:mysql /var/{lib,log}/mysql
-    fperms 755 /var/{lib,log}/mysql
+    edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
+    edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
 
     keepdir /var/run/mysqld
-    fowners mysql:mysql /var/run/mysqld
-    fperms 755 /var/run/mysqld
+    edo chown mysql:mysql "${IMAGE}"/var/run/mysqld
+    edo chmod 755 "${IMAGE}"/var/run/mysqld
 
     hereenvd 46mysql <<EOF
 LDPATH=/usr/$(get_libdir)/${PN}
