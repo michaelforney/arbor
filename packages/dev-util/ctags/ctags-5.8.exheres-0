@@ -14,7 +14,11 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-posix-regex --disable-etags )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-posix-regex
+    --disable-etags
+    --enable-tmpdir=/tmp
+)
 
 src_install() {
     einstall
