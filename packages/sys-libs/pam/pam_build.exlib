@@ -88,7 +88,7 @@ pam_build_src_install() {
     keepdir /etc/security/namespace.d
 
     # Need to be suid
-    edo chmod u+s /sbin/unix_chkpwd
+    edo chmod u+s "${IMAGE}"/sbin/unix_chkpwd
 
     edo find "${IMAGE}"/var -type d -empty -delete
 }

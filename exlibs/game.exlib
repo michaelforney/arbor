@@ -23,10 +23,10 @@ dovarlibgames() {
     for f in "${@-/var/lib/games}"; do
         [[ ${f} == ${IMAGE%+(/)}/* ]] && f=${f#${IMAGE%+(/)}}
         [[ -e "${IMAGE}/${f}" ]] || dodir "${f}"
-        edo chown ${R} wizard:games "${f}"
-        edo chmod ${R} g+w "${f}"
+        edo chown ${R} wizard:games "${IMAGE}${f}"
+        edo chmod ${R} g+w "${IMAGE}${f}"
         if [[ -d "${IMAGE}/${f}" ]]; then
-            edo chmod g+s "${f}"
+            edo chmod g+s "${IMAGE}${f}"
             if [[ -n ${R} ]]; then
                 edo find "${IMAGE}/${f}" -type d -exec chmod g+s '{}' +
             fi

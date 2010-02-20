@@ -45,7 +45,7 @@ CONFIGFILE=/etc/ddclient/ddclient.conf
 EOF
 
     keepdir /var/{cache,run}/${PN}
-    edo chown ${PN}:${PN} /var/{cache,run}/${PN}
+    edo chown ${PN}:${PN} "${IMAGE}"/var/{cache,run}/${PN}
 
     insinto /etc/${PN}
     insopts -m 0640 -o root -g ${PN}
