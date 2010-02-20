@@ -81,15 +81,15 @@ openldap_src_install() {
     default
 
     keepdir /var/openldap-data
-    edo chown ldap:ldap /var/openldap-data
-    edo chmod 0700 /var/openldap-data
+    edo chown ldap:ldap "${IMAGE}"/var/openldap-data
+    edo chmod 0700 "${IMAGE}"/var/openldap-data
 
     keepdir /var/run/openldap
-    edo chown ldap:ldap /var/run/openldap
-    edo chmod 0755 /var/run/openldap
+    edo chown ldap:ldap "${IMAGE}"/var/run/openldap
+    edo chmod 0755 "${IMAGE}"/var/run/openldap
 
-    edo chown root:ldap /etc/openldap/slapd.conf
-    edo chmod 0640 /etc/openldap/slapd.conf
+    edo chown root:ldap "${IMAGE}"/etc/openldap/slapd.conf
+    edo chmod 0640 "${IMAGE}"/etc/openldap/slapd.conf
 
     newinitd "${FILES}"/slapd-initd slapd
     newconfd "${FILES}"/slapd-confd slapd

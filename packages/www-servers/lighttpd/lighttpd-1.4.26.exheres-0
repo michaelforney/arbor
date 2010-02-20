@@ -81,7 +81,7 @@ src_install() {
     keepdir /var/{log,run}/lighttpd
     keepdir /srv/www/htdocs
 
-    edo chown lighttpd:lighttpd /var/{log,run}/lighttpd
-    edo chmod 0750 /var/log/lighttpd
+    edo chown lighttpd:lighttpd "${IMAGE}"/var/{log,run}/lighttpd
+    edo chmod 0750 "${IMAGE}"/var/log/lighttpd
 }
 

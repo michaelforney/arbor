@@ -109,9 +109,9 @@ src_install() {
 
     insinto /etc
     doins -r "${WORK}"/etc/*
-    edo chmod 0640 /etc/sysctl.conf
+    edo chmod 0640 "${IMAGE}"/etc/sysctl.conf
 
-    edo chmod 0600 /etc/shadow
+    edo chmod 0600 "${IMAGE}"/etc/shadow
 
     dodir /etc/init.d
     # doinitd doesnt respect symlinks

@@ -39,10 +39,10 @@ src_prepare() {
 src_install() {
     default
 
-    edo chown root:mail /usr/bin/procmail
-    edo chown :mail /usr/bin/lockfile
-    edo chmod 6755 /usr/bin/procmail
-    edo chmod 2755 /usr/bin/lockfile
+    edo chown root:mail "${IMAGE}"/usr/bin/procmail
+    edo chown :mail "${IMAGE}"/usr/bin/lockfile
+    edo chmod 6755 "${IMAGE}"/usr/bin/procmail
+    edo chmod 2755 "${IMAGE}"/usr/bin/lockfile
 
     dodir /var/spool/${PN}/
     keepdir /var/spool/${PN}/

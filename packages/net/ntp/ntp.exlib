@@ -38,7 +38,7 @@ src_install() {
     insinto /usr/share/ntp
     doins "${FILES}"/ntp.conf
     doins -r scripts/*
-    edo chmod -R go-wx /usr/share/ntp
+    edo chmod -R go-wx "${IMAGE}"/usr/share/ntp
     edo find "${IMAGE}"/usr/share/ntp \
         '(' \
         -name '*.in' -o \
@@ -48,7 +48,7 @@ src_install() {
         -exec rm -r {} \;
 
     keepdir /var/lib/ntp
-    edo chown ntp:ntp /var/lib/ntp
+    edo chown ntp:ntp "${IMAGE}"/var/lib/ntp
 
     newinitd "${FILES}"/ntpd.initd ntpd
     # As of ntp-4.2.4_p7-RC1 ntp will only drop privileges if linuxcaps is enabled
