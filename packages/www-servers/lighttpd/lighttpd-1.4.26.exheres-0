@@ -81,7 +81,7 @@ src_install() {
     keepdir /var/{log,run}/lighttpd
     keepdir /srv/www/htdocs
 
-    fowners lighttpd:lighttpd /var/{log,run}/lighttpd
-    fperms 0750 /var/log/lighttpd
+    edo chown lighttpd:lighttpd /var/{log,run}/lighttpd
+    edo chmod 0750 /var/log/lighttpd
 }
 

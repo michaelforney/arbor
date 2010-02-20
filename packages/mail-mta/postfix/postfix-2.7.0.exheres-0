@@ -73,21 +73,20 @@ src_install() {
     done
 
     keepdir /var/lib/postfix
-    fowners -R postfix:postfix /var/lib/postfix/
+    edo chown -R postfix:postfix /var/lib/postfix/
 
     keepdir /var/spool/postfix
     rmdir "${IMAGE}"/var/spool/postfix/*
-    fowners root /var/spool/postfix
+    edo chown root /var/spool/postfix
 
-    fowners root:postdrop /usr/sbin/post{drop,queue}
-    fperms 2711 /usr/sbin/post{drop,queue}
+    edo chown root:postdrop /usr/sbin/post{drop,queue}
+    edo chmod 2711 /usr/sbin/post{drop,queue}
 
     pamd_mimic_system smtp auth account
 
     dodir /etc/postfix
     insinto /etc/postfix
-    doins "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{master.cf,post*-*}
-    newins "${FILES}"/main.cf.example-0 main.cf.example
+    doins "${IMAGE}"/usr/share/doc/${PNVR}/defaults/{main,master}.cf
 
     insinto /usr/share/doc/${PNVR}
     doins -r "${WORK}"/examples

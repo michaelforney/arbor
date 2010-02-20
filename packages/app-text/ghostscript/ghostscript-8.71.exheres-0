@@ -9,7 +9,7 @@ SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://ghostscript.com/"
 DOWNLOADS="http://ghostscript.com/releases/${PNV}.tar.xz"
 
-LICENCES="GPL-2"
+LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="cairo cups gtk jpeg2000 X
@@ -37,11 +37,11 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-fPIC.patch
+    "${FILES}"/${PN}-8.70-fPIC.patch
 )
 
 src_prepare() {
-    edo rm -r ./{expat,jasper,jpeg,libpng,zlib}
+    edo rm -r ./{expat,jasper,jpeg,libpng,tiff,zlib}
 
     if option !gtk; then
         edo sed -e 's:\$(GSSOX)::' \
@@ -66,6 +66,7 @@ src_configure() {
         --with-drivers=ALL \
         --with-ijs \
         --with-jbig2dec \
+        --with-system-libtiff \
         $(option_enable cairo) \
         $(option_enable cups) \
         $(option_enable gtk) \

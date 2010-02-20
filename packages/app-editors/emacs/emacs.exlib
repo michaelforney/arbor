@@ -98,8 +98,8 @@ EOF
     # they lose group write permission anyway after being updated
     edo chmod g-w "${IMAGE}"/var/lib/games/emacs/*
     preserve_scores "${IMAGE}"/var/lib/games/emacs/*
-    fowners wizard:games /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
-    fperms ug+s /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
+    edo chown wizard:games /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
+    edo chmod ug+s /usr/libexec/emacs/${EMACS_SCM_REAL_VERSION:-${PV}}/${CHOST}/update-game-score
 
     # Handle slotting:
     edo rm "${IMAGE}/usr/bin/${PN}-${EMACS_SCM_REAL_VERSION:-${PV}}-${SLOT}"

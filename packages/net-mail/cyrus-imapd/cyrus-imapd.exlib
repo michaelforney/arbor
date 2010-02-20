@@ -149,14 +149,14 @@ cyrus-imapd_src_install() {
 
     for subdir in imap/{,db,log,msg,proc,socket,sieve} spool/imap/{,stage.} ; do
         keepdir "/var/${subdir}"
-        fowners cyrus:mail "/var/${subdir}"
-        fperms 0750 "/var/${subdir}"
+        edo chown cyrus:mail "/var/${subdir}"
+        edo chmod 0750 "/var/${subdir}"
     done
     for subdir in imap/{user,quota,sieve} spool/imap ; do
         for i in a b c d e f g h i j k l m n o p q r s t v u w x y z ; do
             keepdir "/var/${subdir}/${i}"
-            fowners cyrus:mail "/var/${subdir}/${i}"
-            fperms 0750 "/var/${subdir}/${i}"
+            edo chown cyrus:mail "/var/${subdir}/${i}"
+            edo chmod 0750 "/var/${subdir}/${i}"
         done
     done
 

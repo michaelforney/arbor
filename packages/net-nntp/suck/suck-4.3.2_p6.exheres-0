@@ -91,10 +91,10 @@ src_install() {
     insinto /etc/suck
     insopts -m0640
     doins debian/{get-news.conf,suckkillfile,sucknewsrc}
-    fowners root:news /etc/suck/{get-news.conf,suckkillfile,sucknewsrc}
+    edo chown root:news /etc/suck/{get-news.conf,suckkillfile,sucknewsrc}
 
-    fowners root:news /etc/suck
-    fperms 770 /etc/suck
+    edo chown root:news /etc/suck
+    edo chmod 770 /etc/suck
 
     for subdir in java perl sample ; do
         docinto ${subdir}
@@ -106,7 +106,7 @@ src_install() {
     newins debian/suck.logrotate suck
 
     keepdir /var/{lib,log,spool}/suck
-    fowners news:news /var/{lib,log,spool}/suck
-    fperms 770 /var/{lib,log,spool}/suck
+    edo chown news:news /var/{lib,log,spool}/suck
+    edo chmod 770 /var/{lib,log,spool}/suck
 }
 

@@ -9,19 +9,19 @@ depend() {
 
 start() {
     ebegin "Starting postfix"
-    postfix start
+    postfix start >/dev/null 2>&1
     eend $?
 }
 
 stop() {
     ebegin "Stopping postfix"
-    postfix stop
+    postfix stop >/dev/null 2>&1
     eend $?
 }
 
 reload() {
     ebegin "Reloading postfix"
-    postfix reload
+    postfix reload >/dev/null 2>&1
     eend $?
 }
 

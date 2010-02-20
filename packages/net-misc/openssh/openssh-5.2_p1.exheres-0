@@ -109,7 +109,7 @@ src_test() {
 
 src_install() {
     emake install-nokeys DESTDIR="${IMAGE}"
-    fperms 600 /etc/ssh/sshd_config
+    edo chmod 600 /etc/ssh/sshd_config
     dobin contrib/ssh-copy-id
     newinitd "${FILES}"/sshd.rc6 sshd
     newconfd "${FILES}"/sshd.confd sshd
