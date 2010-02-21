@@ -3,7 +3,7 @@
 # Based in part upon 'libxslt-1.1.23.ebuild', which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] easy-multibuild
 
 SUMMARY="XSLT libraries and tools"
 HOMEPAGE="http://www.xmlsoft.org/XSLT/"
@@ -12,7 +12,8 @@ DOWNLOADS="ftp://xmlsoft.org/${PN}/${PNV}.tar.gz"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="crypt debug examples python"
+MYOPTIONS="crypt debug examples python
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
@@ -48,11 +49,16 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     python
 )
 
-src_install() {
+install_one_multibuild() {
     default
-    keepdir /usr/$(get_libdir)/libxslt-plugins
+    keepdir /usr/${LIBDIR}/libxslt-plugins
+}
+
+src_install() {
+    easy-multibuild_src_install
 
     if ! option examples; then
         rm -rf "${IMAGE}/usr/share/doc/${PN}-python-${PV}/examples"
     fi
 }
+
