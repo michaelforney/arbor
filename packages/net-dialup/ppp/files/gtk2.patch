@@ -1,0 +1,19 @@
+Source: Gentoo
+Upstream: Submitted.
+Reason: Correctly retrieve the CFLAGS and libs for GTK+.   
+
+diff -Nru ppp-2.4.4.orig/contrib/pppgetpass/Makefile.linux ppp-2.4.4/contrib/pppgetpass/Makefile.linux
+--- ppp-2.4.4.orig/contrib/pppgetpass/Makefile.linux	1999-11-15 06:08:24.000000000 +0200
++++ ppp-2.4.4/contrib/pppgetpass/Makefile.linux	2007-08-31 10:15:39.000000000 +0300
+@@ -3,9 +3,9 @@
+ pppgetpass.vt: pppgetpass.vt.o
+ 
+ pppgetpass.gtk: pppgetpass.gtk.o
+-	$(CC) $(LDFLAGS) pppgetpass.gtk.o `gtk-config --libs` -o pppgetpass.gtk
++	$(CC) $(LDFLAGS) pppgetpass.gtk.o `pkg-config --libs gtk+-2.0` -o pppgetpass.gtk
+ pppgetpass.gtk.o: pppgetpass.gtk.c
+-	$(CC) $(CFLAGS) -c pppgetpass.gtk.c `gtk-config --cflags`
++	$(CC) $(CFLAGS) -c pppgetpass.gtk.c `pkg-config --cflags gtk+-2.0`
+ 
+ install: all
+ 	install -m 755 pppgetpass.sh /usr/bin/pppgetpass
