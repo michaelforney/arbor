@@ -1,0 +1,29 @@
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu
+
+SUMMARY="Tools to deal with shar archives"
+DESCRIPTION="
+The GNU shar utilities -- shar, unshar, uuencode, uudecode, and remsync -- are
+a set of tools for encoding and decoding packages of files (in binary or text
+format) in a special plain text format called shell archives (shar). This
+format can be sent through e-mail (which can be problematic for regular binary
+files). The shar utility supports a wide range of capabilities (compressing,
+uuencoding, splitting long files for multi-part mailings, providing checksums),
+which make it very flexible at creating shar files. Unshar automatically strips
+off mail headers and introductory text and then unpacks shar files.
+"
+DOWNLOADS="mirror://gnu/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
+
