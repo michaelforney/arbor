@@ -39,16 +39,16 @@ DEPENDENCIES="
 
 WORK=${WORKBASE}/${PN}-$(ever range 1-3)
 
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-
-src_prepare() {
-    edo sed -e "/^INS_BASE/s:/opt/schily:/usr:" \
-            -e "/^LDPATH/s:/opt/schily:/usr:" \
-            -e "/^RUNPATH/s:-R/opt/schily/lib::" \
-            -e "/^LDPATH/s:lib:$(get_libdir):" \
-            -e "/^RUNPATH/s:lib:$(get_libdir):" \
-            -i DEFAULTS/Defaults.linux
-}
+DEFAULT_SRC_COMPILE_PARAMS=(
+    -j1
+    GMAKE_NOWARN=true
+    INS_BASE=/usr
+    LDPATH="-L/\$(INS_BASE)/$(get_libdir)"
+    RUNPATH="-R/\$(INS_BASE)/$(get_libdir)"
+)
+DEFAULT_SRC_INSTALL_PARAMS=(
+    INS_BASE=/usr
+)
 
 # ./configure is a shell script that notifies people not to use ./configure anymore, and fails
 src_configure() {
@@ -65,6 +65,7 @@ src_install() {
     edo mv "${IMAGE}"/usr/{,share/}man
 
     # Don't install man-pages that are related to the buildsystem
-    edo rm -r "${IMAGE}"/usr/share/man/man5
+    edo rm "${IMAGE}"/usr/share/man/man5/make{files,rules}.5
+    edo rmdir "${IMAGE}"/usr/share/man/man5
 }
 
