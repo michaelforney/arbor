@@ -27,13 +27,16 @@ DEFAULT_SRC_TEST_PARAMS+=( ARGS="--verbose" )
 cmake_run() {
     illegal_in_global_scope
 
+    local ret
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
         edo pushd "${ECMAKE_BUILD_DIR}"
+        ret=$?
     fi
     edo "${@}"
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
         edo popd
     fi
+    return ${ret}
 }
 
 # Similar to option_enable for cmake. A few examples:
