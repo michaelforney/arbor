@@ -51,13 +51,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-abstract-sockets.patch )
-
-src_prepare() {
-    default
-    # We patch configure.in, need to regenerate configure script.
-    eautoreconf
-}
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.2.16-abstract-sockets.patch )
 
 src_configure() {
     # Whitelist bind() to /tmp/dbus-fake-socket-*

@@ -4,6 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require flag-o-matic
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
 HOMEPAGE="http://dbus.freedesktop.org/"
@@ -47,6 +48,15 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.2.16-abstract-sockets.patch )
+
+src_configure() {
+    # Whitelist bind() to /tmp/dbus-fake-socket-*
+    sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
+    default
+    sydboxcmd 'net/unwhitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
+}
 
 src_compile() {
     # Get backtraces from applications
