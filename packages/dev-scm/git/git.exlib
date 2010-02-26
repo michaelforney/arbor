@@ -4,7 +4,7 @@
 myexparam -b htmldocs=true
 myexparam -b manpages=true
 
-require perl-module bash-completion elisp-optional [ source_directory=contrib/emacs ]
+require perl-module python bash-completion elisp-optional [ source_directory=contrib/emacs ]
 
 export_exlib_phases src_unpack src_configure src_compile src_test src_install
 
@@ -30,7 +30,8 @@ UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${P
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="curl ipv6 tk webdav xinetd
+MYOPTIONS="curl ipv6 tk xinetd
+    python [[ description = [ Install helper scripts for git remote helpers, a compatibility layer with other SCMs ] ]]
     webdav [[ requires = curl description = [ Adds support for pushing using http:// and https:// transports ] ]]"
 exparam -b htmldocs && MYOPTIONS+=" doc"
 
@@ -80,6 +81,7 @@ git_src_unpack() {
 git_src_configure() {
     option curl || myoptions+=" NO_CURL=YesPlease"
     option ipv6 || myoptions+=" NO_IPV6=YesPlease"
+    option python || myoptions+=" NO_PYTHON=YesPlease"
     option tk || myoptions+=" NO_TCLTK=YesPlease"
     option webdav || myoptions+=" NO_EXPAT=YesPlease"
 }
@@ -133,6 +135,10 @@ git_src_install() {
 
     dobashcompletion contrib/completion/git-completion.bash
     elisp-optional_src_install
+
+    if option python ; then
+        python_bytecompile
+    fi
 
     exeinto /usr/libexec/${PN}
     doexe contrib/fast-import/git-p4
