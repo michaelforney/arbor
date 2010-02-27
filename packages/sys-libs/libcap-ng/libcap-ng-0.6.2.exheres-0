@@ -1,0 +1,42 @@
+# Copyright 2010 Sterling X. Winter <replica@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+SUMMARY="Advanced POSIX 1003.1e capabilities library and tools"
+DESCRIPTION="
+The libcap-ng library is intended to make programming with POSIX capabilities
+much easier than the traditional libcap library. It includes utilities that can
+analyse all currently running applications and print out any capabilities and
+whether or not it has an open ended bounding set. An open bounding set without
+the securebits \"NOROOT\" flag will allow full capabilities escalation for apps
+retaining UID 0 simply by calling 'execve'.
+"
+HOMEPAGE="http://people.redhat.com/sgrubb/libcap-ng/"
+DOWNLOADS="http://people.redhat.com/sgrubb/libcap-ng/libcap-ng-0.6.2.tar.gz"
+
+LICENCES="GPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    debug  [[ description = [ Turn on debugging ] ]]
+    python [[ description = [ Install Python bindings (requires swig) ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        sys-kernel/linux-headers
+        python? ( dev-lang/swig )
+    build+run:
+        sys-apps/attr
+        python? ( dev-lang/python )
+"
+
+BUGS_TO="replica@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-optional-python.patch )
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( debug )
+
