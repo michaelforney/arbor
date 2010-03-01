@@ -1,4 +1,4 @@
-# Copyright 2009 Ingmar Vanhassel
+# Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 require python-build
@@ -8,6 +8,8 @@ PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 src_test() {
     # Hangs under sydbox
     edo rm Lib/test/test_threading.py
+    # Fails under network sandboxing
+    edo rm Lib/test/test_{ftplib,httpservers,multiprocessing,socket,urllib2}.py
 
     python-build_src_test
 }
