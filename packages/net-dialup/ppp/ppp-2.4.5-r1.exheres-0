@@ -21,7 +21,7 @@ BUGS_TO="philantrop@exherbo.org"
 HOMEPAGE="http://www.samba.org/ppp"
 DOWNLOADS="ftp://ftp.samba.org/pub/ppp/${PNV}.tar.gz
     http://dev.exherbo.org/~philantrop/distfiles/${PN}-2.4.4-scripts-${SCRIPT_VER}.tar.bz2
-    dhcp? ( http://www.netservers.co.uk/gpl/ppp-dhcpc.tgz )"
+"
 
 LICENCES="BSD-3 GPL-2"
 SLOT="0"
@@ -29,7 +29,6 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ipv6 pam radius
     activefilter [[ description = [ Enables activefilter support ] ]]
     atm          [[ description = [ Enables support for PPP over ATM (PPPoA) ] ]]
-    dhcp         [[ description = [ Enables the DHCP plugin ] ]]
 "
 DEPENDENCIES="
     build+run:
@@ -67,13 +66,6 @@ src_prepare() {
     fi
 
     edo sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux
-
-    if option dhcp ; then
-        edo mv "${WORKBASE}/dhcp" "${WORK}/pppd/plugins/"
-        edo sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux
-        expatch -p1 "${WORKBASE}/patch/dhcp-make-vars.patch"
-        expatch -p1 "${WORKBASE}/patch/dhcp-sys_error_to_strerror.patch"
-    fi
 
     # Set correct libdir
     edo sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8}
@@ -130,10 +122,6 @@ src_install() {
 
     if option atm; then
         doins pppd/plugins/pppoatm/pppoatm.so
-    fi
-
-    if option dhcp; then
-        doins pppd/plugins/dhcp/dhcpc.so
     fi
 
     if option radius; then
