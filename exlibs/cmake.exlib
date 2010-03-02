@@ -11,6 +11,7 @@
 
 require multilib
 
+myexparam -b out_of_source=true
 myexparam cmake_minimum_version=2.6.2
 
 DEPENDENCIES="
@@ -99,17 +100,10 @@ cmake_with() {
 ecmake() {
     illegal_in_global_scope
 
-    case "${ECMAKE_BUILD_TYPE-out-of-source}" in
-        in-source)
-            ;;
-        out-of-source)
-            edo mkdir -p "${ECMAKE_BUILD_DIR}" || return 1
-            edo pushd "${ECMAKE_BUILD_DIR}" || return 1
-            ;;
-        *)
-            die "Invalid value for ECMAKE_BUILD_TYPE, ${ECMAKE_BUILD_TYPE}"
-            ;;
-    esac
+    if exparam -b out_of_source; then
+        edo mkdir -p "${ECMAKE_BUILD_DIR}" || return 1
+        edo pushd "${ECMAKE_BUILD_DIR}" || return 1
+    fi
 
     local cmakeargs tmp_libdir=$(get_libdir)
 
@@ -137,9 +131,8 @@ ecmake() {
     fi
 }
 
-# Function for configuring a package. Set ECMAKE_BUILD_TYPE=in-source to make this
-# exlib perform the build in the sources. Otherwise it defaults to
-# out-of-source.
+# Function for configuring a package. Disable the out_of_source exparam to make this
+# exlib perform the build in the sources. Otherwise it defaults to out-of-source.
 cmake_src_configure() {
     illegal_in_global_scope
 

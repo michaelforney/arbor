@@ -1,3 +1,4 @@
+# Copyright 2010 Jan Meier <jan@codejunky.org>
 # Copyright 2008 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'ppp-2.4.4-r21.ebuild' from Gentoo, which is:
@@ -5,7 +6,6 @@
 
 require multilib pam
 
-PATCH_VER="20080922"
 SCRIPT_VER="20080922"
 
 SUMMARY="An implementation of the Point-to-Point Protocol (PPP)"
@@ -20,9 +20,8 @@ BUGS_TO="philantrop@exherbo.org"
 
 HOMEPAGE="http://www.samba.org/ppp"
 DOWNLOADS="ftp://ftp.samba.org/pub/ppp/${PNV}.tar.gz
-    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-patches-${PATCH_VER}.tar.bz2
-    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-scripts-${SCRIPT_VER}.tar.bz2
-    dhcp? ( http://www.netservers.co.uk/gpl/ppp-dhcpc.tgz )"
+    http://dev.exherbo.org/~philantrop/distfiles/${PN}-2.4.4-scripts-${SCRIPT_VER}.tar.bz2
+"
 
 LICENCES="BSD-3 GPL-2"
 SLOT="0"
@@ -30,38 +29,17 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ipv6 pam radius
     activefilter [[ description = [ Enables activefilter support ] ]]
     atm          [[ description = [ Enables support for PPP over ATM (PPPoA) ] ]]
-    dhcp         [[ description = [ Enables the DHCP plugin ] ]]
-    eap-tls      [[ description = [ Enables support for Extensible Authentication Protocol and Transport Level Security (EAP-TLS) ] ]]
 "
 DEPENDENCIES="
     build+run:
         activefilter? ( dev-libs/libpcap[>=0.9.8] )
         atm? ( net-dialup/linux-atm )
-        eap-tls? (
-            net-misc/curl
-          dev-libs/openssl[>=0.9.7]
-        )
         pam? ( sys-libs/pam )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${WORKBASE}/patch/make-vars.patch"
-    "${WORKBASE}/patch/mpls.patch"
-    "${WORKBASE}/patch/killaddr-smarter.patch"
-    "${WORKBASE}/patch/wait-children.patch"
-    "${WORKBASE}/patch/maxoctets-2Glimit.patch"
-    "${WORKBASE}/patch/defaultgateway.patch"
-    "${WORKBASE}/patch/mschapv2-initialize-response.patch"
-    "${WORKBASE}/patch/linkpidfile.patch"
-    "${WORKBASE}/patch/qa-fixes.patch"
-    "${WORKBASE}/patch/kill-pg.patch"
-    "${WORKBASE}/patch/auth-fail.patch"
-    "${WORKBASE}/patch/defaultmetric.patch"
-    "${WORKBASE}/patch/dev-ppp.patch"
-    "${WORKBASE}/patch/gtk2.patch"
-    "${WORKBASE}/patch/pppoe-lcp-timeout.patch"
-    "${WORKBASE}/patch/passwordfd-read-early.patch"
-    "${WORKBASE}/patch/pppd-usepeerwins.patch"
+    "${FILES}/respect-cflags.patch"
+    "${FILES}/gtk2.patch"
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=(
@@ -70,11 +48,6 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 
 src_prepare() {
     default
-
-    if option eap-tls ; then
-        # see http://eaptls.spe.net/index.html for more info
-        expatch -p1 "${WORKBASE}"/patch/eaptls-0.7-gentoo.patch
-    fi
 
     if option atm ; then
         edo sed -i "s/^#HAVE_LIBATM=yes/HAVE_LIBATM=yes/" pppd/plugins/pppoatm/Makefile.linux
@@ -93,13 +66,6 @@ src_prepare() {
     fi
 
     edo sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux
-
-    if option dhcp ; then
-        edo mv "${WORKBASE}/dhcp" "${WORK}/pppd/plugins/"
-        edo sed -i -e 's/SUBDIRS := rp-pppoe/SUBDIRS := rp-pppoe dhcp/' pppd/plugins/Makefile.linux
-        expatch -p1 "${WORKBASE}/patch/dhcp-make-vars.patch"
-        expatch -p1 "${WORKBASE}/patch/dhcp-sys_error_to_strerror.patch"
-    fi
 
     # Set correct libdir
     edo sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8}
@@ -156,10 +122,6 @@ src_install() {
 
     if option atm; then
         doins pppd/plugins/pppoatm/pppoatm.so
-    fi
-
-    if option dhcp; then
-        doins pppd/plugins/dhcp/dhcpc.so
     fi
 
     if option radius; then
