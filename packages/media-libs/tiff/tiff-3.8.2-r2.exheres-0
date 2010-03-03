@@ -14,11 +14,11 @@ MYOPTIONS="jpeg opengl multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        jpeg? ( media-libs/jpeg[multibuild_c:*(+)?] )
-        opengl? ( x11-dri/freeglut[multibuild_c:*(+)?]
-                  x11-dri/mesa[multibuild_c:*(+)?]
-                  x11-libs/libX11[multibuild_c:*(+)?]
-                  x11-libs/libICE[multibuild_c:*(+)?] )
+        jpeg? ( media-libs/jpeg[multibuild_c:*(?)?] )
+        opengl? ( x11-dri/freeglut[multibuild_c:*(?)?]
+                  x11-dri/mesa[multibuild_c:*(?)?]
+                  x11-libs/libX11[multibuild_c:*(?)?]
+                  x11-libs/libICE[multibuild_c:*(?)?] )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-CVE-2009-2347.patch" )
