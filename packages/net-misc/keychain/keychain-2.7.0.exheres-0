@@ -1,0 +1,29 @@
+# Copyright (c) 2008 Alexander Færøy <ahf@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Wrapper around ssh/gpg agent"
+HOMEPAGE="http://www.funtoo.org/en/security/${PN}/intro/"
+DOWNLOADS="http://www.funtoo.org/archive/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*
+        sys-apps/sed
+    test+run:
+        app-shells/bash
+    suggestion:
+        app-crypt/gnupg
+        net-misc/openssh
+"
+
+src_install() {
+    dobin keychain
+    doman keychain.1.gz
+    dodoc README.rst ChangeLog
+}
+
