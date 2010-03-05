@@ -3,14 +3,14 @@
 
 export_exlib_phases pkg_postinst pkg_postrm
 
-freedesktop-mime_is_desktop_file_utils() {
+freedesktop-desktop_is_desktop_file_utils() {
     [[ "${CATEGORY}/${PN}" == 'dev-util/desktop-file-utils' ]]
 }
 
-freedesktop-mime_is_desktop_file_utils || DEPENDENCIES="build: dev-util/desktop-file-utils"
+freedesktop-desktop_is_desktop_file_utils || DEPENDENCIES="build: dev-util/desktop-file-utils"
 
 
-freedesktop-mime_update_desktop_database() {
+freedesktop-desktop_update_desktop_database() {
     illegal_in_global_scope
 
     if [[ "${ROOT}" == / ]] ; then
@@ -25,12 +25,12 @@ freedesktop-mime_update_desktop_database() {
 freedesktop-desktop_pkg_postrm() {
     illegal_in_global_scope
 
-    freedesktop-mime_update_desktop_database
+    freedesktop-desktop_update_desktop_database
 }
 
 freedesktop-desktop_pkg_postinst() {
     illegal_in_global_scope
 
-    freedesktop-mime_update_desktop_database
+    freedesktop-desktop_update_desktop_database
 }
 
