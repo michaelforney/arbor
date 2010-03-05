@@ -2,7 +2,7 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require bash-completion
+require bash-completion easy-multibuild
 
 SUMMARY="D-Bus GLib Bindings"
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/DBusBindings"
@@ -11,7 +11,8 @@ DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="1"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="bash-completion doc verbose"
+MYOPTIONS="bash-completion doc verbose
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -19,16 +20,16 @@ DEPENDENCIES="
         dev-util/pkg-config[>=0.20]
         doc? ( dev-doc/gtk-doc[>=1.4] )
     build+run:
-        dev-libs/glib:2[>=2.10]
-        sys-apps/dbus[>=1.1]
-        dev-libs/expat
+        dev-libs/glib:2[>=2.10][multibuild_c:*(?)?]
+        sys-apps/dbus[>=1.1][multibuild_c:*(?)?]
+        dev-libs/expat[multibuild_c:*(?)?]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-tests' '--disable-doxygen-docs' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose verbose-mode" )
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     if option bash-completion ; then
         dobashcompletion "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh dbus ||
