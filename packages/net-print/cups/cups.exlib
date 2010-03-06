@@ -13,11 +13,11 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="dbus debug gnutls libusb pam perl python ssl tcpd tiff threads xinetd
+MYOPTIONS="dbus debug gnutls libusb pam perl python tcpd tiff threads xinetd
 
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
 tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
-( gnutls ssl ) [[ number-selected = at-most-one ]]
+gnutls
 linguas: ${LANGS}"
 
 # TODO:
@@ -36,7 +36,6 @@ DEPENDENCIES="
         pam? ( sys-libs/pam )
         perl? ( dev-lang/perl )
         python? ( dev-lang/python:* )
-        ssl? ( dev-libs/openssl )
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff )
         app-text/poppler [[ note = [ pdftops ] ]]
@@ -108,10 +107,9 @@ src_configure() {
         --with-system-groups=lpadmin \
         $(option_enable dbus) \
         $(option_enable gnutls) \
-        $(option_enable gnutls ssl) \
         $(option_enable pam) \
-        $(option_enable ssl) \
-        $(option_enable ssl openssl) \
+        $(option_enable gnutls ssl) \
+        $(option_enable !gnutls openssl) \
         $(option_enable tiff) \
         $(option_enable threads) \
         $(option_with perl) \
@@ -170,25 +168,17 @@ EOF
     echo "ServerName localhost" >> "${IMAGE}"/etc/cups/client.conf
 }
 
-echo_crypt() {
-    if option ssl || option gnutls ; then
-        echo 2 # require encryption
-    else
-        echo 0 # disable encryption
-    fi
-}
-
 src_test() {
     # 1 = medium testsuite
     emake unittests
     edo cd test
-    USER=paludisbuild edo ./run-stp-tests.sh 1 $(echo_crypt) n
+    USER=paludisbuild edo ./run-stp-tests.sh 1 2 n
 }
 
 RESTRICT_src_test_expensive() {
     # 4 = torture testsuite :P
     emake unittests
     edo cd test
-    USER=paludisbuild edo ./run-stp-tests.sh 4 $(echo_crypt) n
+    USER=paludisbuild edo ./run-stp-tests.sh 4 2 n
 }
 
