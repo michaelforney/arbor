@@ -99,8 +99,12 @@ src_test() {
     # 'make --dry-run check' fails so don't use default here.
     if ! nonfatal emake check ; then
         eerror "Tests failed. Looking for files for you to add to your bug report..."
-        find "${WORK}" -type f -name '*.epicfail' -or -name '*.log' | while read a ; do
-            eerror "    $a"
+        find "${WORK}" -type f -name 'test-suite.log' -or -name '*.epicfail' | while read file ; do
+            if [[ ${file} == *.log ]] ; then
+                grep -q FAIL "${file}" || continue
+            fi
+
+            eerror "    ${file}"
         done
         die "Make check failed"
     fi
