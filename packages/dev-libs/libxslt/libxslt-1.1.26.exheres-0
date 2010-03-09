@@ -32,8 +32,10 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 src_prepare() {
     default
 
+    edo rm "${WORK}"/{libxslt/xsltconfig.h,libexslt/exsltconfig.h}
+
     # sed Makefile to fix bug Gentoo #99382 so that html gets installed in ${PNVR}
-    sed -i -e "s:libxslt-\$(VERSION):${PNVR}:" doc/Makefile.am
+    edo sed -i -e "s:libxslt-\$(VERSION):${PNVR}:" doc/Makefile.am
 
     # Be warned: eautoreconf breaks tests
     eautomake
@@ -58,7 +60,7 @@ src_install() {
     easy-multibuild_src_install
 
     if ! option examples; then
-        rm -rf "${IMAGE}/usr/share/doc/${PN}-python-${PV}/examples"
+        edo rm -rf "${IMAGE}/usr/share/doc/${PN}-python-${PV}/examples"
     fi
 }
 
