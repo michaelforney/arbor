@@ -1,0 +1,39 @@
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+#
+# Inspired from Gentoo's ccache-2.4-r7.ebuild which is:
+#   Copyright 1999-2008 Gentoo Foundation
+
+MY_PNV=${PNV/_pre/pre}
+
+SUMMARY="Compiler cache"
+HOMEPAGE="http://ccache.samba.org/"
+DOWNLOADS="http://samba.org/ftp/${PN}/${MY_PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/zlib[>=1.2.3]
+"
+
+WORK=${WORKBASE}/${MY_PNV}
+
+src_prepare() {
+    edo sed -e "/installcmd/s/-s//" -i Makefile.in
+}
+
+src_install() {
+    default
+
+    dodir /usr/libexec/ccache/
+    insinto /usr/libexec/ccache/
+    local f
+    for f in {${CHOST}-,}{gcc,g++,c++}; do
+        dosym /usr/bin/ccache /usr/libexec/ccache/${f}
+    done
+}
+
