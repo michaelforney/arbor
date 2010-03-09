@@ -9,11 +9,13 @@ SUMMARY="GNU sed stream editor"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="acl"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
+    build+run:
+        acl? ( sys-apps/acl )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -22,4 +24,5 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-included-gettext
 )
 DEFAULT_SRC_PREPARE_PATCHES=( ${FILES}/${PN}-lc-all.patch )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl )
 
