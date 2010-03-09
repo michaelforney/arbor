@@ -86,7 +86,7 @@ pkg_postinst() {
     done
 
     # create lib -> lib64 symlinks if needed
-    if [[ ${SYMLINK_LIB} == yes ]]; then
+    if [[ ${libdir} != lib ]]; then
         for x in {,usr/,usr/local/}lib; do
             if [[ ! -e "${ROOT}${x}" ]]; then
                 edo ln -s "${libdir}" "${ROOT}${x}"
@@ -96,3 +96,4 @@ pkg_postinst() {
         done
     fi
 }
+
