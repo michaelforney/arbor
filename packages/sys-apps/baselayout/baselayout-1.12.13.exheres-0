@@ -158,7 +158,7 @@ pkg_preinst() {
         edo touch "${ROOT}"${x}/.keep_do_not_break_me
     done
 
-    if [[ ${SYMLINK_LIB} == yes ]]; then
+    if [[ $(get_libdir) != lib ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -L ${ROOT}${x} ]]; then
                 target=$(readlink "${ROOT}${x}") || die "rewriting ${ROOT}${x} failed"
