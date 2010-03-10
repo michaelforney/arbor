@@ -1,0 +1,67 @@
+# Copyright 2008 Stephen Bennett
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require googlecode
+
+SUMMARY="Userland utilities for dm-crypt"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libgcrypt
+        dev-libs/libgpg-error
+        dev-libs/popt
+        sys-fs/lvm2 [[ note = [ cryptsetup needs device-mapper from the LVM2 package ] ]]
+        sys-fs/e2fsprogs
+    run:
+        sys-fs/udev
+"
+
+src_configure() {
+    local static dir
+    for static in enable disable; do
+        dir="${WORKBASE}/${static}-static"
+        mkdir -v "${dir}"
+        cd "${dir}"
+
+        ECONF_SOURCE="../${PNV}"
+
+        local myeconf="--${static}-static"
+        myeconf+=" --disable-selinux"
+
+        if [[ "${static}" == "enable" ]] ; then
+            myeconf+=" --sbindir=/sbin"
+            myeconf+=" --libdir=/$(get_libdir)"
+        fi
+
+        econf ${myeconf}
+    done
+}
+
+src_compile() {
+    local static dir
+    for static in enable disable; do
+        dir="${WORKBASE}/${static}-static"
+        cd "${dir}"
+        default
+    done
+}
+
+src_install() {
+    into /
+    newsbin "${WORKBASE}/enable-static/src/cryptsetup" cryptsetup.static
+
+    cd "${WORKBASE}/disable-static"
+    default
+
+    # for the docs
+    cd "${WORK}"
+    default
+}
+
