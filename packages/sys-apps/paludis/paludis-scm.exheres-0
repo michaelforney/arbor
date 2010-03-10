@@ -12,7 +12,6 @@ require scm-git
 
 MYOPTIONS="doc python ruby vim-syntax
     cran       [[ description = [ Enable CRAN repository support ] ]]
-    inquisitio [[ description = [ Enable inquisitio, the search client ] ]]
     pink       [[ description = [ Use an obnoxious girly colour scheme ] ]]
     xml        [[ description = [ Enable parsing of xml files, for GLSA and metadata.xml support, only useful with Gentoo repositories ] ]]
 "
@@ -41,7 +40,7 @@ DEPENDENCIES="
         user/paludisbuild
         app-admin/eclectic
         app-shells/bash[>=4]
-        inquisitio? ( dev-libs/pcre[>=7.8] )
+        dev-libs/pcre[>=7.8]
         python? (
             dev-lang/python:=
             dev-libs/boost
@@ -67,7 +66,7 @@ src_prepare() {
 
 src_configure() {
     local clients environments repositories
-    clients=$(echo default accerso adjutrix cave importare $(optionv inquisitio ) \
+    clients=$(echo default accerso adjutrix cave importare inquisitio \
         instruo paludis reconcilio | tr -s \  ,)
     environments="default"
     repositories=$(echo default accounts $(optionv cran ) | tr -s \  ,)
@@ -117,13 +116,12 @@ src_install() {
     option python && python_bytecompile
 
     local bashcomp bashcompletions
-    bashcompletions="accerso adjutrix cave importare $(optionv inquisitio) instruo paludis reconcilio"
+    bashcompletions="accerso adjutrix cave importare inquisitio instruo paludis reconcilio"
     for bashcomp in ${bashcompletions}; do
         dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
     done
 
-    for zshcomp in _adjutrix _cave _importare _paludis{,_packages} _reconcilio \
-        $(option inquisitio && echo '_inquisitio')
+    for zshcomp in _adjutrix _cave _importare _inquisitio _paludis{,_packages} _reconcilio
     do
         dozshcompletion "${WORK}/zsh-completion/${zshcomp}"
     done
