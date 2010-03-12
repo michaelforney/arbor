@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 myexparam -b alpha=false
+myexparam subdir=
 myexparam suffix=bz2
 
 myexparam pn=${MY_PN:-${PN}}
@@ -14,7 +15,9 @@ if exparam -b alpha; then
 else
     DOWNLOADS="mirror://gnu/"
 fi
-DOWNLOADS+="$(exparam pn)/$(exparam pnv).tar.$(exparam suffix)"
+DOWNLOADS+="$(exparam pn)/"
+[[ -z $(exparam subdir) ]] || DOWNLOADS+=$(exparam subdir)/
+DOWNLOADS+="$(exparam pnv).tar.$(exparam suffix)"
 
 UPSTREAM_DOCUMENTATION="
 http://www.gnu.org/software/$(exparam pn)/manual/$(exparam pn).html   [[ lang = en description = [ $(exparam pn) manual, HTML ] ]]
