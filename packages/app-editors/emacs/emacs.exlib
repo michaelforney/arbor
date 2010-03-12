@@ -10,7 +10,11 @@ export_exlib_phases src_prepare src_install pkg_postinst pkg_postrm
 SUMMARY="The only Operating System that doesn't come with a real editor"
 
 LICENCES="GPL-3"
-SLOT="${PV}"
+if [[ -z $(ever range 3) ]]; then
+    SLOT=$(ever range 1-2)
+else
+    SLOT=$(ever major).$(($(ever range 2) + 1))
+fi
 MYOPTIONS="
     X alsa dbus freetype gif gpm gtk jpeg otf png svg tiff tiff xpm
     ( freetype gif gtk jpeg otf png svg tiff tiff xpm ) [[ requires = X ]]
