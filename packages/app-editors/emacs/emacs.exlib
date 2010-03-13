@@ -140,12 +140,11 @@ EOF
     done
     alternatives+=( /usr/share/info/${PN} ${PN}-${SLOT} )
 
-    local importance=${SLOT//scm/999}
     alternatives_for \
-        ${PN} ${PN}-${SLOT} ${importance} \
+        ${PN} ${PN}-${SLOT} ${SLOT} \
         ${alternatives[@]}
     alternatives_for \
-        ctags ${PN}-${SLOT} ${importance} \
+        ctags ${PN}-${SLOT} ${SLOT} \
         ${alternatives_ctags[@]}
 }
 
