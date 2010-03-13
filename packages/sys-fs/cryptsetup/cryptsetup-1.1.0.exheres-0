@@ -25,8 +25,8 @@ src_configure() {
     local static dir
     for static in enable disable; do
         dir="${WORKBASE}/${static}-static"
-        mkdir -v "${dir}"
-        cd "${dir}"
+        edo mkdir -v "${dir}"
+        edo cd "${dir}"
 
         ECONF_SOURCE="../${PNV}"
 
@@ -46,7 +46,7 @@ src_compile() {
     local static dir
     for static in enable disable; do
         dir="${WORKBASE}/${static}-static"
-        cd "${dir}"
+        edo cd "${dir}"
         default
     done
 }
@@ -55,11 +55,11 @@ src_install() {
     into /
     newsbin "${WORKBASE}/enable-static/src/cryptsetup" cryptsetup.static
 
-    cd "${WORKBASE}/disable-static"
+    edo cd "${WORKBASE}/disable-static"
     default
 
     # for the docs
-    cd "${WORK}"
+    edo cd "${WORK}"
     default
 }
 
