@@ -3,7 +3,7 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require game alternatives elisp-module
+require game elisp-module
 
 if [[ -z $(ever range 3) ]]; then
     require gnu [ suffix=bz2 ]
@@ -13,14 +13,10 @@ fi
 
 export_exlib_phases src_prepare src_install pkg_postinst pkg_postrm
 
-SUMMARY="The only Operating System that doesn't come with a real editor"
+SUMMARY="The extensible, customizable, self-documenting, real-time display editor"
 
 LICENCES="GPL-3"
-if [[ -z $(ever range 3) ]]; then
-    SLOT=$(ever range 1-2)
-else
-    SLOT=$(ever major).$(($(ever range 2) + 1))
-fi
+SLOT="0"
 MYOPTIONS="
     X alsa dbus freetype gif gpm gtk jpeg otf png svg tiff tiff xpm
     ( freetype gif gtk jpeg otf png svg tiff tiff xpm ) [[ requires = X ]]
@@ -30,6 +26,8 @@ MYOPTIONS="
     ]]
 "
 
+# Make sure slotted versions of emacs are removed before installation
+# Added March 13th, to be removed after a month
 DEPENDENCIES="
     build:
         X? ( dev-util/pkg-config )
@@ -38,6 +36,9 @@ DEPENDENCIES="
         gtk? ( dev-util/pkg-config )
         svg? ( dev-util/pkg-config )
     build+run:
+        !app-editors/emacs:23.1
+        !app-editors/emacs:23.1.92
+        !app-editors/emacs:23.2
         net-libs/liblockfile
         sys-libs/ncurses
         alsa? ( sys-sound/alsa-lib[>=1.0.0] )
@@ -70,8 +71,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --program-suffix=-${SLOT}
-    --infodir=/usr/share/info/emacs-${SLOT}
+    --infodir=/usr/share/info/emacs
     --without-kerberos
     --without-kerberos5
     --without-hesiod
@@ -111,46 +111,18 @@ EOF
     edo chown wizard:games "${IMAGE}"/usr/libexec/emacs/${PV}/${CHOST}/update-game-score
     edo chmod ug+s "${IMAGE}"/usr/libexec/emacs/${PV}/${CHOST}/update-game-score
 
-    # Handle slotting:
-    edo rm "${IMAGE}/usr/bin/${PN}-${PV}-${SLOT}"
-
-    local i m
-    for m in "${IMAGE}"/usr/share/man/man?/*; do
-        edo mv "${m}" "${m%.?}-${SLOT}${m: -2}"
-    done
-    for i in "${IMAGE}"/usr/share/info/${PN}-${SLOT}/*; do
+    local i
+    for i in "${IMAGE}"/usr/share/info/${PN}/*; do
         edo mv "${i}" "${i}.info"
     done
 
-    # Compile a list of everything we install that needs the alternatives treatment:
-    cd "${IMAGE}"
-
-    local unique src target alternatives=() alternatives_ctags=()
-    for src in usr/bin/*-${SLOT} usr/share/man/man?/* ; do
-        if [[ ${src} == usr/bin/ctags-${SLOT} ]]; then
-            edo mv ${src} ${src/${SLOT}/${PN}-${SLOT}}
-            alternatives_ctags+=( /usr/bin/ctags ctags-${PN}-${SLOT} )
-        elif [[ ${src} == usr/share/man/man1/ctags-${SLOT}.1 ]]; then
-            edo mv ${src} ${src/${SLOT}/${PN}-${SLOT}}
-            alternatives_ctags+=( /usr/share/man/man1/ctags.1 ctags-${PN}-${SLOT}.1 )
-        else
-            target=${src/-${SLOT}}
-            alternatives+=( "/${target}" "${src##*/}" )
-        fi
-    done
-    alternatives+=( /usr/share/info/${PN} ${PN}-${SLOT} )
-
-    alternatives_for \
-        ${PN} ${PN}-${SLOT} ${SLOT} \
-        ${alternatives[@]}
-    alternatives_for \
-        ctags ${PN}-${SLOT} ${SLOT} \
-        ${alternatives_ctags[@]}
+    hereenvd 70${PN} <<EOF
+INFOPATH="/usr/share/info/${PN}"
+EOF
 }
 
 emacs_pkg_postinst() {
     game_pkg_postinst
-    alternatives_pkg_postinst
     elisp-generate-global-site-file
 }
 
