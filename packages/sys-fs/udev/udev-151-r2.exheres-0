@@ -10,6 +10,7 @@ require udev easy-multibuild
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS="glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
+           sound [[ description = [ install extra rules for sound cards ] ]]
            gobject-introspection [[ requires = [ glib ] ]]
            multibuild_c: 32 64
            platform: ia64" # ppc s390
@@ -21,11 +22,14 @@ DEPENDENCIES="
     build+run:
         glib? ( dev-libs/glib:2[>=2.7.0][multibuild_c:*(?)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
+        sound? ( sys-apps/usbutils
+                 sys-apps/pciutils )
     suggestion:
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/udev-151-only-build-gudev.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/udev-151-only-build-gudev.patch"
+                              "${FILES}/udev-151-build-sound-rules.patch" )
 
 src_prepare() {
     edo gtkdocize --copy
@@ -33,14 +37,14 @@ src_prepare() {
 }
 
 configure_one_multibuild() {
-    econf \
-        --sbindir=/sbin \
-        --with-rootlibdir=/${LIBDIR} \
-        --libexecdir=/${LIBDIR}/udev/ \
-        --without-selinux \
-        --disable-extras \
-        $(option_enable glib gudev) \
-        $(option_enable gobject-introspection introspection)
+    econf --sbindir=/sbin \
+          --with-rootlibdir=/${LIBDIR} \
+          --libexecdir=/${LIBDIR}/udev/ \
+          --without-selinux \
+          --disable-extras \
+          $(option_enable glib gudev) \
+          $(option_enable gobject-introspection introspection) \
+          $(option_enable sound usb-db) $(option_enable sound pci-db) $(option_enable sound sound-rules)
 }
 
 src_install() {
