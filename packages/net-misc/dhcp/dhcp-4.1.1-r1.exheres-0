@@ -14,14 +14,14 @@ REMOTE_IDS="freshmeat:iscdhcp"
 LICENCES="ISC"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ipv6"
+MYOPTIONS=""
 
 DEPENDENCIES="
     run:
-        sys-apps/net-tools"
+        sys-apps/net-tools
+"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'ipv6 dhcpv6' )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --sbindir=/sbin --localstatedir=/var )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --sbindir=/sbin --localstatedir=/var --enable-dhcpv6 )
 
 WORK=${WORKBASE}/${MY_PNV}
 
