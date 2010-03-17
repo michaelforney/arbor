@@ -1,0 +1,16 @@
+Source: Written by myself
+Upstream: no
+Reason: Add Exherbo as linux distro
+
+--- os-prober/os-probes/mounted/common/90linux-distro.orig	2010-03-17 21:44:28.000000000 +0100
++++ os-prober/os-probes/mounted/common/90linux-distro	2010-03-17 21:45:31.000000000 +0100
+@@ -85,6 +85,9 @@
+ 	elif [ -e "$dir/etc/gentoo-release" ]; then
+ 		short="Gentoo"
+ 		long="$(cat "$dir/etc/gentoo-release")"
++	elif [ -e "$dir/etc/exherbo-release" ]; then
++		short="Exherbo"
++		long="$(cat "$dir/etc/exherbo-release")"
+ 	elif [ -e "$dir/etc/cobalt-release" ]; then
+ 		short="Cobalt"
+ 		long="$(cat "$dir/etc/cobalt-release")"

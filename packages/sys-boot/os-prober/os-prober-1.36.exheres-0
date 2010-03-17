@@ -1,0 +1,65 @@
+# Copyright 2010 Timothy Redaelli <timothy@redaelli.eu>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'os-prober-1.36.ebuild' from Gentoo, which is:
+#     Copyright 1999-2010 Gentoo Foundation
+
+require debian-upstream multilib
+
+SUMMARY="Utility to detect other OSs on a set of drives"
+
+HOMEPAGE="http://joey.kitenet.net/code/os-prober/"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    suggestion:
+        sys-fs/ntfs-3g [[
+            description = [ Used to detect version of Windows installed on NTFS-formatted partitions. ]
+        ]]
+"
+
+BUGS_TO="timothy@redaelli.eu"
+
+WORK="${WORKBASE}"/${PN}
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-exherbo.patch )
+
+src_prepare() {
+    edo sed -i "s:/lib/udev:/$(get_libdir)/udev:g" "${WORK}"/common.sh
+    edo sed -i "s:/lib/ld\*\.so\*:/lib*/ld*.so*:g" "${WORK}"/os-probes/mounted/common/90linux-distro
+    echo 'fgrep -rlZ "/usr/lib" "${WORK}" | xargs -0 sed -i "s:/usr/lib/:/usr/libexec/:g"' >&2
+    fgrep -rlZ "/usr/lib" "${WORK}" | xargs -0 sed -i "s:/usr/lib/:/usr/libexec/:g" || die
+    
+    default
+}
+
+src_compile() {
+    edo ${CC} ${CPPFLAGS} ${CFLAGS} ${LDFLAGS} -o newns newns.c
+}
+
+src_install() {
+    dobin os-prober linux-boot-prober
+
+    exeinto /usr/libexec/os-prober
+    doexe newns
+
+    insinto /usr/share/os-prober
+    doins common.sh
+
+    for dir in os-probes{,/mounted,/init} linux-boot-probes{,/mounted}; do
+        exeinto /usr/libexec/$dir
+        doexe $dir/common/*
+        [[ -d $dir/x86 ]] && doexe $dir/x86/*
+    done
+
+    exeinto /usr/libexec/os-probes/mounted
+    doexe os-probes/mounted/powerpc/20macosx
+
+    emagicdocs
+    dodoc debian/changelog
+
+    keepdir /var/lib/os-prober
+}
