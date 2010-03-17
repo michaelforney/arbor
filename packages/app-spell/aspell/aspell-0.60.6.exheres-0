@@ -12,27 +12,16 @@ LICENCES="LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 
-option_expand_dependencies() {
-    local prefix=${1} option
-    shift
-    for option in "${@}"; do
-        echo "${prefix}:${option}? ( app-dicts/aspell-${option} )"
-    done
-}
+MYOPTIONS="doc examples"
 
-# there's plenty of these to add
-MY_LINGUAS="de en it nl pl ru"
-
-MYOPTIONS="doc examples
-linguas: ${MY_LINGUAS}"
-
+DICTS_SUGGESTIONS=( app-dicts/aspell-{de,en,it,nl,pl,ru} )
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
         sys-libs/ncurses
-    post:
-        $(option_expand_dependencies linguas ${MY_LINGUAS})
+    suggestion:
+        ${DICTS_SUGGESTIONS[@]}
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
