@@ -93,5 +93,8 @@ e2fsprogs_src_install() {
             dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})"
         done
     fi
+
+    dodir /usr/$(get_libdir)/
+    edo mv "${IMAGE}"/{,usr/}$(get_libdir)/pkgconfig
 }
 
