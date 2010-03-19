@@ -55,7 +55,7 @@ pkg_postinst() {
     local x
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
-    for x in bin boot dev{,/pts,/shm} etc home ${libdir} mnt \
+    for x in bin boot dev{,/pts} etc home ${libdir} mnt \
         opt proc sbin sys; do
             create_root_owned_directory "${ROOT}${x}"
     done
@@ -81,6 +81,7 @@ pkg_postinst() {
 
     # directories with special permissions
     create_root_owned_directory "${ROOT}root" 0700
+    create_root_owned_directory "${ROOT}dev/shm" 0777
     for x in var/{lock,tmp} tmp; do
         create_root_owned_directory "${ROOT}${x}" 1777
     done
