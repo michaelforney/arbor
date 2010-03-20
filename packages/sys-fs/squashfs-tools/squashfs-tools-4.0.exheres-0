@@ -1,6 +1,8 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require sourceforge [ project=squashfs suffix=tar.gz pnv=squashfs${PV} ]
+
 SUMMARY="The Squashfs tools for creating compressed filesystems"
 DESCRIPTION="
 Squashfs is a highly compressed read-only filesystem for Linux. It uses zlib to
@@ -9,11 +11,9 @@ data overhead, and block sizes of between 4K and 1M are supported. It is intende
 to be used for archival use, for live CDs, and for embedded systems where low
 overhead is needed. This package allows you to create such filesystems.
 "
-HOMEPAGE="http://squashfs.sourceforge.net/"
-DOWNLOADS="mirror://sourceforge/squashfs/squashfs${PV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
-REMOTE_IDS="freshmeat:squashfs sourceforge:squashfs"
+REMOTE_IDS+="freshmeat:squashfs"
 
 UPSTREAM_RELEASE_NOTES="http://sourceforge.net/project/shownotes.php?group_id=63835&release_id=622329"
 

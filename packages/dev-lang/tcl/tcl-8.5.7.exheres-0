@@ -5,6 +5,7 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require sourceforge [ suffix=tar.gz pnv=${PN}${PV}-src ]
 
 MY_PNV="${PN}${PV}"
 
@@ -17,9 +18,8 @@ source and business-friendly, Tcl is a mature yet evolving language that is
 truly cross platform, easily deployed and highly extensible.
 "
 HOMEPAGE="http://www.tcl.tk/"
-DOWNLOADS="mirror://sourceforge/${PN}/${MY_PNV}-src.tar.gz"
 
-REMOTE_IDS="freshmeat:tcltk sourceforge:tcl"
+REMOTE_IDS+=" freshmeat:tcltk"
 
 LICENCES="BSD-3"
 SLOT="0"
