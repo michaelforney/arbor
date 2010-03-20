@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -9,7 +9,10 @@ MYSQL_MAJOR_VERSION=$(ever range 1-2)
 
 SUMMARY="A relational database management system (RDBMS)"
 HOMEPAGE="http://www.mysql.com/"
-DOWNLOADS="http://downloads.mysql.com/archives/${PN}-$(ever range 1-2)/${PNV}.tar.gz"
+DOWNLOADS="
+mirror://mysql/Downloads/MySQL-$(ever range 1-2)/${PNV}.tar.gz
+http://downloads.mysql.com/archives/${PN}-$(ever range 1-2)/${PNV}.tar.gz
+"
 
 REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_CHANGELOG="
