@@ -35,7 +35,7 @@ create_device_node() {
 
 pkg_pretend() {
     local x
-    if [[ ${libdir} != lib ]]; then
+    if [[ $(get_libdir) != lib ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
                 die "${x}: Expected a symlink but found a directory"
