@@ -23,6 +23,6 @@ DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
 
 src_install() {
     default
-    edo rmdir "${IMAGE}"/usr/share/doc/cppunit
+    [[ -e "${IMAGE}"/usr/share/doc/cppunit ]] && edo rmdir "${IMAGE}"/usr/share/doc/cppunit
 }
 
