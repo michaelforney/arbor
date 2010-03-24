@@ -142,7 +142,7 @@ scm_perform_fetch() {
         whynot=$(scm_call appraise)
         status=${?}
         if [[ ${status} -eq 2 ]]; then
-            einfo "Not fetching ${SCM_THIS:-primary repository} because the existing checkout is perfect"
+            echo "Not fetching ${SCM_THIS:-primary repository} because the existing checkout is perfect"
             return
         fi
     else
@@ -152,7 +152,7 @@ scm_perform_fetch() {
 
     if [[ -n ${SCM_OFFLINE} ]]; then
         [[ ${status} -ne 0 ]] && die "can't use SCM_OFFLINE for ${SCM_THIS:-primary repository} because ${whynot}"
-        einfo "Not fetching ${SCM_THIS:-primary repository} because SCM_OFFLINE is set"
+        echo "Not fetching ${SCM_THIS:-primary repository} because SCM_OFFLINE is set"
         return
     fi
 
@@ -163,10 +163,10 @@ scm_perform_fetch() {
         if scm_check_timestamp "${dir}" .scm.exlib.timestamp ||
                 { [[ -n ${branch} ]] && scm_check_timestamp "${dir}" .scm.exlib.timestamp."${branch//\//--}"; }; then
             if [[ ${status} -eq 0 ]]; then
-                einfo "Not fetching ${SCM_THIS:-primary repository} because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
+                echo "Not fetching ${SCM_THIS:-primary repository} because SCM_MIN_UPDATE_DELAY (${SCM_MIN_UPDATE_DELAY}) hours have not passed"
                 return
             else
-                einfo "Ignoring SCM_MIN_UPDATE_DELAY for ${SCM_THIS:-primary repository} because ${whynot}"
+                echo "Ignoring SCM_MIN_UPDATE_DELAY for ${SCM_THIS:-primary repository} because ${whynot}"
             fi
         fi
     fi
