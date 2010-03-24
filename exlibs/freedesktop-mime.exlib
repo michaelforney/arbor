@@ -9,9 +9,8 @@ freedesktop-mime_update_mime_database() {
     illegal_in_global_scope
 
     if [[ "${ROOT}" == / ]] ; then
-        ebegin "Updating MIME database"
-        /usr/bin/update-mime-database /usr/share/mime
-        eend $?
+        nonfatal edo /usr/bin/update-mime-database /usr/share/mime ||
+            eerror "update-mime-database failed"
     else
         ewarn 'Not updating mime database because ${ROOT} != /'
     fi

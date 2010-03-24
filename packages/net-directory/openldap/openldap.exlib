@@ -1,7 +1,7 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases src_prepare src_compile src_install
+export_exlib_phases src_prepare src_compile src_test_expensive src_install
 
 SUMMARY="An open source implementation of the Lightweight Directory Access Protocol"
 DESCRIPTION="
@@ -17,6 +17,9 @@ DOWNLOADS="ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/${PNV}.tgz"
 LICENCES="OpenLDAP-2.8"
 SLOT="0"
 MYOPTIONS="debug ipv6"
+
+# Expensive tests
+RESTRICT="test"
 
 REMOTE_IDS="freshmeat:${PN}"
 
@@ -75,6 +78,10 @@ openldap_src_prepare() {
 openldap_src_compile() {
     emake depend
     default
+}
+
+openldap_src_test_expensive() {
+    emake test
 }
 
 openldap_src_install() {

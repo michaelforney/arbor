@@ -4,7 +4,7 @@
 require easy-multibuild
 
 SUMMARY="Open source SSL and TLS implementation and cryptographic library"
-HOMEPAGE="http://www.openssl.org"
+HOMEPAGE="http://www.openssl.org/"
 DOWNLOADS="http://www.openssl.org/source/${PNV}.tar.gz"
 
 LICENCES="BSD-3"
@@ -16,10 +16,8 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-CFLAGS.patch
-    "${FILES}"/${PNV}-remove-broken-configs.patch
-    )
-# Parallel build is broken
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+    -p0 "${FILES}"/${PNV}-cfb.patch
+)
 # Tests don't run in parallel
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
@@ -36,18 +34,6 @@ unpack_one_multibuild() {
 
 src_unpack() {
     easy-multibuild_run_phase
-}
-
-prepare_one_multibuild() {
-    default
-
-    # Fix libdir
-    edo sed -e "s:\(\$(INSTALL_PREFIX)\$(INSTALLTOP)\)/lib:\1/${LIBDIR}:g" \
-            -e "/libdir=/s:/lib:/${LIBDIR}:g" \
-            -i Makefile.org engines/Makefile
-
-    # Fix manpath
-    edo sed -e 's:^MANDIR=.*$:MANDIR=/usr/share/man:' -i Makefile.org
 }
 
 src_prepare() {
@@ -69,9 +55,17 @@ configure_one_multibuild() {
     fi
 }
 
+compile_one_multibuild() {
+    # Parallel build is broken
+    emake -j1 LIBDIR=${LIBDIR} MANDIR=/usr/share/man
+}
+
 install_one_multibuild() {
-    emake -j1 INSTALL_PREFIX="${IMAGE}" install
+    emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANDIR=/usr/share/man install
     keepdir /etc/ssl/{certs,private}
     emagicdocs
+
+    # emake install installs to /usr/${LIBDIR} but creates /usr/lib/engines whenever it's run
+    [[ ${LIBDIR} != lib ]] && edo rmdir "${IMAGE}"/usr/lib/{engines/,}
 }
 

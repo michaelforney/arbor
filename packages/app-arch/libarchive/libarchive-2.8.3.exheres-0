@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require googlecode [ suffix=tar.gz ]
@@ -31,6 +31,7 @@ DEPENDENCIES="
         app-arch/xz
         app-arch/gzip
         app-arch/bzip2
+        dev-libs/libxml2:=
         dev-libs/openssl
         acl? ( sys-apps/acl )
         xattr? ( sys-apps/attr )
@@ -39,8 +40,11 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     --enable-bsdcpio=shared
-    # Enable gzip, bzip2, xz support
-    --with-{zlib,bz2lib,lzma}
+    --enable-bsdtar=shared
+    # Enable gzip, bzip2, xz, xar support
+    --with-{zlib,bz2lib,lzma,xml2}
+    # Use libxml2 instead of expat for xar support
+    --without-expat
     # Disable old app-arch/lzma support
     --without-lzmadec
     # enable openssl support

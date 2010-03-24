@@ -3,11 +3,10 @@
 
 MY_PNV=${PN}_$(ever replace_all '_')
 
-require cmake
+require cmake sourceforge
 
 SUMMARY="Boost Libraries for C++"
 HOMEPAGE="http://www.boost.org/"
-DOWNLOADS="mirror://sourceforge/${PN}/${MY_PNV}.tar.bz2"
 
 LICENCES="freedist Boost-1.0"
 SLOT="0"
@@ -31,10 +30,10 @@ DEPENDENCIES="
 "
 
 
-REMOTE_IDS="freshmeat:${PN}"
+REMOTE_IDS+=" freshmeat:${PN}"
 UPSTREAM_CHANGELOG="${HOMEPAGE}/users/news/version_${PV//./_}"
 
-WORK="${WORKBASE}/${PN}_${PV//./_}"
+WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-libdir.patch"

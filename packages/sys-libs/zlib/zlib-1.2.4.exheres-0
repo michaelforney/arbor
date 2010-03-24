@@ -2,10 +2,10 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild flag-o-matic
+require flag-o-matic easy-multibuild
 
 SUMMARY="A free compression library unencumbered by patents"
-HOMEPAGE="http://www.zlib.net"
+HOMEPAGE="http://www.zlib.net/"
 DOWNLOADS="http://www.zlib.net/${PNV}.tar.gz"
 
 LICENCES="as-is"
@@ -16,8 +16,6 @@ MYOPTIONS="multibuild_c: 32 64"
 DEPENDENCIES=""
 
 WORK="${WORKBASE}"
-
-DEFAULT_SRC_PREPARE_PATCHES="${FILES}/zlib-1.2.1-fPIC.patch"
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
@@ -53,19 +51,10 @@ configure_one_multibuild() {
         64) export CC="${CC/ -m32/}";;
     esac
 
-    AR+=" rc"
-
+    # Breaks on most ./configure arguments econf passes
     edo ./configure \
         --prefix=/usr \
         --libdir=/usr/${LIBDIR} \
         --shared
-}
-
-install_one_multibuild() {
-    emake install \
-        prefix="${IMAGE}/usr" \
-        libdir="${IMAGE}/usr/${LIBDIR}"
-
-    emagicdocs
 }
 

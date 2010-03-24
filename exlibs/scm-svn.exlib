@@ -86,28 +86,13 @@ scm-svn_svn() {
     local cmd=${1} extra=( --non-interactive --no-auth-cache )
     shift
     has "${cmd}" checkout co export status stat st switch sw update up && extra+=( --ignore-externals )
-    if [[ -n $(scm_get_var SVN_USERNAME) ]]; then
-        extra+=( --username "$(scm_get_var SVN_USERNAME)" )
-        if [[ -n $(scm_get_var SVN_PASSWORD) ]]; then
-            extra+=( --password "$(scm_get_var SVN_PASSWORD)" )
-        else
-            extra+=( --password= )
-        fi
-    fi
+    [[ -n ${SCM_SVN_CONFIG_DIR} ]] && extra=( "${extra[@]}" --config-dir "${SCM_SVN_CONFIG_DIR}" )
+    [[ -n $(scm_get_var SVN_USERNAME) ]] && extra+=(
+	--username="$(scm_get_var SVN_USERNAME)"
+	--password="$(scm_get_var SVN_PASSWORD)" )
 
     ${echo} svn "${cmd}" "${extra[@]}" "${@}"
-    if [[ ! -e ~/.subversion && -n ${SCM_SVN_CONFIG_DIR} ]]; then
-        ln -s "${SCM_SVN_CONFIG_DIR}" ~/.subversion || die "ln -s .subversion failed"
-
-        svn "${cmd}" "${extra[@]}" "${@}"
-        local status=${?}
-
-        rm ~/.subversion || die "rm .subversion symlink failed"
-
-        [[ ${status} -eq 0 ]]
-    else
-        svn "${cmd}" "${extra[@]}" "${@}"
-    fi || die_unless_nonfatal "svn ${cmd} failed"
+    svn "${cmd}" "${extra[@]}" "${@}" || die_unless_nonfatal "svn ${cmd} failed"
 }
 
 scm-svn_info() {
@@ -219,7 +204,7 @@ scm-svn_do_resolve_externals() {
 
                         got=$(SCM_THIS=${that} scm-svn_uri)
                         [[ ${got} == ${uri} ]] \
-                            || errors+=( "svn URI for ${that} is ${got}, but wanted ${uri}" )x
+                            || errors+=( "svn URI for ${that} is ${got}, but wanted ${uri}" )
 
                         got=$(SCM_THIS=${that} scm_get_var REVISION)
                         if [[ ${got} == _ ]]; then
