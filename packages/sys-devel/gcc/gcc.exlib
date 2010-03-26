@@ -89,7 +89,7 @@ src_prepare() {
     edo cd  "${WORKBASE}/${PNV}"
     default
     # patch can't apply a binary diff. git apply can.
-    option java && [[ ${SLOT} == 4.4 ]] && ! ever at_least 4.4.3 &&
+    [[ ${SLOT} == 4.4 ]] && ! ever at_least 4.4.3 && option java &&
         edo git apply "${FILES}"/${PN}-${SLOT}-jar-fix.patch
 }
 
