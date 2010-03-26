@@ -210,7 +210,7 @@ scm_fetch_one() {
 }
 
 scm_src_fetch_extra() {
-    [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; either set SCM_REPOSITORY before require scm{,-*}, or call scm_finalise in global scope after setting SCM_*"
+    [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
     scm_{for_each,access_checkout,fetch_one}
 }
 
@@ -261,7 +261,7 @@ scm_unpack_one() {
 }
 
 scm_src_unpack() {
-    [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; either set SCM_REPOSITORY before require scm{,-*}, or call scm_finalise in global scope after setting SCM_*"
+    [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
     scm_{for_each,access_checkout,unpack_one}
     SCM_IS_BUILT=1
 }
@@ -357,7 +357,7 @@ scm_finalise() {
 
     DEPENDENCIES+=" )"
 }
-[[ -n ${SCM_REPOSITORY} && -z ${SCM_NO_AUTOMATIC_FINALISE} ]] && scm_finalise
+[[ -z ${SCM_NO_AUTOMATIC_FINALISE} ]] && scm_finalise
 
 #export_exlib_phases src_fetch_extra pkg_scm_revision src_unpack pkg_info
 export_exlib_phases src_fetch_extra src_unpack pkg_info
