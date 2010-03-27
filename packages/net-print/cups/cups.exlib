@@ -17,7 +17,6 @@ MYOPTIONS="dbus debug gnutls libusb pam perl python tcpd tiff threads xinetd
 
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
 tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
-gnutls
 linguas: ${LANGS}"
 
 # TODO:
@@ -110,13 +109,13 @@ src_configure() {
         $(option_enable pam) \
         $(option_enable gnutls ssl) \
         $(option_enable !gnutls openssl) \
+        $(option_enable libusb libusb) \
+        $(option_enable tcpd tcp-wrappers) \
         $(option_enable tiff) \
         $(option_enable threads) \
         $(option_with perl) \
         $(option_with python) \
-        $(option_with xinetd xinetd /etc/xinetd.d) \
-        $(option_enable libusb libusb) \
-        $(option_enable tcpd tcp-wrappers)
+        $(option_with xinetd xinetd /etc/xinetd.d)
 }
 
 src_install() {
