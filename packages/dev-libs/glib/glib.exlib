@@ -1,7 +1,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require gnome.org
+require gnome.org multilib
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
@@ -18,4 +18,11 @@ HOMEPAGE="http://www.gtk.org"
 LICENCES="LGPL-2"
 
 REMOTE_IDS="freshmeat:glib"
+
+export_exlib_phases src_install
+
+glib_src_install() {
+    default
+    keepdir "/usr/$(get_libdir)/gio/modules"
+}
 

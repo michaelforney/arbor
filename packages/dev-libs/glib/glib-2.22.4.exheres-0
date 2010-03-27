@@ -2,7 +2,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require glib multilib
+require glib
 
 SLOT="2"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
@@ -32,11 +32,5 @@ src_test() {
     fi
 
     default
-}
-
-src_install() {
-    default
-
-    keepdir "/usr/$(get_libdir)/gio/modules"
 }
 
