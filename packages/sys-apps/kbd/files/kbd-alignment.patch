@@ -1,0 +1,58 @@
+Source: see below, also debian bug #558492
+Upstream: yes
+Reason: fix alignment issues on non-x86 arches
+
+From: Alexey Gladkov <gladkov.alexey@gmail.com>
+Date: Wed, 2 Dec 2009 23:48:07 +0000 (+0300)
+Subject: psffontop: Fix possible alignment issues, wrt -Wcast-align
+X-Git-Url: http://git.altlinux.org/people/legion/packages/kbd.git?p=kbd.git;a=commitdiff_plain;h=d10c22e120863a4dc2dc6fd82431bdb962327891
+
+psffontop: Fix possible alignment issues, wrt -Wcast-align
+
+Signed-off-by: Alexey Gladkov <gladkov.alexey@gmail.com>
+---
+
+diff --git a/src/psffontop.c b/src/psffontop.c
+index ad9afc2..40577df 100644
+--- a/src/psffontop.c
++++ b/src/psffontop.c
+@@ -4,6 +4,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include <sysexits.h>
+ #include "xmalloc.h"
+ #include "nls.h"
+@@ -247,22 +248,22 @@ readpsffont(FILE *fontf, char **allbufp, int *allszp,
+ 		utf8 = 0;
+ 	} else if (inputlth >= sizeof(struct psf2_header) &&
+ 		   PSF2_MAGIC_OK((unsigned char *)inputbuf)) {
+-		struct psf2_header *psfhdr;
++		struct psf2_header psfhdr;
+ 		int flags;
+ 
+-		psfhdr = (struct psf2_header *) &inputbuf[0];
++		memcpy(&psfhdr, inputbuf, sizeof(struct psf2_header));
+ 
+-		if (psfhdr->version > PSF2_MAXVERSION) {
++		if (psfhdr.version > PSF2_MAXVERSION) {
+ 			char *u = _("%s: Unsupported psf version (%d)\n");
+-			fprintf(stderr, u, progname, psfhdr->version);
++			fprintf(stderr, u, progname, psfhdr.version);
+ 			exit(EX_DATAERR);
+ 		}
+-		fontlen = assemble_int((unsigned char *) &psfhdr->length);
+-		charsize = assemble_int((unsigned char *) &psfhdr->charsize);
+-		flags = assemble_int((unsigned char *) &psfhdr->flags);
++		fontlen = assemble_int((unsigned char *) &psfhdr.length);
++		charsize = assemble_int((unsigned char *) &psfhdr.charsize);
++		flags = assemble_int((unsigned char *) &psfhdr.flags);
+ 		hastable = (flags & PSF2_HAS_UNICODE_TABLE);
+-		ftoffset = assemble_int((unsigned char *) &psfhdr->headersize);
+-		fontwidth = assemble_int((unsigned char *) &psfhdr->width);
++		ftoffset = assemble_int((unsigned char *) &psfhdr.headersize);
++		fontwidth = assemble_int((unsigned char *) &psfhdr.width);
+ 		utf8 = 1;
+ 	} else
+ 		return -1;	/* not psf */
