@@ -24,6 +24,7 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-java-unwinder.patch )
 
 src_unpack() {
     scm_src_unpack
+    option java && edo cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar
     edo mkdir "${WORK}"
 }
 
