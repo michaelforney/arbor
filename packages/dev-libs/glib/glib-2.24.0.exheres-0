@@ -2,11 +2,11 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require glib easy-multibuild
+require glib
 
 SLOT="2"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="doc fam man-pages multibuild_c: 32 64"
+MYOPTIONS="doc fam man-pages"
 
 DEPENDENCIES="
     build:
@@ -25,9 +25,4 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--enable-regex' '--with-pcre=internal' '--with-threads=posix' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' 'fam' 'man-pages man' )
-
-install_one_multibuild() {
-    default
-    keepdir "/usr/${LIBDIR}/gio/modules"
-}
 

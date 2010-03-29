@@ -13,15 +13,16 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="dbus debug gnutls libusb pam perl python tcpd tiff threads xinetd
+MYOPTIONS="acl dbus debug gnutls ldap libusb pam perl python tcpd tiff threads xinetd
 
+acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
+ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
 tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
-gnutls
 linguas: ${LANGS}"
 
 # TODO:
-# options: acl avahi/zeroconf java kerberos ldap php slp
+# options: avahi/zeroconf java kerberos php slp
 # features: maybe ppds?
 # probably better slotting to avoid rebuilding
 
@@ -30,8 +31,10 @@ DEPENDENCIES="
         dbus? ( dev-util/pkg-config )
         gnutls? ( dev-util/pkg-config )
     build+run:
+        acl? ( sys-apps/acl )
         dbus? ( sys-apps/dbus )
         gnutls? ( dev-libs/gnutls )
+        ldap? ( net-directory/openldap )
         libusb? ( dev-libs/libusb:0.1 )
         pam? ( sys-libs/pam )
         perl? ( dev-lang/perl )
@@ -91,7 +94,7 @@ src_configure() {
 
     [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
 
-    # XXX Enables: acl 'kerberos glssapi' ldap slp
+    # XXX Enables: 'kerberos glssapi' slp
     # XXX Withs: java php
     econf \
         --enable-jpeg \
@@ -105,18 +108,20 @@ src_configure() {
         --with-languages="${CUPSLANGS}" \
         --with-pdftops=pdftops \
         --with-system-groups=lpadmin \
+        $(option_enable acl) \
         $(option_enable dbus) \
         $(option_enable gnutls) \
         $(option_enable pam) \
         $(option_enable gnutls ssl) \
         $(option_enable !gnutls openssl) \
+        $(option_enable ldap) \
+        $(option_enable libusb libusb) \
+        $(option_enable tcpd tcp-wrappers) \
         $(option_enable tiff) \
         $(option_enable threads) \
         $(option_with perl) \
         $(option_with python) \
-        $(option_with xinetd xinetd /etc/xinetd.d) \
-        $(option_enable libusb libusb) \
-        $(option_enable tcpd tcp-wrappers)
+        $(option_with xinetd xinetd /etc/xinetd.d)
 }
 
 src_install() {

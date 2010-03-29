@@ -1,0 +1,18 @@
+Source: Aron Griffis
+Upstream: yes (2.6.9+)
+Reason: Use colors also using --eval option.
+
+--- keychain-2.6.8/keychain.orig	2010-03-25 17:37:58.000000000 +0100
++++ keychain-2.6.8/keychain	2010-03-25 17:45:25.000000000 +0100
+@@ -1393,9 +1393,9 @@
+     . "$envf"
+ fi
+ 
+-# Don't use color if there's no terminal on stdout
++# Don't use color if there's no terminal on stderr
+ if [ -n "$OFF" ]; then
+-    tty <&1 >/dev/null 2>&1 || unset BLUE CYAN GREEN OFF RED
++    tty <&2 >/dev/null 2>&1 || unset BLUE CYAN GREEN OFF RED
+ fi
+ 
+ # versinfo uses qprint, which honors --quiet

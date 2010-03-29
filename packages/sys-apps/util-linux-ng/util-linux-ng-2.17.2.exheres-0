@@ -1,0 +1,37 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+MY_PNV="${PNV/_/-}"
+
+SUMMARY="Common linux utilities"
+HOMEPAGE="http://userweb.kernel.org/~kzak/util-linux-ng/"
+DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${MY_PNV}.tar.bz2"
+
+UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}-ChangeLog"
+
+LICENCES="GPL-2 GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="pam"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext[>=0.14.1]
+    build+run:
+        dev-lang/perl:*
+        sys-fs/udev[>=112]
+        sys-libs/ncurses[>=5.6]
+        sys-libs/zlib
+        pam? ( sys-libs/pam )
+"
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-cramfs' '--enable-libblkid' '--enable-nls' '--without-selinux' "--libdir=/$(get_libdir)" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
+

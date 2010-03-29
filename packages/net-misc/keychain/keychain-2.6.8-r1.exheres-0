@@ -15,6 +15,8 @@ DEPENDENCIES="
         app-shells/bash
         net-misc/openssh"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/keychain-2.6.8-colors.patch )
+
 src_install() {
     dobin keychain
     doman keychain.1

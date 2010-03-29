@@ -1,7 +1,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require gnome.org
+require gnome.org easy-multibuild
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
@@ -15,7 +15,20 @@ synchronize their operation.
 "
 HOMEPAGE="http://www.gtk.org"
 
+MYOPTIONS="multibuild_c: 32 64"
+
 LICENCES="LGPL-2"
 
 REMOTE_IDS="freshmeat:glib"
+
+export_exlib_phases src_install
+
+install_one_multibuild() {
+    default
+    keepdir "/usr/${LIBDIR}/gio/modules"
+}
+
+glib_src_install() {
+    easy-multibuild_src_install
+}
 
