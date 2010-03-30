@@ -2,7 +2,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require easy-multibuild
 
 MY_PNV="${PNV/_/-}"
 
@@ -15,7 +15,7 @@ UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range
 LICENCES="GPL-2 GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="pam"
+MYOPTIONS="pam multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -23,15 +23,17 @@ DEPENDENCIES="
     build+run:
         dev-lang/perl:*
         sys-fs/udev[>=112]
-        sys-libs/ncurses[>=5.6]
-        sys-libs/zlib
-        pam? ( sys-libs/pam )
+        sys-libs/ncurses[>=5.6][multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
+        pam? ( sys-libs/pam[multibuild_c:*(?)?] )
 "
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-cramfs' '--enable-libblkid' '--enable-nls' '--without-selinux' "--libdir=/$(get_libdir)" )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
-
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
+
+configure_one_multibuild() {
+    econf '--enable-cramfs' '--enable-libblkid' '--enable-nls' \
+    '--without-selinux' "--libdir=/${LIBDIR}" $(option_with pam)
+}
 
