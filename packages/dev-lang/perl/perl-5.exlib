@@ -49,7 +49,7 @@ perl-5_src_unpack() {
 }
 
 perl-5_src_prepare() {
-    edo cd "${WORKBASE}/${PNV}"
+    edo cd "${WORKBASE}/${MY_PNV:-${PNV}}"
     default
 }
 
@@ -69,7 +69,7 @@ perl-5_src_configure() {
     replace-flags -O3 -O2
 
     edo sh \
-        "${WORKBASE}/${PNV}/Configure" \
+        "${WORKBASE}/${MY_PNV:-${PNV}}/Configure" \
         -des \
         -Dcc="${CC}" \
         -Dcf_by='Exherbo' \
