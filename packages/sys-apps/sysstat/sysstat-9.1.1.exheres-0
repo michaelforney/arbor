@@ -1,0 +1,79 @@
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+SUMMARY="Performance/system monitoring tools for Linux"
+DESCRIPTION="
+iostat(1) reports CPU statistics and input/output statistics for devices, partitions
+and network filesystems.
+mpstat(1) reports individual or combined processor related statistics.
+pidstat(1) reports statistics for Linux tasks (processes) : I/O, CPU, memory, etc.
+sar(1) collects, reports and saves system activity information (CPU, memory, disks,
+interrupts, network interfaces, TTY, kernel tables,etc.)
+sadc(8) is the system activity data collector, used as a backend for sar.
+sa1(8) collects and stores binary data in the system activity daily data file. It
+is a front end to sadc designed to be run from cron.
+sa2(8) writes a summarized daily activity report. It is a front end to sar designed
+to be run from cron.
+sadf(1) displays data collected by sar in multiple formats (CSV, XML, etc.) This
+is useful to load performance data into a database, or import them in a spreadsheet
+to make graphs.
+"
+HOMEPAGE="http://pagesperso-orange.fr/sebastien.godard/"
+DOWNLOADS="
+    ${HOMEPAGE}/${PNV}.tar.gz
+    ftp://ibiblio.org/pub/linux/system/status/${PNV}.tar.gz
+"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changelog.html [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation.html [[ lang = en ]]"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+        smp [[ description = [ Enable workaround for SMP race. ] ]]
+"
+
+DEPENDENCIES="
+    suggestion:
+        sys-process/vixie-cron
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-install-isag
+    --enable-nls
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "smp smp-race"
+)
+
+src_prepare() {
+    # Check if the detected libdir isn't really a symlink.
+    edo sed -i -e 's:\(-d $AuxPrefix/lib\);:\1 -a ! -L $AuxPrefix/lib;:' configure.in
+
+    autotools_src_prepare
+}
+
+src_configure() {
+    # Stupid build system is stupid.
+    export conf_dir=/etc/sysstat
+
+    default
+}
+
+src_install() {
+    default
+
+    # No need to install the licence.
+    edo rm "${IMAGE}"/usr/share/doc/${PNVR}/COPYING
+    dodoc -r contrib xml
+    dodoc crontab sysstat.crond sysstat.cron.daily sysstat.cron.hourly
+
+    keepdir /var/log/sa
+}
