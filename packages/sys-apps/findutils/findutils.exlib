@@ -1,7 +1,11 @@
 # Copyright 2009 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ alpha=true suffix=gz ]
+if (($(ever range 2) % 2)); then
+    require gnu [ alpha=true suffix=gz ]
+else
+    require gnu [ suffix=gz ]
+fi
 
 export_exlib_phases src_configure src_install
 
