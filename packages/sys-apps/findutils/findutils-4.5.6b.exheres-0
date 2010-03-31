@@ -5,13 +5,3 @@ require findutils
 
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
-# When bumping, please check *very* carefully, if this has been fixed by checking
-# https://savannah.gnu.org/bugs/?27213 and the testcase described there.
-# Note that you will have to comment out --disable-assert in the exlib for the
-# test to work. Please re-enable it, though, because upstream's use of assertions
-# is... debatable... in any case. (e. g. assertions over "permission denied" don't
-# make much sense, IMO.)
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-4.5.5-Bug-27213-avoid-failed-assertions-for-non-executable.patch
-)
-
