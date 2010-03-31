@@ -1,17 +1,14 @@
 # Copyright 2008 Wulf Krueger <philantrop@exherbo.org>
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require elisp-module
-
-MY_PV="${PV/rc/RC-}"
-MY_PNV="${PN}-$(ever replace 3 - ${MY_PV})"
+require elisp-optional [ source_directory=Docs ]
 
 SUMMARY="Cross platform Make"
 HOMEPAGE="http://www.cmake.org/"
-DOWNLOADS="http://www.cmake.org/files/v$(ever range 1-2)/${MY_PNV}.tar.gz"
+DOWNLOADS="http://www.cmake.org/files/v$(ever range 1-2)/${PNV}.tar.gz"
 
 UPSTREAM_CHANGELOG="http://www.cmake.org/files/v$(ever range 1-2)/CMakeChangeLog-${PV}"
 REMOTE_IDS="freshmeat:${PN}"
@@ -19,15 +16,13 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="CMake"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="emacs qt4 vim-syntax"
+MYOPTIONS="qt4 vim-syntax"
 
 DEPENDENCIES="
     build+run:
-        net-misc/curl[>=7.16.4]
+        net-misc/curl[>=7.16.4][ssl(+)]
         dev-libs/expat[>=2.0.1]
         dev-libs/libxml2[>=2.6.28]
-        dev-libs/xmlrpc-c[>=1.06.09]
-        emacs? ( app-editors/emacs )
         qt4? ( x11-libs/qt:4 )
         vim-syntax? (
             || (
@@ -40,12 +35,13 @@ DEPENDENCIES="
 VIMFILE="${PN}.vim"
 
 DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/remove-test-failure-submits-via-network.patch" )
 
 src_prepare() {
     default
 
     if option qt4; then
-        edo sed -i -e '/Icon/ s/\.png//' Source/QtDialog/CMake.desktop
+        sed -i -e '/Icon/ s/\.png$//' Source/QtDialog/CMake.desktop
     fi
 }
 
@@ -62,7 +58,7 @@ src_configure() {
 
 src_compile() {
     default
-    option emacs && elisp-compile Docs/*.el
+    elisp-optional_src_compile
 }
 
 src_test() {
@@ -75,10 +71,7 @@ src_test() {
 src_install() {
     default
 
-    if option emacs; then
-        elisp-install ${PN} Docs/*.el
-        elisp-install-site-file
-    fi
+    elisp-optional_src_install
 
     if option vim-syntax; then
         insinto /usr/share/vim/vimfiles/syntax
@@ -90,13 +83,5 @@ src_install() {
         insinto /usr/share/vim/vimfiles/ftdetect
         doins "${FILES}/${VIMFILE}"
     fi
-}
-
-pkg_postinst() {
-    option emacs && elisp-module_pkg_postinst
-}
-
-pkg_postrm() {
-    option emacs && elisp-module_pkg_postrm
 }
 
