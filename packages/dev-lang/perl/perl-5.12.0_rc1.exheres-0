@@ -14,7 +14,8 @@ UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${MY_PNV}/pod/${PN}$(ever delete
 PLATFORMS="~amd64 ~x86"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PN}-5.11.3-Remove-Syslog-tests.patch"
+    -p1 "${FILES}/${PN}-5.11.3-Remove-Syslog-tests.patch"
+    -p0 "${FILES}/${PN}-${MY_PVM}-disable-tests.patch"
 )
 
 PERL5_CONFIGURE_PARAMS=(
