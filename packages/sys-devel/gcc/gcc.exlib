@@ -45,7 +45,7 @@ if ever at_least 4.3; then
         build+run:
             dev-libs/gmp[>=4.1]
             dev-libs/mpfr[>=2.3]
-            ada? ( dev-lang/gnat:${SLOT} )"
+            ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
 else
     DEPENDENCIES+="
         build:
@@ -53,7 +53,7 @@ else
         build+run:
             fortran? ( dev-libs/gmp[>=4.1]
                        dev-libs/mpfr[>=2.3] )
-            ada? ( dev-lang/gnat:${SLOT} )"
+            ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
 fi
 
 if ever at_least 4.4.0-r1; then
@@ -231,6 +231,15 @@ src_install() {
         edo mv "${x%.mo}"{,-${SLOT}}.mo
         alternatives+=( /${x} ${bn}-${SLOT}.mo )
     done
+
+    # ada
+    if option ada; then
+        for x in gnat gnatbind gnatchop gnatclean gnatfind gnatkr gnatlink gnatls gnatmake gnatname gnatprep gnatxref; do
+            echo mv usr/bin/${x} usr/bin/${x}-${SLOT}
+            mv usr/bin/${x} usr/bin/${x}-${SLOT} || die "mv /usr/bin/${x} failed"
+            alternatives+=( /usr/bin/${x} ${x}-${SLOT} )
+        done
+    fi
 
     # java
     if ever at_least 4.3 && option java; then
