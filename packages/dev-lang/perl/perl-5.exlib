@@ -133,7 +133,7 @@ perl-5_src_install() {
     local executable
     for executable in "${IMAGE}"/usr/bin/*; do
         if egrep -q '^#!/usr/bin/perl( +.*)?$' "${executable}"; then
-            edo sed -i -e "/^#!\/usr\/bin\/perl/s/perl/perl${MY_PVM}/" "${executable}"
+            edo sed -i -e '/^#!\/usr\/bin\/perl$/s/perl/perl'${MY_PVM}/ "${executable}"
         fi
         if [[ ${executable##*/} != *${MY_PVM} ]]; then
             edo mv "${executable}" "${executable}-${MY_PVM}"
