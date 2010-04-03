@@ -182,7 +182,7 @@ sendmail_src_install() {
     # Redirecting stderr because the inclusion of cf.m4 will fail if it's not
     # yet installed. Since we're using cf.m4 from ${IMAGE} directly this doesn't
     # matter and can be hidden.
-    edo m4 "${IMAGE}"/usr/share/sendmail-cf/m4/cf.m4 "${IMAGE}"/etc/mail/sendmail.mc \
+    nonfatal edo m4 "${IMAGE}"/usr/share/sendmail-cf/m4/cf.m4 "${IMAGE}"/etc/mail/sendmail.mc \
         > "${IMAGE}"/etc/mail/sendmail.cf 2>/dev/null
 
     echo "include(\`/usr/share/sendmail-cf/m4/cf.m4')dnl" \
