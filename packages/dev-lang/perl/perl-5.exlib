@@ -149,6 +149,9 @@ perl-5_src_install() {
 
     keepdir /usr/$(get_libdir)/${PN}5/{site,vendor}_perl/${MY_PVM}/${CHOST%%-*}-linux
 
+    # We don't need packlists
+    edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
+
     # Save a list of what executables & man-pages we're installing
     edo cd "${IMAGE}"
     local src target alternatives=() Module_Build_pv Module_Build_importance
