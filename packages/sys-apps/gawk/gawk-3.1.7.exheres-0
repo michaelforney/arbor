@@ -51,6 +51,8 @@ src_install() {
         dosym ../../bin/${x} /usr/bin/${x}
     done
 
+    dosym gawk.1 /usr/share/man/man1/awk.1
+
     cd "${WORKBASE}"/filefuncs
     nonfatal emake DESTDIR="${IMAGE}" LIBDIR=$(get_libdir) install || die "filefuncs emake install failed"
 }
