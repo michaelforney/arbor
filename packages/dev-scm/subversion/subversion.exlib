@@ -102,6 +102,9 @@ subversion_src_install() {
     if option perl; then
         emake DESTDIR="${IMAGE}" install-swig-pl
         fixlocalpod
+
+        # We don't need packlists
+        edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
     fi
 
     if option python; then

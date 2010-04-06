@@ -5,7 +5,7 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 export_exlib_phases src_prepare src_install
 
-MY_UPSTREAM_BUILD="2704"
+MY_UPSTREAM_BUILD="2792"
 
 DESCRIPTION="
 Firewall Builder is a GUI firewall configuration and management tool that supports
@@ -31,7 +31,7 @@ fwbuilder_src_prepare() {
     default
     export STRIPPROG=true
 
-    if [[ ${PNVR} == fwbuilder-4.0.0 ]]; then
+    if [[ ${PNV} == fwbuilder-4.0.0 ]]; then
         edo mv fwbuilder3.pro fwbuilder4.pro
     fi
 

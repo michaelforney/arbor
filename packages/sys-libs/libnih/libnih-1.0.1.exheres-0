@@ -1,0 +1,26 @@
+# Copyright 2010 Alex Elsayed
+# Distributed under the terms of the GNU General Public License v2
+
+require launchpad
+
+SUMMARY="a small library of C functions that are not implemented elsewhere in the standard library set."
+DESCRIPTION="
+libnih is roughly equivalent to other C libraries such as glib, except that its
+focus is on a small size and intended for applications that sit very low in the
+software stack, especially outside of /usr. It expressly does not reimplement
+functions that already exist in libraries ordinarily shipped in /lib such libc6,
+and does not do foolish things like invent arbitrary typedefs for perfectly good
+C types.
+"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/expat[>=2.0.0]
+        sys-apps/dbus[>=1.2.16]
+"
+

@@ -1,13 +1,27 @@
 # Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'lm_sensors-3.0.2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require multilib
 
+export_exlib_phases src_prepare src_install
+
 SUMMARY="Hardware Monitoring user-space utilities"
+DESCRIPTION="
+${PN} provides hardware health monitoring support for Linux, in the form of kernel
+drivers and a user-space library. The project attempts to support as many related
+devices as possible (when documentation is available), especially those which are
+commonly included on PC mainboards. The drivers provide the base software layer for
+utilities to acquire data on the environmental conditions of the hardware. ${PN}
+also provides a user-space access library and a sample text-oriented utility built
+on top of said library to display sensor data.
+"
 HOMEPAGE="http://www.lm-sensors.org/"
 DOWNLOADS="http://dl.lm-sensors.org/lm-sensors/releases/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -17,36 +31,37 @@ DEPENDENCIES="
     build+run:
         sensord? ( net-analyzer/rrdtool )
     run:
-        dev-lang/perl:*"
-#        virtual/logger"
+        dev-lang/perl:*
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sensors-detect.patch )
+DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 
 DEFAULT_SRC_INSTALL_PARAMS=(
     PREFIX=/usr
     MANDIR=/usr/share/man
     LIBDIR=/usr/$(get_libdir)
 )
+
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     doc/donations
     doc/fancontrol.txt
     doc/fan-divisors
+    doc/libsensors-API.txt
     doc/progs
     doc/temperature-sensors
     doc/vid
 )
 
-src_prepare() {
-    expatch "${FILES}"/${PNV}-sensors-detect.patch
+lm_sensors_src_prepare() {
+    default
 
     if option sensord; then
-        edo sed -e 's:^# \(PROG_EXTRA\):\1:' -i "${WORK}"/Makefile
+        edo sed -e 's:^#\(PROG_EXTRA\):\1:' -i "${WORK}"/Makefile
     fi
 }
 
-src_compile() {
-    emake CC="${CC}"
-}
-
-src_install() {
+lm_sensors_src_install() {
     default
 
     keepdir /etc/sensors.d
@@ -65,11 +80,3 @@ src_install() {
     docinto developers
     dodoc doc/developers/applications
 }
-
-pkg_postinst() {
-    einfo "Be warned, that the sensor probing may freeze your system."
-    einfo "Use sensors-detect with care!"
-    ewarn "Make sure to read the documentation before using lm_sensors"
-    ewarn "on IBM/Lenovo ThinkPads."
-}
-
