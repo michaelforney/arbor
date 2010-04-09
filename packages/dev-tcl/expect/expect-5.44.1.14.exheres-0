@@ -30,7 +30,12 @@ DEPENDENCIES="
         dev-lang/tcl
         tk? ( dev-lang/tk )"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-no-tk.patch )
+src_prepare() {
+    expatch -p0 "${FILES}"/${PNV}-no-tk.patch
+
+    # The mkpasswd program does not belong in here
+    edo sed -e '/mkpasswd/s:mkpasswd::' -i Makefile.in
+}
 
 src_configure() {
     econf \
