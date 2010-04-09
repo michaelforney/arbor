@@ -39,6 +39,7 @@ src_prepare() {
 
 src_configure() {
     econf \
+        --hates=docdir \
         --with-tcl=/usr/$(get_libdir) \
         --with-tclinclude=/usr/include \
         --with-tk=$(option tk && echo /usr/$(get_libdir) || echo no) \
