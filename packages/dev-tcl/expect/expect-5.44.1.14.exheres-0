@@ -35,6 +35,8 @@ src_prepare() {
 
     # The mkpasswd program does not belong in here
     edo sed -e '/mkpasswd/s:mkpasswd::' -i Makefile.in
+
+    autotools_src_prepare
 }
 
 src_configure() {
