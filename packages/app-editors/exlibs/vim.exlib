@@ -57,16 +57,16 @@ MYOPTIONS=""
 
 if [[ ${PN} != vim-runtime ]]; then
     MYOPTIONS+=" gpm perl python ruby
-        minimal [[ description = [ Build without runtime scripts (no syntax highlighting, help) ] ]]"
-   #MYOPTIONS+=" cscope"
+        minimal [[ description = [ Build without runtime scripts (no syntax highlighting, help) ] ]]
+        cscope [[ description = [ add support for the cscope code browser ] ]]"
     DEPENDENCIES+="
         build+run:
             gpm?     ( sys-libs/gpm[>=1.19.3] )
             !minimal? ( app-editors/vim-runtime:${VIM_VERSION} )
             perl?    ( dev-lang/perl )
             python?  ( dev-lang/python:= )
-            ruby?    ( dev-lang/ruby )"
-           #cscope?  ( dev-util/cscope )
+            ruby?    ( dev-lang/ruby )
+            cscope?  ( dev-util/cscope )"
            #acl?     ( kernel_linux? ( sys-apps/acl ) )
     case ${PN} in
         vim)
@@ -225,17 +225,17 @@ vim_src_configure() {
                 $(option_enable gpm)
                 $(option_enable perl perlinterp) \
                 $(option_enable python pythoninterp)
-                $(option_enable ruby rubyinterp)"
-       #myconf+=" $(option_enable cscope)"
+                $(option_enable ruby rubyinterp)
+                $(option_enable cscope)"
    #if [[ "${PN}" == "gvim" ]] ; then
    #    myconf+=" $(option_enable netbeans)"
    #fi
 
         # --with-features=huge forces on cscope even if we --disable it. We need
         # to sed this out to avoid screwiness. (1 Sep 2004 ciaranm)
-        #if option !cscope ; then
+        if option !cscope ; then
             edo sed -i -e '/# define FEAT_CSCOPE/d' src/feature.h
-        #fi
+        fi
 
         case "${PN}" in
             vim)
