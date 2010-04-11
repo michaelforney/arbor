@@ -40,7 +40,12 @@ DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( gdb sim )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CONTRIBUTE )
 
 src_test_expensive() {
-    # make --dry-run check fails
-    emake check
+    if [[ -n "${PALUDIS_DO_NOTHING_SANDBOXY}" ]]; then
+        # make --dry-run check fails
+        emake check
+    else
+        elog "Not running tests because gdb doesn't work under sydbox"
+        elog "set PALUDIS_DO_NOTHING_SANDBOXY=1 if you want to run the tests"
+    fi
 }
 
