@@ -1,4 +1,4 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'bzr-1.10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -17,13 +17,13 @@ context. Users can commit to local branches without requiring special permission
 from the branches that they branched from.
 If you have a choice, use dev-scm/git instead.
 "
-HOMEPAGE="http://bazaar-vcs.org"
+HOMEPAGE="http://bazaar.canonical.com/"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN} launchpad:${PN}"
 
-UPSTREAM_RELEASE_NOTES="http://doc.bazaar-vcs.org/${PN}.dev/en/release-notes/NEWS.html"
-UPSTREAM_DOCUMENTATION="${HOMEPAGE}/Documentation [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="https://launchpad.net/${PN}/$(ever range 1-2)/${PV}"
+UPSTREAM_DOCUMENTATION="http://doc.bazaar.canonical.com/${PN}.$(ever range 1-2)/en/ [[ lang = en ]]"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -31,8 +31,6 @@ MYOPTIONS=""
 RESTRICT="test"
 
 DEPENDENCIES="
-    recommendation:
-        dev-scm/git [[ description = [ A much better SCM ] ]]
     suggestion:
         dev-python/paramiko [[ description = [ Provides sftp support ] ]]
         dev-python/pycrypto [[ description = [ Provides sftp support ] ]]
@@ -58,4 +56,3 @@ bzr_src_install() {
 
     dobashcompletion contrib/bash/bzr
 }
-
