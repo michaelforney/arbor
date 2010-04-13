@@ -29,19 +29,13 @@ REMOTE_IDS="freshmeat:${PN}"
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
 sydbox_pkg_pretend() {
-    local kv kvminor
+    local kv=$(uname -r)
+    kv=${kv%%-*}
 
-    kv="$(uname -r | cut -d'-' -f1)"
-    kvminor="$(echo $kv | cut -d'.' -f3)"
-
-    case "$kv" in
-        2.6*)
-            if [[ "$kvminor" -lt 29 ]]; then
-                ewarn "sydbox works slow on kernels <2.6.29 due to a ptrace bug!"
-                ewarn "See http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=53da1d9456fe7f87a920a78fdbdcf1225d197cb7 for the fix!"
-            fi
-            ;;
-    esac
+    if [[ $(ever range 1-2 ${kv}) == 2.6 ]] && ! ever at_least 2.6.29 ${kv}; then
+        ewarn "sydbox works slow on kernels <2.6.29 due to a ptrace bug!"
+        ewarn "See http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=53da1d9456fe7f87a920a78fdbdcf1225d197cb7 for the fix!"
+    fi
 }
 
 sydbox_src_test() {

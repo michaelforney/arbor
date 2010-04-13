@@ -1,0 +1,22 @@
+# Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Purpose Licence v2
+
+require sourceforge
+
+SUMMARY="A developer's tool for browsing source code"
+HOMEPAGE="http://cscope.sourceforge.net/"
+
+LICENCES="BSD"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/cscope-${PV}-ocs-sysdir.patch" )
+
+DEFAULT_SRC_COMPILE_PARAMS=( STRIP="no" )
+
