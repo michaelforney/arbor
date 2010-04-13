@@ -1,0 +1,111 @@
+Upstream: Wouldn't accept this, Exherbo-specific problem.
+Original Source: nfs-utils-1.1.2-cpp_path.patch by philantrop@exherbo.org
+Source: tgurr@gentoo.org
+Summary:
+
+rpcgen as provided by our glibc doesn't find /usr/bin/cpp. It's searching it in
+/lib/cpp and /usr/ccs/lib/cpp only. So we're specifying the correct path here.
+
+diff -Naur nfs-utils-1.2.2/support/export/Makefile.in nfs-utils-1.2.2.new/support/export/Makefile.in
+--- nfs-utils-1.2.2/support/export/Makefile.in	2010-02-18 13:36:42.000000000 +0100
++++ nfs-utils-1.2.2.new/support/export/Makefile.in	2010-04-13 01:13:49.360988319 +0200
+@@ -560,15 +560,15 @@
+ 
+ $(GENFILES_CLNT): %_clnt.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -l -o $@ $<
++	$(RPCGEN) -Y /usr/bin -l -o $@ $<
+ 
+ $(GENFILES_XDR): %_xdr.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -c -o $@ $<
++	$(RPCGEN) -Y /usr/bin -c -o $@ $<
+ 
+ $(GENFILES_H): %.h: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -h -o $@ $<
++	$(RPCGEN) -Y /usr/bin -h -o $@ $<
+ 	rm -f $(top_builddir)/support/include/mount.h
+ 	$(LN_S) ../export/mount.h $(top_builddir)/support/include/mount.h
+ 
+diff -Naur nfs-utils-1.2.2/support/nsm/Makefile.in nfs-utils-1.2.2.new/support/nsm/Makefile.in
+--- nfs-utils-1.2.2/support/nsm/Makefile.in	2010-02-18 13:36:43.000000000 +0100
++++ nfs-utils-1.2.2.new/support/nsm/Makefile.in	2010-04-13 01:16:41.136985386 +0200
+@@ -548,19 +548,19 @@
+ 
+ $(GENFILES_CLNT): %_clnt.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -l -o $@ $<
++	$(RPCGEN) -Y /usr/bin -l -o $@ $<
+ 
+ $(GENFILES_SVC): %_svc.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -m -o $@ $<
++	$(RPCGEN) -Y /usr/bin -m -o $@ $<
+ 
+ $(GENFILES_XDR): %_xdr.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -c -o $@ $<
++	$(RPCGEN) -Y /usr/bin -c -o $@ $<
+ 
+ $(GENFILES_H): %.h: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -h -o $@ $<
++	$(RPCGEN) -Y /usr/bin -h -o $@ $<
+ 	rm -f $(top_builddir)/support/include/sm_inter.h
+ 	$(LN_S) ../nsm/sm_inter.h $(top_builddir)/support/include/sm_inter.h
+ 
+diff -Naur nfs-utils-1.2.2/tests/nsm_client/Makefile.in nfs-utils-1.2.2.new/tests/nsm_client/Makefile.in
+--- nfs-utils-1.2.2/tests/nsm_client/Makefile.in	2010-02-18 13:36:43.000000000 +0100
++++ nfs-utils-1.2.2.new/tests/nsm_client/Makefile.in	2010-04-13 01:20:05.584988599 +0200
+@@ -554,19 +554,19 @@
+ 
+ $(GENFILES_CLNT): %_clnt.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -l -o $@ $<
++	$(RPCGEN) -Y /usr/bin -l -o $@ $<
+ 
+ $(GENFILES_SVC): %_svc.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -m -o $@ $<
++	$(RPCGEN) -Y /usr/bin -m -o $@ $<
+ 
+ $(GENFILES_XDR): %_xdr.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -c -o $@ $<
++	$(RPCGEN) -Y /usr/bin -c -o $@ $<
+ 
+ $(GENFILES_H): %.h: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -h -o $@ $<
++	$(RPCGEN) -Y /usr/bin -h -o $@ $<
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+diff -Naur nfs-utils-1.2.2/utils/statd/Makefile.in nfs-utils-1.2.2.new/utils/statd/Makefile.in
+--- nfs-utils-1.2.2/utils/statd/Makefile.in	2010-02-18 13:36:44.000000000 +0100
++++ nfs-utils-1.2.2.new/utils/statd/Makefile.in	2010-04-13 01:15:46.176983291 +0200
+@@ -731,19 +731,19 @@
+ 
+ $(GENFILES_CLNT): %_clnt.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -l -o $@ $<
++	$(RPCGEN) -Y /usr/bin -l -o $@ $<
+ 
+ $(GENFILES_SVC): %_svc.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -m -o $@ $<
++	$(RPCGEN) -Y /usr/bin -m -o $@ $<
+ 
+ $(GENFILES_XDR): %_xdr.c: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -c -o $@ $<
++	$(RPCGEN) -Y /usr/bin -c -o $@ $<
+ 
+ $(GENFILES_H): %.h: %.x $(RPCGEN)
+ 	test -f $@ && rm -rf $@ || true
+-	$(RPCGEN) -h -o $@ $<
++	$(RPCGEN) -Y /usr/bin -h -o $@ $<
+ 
+ #######################################################################
+ # The following allows the current practice of having
