@@ -101,7 +101,7 @@ src_configure() {
     ever at_least 4.3 && option java && LANGS+=",java"
 
     econf \
-        --hates=docdir \
+        "$(ever at_least 4.5.0 || echo --hates=docdir)" \
         --disable-multilib \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
