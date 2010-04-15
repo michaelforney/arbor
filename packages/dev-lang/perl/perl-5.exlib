@@ -106,6 +106,9 @@ perl-5_src_test() {
     sydboxcmd "net/whitelist/bind/unix://${WORK}/t/sock-*"
     # This is necessary for Net/Ping/t/510_ping_udp.t
     sydboxcmd "net/whitelist/connect/inet://127.0.0.1@7"
+    # This is necessary for dist/IO/t/io_unix.t
+    sydboxcmd "net/whitelist/bind/unix://${WORK}/dist/IO/sock-*"
+
     if ever at_least 5.10.1 ; then
         TEST_JOBS="${EXJOBS:-1}" emake test_harness
     else
@@ -113,6 +116,7 @@ perl-5_src_test() {
     fi
     sydboxcmd "net/unwhitelist/bind/unix://${WORK}/t/sock-*"
     sydboxcmd "net/unwhitelist/connect/inet://127.0.0.1@7"
+    sydboxcmd "net/unwhitelist/bind/unix://${WORK}/dist/IO/sock-*"
 }
 
 perl-5_src_install() {

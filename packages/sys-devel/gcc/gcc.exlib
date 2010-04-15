@@ -112,7 +112,7 @@ src_configure() {
     econf \
         ${multilib} \
         --libdir=/usr/${LIBDIR} \
-        --hates=docdir \
+        "$(ever at_least 4.5.0 || echo --hates=docdir)" \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \

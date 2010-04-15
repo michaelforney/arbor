@@ -3,7 +3,26 @@
 # Based in part upon 'ntp-4.2.4_p4.ebuild' which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require common-metadata
+MY_PNV=${PNV/_p/p}
+
+SUMMARY="Network Time Protocol suite/programs"
+DESCRIPTION="
+The Network Time Protocol (NTP) is used to synchronize the time of a computer
+client or server to another server or reference time source, such as a radio or
+satellite receiver or modem. It provides client accuracies typically within a
+millisecond on LANs and up to a few tens of milliseconds on WANs relative to a
+primary server synchronized to Coordinated Universal Time (UTC) via a Global
+Positioning Service (GPS) receiver, for example.
+"
+HOMEPAGE="http://www.${PN}.org/"
+DOWNLOADS="
+    http://www.eecis.udel.edu/~${PN}/${PN}_spool/${PN}$(ever major)/${PN}-${PV:0:3}/${MY_PNV}.tar.gz
+    mirror://gentoo/${PN}-${PV/_p*}-manpages.tar.bz2
+"
+
+LICENCES="as-is"
+
+UPSTREAM_RELEASE_NOTES="http://www.eecis.udel.edu/~${PN}/${PN}_spool/${PN}4/NEWS"
 
 SLOT="0"
 
@@ -61,8 +80,3 @@ EOF
 
     edo find "${IMAGE}"/usr/ -type d -empty -delete
 }
-
-pkg_postinst() {
-    elog "You can find an example ${PN}.conf in /usr/share/ntp/"
-}
-

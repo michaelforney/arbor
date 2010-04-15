@@ -1,0 +1,17 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gcc
+
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-java-unwinder.patch )
+
+# http://gcc.gnu.org/install/prerequisites.html
+DEPENDENCIES="
+    build:
+        sys-devel/flex
+        sys-devel/gettext
+        dev-libs/mpc[>=0.8.1]
+"
+

@@ -32,3 +32,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-deprecated
 )
 
+src_test() {
+    sydboxcmd "net/whitelist/bind/unix://${TEMP%/}/guile-test-socket-*"
+    default
+    sydboxcmd "net/unwhitelist/bind/unix://${TEMP%/}/guile-test-socket-*"
+}
+
