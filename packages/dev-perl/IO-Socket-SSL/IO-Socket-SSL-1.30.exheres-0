@@ -14,11 +14,3 @@ DEPENDENCIES="
         dev-perl/Net-SSLeay[>=1.21]
 "
 
-# The tests get caught in an seemingly infinite loop. Or at least my patience is
-# not infinite. ;)
-RESTRICT="test"
-
-src_test() {
-    sydboxcmd net/allow
-    perl-module_src_test
-}
