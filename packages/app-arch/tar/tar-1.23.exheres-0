@@ -23,6 +23,14 @@ src_compile() {
     edo perl "${FILES}"/tarman > tar.1
 }
 
+src_test() {
+    emake check TESTSUITEFLAGS='-k !sparse03'
+}
+
+src_test_expensive() {
+    emake check TESTSUITEFLAGS='-k sparse03'
+}
+
 src_install() {
     default
     doman tar.1
