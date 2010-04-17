@@ -17,7 +17,8 @@ DESCRIPTION="A replacement for the inadequately behaving ifconfig/route programs
 LICENCES="GPL-2"
 SLOT="0"
 
-MYOPTIONS="berkdb"
+MYOPTIONS="atm berkdb
+atm [[ description = [ Add ATM support in tc program ] ]]"
 
 UPSTREAM_DOCUMENTATION="
     http://ornellas.apanela.com/dokuwiki/pub:firewall_and_adv_routing [[ lang = en ]]
@@ -30,6 +31,7 @@ DEPENDENCIES="
     build:
         sys-kernel/linux-headers
     build+run:
+        atm? ( net-dialup/linux-atm )
         berkdb? ( sys-libs/db:= )
 "
 
@@ -70,6 +72,10 @@ src_prepare() {
         edo sed -e '/TARGETS/s:arpd::' \
                 -i misc/Makefile
     fi
+}
+
+src_configure() {
+    option atm && echo 'TC_CONFIG_ATM=y' >> Config
 }
 
 src_install() {
