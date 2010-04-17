@@ -33,6 +33,12 @@ DEPENDENCIES="
         berkdb? ( sys-libs/db:= )
 "
 
+DEFAULT_SRC_COMPILE_PARAMS+=(
+    CC="${CC}"
+    AR="${AR}"
+    LIBDIR=/usr/$(get_libdir)
+)
+
 DEFAULT_SRC_INSTALL_PARAMS+=(
     LIBDIR=/usr/$(get_libdir)
     DESTDIR="${IMAGE}"
@@ -66,10 +72,6 @@ src_prepare() {
         edo sed -e '/TARGETS/s:arpd::' \
                 -i misc/Makefile
     fi
-}
-
-src_compile() {
-    emake CC="${CC}" AR="${AR}" LIBDIR=/usr/$(get_libdir)
 }
 
 src_install() {
