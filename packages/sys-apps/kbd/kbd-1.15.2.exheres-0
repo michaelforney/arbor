@@ -4,12 +4,11 @@
 # Based in part upon 'kbd-1.14.1-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-# Release doesn't have processed autotools
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-
 SUMMARY="Keyboard and console utilities"
 HOMEPAGE="http://freshmeat.net/projects/kbd/"
 DOWNLOADS="ftp://ftp.altlinux.org/pub/people/legion/${PN}/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -21,7 +20,6 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/kbd-alignment.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
 
 src_install() {
