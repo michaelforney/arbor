@@ -83,12 +83,12 @@ src_install() {
     default
 
     if optionq berkdb ; then
-        # misc/arpd.c:char        *dbname = "/var/lib/arpd/arpd.db"; make sure to create the path
-        dodir /var/lib/arpd
         keepdir /var/lib/arpd
 
         dodir /usr/sbin
         edo mv "${IMAGE}"/{,usr/}sbin/arpd
+    else
+        edo rmdir "${IMAGE}"/var{lib/{arpd,},}
     fi
 }
 
