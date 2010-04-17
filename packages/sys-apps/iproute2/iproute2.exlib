@@ -37,6 +37,7 @@ DEFAULT_SRC_COMPILE_PARAMS+=(
     CC="${CC}"
     AR="${AR}"
     LIBDIR=/usr/$(get_libdir)
+    IPT_LIB_DIR=/usr/$(get_libdir)
 )
 
 DEFAULT_SRC_INSTALL_PARAMS+=(
@@ -64,9 +65,6 @@ src_prepare() {
 
     edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' \
             -i netem/Makefile
-
-    edo sed -e "s:/usr/local/lib:/usr/$(get_libdir):" \
-            -i include/iptables.h
 
     if ! option berkdb ; then
         edo sed -e '/TARGETS/s:arpd::' \
