@@ -37,6 +37,7 @@ MYOPTIONS="
         mcrypt      [[ description = [ Support modern encryption algorithms, e. g. AES. ] ]]
         mssql       [[ description = [ Support for MS SQL-Server. ] ]]
         mysql       [[ description = [ Support for the popular MySQL database. ] requires = [ php_extensions: -recode ] ]]
+        mysqli      [[ description = [ Support for the popular MySQL database, improved driver. ] ]]
         ncurses     [[ description = [ Include ncurses support (CLI/CGI only) ] ]]
         pcre        [[ description = [ Include support for Perl Compatible Regular Expressions. ] ]]
         pdo-dblib   [[ description = [ PDO: Support for MS SQL-Server. ] ]]
@@ -91,6 +92,7 @@ DEPENDENCIES="
         php_extensions:mcrypt? ( dev-libs/libmcrypt[>=2.5.8] )
         php_extensions:mssql? ( dev-db/freetds[>=0.82] )
         php_extensions:mysql? ( dev-db/mysql[>=5.0.72] )
+        php_extensions:mysqli? ( dev-db/mysql[>=5.0.72] )
         php_extensions:ncurses? ( sys-libs/ncurses[>=5.7] )
         php_extensions:pcre? ( dev-libs/pcre[>=7.9] )
         php_extensions:pdo-dblib? ( dev-db/freetds[>=0.82] )
@@ -251,6 +253,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:mcrypt mcrypt"
     "php_extensions:mssql mssql"
     "php_extensions:mysql mysql"
+    "php_extensions:mysqli mysqli"
     "php_extensions:mysql mysql-sock /var/run/mysqld/mysqld.sock"
     "php_extensions:ncurses ncurses"
     "php_extensions:pcre pcre-dir /usr"
