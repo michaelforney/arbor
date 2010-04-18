@@ -81,7 +81,8 @@ subversion_src_configure() {
         --enable-nls \
         --enable-shared \
         ${myconf} \
-        $(option_with berkdb berkeley-db "db.h:$(berkdb_includedir)::db-$(berkdb_slot)") \
+        $(option_with berkdb berkeley-db $(option berkdb &&
+            echo "db.h:$(berkdb_includedir)::db-$(berkdb_slot)")) \
         $(option_with kde kwallet)
 }
 
