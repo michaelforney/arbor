@@ -56,9 +56,6 @@ src_prepare() {
     # use system headers
     edo rm -r include/linux include/netinet
 
-    # fix hardcoded gcc
-    edo sed -i -e "s:^gcc:${CC}:" configure
-
     # fix hardcoded -O2 and allow user CFLAGS
     # The -DRTPROT_DHCP is an evil hack, but I'm not sure of a better
     # fix for now.
