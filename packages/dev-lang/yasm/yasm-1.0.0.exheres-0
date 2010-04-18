@@ -1,18 +1,19 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ deps_var=autotools_deps supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
-
 SUMMARY="YASM Modular Assembler Project"
-DESCRIPTION='
+DESCRIPTION="
 Yasm is a complete rewrite of the NASM assembler under the "new" BSD License.
 Yasm currently supports the x86 and AMD64 instruction sets, accepts NASM and GAS assembler syntaxes,
 outputs binary, ELF32, ELF64, 32 and 64-bit Mach-O, RDOFF2, COFF, Win32, and Win64 object formats,
 and generates source debugging information in STABS, DWARF 2, and CodeView 8 formats.
-'
+"
 HOMEPAGE="http://www.tortall.net/projects/${PN}/"
-DOWNLOADS="${HOMEPAGE}/releases/${PNV}.tar.gz"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/wiki/Release${PNV//.}"
+DOWNLOADS="${HOMEPAGE}releases/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}wiki/Release${PV}"
 
 LICENCES="BSD-3"
 SLOT="0"
@@ -22,25 +23,13 @@ MYOPTIONS="python"
 DEPENDENCIES="
     build:
         sys-devel/gettext
-        python? ( ${autotools_deps} )
     build+run:
         python? (
             dev-lang/python:=
+            dev-python/Cython
             dev-python/Pyrex
-        )"
-
-# The fPIC patch breaks tests for me, disable tests if we apply it.
-RESTRICT="python? ( test )"
-
-AT_M4DIR="m4"
+        )
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python 'python python-bindings' )
-
-src_prepare() {
-    if option python; then
-        expatch "${FILES}/${PN}-0.7.1-fPIC-compile-fix.patch"
-        autotools_src_prepare
-    fi
-}
-
