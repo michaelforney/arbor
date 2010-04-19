@@ -6,8 +6,8 @@
 require multilib
 
 SUMMARY="Access control list utilities, libraries and headers"
-HOMEPAGE="http://oss.sgi.com/projects/xfs/"
-DOWNLOADS="ftp://oss.sgi.com/projects/xfs/cmd_tars-oct_09/${PNV}.src.tar.gz"
+HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
+DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -23,8 +23,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILES}"/${PN}-2.2.45-libtool.patch
-    -p0 "${FILES}"/${PN}-2.2.32-only-symlink-when-needed.patch
+    -p1 "${FILES}"/${PN}-2.2.49-quote-strchr.patch
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -35,12 +34,15 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 src_prepare() {
+    # hack PATH with AC_PATH_PROG
+    edo sed -e '/^as_dummy=/s:=":="$PATH$PATH_SEPARATOR:' \
+            -i configure
+    # update builddefs
     edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
             -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
             -i include/builddefs.in
-    # libtool will clobber install-sh which is really a custom file
-    edo mv install-sh acl.install-sh
-    edo mv acl.install-sh install-sh
+
+    default
 }
 
 src_configure() {
