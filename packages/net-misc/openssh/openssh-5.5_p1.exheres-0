@@ -1,0 +1,155 @@
+# Copyright 2008, 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam
+
+# Make it more portable between straight releases and _p? releases.
+PARCH=${PNV/_/}
+
+X509_VERSION="6.2.3" X509_PATCH="${PARCH}+x509-${X509_VERSION}.diff.gz"
+HPN_PATCH="${PARCH}-hpn13v6.diff.gz"
+
+SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
+HOMEPAGE="http://www.openssh.org/"
+DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
+    X509? ( http://roumenpetrov.info/${PN}/x509-${X509_VERSION}/${X509_PATCH} )
+"
+#   hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="pam tcpd X
+    hpn  [[ description = [ Enable high performance ssh ] ]]
+    gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
+    X509 [[ description = [ Adds support for X.509 certificate authentication ] ]]
+"
+# Unfortunately, the tests need to be run as root.
+RESTRICT="userpriv"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        sys-kernel/linux-headers
+    build+run:
+        user/sshd
+        dev-libs/openssl[>=0.9.8f]
+        sys-apps/shadow
+        sys-libs/zlib[>=1.2.3]
+        gtk? ( x11-libs/gtk+:2 )
+        pam? ( sys-libs/pam[>=0.78] )
+        tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
+        X? ( x11-apps/xauth )
+"
+
+WORK="${WORKBASE}/${PARCH}"
+
+pkg_pretend() {
+    local err=()
+    option hpn && err+=( "option=hpn: HPN patch disabled for ${PNVR}: No patch is available for this version" )
+    if (( ${#err} )) ; then
+        ewarn "Following options are disabled in this release:"
+        ewarn "${err[@]/#/$'\n'}"
+        die "Mask ${PNVR} or disable all of the above options"
+    fi
+}
+
+src_prepare() {
+    edo sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h
+
+    default
+
+    if [[ -n ${X509_PATCH} ]] && option X509 ; then
+        expatch \
+            -p1 "${WORKBASE}/${X509_PATCH%.gz}" \
+            -p0 "${FILES}/${PN}-4.7_p1-GSSAPI-dns.patch"
+    fi
+
+    if [[ -n ${HPN_PATCH} ]] && option hpn ; then
+        expatch -p1 "${WORKBASE}/${HPN_PATCH%.gz}"
+    fi
+
+    edo sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure.ac
+
+    eautoreconf
+}
+
+src_configure() {
+    export LD="${CC}"
+
+    econf \
+        --with-ldflags="${LDFLAGS}" \
+        --disable-strip \
+        --sysconfdir=/etc/ssh \
+        --datadir=/usr/share/openssh \
+        --with-privsep-path=/var/empty \
+        --with-privsep-user=sshd \
+        --with-md5-passwords \
+        --with-ssl-engine \
+        --without-libedit \
+        --without-kerberos5 \
+        $(option_with pam) \
+        $(option_with tcpd tcp-wrappers)
+}
+
+src_compile() {
+    default
+
+    if option gtk ; then
+        emake -C contrib gnome-ssh-askpass2
+    fi
+}
+
+src_test() {
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/ssh-*/agent.*'
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
+
+    option X509 && export SSH_X509TESTS="blob_auth"
+    emake -j1 tests
+
+    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/ssh-*/agent.*'
+    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
+}
+
+src_install() {
+    emake install-nokeys DESTDIR="${IMAGE}"
+    edo chmod 600 "${IMAGE}"/etc/ssh/sshd_config
+    dobin contrib/ssh-copy-id
+    newinitd "${FILES}"/sshd.rc6 sshd
+    newconfd "${FILES}"/sshd.confd sshd
+    keepdir /etc/ssh/ca
+    keepdir /etc/skel/.ssh
+    keepdir /var/run
+    edo rmdir "${IMAGE}"/var/empty
+
+    if option pam ; then
+        edo sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config
+        edo sed -i -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
+            "${IMAGE}"/etc/ssh/sshd_config
+        newpamd "${FILES}"/sshd.pam_include.1 sshd
+    fi
+
+    doman contrib/ssh-copy-id.1
+    emagicdocs
+    dodoc OVERVIEW sshd_config
+
+    diropts -m 0700
+    dodir /etc/skel/.ssh
+
+    if option gtk ; then
+        newbin contrib/gnome-ssh-askpass2 gnome-ssh-askpass
+    fi
+}
+
+pkg_postinst() {
+    [[ ! -d ${ROOT}/var/empty ]] && mkdir -p "${ROOT}"/var/empty
+
+    ewarn "Remember to merge your config files in /etc/ssh/ and then"
+    ewarn "restart sshd: '/etc/init.d/sshd restart'."
+    echo
+    ewarn "Please be aware users need a valid shell in /etc/passwd"
+    ewarn "in order to be allowed to login."
+}
+
