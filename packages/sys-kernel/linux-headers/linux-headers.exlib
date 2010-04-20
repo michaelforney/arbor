@@ -43,6 +43,9 @@ linux-headers_src_compile() {
 linux-headers_src_install() {
     emake INSTALL_HDR_PATH="${IMAGE}/usr" headers_install
 
+    # remove installed .install and ..install.cmd files
+    edo rm "${IMAGE}"/**/.install "${IMAGE}"/**/..install.cmd
+
     # DRM headers are installed by x11-dri/libdrm
     edo rm -r "${IMAGE}"/usr/include/drm
     # scsi.h is installed by sys-libs/glibc
