@@ -82,12 +82,18 @@ src_install() {
     default
 
     if optionq berkdb ; then
+        if ! ever at_least 2.6.33 ; then
+            dodir /var/lib/arpd
+        fi
+
         keepdir /var/lib/arpd
 
         dodir /usr/sbin
         edo mv "${IMAGE}"/{,usr/}sbin/arpd
     else
-        edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
+        if ever at_least 2.6.33 ; then
+            edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
+        fi
     fi
 }
 
