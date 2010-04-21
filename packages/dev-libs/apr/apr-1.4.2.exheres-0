@@ -18,9 +18,14 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.3.9-sydbox.patch )
 
 src_configure() {
     # FIXME: Two more configure tests try to bind 0.0.0.0:0
-    sydboxcmd "net/whitelist/bind/unix://${WORK}/apr_accept4_test_socket"
+    # Since this is a net-sandboxing mess, we turn it off for now.
+    sydboxcmd "sandunbox/net"
+#    sydboxcmd "net/whitelist/bind/unix://${WORK}/apr_accept4_test_socket"
+#    sydboxcmd "net/whitelist/connect/unix://${WORK}/apr_accept4_test_socket"
     default
-    sydboxcmd "net/unwhitelist/bind/unix://${WORK}/apr_accept4_test_socket"
+#    sydboxcmd "net/unwhitelist/connect/unix://${WORK}/apr_accept4_test_socket"
+#    sydboxcmd "net/unwhitelist/bind/unix://${WORK}/apr_accept4_test_socket"
+    sydboxcmd "net/sandbox/net"
 
     # Make sure we use the system libtool
     edo sed -i -e 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${WORK}"/build/apr_rules.mk
