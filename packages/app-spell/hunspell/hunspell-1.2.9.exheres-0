@@ -10,7 +10,6 @@ designed for languages with rich morphology and complex word compounding or
 character encoding. Hunspell interfaces: Ispell-like terminal interface
 using Curses library, Ispell pipe interface, OpenOffice.org UNO module.
 "
-UPSTREAM_RELEASE_NOTES="http://sourceforge.net/project/shownotes.php?group_id=143754&release_id=619954"
 
 LICENCES="|| ( MPL-1.1 GPL-2 LGPL-2.1 )"
 SLOT="0"
@@ -35,6 +34,6 @@ src_install() {
 
     # these binaries are rarely used and have very generic names. move them to a separate dir.
     dodir /usr/libexec/${PN}
-    edo mv "${IMAGE}"/usr/bin/{analyze,chmorph,example,hzip,hunzip} "${IMAGE}"/usr/libexec/${PN}/
+    edo mv "${IMAGE}"/usr/bin/{analyze,chmorph,hzip,hunzip} "${IMAGE}"/usr/libexec/${PN}/
 }
 
