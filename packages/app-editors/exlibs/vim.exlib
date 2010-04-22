@@ -72,16 +72,16 @@ if [[ ${PN} != vim-runtime ]]; then
         vim)
         MYOPTIONS+="
             vim-pager [[ description = [ Use vim as a replacement for less ] ]]
-            X [[ description = [ Link against X11 libraries, for mouse support (does not build a GUI) ] ]]"
+            x-clipboard [[ description = [ Link against X11 libraries, for X clipboard support ] ]]"
         DEPENDENCIES+="
             build:
-                X? (
+                x-clipboard? (
                     x11-libs/libXt
                     x11-libs/libX11
                     x11-libs/libSM
                     x11-proto/xproto )
             run:
-                X? ( x11-libs/libXt )
+                x-clipboard? ( x11-libs/libXt )
             suggestion:
                 app-vim/securemodelines [[ description = [ the built in modelines support is insecure ] ]]
             "
@@ -239,7 +239,7 @@ vim_src_configure() {
 
         case "${PN}" in
             vim)
-            myconf+=" --enable-gui=no $(option_with X x)"
+            myconf+=" --enable-gui=no $(option_with x-clipboard x)"
             ;;
             gvim)
             myconf+=" --with-vim-name=gvim \
