@@ -1,8 +1,10 @@
-# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2008, 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge [ suffix=tar.gz project=xmlstar ] \
         autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+
+export_exlib_phases src_prepare src_install
 
 SUMMARY="Command line tools to transform, query, validate, and edit XML documents"
 DESCRIPTION="
@@ -20,27 +22,30 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.php [[ lang = en ]]"
 
 LICENCES="MIT"
 SLOT="0"
-PLATFORMS="~amd64"
 MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        dev-libs/libxml2
-        dev-libs/libxslt
+        dev-libs/libgcrypt[>=1.4.5]
+        dev-libs/libxml2[>=2.6.12]
+        dev-libs/libxslt[>=1.1.9][crypt]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PNV}-cflags.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-libxml-prefix=/usr
+    --with-libxslt-prefix=/usr
+)
 
-src_configure() {
-    local xmllibs=$(pkg-config --libs libxml-2.0)
-    local xsltlibs=$(pkg-config --libs libxslt libexslt)
+xmlstarlet_src_prepare() {
+    # We force libxslt[crypt] so we need to link against libgcrypt here, too.
+    edo sed -i -e '/LIBXSLT_LIBS=/s:\(-lpthread\):\1 -lgcrypt:' configure.in
 
-    LIBXML_LIBS="${xmllibs}" LIBXSLT_LIBS="${xsltlibs}" econf
+    autotools_src_prepare
 }
 
-src_install() {
+xmlstarlet_src_install() {
     default
 
     mv "${IMAGE}"/usr/bin/xml "${IMAGE}"/usr/bin/xmlstarlet
