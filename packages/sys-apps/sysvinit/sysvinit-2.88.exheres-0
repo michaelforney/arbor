@@ -8,10 +8,11 @@ require flag-o-matic alternatives
 PATCHTBZ2_VER="1.0"
 
 SUMMARY="System V init system"
-HOMEPAGE="ftp://ftp.cistron.nl/pub/people/miquels/sysvinit/"
-DOWNLOADS="ftp://ftp.cistron.nl/pub/people/miquels/software/${PNV}.tar.gz
-    ftp://sunsite.unc.edu/pub/Linux/system/daemons/init/${PNV}.tar.gz
-    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-patches-${PATCHTBZ2_VER}.tar.bz2"
+HOMEPAGE="http://savannah.nongnu.org/projects/${PN}"
+DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}dsf.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${PN}-2.86-patches-${PATCHTBZ2_VER}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -23,29 +24,18 @@ DEPENDENCIES="
         sys-kernel/linux-headers
 "
 
+WORK=${WORKBASE}/${PNV}dsf
+
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${WORKBASE}/${PNV}-docs.patch"
-    -p0 "${WORKBASE}/${PNV}-shutdown-usage.patch"
-    -p0 "${WORKBASE}/${PNV}-off-by-one.patch"
-    -p1 "${WORKBASE}/${PNV}-kexec.patch"
-    -p1 "${WORKBASE}/${PNV}-execl.patch"
-    -p1 "${WORKBASE}/${PNV}-utmp-64bit.patch"
-    -p1 "${WORKBASE}/${PNV}-shutdown-single.patch"
-    -p0 "${WORKBASE}/${PNV}-utmp-smp.patch"
-    -p1 "${WORKBASE}/${PNV}-build.patch"
+    -p1 "${WORKBASE}/${PN}-2.86-kexec.patch"
+    -p1 "${WORKBASE}/${PN}-2.86-shutdown-single.patch"
 )
-
-src_unpack() {
-    default
-
-    edo cp "${WORKBASE}"/change_console.{c,8} "${WORK}"/src/
-}
 
 src_compile() {
     option static && append-ldflags -static
     emake -C src \
         CC="${CC}" \
-        all change_console
+        all
 }
 
 src_install() {
@@ -54,10 +44,6 @@ src_install() {
     # Installing "Install", too, because it contains some information beyond
     # simple installation instructions.
     dodoc README doc/Changelog doc/Install doc/Propaganda doc/bootlogd.README
-
-    into /
-    dosbin src/change_console
-    doman src/change_console.8
 
     insinto /etc
     doins "${WORKBASE}"/inittab
