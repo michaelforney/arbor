@@ -48,6 +48,18 @@ pkg_pretend() {
 src_install() {
     insinto /etc
     doins "${FILES}"/exherbo-release
+
+    if [[ ${LIBDIR} != lib ]]; then
+        local multibuild_c_target ldpath=()
+        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            multibuild_switch_build_target C ${multibuild_c_target}
+            ldpath=( /usr/${LIBDIR} /${LIBDIR} "${ldpath[@]}" )
+        done
+        IFS=": " ldpath="${ldpath[*]}"
+        hereenvd 10multilib <<EOF
+LDPATH="${ldpath}"
+EOF
+    fi
 }
 
 pkg_postinst() {
