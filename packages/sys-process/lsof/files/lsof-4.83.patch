@@ -4,12 +4,12 @@ Reason: Respect CFLAGS and LDFLAGS. Avoid interactivity.
 
 --- lsof_4.79_src/Configure
 +++ lsof_4.79_src/Configure
-@@ -2294,7 +2294,7 @@
+@@ -2666,7 +2666,7 @@
  
        LSOF_VERS=`echo $LSOF_VSTR | sed 's/\./ /g' | awk '{printf "%d%d%03d",\$1,\$2,\$3}'`
      fi	# }
--    LSOF_CFGF="-DLINUXV=$LSOF_VERS"
-+    LSOF_CFGF="-DLINUXV=$LSOF_VERS ${CFLAGS}"
+-    LSOF_CFGF="$LSOF_CFGF -DLINUXV=$LSOF_VERS"
++    LSOF_CFGF="$LSOF_CFGF -DLINUXV=$LSOF_VERS ${CFLAGS}"
      if test $LSOF_VERS -lt 21072	# {
      then
        echo ""
