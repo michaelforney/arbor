@@ -39,7 +39,7 @@ sydbox_pkg_pretend() {
 }
 
 sydbox_src_test() {
-    if [[ -n "${PALUDIS_DO_NOTHING_SANDBOXY}" ]]; then
+    if ! sydboxcheck 2>/dev/null; then
         default
     else
         elog "Not running tests because sydbox doesn't work under sydbox"

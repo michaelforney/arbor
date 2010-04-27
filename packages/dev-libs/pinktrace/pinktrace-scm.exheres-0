@@ -31,7 +31,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/api/c [[ lang = en ]]"
 AT_M4DIR=m4
 
 src_test() {
-    if [[ -n "${PALUDIS_DO_NOTHING_SANDBOXY}" ]]; then
+    if ! sydboxcheck 2>/dev/null; then
         default
     else
         elog "Not running tests due to ptrace limitations"
