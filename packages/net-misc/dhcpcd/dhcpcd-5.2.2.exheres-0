@@ -4,8 +4,10 @@
 require multilib
 
 SUMMARY="DHCP client"
-HOMEPAGE="http://roy.marples.name/dhcpcd"
+HOMEPAGE="http://roy.marples.name/${PN}"
 DOWNLOADS="http://roy.marples.name/downloads/${PN}/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="BSD-2"
 SLOT="0"
@@ -14,11 +16,11 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_COMPILE_PARAMS=( "DBDIR=/var/lib/dhcpcd" "LIBEXECDIR=/$(get_libdir)/dhcpcd" )
-DEFAULT_SRC_INSTALL_PARAMS=(
-    DBDIR="/var/lib/dhcpcd"
-    LIBEXECDIR="/$(get_libdir)/dhcpcd"
-    HOOKSCRIPTS="50-yp.conf 50-ntp.conf 90-NetworkManager"
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --sbindir=/sbin
+    --dbdir=/var/lib/dhcpcd
+    --libexecdir=/$(get_libdir)/dhcpcd
+    --with-hooks="yp ntp"
 )
 
 src_install() {

@@ -3,10 +3,10 @@
 
 require multilib
 
-SUMMARY="Suspend and hibernation utilities for HAL"
-HOMEPAGE="http://pm-utils.freedesktop.org/"
-DOWNLOADS="http://pm-utils.freedesktop.org/releases/${PNV}.tar.gz
-           http://dev.exherbo.org/~compnerd/distfiles/video-quirks-20100127.tar.gz"
+SUMMARY="Suspend and hibernation utilities"
+HOMEPAGE="http://${PN}.freedesktop.org/"
+DOWNLOADS="http://${PN}.freedesktop.org/releases/${PNV}.tar.gz
+           http://${PN}.freedesktop.org/releases/pm-quirks-20100316.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -31,6 +31,7 @@ src_install() {
     edo rm "${IMAGE}/usr/$(get_libdir)/pm-utils/sleep.d/01grub"
 
     edo rm "${IMAGE}/usr/bin/import-fdi-quirkdb"
-    edo mv "${WORKBASE}/video-quirks" "${IMAGE}/usr/$(get_libdir)/pm-utils"
+    insinto /usr/$(get_libdir)/pm-utils/video-quirks
+    doins "${WORKBASE}"/*.quirkdb
 }
 

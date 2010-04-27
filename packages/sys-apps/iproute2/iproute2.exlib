@@ -8,6 +8,8 @@ MY_PNV="${PN}-${MY_PV}"
 MY_PVR="${PVR/_p/-}"
 MY_PNVR="${PN}-${MY_PVR}"
 
+myexparam headers_version='[>=2.6.33]'
+
 require multilib
 
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux."
@@ -30,7 +32,7 @@ REMOTE_IDS="freshmeat:${PN}"
 
 DEPENDENCIES="
     build:
-        sys-kernel/linux-headers
+        sys-kernel/linux-headers$(exparam headers_version)
     build+run:
         atm? ( net-dialup/linux-atm )
         berkdb? ( sys-libs/db:= )
@@ -80,12 +82,18 @@ src_install() {
     default
 
     if optionq berkdb ; then
+        if ! ever at_least 2.6.33 ; then
+            dodir /var/lib/arpd
+        fi
+
         keepdir /var/lib/arpd
 
         dodir /usr/sbin
         edo mv "${IMAGE}"/{,usr/}sbin/arpd
     else
-        edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
+        if ever at_least 2.6.33 ; then
+            edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
+        fi
     fi
 }
 

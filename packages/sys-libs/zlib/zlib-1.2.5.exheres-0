@@ -6,7 +6,7 @@ require flag-o-matic easy-multibuild
 
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net/"
-DOWNLOADS="http://www.zlib.net/${PNV}.tar.gz"
+DOWNLOADS="http://www.zlib.net/${PNV}.tar.bz2"
 
 LICENCES="as-is"
 SLOT="0"
@@ -17,6 +17,7 @@ DEPENDENCIES=""
 
 WORK="${WORKBASE}"
 
+DEFAULT_SRC_INSTALL_PARAMS=( LDCONFIG=: )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
 unpack_prepare_one_multibuild() {
@@ -29,15 +30,6 @@ unpack_one_multibuild() {
 }
 
 src_unpack() {
-    easy-multibuild_run_phase
-}
-
-prepare_one_multibuild() {
-    # Don't run ldconfig
-    edo sed -e '/ldconfig/d' -i Makefile.in
-}
-
-src_prepare() {
     easy-multibuild_run_phase
 }
 
