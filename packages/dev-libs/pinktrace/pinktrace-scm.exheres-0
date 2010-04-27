@@ -1,0 +1,40 @@
+# Copyright 2010 Ali Polatel <alip@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+
+SUMMARY="Pink's Tracing Library"
+DESCRIPTION="
+pinktrace is a wrapper around ptrace(2) system call.
+It provides a robust API for tracing processes.
+Note this is a work in progress and the API is *not* stable.
+"
+HOMEPAGE="http://dev.exherbo.org/~alip/${PN}"
+DOWNLOADS=""
+SCM_REPOSITORY="git://github.com/alip/pinktrace.git"
+require scm-git
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-libs/check
+"
+
+BUGS_TO="alip@exherbo.org"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/reference/html [[ lang = en ]]"
+
+AT_M4DIR=m4
+
+src_test() {
+    if [[ -n "${PALUDIS_DO_NOTHING_SANDBOXY}" ]]; then
+        default
+    else
+        elog "Not running tests due to ptrace limitations"
+        elog "set PALUDIS_DO_NOTHING_SANDBOXY=1 if you want to run the tests"
+    fi
+}
+
