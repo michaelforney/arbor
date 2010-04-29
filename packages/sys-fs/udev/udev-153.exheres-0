@@ -5,39 +5,42 @@
 #       Copyright 1999-2008 Gentoo Foundation
 
 require udev
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="glib [[ description = [ build extra utilities for usb, acl, etc and gudev to integrate with glib main-loop ] ]]
-           gobject-introspection [[ description = [ build data for gobject introspection ] ]]
+MYOPTIONS="glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
+           sound [[ description = [ install extra rules for sound cards ] ]]
+           gobject-introspection [[ requires = [ glib ] ]]
            platform: ia64" # ppc s390
 
 DEPENDENCIES="
     build:
+        dev-doc/gtk-doc
         dev-libs/libxslt
-        glib? ( dev-util/gperf )
     build+run:
-        glib? (
-            dev-libs/glib:2[>=2.7.0]
-            dev-libs/libusb:0.1[>=0.1.12]
-            sys-apps/acl
-            sys-apps/pciutils-data
-            sys-apps/usbutils[>=0.82]
-        )
+        glib? ( dev-libs/glib:2[>=2.7.0] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
+        sound? ( sys-apps/usbutils
+                 sys-apps/pciutils )
     suggestion:
-        glib? (
-            sys-auth/ConsoleKit[>=0.4.1]
-        )
+        glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    '--sbindir=/sbin'
-    "--with-rootlibdir=/$(get_libdir)"
-    "--libexecdir=/$(get_libdir)/udev/"
-    '--without-selinux'
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib extras' 'gobject-introspection introspection' )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/udev-151-only-build-gudev.patch"
+                              "${FILES}/udev-153-build-sound-rules.patch" )
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--sbindir=/sbin' "--with-rootlibdir=/$(get_libdir)"
+                               "--libexecdir=/$(get_libdir)/udev/" '--without-selinux'
+                               '--disable-extras' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib gudev' 'gobject-introspection introspection'
+                                       'sound usb-db' 'sound pci-db' 'sound sound-rules' )
+
+
+src_prepare() {
+    edo gtkdocize --copy
+    autotools_src_prepare
+}
 
 src_install() {
     default
@@ -95,7 +98,9 @@ EOT
     keepdir /etc/udev/rules.d /$(get_libdir)/udev/{devices,state}
 
     if [[ $(get_libdir) != lib ]] ; then
-        option glib && edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit
+        if option glib && [[ -d "${IMAGE}/usr/lib/ConsoleKit" ]] ; then
+            edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit
+        fi
         [[ -d "${IMAGE}"/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 }
