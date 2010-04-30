@@ -3,13 +3,15 @@
 
 SCM_REPOSITORY="http://llvm.org/svn/llvm-project/llvm/"
 
+SCM_SECONDARY_REPOSITORIES="clang? ( clang )"
+SCM_clang_REPOSITORY="http://llvm.org/svn/llvm-project/cfe/"
+SCM_clang_UNPACK_TO="${WORK}/tools/clang/"
+
 require llvm scm-svn
 
 DOWNLOADS=""
 
 PLATFORMS="~amd64"
 
-# FIXME Support for building & installing documentation
-# FIXME Shared libraries don't build currently, shared libs aren't recommended by upstream
-# CMAKE_SRC_CONFIGURE_PARAMS=( -DBUILD_SHARED_LIBS:BOOL=TRUE -DLLVM_ENABLE_PIC:BOOL=TRUE )
+# FIXME Support for building documentation
 

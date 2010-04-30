@@ -1,9 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib cmake
-
-export_exlib_phases src_test src_install
+require multilib
 
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
@@ -12,23 +10,45 @@ compile-time, link-time, run-time, and 'idle-time' optimization of programs
 from arbitrary programming languages. It currently supports compilation of C,
 Objective-C, and C++ programs, using front-ends derived from GCC 4.0, GCC 4.2,
 and a custom new front-end, 'clang'. It supports x86, x86_64, ia64, PowerPC,
-and SPARC, with support for Alpha and ARM under development."
+and SPARC, with support for Alpha and ARM under development.
+
+Some of the goals of clang include the following:
+- End-User Features
+  Fast compiles and low memory use
+  Expressive diagnostics (examples)
+  GCC compatibility
+- Utility and Applications
+  Modular library based architecture
+  Support diverse clients (refactoring, static analysis, code generation, etc)
+  Allow tight integration with IDEs
+  Use the LLVM 'BSD' License
+- Internal Design and Implementation
+  A real-world, production quality compiler
+  A simple and hackable code base
+  A single unified parser for C, Objective C, C++, and Objective C++
+  Conformance with C/C++/ObjC and their variants
+"
 HOMEPAGE="http://llvm.org/"
+#   ${HOMEPAGE}/releases/${PV}/${PN}-test-${PV}.tgz
 DOWNLOADS="
-    ${HOMEPAGE}/releases/${PV}/${PNV}.tar.gz
+    ${HOMEPAGE}/releases/${PV}/${PNV}.tgz
+    clang? ( ${HOMEPAGE}/releases/${PV}/clang-${PV}.tgz )
 "
 
 LICENCES="UoI-NCSA"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="clang"
 
 GCC_VERSION="4.4.3"
 
+# Allow for a transition period from sys-devel/clang to dev-lang/llvm[clang], maybe 1 month
 DEPENDENCIES="
     build:
         dev-lang/perl:*
         sys-devel/gcc[~${GCC_VERSION}]
         sys-devel/flex
+    build+run:
+        !sys-devel/clang
 "
 
 BUGS_TO="ingmar@exherbo.org"
@@ -38,24 +58,36 @@ REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_DOCUMENTATION="http://llvm.org/docs [[ lang = en ]]"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 
-libsuffix=$(get_libdir)
-libsuffix=${libsuffix##lib}
-CMAKE_SRC_CONFIGURE_PARAMS=(
-    -DCXX_INCLUDE_ARCH="${CHOST}"
-    -DCXX_INCLUDE_ROOT="/usr/include/c++/${GCC_VERSION}/"
-    -DLLVM_LIBDIR_SUFFIX="${libsuffix}"
-)
-
-llvm_src_test() {
-    cmake_run nonfatal emake check
+src_prepare() {
+    default
+    if option clang; then
+        ever is_scm || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
+        edo sed \
+            -e "/^PROJ_headers :=/s|/lib/|/$(get_libdir)/|" \
+            -i tools/clang/lib/Headers/Makefile
+    fi
 }
 
-llvm_src_install() {
-    cmake_src_install
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'clang built-clang' )
 
-    insinto /usr/share/doc/${PNVR}/
-    find docs/{img,HistoricalNotes} -type d -name .svn -print0 | xargs -0 --no-run-if-empty rm -r ||
-        die "Couldn't remove .svn/ cruft"
-    doins -r docs/*.{css,html} docs/img/ docs/HistoricalNotes
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+    --enable-optimized
+    --hates=docdir
+    --with-cxx-include-arch="${CHOST}"
+    --with-cxx-include-root="/usr/include/c++/${GCC_VERSION}/"
+)
+
+src_test() {
+    emake check
+    option clang && emake test -C tools/clang
+}
+
+src_install() {
+    emake install \
+        DESTDIR="${IMAGE}" \
+        KEEP_SYMBOLS=1 \
+        PROJ_docsdir=/usr/share/doc/${PNVR} \
+        PROJ_libdir=/usr/$(get_libdir)
 }
 
