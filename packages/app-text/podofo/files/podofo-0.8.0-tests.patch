@@ -1,0 +1,26 @@
+From 3dee1d4c957387a0ef7e6586afd878991475a7b6 Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Sat, 1 May 2010 14:52:31 +0200
+Subject: [PATCH] Remove a test that specifically requires the Arial font.
+Upstream: Rejected. They think it's great as it is.
+
+---
+ podofo-0.8.0/test/unit/CMakeLists.txt |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/podofo-0.8.0/test/unit/CMakeLists.txt b/podofo-0.8.0/test/unit/CMakeLists.txt
+index 21cb2fa..911480a 100644
+--- a/podofo-0.8.0/test/unit/CMakeLists.txt
++++ b/podofo-0.8.0/test/unit/CMakeLists.txt
+@@ -5,7 +5,7 @@ IF(PODOFO_HAVE_CPPUNIT)
+   
+   # repeat for each test
+   ADD_EXECUTABLE( podofo-test main.cpp EncodingTest.cpp EncryptTest.cpp 
+-		  FilterTest.cpp FontTest.cpp NameTest.cpp PagesTreeTest.cpp 
++		  FilterTest.cpp FontTest.cpp NameTest.cpp
+                   TokenizerTest.cpp StringTest.cpp VariantTest.cpp BasicTypeTest.cpp )
+   ADD_DEPENDENCIES( podofo-test ${PODOFO_DEPEND_TARGET})
+   TARGET_LINK_LIBRARIES( podofo-test ${PODOFO_LIB} ${PODOFO_LIB_DEPENDS} ${CPPUNIT_LIBRARIES} )
+-- 
+1.7.1
+
