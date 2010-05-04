@@ -17,16 +17,26 @@ require scm-git
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="doc"
+MYOPTIONS="doc python ruby"
 
 DEPENDENCIES="
     build:
         dev-libs/check
-        doc? ( app-doc/doxygen )
+        doc? (
+            app-doc/doxygen
+            python? ( dev-python/epydoc )
+        )
+    build+run:
+        python? ( dev-lang/python:= )
+        ruby? ( dev-lang/ruby )
 "
 
 BUGS_TO="alip@exherbo.org"
-UPSTREAM_DOCUMENTATION="${HOMEPAGE}/api/c [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="
+    ${HOMEPAGE}/api/c      [[ lang = en description = [ API documentation ] ]]
+    ${HOMEPAGE}/api/python [[ lang = en description = [ Python bindings API documentation ] ]]
+    ${HOMEPAGE}/api/ruby   [[ lang = en description = [ Ruby bindings API documentation ] ]]
+"
 
 AT_M4DIR=m4
 
@@ -37,5 +47,14 @@ src_test() {
         elog "Not running tests due to ptrace limitations"
         elog "set PALUDIS_DO_NOTHING_SANDBOXY=1 if you want to run the tests"
     fi
+}
+
+src_configure() {
+    econf \
+        $(option_enable doc doxygen) \
+        $(option doc && option python && echo '--enable-python-doc') \
+        $(option doc && option ruby && echo '--enable-ruby-doc') \
+        $(option_enable python) \
+        $(option_enable ruby)
 }
 
