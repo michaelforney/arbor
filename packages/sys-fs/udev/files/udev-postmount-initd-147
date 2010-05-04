@@ -18,7 +18,7 @@ start() {
 	[ -d /dev/.udev/ ] || return 0
 
 	# Run the events that failed at first udev trigger
-	udevadm trigger --type=failed -v
+	udevadm trigger --action=add --type=failed -v
 
 	# only continue if rules-directory is writable
 	dir_writeable /etc/udev/rules.d || return 0

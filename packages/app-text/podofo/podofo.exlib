@@ -1,7 +1,9 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require cmake sourceforge [ suffix=tar.gz ]
+
+export_exlib_phases src_prepare src_test
 
 SUMMARY="PoDoFo is a library to work with the PDF file format"
 DESCRIPTION="
@@ -22,9 +24,7 @@ UPSTREAM_RELEASE_NOTES="http://sourceforge.net/mailarchive/forum.php?thread_name
 
 LICENCES="GPL-2 LGPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
-        fontconfig [[ description = [ Support fontconfig in PoDoFo ] ]]
         graph [[ description = [ Support for graphs using boost ] ]]
         lua [[ description = [ Support Lua plan files for imposition ] ]]
         platform:
@@ -32,41 +32,55 @@ MYOPTIONS="
 "
 
 DEPENDENCIES="
-    build:
-        dev-cpp/cppunit[>=1.12.1]
     build+run:
         dev-libs/openssl[>=0.9.8j]
+        media-libs/fontconfig[>=2.6.0]
         media-libs/freetype[>=2.3.9]
         media-libs/jpeg[>=6b]
+        media-libs/libpng[>=1.2]
         media-libs/tiff[>=3.8.2-r1]
         graph? ( dev-libs/boost[>=1.38.0] )
-        fontconfig? ( media-libs/fontconfig[>=2.6.0] )
         lua? ( dev-lang/lua[>=5.1.4] )
+    test:
+        dev-cpp/cppunit[>=1.12.1]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}"/${PNV}-automagic-deps.patch
-    -p1 "${FILES}"/${PNV}-tests.patch
+    -p2 "${FILES}"/${PNV}-tests.patch
 )
 
-CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE )
+CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE -DWANT_FONTCONFIG:BOOL=TRUE)
 CMAKE_SRC_CONFIGURE_OPTION_WANTS=(
-    "fontconfig FONTCONFIG"
     "graph BOOST"
     "platform:amd64 LIB64"
 )
 CMAKE_SRC_CONFIGURE_OPTION_WITHS=( "lua LUA" )
 
-src_test() {
+podofo_src_prepare() {
+    default
+
+    # For the tests to succeed a path must be changed.
+    edo sed -i -e "s:../../../podofo/\(test/CreationTest/CreationTest.cpp\):../../${PNV}/\1:" test/CreationTest/CreationTest.cpp
+}
+
+podofo_src_test() {
+    # The commented tests fail due to bogus assumptions (e. g. specific fonts
+    # being installed, all fonts being supported, etc.) or problems with the tests
+    # themselves, not podofo.
     edo pushd "${WORKBASE}"/build/test
+    edo ./ContentParser/ContentParser CreationTest/resources/Illust.pdf
+    edo ./CreationTest/CreationTest ./lala.pdf
     edo ./DeviceTest/DeviceTest
-    edo ./FilterTest/FilterTest
+#    edo ./FilterTest/FilterTest
+#    edo ./FormTest/FormTest ./lala.pdf
+#    edo ./FormTest/FormTest ./lala.pdf ./lala2.pdf
+#    edo ./LargeTest/LargeTest ./lala.pdf ./CreationTest/resources/lena.jpg
+#    edo ./ObjectParserTest/ObjectParserTest
     edo ./ParserTest/ParserTest ./CreationTest/resources/Illust.pdf lala.pdf
-    edo ./PdfError_Test
     edo ./TokenizerTest/TokenizerTest ./CreationTest/resources/Illust.pdf
     edo ./VariantTest/VariantTest
     edo ./WatermarkTest/WatermarkTest ./CreationTest/resources/Illust.pdf lala.pdf
-    edo ./unit/podofo-test
+#    edo ./unit/podofo-test
     edo popd
 }
-
