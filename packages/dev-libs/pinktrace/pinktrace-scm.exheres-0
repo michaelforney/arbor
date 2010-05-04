@@ -17,7 +17,7 @@ require scm-git
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="doc python ruby"
+MYOPTIONS="doc python ruby ipv6"
 
 DEPENDENCIES="
     build:
@@ -54,6 +54,7 @@ src_configure() {
         $(option_enable doc doxygen) \
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
+        $(option_enable ipv6) \
         $(option_enable python) \
         $(option_enable ruby)
 }
