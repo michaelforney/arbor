@@ -21,7 +21,11 @@ DEPENDENCIES="
 "
 
 elisp-optional_src_compile() {
-    option emacs && elisp-compile "${WORK}/${ELISP_SOURCE_DIRECTORY}"/*.el
+    if option emacs; then
+        edo pushd "${WORK}/${ELISP_SOURCE_DIRECTORY}"
+        elisp-compile *.el
+        edo popd
+    fi
 }
 
 elisp-optional_src_install() {
