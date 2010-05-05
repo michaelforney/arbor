@@ -44,10 +44,10 @@ GCC_VERSION="4.4.3"
 DEPENDENCIES="
     build:
         dev-lang/perl:*
-        sys-devel/gcc[~${GCC_VERSION}]
         sys-devel/flex
     build+run:
         !sys-devel/clang
+        clang? ( sys-devel/gcc[~${GCC_VERSION}] )
 "
 
 BUGS_TO="ingmar@exherbo.org"
