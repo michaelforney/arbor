@@ -1,0 +1,17 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: pasted on irc, not yet committed
+Reason: Make clang++ work with gcc 4.4.4
+--- tools/clang/lib/Frontend/InitHeaderSearch.cpp
++++ tools/clang/lib/Frontend/InitHeaderSearch.cpp
+@@ -531,9 +531,9 @@
+     break;
+   case llvm::Triple::Linux:
+     // Exherbo (2010-01-25)
+-    AddGnuCPlusPlusIncludePaths("/usr/include/c++/4.4.3",
++    AddGnuCPlusPlusIncludePaths("/usr/include/c++/4.4.4",
+                                 "x86_64-pc-linux-gnu", "32", "", triple);
+-    AddGnuCPlusPlusIncludePaths("/usr/include/c++/4.4.3",
++    AddGnuCPlusPlusIncludePaths("/usr/include/c++/4.4.4",
+                                 "i686-pc-linux-gnu", "", "", triple);
+     // Debian sid
+     AddGnuCPlusPlusIncludePaths("/usr/include/c++/4.4",

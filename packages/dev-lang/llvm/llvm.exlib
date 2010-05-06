@@ -40,7 +40,11 @@ LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS="clang"
 
-GCC_VERSION="4.4.3"
+if ever is_scm; then
+    GCC_VERSION="4.4.4"
+else
+    GCC_VERSION="4.4.3"
+fi
 
 # Allow for a transition period from sys-devel/clang to dev-lang/llvm[clang], maybe 1 month
 DEPENDENCIES="
@@ -74,6 +78,7 @@ llvm_src_prepare() {
     default
     if option clang; then
         ever is_scm || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
+        ever is_scm && expatch -p0 "${FILES}/${PN}-cxx-includes.patch"
         edo sed \
             -e "/^PROJ_headers :=/s|/lib/|/$(get_libdir)/|" \
             -i tools/clang/lib/Headers/Makefile
