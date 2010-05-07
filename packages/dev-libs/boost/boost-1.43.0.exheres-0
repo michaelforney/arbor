@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PNV=${PN}_$(ever replace_all '_')
@@ -7,6 +7,7 @@ require cmake sourceforge
 
 SUMMARY="Boost Libraries for C++"
 HOMEPAGE="http://www.boost.org/"
+DOWNLOADS+=" http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}-cmake.patch.bz2"
 
 LICENCES="freedist Boost-1.0"
 SLOT="0"
@@ -14,7 +15,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug doc"
 
 # All tests are slow, run only slow tests
-# RESTRICT="test"
+RESTRICT="test"
 
 DEPENDENCIES="
     build:
@@ -30,49 +31,38 @@ DEPENDENCIES="
 "
 
 
-REMOTE_IDS+=" freshmeat:${PN}"
+REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_CHANGELOG="${HOMEPAGE}/users/news/version_${PV//./_}"
 
 WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-libdir.patch"
-    "${FILES}/${PNV}-boost.python.patch"
-    "${FILES}/${PNV}-boost.inspect.patch"
-    "${FILES}/0001-fix-the-static-property-initialization-caused-by-Pyt.patch"
+    "${WORKBASE}/${PNV}-cmake.patch"
 )
 
 CMAKE_SRC_CONFIGURE_PARAMS=(
-    -DCMAKE_IS_EXPERIMENTAL=YES_I_KNOW
-    -DBUILD_BCP:BOOL=FALSE # Fails with undefined references to 'main'
-    -DBUILD_SINGLE_THREADED:BOOL=TRUE
-    -DBUILD_STATIC:BOOL=FALSE
+    -DENABLE_MULTI_THREADED:BOOL=TRUE
+    -DENABLE_SINGLE_THREADED:BOOL=TRUE
+    -DENABLE_SHARED:BOOL=TRUE
+    -DENABLE_STATIC:BOOL=FALSE
     -DMPI_FOUND:BOOL=FALSE # Avoid automagic dependency
 )
-CMAKE_SRC_CONFIGURE_OPTION_BUILDS=(
-    DEBUG
+CMAKE_SRC_CONFIGURE_OPTIONS=(
     'doc DOCUMENTATION'
     'doc DOCUMENTATION_HTML'
 )
+CMAKE_SRC_CONFIGURE_OPTION_ENABLES=( DEBUG )
 
-src_compile() {
-    edo pushd "${ECMAKE_BUILD_DIR}"
-
-    # See https://svn.boost.org/trac/boost/ticket/2189
-    emake modularize
-
-    cmake_src_compile
-}
-
-# FIXME https://svn.boost.org/trac/boost/wiki/CMakeTesting
-# Some tests need static libs
-# cmake -DBUILD_TESTING:BOOL=TRUE fails with CMake 2.6.4
-# src_test_expensive() { ctest ; }
+# FIXME http://sodium.resophonic.com/boost-cmake/current-docs/testing.html
+# Some tests still need their CMakeLists.txt written, current cmake patch isn't quite complete
+# To build tests: cmake -DBUILD_TESTING:BOOL=ALL
+# To run tests:   src_test_expensive() { ctest ; }
 
 src_install() {
     cmake_src_install
 
-    edo rmdir "${IMAGE}"/usr/include/boost/interprocess/containers/detail
+    edo find "${IMAGE}" -type d -empty
+    edo find "${IMAGE}" -type d -empty -delete
 
     if option doc ; then
         # FIXME Should really be handled by boosts buildsystem
