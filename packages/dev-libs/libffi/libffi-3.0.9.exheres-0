@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A portable foreign function interface library"
@@ -22,4 +22,16 @@ A layer must exist above libffi that handles type conversions for values passed 
 "
 HOMEPAGE="http://sourceware.org/${PN}/"
 DOWNLOADS="mirror://sourceware/${PN}/${PNV}.tar.gz"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="debug"
+
+DEPENDENCIES="
+    test:
+        dev-util/dejagnu
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 
