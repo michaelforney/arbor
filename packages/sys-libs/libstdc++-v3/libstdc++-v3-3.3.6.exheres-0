@@ -40,9 +40,7 @@ src_install() {
     emake -j1 -C "${WORK}" DESTDIR="${IMAGE}" install-target-libstdc++-v3
 
     # We only care about the shared library
-    edo pushd "${IMAGE}"
-    edo rm -rf usr/[^l]*
-    edo rm -rf usr/lib*/*.{a,la,so}
-    edo popd
+    edo rm -rf "${IMAGE}"/usr/[^l]*
+    edo rm -rf "${IMAGE}"/usr/lib*/*.{a,la,so}
 }
 
