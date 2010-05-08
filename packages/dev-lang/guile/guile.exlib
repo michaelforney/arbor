@@ -1,0 +1,67 @@
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+if (($(ever range 2) % 2)); then
+    require gnu [ alpha=true suffix=gz ]
+else
+    require gnu [ suffix=gz ]
+fi
+
+require alternatives
+
+SUMMARY="An interpreter for the Scheme programming language -- Project GNU's extension language"
+DESCRIPTION="
+Guile is a library designed to help programmers create flexible applications.
+Using Guile in an application allows programmers to write plug-ins, or modules
+(there are many names, but the concept is essentially the same) and users to
+use them to have an application fit their needs."
+
+LICENCES="LGPL-2.1"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+      dev-libs/gmp[>=4.1]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-deprecated
+)
+
+src_test() {
+    sydboxcmd "net/whitelist/bind/unix://${TEMP%/}/guile-test-socket-*"
+    default
+    sydboxcmd "net/unwhitelist/bind/unix://${TEMP%/}/guile-test-socket-*"
+}
+
+src_install() {
+    default
+
+    # TODO: Handle emacs files
+    rm -rf "${IMAGE}/usr/share/emacs"
+
+    local alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
+
+    local bin binaries=(
+        /usr/bin/guile-config
+        /usr/bin/guile-tools
+        /usr/bin/guile
+        /usr/bin/guile-snarf
+    )
+    for bin in ${binaries[@]}; do
+        alternatives+=( ${bin} ${bin##*/}-${SLOT} )
+    done
+
+    local basename info info_pages=( "${IMAGE}"/usr/share/info/*.info* )
+    for info in ${info_pages[@]}; do
+        basename=${info##*/}
+        alternatives+=( /usr/share/info/${basename} ${basename%.info*}-${SLOT}.${basename#*.} )
+    done
+
+    alternatives+=(
+        /usr/share/aclocal/guile.m4 guile-${SLOT}.m4
+        /usr/share/man/man1/guile.1 guile-${SLOT}.1
+    )
+    alternatives_for "${alternatives[@]}"
+}
+
