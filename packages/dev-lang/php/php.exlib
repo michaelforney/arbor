@@ -22,6 +22,7 @@ MYOPTIONS="
     ipv6
     apache [[ description = [ Build PHP for the Apache webserver. ] ]]
     pear [[ description = [ Support for using the PHP Extension and Application Repository (PEAR). ] requires = [ php_extensions: pcre xml ] ]]
+
     php_extensions:
         curl        [[ description = [ Build the cURL extension (includes curl-wrappers). ] ]]
         berkdb      [[ description = [ Build the Berkeley DB extension. ] ]]
@@ -91,12 +92,9 @@ DEPENDENCIES="
         php_extensions:libedit? ( dev-libs/libedit[>=2.11_p20080712] )
         php_extensions:mcrypt? ( dev-libs/libmcrypt[>=2.5.8] )
         php_extensions:mssql? ( dev-db/freetds[>=0.82] )
-        php_extensions:mysql? ( dev-db/mysql[>=5.0.72] )
-        php_extensions:mysqli? ( dev-db/mysql[>=5.0.72] )
         php_extensions:ncurses? ( sys-libs/ncurses[>=5.7] )
         php_extensions:pcre? ( dev-libs/pcre[>=7.9] )
         php_extensions:pdo-dblib? ( dev-db/freetds[>=0.82] )
-        php_extensions:pdo-mysql? ( dev-db/mysql[>=5.0.72] )
         php_extensions:pdo-odbc? ( dev-db/unixODBC[>=2.2.14] )
         php_extensions:pdo-pgsql? ( dev-db/postgresql[>=8.3.7] )
         php_extensions:pdo-sqlite? ( dev-db/sqlite[>=3.5.9] )
@@ -252,14 +250,13 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:libedit libedit"
     "php_extensions:mcrypt mcrypt"
     "php_extensions:mssql mssql"
-    "php_extensions:mysql mysql"
-    "php_extensions:mysqli mysqli"
-    "php_extensions:mysql mysql-sock /var/run/mysqld/mysqld.sock"
+    "php_extensions:mysql mysql mysqlnd"
+    "php_extensions:mysqli mysqli mysqlnd"
     "php_extensions:ncurses ncurses"
     "php_extensions:pcre pcre-dir /usr"
     "php_extensions:pcre pcre-regex /usr"
+    "php_extensions:pdo-mysql pdo-mysql mysqlnd"
     "php_extensions:pdo-dblib pdo-dblib /usr"
-    "php_extensions:pdo-mysql pdo-mysql /usr"
     "php_extensions:pdo-odbc pdo-odbc unixODBC,/usr"
     "php_extensions:pdo-pgsql pdo-pgsql /usr"
     "php_extensions:pdo-sqlite pdo-sqlite /usr"
@@ -274,6 +271,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:xmlrpc xmlrpc"
     "php_extensions:xsl xsl"
 )
+
 
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 
@@ -314,7 +312,7 @@ php_src_install() {
 
     # Cleaning up.
     if option pear; then
-        edo rm -r "${IMAGE}"/.{channels,registry}
+        edo rm -rf "${IMAGE}"/.{channels,registry}
         edo rm "${IMAGE}"/.{depdb,depdblock,filemap,lock}
     fi
     edo rmdir "${IMAGE}"/usr/include/php/include
@@ -330,7 +328,7 @@ php_src_install() {
 
     dodir /etc/${PN}
     insinto /etc/${PN}
-    newins php.ini-recommended php.ini
+    newins php.ini-production php.ini
     if option pear; then
         edo sed -i -e 's|^;\(include_path =\).*|\1 ".:/usr/share/pear:/usr/share/php:"|' "${IMAGE}"/etc/php/php.ini
         keepdir "${PHP_PEAR_CACHE_DIR}"
@@ -346,4 +344,3 @@ php_src_install() {
        doins "${FILES}"/70_mod_php.conf
     fi
 }
-
