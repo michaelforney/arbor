@@ -48,6 +48,8 @@ DEPENDENCIES="
 #FIXME missing packages
 #FIXME test would like fcgi
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/lighttpd-network.c-ssl.patch" )
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--libdir=/usr/$(get_libdir)/${PN}"
     '--without-mysql'
@@ -58,7 +60,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     '--with-bzip2'
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "debug valgrind" fam gdbm pcre "webdav webdav-locks" "webdav webdav-props" "xattr attr" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "debug valgrind" fam gdbm pcre "ssl openssl" "webdav webdav-locks" "webdav webdav-props" "xattr attr" )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 

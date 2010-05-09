@@ -22,10 +22,12 @@ MYOPTIONS="
     ipv6
     apache [[ description = [ Build PHP for the Apache webserver. ] ]]
     pear [[ description = [ Support for using the PHP Extension and Application Repository (PEAR). ] requires = [ php_extensions: pcre xml ] ]]
+
     php_extensions:
         curl        [[ description = [ Build the cURL extension (includes curl-wrappers). ] ]]
         berkdb      [[ description = [ Build the Berkeley DB extension. ] ]]
         exif        [[ description = [ Support acquiring metadata from images using exif. ] ]]
+        fileinfo    [[ description = [ Build fileinfo support. ] ]]
         filter      [[ description = [ Build the input filter extension. ] ]]
         ftp         [[ description = [ Enable FTP support. ] requires = [ php_extensions: ssl ] ]]
         gd          [[ description = [ Support dynamic image manipulation via the GD graphics library (activates all supported formats) ] ]]
@@ -38,7 +40,6 @@ MYOPTIONS="
         mssql       [[ description = [ Support for MS SQL-Server. ] ]]
         mysql       [[ description = [ Support for the popular MySQL database. ] requires = [ php_extensions: -recode ] ]]
         mysqli      [[ description = [ Support for the popular MySQL database, improved driver. ] ]]
-        ncurses     [[ description = [ Include ncurses support (CLI/CGI only) ] ]]
         pcre        [[ description = [ Include support for Perl Compatible Regular Expressions. ] ]]
         pdo-dblib   [[ description = [ PDO: Support for MS SQL-Server. ] ]]
         pdo-mysql   [[ description = [ PDO: Support for the popular MySQL database. ] ]]
@@ -62,10 +63,11 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
         dev-libs/gmp[>=4.3.0]
+        dev-libs/icu[>=4.2.1]
         apache? ( www-servers/apache[>=2.2.11] )
         php_extensions:curl? ( net-misc/curl[>=7.19.4] )
         php_extensions:berkdb? ( sys-libs/db:=[>=4.6.21] )
-        php_extensions:ftp? ( dev-libs/openssl[>=0.9.8j] )
+        php_extensions:ftp? ( dev-libs/openssl[>=0.9.6] )
         php_extensions:gd? (
             media-libs/gd[>=2.0.35]
             media-libs/jpeg[>=6b]
@@ -91,12 +93,8 @@ DEPENDENCIES="
         php_extensions:libedit? ( dev-libs/libedit[>=2.11_p20080712] )
         php_extensions:mcrypt? ( dev-libs/libmcrypt[>=2.5.8] )
         php_extensions:mssql? ( dev-db/freetds[>=0.82] )
-        php_extensions:mysql? ( dev-db/mysql[>=5.0.72] )
-        php_extensions:mysqli? ( dev-db/mysql[>=5.0.72] )
-        php_extensions:ncurses? ( sys-libs/ncurses[>=5.7] )
         php_extensions:pcre? ( dev-libs/pcre[>=7.9] )
         php_extensions:pdo-dblib? ( dev-db/freetds[>=0.82] )
-        php_extensions:pdo-mysql? ( dev-db/mysql[>=5.0.72] )
         php_extensions:pdo-odbc? ( dev-db/unixODBC[>=2.2.14] )
         php_extensions:pdo-pgsql? ( dev-db/postgresql[>=8.3.7] )
         php_extensions:pdo-sqlite? ( dev-db/sqlite[>=3.5.9] )
@@ -105,7 +103,7 @@ DEPENDENCIES="
         php_extensions:readline? ( sys-libs/readline[>=5.2_p12] )
         php_extensions:recode? ( app-text/recode[>=3.6] )
         php_extensions:ssl? (
-            dev-libs/openssl[>=0.9.8j]
+            dev-libs/openssl[>=0.9.6]
             php_extensions:imap? (
                 dev-libs/c-client[>=2007e][ssl]
             )
@@ -135,19 +133,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cli
     --enable-ctype
     --enable-dba
-    --enable-discard-path
-    --enable-fastcgi
     --enable-flatfile
-    --enable-force-cgi-redirect
     --enable-hash
     --enable-inifile
+    --enable-intl
     --enable-magic-quotes
     --enable-mbstring
     --enable-mbregex
     --enable-mbregex-backtrack
     --enable-pcntl
+    --enable-phar
     --enable-posix
-    --enable-reflection
     --enable-safe-mode
     --enable-session
     --enable-shmop
@@ -155,10 +151,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-sysvmsg
     --enable-sysvsem
     --enable-sysvshm
+    --enable-tokenizer
     --enable-zend-multibyte
     --enable-zip
-    --disable-dbase
     --disable-embed
+    --disable-embedded-mysqli
+    --disable-json
     --hates=docdir
     --with-bz2
     --with-config-file-path=/etc/${PN}
@@ -167,6 +165,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-gettext
     --with-gmp
     --with-iconv
+    --with-icu-dir=/usr
     --with-layout=GNU
     --with-zlib
     --with-zlib-dir=/usr
@@ -180,20 +179,18 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-cdb
     --without-continuity
     --without-custom-odbc
+    --without-dbmaker
     --without-empress
     --without-empress-bcs
+    --without-enchant
     --without-esoob
-    --without-fbsql
-    --without-fdftk
     --without-mhash
     --without-ibm-db2
     --without-interbase
     --without-iodbc
     --without-isapi
     --without-milter
-    --without-ming
     --without-mm
-    --without-msql
     --without-ndbm
     --without-nsapi
     --without-ODBCRouter
@@ -207,10 +204,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-sapdb
     --without-snmp
     --without-solid
-    --without-sybase
     --without-sybase-ct
     --without-thttpd
-    --without-ttf
     --without-tux
     --without-webjames
 )
@@ -219,6 +214,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     debug
     ipv6
     "php_extensions:exif exif"
+    "php_extensions:fileinfo fileinfo"
     "php_extensions:filter filter"
     "php_extensions:gd gd-native-ttf"
     "php_extensions:pdo-sqlite sqlite-utf8"
@@ -252,17 +248,19 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:libedit libedit"
     "php_extensions:mcrypt mcrypt"
     "php_extensions:mssql mssql"
-    "php_extensions:mysql mysql"
-    "php_extensions:mysqli mysqli"
+    "php_extensions:mysql mysql mysqlnd"
     "php_extensions:mysql mysql-sock /var/run/mysqld/mysqld.sock"
-    "php_extensions:ncurses ncurses"
+    "php_extensions:mysqli mysqli mysqlnd"
+    "php_extensions:mysqli mysql-sock /var/run/mysqld/mysqld.sock"
     "php_extensions:pcre pcre-dir /usr"
     "php_extensions:pcre pcre-regex /usr"
+    "php_extensions:pdo-mysql pdo-mysql mysqlnd"
+    "php_extensions:pdo-mysql mysql-sock /var/run/mysqld/mysqld.sock"
     "php_extensions:pdo-dblib pdo-dblib /usr"
-    "php_extensions:pdo-mysql pdo-mysql /usr"
     "php_extensions:pdo-odbc pdo-odbc unixODBC,/usr"
     "php_extensions:pdo-pgsql pdo-pgsql /usr"
     "php_extensions:pdo-sqlite pdo-sqlite /usr"
+    "php_extensions:pdo-sqlite sqlite /usr"
     "php_extensions:pgsql pgsql /usr"
     "php_extensions:pspell pspell"
     "php_extensions:readline readline"
@@ -314,7 +312,7 @@ php_src_install() {
 
     # Cleaning up.
     if option pear; then
-        edo rm -r "${IMAGE}"/.{channels,registry}
+        edo rm -rf "${IMAGE}"/.{channels,registry}
         edo rm "${IMAGE}"/.{depdb,depdblock,filemap,lock}
     fi
     edo rmdir "${IMAGE}"/usr/include/php/include
@@ -330,7 +328,7 @@ php_src_install() {
 
     dodir /etc/${PN}
     insinto /etc/${PN}
-    newins php.ini-recommended php.ini
+    newins php.ini-production php.ini
     if option pear; then
         edo sed -i -e 's|^;\(include_path =\).*|\1 ".:/usr/share/pear:/usr/share/php:"|' "${IMAGE}"/etc/php/php.ini
         keepdir "${PHP_PEAR_CACHE_DIR}"
@@ -346,4 +344,3 @@ php_src_install() {
        doins "${FILES}"/70_mod_php.conf
     fi
 }
-

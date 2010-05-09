@@ -40,8 +40,8 @@ src_configure() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        edo mkdir "${WORK}/${multibuild_c_target}"
+        edo cd "${WORK}/${multibuild_c_target}"
 
         default
     done
@@ -53,8 +53,7 @@ src_compile() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
-
+        edo cd "${WORK}/${multibuild_c_target}"
         default
     done
 }
@@ -69,15 +68,13 @@ src_install() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        edo cd "${WORK}/${multibuild_c_target}"
 
         emake DESTDIR="${IMAGE}" install-target-libstdc++-v3
     done
 
     # We only care about the shared library
-    edo pushd "${IMAGE}"
-    edo rm -rf usr/[^l]*
-    edo rm -rf usr/lib*/*.{a,la,so}
-    edo popd
+    edo rm -rf "${IMAGE}"/usr/[^l]*
+    edo rm -rf "${IMAGE}"/usr/lib*/*.{a,la,so}
 }
 

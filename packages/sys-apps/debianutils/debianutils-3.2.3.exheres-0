@@ -4,6 +4,8 @@
 # Based in part upon 'debianutils-2.28.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
+require debian-upstream [ suffix=.tar.bz2 ]
+
 SUMMARY="Miscellaneous utilities specific to Debian"
 DESCRIPTION="
 * installkernel: install a new kernel image
@@ -11,9 +13,9 @@ DESCRIPTION="
 * savelog: save a log file
 * tempfile: create a temporary file in a safe manner
 "
-HOMEPAGE="http://packages.debian.org/debianutils"
+HOMEPAGE="http://packages.debian.org/${PN}"
 
-require debian-upstream
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"

@@ -5,6 +5,8 @@ require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Fuser, killall, pstree and peekfd utilities"
 
+REMOTE_IDS="freshmeat:${PN}"
+
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/changelog.html"
 
 LICENCES="GPL-2"
@@ -16,8 +18,6 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin --enable-nls )
-
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PNV}-fuser-kill.patch" )
 
 src_install() {
     default

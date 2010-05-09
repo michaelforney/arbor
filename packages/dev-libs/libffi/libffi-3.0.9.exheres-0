@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require easy-multibuild
@@ -25,7 +25,18 @@ A layer must exist above libffi that handles type conversions for values passed 
 HOMEPAGE="http://sourceware.org/${PN}/"
 DOWNLOADS="mirror://sourceware/${PN}/${PNV}.tar.gz"
 
-MYOPTIONS="multibuild_c: 32 64"
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="debug
+    multibuild_c: 32 64"
+
+DEPENDENCIES="
+    test:
+        dev-util/dejagnu
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 
 test_prepare_one_multibuild() {
     case "${MULTIBUILD_TARGET}" in

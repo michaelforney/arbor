@@ -1,41 +1,18 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require guile autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 
-SUMMARY="An interpreter for the Scheme programming language -- Project GNU's extension language"
-DESCRIPTION="
-Guile is a library designed to help programmers create flexible applications.
-Using Guile in an application allows programmers to write plug-ins, or modules
-(there are many names, but the concept is essentially the same) and users to
-use them to have an application fit their needs."
-
-LICENCES="LGPL-2.1"
-SLOT="0"
+SLOT="1.8"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
-
-DOWNLOADS="http://ftp.gnu.org/pub/gnu/${PN}/${PNV}.tar.gz"
-
-DEPENDENCIES="
-    build+run:
-      dev-libs/gmp[>=4.1]
-"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-DESTDIR.patch"
     "${FILES}/${PNV}-gcc-4.5-doc.patch"
     "${FILES}/${PNV}-libtool.patch"
 )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    # Exherbo has no proper emacs support yet
-    --disable-elisp
-    --enable-deprecated
-)
 
-src_test() {
-    sydboxcmd "net/whitelist/bind/unix://${TEMP%/}/guile-test-socket-*"
-    default
-    sydboxcmd "net/unwhitelist/bind/unix://${TEMP%/}/guile-test-socket-*"
-}
+DEFAULT_SRC_CONFIGURE_PARAMS+=(
+    --disable-elisp
+)
 
