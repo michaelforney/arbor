@@ -21,3 +21,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
 )
 
+src_configure() {
+    # Configuration takes a million years without this hack.
+    sydboxcmd nowrap/lstat
+    default
+    sydboxcmd wrap/lstat
+}
+

@@ -18,6 +18,13 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
+src_configure() {
+    # Configuration takes a million years without this hack.
+    sydboxcmd nowrap/lstat
+    default
+    sydboxcmd wrap/lstat
+}
+
 src_compile() {
     default
     edo perl "${FILES}"/tarman > tar.1
