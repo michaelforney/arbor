@@ -1,11 +1,9 @@
 # Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] multilib
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] multilib sourceforge
 
 SUMMARY="Tool for automating interactive applications"
-HOMEPAGE="http://expect.nist.gov/"
-DOWNLOADS="http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}.tar.bz2"
 
 DESCRIPTION="Expect is a tool for automating interactive applications
 such as telnet, ftp, passwd, fsck, rlogin, tip, etc. Expect really
@@ -31,7 +29,7 @@ DEPENDENCIES="
         tk? ( dev-lang/tk )"
 
 src_prepare() {
-    expatch -p0 "${FILES}"/${PNV}-no-tk.patch
+    expatch -p0 "${FILES}"/${PN}-5.44.1.14-no-tk.patch
 
     # The mkpasswd program does not belong in here
     edo sed -e '/mkpasswd/s:mkpasswd::' -i Makefile.in
@@ -41,7 +39,6 @@ src_prepare() {
 
 src_configure() {
     econf \
-        --hates=docdir \
         --with-tcl=/usr/$(get_libdir) \
         --with-tclinclude=/usr/include \
         --with-tk=$(option tk && echo /usr/$(get_libdir) || echo no) \
