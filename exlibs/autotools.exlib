@@ -299,10 +299,10 @@ autotools_get_subdirs() {
     subdirs_scan_out=$(autotools_check_macro "AC_CONFIG_SUBDIRS")
     [[ -n ${subdirs_scan_out} ]] || return 0
 
-    echo "${subdirs_scan_out}" | gawk \
+    echo "${subdirs_scan_out}" | awk \
     '($0 !~ /^[[:space:]]*(#|dnl)/) {
-        if (match($0, /AC_CONFIG_SUBDIRS:(.*)$/, res))
-            print res[1]
+        if (match($0, /AC_CONFIG_SUBDIRS:/))
+            print substr($0, RSTART + RLENGTH)
     }' | uniq
 
     return 0
@@ -317,10 +317,10 @@ autotools_get_auxdir() {
     auxdir_scan_out=$(autotools_check_macro "AC_CONFIG_AUX_DIR")
     [[ -n ${auxdir_scan_out} ]] || return 0
 
-    echo ${auxdir_scan_out} | gawk \
+    echo ${auxdir_scan_out} | awk \
     '($0 !~ /^[[:space:]]*(#|dnl)/) {
-        if (match($0, /AC_CONFIG_AUX_DIR:(.*)$/, res))
-            print res[1]
+        if (match($0, /AC_CONFIG_AUX_DIR:/))
+            print substr($0, RSTART + RLENGTH)
     }' | uniq
 
     return 0
