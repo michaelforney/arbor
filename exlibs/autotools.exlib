@@ -305,7 +305,7 @@ autotools_get_subdirs() {
         if [[ ${line} == *AC_CONFIG_SUBDIRS:* ]]; then
             subdirs+=( ${line#*AC_CONFIG_SUBDIRS:} )
         fi
-    done < <(echo "${subdirs_scan_out}")
+    done <<< "${subdirs_scan_out}"
 
     echo ${subdirs[*]}
     return 0
