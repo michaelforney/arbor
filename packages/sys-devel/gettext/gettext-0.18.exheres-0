@@ -8,20 +8,19 @@ SUMMARY="GNU localization utilties"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="glib"
+MYOPTIONS=""
 
-DEPENDENCIES="
-    build+run:
-        glib? ( dev-libs/glib:2 )
-"
+DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-acl
     --disable-csharp
     --disable-java
     --disable-openmp
+    --with-included-glib
+    --with-included-libcroco
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' '!glib included-glib' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' )
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-sydbox.patch
 )
