@@ -1,0 +1,114 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: Sent a mail to the maintainer
+Reason: configure checks for multiple versions of awk but then forgets about it
+--- configure
++++ configure
+@@ -567,26 +567,26 @@
+             found=true
+             eval $filter=""
+           fi
+-        elif test -f `echo $tmp | awk '{print $1}'`
++        elif test -f `echo $tmp | $awk '{print $1}'`
+         then
+           found=true
+           eval $filter=\""$tmp"\"
+         else
+           found=false
+           echo ""
+-          echo "`echo $tmp | awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
++          echo "`echo $tmp | $awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
+         fi
+-      elif test `eval echo \\$$filter | awk '{print $1}'` = "missing"
++      elif test `eval echo \\$$filter | $awk '{print $1}'` = "missing"
+       then
+         found=true
+         eval $filter=""
+-      elif test -f `eval echo \\$$filter | awk '{print $1}'`
++      elif test -f `eval echo \\$$filter | $awk '{print $1}'`
+       then
+         found=true
+       else
+         found=false
+         echo ""
+-        echo "`eval echo \\$$filter | awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
++        echo "`eval echo \\$$filter | $awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
+       fi
+     done
+   done
+@@ -596,7 +596,7 @@
+   for filter in $FILTERS
+   do
+     echo "$filter command:	`eval echo \\$$filter`"
+-    if test `eval echo \\$$filter | awk '{print $1}'` = "missing"
++    if test `eval echo \\$$filter | $awk '{print $1}'` = "missing"
+     then
+       eval $filter=""
+     fi
+@@ -1039,22 +1039,22 @@
+         read tmp
+         if test -n "$tmp"
+         then
+-          if test -f `echo $tmp | awk '{print $1}'`
++          if test -f `echo $tmp | $awk '{print $1}'`
+           then
+             found=true
+             compress=$tmp
+           else
+             found=false
+             echo ""
+-            echo "`echo $tmp | awk '{print $1}'` doesn't seem to exist!  Try again!"
++            echo "`echo $tmp | $awk '{print $1}'` doesn't seem to exist!  Try again!"
+           fi
+-        elif test -f `echo "$compress" | awk '{print $1}'`
++        elif test -f `echo "$compress" | $awk '{print $1}'`
+         then
+           found=true
+         else
+           found=false
+           echo ""
+-          echo "`echo "$compress" | awk '{print $1}'` doesn't seem to exist!  Try again!"
++          echo "`echo "$compress" | $awk '{print $1}'` doesn't seem to exist!  Try again!"
+         fi
+       done
+     else
+@@ -1187,26 +1187,26 @@
+         then
+           found=true
+           eval $filter=""
+-        elif test -f `echo $tmp | awk '{print $1}'`
++        elif test -f `echo $tmp | $awk '{print $1}'`
+         then
+           found=true
+           eval $filter=\""$tmp"\"
+         else
+           found=false
+           echo ""
+-          echo "`echo $tmp | awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
++          echo "`echo $tmp | $awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
+         fi
+-      elif test `eval echo \\$$filter | awk '{print $1}'` = "missing"
++      elif test `eval echo \\$$filter | $awk '{print $1}'` = "missing"
+       then
+         found=true
+         eval $filter=""
+-      elif test -f `eval echo \\$$filter | awk '{print $1}'`
++      elif test -f `eval echo \\$$filter | $awk '{print $1}'`
+       then
+         found=true
+       else
+         found=false
+         echo ""
+-        echo "`eval echo \\$$filter | awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
++        echo "`eval echo \\$$filter | $awk '{print $1}'` doesn't seem to exist!  Try again or enter \`missing'"
+       fi
+     done
+   done
+@@ -1216,7 +1216,7 @@
+   for filter in $UNCOMPRESSORS
+   do
+     echo "$filter command:   	`eval echo \\$$filter`"
+-    if test `eval echo \\$$filter | awk '{print $1}'` = "missing"
++    if test `eval echo \\$$filter | $awk '{print $1}'` = "missing"
+     then
+       eval $filter=""
+     fi
