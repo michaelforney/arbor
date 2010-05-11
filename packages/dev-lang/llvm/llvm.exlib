@@ -67,7 +67,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-cxx-include-arch="${CHOST}"
     --with-cxx-include-root="/usr/include/c++/${GCC_VERSION}/"
 )
-
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
 llvm_src_prepare() {
@@ -91,6 +90,7 @@ llvm_src_install() {
         DESTDIR="${IMAGE}" \
         KEEP_SYMBOLS=1 \
         PROJ_docsdir=/usr/share/doc/${PNVR} \
-        PROJ_libdir=/usr/$(get_libdir)
+        PROJ_libdir=/usr/$(get_libdir) \
+        VERBOSE=1
 }
 
