@@ -1,0 +1,34 @@
+From: Timo Gurr <tgurr@exherbo.org> 
+Reason: Allow the user to specify the pkgconfig directory, e.g. to install into lib64 instead of lib.
+Upstream: Reported
+
+diff -Naur popt-1.16.orig/configure.ac popt-1.16/configure.ac
+--- popt-1.16.orig/configure.ac	2010-05-04 22:55:54.000000000 +0200
++++ popt-1.16/configure.ac	2010-05-11 21:12:25.172383427 +0200
+@@ -91,6 +91,14 @@
+ eval "popt_sysconfdir=\"${popt_sysconfdir}\"" # expand contained ${prefix}
+ AC_DEFINE_UNQUOTED([POPT_SYSCONFDIR], ["$popt_sysconfdir"], [Full path to default POPT configuration directory])
+ 
++# Allow the user to specify the pkgconfig directory.
++#
++AC_ARG_WITH(pkgconfigdir,
++	AC_HELP_STRING([--with-pkgconfigdir=DIR],[Specify location of pkgconfig dir (default is libdir/pkgconfig)]),
++	[pkgconfigdir=${withval}],
++	[pkgconfigdir='${libdir}/pkgconfig'])
++
++AC_SUBST([pkgconfigdir])
+ 
+ # Define a (hope) portable Libs pkgconfig directive that 
+ # - Don't harm if the default library search path include ${libdir}
+diff -Naur popt-1.16.orig/Makefile.am popt-1.16/Makefile.am
+--- popt-1.16.orig/Makefile.am	2010-05-04 22:55:54.000000000 +0200
++++ popt-1.16/Makefile.am	2010-05-11 21:09:50.564383567 +0200
+@@ -47,7 +47,7 @@
+ libpopt_la_SOURCES = popt.c poptparse.c poptconfig.c popthelp.c poptint.c
+ libpopt_la_LDFLAGS = -no-undefined @LTLIBINTL@ @LTLIBICONV@
+ 
+-pkgconfigdir = $(prefix)/lib/pkgconfig
++pkgconfigdir = @pkgconfigdir@
+ pkgconfig_DATA = popt.pc
+ 
+ if HAVE_LD_VERSION_SCRIPT
