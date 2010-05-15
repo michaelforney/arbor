@@ -26,8 +26,8 @@ DEPENDENCIES="
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/udev-153-only-build-gudev.patch"
-                              "${FILES}/udev-153-build-sound-rules.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/udev-154-only-build-gudev.patch"
+                              "${FILES}/udev-154-build-sound-rules.patch" )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--sbindir=/sbin' "--with-rootlibdir=/$(get_libdir)"
                                "--libexecdir=/$(get_libdir)/udev/" '--without-selinux'
@@ -57,9 +57,9 @@ src_install() {
     newins "${FILES}/udev-start-147.sh" udev-start.sh
     newins "${FILES}/udev-stop-136.sh" udev-stop.sh
 
-    newinitd "${FILES}/udev-initd-147" udev
-    newinitd "${FILES}/udev-mount-initd-147" udev-mount
-    newinitd "${FILES}/udev-postmount-initd-147" udev-postmount
+    newinitd "${FILES}/udev-initd-151-r4" udev
+    newinitd "${FILES}/udev-mount-initd-151-r4" udev-mount
+    newinitd "${FILES}/udev-postmount-initd-151-r4" udev-postmount
     newinitd "${FILES}/udev-dev-tarball-initd-136" udev-dev-tarball
 
     insinto /etc/modprobe.d
