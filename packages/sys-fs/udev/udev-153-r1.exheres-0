@@ -16,7 +16,6 @@ MYOPTIONS="glib [[ description = [ build gudev to integrate with glib main-loop 
 
 DEPENDENCIES="
     build:
-        dev-doc/gtk-doc
         dev-libs/libxslt
     build+run:
         glib? ( dev-libs/glib:2[>=2.7.0] )
@@ -38,7 +37,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib gudev' 'gobject-introspection intro
 
 
 src_prepare() {
-    edo gtkdocize --copy
+    edo cp "${FILES}/gtk-doc.make" "${WORK}"
     autotools_src_prepare
 }
 
