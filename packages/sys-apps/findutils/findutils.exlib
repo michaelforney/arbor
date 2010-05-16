@@ -7,7 +7,7 @@ else
     require gnu [ suffix=gz ]
 fi
 
-export_exlib_phases src_configure src_install
+export_exlib_phases src_configure src_install src_test_expensive
 
 SUMMARY="Basic directory searching utilities."
 
@@ -15,8 +15,10 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS=""
 
+RESTRICT="test"
+
 DEPENDENCIES="
-    test:
+    test-expensive:
         dev-util/dejagnu
 "
 
@@ -33,6 +35,10 @@ findutils_src_configure() {
     sydboxcmd nowrap/lstat
     default
     sydboxcmd wrap/lstat
+}
+
+findutils_src_test_expensive() {
+    emake "${DEFAULT_SRC_TEST_PARAMS[@]}" check
 }
 
 findutils_src_install() {
