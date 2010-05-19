@@ -1,5 +1,5 @@
 #!/sbin/runscript
-# Copyright 2008 Mike Kelly
+# Copyright 1999-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 opts="reload"
@@ -7,30 +7,24 @@ opts="reload"
 depend() {
     need localmount
     use logger
-    before dbus hald
+    before hald
 }
 
 start() {
-    local acpid_opts
-    if [[ "${ACPID_LOG}" == y* ]] ; then
-        acpid_opts+=" --logevents"
-    fi
-
     ebegin "Starting acpid"
-    start-stop-daemon --start --exec /usr/sbin/acpid -- ${acpid_opts}
+    start-stop-daemon --start --quiet --exec /usr/sbin/acpid -- ${ACPID_OPTIONS}
     eend $?
 }
 
 stop() {
     ebegin "Stopping acpid"
-    start-stop-daemon --stop --exec /usr/sbin/acpid && rm /var/run/acpid.socket
+    start-stop-daemon --stop --exec /usr/sbin/acpid
     eend $?
 }
 
 reload() {
-    ebegin "Reloading acpid"
-    start-stop-daemon --stop --oknodo --signal HUP --exec /usr/sbin/acpid
+    ebegin "Reloading acpid configuration"
+    start-stop-daemon --stop --oknodo --exec /usr/sbin/acpid --signal HUP
     eend $?
 }
 
-# vim: set et sw=4 sts=4 :

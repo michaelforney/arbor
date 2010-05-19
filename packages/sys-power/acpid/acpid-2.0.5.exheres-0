@@ -1,0 +1,52 @@
+# Copyright 2008, 2009 Mike Kelly <pioto@exherbo.org>
+# Distributed under the terms of the GPL v2
+# Based in part upon 'acpid-1.0.6-r1.ebuild', which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+SUMMARY="A configurable ACPI policy daemon for Linux"
+DESCRIPTION="
+acpid is designed to notify user-space programs of ACPI events. It will
+will attempt to connect to the Linux kernel via the input layer and
+netlink. When an ACPI event is received from one of these sources, acpid
+will examine a list of rules, and execute the rules that match the event.
+"
+HOMEPAGE="http://tedfelix.com/linux/${PN}-netlink.html"
+DOWNLOADS="http://tedfelix.com/linux/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:{PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+BUGS_TO="pioto@exherbo.org"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/${PNV}-kde4.patch" )
+DEFAULT_SRC_INSTALL_PARAMS=( DOCDIR="/usr/share/doc/${PNV}" )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( kacpimon )
+
+src_compile() {
+    default
+
+    emake -C kacpimon
+}
+
+src_install() {
+    default
+
+    dobin kacpimon/kacpimon
+
+    newinitd "${FILES}"/acpid.init.d-0 acpid
+    newconfd "${FILES}"/acpid.conf.d-0 acpid
+
+    keepdir /etc/acpi/events
+
+    insinto /etc/acpi/events
+    newins samples/powerbtn/powerbtn-conf powerbtn
+    exeinto /etc/acpi
+    doexe samples/powerbtn/powerbtn.sh
+}
+
