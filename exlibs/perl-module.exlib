@@ -35,13 +35,9 @@ DEPENDENCIES="build+run: dev-lang/perl:="
 perl-module_src_configure() {
     perlinfo
     if [[ -f Build.PL ]]; then
-        einfo "Using Module::Build"
-
         edo perl Build.PL --installdirs=vendor --destdir="${IMAGE}" --libdoc= \
             "${PERL_MODULE_SRC_CONFIGURE_PARAMS[@]}"
     elif [[ -f Makefile.PL ]]; then
-        einfo "Using ExtUtils::MakeMaker"
-
         export PERL_MM_USE_DEFAULT="1"
 
         edo perl Makefile.PL INSTALLMAN3DIR='none' PREFIX=/usr INSTALLDIRS=vendor DESTDIR="${IMAGE}" \

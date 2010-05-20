@@ -35,8 +35,11 @@ DEPENDENCIES="
 
 if ever at_least 4.3; then
     MYOPTIONS+=" java"
-    # ecj jar version will need manual updating. No 4.4 version available (yet?)
-    ECJ_JAR_PV="4.3"
+    if [[ ${SLOT} == 4.4 ]]; then
+        ECJ_JAR_PV="4.3" # There is no ecj-4.4.jar
+    else
+        ECJ_JAR_PV=${SLOT}
+    fi
     DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
     DEPENDENCIES+="
         build:

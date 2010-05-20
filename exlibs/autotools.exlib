@@ -294,17 +294,20 @@ autotools_get_subdirs() {
     illegal_in_global_scope
 
     autotools_select_versions
-    local subdirs_scan_out
 
+    local subdirs_scan_out
     subdirs_scan_out=$(autotools_check_macro "AC_CONFIG_SUBDIRS")
+
     [[ -n ${subdirs_scan_out} ]] || return 0
 
-    echo "${subdirs_scan_out}" | gawk \
-    '($0 !~ /^[[:space:]]*(#|dnl)/) {
-        if (match($0, /AC_CONFIG_SUBDIRS:(.*)$/, res))
-            print res[1]
-    }' | uniq
+    local line subdirs=()
+    while read line; do
+        if [[ ${line} == *AC_CONFIG_SUBDIRS:* ]]; then
+            subdirs+=( ${line#*AC_CONFIG_SUBDIRS:} )
+        fi
+    done <<< "${subdirs_scan_out}"
 
+    echo ${subdirs[*]}
     return 0
 }
 
@@ -315,14 +318,10 @@ autotools_get_auxdir() {
     local auxdir_scan_out
 
     auxdir_scan_out=$(autotools_check_macro "AC_CONFIG_AUX_DIR")
-    [[ -n ${auxdir_scan_out} ]] || return 0
 
-    echo ${auxdir_scan_out} | gawk \
-    '($0 !~ /^[[:space:]]*(#|dnl)/) {
-        if (match($0, /AC_CONFIG_AUX_DIR:(.*)$/, res))
-            print res[1]
-    }' | uniq
-
+    if [[ ${auxdir_scan_out} == *AC_CONFIG_AUX_DIR:* ]]; then
+        echo ${auxdir_scan_out#*AC_CONFIG_AUX_DIR:}
+    fi
     return 0
 }
 

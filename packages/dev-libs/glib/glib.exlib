@@ -21,7 +21,7 @@ LICENCES="LGPL-2"
 
 REMOTE_IDS="freshmeat:glib"
 
-export_exlib_phases src_install
+export_exlib_phases src_install src_test
 
 install_one_multibuild() {
     default
@@ -30,5 +30,13 @@ install_one_multibuild() {
 
 glib_src_install() {
     easy-multibuild_src_install
+}
+
+glib_src_test() {
+    sydboxcmd 'net/whitelist/connect/unix:///tmp/g-dbus-tests-pid-*'
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/g-dbus-tests-pid-*'
+    sydboxcmd 'net/whitelist/connect/unix:///tmp/gdbus-test-does-not-exist-pid'
+    sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/gdbus-test-/dbus-*'
+    default
 }
 

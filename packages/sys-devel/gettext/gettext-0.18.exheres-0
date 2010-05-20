@@ -1,0 +1,32 @@
+# Copyright 2007, 2009 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=gz ] elisp-optional
+
+SUMMARY="GNU localization utilties"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-acl
+    --disable-csharp
+    --disable-java
+    --disable-openmp
+    --with-included-glib
+    --with-included-libcroco
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-sydbox.patch
+)
+
+src_install() {
+    default
+    option emacs && elisp-install-site-file
+}
+

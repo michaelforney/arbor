@@ -17,7 +17,6 @@ MYOPTIONS="glib [[ description = [ build gudev to integrate with glib main-loop 
 
 DEPENDENCIES="
     build:
-        dev-doc/gtk-doc
         dev-libs/libxslt
     build+run:
         glib? ( dev-libs/glib:2[>=2.7.0][multibuild_c:*(?)?] )
@@ -44,9 +43,10 @@ configure_one_multibuild() {
         $(option_enable sound pci-db) \
         $(option_enable sound sound-rules)
 }
+AT_M4DIR=( m4 )
 
 src_prepare() {
-    edo gtkdocize --copy
+    edo cp "${FILES}/gtk-doc.make" "${WORK}"
     autotools_src_prepare
 }
 

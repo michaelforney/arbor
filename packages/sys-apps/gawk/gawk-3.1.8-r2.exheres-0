@@ -2,7 +2,7 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu
+require multilib gnu alternatives
 
 SUMMARY="GNU awk implementation"
 
@@ -14,13 +14,13 @@ MYOPTIONS=""
 DEPENDENCIES="
     build:
         sys-devel/gettext
+    build+run:
+        dev-libs/libsigsegv
 "
 
 # Install binaries outside /usr
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
-    # Internal copy of libsigsegv fails its tests
-    --disable-libsigsegv
     --enable-nls
 )
 
@@ -51,9 +51,11 @@ src_install() {
         dosym ../../bin/${x} /usr/bin/${x}
     done
 
-    dosym gawk.1 /usr/share/man/man1/awk.1
-
     cd "${WORKBASE}"/filefuncs
     nonfatal emake DESTDIR="${IMAGE}" LIBDIR=$(get_libdir) install || die "filefuncs emake install failed"
+
+    alternatives_for awk ${PN} 5 \
+        /usr/bin/awk ${PN} \
+        /usr/share/man/man1/awk.1 ${PN}.1
 }
 

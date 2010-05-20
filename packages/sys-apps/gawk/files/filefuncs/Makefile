@@ -1,7 +1,7 @@
 # Copyright 1999-2004 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # Author:  Martin Schlemmer <azarah@gentoo.org>
-# $Header: /var/cvsroot/gentoo-x86/sys-apps/gawk/files/filefuncs/Makefile,v 1.8 2006/03/28 07:15:31 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-apps/gawk/files/filefuncs/Makefile,v 1.10 2009/05/16 22:02:25 vapier Exp $
 
 CC ?= gcc
 LD = $(CC)
@@ -22,7 +22,7 @@ DESTDIR =
 all: $(TARGET_LIB)
 
 $(TARGET).o: $(TARGET).c
-	$(CC) $(CLAGS) -shared -Wall -DHAVE_CONFIG_H -c -O2 -fPIC -I$(AWKINCDIR) $^
+	$(CC) $(CFLAGS) $(CPPFLAGS) -shared -Wall -DHAVE_CONFIG_H -c -O2 -fPIC -I$(AWKINCDIR) $^
 
 $(TARGET_LIB): $(TARGET).o
 	$(LD) $(LDFLAGS) -o $@ -shared -Wl,-soname -Wl,$(TARGET).so.$(MAJORVER) $^

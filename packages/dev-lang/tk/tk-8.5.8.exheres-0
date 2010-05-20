@@ -4,7 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ] easy-multibuild
-require sourceforge [ pnv=${PN}${PV}-src suffix=tar.gz ]
+require sourceforge [ pnv=${PN}${PV}-src project=tcl suffix=tar.gz ]
 
 MY_PNV="${PN}${PV}"
 
@@ -40,7 +40,7 @@ WORK="${WORKBASE}/${MY_PNV}/unix"
 
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}/${PNV}-multilib.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}/${PN}-8.5.7-multilib.patch" )
 
 configure_one_multibuild() {
     econf \

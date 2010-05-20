@@ -15,7 +15,10 @@ DEPENDENCIES="
         sys-apps/groff[>=1.19.2]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/man-1.6f-unicode.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILES}/man-1.6f-configure-awk.patch"
+    -p1 "${FILES}/man-1.6f-unicode.patch"
+)
 
 src_configure() {
     edo ./configure \
