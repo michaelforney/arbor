@@ -334,6 +334,7 @@ php_src_install() {
     dodir /etc/${PN}
     insinto /etc/${PN}
     newins php.ini-production php.ini
+
     if option pear; then
         edo sed -i -e 's|^;\(include_path =\).*|\1 ".:/usr/share/pear:/usr/share/php:"|' "${IMAGE}"/etc/php/php.ini
         keepdir "${PHP_PEAR_CACHE_DIR}"
@@ -350,8 +351,7 @@ php_src_install() {
     fi
 
     # Set extension_dir path. Only replace the first occurence.
-    linenum=`edo grep -n "extension_dir" "${IMAGE}"/etc/php/php.ini | head -1 | awk -F: '{ print $1}'`
-    extension_dir=$(${IMAGE}/usr/bin/php-config --extension-dir | sed 's/\//\\\//g')
+    linenum=$(edo grep -n "extension_dir" "${IMAGE}"/etc/php/php.ini | head -1 | awk -F: '{ print $1}')
+    extension_dir=$(edo "${IMAGE}"/usr/bin/php-config --extension-dir | sed -e 's/\//\\\//g')
     edo sed -i -e "${linenum},${linenum} s/; extension_dir = \".\/\"/extension_dir = \"${extension_dir}\"/" "${IMAGE}"/etc/php/php.ini
 }
-
