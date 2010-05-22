@@ -1,9 +1,11 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'multipath-tools-0.4.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
 require multilib
+
+export_exlib_phases src_prepare src_compile src_install pkg_postinst
 
 SUMMARY="Userland tools for the device Mapper multipathing driver"
 DESCRIPTION="
@@ -21,7 +23,6 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE} [[ lang = en ]]"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -32,11 +33,12 @@ DEPENDENCIES="
         sys-fs/udev[>=141]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-build.patch )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( multipath.conf.annotated multipath.conf.synthetic )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( kpartx )
 
-src_prepare() {
+WORK=${WORKBASE}
+
+multipath-tools_src_prepare() {
     default
 
     local my_libdir=$(get_libdir)
@@ -44,21 +46,36 @@ src_prepare() {
     edo sed -i -e '/libudevdir/s:/lib/:/'${my_libdir}'/:' Makefile.inc
 }
 
-src_compile() {
+multipath-tools_src_compile() {
     emake -j1 CC="${CC}"
 }
 
-src_install() {
+multipath-tools_src_install() {
     default
 
     insinto /etc
     newins "${WORK}"/multipath.conf.annotated multipath.conf
-    edo chmod 644 "${IMAGE}"/etc/udev/rules.d/{65-multipath,66-kpartx}.rules
+
+    # Move udev rules into the correct place.
+    dodir /$(get_libdir)/udev/rules.d
+    edo mv "${IMAGE}"/etc/udev/rules.d/multipath.rules "${IMAGE}"/$(get_libdir)/udev/rules.d/65-multipath.rules
+    edo mv "${IMAGE}"/etc/udev/rules.d/kpartx.rules "${IMAGE}"/$(get_libdir)/udev/rules.d/66-kpartx.rules
+    edo chmod 644 "${IMAGE}"/$(get_libdir)/udev/rules.d/{65-multipath,66-kpartx}.rules
+    edo find "${IMAGE}"/etc -type d -empty -delete
 
     # This is the monitoring daemon
     newinitd "${FILES}"/rc-multipathd multipathd
+
     # Handle early-boot startup as well as shutdown of multipath devices
     insinto /$(get_libdir)/rcscripts/addons
     doins "${FILES}"/multipath-{start,stop}.sh
 }
 
+multipath-tools_pkg_postinst() {
+    local cruft=( /etc/udev/rules.d/{65-multipath,66-kpartx}.rules )
+    for file in ${cruft[@]}; do
+        if test -f "${file}" ; then
+            nonfatal edo rm "${file}" || ewarn "removing ${file} failed"
+        fi
+    done
+}
