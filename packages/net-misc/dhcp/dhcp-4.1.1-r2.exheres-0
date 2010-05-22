@@ -38,5 +38,10 @@ WORK=${WORKBASE}/${MY_PNV}
 src_install() {
     default
 
+    dodir /var/db
+    edo touch "${IMAGE}"/var/db/dhcpd.leases
+    newinitd "${FILES}"/dhcpd.init dhcpd
+    newconfd "${FILES}"/dhcpd.conf dhcpd
+
     dodoc -r doc/*
 }
