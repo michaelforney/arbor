@@ -1,0 +1,46 @@
+#!/sbin/runscript
+
+DHCPD_CONF=${DHCPD_CONF:-/etc/dhcpd.conf}
+
+depend() {
+    need net
+    use logger dns
+}
+
+get_var() {
+    sed -n 's/^[[:blank:]]\?'"$1"' "*\([^#";]\+\).*/\1/p' "${DHCPD_CONF}"
+}
+
+start() {
+    # Work out our cffile if it's on our DHCPD_OPTS
+    case " ${DHCPD_OPTS} " in
+        *" -cf "*)
+            DHCPD_CONF=" ${DHCPD_OPTS} "
+            DHCPD_CONF="${DHCPD_CONF##* -cf }"
+            DHCPD_CONF="${DHCPD_CONF%% *}"
+            ;;
+        *)    DHCPD_OPTS="${DHCPD_OPTS} -cf ${DHCPD_CONF}"
+            ;;
+    esac
+
+    if [ ! -f "${DHCPD_CONF}" ] ; then
+        eerror "${DHCPD_CONF} does not exist"
+        return 1
+    fi
+
+    local pidfile="$(get_var pid-file-name)"
+    pidfile="${pidfile:-/var/run/dhcpd.pid}"
+
+    ebegin "Starting ${SVCNAME}"
+    start-stop-daemon --start --exec /sbin/dhcpd \
+        --pidfile "${pidfile}" \
+        -- ${DHCPD_OPTS} -q -pf "${pidfile}" \
+        ${DHCPD_IFACE}
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping ${SVCNAME}"
+    start-stop-daemon --stop --exec /usr/sbin/dhcpd --pidfile "${pidfile}"
+    eend $?
+}

@@ -17,6 +17,7 @@ DEPENDENCIES=""
 
 WORK="${WORKBASE}"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-lfs-declarations.patch" )
 DEFAULT_SRC_INSTALL_PARAMS=( LDCONFIG=: )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
@@ -33,20 +34,33 @@ src_unpack() {
     easy-multibuild_run_phase
 }
 
-configure_prepare_one_multibuild() { :; }
+src_prepare() {
+    easy-multibuild_run_phase
+}
 
-configure_one_multibuild() {
+set_cc() {
     append-flags -fPIC
     filter-flags -m32
     case "${MULTIBUILD_TARGET}" in
         32) export CC="${CC} -m32";;
         64) export CC="${CC/ -m32/}";;
     esac
+}
+
+configure_prepare_one_multibuild() { :; }
+
+configure_one_multibuild() {
+    set_cc
 
     # Breaks on most ./configure arguments econf passes
     edo ./configure \
         --prefix=/usr \
         --libdir=/usr/${LIBDIR} \
         --shared
+}
+
+test_one_multibuild() {
+    set_cc
+    default
 }
 
