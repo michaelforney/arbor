@@ -3,12 +3,8 @@
 # Based in part upon 'dbus-1.2.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic
+require dbus
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
-
-SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
-HOMEPAGE="http://dbus.freedesktop.org/"
-DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
@@ -37,11 +33,10 @@ DEPENDENCIES="
 # Testing code (--enable-tests) disabled since building with tests support
 # creates an insecure (sic upstream), non-production use library
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--localstatedir=/var'
-'--with-system-socket=/var/run/dbus/system_bus_socket'
-'--with-session-socket-dir=/tmp' '--with-dbus-user=messagebus'
-'--enable-xml-docs' '--with-xml=expat' '--enable-inotify'
-'--disable-tests' '--disable-selinux' '--disable-libaudit' )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--localstatedir=/var' '--with-system-socket=/var/run/dbus/system_bus_socket'
+                               '--with-session-socket-dir=/tmp' '--with-dbus-user=messagebus'
+                               '--enable-xml-docs' '--with-xml=expat' '--enable-inotify'
+                               '--disable-tests' '--disable-selinux' '--disable-libaudit' )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'debug asserts' 'debug verbose-mode' 'doc doxygen-docs' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' )
@@ -50,45 +45,4 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.2.16-abstract-sockets.patch )
-
-src_configure() {
-    # Whitelist bind() to /tmp/dbus-fake-socket-*
-    sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
-    default
-    sydboxcmd 'net/unwhitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
-}
-
-src_compile() {
-    # Get backtraces from applications
-    append-flags -rdynamic
-    default
-}
-
-src_install() {
-    default
-
-    sed -i -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
-        "${IMAGE}/etc/dbus-1/system.conf" || die "failed to update pidfile config"
-
-    newinitd "${FILES}"/dbus.init-1.0 dbus
-
-    # dbus X session script (Gentoo bug #77504)
-    # turns out to only work for GDM. has been merged into other desktop
-    # (kdm and such scripts)
-    exeinto /etc/X11/xinit/xinitrc.d/
-    doexe "${FILES}"/30-dbus
-
-    keepdir /var/run/dbus                       \
-            /var/lib/dbus                       \
-            /usr/libexec/dbus-1                 \
-            /etc/dbus-1/system.d/               \
-            /etc/dbus-1/session.d/              \
-            /usr/share/dbus-1/services          \
-            /usr/share/dbus-1/system-services
-
-    if option doc; then
-        insinto /usr/share/doc/${PNVR}/html/
-        doins -r doc/*.html
-    fi
-}
 
