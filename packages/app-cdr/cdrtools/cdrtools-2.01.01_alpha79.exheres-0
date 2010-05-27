@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
@@ -61,8 +61,6 @@ src_install() {
     if [[ $(get_libdir) != lib ]]; then
         edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}
     fi
-
-    edo mv "${IMAGE}"/usr/{,share/}man
 
     # Don't install man-pages that are related to the buildsystem
     edo rm "${IMAGE}"/usr/share/man/man5/make{files,rules}.5
