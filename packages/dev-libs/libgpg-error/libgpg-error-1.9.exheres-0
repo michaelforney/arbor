@@ -19,3 +19,11 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
 
+install_one_multibuild() {
+    default
+    if [[ "${MULTIBUILD_TARGET}" != "${MULTIBUILD_C_DEFAULT_TARGET}" ]]; then
+        dodir "/usr/${CHOST}/bin"
+        mv "${IMAGE}"/usr/bin/"${PN/lib/}"-config "${IMAGE}"/usr/"${CHOST}"/bin
+    fi
+}
+
