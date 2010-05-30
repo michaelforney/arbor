@@ -1,0 +1,36 @@
+Source: by MK_FG on #exherbo (freenode)
+Upstream: Not yet
+Reason: Re-enables proper installation of "tc" binary and .so's.
+	As of 01a16fc, tc gets built but not installed, so any people with traffic
+	shaping set up will get a big unpleasant surprise on .33 -> .34 update.
+
+From 6a31d34e378074bc12c48578f068a5d1f2a0c004 Mon Sep 17 00:00:00 2001
+From: Mike Kazantsev (coercion) <mk.fraggod@gmail.com>
+Date: Sun, 30 May 2010 20:57:23 +0600
+Subject: [PATCH] tc.Makefile: fixed "install" section, so /sbin/tc binary will get properly installed
+
+---
+ tc/Makefile |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/tc/Makefile b/tc/Makefile
+index 01a16fc..3aa9f26 100644
+--- a/tc/Makefile
++++ b/tc/Makefile
+@@ -99,10 +99,10 @@ libtc.a: $(TCLIB)
+ 	$(AR) rcs $@ $(TCLIB)
+ 
+ install: all
+-	echo mkdir -p $(MODDESTDIR)
+-	echo install -m 0755 tc $(DESTDIR)$(SBINDIR)
++	mkdir -p $(MODDESTDIR)
++	install -m 0755 tc $(DESTDIR)$(SBINDIR)
+ 	for i in $(TCSO); \
+-	do echo install -m 755 $$i $(MODDESTDIR); \
++	do install -m 755 $$i $(MODDESTDIR); \
+ 	done
+ 	if [ ! -f $(MODDESTDIR)/m_ipt.so ]; then \
+ 	if [ -f $(MODDESTDIR)/m_xt.so ]; \
+-- 
+1.7.1
+
