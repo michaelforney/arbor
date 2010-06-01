@@ -1,0 +1,16 @@
+# Copyright 2007-2008 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require glibc [ source_uri="mirror://gnu/${PN}/${PNV}.tar.xz" libidn_uri= \
+                ports_uri="http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PN}-ports-${PV}.tar.xz" ]
+
+PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+
+# Sandbox causes numerous test failures
+RESTRICT=test
+
+DEPENDENCIES="
+    build:
+        app-arch/xz
+"
+
