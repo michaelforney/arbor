@@ -1,0 +1,64 @@
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="git://anongit.freedesktop.org/systemd"
+
+require scm-git autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib
+
+SUMMARY="systemd is a system and session manager for Linux"
+DESCRIPTION="
+systemd is a system and session manager for Linux, compatible with SysV and LSB
+init scripts. systemd provides aggressive parallelization capabilities, uses
+socket and D-Bus activation for starting services, offers on-demand starting of
+daemons, keeps track of processes using Linux cgroups, supports snapshotting and
+restoring of the system state, maintains mount and automount points and implements
+an elaborate transactional dependency-based service control logic. It can work as
+a drop-in replacement for sysvinit.
+"
+HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-lang/vala[>=0.8.0]
+        dev-libs/libcgroup[>=0.35]
+        sys-fs/udev[>=151]
+        sys-apps/dbus[>=1.2.24]
+        x11-libs/gtk+:2[>=2.20]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --prefix=/
+    --exec-prefix=/
+    --libdir=/$(get_libdir)
+    --with-distro=other
+    --with-sysvinit-path=/etc/init.d
+    --with-sysvrcd-path=/etc
+    --with-dbus-service="dbus.service"
+    --with-syslog-service="syslog-ng.service"
+    --with-udevrulesdir=/$(get_libdir)/udev/rules.d
+    --with-rootdir=/
+)
+
+AT_M4DIR=m4
+
+src_prepare() {
+    edo sed -i -e "/rootlibexecdir=/s:/lib/:/$(get_libdir)/:" Makefile.am
+    edo sed -i -e "/systemunitdir=/s:lib:$(get_libdir):" Makefile.am
+
+    autotools_src_prepare
+}
+
+src_install() {
+    default
+
+    keepdir /cgroup/systemd
+    keepdir /etc/systemd/session
+    keepdir /etc/systemd/system/graphical.target.wants
+}
