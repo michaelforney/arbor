@@ -33,10 +33,17 @@ glib_src_install() {
 }
 
 glib_src_test() {
+    unset DBUS_SESSION_BUS_ADDRESS
+
+    export XDG_CONFIG_DIRS="${TEMP}/etc"
+    export XDG_DATA_DIRS="${TEMP}/usr/share"
+    export XDG_DATA_HOME="${TEMP}"
+
     sydboxcmd 'net/whitelist/connect/unix:///tmp/g-dbus-tests-pid-*'
     sydboxcmd 'net/whitelist/bind/unix:///tmp/g-dbus-tests-pid-*'
     sydboxcmd 'net/whitelist/connect/unix:///tmp/gdbus-test-does-not-exist-pid'
     sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/gdbus-test-/dbus-*'
+
     default
 }
 
