@@ -45,7 +45,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    if [[ ! -f /var/db/dhcpd.leases ]]; then
-        nonfatal edo touch /var/db/dhcpd.leases || ewarn "creating dhcpd.leases failed."
+    if [[ ! -f ${ROOT}/var/db/dhcpd.leases ]]; then
+        nonfatal edo touch "${ROOT}"/var/db/dhcpd.leases || ewarn "creating dhcpd.leases failed."
     fi
 }
