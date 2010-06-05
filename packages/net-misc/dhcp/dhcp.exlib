@@ -1,0 +1,63 @@
+# Copyright 2007-2009 Bryan Østergaard
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases src_install pkg_postinst
+
+MY_PNV="${PNV/_rc/rc}"
+MY_PNV="${PNV/_p/-P}"
+
+SUMMARY="ISC DHCP server and client"
+DESCRIPTION="
+ISC DHCP is open source software that implements the Dynamic Host Configuration
+Protocols for connection to a local network. It is a reference implementation of
+those protocols, but it is also production-grade software, suitable for use in
+high-volume and high-reliability applications.
+"
+BASE_URI="isc.org"
+HOMEPAGE="http://www.${BASE_URI}/software/${PN}/"
+DOWNLOADS="
+    http://ftp.${BASE_URI}/isc/${PN}/${MY_PNV}.tar.gz
+    http://ftp.${BASE_URI}/isc/${PN}/${PN}-$(ever range 1-2)-history/${MY_PNV}.tar.gz
+"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:iscdhcp"
+
+LICENCES="ISC"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        sys-apps/net-tools
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --sbindir=/sbin
+    --localstatedir=/var
+    --enable-dhcpv6
+    --enable-execute
+    --enable-failover
+    --enable-tracing
+    --disable-delayed-ack
+    --disable-early-chroot
+    --disable-paranoia
+)
+
+WORK=${WORKBASE}/${MY_PNV}
+
+dhcp_src_install() {
+    default
+
+    newinitd "${FILES}"/dhcpd.init dhcpd
+    newconfd "${FILES}"/dhcpd.conf dhcpd
+
+    dodoc -r doc/*
+}
+
+dhcp_pkg_postinst() {
+    if [[ ! -f ${ROOT}/var/db/dhcpd.leases ]]; then
+        nonfatal edo touch "${ROOT}"/var/db/dhcpd.leases || ewarn "creating dhcpd.leases failed."
+    fi
+}
