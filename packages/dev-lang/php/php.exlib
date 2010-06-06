@@ -355,3 +355,4 @@ php_src_install() {
     extension_dir=$(edo "${IMAGE}"/usr/bin/php-config --extension-dir | sed -e 's/\//\\\//g')
     edo sed -i -e "${linenum},${linenum} s/; extension_dir = \".\/\"/extension_dir = \"${extension_dir}\"/" "${IMAGE}"/etc/php/php.ini
 }
+
