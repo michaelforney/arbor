@@ -57,7 +57,7 @@ dhcp_src_install() {
 }
 
 dhcp_pkg_postinst() {
-    if [[ ! -f "${ROOT}"/var/db/dhcpd.leases ]]; then
+    if [[ ! -f ${ROOT}/var/db/dhcpd.leases ]]; then
         nonfatal edo touch "${ROOT}"/var/db/dhcpd.leases || ewarn "creating dhcpd.leases failed."
     fi
 }
