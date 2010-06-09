@@ -55,6 +55,9 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
 WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
+    # apply version-specific patches
+    default
+
     # use system headers
     edo rm -r include/linux include/netinet
 
