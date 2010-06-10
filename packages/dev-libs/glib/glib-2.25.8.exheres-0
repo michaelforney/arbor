@@ -23,7 +23,10 @@ DEPENDENCIES="
         dev-python/dbus-python
     suggestion:
         gnome-desktop/gvfs
+        sys-apps/dbus
 "
+
+RESTRICT="test" # need to figure out how to encapsulate the dbus usage
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.24.0-assert-test.patch )
 
