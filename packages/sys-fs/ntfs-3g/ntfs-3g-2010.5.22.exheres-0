@@ -7,19 +7,22 @@ The NTFS-3G driver is a read/write NTFS driver for Linux, FreeBSD, Mac OS X, Net
 It provides safe and fast handling of the Windows XP, Windows Server 2003, Windows 2000 and Windows Vista file systems.
 POSIX file system operations are supported, and full file ownership and permission support is available as well.
 "
-HOMEPAGE="http://www.tuxera.com/"
+HOMEPAGE="http://www.tuxera.com"
 DOWNLOADS="${HOMEPAGE}/opensource/${PNV}.tgz"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/community/release-history/"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~x86 ~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="debug hal"
 
 DEPENDENCIES="
     run:
-        hal? ( sys-apps/hal )"
+        hal? ( sys-apps/hal )
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-ldconfig )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
@@ -27,7 +30,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 src_install() {
     default
 
-    if option hal; then
+    insinto /etc/udev/rules.d
+    doins "${FILES}/99-${PN}.rules"
+
+    if option hal ; then
         insinto /etc/hal/fdi/policy
         doins "${FILES}/10-${PN}.fdi"
     fi
