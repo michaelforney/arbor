@@ -97,20 +97,25 @@ src_prepare() {
 }
 
 src_configure() {
-    local i LANGS="c++"
+    local i LANGS="c++" pkgversion
+
     for i in ada fortran objc obj-c++; do
         option ${i} && LANGS+=",${i}"
     done
-    ever at_least 4.3 && option java && LANGS+=",java"
+
+    if ever at_least 4.3; then
+        pkgversion="Exherbo ${PNVR}"
+        option java && LANGS+=",java"
+    fi
 
     econf \
-        "$(ever at_least 4.5.0 || echo --hates=docdir)" \
+        $(ever at_least 4.5.0 || echo --hates=docdir) \
         --disable-multilib \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \
         --program-suffix=-${SLOT} \
-       "$(ever at_least 4.3.0 && echo --with-pkgversion="Exherbo ${PNVR}")" \
+        ${pkgversion:+--with-pkgversion="${pkgversion}"} \
         $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
         $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
         $(ever at_least 4.4.0 && echo --with-system-zlib) \
