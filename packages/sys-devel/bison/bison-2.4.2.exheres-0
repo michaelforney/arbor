@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu
+require gnu autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="General-purpose parser generator for LALR(1) or GLR parsers"
 
@@ -17,5 +17,6 @@ DEPENDENCIES="
         sys-devel/m4[>=1.4]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-gcc-4.5-tests.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
 
