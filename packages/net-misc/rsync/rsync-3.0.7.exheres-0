@@ -27,3 +27,9 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 DEFAULT_SRC_CONFIGURE_PARAMS=( --without-included-popt )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( OLDNEWS )
 
+src_test() {
+    sydboxcmd sandunbox/net
+    default
+    sydboxcmd sandbox/net
+}
+
