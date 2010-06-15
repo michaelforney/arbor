@@ -1,0 +1,68 @@
+Source: Ali Polatel <alip@exherbo.org>
+Upstream: No, TODO (report all hunks except first)
+Reason: Binding to 0.0.0.0 is bad mmkay?
+
+--- neon-0.29.3/test/socket.c	2009-09-02 19:43:05.000000000 +0000
++++ neon-0.29.3/test/socket.c	2010-06-15 16:55:05.000000000 +0000
+@@ -1229,7 +1229,9 @@
+ static int prebind(void)
+ {
+     CALL(try_prebind(1, 0));
+-    CALL(try_prebind(0, 1));
++    /* Disable this test because it binds to 0.0.0.0
++     * CALL(try_prebind(0, 1));
++     */
+     CALL(try_prebind(1, 1));
+ 
+     return OK;
+--- neon-0.29.3/test/acl3744.c	2008-10-14 19:19:41.000000000 +0000
++++ neon-0.29.3/test/acl3744.c	2010-06-15 16:56:52.000000000 +0000
+@@ -97,6 +97,7 @@
+ }
+ 
+ ne_test tests[] = {
++    T(lookup_localhost),
+     T(grant_all),
+     T(deny_all),
+     T(deny_one),
+--- neon-0.29.3/test/oldacl.c	2008-10-14 19:19:41.000000000 +0000
++++ neon-0.29.3/test/oldacl.c	2010-06-15 16:56:28.000000000 +0000
+@@ -93,6 +93,7 @@
+ }
+ 
+ ne_test tests[] = {
++    T(lookup_localhost),
+     T(grant_all),
+     T(deny_all),
+     T(deny_one),
+--- neon-0.29.3/test/props.c	2008-01-30 16:38:19.000000000 +0000
++++ neon-0.29.3/test/props.c	2010-06-15 16:57:11.000000000 +0000
+@@ -671,6 +671,7 @@
+ }
+ 
+ ne_test tests[] = {
++    T(lookup_localhost),
+     T(two_oh_seven),
+     T(patch_simple),
+     T(propfind),
+--- neon-0.29.3/test/ssl.c	2009-09-13 11:57:18.000000000 +0000
++++ neon-0.29.3/test/ssl.c	2010-06-15 16:56:09.000000000 +0000
+@@ -1833,6 +1833,8 @@
+ ne_test tests[] = {
+     T_LEAKY(init),
+ 
++    T(lookup_localhost),
++
+     T(load_server_certs),
+     T(trust_default_ca),
+ 
+--- neon-0.29.3/test/xmlreq.c	2006-09-26 09:35:46.000000000 +0000
++++ neon-0.29.3/test/xmlreq.c	2010-06-15 16:55:32.000000000 +0000
+@@ -168,6 +168,7 @@
+ }
+ 
+ ne_test tests[] = {
++    T(lookup_localhost),
+     T(success),
+     T(failure),
+     T(types),

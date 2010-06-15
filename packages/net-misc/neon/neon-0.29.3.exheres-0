@@ -23,6 +23,8 @@ DEPENDENCIES="
         libproxy? ( net-libs/libproxy )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sydbox.patch )
+
 src_configure() {
     local myconf
 
@@ -33,16 +35,5 @@ src_configure() {
     fi
 
     econf --enable-shared --with-ssl=openssl ${myconf} $(option_with libproxy)
-}
-
-src_test() {
-    local cmd
-    for cmd in net/whitelist/{connect,bind}/inet://0.0.0.0@777{7,8}; do
-        sydboxcmd $cmd
-    done
-    default
-    for cmd in net/unwhitelist/{connect,bind}/inet://0.0.0.0@777{7,8}; do
-        sydboxcmd $cmd
-    done
 }
 
