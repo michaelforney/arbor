@@ -141,7 +141,7 @@ alternatives_pkg_prerm() {
     for a in "${ALTERNATIVES_PROVIDED[@]}"; do
         alt="${a%:*}"
         provider="${a#*:}"
-        einfo "Making sure ${alt} has a valid provider"
+        echo "Making sure ${alt} has a valid provider"
         echo eclectic "${alt}" update${ignore} "${provider}"
         eclectic "${alt}" update${ignore} "${provider}" && continue
         if [[ $? -eq 2 ]]; then

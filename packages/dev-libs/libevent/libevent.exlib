@@ -8,8 +8,10 @@ export_exlib_phases src_test
 MY_PNV="${PNV}-stable"
 
 SUMMARY="A library to execute a function when a specific event occurs on a file descriptor"
-HOMEPAGE="http://monkey.org/~provos/libevent/"
+HOMEPAGE="http://monkey.org/~provos/${PN}/"
 DOWNLOADS="http://monkey.org/~provos/${MY_PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="BSD-3"
 SLOT="0"
@@ -27,3 +29,4 @@ libevent_src_test() {
     grep -q FAILED "${TEMP}"/tests && die "1 or more tests failed"
     popd
 }
+

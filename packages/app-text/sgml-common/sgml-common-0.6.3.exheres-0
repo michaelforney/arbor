@@ -26,7 +26,7 @@ pkg_postinst() {
         die "install-catalog not found"
     fi
 
-    einfo "Installing catalogs..."
+    echo "Installing catalogs ..."
     "$installer" --add \
         /etc/sgml/sgml-ent.cat \
         /usr/share/sgml/sgml-iso-entities-8879.1986/catalog
@@ -44,7 +44,7 @@ pkg_postrm() {
         return
     fi
 
-    einfo "Removing Catalogs..."
+    echo "Removing Catalogs ..."
     if [[ -e ${ROOT}/etc/sgml/sgml-ent.cat ]] ; then
         "${TEMP}"/install-catalog --remove \
         /etc/sgml/sgml-ent.cat \
@@ -57,3 +57,4 @@ pkg_postrm() {
         /etc/sgml/sgml-ent.cat
     fi
 }
+

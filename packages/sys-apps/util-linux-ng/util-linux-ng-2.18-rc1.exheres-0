@@ -32,7 +32,14 @@ WORK="${WORKBASE}/${MY_PNV}"
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
-    econf '--enable-cramfs' '--enable-libblkid' '--enable-nls' '--without-selinux' \
-          --libdir="/${LIBDIR}" $(option_with pam)
+    econf                   \
+        --enable-cramfs     \
+        --enable-libblkid   \
+        --enable-libmount   \
+        --enable-nls        \
+        --without-utempter  \
+        --without-selinux   \
+        --libdir=/${LIBDIR} \
+        $(option_with pam)
 }
 

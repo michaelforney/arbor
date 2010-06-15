@@ -1,0 +1,47 @@
+Source: James Toy <toyj@union.edu>
+Upstream: No, upstream wants it as is
+Reason:
+
+From: James Toy <toyj@union.edu>
+Date: Sun, 26 Apr 2009 13:46:02 +0200
+Subject: [PATCH] Reason: patches makefiles for sane install
+
+Patch rebased by:
+Daniel Mierswa <impulze@impulze.org>
+Wulf C. Krueger <philantrop@exherbo.org>
+Ingmar Vanhassel <ingmar@exherbo.org>
+
+---
+ Makefile.in          |    2 +-
+ lib/Makefile.elf-lib |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 5708efd..ec35562 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -60,7 +60,7 @@ distclean-doc:
+ 
+ install: subs all-libs-recursive install-progs-recursive \
+   install-shlibs-libs-recursive install-doc-libs
+-	if test ! -d e2fsck && test ! -d debugfs && test ! -d misc && test ! -d ext2ed ; then $(MAKE) install-libs ; fi
++	$(MAKE) install-libs
+ 
+ install-strip: subs all-libs-recursive install-strip-progs-recursive \
+   install-shlibs-strip-libs-recursive install-doc-libs
+diff --git a/lib/Makefile.elf-lib b/lib/Makefile.elf-lib
+index ea600c7..4362887 100644
+--- a/lib/Makefile.elf-lib
++++ b/lib/Makefile.elf-lib
+@@ -49,7 +49,7 @@ install-shlibs install:: $(ELF_LIB) installdirs-elf-lib
+ 	$(Q) if test "$(ELF_INSTALL_DIR)" = "$(libdir)"; then \
+ 		$(LN_S) -f $(ELF_SONAME) $(DESTDIR)$(libdir)/$(ELF_IMAGE).so ; \
+ 	else \
+-		$(LN_S) -f $(ELF_INSTALL_DIR)/$(ELF_SONAME) \
++		$(LN_S) -f $(ELF_SONAME) \
+ 			$(DESTDIR)$(libdir)/$(ELF_IMAGE).so; \
+ 	fi			
+ 	$(E) "	LDCONFIG"
+-- 
+1.7.1
+

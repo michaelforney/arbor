@@ -40,3 +40,10 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-optional-python.patch )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( debug )
 
+src_prepare() {
+    # Add '-I..' to INCLUDES so `make check` can find cap-ng.h in build tree.
+    # Patch sent to maintainer.
+    edo sed -i -e '/^check_PROGRAMS/i\INCLUDES = -I. -I.. -I${top_srcdir}' src/test/Makefile.am
+    autotools_src_prepare
+}
+

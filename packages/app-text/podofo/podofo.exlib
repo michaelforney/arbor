@@ -46,8 +46,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}"/${PNV}-automagic-deps.patch
-    -p2 "${FILES}"/${PNV}-tests.patch
+    -p1 "${FILES}"/${PN}-0.8.0-automagic-deps.patch
 )
 
 CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE -DWANT_FONTCONFIG:BOOL=TRUE)
@@ -84,3 +83,4 @@ podofo_src_test() {
 #    edo ./unit/podofo-test
     edo popd
 }
+
