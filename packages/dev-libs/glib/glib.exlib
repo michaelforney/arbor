@@ -21,18 +21,12 @@ LICENCES="LGPL-2"
 
 REMOTE_IDS="freshmeat:glib"
 
-export_exlib_phases src_install src_test
-
 install_one_multibuild() {
     default
     keepdir "/usr/${LIBDIR}/gio/modules"
 }
 
-glib_src_install() {
-    easy-multibuild_src_install
-}
-
-glib_src_test() {
+test_one_multibuild() {
     unset DBUS_SESSION_BUS_ADDRESS
 
     export XDG_CONFIG_DIRS="${TEMP}/etc"
