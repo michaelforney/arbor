@@ -1,0 +1,53 @@
+# Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Purpose License v2
+
+: ${GTK_UPDATE_ICON_CACHE_2_0:=${ROOT}usr/bin/gtk-update-icon-cache}
+: ${GTK_UPDATE_ICON_CACHE_3_0:=${ROOT}usr/bin/gtk-update-icon-cache-3.0}
+
+export_exlib_phases pkg_preinst pkg_postinst pkg_postrm
+
+_save_icon_theme_directories()
+{
+    pushd "${IMAGE}" &> /dev/null
+    export GTK_ICON_CACHE_ICON_THEME_DIRECTORIES=$(find 'usr/share/icons' -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
+    popd "${IMAGE}" &> /dev/null
+}
+
+_update_icon_theme_cache()
+{
+    local failures=()
+
+    [[ -n ${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES} ]] || return
+
+    echo "Updating icon cache ..."
+
+    for dir in "${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES[@]}" ; do
+        [[ -f "${ROOT}${dir}/index.theme" ]] || continue
+
+        if [[ -x ${GTK_UPDATE_ICON_CACHE_2_0} ]] ; then
+            nonfatal edo "${GTK_UPDATE_ICON_CACHE_2_0} -qf ${ROOT}${dir}"
+        fi
+
+        if [[ -x ${GTK_UPDATE_ICON_CACHE_3_0} ]] ; then
+            nonfatal edo "${GTK_UPDATE_ICON_CACHE_3_0} -qf ${ROOT}${dir}"
+        fi
+    done
+}
+
+gtk_icon_cache_pkg_preinst()
+{
+    _save_icon_theme_directories
+    default
+}
+
+gtk_icon_cache_pkg_postinst()
+{
+    _update_icon_theme_cache
+    default
+}
+
+gtk_icon_cache_pkg_postrm() {
+    _update_icon_theme_cache
+    default
+}
+
