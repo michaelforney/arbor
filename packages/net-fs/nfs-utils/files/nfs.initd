@@ -23,7 +23,7 @@ depend() {
 		fi
 	fi
 	config /etc/exports
-	need portmap rpc.statd ${myneed}
+	need rpcbind rpc.statd ${myneed}
 	use ypbind net dns rpc.rquotad rpc.idmapd rpc.svcgssd
 	after quota
 }

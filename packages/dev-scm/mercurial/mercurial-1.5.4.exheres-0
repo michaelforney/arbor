@@ -37,8 +37,10 @@ DEPENDENCIES="
 REMOTE_IDS="pypi:${PN}"
 
 src_test() {
+    sydboxcmd sandunbox/net
     edo cd tests
     edo ${PYTHON} ./run-tests.py -j${EXJOBS:-1} --verbose
+    sydboxcmd sandbox/net
 }
 
 src_install() {

@@ -1,0 +1,105 @@
+Source: Upstream, cherry-picked from branch-2.4.3
+Upstream: Yes
+Reason: Fix tests when building with GCC 4.5.0
+
+From 9bb1eda2e987a6d8c6bb46e72e13878e751b83a7 Mon Sep 17 00:00:00 2001
+From: Joel E. Denny <jdenny@clemson.edu>
+Date: Wed, 31 Mar 2010 12:46:53 -0400
+Subject: [PATCH 1/2] portability: fix test suite for GCC 4.5's new #error message.
+
+Reported by Tys Lefering at
+<http://lists.gnu.org/archive/html/bug-bison/2010-03/msg00030.html>.
+* NEWS (2.4.3): Mention.
+* tests/synclines.at (AT_TEST_SYNCLINE): Implement.
+---
+ tests/synclines.at |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/tests/synclines.at b/tests/synclines.at
+index 08b33c5..a975433 100644
+--- a/tests/synclines.at
++++ b/tests/synclines.at
+@@ -71,7 +71,9 @@ AT_CHECK([[test "`cat stdout`" = 'syncline.c:1: @%:@error "1"' || exit 77]])
+ AT_DATA([[input.y]], [$2])
+ AT_BISON_CHECK([-o input.c input.y])
+ AT_SYNCLINES_COMPILE([input.c])
+-AT_CHECK([cat stdout], 0, [$3])
++# GCC 4.5 tells you the function within which #error appears, but
++# previous versions of gcc do not.
++AT_CHECK([grep -v ': In function ' stdout], 0, [$3])
+ AT_CLEANUP
+ ])
+ 
+-- 
+1.7.1
+
+
+From 1b439d1bdf4a8900139653e725fd2d867a6580f7 Mon Sep 17 00:00:00 2001
+From: Akim Demaille <demaille@gostai.com>
+Date: Wed, 14 Apr 2010 16:40:18 +0200
+Subject: [PATCH 2/2] tests: enhance AT_SYNCLINES_COMPILE.
+
+	* tests/synclines.at (AT_SYNCLINES_COMPILE): More distcc patterns.
+	(AT_TEST_SYNCLINE): Remove GCC 4.5 protection which is already
+	taken care of in AT_SYNCLINES_COMPILE.
+
+(cherry picked from commit c826013fb38c98861ef0fc5d4dc3fb3fb4f555be)
+
+Conflicts:
+
+	tests/synclines.at
+---
+ tests/synclines.at |   30 ++++++++++++++++++++++++++----
+ 1 files changed, 26 insertions(+), 4 deletions(-)
+
+diff --git a/tests/synclines.at b/tests/synclines.at
+index a975433..83a26d0 100644
+--- a/tests/synclines.at
++++ b/tests/synclines.at
+@@ -34,7 +34,31 @@ m4_define([AT_SYNCLINES_COMPILE],
+ # =>
+ #   input.y:4: #error "4"
+ #
+-AT_CHECK([[sed -e 's/^\([^:]*:[^:.]*\)[.:][^:]*:\(.*\)$/\1:\2/' -e 's/^\([^:]*:[^:]*:\)[^@%:@]*\( @%:@error\)/\1\2/' stderr]], 0, [stdout])
++# It may also issue more context information:
++#
++#   input.y: In function 'yyparse':
++#   input.y:8: #error "8"
++# =>
++#   input.y:4: #error "8"
++#
++#
++# And possibly distcc adds its bits.
++#
++#   distcc[33187] ERROR: compile (null) on localhost failed
++#   syncline.c:1:2: error: #error "1"
++#   distcc[33185] ERROR: compile syncline.c on localhost failed
++#
++# or even
++#
++#   distcc[35882] (dcc_connect_by_name) ERROR: failed to look up host "chrisimac": Unknown host
++#   distcc[35882] Warning: failed to distribute input.c to chrisimac/4, running locally instead
++
++AT_CHECK([[sed -e '/^distcc\[[0-9]*\] /d'                            \
++               -e 's/^\([^:]*:[^:.]*\)[.:][^:]*:\(.*\)$/\1:\2/'      \
++               -e 's/^\([^:]*:[^:]*:\)[^@%:@]*\( @%:@error\)/\1\2/'  \
++               -e "/^[^:]*: In function '[^\']*':$/d"                \
++            stderr]],
++         0, [stdout])
+ ])
+ 
+ # AT_TEST_SYNCLINE(TITLE, INPUT, ERROR-MSG)
+@@ -71,9 +95,7 @@ AT_CHECK([[test "`cat stdout`" = 'syncline.c:1: @%:@error "1"' || exit 77]])
+ AT_DATA([[input.y]], [$2])
+ AT_BISON_CHECK([-o input.c input.y])
+ AT_SYNCLINES_COMPILE([input.c])
+-# GCC 4.5 tells you the function within which #error appears, but
+-# previous versions of gcc do not.
+-AT_CHECK([grep -v ': In function ' stdout], 0, [$3])
++AT_CHECK([cat stdout], 0, [$3])
+ AT_CLEANUP
+ ])
+ 
+-- 
+1.7.1
+

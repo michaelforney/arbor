@@ -14,7 +14,7 @@ depend() {
 		[ ${ret} -eq 20 ] && myneed="${myneed} rpc.idmapd"
 	fi
 	config /etc/fstab
-	need net portmap rpc.statd ${myneed}
+	need net rpcbind rpc.statd ${myneed}
 	use ypbind dns rpc.idmapd rpc.gssd
 }
 
