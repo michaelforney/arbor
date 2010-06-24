@@ -32,6 +32,16 @@ pkg_pretend() {
     fi
 }
 
+src_prepare() {
+    default
+    # Don't regenerate man-pages to avoid a docbook-utils dependency
+    edo touch *.{5,8}
+}
+
+src_test() {
+    edo ./tests/runtests
+}
+
 src_install() {
     default
     dosym ../bin/lsmod /sbin/lsmod
