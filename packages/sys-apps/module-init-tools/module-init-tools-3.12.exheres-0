@@ -23,7 +23,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CODING )
 pkg_pretend() {
     local file errors=()
     for file in "${ROOT}"/etc/modprobe.d/* ; do
-        [[ -f ${file} && ${file} != *.conf ]] && errors+=( "${file}" )
+        [[ -f ${file} && ${file%\~} != *.conf ]] && errors+=( "${file}" )
     done
 
     if [[ -n ${errors[@]} ]]; then
