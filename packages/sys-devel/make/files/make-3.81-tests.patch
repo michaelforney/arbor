@@ -1,0 +1,18 @@
+Source: Petr Machata, https://bugzilla.redhat.com/show_bug.cgi?id=595367
+Upstream: Reported at https://savannah.gnu.org/bugs/index.php?29968
+Reason: Presumably changes in getopt_long in glibc 2.11.2 caused make to no
+        longer accept -w-j to mean -w -j.
+
+--- make-3.81/tests/scripts/features/recursion~	2005-02-10 01:10:58.000000000 +0100
++++ make-3.81/tests/scripts/features/recursion	2010-05-26 15:30:30.000000000 +0200
+@@ -16,7 +16,7 @@ last:
+ 	@echo MAKELEVEL = $(MAKELEVEL)
+ 	@echo THE END
+ ',
+-              ('CFLAGS=-O -w' . ($parallel_jobs ? '-j 2' : '')),
++              ('CFLAGS=-O -w' . ($parallel_jobs ? ' -j 2' : '')),
+               ($vos
+                ? "#MAKE#: Entering directory `#PWD#'
+ make 'CFLAGS=-O' -f #MAKEFILE# foo
+
+Diff finished.  Wed May 26 15:30:43 2010
