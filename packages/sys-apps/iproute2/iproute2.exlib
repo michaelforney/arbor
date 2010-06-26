@@ -19,9 +19,10 @@ DESCRIPTION="A replacement for the inadequately behaving ifconfig/route programs
 LICENCES="GPL-2"
 SLOT="0"
 
-MYOPTIONS="atm berkdb
-atm [[ description = [ Add ATM support in tc program ] ]]
-berkdb [[ description = [ Build ARP daemon ] ]]"
+MYOPTIONS="
+    atm [[ description = [ Add ATM support in tc program ] ]]
+    berkdb [[ description = [ Build ARP daemon ] ]]
+"
 
 UPSTREAM_DOCUMENTATION="
     http://ornellas.apanela.com/dokuwiki/pub:firewall_and_adv_routing [[ lang = en ]]
@@ -68,17 +69,19 @@ src_prepare() {
             -e 's:^CFLAGS =:CFLAGS += -DRTPROT_DHCP=16:' \
             -i Makefile
 
-    edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' \
-            -i netem/Makefile
+    edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' -i netem/Makefile
 
     if ! option berkdb ; then
-        edo sed -e '/TARGETS/s:arpd::' \
-                -i misc/Makefile
+        edo sed -e '/TARGETS/s:arpd::' -i misc/Makefile
     fi
 }
 
 src_configure() {
-    option atm && echo 'TC_CONFIG_ATM=y' >> Config
+    if option atm ; then
+        edo echo 'TC_CONFIG_ATM=y' >> Config
+    else
+        edo echo 'TC_CONFIG_ATM=n' >> Config
+    fi
 }
 
 src_install() {
@@ -98,5 +101,7 @@ src_install() {
             edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
         fi
     fi
+
+    option atm || edo rmdir "${IMAGE}"/$(get_libdir)/{tc,}
 }
 
