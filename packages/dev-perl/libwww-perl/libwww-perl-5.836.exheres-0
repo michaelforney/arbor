@@ -1,0 +1,32 @@
+# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'libwww-perl-5.812.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require perl-module [ module_author=GAAS ]
+
+SUMMARY="A collection of Perl Modules for the WWW"
+
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="ssl"
+
+DEPENDENCIES="
+    build+run:
+        dev-perl/Compress-Zlib
+        dev-perl/HTML-Parser
+        dev-perl/HTML-Tree
+        dev-perl/libnet
+        dev-perl/URI
+        ssl? ( dev-perl/Crypt-SSLeay )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sydbox.patch )
+
+src_install() {
+    perl-module_src_install
+    dosym /usr/bin/lwp-request /usr/bin/GET
+    dosym /usr/bin/lwp-request /usr/bin/POST
+    dosym /usr/bin/lwp-request /usr/bin/HEAD
+}
+

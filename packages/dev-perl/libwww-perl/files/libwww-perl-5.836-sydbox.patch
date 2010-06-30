@@ -1,0 +1,78 @@
+Source: Ali Polatel <alip@exherbo.org>
+Source: Radoslaw Szkodzinski <astralstorm@gen2.org>
+Upstream: No (TODO)
+Reason: Binding to 0.0.0.0 is bad, mmkay?
+
+--- libwww-perl-5.831/t/local/chunked.t	2009-06-15 15:20:06.000000000 +0200
++++ libwww-perl-5.831/t/local/chunked.t.new	2009-09-03 18:11:13.791041011 +0200
+@@ -95,7 +95,7 @@
+ my $tests = @TESTS;
+ my $tport = 8333;
+ 
+-my $tsock = IO::Socket::INET->new(LocalAddr => '0.0.0.0',
++my $tsock = IO::Socket::INET->new(LocalAddr => '127.0.0.1',
+                                   LocalPort => $tport,
+                                   Listen    => 1,
+                                   ReuseAddr => 1);
+@@ -103,7 +103,7 @@
+   plan skip_all => "This system cannot fork";
+ }
+ elsif (!$tsock) {
+-  plan skip_all => "Cannot listen on 0.0.0.0:$tport";
++  plan skip_all => "Cannot listen on 127.0.0.1:$tport";
+ }
+ else {
+   close $tsock;
+@@ -158,7 +158,7 @@
+ } else {
+   die "cannot fork: $!" unless defined $pid;
+   my $d = HTTP::Daemon->new(
+-                            LocalAddr => '0.0.0.0',
++                            LocalAddr => '127.0.0.1',
+                             LocalPort => $tport,
+                             ReuseAddr => 1,
+                            ) or die;
+--- libwww-perl-5.833/talk-to-ourself	2010-01-06 12:01:03.000000000 +0200
++++ libwww-perl-5.833/talk-to-ourself	2010-01-06 12:01:47.000000000 +0200
+@@ -32,7 +32,7 @@
+ }
+ 
+ # server code
+-my $socket = IO::Socket::INET->new(Listen => 1, Timeout => 5);
++my $socket = IO::Socket::INET->new(LocalAddr => 'localhost', Listen => 1, Timeout => 5);
+ my $port = $socket->sockport;
+ open(CLIENT, qq("$^X" "$0" --port $port |)) || die "Can't run $^X $0: $!\n";
+ 
+--- libwww-perl-5.833/t/robot/ua.t	2010-01-06 12:40:35.000000000 +0200
++++ libwww-perl-5.833/t/robot/ua.t	2010-01-06 12:40:52.000000000 +0200
+@@ -17,7 +17,7 @@
+ 
+     require HTTP::Daemon;
+ 
+-    my $d = new HTTP::Daemon Timeout => 10;
++    my $d = new HTTP::Daemon LocalAddr => 'localhost', Timeout => 10;
+ 
+     print "Please to meet you at: <URL:", $d->url, ">\n";
+     open(STDOUT, $^O eq 'MSWin32' ?  ">nul" : $^O eq 'VMS' ? ">NL:"  : ">/dev/null");
+--- libwww-perl-5.833/t/robot/ua-get.t	2010-01-06 12:40:41.000000000 +0200
++++ libwww-perl-5.833/t/robot/ua-get.t	2010-01-06 12:41:04.000000000 +0200
+@@ -17,7 +17,7 @@
+ 
+     require HTTP::Daemon;
+ 
+-    my $d = new HTTP::Daemon Timeout => 10;
++    my $d = new HTTP::Daemon LocalAddr => 'localhost', Timeout => 10;
+ 
+     print "Please to meet you at: <URL:", $d->url, ">\n";
+     open(STDOUT, $^O eq 'MSWin32' ?  ">nul" : $^O eq 'VMS' ? ">NL:"  : ">/dev/null");
+--- libwww-perl-5.833/t/local/http.t	2010-01-06 12:43:24.000000000 +0200
++++ libwww-perl-5.833/t/local/http.t	2010-01-06 12:43:35.000000000 +0200
+@@ -18,7 +18,7 @@
+ 
+     require HTTP::Daemon;
+ 
+-    my $d = HTTP::Daemon->new(Timeout => 10);
++    my $d = HTTP::Daemon->new(LocalAddr => 'localhost', Timeout => 10);
+ 
+     print "Please to meet you at: <URL:", $d->url, ">\n";
+     open(STDOUT, $^O eq 'VMS'? ">nl: " : ">/dev/null");
