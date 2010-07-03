@@ -93,7 +93,9 @@ postgresql_src_install() {
 postgresql_src_test() {
     # 55432 is a hardcoded number.
     sydboxcmd 'net/whitelist/bind/unix:///tmp/.s.PGSQL.55432'
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/.s.PGSQL.64020'
     default
     sydboxcmd 'net/unwhitelist/bind/unix:///tmp/.s.PGSQL.55432'
+    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/.s.PGSQL.64020'
 }
 
