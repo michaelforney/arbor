@@ -1,4 +1,5 @@
 # Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2010 Cecil Curry <leycec@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'doxygen-1.5.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -10,16 +11,20 @@ HOMEPAGE="http://www.doxygen.org/"
 DOWNLOADS="ftp://ftp.stack.nl/pub/users/dimitri/${PNV}.src.tar.gz
     doc? ( ftp://ftp.stack.nl/pub/users/dimitri/${PN}_manual-${PV}.pdf.zip )"
 
+DOXYGEN_DOCUMENTATION_HOME="http://www.stack.nl/~dimitri/${PN}"
 UPSTREAM_DOCUMENTATION="
-http://www.stack.nl/~dimitri/doxygen/faq.html       [[ description = [ Doxygen FAQ ] lang = en ]]
-http://www.stack.nl/~dimitri/doxygen/manual.html    [[ description = [ Doxygen Manual ] lang = en ]]
+${DOXYGEN_DOCUMENTATION_HOME}/faq.html    [[ description = [ Doxygen FAQ ] lang = en ]]
+${DOXYGEN_DOCUMENTATION_HOME}/manual.html [[ description = [ Doxygen Manual ] lang = en ]]
 "
-UPSTREAM_RELEASE_NOTES="http://www.stack.nl/~dimitri/doxygen/changelog.html"
+UPSTREAM_RELEASE_NOTES="${DOXYGEN_DOCUMENTATION_HOME}/changelog.html"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc dot examples qt4" # latex
+MYOPTIONS="doc dot
+    examples [[ description = [ Build doxyapp ] requires = [ qt4 ] ]]
+    qt4      [[ description = [ Build doxywizard ] ]]
+" # latex
 
 DEPENDENCIES="
     build:
@@ -31,16 +36,18 @@ DEPENDENCIES="
         app-text/ghostscript
         media-libs/libpng
         dot? (
-            media-gfx/graphviz
+            media-gfx/graphviz[>=1.8.10]
             media-libs/freetype:2
         )
         qt4? ( x11-libs/qt:4[>=4.3.0] )
 "
 
-# Use eqmake4 instead
+# Prevent Makefiles from running "qmake"; run "eqmake4" instead in src_configure
 DEFAULT_SRC_COMPILE_PARAMS=( QMAKE=true )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
 DEFAULT_SRC_INSTALL_PARAMS=( MAN1DIR="share/man/man1" )
+
+DOXYGEN_DOC_DIR="/usr/share/doc/${PNVR}"
 
 src_prepare() {
     default
@@ -54,28 +61,32 @@ src_prepare() {
             -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
             -i tmake/lib/linux*/tmake.conf
 
-    # DESTDIR issues with the doxywizard binary
-    edo sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
-            -i addon/doxywizard/Makefile.in
+    if option qt4; then
+        # Without this, qt:3 is picked up if installed
+        export QTDIR=/usr
 
-    option qt4 && eqmake4 addon/doxywizard/doxywizard.pro
+        # Fix DESTDIR issues with the doxywizard binary
+        edo sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
+                -i addon/doxywizard/Makefile.in
+
+        if option examples; then
+            # Without this, doxyapp complains about unresolved libpthread symbols
+            edo sed -e '/^LIBS[[:space:]]/s~$~ -lpthread~' \
+                    -i addon/doxyapp/doxyapp.pro.in
+        fi
+    fi
 }
 
 src_configure() {
-    local myconf
+    option qt4 && eqmake4 addon/doxywizard/doxywizard.pro -o addon/doxywizard/Makefile.doxywizard
 
-    # configure doesn't like --without-doxyapp
-    option examples && myconf+="--with-doxyapp"
-    # Without this, Qt:3 is picked up, if it's installed
-    option qt4 && export QTDIR=/usr
-
-
+    # Custom configure file hates --without-* and most standard econf options
     edo ./configure \
-        --docdir /usr/share/doc/${PNVR} \
+        --docdir "${DOXYGEN_DOC_DIR}" \
         --prefix /usr \
         --shared \
-        $(option qt4 && option_with qt4 doxywizard) \
-        ${myconf}
+        $(option qt4 && echo "--with-doxywizard") \
+        $(option examples && echo "--with-doxyapp")
 }
 
 src_compile() {
@@ -84,10 +95,8 @@ src_compile() {
     if option doc; then
         dodoc "${WORKBASE}"/${PN}_manual-${PV}.pdf
 
-        if option !dot; then
-            edo sed -e '/HAVE_DOT/s:YES:NO:' \
-                    -i $(find -name Doxyfile)
-        fi
+        # Disable Graphviz support
+        option !dot && edo sed -e '/HAVE_DOT/s:YES:NO:' -i $(find -name Doxyfile)
 
         # Disable latex support.
         edo cp doc/Doxyfile{,.orig}
@@ -110,8 +119,10 @@ src_install() {
     default
 
     if option doc; then
-        insinto /usr/share/doc/${PNVR}
+        insinto "${DOXYGEN_DOC_DIR}"
         doins -r html/*
     fi
+
+    option examples && dobin bin/doxyapp
 }
 
