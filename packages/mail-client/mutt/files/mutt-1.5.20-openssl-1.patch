@@ -1,0 +1,24 @@
+Source: upstream
+Reason: openssl-1 api change
+
+# HG changeset patch
+# User Patrick Welche <prlw1@cam.ac.uk>
+# Date 1260256127 28800
+# Branch HEAD
+# Node ID 1cf34ea1f12864efa1c3f4481fc409ed6c8e11eb
+# Parent  fc9563de3dcbcd1eaffa5899dc35e7f4212a0c79
+STACK* is not defined with newer SSL, use STACK_OF instead.
+Closes #3356.
+
+diff --git a/mutt_ssl.c b/mutt_ssl.c
+--- a/mutt_ssl.c
++++ b/mutt_ssl.c
+@@ -652,7 +652,7 @@
+   char *buf = NULL;
+   int bufsize;
+   /* needed to get the DNS subjectAltNames: */
+-  STACK *subj_alt_names;
++  STACK_OF(GENERAL_NAME) *subj_alt_names;
+   int subj_alt_names_count;
+   GENERAL_NAME *subj_alt_name;
+   /* did we find a name matching hostname? */
