@@ -34,6 +34,10 @@ DEPENDENCIES="
         x11-libs/gtk+:2[>=2.20]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-Make-selinux-support-optional.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
     --exec-prefix=/
@@ -45,6 +49,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-udevrulesdir=/$(get_libdir)/udev/rules.d
     --with-pamlibdir=/$(get_libdir)/security
     --with-rootdir=/
+    --disable-selinux
 )
 
 AT_M4DIR=m4
