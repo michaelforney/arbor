@@ -12,6 +12,7 @@ require scm-git
 
 MYOPTIONS="doc python ruby vim-syntax
     cran       [[ description = [ Enable CRAN repository support ] ]]
+    pbin       [[ description = [ Experimental binary package support ] ]]
     pink       [[ description = [ Use an obnoxious girly colour scheme ] ]]
     xml        [[ description = [ Enable parsing of xml files, for GLSA and metadata.xml support, only useful with Gentoo repositories ] ]]
 "
@@ -41,6 +42,9 @@ DEPENDENCIES="
         app-admin/eclectic
         app-shells/bash[>=4]
         dev-libs/pcre[>=7.8]
+        pbin? (
+            app-arch/libarchive[=scm]
+        )
         python? (
             dev-lang/python:=
             dev-libs/boost
@@ -75,13 +79,13 @@ src_configure() {
         $(option_enable doc doxygen) \
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
+        $(option_enable pbin pbins) \
         $(option_enable pink) \
         $(option_enable ruby) \
         $(option_enable python) \
         $(option_enable vim-syntax vim ) \
         $(option_enable xml) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
-        --enable-pbins \
         --enable-visibility \
         --with-clients=${clients} \
         --with-environments=${environments} \
