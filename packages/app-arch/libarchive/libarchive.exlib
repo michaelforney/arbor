@@ -1,0 +1,53 @@
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require googlecode [ suffix=tar.gz ]
+
+SUMMARY="C library for reading and writing tar, cpio, zip, ISO, and other archive formats"
+DESCRIPTION="
+The formats supported include:
+gzip (read and write, uses zlib)
+bzip2 (read and write, uses bzlib)
+compress (read and write, uses an internal implementation)
+cpio (read and write, including odc and newc variants)
+separate command-line compressors (no auto-detect for these)
+tar (read and write, including GNU extensions)
+pax (read and write, including GNU and star extensions)
+ISO9660 (read only, with some limitations)
+Zip (read only, with some limitations)
+mtree (read and write)
+shar (write only)
+ar (read and write, including BSD and GNU/SysV variants)
+"
+HOMEPAGE+=" http://people.freebsd.org/~kientzle/${PN}"
+
+LICENCES="BSD-3"
+SLOT="0"
+MYOPTIONS="acl xattr"
+
+DEPENDENCIES="
+    build+run:
+        app-arch/xz
+        app-arch/gzip
+        app-arch/bzip2
+        dev-libs/libxml2:=
+        dev-libs/openssl
+        acl? ( sys-apps/acl )
+        xattr? ( sys-apps/attr )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+    --enable-bsdcpio=shared
+    --enable-bsdtar=shared
+    # Enable gzip, bzip2, xz, xar support
+    --with-{zlib,bz2lib,lzma,xml2}
+    # Use libxml2 instead of expat for xar support
+    --without-expat
+    # Disable old app-arch/lzma support
+    --without-lzmadec
+    # enable openssl support
+    --with-openssl
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl xattr )
+
