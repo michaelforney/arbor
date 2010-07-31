@@ -4,9 +4,9 @@
 require multilib
 
 SUMMARY="Suspend and hibernation utilities"
-HOMEPAGE="http://${PN}.freedesktop.org/"
-DOWNLOADS="http://${PN}.freedesktop.org/releases/${PNV}.tar.gz
-           http://${PN}.freedesktop.org/releases/pm-quirks-20100316.tar.gz"
+HOMEPAGE="http://${PN}.freedesktop.org"
+DOWNLOADS="${HOMEPAGE}/releases/${PNV}.tar.gz
+           ${HOMEPAGE}/releases/pm-quirks-20100619.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -21,8 +21,10 @@ DEPENDENCIES="
         video_drivers:radeon? ( app-laptop/radeontool )
     recommendation:
         sys-apps/dbus[>=1.0.0]
-        sys-apps/DeviceKit-power
+        sys-apps/upower
 "
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-doc )
 
 src_install() {
     default
@@ -30,8 +32,7 @@ src_install() {
     keepdir /etc/pm/{config,power,sleep}.d
     edo rm "${IMAGE}/usr/$(get_libdir)/pm-utils/sleep.d/01grub"
 
-    edo rm "${IMAGE}/usr/bin/import-fdi-quirkdb"
     insinto /usr/$(get_libdir)/pm-utils/video-quirks
-    doins "${WORKBASE}"/*.quirkdb
+    doins "${WORKBASE}"/video-quirks/*.quirkdb
 }
 

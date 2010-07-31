@@ -18,6 +18,10 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+# The tests all succeed but break sydbox in a weird way:
+# http://paste.pocoo.org/show/243752/
+RESTRICT="test"
+
 WORK="${WORKBASE}/${MY_PNV}_src"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -39,9 +43,11 @@ DEFAULT_SRC_COMPILE_PARAMS=( DEBUG="" )
 
 src_test() {
     edo cd tests
-    sydboxcmd "net/whitelist/bind/unix://${WORK}/tests/config.*"
+    sydboxcmd "sandunbox/net"
+    sydboxcmd "sandunbox/exec"
     emake -j1 test opt
-    sydboxcmd "net/unwhitelist/bind/unix://${WORK}/tests/config.*"
+    sydboxcmd "sandbox/net"
+    sydboxcmd "sandbox/exec"
 }
 
 src_install() {

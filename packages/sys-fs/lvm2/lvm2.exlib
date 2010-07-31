@@ -4,7 +4,7 @@
 
 require multilib
 
-export_exlib_phases src_install
+export_exlib_phases src_test_expensive src_install
 
 SUMMARY="Userspace toolset providing logical volume management facilities"
 DESCRIPTION="
@@ -29,10 +29,7 @@ UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
 
 DEPENDENCIES=""
 
-# Lots of test failures, tests could use some loving.
-# We *really* want them in src_test_expensive().
-# The tests need to run as root.
-# Last checked: 2.02.66
+# The tests are expensive and need to run as root.
 RESTRICT="test userpriv"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -47,6 +44,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-nls
     --disable-selinux
     --with-udevdir=/$(get_libdir)/udev/rules.d
+    --with-usrlibdir=/usr/$(get_libdir)
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
@@ -57,6 +55,18 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 WORK="${WORKBASE}"/LVM2.${PV}
+
+lvm2_src_test_expensive() {
+    # This test still fails or succeeds pretty much randomly for no apparent reason.
+    edo rm test/t-lvcreate-usage.sh
+
+    # The tests call several tools and need a few devices.
+    sydboxcmd sandunbox/exec
+    sydboxcmd write /dev
+    sydboxcmd write /etc
+
+    emake -j1 check
+}
 
 lvm2_src_install() {
     default

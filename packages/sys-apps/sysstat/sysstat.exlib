@@ -37,10 +37,12 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation.html [[ lang = en ]]"
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="
-        smp [[ description = [ Enable workaround for SMP race. ] ]]
+        sensors [[ description = [ Enable sensors support. ] ]]
 "
 
 DEPENDENCIES="
+    build+run:
+        sensors? ( sys-apps/lm_sensors )
     suggestion:
         sys-process/vixie-cron
 "
@@ -50,9 +52,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "smp smp-race"
-)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( sensors )
 
 sysstat_src_prepare() {
     # Check if the detected libdir isn't really a symlink.
