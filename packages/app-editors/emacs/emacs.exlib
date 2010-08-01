@@ -3,7 +3,7 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require game elisp-module
+require game alternatives elisp-module
 
 if [[ -z $(ever range 3) ]]; then
     require gnu [ suffix=bz2 ]
@@ -111,6 +111,13 @@ EOF
         edo mv "${i}" "${i}.info"
     done
 
+    cd "${IMAGE}"
+    edo mv usr/share/man/man1/ctags{,-emacs}.1
+    edo mv usr/bin/ctags{,-emacs}
+    alternatives_for ctags emacs 500 \
+        /usr/bin/ctags ctags-emacs \
+        /usr/share/man/man1/ctags.1 ctags-emacs.1
+
     hereenvd 70${PN} <<EOF
 INFOPATH="/usr/share/info/${PN}"
 EOF
@@ -118,6 +125,7 @@ EOF
 
 emacs_pkg_postinst() {
     game_pkg_postinst
+    alternatives_pkg_postinst
     elisp-generate-global-site-file
 }
 
