@@ -57,10 +57,6 @@ REMOTE_IDS="freshmeat:cups"
 # testsuite has lots of FAILs for now, will check into those next version
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES+=(
-    "${FILES}/${PN}-backend-https.patch"
-)
-
 DEFAULT_SRC_INSTALL_PARAMS+=(
     BUILDROOT="${IMAGE}"
 )
@@ -83,6 +79,8 @@ src_prepare() {
 
     # disable the xinetd service by default
     option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" init/cups-lpd.in
+
+    expatch "${FILES}/${PN}-backend-https.patch"
 
     AT_M4DIR=config-scripts autotools_src_prepare
 }
