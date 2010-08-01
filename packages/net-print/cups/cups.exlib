@@ -80,6 +80,9 @@ src_prepare() {
     # disable the xinetd service by default
     option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" init/cups-lpd.in
 
+    # Disable silent rules
+    edo sed -i '/^\.SILENT:$/d' Makedefs.in
+
     expatch "${FILES}/${PN}-backend-https.patch"
 
     AT_M4DIR=config-scripts autotools_src_prepare
