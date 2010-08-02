@@ -47,6 +47,6 @@ linux-headers_src_install() {
     edo rm "${IMAGE}"/**/.install "${IMAGE}"/**/..install.cmd
 
     # scsi.h is installed by sys-libs/glibc
-    edo rm "${IMAGE}"/usr/include/scsi/scsi.h
+    ever at_least 2.6.35 || edo rm "${IMAGE}"/usr/include/scsi/scsi.h
 }
 
