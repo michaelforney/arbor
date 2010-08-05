@@ -1,7 +1,8 @@
 # Copyright 2007 Bryan Østergaard
+# Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases src_compile src_install
+export_exlib_phases pkg_pretend src_compile src_install
 
 myexparam path=
 
@@ -17,6 +18,22 @@ MYOPTIONS="platform: amd64 arm ia64 ppc64 x86"
 WORK="${WORKBASE}/linux-${PV}"
 
 # FIXME: Need to sanitize headers at some point
+
+linux-headers_pkg_pretend() {
+    local kv=$(uname -r)
+
+    # Perform a crude "starts with" string match, because kernels built with
+    # EXTRAVERSION defined can make version-aware comparisons of `uname -r` to
+    # PV ambiguous -- by default, the kernel Makefile doesn't enforce any kind
+    # of separator between the SUBLEVEL and EXTRAVERSION components of the
+    # version string:
+    #     KERNELVERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+    if [[ ! ${kv} =~ ^${PV} ]] ; then
+        ewarn "Kernel headers mismatch: You are attempting to install headers for the ${PV}"
+        ewarn "kernel series, but you appear to be running kernel ${kv}. You should only"
+        ewarn "proceed with this if you know what you're doing."
+    fi
+}
 
 linux-headers_src_compile() {
     # Fix ARCH to match linux-headers values
