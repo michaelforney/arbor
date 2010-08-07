@@ -26,14 +26,15 @@ DEPENDENCIES="
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/udev-154-only-build-gudev.patch"
-                              "${FILES}/udev-154-build-sound-rules.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-allow-building-of-only-gudev.patch"
+                              "${FILES}/0002-allow-building-only-the-sound-rules.patch" )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--sbindir=/sbin' "--with-rootlibdir=/$(get_libdir)"
                                "--libexecdir=/$(get_libdir)/udev/" '--without-selinux'
                                '--disable-extras' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib gudev' 'gobject-introspection introspection'
                                        'sound usb-db' 'sound pci-db' 'sound sound-rules' )
+
 AT_M4DIR=( m4 )
 
 src_prepare() {
@@ -44,48 +45,19 @@ src_prepare() {
 src_install() {
     default
 
-    # rules {{{
-    insinto /$(get_libdir)/udev/rules.d/
-    doins rules/gentoo/??-*.rules
+    keepdir /etc/udev/rules.d /$(get_libdir)/udev/{devices,state}
 
-    # Adding arch specific rules (ppc and s390 are not supported)
-    option platform:ia64 && doins "rules/packages/40-ia64.rules"
+    # platform rules {{{
+    insinto /$(get_libdir)/udev/rules.d/
+
+    option platform:ia64 && doins "rules/arch/40-ia64.rules"
     # }}}
 
-    # hooks {{{
-    insinto /$(get_libdir)/rcscripts/addons
-    newins "${FILES}/udev-start-147.sh" udev-start.sh
-    newins "${FILES}/udev-stop-136.sh" udev-stop.sh
-
-    newinitd "${FILES}/udev-initd-151-r4" udev
-    newinitd "${FILES}/udev-mount-initd-151-r4" udev-mount
-    newinitd "${FILES}/udev-postmount-initd-151-r4" udev-postmount
-    newinitd "${FILES}/udev-dev-tarball-initd-136" udev-dev-tarball
-
+    # module loading configuration {{{
     insinto /etc/modprobe.d
+
     doins "${FILES}/blacklist.conf"
     doins "${FILES}/pnp-aliases.conf"
-    # }}}
-
-    # helper scripts {{{
-    exeinto /$(get_libdir)/udev
-    newexe "${FILES}/net-130-r1.sh" net.sh
-    newexe "${FILES}/move_tmp_persistent_rules-128.sh" move_tmp_persistent_rules.sh
-    newexe "${FILES}/write_root_link_rule-128" write_root_link_rule
-    newexe "${FILES}/shell-compat-addon-147.sh" shell-compat-addon.sh
-
-    # multilib our scripts
-    edo sed -i -e "s:/lib/udev:/$(get_libdir)/udev:"                \
-        "${IMAGE}/$(get_libdir)/udev/move_tmp_persistent_rules.sh"  \
-        "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-start.sh"     \
-        "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-stop.sh"      \
-        "${IMAGE}/$(get_libdir)/udev/write_root_link_rule"          \
-        "${IMAGE}/etc/init.d/udev"                                  \
-        "${IMAGE}/etc/init.d/udev-mount"                            \
-        "${IMAGE}/etc/init.d/udev-postmount"                        \
-        "${IMAGE}/etc/init.d/udev-dev-tarball"                      \
-        "${IMAGE}/etc/modprobe.d/pnp-aliases.conf"                  \
-        "${IMAGE}/etc/modprobe.d/blacklist.conf"
     # }}}
 
     # config protect {{{
@@ -94,13 +66,26 @@ CONFIG_PROTECT_MASK=\"/$(get_libdir)/udev/rules.d\"
 EOT
     # }}}
 
-    keepdir /etc/udev/rules.d /$(get_libdir)/udev/{devices,state}
-
+    # fix lib paths {{{
     if [[ $(get_libdir) != lib ]] ; then
         if option glib && [[ -d "${IMAGE}/usr/lib/ConsoleKit" ]] ; then
             edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}/ConsoleKit
         fi
         [[ -d "${IMAGE}"/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
+    # }}}
+
+    # baselayout init scripts {{{
+    doinitd "${FILES}/udev-postmount"
+
+    insinto /$(get_libdir)/rcscripts/addons
+
+    doins "${FILES}/udev-start.sh"
+    doins "${FILES}/udev-stop.sh"
+
+    edo sed -e "s,@@libdir@@,$(get_libdir),g"                           \
+            -i "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-start.sh"  \
+            -i "${IMAGE}/$(get_libdir)/rcscripts/addons/udev-stop.sh"
+    # }}}
 }
 

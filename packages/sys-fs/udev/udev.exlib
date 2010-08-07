@@ -15,20 +15,20 @@ MYOPTIONS=""
 REMOTE_IDS="freshmeat:udev"
 
 pkg_postinst() {
-    if [[ ${ROOT} == / ]] ; then
-        if [[ -n $(pidof udevd) ]] ; then
-            killall -15 udevd &>/dev/null
-            sleep 1
-            killall -9 udevd &>/dev/null
-        fi
+    [[ "${ROOT}" == "/" ]] || return
 
-        # Change the wait mode to wait/eldest so
-        # sydbox doesn't wait for udevd to exit.
-        sydboxcmd wait/eldest
-        # Allow network access for udevd
-        sydboxcmd net/whitelist/bind/unix-abstract:///org/kernel/udev/udevd
-        sydboxcmd net/whitelist/connect/unix:///dev/log
-        /sbin/udevd --daemon
-    fi
+    pkill -TERM udevd &> /dev/null
+    sleep 1
+    pkill -KILL udevd &> /dev/null
+
+    # Change the wait mode to wait/eldest so
+    # sydbox doesn't wait for udevd to exit.
+    sydboxcmd wait/eldest
+
+    # Allow network access for udevd
+    sydboxcmd net/whitelist/bind/unix-abstract:///org/kernel/udev/udevd
+    sydboxcmd net/whitelist/connect/unix:///dev/log
+
+    /sbin/udevd --daemon
 }
 
