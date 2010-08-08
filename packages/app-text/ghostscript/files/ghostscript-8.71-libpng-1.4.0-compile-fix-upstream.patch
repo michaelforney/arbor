@@ -1,0 +1,37 @@
+Source: Upstream (http://bugs.ghostscript.com/show_bug.cgi?id=691111)
+Upstream: Yes, fixed in trunk
+Reason: configure checks for a function from libpng 1.2.x that's been replaced in 1.4.x
+
+# Trunk Revision: r11449
+# Author: hintak
+# Date: Jun 28, 2010
+# Log message: switch autoconf png test away from testing for a
+# soon-to-be-obsolete routine to one we actually use, to smooth
+# over the libpng 1.2.x to 1.4.x transition; bug 691111
+
+Index: jbig2dec/configure.ac
+===================================================================
+--- jbig2dec/configure.ac	(Revision 11448)
++++ jbig2dec/configure.ac	(Revision 11449)
+@@ -45,7 +45,7 @@
+   fi
+   dnl libpng requires pow() which may be in libm
+   AC_SEARCH_LIBS([pow], [m])
+-  AC_CHECK_LIB([png], [png_check_sig], [
++  AC_CHECK_LIB([png], [png_create_write_struct], [
+     AC_CHECK_LIB([z], [deflate], [
+       AC_DEFINE(HAVE_LIBPNG, 1, [Define if libpng is available (-lpng)])
+       LIBS="-lpng -lz $LIBS"
+Index: base/configure.ac
+===================================================================
+--- base/configure.ac	(Revision 11448)
++++ base/configure.ac	(Revision 11449)
+@@ -520,7 +520,7 @@
+ 	PNGDEVS="$PNGDEVS_ALL"
+ else
+ 	AC_MSG_RESULT([no])
+-	AC_CHECK_LIB(png, png_check_sig, [
++	AC_CHECK_LIB(png, png_create_write_struct, [
+ 	  AC_CHECK_HEADERS(png.h, [
+ 		SHARE_LIBPNG=1
+ 		PNGDEVS="$PNGDEVS_ALL"

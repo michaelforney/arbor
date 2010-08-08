@@ -38,7 +38,8 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-8.70-fPIC.patch
-    "${FILES}"/${PNV}-libpng-1.4.0-compile-fix-v2.patch
+    -p0 "${FILES}"/${PNV}-libpng-1.4.0-compile-fix-upstream.patch
+    -p1 "${FILES}"/${PNV}-CVE-2010-1628.patch
 )
 
 src_prepare() {

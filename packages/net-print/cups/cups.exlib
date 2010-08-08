@@ -64,6 +64,10 @@ DEFAULT_SRC_PREPARE_PATCHES+=(
     "${FILES}/${PN}-backend-https.patch"
 )
 
+DEFAULT_SRC_INSTALL_PARAMS+=(
+    BUILDROOT="${IMAGE}"
+)
+
 WORK="${WORKBASE}"
 
 unpack_prepare_one_multibuild() {
@@ -100,7 +104,12 @@ prepare_one_multibuild() {
     # disable the xinetd service by default
     option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" init/cups-lpd.in
 
-    AT_M4DIR=config-scripts eautoreconf
+    # Disable silent rules
+    edo sed -i '/^\.SILENT:$/d' Makedefs.in
+
+    expatch "${FILES}/${PN}-backend-https.patch"
+
+    AT_M4DIR=config-scripts autotools_src_prepare
 }
 
 src_prepare() {
