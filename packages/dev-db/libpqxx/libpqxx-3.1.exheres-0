@@ -1,0 +1,33 @@
+# Copyright 2010 Alex Elsayed <eternaleye@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Official C++ client API for PostgreSQL"
+DESCRIPTION="
+If you are writing software in C++ that needs to access databases managed by
+postgres—on just about any platform—then libpqxx is the library you use.
+"
+HOMEPAGE="http://pqxx.org/"
+DOWNLOADS="http://pqxx.org/download/software/${PN}/${PNV}.tar.gz"
+
+# Requires connection to a running postgres server
+RESTRICT="test"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        app-doc/doxygen
+        app-text/xmlto
+    build+run:
+        dev-libs/boost
+        dev-db/postgresql
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+    --disable-static
+)
+
