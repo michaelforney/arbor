@@ -43,8 +43,7 @@ if ever at_least 4.3; then
         build:
             doc? ( app-doc/doxygen[>=1.5.1] )
             java? ( app-arch/unzip
-                    app-arch/zip
-                    $([[ ${SLOT} == 4.4 ]] && echo dev-scm/git) )
+                    app-arch/zip )
         build+run:
             dev-libs/gmp[>=4.1]
             dev-libs/mpfr[>=2.3]
@@ -91,9 +90,6 @@ src_unpack() {
 src_prepare() {
     edo cd  "${WORKBASE}/${PNV}"
     default
-    # patch can't apply a binary diff. git apply can.
-    [[ ${SLOT} == 4.4 ]] && ! ever at_least 4.4.3 && option java &&
-        edo git apply "${FILES}"/${PN}-${SLOT}-jar-fix.patch
 }
 
 src_configure() {
