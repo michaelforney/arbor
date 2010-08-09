@@ -1,6 +1,6 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
-# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require toolchain-funcs multilib versionator alternatives gnu
@@ -179,7 +179,7 @@ src_install() {
     for x in usr/${libdir}/*.*; do
         if [[ -L ${x} ]]; then
             # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
-            edo rm "${x}" || die "rm /${x} failed"
+            edo rm "${x}"
             removed+=( "/${x}" ) # just a sanity check
         elif [[ -f ${x} ]]; then
             bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
@@ -239,8 +239,7 @@ src_install() {
     # ada
     if option ada; then
         for x in gnat gnatbind gnatchop gnatclean gnatfind gnatkr gnatlink gnatls gnatmake gnatname gnatprep gnatxref; do
-            echo mv usr/bin/${x} usr/bin/${x}-${SLOT}
-            mv usr/bin/${x} usr/bin/${x}-${SLOT} || die "mv /usr/bin/${x} failed"
+            edo mv usr/bin/${x} usr/bin/${x}-${SLOT}
             alternatives+=( /usr/bin/${x} ${x}-${SLOT} )
         done
     fi
@@ -286,8 +285,7 @@ pkg_preinst() {
 myln() {
     local ret=0
     # create symlink if it is missing or dangling
-    echo ln -fs "${1}" "${2}"
-    ln -fs "${1}" "${2}" || { ret=$?; eerror "Creating ${2} symlink failed"; }
+    nonfatal edo ln -fs "${1}" "${2}" || { ret=$?; eerror "Creating ${2} symlink failed"; }
     return $ret
 }
 
@@ -343,8 +341,7 @@ cleanup_dangling_libstdcpp_symlinks() {
     local l
     for l in "${ROOT}"/usr/libstdc++.so*; do
         if [[ -L ${l} && ! -f ${l} ]]; then
-            echo rm "${l}"
-            rm "${l}" || eerror "Failed to clean up ${l}"
+            nonfatal edo rm "${l}" || eerror "Failed to clean up ${l}"
         fi
     done
 }
@@ -387,16 +384,14 @@ pkg_postrm() {
     local x
     for x in "${symlinks[@]}"; do
         if [[ -L ${ROOT}${x/-${SLOT}} && ! -e ${ROOT}${x/-${SLOT}} ]]; then
-            echo rm "${ROOT}${x/-${SLOT}}"
-            rm "${ROOT}${x/-${SLOT}}" || eerror "Failed to clean up dangling symlink"
+            nonfatal edo rm "${ROOT}${x/-${SLOT}}" || eerror "Failed to clean up dangling symlink"
         fi
     done
 
     for x in "${so_symlinks[@]%.*}"; do
         while [[ ${x} == */*.so* ]]; do
             if [[ -L ${ROOT}${x} && ! -e ${ROOT}${x} ]]; then
-                echo rm "${ROOT}${x}"
-                rm "${ROOT}${x}" || eerror "Failed to clean up dangling symlink"
+                nonfatal edo rm "${ROOT}${x}" || eerror "Failed to clean up dangling symlink"
             fi
             x=${x%.*}
         done
