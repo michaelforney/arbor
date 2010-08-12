@@ -60,14 +60,6 @@ REMOTE_IDS="freshmeat:cups"
 # testsuite has lots of FAILs for now, will check into those next version
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES+=(
-    "${FILES}/${PN}-backend-https.patch"
-)
-
-DEFAULT_SRC_INSTALL_PARAMS+=(
-    BUILDROOT="${IMAGE}"
-)
-
 WORK="${WORKBASE}"
 
 unpack_prepare_one_multibuild() {
@@ -84,8 +76,6 @@ src_unpack() {
 }
 
 prepare_one_multibuild() {
-    default
-
     # remove default optimizations and do not strip by default
     edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
             -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
