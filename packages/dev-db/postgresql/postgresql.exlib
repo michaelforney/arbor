@@ -67,8 +67,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 postgresql_pkg_pretend() {
-    if [[ -z ${POSTGRESQL_MAJOR_UPGRADE} ]] && has_version ${CATEGORY}/${PN} && \
-        ! has_version ${CATEGORY}/${PN}[=${PSQL_MAJOR_VERSION}*] ; then
+    if [[ -z ${POSTGRESQL_MAJOR_UPGRADE} ]] && has_version --root ${CATEGORY}/${PN} && \
+        ! has_version --root ${CATEGORY}/${PN}[=${PSQL_MAJOR_VERSION}*] ; then
         ewarn "To install a different major version of PostgreSQL, you have to dump/reload your database."
         ewarn "When you've done this, please set 'POSTGRESQL_MAJOR_UPGRADE=YesPlease', to continue the upgrade."
         ewarn "For more information visit http://www.postgresql.org/support/versioning."
