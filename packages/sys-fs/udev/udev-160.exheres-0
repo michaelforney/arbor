@@ -37,6 +37,22 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'glib gudev' 'gobject-introspection intro
 
 AT_M4DIR=( m4 )
 
+pkg_pretend() {
+    local f nuke_f=()
+    for f in "${ROOT%%/}"/etc/init.d/udev{,-mount,-dev-tarball}; do
+        [[ -e ${f} ]] && nuke_f+=( "${f}" )
+    done
+
+    if [[ -n ${nuke_f[@]} ]]; then
+        echo >&2
+        ewarn "The following Exherbo provided init scripts have been removed as of udev[=160]."
+        for f in "${nuke_f[@]}"; do
+            ewarn "    ${f}"
+        done
+        ewarn "Since they are under config protection you need to remove them manually."
+    fi
+}
+
 src_prepare() {
     edo cp "${FILES}/gtk-doc.make" "${WORK}"
     autotools_src_prepare
