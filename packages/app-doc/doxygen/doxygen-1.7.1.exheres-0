@@ -54,9 +54,11 @@ src_prepare() {
 
     # Respect *FLAGS
     edo sed \
+        -e "/^TMAKE_CC[[:space:]]/s:=.*$:= ${CC}:" \
         -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
         -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
         -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CXX[[:space:]]/s:=.*$:= ${CXX}:" \
         -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
         -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
         -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
