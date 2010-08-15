@@ -11,10 +11,11 @@ SCM_REPOSITORY="git://git.pioto.org/paludis"
 require scm-git
 
 MYOPTIONS="doc python ruby vim-syntax
-    cran       [[ description = [ Enable CRAN repository support ] ]]
-    pbin       [[ description = [ Experimental binary package support ] ]]
-    pink       [[ description = [ Use an obnoxious girly colour scheme ] ]]
-    xml        [[ description = [ Enable parsing of xml files, for GLSA and metadata.xml support, only useful with Gentoo repositories ] ]]
+    cran         [[ description = [ Enable CRAN repository support ] ]]
+    pbin         [[ description = [ Experimental binary package support ] ]]
+    pink         [[ description = [ Use an obnoxious girly colour scheme ] ]]
+    search-index [[ description = [ Enable cave search --index ] ]]
+    xml          [[ description = [ Enable parsing of xml files, for GLSA and metadata.xml support, only useful with Gentoo repositories ] ]]
 "
 LICENCES="GPL-2 vim-syntax? ( vim )"
 SLOT="0"
@@ -50,6 +51,7 @@ DEPENDENCIES="
             dev-libs/boost
         )
         ruby? ( dev-lang/ruby )
+        search-index? ( dev-db/sqlite:3 )
         xml? ( dev-libs/libxml2[>=2.6] )
     run:
         net-misc/wget
@@ -83,6 +85,7 @@ src_configure() {
         $(option_enable pink) \
         $(option_enable python) \
         $(option_enable ruby) \
+        $(option_enable search-index) \
         $(option_enable vim-syntax vim ) \
         $(option_enable xml) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
