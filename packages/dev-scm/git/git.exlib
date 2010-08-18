@@ -91,6 +91,7 @@ myemake() {
         DESTDIR="${IMAGE}" \
         prefix=/usr \
         gitexecdir=/usr/libexec/${PN} \
+        gitwebdir=/usr/share/gitweb \
         template_dir=/usr/share/${PN}/templates \
         INSTALLSITELIB=${VENDOR_LIB} \
         CFLAGS="${CFLAGS} -Wall" \
@@ -145,10 +146,6 @@ git_src_install() {
     dodoc contrib/fast-import/git-p4.txt
     newexe contrib/fast-import/import-tars.perl git-import-tars
 
-    dodir /usr/libexec/gitweb
-    insinto /usr/libexec/gitweb
-    doins gitweb/gitweb.{cgi,css} gitweb/git-{favicon,logo}.png
-    edo chmod 0755 "${IMAGE}"/usr/libexec/gitweb/gitweb.cgi
     docinto /gitweb/
     dodoc gitweb/{INSTALL,README}
 

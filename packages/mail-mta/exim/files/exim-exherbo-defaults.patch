@@ -1,14 +1,14 @@
-From 08712991ff7ca79b15144b9ba45708716cc480f7 Mon Sep 17 00:00:00 2001
-From: Ingmar Vanhassel <ingmar@exherbo.org>
-Date: Thu, 4 Sep 2008 10:49:30 +0200
+From b8ea19679e7043793b4eabcffe2eef15dbc0643e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bo=20=C3=98rsted=20Andresen?= <zlin@exherbo.org>
+Date: Thu, 3 Jun 2010 04:24:25 +0000
 Subject: [PATCH] Exherbo configuration.
 
 ---
- src/EDITME |   42 ++++++++++++++++++++++--------------------
- 1 files changed, 22 insertions(+), 20 deletions(-)
+ src/EDITME |   41 +++++++++++++++++++++--------------------
+ 1 files changed, 21 insertions(+), 20 deletions(-)
 
 diff --git a/src/EDITME b/src/EDITME
-index 1438a38..852b0ae 100644
+index 9869eb1..582d75d 100644
 --- a/src/EDITME
 +++ b/src/EDITME
 @@ -100,7 +100,7 @@
@@ -29,12 +29,12 @@ index 1438a38..852b0ae 100644
  
  # It is possible to specify a colon-separated list of files for CONFIGURE_FILE.
  # In this case, Exim will use the first of them that exists when it is run.
-@@ -134,14 +134,15 @@ CONFIGURE_FILE=/usr/exim/configure
+@@ -134,14 +134,14 @@ CONFIGURE_FILE=/usr/exim/configure
  # owner of a local mailbox.) Specifying these values as root is very strongly
  # discouraged.
  
 -EXIM_USER=
-+EXIM_USER=mail
++# EXIM_USER=mail
  
  # If you specify EXIM_USER as a name, this is looked up at build time, and the
  # uid number is built into the binary. However, you can specify that this
@@ -42,12 +42,11 @@ index 1438a38..852b0ae 100644
  # into the binary. You can do this by a setting of the form:
  
 -# EXIM_USER=ref:exim
-+# XXX Disable this when we have a guaranteed uid for the 'mail' user, from creandus.
 +EXIM_USER=ref:mail
  
  # In other words, put "ref:" in front of the user name. If you set EXIM_USER
  # like this, any value specified for EXIM_GROUP is also passed "by reference".
-@@ -244,8 +245,8 @@ TRANSPORT_SMTP=yes
+@@ -244,8 +244,8 @@ TRANSPORT_SMTP=yes
  # MBX, is included only when requested. If you do not know what this is about,
  # leave these settings commented out.
  
@@ -58,14 +57,13 @@ index 1438a38..852b0ae 100644
  # SUPPORT_MBX=yes
  
  
-@@ -261,16 +262,16 @@ TRANSPORT_SMTP=yes
- LOOKUP_DBM=yes
+@@ -262,15 +262,15 @@ LOOKUP_DBM=yes
  LOOKUP_LSEARCH=yes
+ LOOKUP_DNSDB=yes
  
 -# LOOKUP_CDB=yes
-+LOOKUP_CDB=yes
- # LOOKUP_DNSDB=yes
 -# LOOKUP_DSEARCH=yes
++LOOKUP_CDB=yes
 +LOOKUP_DSEARCH=yes
  # LOOKUP_IBASE=yes
  # LOOKUP_LDAP=yes
@@ -78,7 +76,7 @@ index 1438a38..852b0ae 100644
  # LOOKUP_PGSQL=yes
  # LOOKUP_SQLITE=yes
  # LOOKUP_WHOSON=yes
-@@ -333,7 +334,7 @@ PCRE_LIBS=-lpcre
+@@ -333,7 +333,7 @@ PCRE_LIBS=-lpcre
  # files are defaulted in the OS/Makefile-Default file, but can be overridden in
  # local OS-specific make files.
  
@@ -87,7 +85,7 @@ index 1438a38..852b0ae 100644
  
  
  #------------------------------------------------------------------------------
-@@ -486,11 +487,11 @@ FIXED_NEVER_USERS=root
+@@ -486,11 +486,11 @@ FIXED_NEVER_USERS=root
  # included in the Exim binary. You will then need to set up the run time
  # configuration to make use of the mechanism(s) selected.
  
@@ -102,7 +100,7 @@ index 1438a38..852b0ae 100644
  
  
  #------------------------------------------------------------------------------
-@@ -643,7 +644,7 @@ HEADERS_CHARSET="ISO-8859-1"
+@@ -643,7 +643,7 @@ HEADERS_CHARSET="ISO-8859-1"
  # Once you have done this, "make install" will build the info files and
  # install them in the directory you have defined.
  
@@ -111,7 +109,7 @@ index 1438a38..852b0ae 100644
  
  
  #------------------------------------------------------------------------------
-@@ -656,7 +657,7 @@ HEADERS_CHARSET="ISO-8859-1"
+@@ -656,7 +656,7 @@ HEADERS_CHARSET="ISO-8859-1"
  # %s. This will be replaced by one of the strings "main", "panic", or "reject"
  # to form the final file names. Some installations may want something like this:
  
@@ -120,7 +118,7 @@ index 1438a38..852b0ae 100644
  
  # which results in files with names /var/log/exim_mainlog, etc. The directory
  # in which the log files are placed must exist; Exim does not try to create
-@@ -705,7 +706,7 @@ EXICYCLOG_MAX=10
+@@ -705,7 +705,7 @@ EXICYCLOG_MAX=10
  # files. Both the name of the command and the suffix that it adds to files
  # need to be defined here. See also the EXICYCLOG_MAX configuration.
  
@@ -129,7 +127,7 @@ index 1438a38..852b0ae 100644
  COMPRESS_SUFFIX=gz
  
  
-@@ -713,7 +714,7 @@ COMPRESS_SUFFIX=gz
+@@ -713,7 +713,7 @@ COMPRESS_SUFFIX=gz
  # If the exigrep utility is fed compressed log files, it tries to uncompress
  # them using this command.
  
@@ -138,7 +136,7 @@ index 1438a38..852b0ae 100644
  
  
  #------------------------------------------------------------------------------
-@@ -810,7 +811,8 @@ ZCAT_COMMAND=/usr/bin/zcat
+@@ -810,7 +810,8 @@ ZCAT_COMMAND=/usr/bin/zcat
  # group. Once you have installed saslauthd, you should arrange for it to be
  # started by root at boot time.
  
@@ -148,7 +146,7 @@ index 1438a38..852b0ae 100644
  
  
  #------------------------------------------------------------------------------
-@@ -851,7 +853,7 @@ ZCAT_COMMAND=/usr/bin/zcat
+@@ -851,7 +852,7 @@ ZCAT_COMMAND=/usr/bin/zcat
  # aliases). The following setting can be changed to specify a different
  # location for the system alias file.
  
@@ -157,7 +155,7 @@ index 1438a38..852b0ae 100644
  
  
  #------------------------------------------------------------------------------
-@@ -1095,7 +1097,7 @@ TMPDIR="/tmp"
+@@ -1097,7 +1098,7 @@ TMPDIR="/tmp"
  # (process id) to a file so that it can easily be identified. The path of the
  # file can be specified here. Some installations may want something like this:
  
@@ -167,5 +165,5 @@ index 1438a38..852b0ae 100644
  # If PID_FILE_PATH is not defined, Exim writes a file in its spool directory
  # using the name "exim-daemon.pid".
 -- 
-1.6.0.1
+1.7.1
 

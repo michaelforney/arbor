@@ -1,13 +1,12 @@
-# Copyright 2007 Bryan Østergaard
-# Copyright 2008-2010 Ingmar Vanhassel
-# Copyright 2008-2009 Bo Ørsted Andresen
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
 # Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs multilib versionator alternatives gnu
+require toolchain-funcs multilib versionator alternatives gnu [ subdir=${PNV} ]
 
 SUMMARY="GNU Compiler Collection"
-DOWNLOADS="mirror://gnu/${PN}/${PNV}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="$(ever range 1-2)"
@@ -22,7 +21,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
 
-RESTRICT="test"
+RESTRICT="test" # tests are expensive
 
 DEPENDENCIES="
     build:
@@ -45,8 +44,7 @@ if ever at_least 4.3; then
         build:
             doc? ( app-doc/doxygen[>=1.5.1] )
             java? ( app-arch/unzip
-                    app-arch/zip
-                    $([[ ${SLOT} == 4.4 ]] && echo dev-scm/git) )
+                    app-arch/zip )
         build+run:
             dev-libs/gmp[>=4.1]
             dev-libs/mpfr[>=2.3]
@@ -93,9 +91,6 @@ src_unpack() {
 src_prepare() {
     edo cd  "${WORKBASE}/${PNV}"
     default
-    # patch can't apply a binary diff. git apply can.
-    [[ ${SLOT} == 4.4 ]] && ! ever at_least 4.4.3 && option java &&
-        edo git apply "${FILES}"/${PN}-${SLOT}-jar-fix.patch
 }
 
 src_configure() {
@@ -126,9 +121,10 @@ src_configure() {
         --enable-nls \
         --program-suffix=-${SLOT} \
         ${pkgversion:+--with-pkgversion="${pkgversion}"} \
-        $(ever at_least 4.4.0-r1 && option_with graphite cloog) \
-        $(ever at_least 4.4.0-r1 && option_with graphite ppl) \
-        $(ever at_least 4.4.0 && echo --with-system-zlib) \
+        $(ever at_least 4.4.0-r1 &&
+            option_with graphite cloog &&
+            option_with graphite ppl &&
+            echo --with-system-zlib) \
         $(ever at_least 4.5.0 && echo --with-libelf) \
         $(option_enable openmp libgomp) \
         $(option_enable propolice libssp)
@@ -169,6 +165,19 @@ src_install() {
 
     edo pushd "${IMAGE}"
 
+<<<<<<< HEAD
+=======
+    local p
+    for p in usr/${libdir}/*-gdb.py ; do
+        [[ -f ${p} ]] || continue
+        [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
+
+        # http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
+        local p=${p##*/}
+        edo mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
+    done
+
+>>>>>>> origin/master
     ### slots handling
     local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
 
@@ -180,6 +189,7 @@ src_install() {
     alternatives+=( /usr/bin/cc gcc )
 
     # libraries
+<<<<<<< HEAD
     local libdir
     all_libdirs=$(get_all_libdirs)
     for libdir in ${all_libdirs}; do
@@ -225,6 +235,41 @@ src_install() {
                 esac
             fi
         done
+=======
+    for x in usr/${libdir}/*.*; do
+        if [[ -L ${x} ]]; then
+            # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
+            edo rm "${x}"
+            removed+=( "/${x}" ) # just a sanity check
+        elif [[ -f ${x} ]]; then
+            bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
+            ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
+            case "${bn}" in
+                # always use newest available so version and create so symlinks
+                libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
+                    # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
+                    # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
+                    # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
+                    edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                    so_symlinks+=( "${x}" )
+                    ;;
+                # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
+                libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
+                    # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                    [[ ${bn} == libstdc++.so.* ]] && libstdcpp="${bn}"
+                    so_symlinks+=( "${x}" )
+                    ;;
+                # always use newest available version
+                *.a|*.la|*.spec|*.security|*.properties)
+                    # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
+                    # symlinks+=( usr/lib/libstdc++-4.3.la )
+                    edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                    ;;
+            esac
+        fi
+>>>>>>> origin/master
     done
 
     # info pages
@@ -255,8 +300,7 @@ src_install() {
     # ada
     if option ada; then
         for x in gnat gnatbind gnatchop gnatclean gnatfind gnatkr gnatlink gnatls gnatmake gnatname gnatprep gnatxref; do
-            echo mv usr/bin/${x} usr/bin/${x}-${SLOT}
-            mv usr/bin/${x} usr/bin/${x}-${SLOT} || die "mv /usr/bin/${x} failed"
+            edo mv usr/bin/${x} usr/bin/${x}-${SLOT}
             alternatives+=( /usr/bin/${x} ${x}-${SLOT} )
         done
     fi
@@ -292,11 +336,8 @@ src_install() {
 }
 
 myln() {
-    local ret=0
-    # create symlink if it is missing or dangling
-    echo ln -fs "${1}" "${2}"
-    ln -fs "${1}" "${2}" || { ret=$?; eerror "Creating ${2} symlink failed"; }
-    return $ret
+    nonfatal edo ln -fs "${1}" "${2}" || { eerror "Creating ${2} symlink failed"; return $?; }
+    return 0
 }
 
 rewrite_symlink() {
@@ -351,8 +392,7 @@ cleanup_dangling_libstdcpp_symlinks() {
     local l
     for l in "${ROOT}"/usr/libstdc++.so*; do
         if [[ -L ${l} && ! -f ${l} ]]; then
-            echo rm "${l}"
-            rm "${l}" || eerror "Failed to clean up ${l}"
+            nonfatal edo rm "${l}" || eerror "Failed to clean up ${l}"
         fi
     done
 }
@@ -395,16 +435,14 @@ pkg_postrm() {
     local x
     for x in "${symlinks[@]}"; do
         if [[ -L ${ROOT}${x/-${SLOT}} && ! -e ${ROOT}${x/-${SLOT}} ]]; then
-            echo rm "${ROOT}${x/-${SLOT}}"
-            rm "${ROOT}${x/-${SLOT}}" || eerror "Failed to clean up dangling symlink"
+            nonfatal edo rm "${ROOT}${x/-${SLOT}}" || eerror "Failed to clean up dangling symlink"
         fi
     done
 
     for x in "${so_symlinks[@]%.*}"; do
         while [[ ${x} == */*.so* ]]; do
             if [[ -L ${ROOT}${x} && ! -e ${ROOT}${x} ]]; then
-                echo rm "${ROOT}${x}"
-                rm "${ROOT}${x}" || eerror "Failed to clean up dangling symlink"
+                nonfatal edo rm "${ROOT}${x}" || eerror "Failed to clean up dangling symlink"
             fi
             x=${x%.*}
         done

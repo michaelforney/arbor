@@ -1,5 +1,5 @@
 # Copyright 2010 Jan Meier <jan@codejunky.org>
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2008, 2010 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'ppp-2.4.4-r21.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
@@ -10,7 +10,7 @@ SCRIPT_VER="20080922"
 
 SUMMARY="An implementation of the Point-to-Point Protocol (PPP)"
 DESCRIPTION="
-ppp (Paul's PPP Package) is an open source package which implements the 
+ppp (Paul's PPP Package) is an open source package which implements the
 Point-to-Point Protocol (PPP) on Linux and Solaris systems.
 "
 REMOTE_IDS="freshmeat:pppd"
@@ -38,8 +38,9 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/respect-cflags.patch"
-    "${FILES}/gtk2.patch"
+    "${FILES}"/respect-cflags.patch
+    "${FILES}"/gtk2.patch
+    "${FILES}"/${PNV}-pppol2tp.patch
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=(

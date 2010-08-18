@@ -53,13 +53,16 @@ src_prepare() {
     default
 
     # Respect *FLAGS
-    edo sed -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
-            -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
-            -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
-            -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
-            -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
-            -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
-            -i tmake/lib/linux*/tmake.conf
+    edo sed \
+        -e "/^TMAKE_CC[[:space:]]/s:=.*$:= ${CC}:" \
+        -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
+        -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CXX[[:space:]]/s:=.*$:= ${CXX}:" \
+        -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
+        -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
+        -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
+        -i tmake/lib/linux*/tmake.conf
 
     if option qt4; then
         # Without this, qt:3 is picked up if installed
