@@ -102,6 +102,8 @@ src_install() {
         fi
     fi
 
-    option atm || edo rmdir "${IMAGE}"/$(get_libdir)/{tc,}
+    if ! option atm ; then
+        [[ -d "${IMAGE}"/$(get_libdir)/{tc,} ]] && edo rmdir "${IMAGE}"/$(get_libdir)/{tc,}
+    fi
 }
 
