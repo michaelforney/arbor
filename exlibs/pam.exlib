@@ -115,7 +115,7 @@ pamd_mimic_system() {
 
     authlevels="auth account password session"
 
-    if has_version 'sys-libs/pam[<0.78]'; then
+    if has_version --root 'sys-libs/pam[<0.78]'; then
         mimic="\trequired\t\tpam_stack.so service=system-auth"
     else
         mimic="\tinclude\t\tsystem-auth"
@@ -140,7 +140,7 @@ cleanpamd() {
     illegal_in_global_scope
 
     while [[ -n $1 ]]; do
-        if ! has_version sys-libs/pam; then
+        if ! has_version --root sys-libs/pam; then
             edo sed -e '/pam_shells\|pam_console/s:^:#:' \
                     -i "${IMAGE}"/etc/pam.d/${1}
         fi

@@ -11,7 +11,7 @@ berkdb_slot() {
     local db_pkg="", db_ver=""
     exparam -v db_ver slot
     if [[ ${db_ver} -eq 0 ]]; then
-        db_pkg=$(best_version sys-libs/db)
+        db_pkg=$(best_version --slash sys-libs/db)
         db_pkg=${db_pkg%%:*}
         db_ver=$(ever range 1-2 ${db_pkg##sys-libs/db-})
     fi

@@ -89,7 +89,7 @@ ruby_src_test_expensive() {
     # Extended tests need ruby installed, setting LD_LIBRARY_PATH partially
     # works around this, but you'll still hit /usr/bin/ruby19: No such file or
     # directory
-    if has_version ${CATEGORY}/${PN}[=${PVR}] ; then
+    if has_version --slash ${CATEGORY}/${PN}[=${PVR}] ; then
         emake -j1 test-all TERM="dumb"
     else
         ewarn "ruby_src_test_expensive() needs ${CATEGORY}/${PN}[=${PVR}] installed, skipping src_test_expensive()"

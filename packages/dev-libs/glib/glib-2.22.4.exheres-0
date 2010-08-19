@@ -26,7 +26,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--enable-regex' '--with-pcre=i
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' 'fam' 'man-pages man' )
 
 src_test() {
-    if ! has_version dev-util/desktop-file-utils ; then
+    if ! has_version --slash dev-util/desktop-file-utils ; then
         ewarn "${PNV} tests need dev-utils/desktop-file-utils to succeed, skipping testsuite"
         return
     fi

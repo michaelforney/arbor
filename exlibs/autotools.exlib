@@ -47,7 +47,7 @@ autotools_select_versions() {
     if [[ -z ${WANT_AUTOCONF} && ${SUPPORTED_AUTOCONF[@]} != none ]]; then
         sorted_slots=( $(version_sort ${SUPPORTED_AUTOCONF[@]}) )
         for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
-            has_version sys-devel/autoconf:${sorted_slots[i]} \
+            has_version --slash sys-devel/autoconf:${sorted_slots[i]} \
                 && export WANT_AUTOCONF="${sorted_slots[i]}" \
                 && break
         done
@@ -57,7 +57,7 @@ autotools_select_versions() {
     if [[ -z ${WANT_AUTOMAKE} && ${SUPPORTED_AUTOMAKE[@]} != none ]]; then
         sorted_slots=( $(version_sort ${SUPPORTED_AUTOMAKE[@]}) )
         for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
-            has_version sys-devel/automake:${sorted_slots[i]} \
+            has_version --slash sys-devel/automake:${sorted_slots[i]} \
                 && export WANT_AUTOMAKE="${sorted_slots[i]}" \
                 && break
         done
