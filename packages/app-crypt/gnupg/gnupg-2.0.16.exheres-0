@@ -46,6 +46,13 @@ src_compile() {
     option doc && emake html
 }
 
+src_test() {
+    # Allow the tests to run its own instance of gpg-agent
+    sydboxcmd 'net/whitelist/bind/unix:///tmp/gpg-*/S.gpg-agent'
+    default
+    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/gpg-*/S.gpg-agent'
+}
+
 src_install() {
     default
 
