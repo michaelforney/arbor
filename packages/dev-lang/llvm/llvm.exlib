@@ -40,6 +40,10 @@ LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS="clang"
 
+if ! ever is_scm; then
+    MYOPTIONS+=" doc"
+fi
+
 GCC_VERSION="4.4.4"
 
 DEPENDENCIES="
@@ -50,6 +54,16 @@ DEPENDENCIES="
         clang? ( sys-devel/gcc[~${GCC_VERSION}] )
 "
 
+if ! ever is_scm; then
+    DEPENDENCIES+="
+    build:
+            doc? (
+            app-doc/doxygen
+            media-gfx/graphviz
+        )
+"
+fi
+
 BUGS_TO="ingmar@exherbo.org"
 
 REMOTE_IDS="freshmeat:${PN}"
@@ -57,6 +71,9 @@ REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_DOCUMENTATION="http://llvm.org/docs [[ lang = en ]]"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 
+if ! ever is_scm; then
+    DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc doxygen' )
+fi
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'clang built-clang' )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
