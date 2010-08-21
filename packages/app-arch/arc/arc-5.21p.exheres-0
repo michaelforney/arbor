@@ -1,7 +1,7 @@
-# Copyright 2008 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2008-2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge [ suffix=tgz ]
+require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Tool to manage archives in the .arc format"
 DESCRIPTION="
@@ -23,12 +23,7 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
-
 DEPENDENCIES=""
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}"/${PNV}-version.patch
-)
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     Arc521.doc
@@ -44,6 +39,8 @@ src_prepare() {
     edo sed -i -e "s:^\(CC = \).*:\1 ${CC}:" Makefile
     # Add a fake install target
     echo -e "\ninstall:\n" >> Makefile
+    # Don't strip on your own.
+    edo sed -i -e "s:\(install \)-s:\1:" Makefile
 
     default
 }
