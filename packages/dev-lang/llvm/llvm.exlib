@@ -42,13 +42,11 @@ MYOPTIONS="clang"
 
 GCC_VERSION="4.4.4"
 
-# Allow for a transition period from sys-devel/clang to dev-lang/llvm[clang], maybe 1 month
 DEPENDENCIES="
     build:
         dev-lang/perl:*
         sys-devel/flex
     build+run:
-        !sys-devel/clang
         clang? ( sys-devel/gcc[~${GCC_VERSION}] )
 "
 
