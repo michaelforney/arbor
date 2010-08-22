@@ -1,0 +1,37 @@
+# Copyright 2009 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Unicode Character Database data files"
+DESCRIPTION="
+The Unicode Character Database (UCD) is a collection of data files which contain the
+Unicode character code points and character names. The data files define the Unicode
+character properties and mappings between Unicode characters (such as case mappings).
+"
+HOMEPAGE="http://www.unicode.org"
+DOWNLOADS="
+    ${HOMEPAGE}/Public/zipped/${PV}/UCD.zip -> UCD-${PV}.zip
+    ${HOMEPAGE}/Public/zipped/${PV}/Unihan.zip -> Unihan-${PV}.zip
+"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/reports/tr44/tr44-4.html#Change_History [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/reports/tr44/tr44-4.html [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/versions/Unicode${PV}/index.html [[ lang = en ]]"
+
+LICENCES="Unicode-Data"
+MYOPTIONS=""
+SLOT="0"
+
+DEPENDENCIES="
+    build:
+        app-arch/unzip
+"
+
+PLATFORMS="~amd64 ~x86"
+
+WORK="${WORKBASE}"
+
+src_install() {
+    insinto /usr/share/unicode-data
+    doins -r *
+}
+
