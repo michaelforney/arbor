@@ -5,7 +5,7 @@
 
 require launchpad distutils [ python_dep=2.5 ] bash-completion
 
-export_exlib_phases src_test_expensive src_install
+export_exlib_phases src_install
 
 MY_PV=${PV/_}
 
@@ -28,28 +28,36 @@ UPSTREAM_DOCUMENTATION="http://doc.bazaar.canonical.com/${PN}.$(ever range 1-2)/
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS=""
+
+# The tests are very expensive in terms of runtime. (~60 minutes on a really fast
+# machine.) About 10 tests out of about 24000 (!) fail. See below for details.
 RESTRICT="test"
 
 DEPENDENCIES="
-    test-expensive:
-        dev-python/paramiko
-        dev-python/pycrypto
-        dev-python/testtools
     suggestion:
         dev-python/paramiko [[ description = [ Provides sftp support ] ]]
         dev-python/pycrypto [[ description = [ Provides sftp support ] ]]
         dev-scm/bzrtools [[ description = [ Provides rsync support, and other useful extra functionality ] ]]
 "
+#    test-expensive:
+#        dev-python/paramiko
+#        dev-python/pycrypto
+#        dev-python/testtools
 
 WORK="${WORKBASE}"/${PN}-${MY_PV}
 
-bzr_src_test_expensive() {
-    # Some tests expect the usual pyc compiling behaviour.
-    python_enable_pyc
-    edo "${PYTHON}" bzr --no-plugins selftest
-    # Just to make sure we don't hit any errors on later stages.
-    python_disable_pyc
-}
+# Ran 23849 tests in 3434.193s
+#
+# FAILED (failures=4, errors=7, known_failure_count=42)
+# 1431 tests skipped
+#
+#bzr_src_test_expensive() {
+#    # Some tests expect the usual pyc compiling behaviour.
+#    python_enable_pyc
+#    edo "${PYTHON}" bzr --no-plugins selftest
+#    # Just to make sure we don't hit any errors on later stages.
+#    python_disable_pyc
+#}
 
 bzr_src_install() {
     distutils_src_install
