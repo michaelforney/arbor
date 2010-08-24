@@ -3,7 +3,7 @@
 # Based in part upon 'acl-2.2.47.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic easy-multibuild
+require flag-o-matic easy-multibuild [ work=${PNV} ]
 
 SUMMARY="Access control list utilities, libraries and headers"
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
@@ -31,11 +31,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 
 unpack_prepare_one_multibuild() {
     edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-unpack_one_multibuild() {
-    default
-    edo mv "${PNV}"/* .
 }
 
 src_unpack() {

@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
+require easy-multibuild [ work=${PNV} ]
 
 SUMMARY="Open source SSL and TLS implementation and cryptographic library"
 HOMEPAGE="http://www.openssl.org/"
@@ -24,11 +24,6 @@ WORK="${WORKBASE}"
 
 unpack_prepare_one_multibuild() {
     edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-unpack_one_multibuild() {
-    default
-    edo mv ${PNV}/* .
 }
 
 src_unpack() {

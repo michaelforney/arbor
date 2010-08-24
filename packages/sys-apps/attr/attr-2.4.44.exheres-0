@@ -4,7 +4,7 @@
 # Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] easy-multibuild
+require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] easy-multibuild [ work=${PNV} ]
 
 SUMMARY="Core file, shell and text utilities expected to be on any system."
 
@@ -38,11 +38,6 @@ set_compiler_flags() {
 
 unpack_prepare_one_multibuild() {
     edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-unpack_one_multibuild() {
-    default
-    edo mv ${PNV}/* .
 }
 
 src_unpack() {
