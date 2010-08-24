@@ -7,7 +7,7 @@
 # Autoconf wrapper v0.2.3 -- http://www.exherbo.org/
 
 # Keep versions:slots sorted highest to lowest
-AUTOCONF_VERSIONS="2.65:2.5 2.64:2.5 2.63:2.5 2.61:2.5 2.13:2.1"
+AUTOCONF_VERSIONS="2.67:2.5 2.65:2.5 2.64:2.5 2.63:2.5 2.61:2.5 2.13:2.1"
 AUTOCONF_PROGRAM="$(basename $0)"
 
 # Default to latest available if WANT_AUTOCONF isn't set

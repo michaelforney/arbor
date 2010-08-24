@@ -17,8 +17,10 @@ DEPENDENCIES="
     build+run:
         sys-apps/coreutils[>=6.10]
     run:
-        dev-libs/openssl"
-
+        dev-libs/openssl
+    install+run:
+        sys-apps/debianutils [[ note = [ update-ca-certificates needs run-parts from debianutils ] ]]
+"
 WORK=${WORKBASE}
 
 src_unpack() {
