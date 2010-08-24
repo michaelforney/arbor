@@ -8,6 +8,8 @@ require multibuild
 myexparam classes=[ C ]
 exparam -v EASY_MULTIBUILD_CLASSES classes[@]
 
+myexparam work=
+
 export_exlib_phases src_configure src_compile src_test src_install
 
 # TODO: use less evil haxx to do this
@@ -20,10 +22,12 @@ easy-multibuild_check_classes() {
 }
 
 easy-multibuild_run_phase() {
-    local targetsv
+    local targetsv easy_multibuild_work
 
     # TODO: when paludis handles it better, move this to global scope.
     easy-multibuild_check_classes
+
+    [[ ${EXHERES_PHASE} != unpack ]] && exparam -v easy_multibuild_work work
 
     for MULTIBUILD_CLASS in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
         targetsv="MULTIBUILD_${MULTIBUILD_CLASS}_TARGETS"
@@ -42,7 +46,7 @@ easy-multibuild_run_phase() {
                 "${EXHERES_PHASE}_prepare_one_multibuild"
             fi
 
-            edo pushd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+            edo pushd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${easy_multibuild_work}"
 
             if [[ "$(type -t "${EXHERES_PHASE}_one_multibuild")" == "function" ]] ; then
                 "${EXHERES_PHASE}_one_multibuild"
