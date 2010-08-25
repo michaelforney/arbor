@@ -2,6 +2,11 @@
 # Copyright 2009 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+multibuild_default_target() {
+    local default_target=MULTIBUILD_${1}_DEFAULT_TARGET
+    [[ ${MULTIBUILD_TARGET} == ${!default_target} ]]
+}
+
 # multibuild_get_var $class $target $var
 multibuild_get_var() {
     local merged class=${1} target=${2} var=${3}
