@@ -29,6 +29,6 @@ DEPENDENCIES="
 
 src_prepare() {
     default
-    edo sed -i -e "s:\(PREFIX = /usr\)/local:\1:" Makefile
+    edo sed -i -e "s:\(PREFIX = /usr\)/local:\1:" -e "/^CFLAGS/d" Makefile
 }
 
