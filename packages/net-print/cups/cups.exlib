@@ -142,15 +142,15 @@ configure_one_multibuild() {
 }
 
 compile_one_multibuild() {
-    if [[ "${MULTIBUILD_C_DEFAULT_TARGET}" != "${MULTIBUILD_TARGET}" ]] ; then
-        emake libs
-    else
+    if multibuild_default_target C; then
         emake
+    else
+        emake libs
     fi
 }
 
 install_one_multibuild() {
-    if [[ "${MULTIBUILD_C_DEFAULT_TARGET}" != "${MULTIBUILD_TARGET}" ]] ; then
+    if ! multibuild_default_target C; then
         emake -j1 BUILDROOT="${IMAGE}" install-libs
         return
     fi

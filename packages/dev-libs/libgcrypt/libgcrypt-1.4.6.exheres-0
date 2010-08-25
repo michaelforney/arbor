@@ -31,7 +31,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 install_one_multibuild() {
     default
-    if [[ "${MULTIBUILD_TARGET}" != "${MULTIBUILD_C_DEFAULT_TARGET}" ]]; then
+    if ! multibuild_default_target C; then
         dodir "/usr/${CHOST}/bin"
         edo mv "${IMAGE}"/usr/bin/"${PN}"-config "${IMAGE}"/usr/"${CHOST}"/bin
     fi

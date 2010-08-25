@@ -53,15 +53,15 @@ compile_one_multibuild() {
     )
 
     emake "${myemake[@]}" -f Makefile-libbz2_so
-    emake "${myemake[@]}" $([[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]] || echo libbz2.a)
+    emake "${myemake[@]}" $(multibuild_default_target C || echo libbz2.a)
 }
 
 test_one_multibuild() {
-    [[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]] && default
+    multibuild_default_target C && default
 }
 
 install_one_multibuild() {
-    if [[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]]; then
+    if multibuild_default_target C; then
         emake PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANPREFIX="${IMAGE}"/usr/share install
         emagicdocs
     else
@@ -76,7 +76,7 @@ install_one_multibuild() {
         dosym libbz2.so.${PV} /${LIBDIR}/${v}
     done
 
-    if [[ "${MULTIBUILD_TARGET}" == "${MULTIBUILD_C_DEFAULT_TARGET}" ]]; then
+    if multibuild_default_target C; then
         # Fix symlinks linking to ${IMAGE}
         dosym bzgrep /bin/bzegrep
         dosym bzgrep /bin/bzfgrep
