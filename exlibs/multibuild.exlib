@@ -23,7 +23,7 @@ multibuild_get_all_var() {
 
 # multibuild_load_build_target $class $target
 multibuild_load_build_target() {
-    local merged class=${1} target=${2}
+    local merged class=${1} target=${2} prepend var
 
     multibuild_merge_build_target_vars ${class} ${target}
 
@@ -31,6 +31,24 @@ multibuild_load_build_target() {
     for merged in $(eval echo \${!MULTIBUILD_${class}_${target}_MERGED_*}); do
         export MULTIBUILD_${class}_${target}_CURRENT_${merged#MULTIBUILD_${class}_${target}_MERGED_}="${!merged}"
         export ${merged#MULTIBUILD_${class}_${target}_MERGED_}="${!merged}"
+    done
+
+    # remove previously prepended values
+    for prepend in $(eval echo \${!MULTIBUILD_${class}_PREPEND_*}); do
+        var=${prepend#MULTIBUILD_${class}_PREPEND_}
+        if [[ -n ${!prepend} ]]; then
+            export ${var}="${!var//${!prepend}}"
+            export ${prepend}=
+        fi
+    done
+
+    # prepend _PREPEND_ variables
+    for prepend in $(eval echo \${!MULTIBUILD_${class}_${target}_PREPEND_*}); do
+        var=${prepend#MULTIBUILD_${class}_${target}_PREPEND_}
+        if [[ ${!var} != *${!prepend}* ]]; then
+            export ${var}="${!prepend}${!var}"
+            export MULTIBUILD_${class}_PREPEND_${var}="${!prepend}"
+        fi
     done
 
     # set current target
