@@ -1,4 +1,4 @@
-# Copyright 2007,2009 Mike Kelly <pioto@exherbo.org>
+# Copyright 2007, 2009, 2010 Mike Kelly <pioto@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'bash-completion-20060301-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2006 Gentoo Foundation
@@ -24,7 +24,8 @@ export_exlib_phases src_install
 bash-completion_src_install() {
     default
 
-    edo mv "${IMAGE}"/{etc/bash_completion.d,usr/share/bash-completion}
+    edo mv "${IMAGE}"/etc/bash_completion.d/* "${IMAGE}"/usr/share/bash-completion
+    edo rmdir "${IMAGE}"/etc/bash_completion.d/
 
     exeinto /etc/bash/bashrc.d
     newexe "${FILES}/bash-completion-1.sh" "bash-completion.sh"
