@@ -63,16 +63,5 @@ src_install() {
 
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
-
-    # We will install this directory in pkg_postinst
-    edo rmdir "${IMAGE}"/cgroup
-}
-
-pkg_postinst() {
-    # This directory must be created in postinst because systemd uses it as a
-    # mount point for cgroups. It cannot be created with keepdir because when
-    # the system is booted with systemd, this directory is mounted and
-    # read-only, so the merge will fail.
-    [[ -d /cgroup/systemd ]] || edo mkdir -p /cgroup/systemd
 }
 
