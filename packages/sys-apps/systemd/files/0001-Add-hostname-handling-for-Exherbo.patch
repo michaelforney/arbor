@@ -1,0 +1,34 @@
+From 18220668b9daca911c147eedccbaa968ac3c8177 Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Thu, 26 Aug 2010 20:42:10 +0200
+Subject: [PATCH] Add hostname handling for Exherbo.
+
+---
+ src/hostname-setup.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/src/hostname-setup.c b/src/hostname-setup.c
+index ce7d2a1..3d3bb95 100644
+--- a/src/hostname-setup.c
++++ b/src/hostname-setup.c
+@@ -38,6 +38,8 @@
+ #define FILENAME "/etc/rc.conf"
+ #elif defined(TARGET_GENTOO)
+ #define FILENAME "/etc/conf.d/hostname"
++#elif defined(TARGET_EXHERBO)
++#define FILENAME "/etc/hostname"
+ #endif
+ 
+ static char* strip_bad_chars(char *s) {
+@@ -137,7 +139,7 @@ finish:
+         fclose(f);
+         return r;
+ 
+-#elif defined(TARGET_SUSE) || defined(TARGET_SLACKWARE)
++#elif defined(TARGET_SUSE) || defined(TARGET_SLACKWARE) || defined(TARGET_EXHERBO)
+         return read_and_strip_hostname(FILENAME, hn);
+ #else
+         return -ENOENT;
+-- 
+1.7.2.2
+
