@@ -45,10 +45,7 @@ DEPENDENCIES="
         dev-cpp/cppunit[>=1.12.1]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}"/${PN}-0.8.0-automagic-deps.patch
-    -p1 "${FILES}"/${PN}-0.8.1-casts.patch
-)
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PN}-0.8.0-automagic-deps.patch )
 
 CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE -DWANT_FONTCONFIG:BOOL=TRUE)
 CMAKE_SRC_CONFIGURE_OPTION_WANTS=(
@@ -67,14 +64,14 @@ podofo_src_prepare() {
 podofo_src_test() {
     # The commented tests fail due to bogus assumptions (e. g. specific fonts
     # being installed, all fonts being supported, etc.) or problems with the tests
-    # themselves, not podofo.
+    # themselves, not podofo. (E. g. some test are actually *interactive*.)
     edo pushd "${WORKBASE}"/build/test
     edo ./ContentParser/ContentParser CreationTest/resources/Illust.pdf
     edo ./CreationTest/CreationTest ./lala.pdf
     edo ./DeviceTest/DeviceTest
 #    edo ./FilterTest/FilterTest
 #    edo ./FormTest/FormTest ./lala.pdf
-#    edo ./FormTest/FormTest ./lala.pdf ./lala2.pdf
+    edo ./FormTest/FormTest ./lala.pdf ./lala2.pdf
 #    edo ./LargeTest/LargeTest ./lala.pdf ./CreationTest/resources/lena.jpg
 #    edo ./ObjectParserTest/ObjectParserTest
     edo ./ParserTest/ParserTest ./CreationTest/resources/Illust.pdf lala.pdf
