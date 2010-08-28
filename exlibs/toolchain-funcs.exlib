@@ -45,6 +45,37 @@ gcc-micro-version() {
     gcc-fullversion "$@" | cut -f3 -d. | cut -f1 -d-
 }
 
+# Returns the version as by `$CC -dumpversion`
+gxx-fullversion() {
+    illegal_in_global_scope
+
+    "${CXX}" "$@" -dumpversion
+}
+# Returns the version, but only the <major>.<minor>
+gxx-version() {
+    illegal_in_global_scope
+
+    gxx-fullversion "$@" | cut -f1,2 -d.
+}
+# Returns the Major version
+gxx-major-version() {
+    illegal_in_global_scope
+
+    gxx-version "$@" | cut -f1 -d.
+}
+# Returns the Minor version
+gxx-minor-version() {
+    illegal_in_global_scope
+
+    gxx-version "$@" | cut -f2 -d.
+}
+# Returns the Micro version
+gxx-micro-version() {
+    illegal_in_global_scope
+
+    gxx-fullversion "$@" | cut -f3 -d. | cut -f1 -d-
+}
+
 # Check whether our selected compiler supports visibility
 has_visibility() {
     illegal_in_global_scope
