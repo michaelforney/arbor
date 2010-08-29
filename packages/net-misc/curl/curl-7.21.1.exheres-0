@@ -6,7 +6,7 @@ require common-metadata easy-multibuild
 
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="idn ipv6
-    ares [[ description = [ Enabled c-ares dns support ] ]]
+    ares [[ description = [ Enabled c-ares posix-threaded dns support, disables curl's own threaded resolver ] ]]
     multibuild_c: 32 64
 "
 DEPENDENCIES="
@@ -25,14 +25,15 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-sydbox.patch
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-werror
     --disable-{gssapi,ldap,sspi}
-    --without-{gnutls,nss,krb4,libssh2,spnego}
+    --without-{gnutls,nss,krb4,librtmp,libssh2,polarssl,spnego}
     --without-ca-bundle
     --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
     --with-ssl
     --with-ca-path=/etc/ssl/certs
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares '!ares threaded-resolver' ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'idn libidn' )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )

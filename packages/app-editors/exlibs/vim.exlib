@@ -1,4 +1,4 @@
-# Copyright 2007, 2009 Mike Kelly <pioto@exherbo.org>
+# Copyright 2007, 2009, 2010 Mike Kelly <pioto@exherbo.org>
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Based upon vim.eclass, copyright 1999-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
@@ -114,10 +114,13 @@ vim_src_uri_patches() {
 
 VIM_BASE_URI="${VIM_BASE_URI:-ftp://ftp.vim.org/pub/vim}"
 DOWNLOADS="${VIM_BASE_URI}/unix/vim-${VIM_VERSION}.tar.bz2
-    ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-lang.tar.gz
-    ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-extra.tar.gz
     ${VIM_EXHERBO_PATCHES_URI:-http://dev.exherbo.org/~pioto/distfiles/vim-${VIM_VERSION}-exherbo-patches.tar.bz2}
     $(vim_src_uri_patches DOWNLOADS)"
+if ! ever at_least 7.3 ; then
+    # extras and lang are included in the main tarball as of 7.3
+    DOWNLOADS+=" ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-extra.tar.gz
+    ${VIM_BASE_URI}/extra/vim-${VIM_VERSION}-lang.tar.gz"
+fi
 WORK="${WORKBASE}/vim${VIM_VERSION//.}"
 
 vim_src_prepare() {
