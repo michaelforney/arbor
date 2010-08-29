@@ -1,41 +1,15 @@
-Source: Written by Michael Forney
-Upstream: Not interested (see DISTRO_PORTING)
-Reason: Add Exherbo distribution option to systemd
-
-From d93e99443c4f6ee65305e254e3b0c3034c2ea73d Mon Sep 17 00:00:00 2001
+From ea2bcf073859f6e87fa5a5b929c0ef0518d7480a Mon Sep 17 00:00:00 2001
 From: Michael Forney <mforney@mforney.org>
 Date: Tue, 13 Jul 2010 11:38:10 -0700
 Subject: [PATCH] Add Exherbo distribution
 
 ---
- Makefile.am                 |    6 ++++++
- configure.ac                |   11 ++++++++++-
- units/exherbo/font.target   |   12 ++++++++++++
- units/exherbo/font@.service |   18 ++++++++++++++++++
- units/getty@.service.m4     |    1 +
- 5 files changed, 47 insertions(+), 1 deletions(-)
- create mode 100644 units/exherbo/font.target
- create mode 100644 units/exherbo/font@.service
+ configure.ac            |   11 ++++++++++-
+ units/getty@.service.m4 |    1 +
+ 2 files changed, 11 insertions(+), 1 deletions(-)
 
-diff --git a/Makefile.am b/Makefile.am
-index 725685d..f961a9f 100644
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -259,6 +259,12 @@ dist_systemunit_DATA += \
- 	units/arch/reboot.service
- endif
- 
-+if TARGET_EXHERBO
-+dist_systemunit_DATA += \
-+	units/exherbo/font.target \
-+	units/exherbo/font@.service
-+endif
-+
- dist_doc_DATA = \
- 	README \
- 	LICENSE \
 diff --git a/configure.ac b/configure.ac
-index f8a4247..cc56c90 100644
+index 3905e49..9f50f74 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -245,7 +245,7 @@ AM_CONDITIONAL(HAVE_XSLTPROC, test x"$XSLTPROC" != x)
@@ -77,48 +51,6 @@ index f8a4247..cc56c90 100644
  
  AC_DEFINE_UNQUOTED(SPECIAL_SYSLOG_SERVICE, ["$SPECIAL_SYSLOG_SERVICE"], [Syslog service name])
  
-diff --git a/units/exherbo/font.target b/units/exherbo/font.target
-new file mode 100644
-index 0000000..22983be
---- /dev/null
-+++ b/units/exherbo/font.target
-@@ -0,0 +1,12 @@
-+#  This file is part of systemd.
-+#
-+#  systemd is free software; you can redistribute it and/or modify it
-+#  under the terms of the GNU General Public License as published by
-+#  the Free Software Foundation; either version 2 of the License, or
-+#  (at your option) any later version.
-+
-+[Unit]
-+Description=Console fonts
-+
-+[Install]
-+WantedBy=multi-user.target
-diff --git a/units/exherbo/font@.service b/units/exherbo/font@.service
-new file mode 100644
-index 0000000..1910f5a
---- /dev/null
-+++ b/units/exherbo/font@.service
-@@ -0,0 +1,18 @@
-+#  This file is part of systemd.
-+#
-+#  systemd is free software; you can redistribute it and/or modify it
-+#  under the terms of the GNU General Public License as published by
-+#  the Free Software Foundation; either version 2 of the License, or
-+#  (at your option) any later version.
-+
-+[Unit]
-+Description=Console font on %I
-+Before=font.target
-+
-+[Service]
-+Type=oneshot
-+RemainAfterExit=yes
-+ExecStart=/usr/bin/setfont -C /dev/%I default8x16
-+
-+[Install]
-+Alias=font.target.wants/font@tty1.service font.target.wants/font@tty2.service font.target.wants/font@tty3.service font.target.wants/font@tty4.service font.target.wants/font@tty5.service font.target.wants/font@tty6.service
 diff --git a/units/getty@.service.m4 b/units/getty@.service.m4
 index 4b65d5b..942b3d6 100644
 --- a/units/getty@.service.m4
