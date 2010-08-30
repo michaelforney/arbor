@@ -1,11 +1,17 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+if [[ ${PV} == "scm" ]] ; then
+    SCM_REPOSITORY="git://anongit.freedesktop.org/git/dbus/dbus"
+    require scm-git
+else
+    DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
+fi
+
 require flag-o-matic
 
 SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
 HOMEPAGE="http://dbus.freedesktop.org/"
-DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
