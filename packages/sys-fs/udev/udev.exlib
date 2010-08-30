@@ -1,5 +1,12 @@
-# Copyright 2008 Wulf C. Krueger <philanthrop@exherbo.org>
+# Copyright 2010 Wulf C. Krueger <philanthrop@exherbo.org>
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+
+if [[ ${PV} == "scm" ]] ; then
+    SCM_REPOSITORY="git://git.kernel.org/pub/scm/linux/hotplug/udev.git"
+    require scm-git
+else
+    DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
+fi
 
 require multilib
 
@@ -7,8 +14,6 @@ SUMMARY="Dynamic userspace /dev manager for Linux"
 DESCRIPTION="
 "
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
-DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
-
 LICENCES="( GPL-2 LGPL-2 )"
 MYOPTIONS=""
 
