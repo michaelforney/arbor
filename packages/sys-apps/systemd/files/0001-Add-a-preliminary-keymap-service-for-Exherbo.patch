@@ -1,21 +1,21 @@
-From 0deeab8272a494e005b2e196f504d00a9500194d Mon Sep 17 00:00:00 2001
+From a087e2378e8ff99966a088ffd526d339579d6759 Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
 Date: Sun, 29 Aug 2010 17:40:23 +0200
 Subject: [PATCH] Add a preliminary keymap service for Exherbo.
 
 ---
  Makefile.am                   |    4 +++-
- units/exherbo/keymap.target   |   13 +++++++++++++
+ units/exherbo/keymap.target   |   12 ++++++++++++
  units/exherbo/keymap@.service |   22 ++++++++++++++++++++++
- 3 files changed, 38 insertions(+), 1 deletions(-)
+ 3 files changed, 37 insertions(+), 1 deletions(-)
  create mode 100644 units/exherbo/keymap.target
  create mode 100644 units/exherbo/keymap@.service
 
 diff --git a/Makefile.am b/Makefile.am
-index 244dad4..b447855 100644
+index f18d48f..60662f1 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -266,7 +266,9 @@ dist_systemunit_DATA += \
+@@ -263,7 +263,9 @@ dist_systemunit_DATA += \
  	units/exherbo/halt.service \
  	units/exherbo/killall.service \
  	units/exherbo/reboot.service \
@@ -28,10 +28,10 @@ index 244dad4..b447855 100644
  dist_doc_DATA = \
 diff --git a/units/exherbo/keymap.target b/units/exherbo/keymap.target
 new file mode 100644
-index 0000000..c80c48e
+index 0000000..e2049fd
 --- /dev/null
 +++ b/units/exherbo/keymap.target
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,12 @@
 +#  This file is part of systemd.
 +#
 +#  systemd is free software; you can redistribute it and/or modify it
@@ -41,7 +41,6 @@ index 0000000..c80c48e
 +
 +[Unit]
 +Description=Key mapping
-+Requires=keymap@.service
 +
 +[Install]
 +WantedBy=multi-user.target
