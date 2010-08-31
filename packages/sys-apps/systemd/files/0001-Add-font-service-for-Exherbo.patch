@@ -1,4 +1,4 @@
-From 4dd56e1658471ee943e32a0272cc300a4efb278b Mon Sep 17 00:00:00 2001
+From fa946b35d28022e6e5304452d353ee3de730c29a Mon Sep 17 00:00:00 2001
 From: Michael Forney <mforney@mforney.org>
 Date: Sun, 29 Aug 2010 05:42:15 -0700
 Subject: [PATCH] Add font service for Exherbo
@@ -48,7 +48,7 @@ index 0000000..22983be
 +WantedBy=multi-user.target
 diff --git a/units/exherbo/font@.service b/units/exherbo/font@.service
 new file mode 100644
-index 0000000..927abe9
+index 0000000..e4fbedd
 --- /dev/null
 +++ b/units/exherbo/font@.service
 @@ -0,0 +1,19 @@
@@ -67,7 +67,7 @@ index 0000000..927abe9
 +EnvironmentFile=/etc/conf.d/console.conf
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=/usr/bin/setfont -C /dev/%I $FONT
++ExecStart=/usr/bin/setfont -C /dev/%I ${FONT}
 +
 +[Install]
 +Alias=font.target.wants/font@tty1.service font.target.wants/font@tty2.service font.target.wants/font@tty3.service font.target.wants/font@tty4.service font.target.wants/font@tty5.service font.target.wants/font@tty6.service
