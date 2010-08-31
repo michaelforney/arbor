@@ -1,4 +1,4 @@
-From a087e2378e8ff99966a088ffd526d339579d6759 Mon Sep 17 00:00:00 2001
+From d44df0463224da836d3b910c9ad5c6821b5c898e Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
 Date: Sun, 29 Aug 2010 17:40:23 +0200
 Subject: [PATCH] Add a preliminary keymap service for Exherbo.
@@ -12,10 +12,10 @@ Subject: [PATCH] Add a preliminary keymap service for Exherbo.
  create mode 100644 units/exherbo/keymap@.service
 
 diff --git a/Makefile.am b/Makefile.am
-index f18d48f..60662f1 100644
+index 244dad4..b447855 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -263,7 +263,9 @@ dist_systemunit_DATA += \
+@@ -266,7 +266,9 @@ dist_systemunit_DATA += \
  	units/exherbo/halt.service \
  	units/exherbo/killall.service \
  	units/exherbo/reboot.service \
@@ -46,7 +46,7 @@ index 0000000..e2049fd
 +WantedBy=multi-user.target
 diff --git a/units/exherbo/keymap@.service b/units/exherbo/keymap@.service
 new file mode 100644
-index 0000000..a58c974
+index 0000000..65afcfe
 --- /dev/null
 +++ b/units/exherbo/keymap@.service
 @@ -0,0 +1,22 @@
@@ -66,7 +66,7 @@ index 0000000..a58c974
 +RemainAfterExit=yes
 +EnvironmentFile=/etc/conf.d/console.conf
 +ExecStartPre=/usr/bin/kbd_mode -u
-+ExecStart=/usr/bin/loadkeys windowkeys $KEYMAP
++ExecStart=/usr/bin/loadkeys windowkeys ${KEYMAP}
 +ExecStartPost=-/usr/bin/dumpkeys | /usr/bin/loadkeys --unicode
 +ExecStartPost=/usr/bin/echo -n -e $'\033%G' > /dev/%I
 +
