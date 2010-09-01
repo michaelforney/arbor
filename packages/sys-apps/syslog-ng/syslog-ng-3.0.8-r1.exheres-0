@@ -1,8 +1,10 @@
 # Copyright 2007 Bryan Østergaard
-# Copyright 2009 Wulf C. Krueger
+# Copyright 2009, 2010 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
+
+require multilib
 
 SUMMARY="Popular system logger"
 HOMEPAGE="http://www.balabit.com/network-security/${PN}/"
@@ -13,7 +15,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="caps ipv6 pcre tcpd vim-syntax"
+MYOPTIONS="caps ipv6 pcre systemd tcpd vim-syntax"
 RESTRICT="test"
 
 DEPENDENCIES="
@@ -51,9 +53,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "tcpd tcp-wrapper"
 )
 
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
-    contrib/syslog-ng.conf.doc
-)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/syslog-ng.conf.doc )
 
 src_install() {
     default
@@ -70,8 +70,13 @@ src_install() {
     insinto /etc/syslog-ng
     newins "${FILES}"/syslog-ng.conf.sample syslog-ng.conf
 
-    newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
-    newconfd "${FILES}"/syslog-ng.confd syslog-ng
+    if ! option systemd ; then
+        newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
+        newconfd "${FILES}"/syslog-ng.confd syslog-ng
+    else
+        insinto /$(get_libdir)/systemd/system
+        doins "${FILES}"/syslog-ng.service
+    fi
 
     insinto /etc/logrotate.d
     newins "${FILES}"/syslog-ng.logrotate syslog-ng
