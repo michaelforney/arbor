@@ -1,0 +1,54 @@
+# Copyright 2010 Alex Elsayed <eternaleye@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="git://dracut.git.sourceforge.net/gitroot/dracut/dracut"
+require scm-git
+
+
+SUMMARY="Dracut is a new, modular, initramfs infrastructure. "
+DESCRIPTION="
+Unlike existing initramfs's, this is an attempt at having as little as possible hard-coded into
+the initramfs as possible. The initramfs has (basically) one purpose in life -- getting the rootfs
+mounted so that we can transition to the real rootfs. This is all driven off of device availability.
+Therefore, instead of scripts hard-coded to do various things, we depend on udev to create device
+nodes for us and then when we have the rootfs's device node, we mount and carry on. This helps to
+keep the time required in the initramfs as little as possible so that things like a 5 second boot
+aren't made impossible as a result of the very existence of an initramfs. It's likely that we'll
+grow some hooks for running arbitrary commands in the flow of the script, but it's worth trying
+to resist the urge as much as we can as hooks are guaranteed to be the path to slow-down. 
+"
+HOMEPAGE="http://sourceforge.net/apps/trac/dracut/"
+DOWNLOADS=""
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-libs/libxml2:2.0
+    run:
+        app-shells/dash
+    suggestion:
+        app-misc/bootchart     [[ note = [ Support for graphical analysis of boot process ] ]]
+        net-misc/bridge-utils  [[ note = [ Support for network boot ] ]]
+        net-misc/dhcp          [[ note = [ Support for network boot ] ]]
+        net-misc/iputils       [[ note = [ Support for network boot ] ]]
+        net-misc/open-iscsi    [[ note = [ Support for rootfs on iSCSI ] ]]
+        sys-apps/eject         [[ note = [ Support got livecds ] ]]
+        sys-apps/iproute2      [[ note = [ Support for network boot ] ]]
+        sys-apps/net-tools     [[ note = [ Support for network boot ] ]]
+        sys-fs/btrfs-progs     [[ note = [ Support for multi-device btrfs filesystems ] ]]
+        sys-fs/cryptsetup      [[ note = [ Support for rootfs on dm-crypt ] ]]
+        sys-fs/lvm2            [[ note = [ Support for rootfs on LVM volumes, also livecds ] ]]
+        sys-fs/multipath-tools [[ note = [ Support for rootfs on dmraid, mkdraid, and multipath ] ]]
+"
+
+BUGS_TO="eternaleye@gmail.com"
+
+src_install() {
+    default
+    keepdir /usr/etc/dracut.conf.d
+}
+
