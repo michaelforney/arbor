@@ -1,0 +1,11 @@
+[Unit]
+Description=NSM service daemon
+Requires=rpcbind.service
+After=rpcbind.service
+
+[Service]
+ExecStart=/sbin/rpc.statd
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
