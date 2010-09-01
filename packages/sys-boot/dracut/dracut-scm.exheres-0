@@ -31,18 +31,20 @@ DEPENDENCIES="
     run:
         app-shells/dash
     suggestion:
-        app-misc/bootchart     [[ note = [ Support for graphical analysis of boot process ] ]]
-        net-misc/bridge-utils  [[ note = [ Support for network boot ] ]]
-        net-misc/dhcp          [[ note = [ Support for network boot ] ]]
-        net-misc/iputils       [[ note = [ Support for network boot ] ]]
-        net-misc/open-iscsi    [[ note = [ Support for rootfs on iSCSI ] ]]
-        sys-apps/eject         [[ note = [ Support got livecds ] ]]
-        sys-apps/iproute2      [[ note = [ Support for network boot ] ]]
-        sys-apps/net-tools     [[ note = [ Support for network boot ] ]]
-        sys-fs/btrfs-progs     [[ note = [ Support for multi-device btrfs filesystems ] ]]
-        sys-fs/cryptsetup      [[ note = [ Support for rootfs on dm-crypt ] ]]
-        sys-fs/lvm2            [[ note = [ Support for rootfs on LVM volumes, also livecds ] ]]
-        sys-fs/multipath-tools [[ note = [ Support for rootfs on dmraid, mkdraid, and multipath ] ]]
+        app-misc/bootchart     [[ description = [ Support for graphical analysis of boot process ] ]]
+        net-misc/open-iscsi    [[ description = [ Support for rootfs on iSCSI ] ]]
+        sys-apps/eject         [[ description = [ Support got livecds ] ]]
+        sys-fs/btrfs-progs     [[ description = [ Support for multi-device btrfs filesystems ] ]]
+        sys-fs/cryptsetup      [[ description = [ Support for rootfs on dm-crypt ] ]]
+        sys-fs/lvm2            [[ description = [ Support for rootfs on LVM volumes, also livecds ] ]]
+        sys-fs/multipath-tools [[ description = [ Support for rootfs on dmraid, mkdraid, and multipath ] ]]
+        (
+            net-misc/bridge-utils
+            net-misc/dhcp
+            net-misc/iputils
+            sys-apps/iproute2
+            sys-apps/net-tools
+        } [[ description = [ Support for network boot ] ]]
 "
 
 BUGS_TO="eternaleye@gmail.com"
