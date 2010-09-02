@@ -46,12 +46,12 @@ src_install() {
     local f list=""
     option nfsv4 && list+="rpc.idmapd"
 
-    if ! option systemd ; then
-        for f in nfs nfsmount rpc.statd ${list} ; do
-            newinitd "${FILES}"/${f}.initd ${f}
-        done
-        newconfd "${FILES}"/nfs.confd nfs
-    else
+    for f in nfs nfsmount rpc.statd ${list} ; do
+        newinitd "${FILES}"/${f}.initd ${f}
+    done
+    newconfd "${FILES}"/nfs.confd nfs
+
+    if option systemd ; then
         insinto /$(get_libdir)/systemd/system
         doins \
             "${FILES}"/systemd/rpcbind.service \
