@@ -1,4 +1,4 @@
-From d44df0463224da836d3b910c9ad5c6821b5c898e Mon Sep 17 00:00:00 2001
+From 3be86ec20078e9e785ac7ac4a42ded3131123227 Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
 Date: Sun, 29 Aug 2010 17:40:23 +0200
 Subject: [PATCH] Add a preliminary keymap service for Exherbo.
@@ -46,7 +46,7 @@ index 0000000..e2049fd
 +WantedBy=multi-user.target
 diff --git a/units/exherbo/keymap@.service b/units/exherbo/keymap@.service
 new file mode 100644
-index 0000000..65afcfe
+index 0000000..0a29ff9
 --- /dev/null
 +++ b/units/exherbo/keymap@.service
 @@ -0,0 +1,22 @@
@@ -65,10 +65,10 @@ index 0000000..65afcfe
 +Type=oneshot
 +RemainAfterExit=yes
 +EnvironmentFile=/etc/conf.d/console.conf
-+ExecStartPre=/usr/bin/kbd_mode -u
-+ExecStart=/usr/bin/loadkeys windowkeys ${KEYMAP}
++ExecStartPre=-/usr/bin/kbd_mode -u
++ExecStart=-/usr/bin/loadkeys windowkeys ${KEYMAP}
 +ExecStartPost=-/usr/bin/dumpkeys | /usr/bin/loadkeys --unicode
-+ExecStartPost=/usr/bin/echo -n -e $'\033%G' > /dev/%I
++ExecStartPost=-/usr/bin/echo -n -e $'\033%G' > /dev/%I
 +
 +[Install]
 +Alias=keymap.target.wants/keymap@tty1.service keymap.target.wants/keymap@tty2.service keymap.target.wants/keymap@tty3.service keymap.target.wants/keymap@tty4.service keymap.target.wants/keymap@tty5.service keymap.target.wants/keymap@tty6.service
