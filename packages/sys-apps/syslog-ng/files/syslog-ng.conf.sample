@@ -9,7 +9,7 @@ options {
 
 source src {
     file ("/proc/kmsg");
-    unix-stream("/dev/log" max-connections(256));
+    unix-dgram("/dev/log" max-connections(256));
     internal();
 };
 
