@@ -1,0 +1,11 @@
+[Unit]
+Description=sendmail client
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/sendmail -Ac -q30m -L sm-cm
+PIDFile=/var/spool/clientmqueue/sm-client.pid
+
+[Install]
+WantedBy=multi-user.target

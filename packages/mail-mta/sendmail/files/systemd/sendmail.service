@@ -1,0 +1,13 @@
+[Unit]
+Description=sendmail server
+After=syslog.target
+
+[Service]
+Type=forking
+ExecStartPre=-/usr/bin/newaliases > /dev/null 2>&1
+ExecStartPre=/usr/bin/rm -f /var/spool/mqueue/xf*
+ExecStart=/usr/sbin/sendmail -bd -q30m -L sm-mta
+PIDFile=/var/run/sendmail.pid
+
+[Install]
+WantedBy=multi-user.target
