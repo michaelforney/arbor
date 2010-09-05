@@ -1,0 +1,69 @@
+Source: written by ClintonRoy
+Upstream: yes, Python Issue #3585
+Reason: Add python-$(SLOT).pc for pkg-config (multibuild version)
+Index: configure.in
+===================================================================
+--- python2.6/configure.in	(revision 72896)
++++ python2.6/configure.in	(working copy)
+@@ -3867,7 +3867,7 @@
+ AC_MSG_RESULT(done)
+ 
+ # generate output files
+-AC_CONFIG_FILES(Makefile.pre Modules/Setup.config)
++AC_CONFIG_FILES(Makefile.pre Modules/Setup.config Misc/python.pc)
+ AC_OUTPUT
+ 
+ echo "creating Modules/Setup"
+Index: Misc/python.pc.in
+===================================================================
+--- python2.6/Misc/python.pc.in	(revision 0)
++++ python2.6/Misc/python.pc.in	(revision 0)
+@@ -0,0 +1,13 @@
++prefix=@prefix@
++exec_prefix=@exec_prefix@
++libdir=@libdir@
++includedir=@includedir@
++
++Name: Python
++Description: Python library
++Requires: 
++Version: @VERSION@
++Libs.private: @LIBS@
++Libs: -L${libdir} -lpython@VERSION@
++Cflags: -I${includedir}/python@VERSION@ @CFLAGS@
++
+Index: Makefile.pre.in
+===================================================================
+--- python2.6/Makefile.pre.in	(revision 72896)
++++ python2.6/Makefile.pre.in	(working copy)
+@@ -770,6 +770,8 @@
+ 	(cd $(DESTDIR)$(BINDIR); $(LN) python$(VERSION)$(EXE) $(PYTHON))
+ 	-rm -f $(DESTDIR)$(BINDIR)/python-config
+ 	(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(VERSION)-config python-config)
++	-rm -f $(DESTDIR)$(LIBPC)/python.pc
++	(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(VERSION).pc python.pc)
+ 
+ # Install the interpreter with $(VERSION) affixed
+ # This goes into $(exec_prefix)
+@@ -946,8 +948,12 @@
+ # Install the library and miscellaneous stuff needed for extending/embedding
+ # This goes into $(exec_prefix)
+ LIBPL=		$(LIBP)/config
++
++# pkgconfig directory
++LIBPC=		$(LIBDIR)/pkgconfig
++
+ libainstall:	all
+-	@for i in $(LIBDIR) $(LIBP) $(LIBPL); \
++	@for i in $(LIBDIR) $(LIBP) $(LIBPL) $(LIBPC); \
+ 	do \
+ 		if test ! -d $(DESTDIR)$$i; then \
+ 			echo "Creating directory $$i"; \
+@@ -974,6 +980,7 @@
+ 	$(INSTALL_DATA) Modules/Setup $(DESTDIR)$(LIBPL)/Setup
+ 	$(INSTALL_DATA) Modules/Setup.local $(DESTDIR)$(LIBPL)/Setup.local
+ 	$(INSTALL_DATA) Modules/Setup.config $(DESTDIR)$(LIBPL)/Setup.config
++	$(INSTALL_DATA) Misc/python.pc $(DESTDIR)$(LIBPC)/python-$(VERSION).pc
+ 	$(INSTALL_SCRIPT) $(srcdir)/Modules/makesetup $(DESTDIR)$(LIBPL)/makesetup
+ 	$(INSTALL_SCRIPT) $(srcdir)/install-sh $(DESTDIR)$(LIBPL)/install-sh
+ 	# Substitution happens here, as the completely-expanded BINDIR

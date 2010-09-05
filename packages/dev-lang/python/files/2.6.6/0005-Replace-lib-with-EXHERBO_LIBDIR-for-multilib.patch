@@ -10,7 +10,7 @@ See what debian does.
 ---
  Lib/distutils/command/install.py |    4 ++--
  Lib/distutils/sysconfig.py       |    3 ++-
- Lib/site.py                      |    4 ++--
+ Lib/site.py                      |    6 +++---
  Makefile.pre.in                  |    4 ++--
  Modules/Setup.dist               |    2 +-
  Modules/getpath.c                |    6 +++---
@@ -21,7 +21,7 @@ diff --git a/Lib/distutils/command/install.py b/Lib/distutils/command/install.py
 index 76efe3b..865af0a 100644
 --- a/Lib/distutils/command/install.py
 +++ b/Lib/distutils/command/install.py
-@@ -41,8 +41,8 @@ else:
+@@ -41,15 +41,15 @@ else:
  
  INSTALL_SCHEMES = {
      'unix_prefix': {
@@ -30,6 +30,15 @@ index 76efe3b..865af0a 100644
 +        'purelib': '$base/@@EXHERBO_LIBDIR@@/python$py_version_short/site-packages',
 +        'platlib': '$platbase/@@EXHERBO_LIBDIR@@/python$py_version_short/site-packages',
          'headers': '$base/include/python$py_version_short/$dist_name',
+         'scripts': '$base/bin',
+         'data'   : '$base',
+         },
+     'unix_home': {
+-        'purelib': '$base/lib/python',
+-        'platlib': '$base/lib/python',
++        'purelib': '$base/@@EXHERBO_LIBDIR@@/python',
++        'platlib': '$base/@@EXHERBO_LIBDIR@@/python',
+         'headers': '$base/include/python/$dist_name',
          'scripts': '$base/bin',
          'data'   : '$base',
 diff --git a/Lib/distutils/sysconfig.py b/Lib/distutils/sysconfig.py
@@ -50,6 +59,15 @@ diff --git a/Lib/site.py b/Lib/site.py
 index 21c7db2..2a4bf28 100644
 --- a/Lib/site.py
 +++ b/Lib/site.py
+@@ -243,7 +243,7 @@ def addusersitepackages(known_paths):
+                                  "site-packages")
+     else:
+         USER_BASE = env_base if env_base else joinuser("~", ".local")
+-        USER_SITE = os.path.join(USER_BASE, "lib",
++        USER_SITE = os.path.join(USER_BASE, "@@EXHERBO_LIBDIR@@",
+                                  "python" + sys.version[:3],
+                                  "site-packages")
+ 
 @@ -265,10 +265,10 @@ def addsitepackages(known_paths):
          if sys.platform in ('os2emx', 'riscos'):
              sitedirs.append(os.path.join(prefix, "Lib", "site-packages"))
@@ -124,6 +142,24 @@ diff --git a/setup.py b/setup.py
 index 951bb50..81791de 100644
 --- a/setup.py
 +++ b/setup.py
++@@ -325,7 +325,7 @@
++ 
++     def detect_modules(self):
++         # Ensure that /usr/local is always used
++-        add_dir_to_list(self.compiler.library_dirs, '/usr/local/lib')
+++        add_dir_to_list(self.compiler.library_dirs, '/usr/local/@@EXHERBO_LIBDIR@@')
++         add_dir_to_list(self.compiler.include_dirs, '/usr/local/include')
++ 
++         # Add paths specified in the environment variables LDFLAGS and
++@@ -377,7 +377,7 @@
++         # if a file is found in one of those directories, it can
++         # be assumed that no additional -I,-L directives are needed.
++         lib_dirs = self.compiler.library_dirs + [
++-            '/lib64', '/usr/lib64',
+++            '/@@EXHERBO_LIBDIR@@', '/usr/@@EXHERBO_LIBDIR@@',
++             '/lib', '/usr/lib',
++             ]
++         inc_dirs = self.compiler.include_dirs + ['/usr/include']
 @@ -594,11 +594,11 @@ class PyBuildExt(build_ext):
              elif self.compiler.find_library_file(lib_dirs, 'curses'):
                  readline_libs.append('curses')
@@ -138,6 +174,36 @@ index 951bb50..81791de 100644
                                     extra_link_args=readline_extra_link_args,
                                     libraries=readline_libs) )
          else:
++@@ -853,7 +853,7 @@
++ 
++                 # check lib directories parallel to the location of the header
++                 db_dirs_to_check = [
++-                    db_incdir.replace("include", 'lib64'),
+++                    db_incdir.replace("include", '@@EXHERBO_LIBDIR@@'),
++                     db_incdir.replace("include", 'lib'),
++                 ]
++                 db_dirs_to_check = filter(os.path.isdir, db_dirs_to_check)
++@@ -944,9 +944,9 @@
++ 
++         if sqlite_incdir:
++             sqlite_dirs_to_check = [
++-                os.path.join(sqlite_incdir, '..', 'lib64'),
+++                os.path.join(sqlite_incdir, '..', '@@EXHERBO_LIBDIR@@'),
++                 os.path.join(sqlite_incdir, '..', 'lib'),
++-                os.path.join(sqlite_incdir, '..', '..', 'lib64'),
+++                os.path.join(sqlite_incdir, '..', '..', '@@EXHERBO_LIBDIR@@'),
++                 os.path.join(sqlite_incdir, '..', '..', 'lib'),
++             ]
++             sqlite_libfile = self.compiler.find_library_file(
++@@ -1609,7 +1609,7 @@
++             added_lib_dirs.append('/usr/openwin/lib')
++         elif os.path.exists('/usr/X11R6/include'):
++             include_dirs.append('/usr/X11R6/include')
++-            added_lib_dirs.append('/usr/X11R6/lib64')
+++            added_lib_dirs.append('/usr/X11R6/@@EXHERBO_LIBDIR@@')
++             added_lib_dirs.append('/usr/X11R6/lib')
++         elif os.path.exists('/usr/X11R5/include'):
++             include_dirs.append('/usr/X11R5/include')
 -- 
 1.6.0.2
 

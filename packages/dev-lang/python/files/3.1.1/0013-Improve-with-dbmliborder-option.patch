@@ -1,0 +1,33 @@
+Source: written by Arfrever Frehtes Taifersar Arahesis
+Upstream: yes, Python Issue #6491
+Reason: Improve --with-dbmliborder option
+--- trunk/setup.py	2010/01/01 15:20:06	77214
++++ trunk/setup.py	2010/01/01 15:21:13	77215
+@@ -893,14 +893,15 @@
+         else:
+             missing.append('_sqlite3')
+ 
++        dbm_order = ['gdbm']
+         # The standard Unix dbm module:
+         if platform not in ['cygwin']:
+             config_args = [arg.strip("'")
+                            for arg in sysconfig.get_config_var("CONFIG_ARGS").split()]
+-            dbm_args = [arg.split('=')[-1] for arg in config_args
++            dbm_args = [arg for arg in config_args
+                         if arg.startswith('--with-dbmliborder=')]
+             if dbm_args:
+-                dbm_order = dbm_args[-1].split(":")
++                dbm_order = [arg.split('=')[-1] for arg in dbm_args][-1].split(":")
+             else:
+                 dbm_order = "ndbm:gdbm:bdb".split(":")
+             dbmext = None
+@@ -962,7 +963,8 @@
+                 missing.append('_dbm')
+ 
+         # Anthony Baxter's gdbm module.  GNU dbm(3) will require -lgdbm:
+-        if (self.compiler.find_library_file(lib_dirs, 'gdbm')):
++        if ('gdbm' in dbm_order and
++            self.compiler.find_library_file(lib_dirs, 'gdbm')):
+             exts.append( Extension('_gdbm', ['_gdbmmodule.c'],
+                                    libraries = ['gdbm'] ) )
+         else:

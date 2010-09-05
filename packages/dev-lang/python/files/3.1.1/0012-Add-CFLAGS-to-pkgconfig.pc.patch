@@ -1,0 +1,13 @@
+Source: written by ClintonRoy
+Upstream: yes, Python Issue #3585
+Reason: Add python-$(SLOT).pc for pkg-config (multibuild version)
+Index: Misc/python.pc.in
+===================================================================
+--- Python-3.1.1/Misc/python.pc.in.orig	2009-05-24 22:39:11.000000000 +0200
++++ Python-3.1.1/Misc/python.pc.in	2010-09-23 21:14:06.232215303 +0200
+@@ -9,5 +9,5 @@
+ Version: @VERSION@
+ Libs.private: @LIBS@
+ Libs: -L${libdir} -lpython@VERSION@
+-Cflags: -I${includedir}/python@VERSION@ 
++Cflags: -I${includedir}/python@VERSION@ @CFLAGS@

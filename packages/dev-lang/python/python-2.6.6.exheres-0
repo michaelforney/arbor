@@ -5,19 +5,14 @@ require python-build
 
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
-src_test() {
+test_prepare_one_multibuild() {
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}"
+
     # Fails under network sandboxing
-    edo rm Lib/test/test_{ftplib,httpservers,multiprocessing,socket,urllib2}.py
+    edo rm Lib/test/test_{asynchat,asyncore,docxmlrpc,epoll,ftplib,httplib,httpservers,logging,multiprocessing,poplib,smtplib,socket,telnetlib,urllib2,urllib2_localnet,xmlrpc}.py
     # Fails for fresh installs
     edo rm Lib/distutils/tests/test_build_ext.py
-
-    python-build_src_test
-}
-
-src_install() {
-    python-build_src_install
-
-    # Installs empty directory.
-    edo rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}${SLOT}/lib-old
+    # Fails under MULTIBUILD_C == 32
+    edo rm Lib/test/test_distutils.py
 }
 
