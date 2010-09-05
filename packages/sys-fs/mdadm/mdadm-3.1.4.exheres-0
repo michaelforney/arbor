@@ -14,7 +14,7 @@ DEPENDENCIES="
         sys-apps/util-linux-ng[>=2.16]"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-dont-make-man.patch
+    "${FILES}"/${PN}-3.0-dont-make-man.patch
     "${FILES}"/${PN}-2.6-syslog-updates.patch
     -p0 "${FILES}"/${PN}-2.6.4-mdassemble.patch
 )
@@ -42,6 +42,7 @@ src_install() {
     newinitd "${FILES}"/mdadm.rc mdadm
     newconfd "${FILES}"/mdadm.confd mdadm
     newinitd "${FILES}"/mdraid.rc mdraid
+    newconfd "${FILES}"/mdraid.confd mdraid
 
     insinto /etc/udev/rules.d/
     newins "${FILES}"/udev-145-64-md-raid.rules 64-md-raid.rules
