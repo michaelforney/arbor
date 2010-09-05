@@ -68,10 +68,10 @@ src_install() {
     default
 
     insinto /$(get_libdir)/systemd/system
-    doins "${FILES}"/bootmisc.service
+    doins "${FILES}"/sysinit.service
 
     exeinto /etc/init.d
-    doexe "${FILES}"/bootmisc.bash
+    doexe "${FILES}"/sysinit.bash
 
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
