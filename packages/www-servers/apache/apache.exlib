@@ -33,7 +33,7 @@ UPSTREAM_RELEASE_NOTES="http://httpd.apache.org/docs/${PV2}/new_features_${PV2//
 
 LICENCES="Apache-2.0"
 SLOT="0"
-MYOPTIONS="ssl
+MYOPTIONS="ssl systemd
     apache_modules: ${APACHE_MODULES[*]}
 "
 
@@ -94,6 +94,13 @@ apache_src_install() {
 
     newconfd "${FILES}"/apache-confd apache2
     newinitd "${FILES}"/apache-initd apache2
+
+    if option systemd ; then
+        insinto /$(get_libdir)/systemd/system
+        doins "${FILES}"/systemd/apache.service
+        insinto /etc/conf.d
+        doins "${FILES}"/systemd/apache.conf
+    fi
 
     # Fix user/group.
     edo sed -i -e "s:^\(.* \)daemon$:\1 ${PN}:" "${IMAGE}"/etc/apache2/httpd.conf

@@ -1,0 +1,16 @@
+[Unit]
+Description=Apache web server
+After=network.target
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/conf.d/apache.conf
+ExecStartPre=/usr/bin/rm -f /var/run/apache2/ssl_scache
+ExecStartPre=/usr/bin/apachectl $APACHE2_OPTS -t
+ExecStart=/usr/bin/apachectl $APACHE2_OPTS -k start
+ExecStop=/usr/bin/apachectl $APACHE2_OPTS -k stop
+ExecReload=/usr/bin/apachectl $APACHE2_OPTS -k graceful
+PIDFile=/var/run/apache2.pid
+
+[Install]
+WantedBy=multi-user.target
