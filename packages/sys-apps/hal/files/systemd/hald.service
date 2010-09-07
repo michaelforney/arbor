@@ -1,0 +1,14 @@
+[Unit]
+Description=Hardware abstraction layer
+Requires=dbus.target
+After=dbus.target
+
+[Service]
+Type=forking
+ExecStartPre=-/usr/bin/chgrp haldaemon /proc/acpi/event
+ExecStartPre=-/usr/bin/chmod 440 /proc/acpi/event
+ExecStart=/usr/sbin/hald --use-syslog --verbose=no
+PIDFile=/var/run/hald.pid
+
+[Install]
+WantedBy=multi-user.target
