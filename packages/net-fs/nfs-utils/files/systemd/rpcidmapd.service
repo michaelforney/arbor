@@ -1,0 +1,8 @@
+[Unit]
+Description=NFSv4 ID <-> Name Mapper
+Requires=rpcbind.service
+After=rpcbind.service
+
+[Service]
+ExecStart=/usr/sbin/rpc.idmapd
+Type=forking

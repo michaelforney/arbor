@@ -1,0 +1,16 @@
+[Unit]
+Description=System Initialization
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target emergency.service emergency.target
+RefuseManualStart=yes
+RefuseManualStop=yes
+
+[Service]
+Type=oneshot
+StandardInput=tty
+RemainAfterExit=yes
+ExecStart=/etc/init.d/sysinit.bash
+
+[Install]
+WantedBy=sysinit.target

@@ -70,10 +70,10 @@ src_install() {
     insinto /etc/syslog-ng
     newins "${FILES}"/syslog-ng.conf.sample syslog-ng.conf
 
-    if ! option systemd ; then
-        newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
-        newconfd "${FILES}"/syslog-ng.confd syslog-ng
-    else
+    newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
+    newconfd "${FILES}"/syslog-ng.confd syslog-ng
+
+    if option systemd ; then
         insinto /$(get_libdir)/systemd/system
         doins "${FILES}"/syslog-ng.service
     fi

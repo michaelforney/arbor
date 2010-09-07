@@ -1,0 +1,9 @@
+[Unit]
+Description=git daemon
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/git daemon --pid-file=/var/run/git-daemon.pid --user=nobody --group=nobody --syslog /var/git
+
+[Install]
+WantedBy=multi-user.target

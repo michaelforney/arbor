@@ -1,0 +1,76 @@
+From fa946b35d28022e6e5304452d353ee3de730c29a Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Aug 2010 05:42:15 -0700
+Subject: [PATCH] Add font service for Exherbo
+
+---
+ Makefile.am                 |    6 ++++++
+ units/exherbo/font.target   |   12 ++++++++++++
+ units/exherbo/font@.service |   19 +++++++++++++++++++
+ 3 files changed, 37 insertions(+), 0 deletions(-)
+ create mode 100644 units/exherbo/font.target
+ create mode 100644 units/exherbo/font@.service
+
+diff --git a/Makefile.am b/Makefile.am
+index 725685d..f961a9f 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -259,6 +259,12 @@ dist_systemunit_DATA += \
+ 	units/arch/reboot.service
+ endif
+ 
++if TARGET_EXHERBO
++dist_systemunit_DATA += \
++	units/exherbo/font.target \
++	units/exherbo/font@.service
++endif
++
+ dist_doc_DATA = \
+ 	README \
+ 	LICENSE \
+diff --git a/units/exherbo/font.target b/units/exherbo/font.target
+new file mode 100644
+index 0000000..22983be
+--- /dev/null
++++ b/units/exherbo/font.target
+@@ -0,0 +1,12 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU General Public License as published by
++#  the Free Software Foundation; either version 2 of the License, or
++#  (at your option) any later version.
++
++[Unit]
++Description=Console fonts
++
++[Install]
++WantedBy=multi-user.target
+diff --git a/units/exherbo/font@.service b/units/exherbo/font@.service
+new file mode 100644
+index 0000000..e4fbedd
+--- /dev/null
++++ b/units/exherbo/font@.service
+@@ -0,0 +1,19 @@
++#  This file is part of systemd.
++#
++#  systemd is free software; you can redistribute it and/or modify it
++#  under the terms of the GNU General Public License as published by
++#  the Free Software Foundation; either version 2 of the License, or
++#  (at your option) any later version.
++
++[Unit]
++Description=Console font on %I
++Before=font.target
++
++[Service]
++EnvironmentFile=/etc/conf.d/console.conf
++Type=oneshot
++RemainAfterExit=yes
++ExecStart=/usr/bin/setfont -C /dev/%I ${FONT}
++
++[Install]
++Alias=font.target.wants/font@tty1.service font.target.wants/font@tty2.service font.target.wants/font@tty3.service font.target.wants/font@tty4.service font.target.wants/font@tty5.service font.target.wants/font@tty6.service
+-- 
+1.7.2.2
+

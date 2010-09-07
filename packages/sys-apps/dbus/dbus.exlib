@@ -1,0 +1,62 @@
+# Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+if [[ ${PV} == "scm" ]] ; then
+    SCM_REPOSITORY="git://anongit.freedesktop.org/git/dbus/dbus"
+    require scm-git
+else
+    DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
+fi
+
+require flag-o-matic
+
+SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
+HOMEPAGE="http://dbus.freedesktop.org/"
+
+dbus_src_configure() {
+    # whitelist bind() to /tmp/dbus-fake-socket-*
+    sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
+    default
+    sydboxcmd 'net/unwhitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
+}
+
+dbus_src_compile() {
+    # get backtraces from applications
+    append-flags -rdynamic
+    default
+}
+
+dbus_src_install() {
+    default
+
+    edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
+            -i "${IMAGE}/etc/dbus-1/system.conf"
+
+    newinitd "${FILES}"/dbus.init-1.0 dbus
+
+    # dbus X session script (Gentoo bug #77504)
+    # turns out to only work for GDM. has been merged into other desktop
+    # (kdm and such scripts)
+    exeinto /etc/X11/xinit/xinitrc.d/
+    doexe "${FILES}"/30-dbus
+
+    keepdir /var/run/dbus                       \
+            /var/lib/dbus                       \
+            /usr/libexec/dbus-1                 \
+            /etc/dbus-1/system.d/               \
+            /etc/dbus-1/session.d/              \
+            /usr/share/dbus-1/services          \
+            /usr/share/dbus-1/system-services
+
+    if option doc; then
+        insinto /usr/share/doc/${PNVR}/html/
+        doins -r doc/*.html
+    fi
+}
+
+dbus_src_test() {
+    DBUS_VERBOSE=1 default
+}
+
+export_exlib_phases src_configure src_compile src_install src_test
+

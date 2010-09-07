@@ -1,4 +1,4 @@
-# Copyright 2009 Wulf C. Krueger
+# Copyright 2009-2010 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -13,6 +13,8 @@ MY_PNV="${MY_PN}-${PV}"
 HOMEPAGE="http://www.kernel.org/pub/linux/libs/${PN}/"
 SUMMARY="Linux-PAM provides Pluggable Authentication Modules"
 DOWNLOADS="mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
@@ -53,10 +55,9 @@ pam_build_pkg_pretend() {
 }
 
 pam_build_src_prepare() {
-    mkdir -p doc/txt
+    edo mkdir -p doc/txt
     for readme in modules/pam_*/README; do
-        edo cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | \
-            sed -e 's|^modules/||')
+        edo cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | sed -e 's|^modules/||')
     done
 
     autotools_src_prepare

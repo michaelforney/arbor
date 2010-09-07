@@ -1,4 +1,4 @@
-# Copyright 2009 Wulf C. Krueger
+# Copyright 2009, 2010 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -15,7 +15,7 @@ DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="pam"
+MYOPTIONS="pam systemd"
 
 DEPENDENCIES="
     build+run:
@@ -65,6 +65,11 @@ src_install() {
 
     keepdir /etc/cron.d
     newinitd "${FILES}"/vixie-cron.rc6 vixie-cron
+
+    if option systemd ; then
+        insinto /$(get_libdir)/systemd/system
+        doins "${FILES}"/vixie-cron.service
+    fi
 
     option pam && newpamd "${FILES}"/pamd.compatible cron
 

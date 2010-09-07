@@ -1,0 +1,10 @@
+[Unit]
+Description=RPC Service
+After=syslog.target
+
+[Service]
+ExecStart=/sbin/rpcbind
+Type=forking
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,4 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2008-2010 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'nfs-utils-1.1.2-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -8,9 +8,7 @@ require multilib nfs-utils
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PN}-1.2.2-cpp_path.patch"
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-1.2.2-cpp_path.patch" )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     '--mandir=/usr/share/man'
@@ -45,9 +43,6 @@ src_install() {
     dodir /sbin
     edo mv "${IMAGE}"/usr/sbin/rpc.statd "${IMAGE}"/sbin/
 
-    insinto /etc
-    doins "${FILES}"/exports
-
     local f list=""
     option nfsv4 && list+="rpc.idmapd"
 
@@ -55,10 +50,15 @@ src_install() {
         newinitd "${FILES}"/${f}.initd ${f}
     done
     newconfd "${FILES}"/nfs.confd nfs
-}
 
-pkg_preinst() {
-    [[ -s ${ROOT}/etc/exports ]] && rm -f "${IMAGE}"/etc/exports
+    if option systemd ; then
+        insinto /$(get_libdir)/systemd/system
+        doins \
+            "${FILES}"/systemd/rpcbind.service \
+            "${FILES}"/systemd/rpcstatd.service \
+            "${FILES}"/systemd/rpcidmapd.service \
+            "${FILES}"/systemd/rpcgssd.service
+    fi
 }
 
 pkg_postinst() {
