@@ -4,7 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require dbus
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
@@ -20,26 +20,18 @@ DEPENDENCIES="
         doc? ( app-doc/doxygen )
         X? ( x11-proto/xproto )
     build+run:
-        dev-libs/expat[>=1.95.8]
+        dev-libs/expat[>=1.95.8][multibuild_c:*(?)?]
         group/messagebus
         user/messagebus
-        X? ( x11-libs/libICE
-             x11-libs/libSM
-             x11-libs/libX11 )
+        X? ( x11-libs/libICE[multibuild_c:*(?)?]
+             x11-libs/libSM[multibuild_c:*(?)?]
+             x11-libs/libX11[multibuild_c:*(?)?] )
     recommendation:
         sys-auth/ConsoleKit
 "
 
 # Testing code (--enable-tests) disabled since building with tests support
 # creates an insecure (sic upstream), non-production use library
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--localstatedir=/var' '--with-system-socket=/var/run/dbus/system_bus_socket'
-                               '--with-session-socket-dir=/tmp' '--with-dbus-user=messagebus'
-                               '--enable-xml-docs' '--with-xml=expat' '--enable-inotify'
-                               '--disable-tests' '--disable-selinux' '--disable-libaudit' )
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'debug asserts' 'debug verbose-mode' 'doc doxygen-docs' )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' "systemd systemdsystemunitdir /$(get_libdir)/systemd/system")
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( dcop-howto.txt system-activation.txt )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
@@ -48,4 +40,23 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-Don-t-install-systemd-scripts-with-without-systemdsy.patch
     "${FILES}"/${PN}-abstract-sockets.patch
 )
+
+configure_one_multibuild() {
+    econf                                                      \
+        '--localstatedir=/var'                                 \
+        '--with-system-socket=/var/run/dbus/system_bus_socket' \
+        '--with-session-socket-dir=/tmp'                       \
+        '--with-dbus-user=messagebus'                          \
+        '--enable-xml-docs'                                    \
+        '--with-xml=expat'                                     \
+        '--enable-inotify'                                     \
+        '--disable-tests'                                      \
+        '--disable-selinux'                                    \
+        '--disable-libaudit'                                   \
+        $(option_enable debug asserts)                         \
+        $(option_enable debug verbose-mode)                    \
+        $(option_enable doc doxygen-docs)                      \
+        $(option_with X x)                                     \
+        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+}
 

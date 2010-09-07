@@ -20,12 +20,12 @@ DEPENDENCIES="
         doc? ( app-doc/doxygen )
         X? ( x11-proto/xproto )
     build+run:
-        dev-libs/expat[>=1.95.8]
+        dev-libs/expat[>=1.95.8][multibuild_c:*(?)?]
         group/messagebus
         user/messagebus
-        X? ( x11-libs/libICE
-             x11-libs/libSM
-             x11-libs/libX11 )
+        X? ( x11-libs/libICE[multibuild_c:*(?)?]
+             x11-libs/libSM[multibuild_c:*(?)?]
+             x11-libs/libX11[multibuild_c:*(?)?] )
     recommendation:
         sys-auth/ConsoleKit
 "

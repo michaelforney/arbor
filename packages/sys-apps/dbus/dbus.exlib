@@ -8,26 +8,27 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic
+require flag-o-matic easy-multibuild
 
 SUMMARY="D-Bus is a message bus system for interprocess communication (IPC)"
 HOMEPAGE="http://dbus.freedesktop.org/"
+MYOPTIONS="multibuild_c: 32 64"
 
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
     sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
-    default
+    easy-multibuild_src_configure
     sydboxcmd 'net/unwhitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
 }
 
 dbus_src_compile() {
     # get backtraces from applications
     append-flags -rdynamic
-    default
+    easy-multibuild_src_compile
 }
 
 dbus_src_install() {
-    default
+    easy-multibuild_src_install
 
     edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
             -i "${IMAGE}/etc/dbus-1/system.conf"
@@ -55,7 +56,7 @@ dbus_src_install() {
 }
 
 dbus_src_test() {
-    DBUS_VERBOSE=1 default
+    DBUS_VERBOSE=1 easy-multibuild_src_test
 }
 
 export_exlib_phases src_configure src_compile src_install src_test
