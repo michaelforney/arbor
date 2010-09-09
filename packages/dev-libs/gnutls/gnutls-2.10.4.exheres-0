@@ -1,22 +1,22 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require gnu
+require easy-multibuild gnu
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
 
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc"
+MYOPTIONS="doc multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         doc? ( dev-doc/gtk-doc[>=1.1] )
     build+run:
-        dev-libs/libgcrypt[>=1.2.4]
-        dev-libs/libtasn1[>=1.8]
-        sys-libs/zlib[>=1.2.3]
+        dev-libs/libgcrypt[>=1.2.4][multibuild_c:*(?)?]
+        dev-libs/libtasn1[>=1.8][multibuild_c:*(?)?]
+        sys-libs/zlib[>=1.2.3][multibuild_c:*(?)?]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-sydbox.patch")
