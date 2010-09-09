@@ -1,0 +1,7 @@
+/var/log/boot /var/log/cron /var/log/kernel /var/log/mail /var/log/messages /var/log/news/news /var/log/secure /var/log/spooler {
+    missingok
+    sharedscripts
+    postrotate
+        /usr/bin/killall -HUP rsyslogd
+    endscript
+}
