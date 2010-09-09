@@ -1,7 +1,7 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib alternatives
 
 SUMMARY="An enhanced syslog daemon for Linux (and Unix)"
 DESCRIPTION="
@@ -25,7 +25,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/doc/manual.html [[ lang = en ]]"
 
 LICENCES="GPL-3 LGPL-3"
 SLOT="4"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     debug
     gnutls
@@ -87,8 +87,10 @@ src_install() {
     if option systemd ; then
         insinto /$(get_libdir)/systemd/system
         doins \
-            "${FILES}"/systemd/rsyslog.service \
-            "${FILES}"/systemd/rsyslog.socket
+            "${FILES}"/systemd/syslog.service.${PN} \
+            "${FILES}"/systemd/syslog.socket.${PN}
+        alternatives_for systemd-logger ${PN} 10 /$(get_libdir)/systemd/system/syslog.service syslog.service.${PN}
+        alternatives_for systemd-logger ${PN} 10 /$(get_libdir)/systemd/system/syslog.socket syslog.socket.${PN}
     fi
 }
 
