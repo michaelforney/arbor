@@ -20,6 +20,7 @@ MYOPTIONS="
     apm
     partition-data [[ description = [ Allows HAL to use libparted from sys-apps/parted to read raw partition data from your disks and process that data. Future versions of HAL (possibly 0.5.11 and higher) will allow you to create, modify, delete and format partitions from a GUI interface agnostic of your desktop environment. ] ]]
     policykit
+    systemd
     verbose
     platform:
         amd64
@@ -118,6 +119,11 @@ src_install() {
 
     # initscript
     newinitd "${FILES}/0.5.11-hald.rc" hald
+
+    if option systemd ; then
+        insinto /$(get_libdir)/systemd/system
+        doins "${FILES}"/systemd/hald.service
+    fi
 
     # configuration
     hereconfd hald <<EOF

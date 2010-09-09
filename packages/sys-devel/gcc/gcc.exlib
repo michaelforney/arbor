@@ -159,9 +159,7 @@ src_install() {
     fi
 
     # nuke empty dir if applicable
-    if option openmp && option !fortran && ever at_least 4.2; then
-        edo rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
-    fi
+    rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
 
     edo pushd "${IMAGE}"
 
