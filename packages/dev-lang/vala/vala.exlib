@@ -1,0 +1,32 @@
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnome.org
+
+export_exlib_phases src_test
+
+SUMMARY="A modern C#-like language for GNOME development"
+HOMEPAGE="http://live.gnome.org/Vala"
+
+LICENCES="LGPL-2.1"
+SLOT="0.10"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-libs/libxslt
+        dev-util/pkg-config[>=0.20]
+    build+run:
+        dev-libs/glib:2[>=2.25.9]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-vapigen' )
+
+vala_src_test() {
+    unset DISPLAY
+
+    sydboxcmd "net/whitelist/bind/unix-abstract:///tmp/dbus-*"
+
+    default
+}
+
