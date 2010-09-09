@@ -4,7 +4,7 @@
 # Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib
+require multilib alternatives
 
 SUMMARY="Popular system logger"
 HOMEPAGE="http://www.balabit.com/network-security/${PN}/"
@@ -75,7 +75,8 @@ src_install() {
 
     if option systemd ; then
         insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/syslog-ng.service
+        doins "${FILES}"/systemd/syslog.service.${PN}
+        alternatives_for systemd-logger ${PN} 5 /$(get_libdir)/systemd/system/syslog.service syslog.service.${PN}
     fi
 
     insinto /etc/logrotate.d
