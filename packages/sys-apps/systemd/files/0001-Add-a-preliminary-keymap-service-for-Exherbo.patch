@@ -1,4 +1,4 @@
-From a514d74a9584bd66d6f35aa634138017fec0379a Mon Sep 17 00:00:00 2001
+From c41a97a099e96634267127dbc06af0b162a6e3dd Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
 Date: Sun, 29 Aug 2010 17:40:23 +0200
 Subject: [PATCH] Add a preliminary keymap service for Exherbo.
@@ -12,10 +12,10 @@ Subject: [PATCH] Add a preliminary keymap service for Exherbo.
  create mode 100644 units/exherbo/keymap@.service
 
 diff --git a/Makefile.am b/Makefile.am
-index 244dad4..b447855 100644
+index 50f050c..43fa63c 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -266,7 +266,9 @@ dist_systemunit_DATA += \
+@@ -263,7 +263,9 @@ dist_systemunit_DATA += \
  	units/exherbo/halt.service \
  	units/exherbo/killall.service \
  	units/exherbo/reboot.service \
@@ -28,7 +28,7 @@ index 244dad4..b447855 100644
  dist_doc_DATA = \
 diff --git a/units/exherbo/keymap.target b/units/exherbo/keymap.target
 new file mode 100644
-index 0000000..e2049fd
+index 0000000..027524e
 --- /dev/null
 +++ b/units/exherbo/keymap.target
 @@ -0,0 +1,12 @@
@@ -43,10 +43,10 @@ index 0000000..e2049fd
 +Description=Key mapping
 +
 +[Install]
-+WantedBy=multi-user.target
++WantedBy=getty.target
 diff --git a/units/exherbo/keymap@.service b/units/exherbo/keymap@.service
 new file mode 100644
-index 0000000..b682171
+index 0000000..f3af248
 --- /dev/null
 +++ b/units/exherbo/keymap@.service
 @@ -0,0 +1,22 @@
@@ -65,8 +65,8 @@ index 0000000..b682171
 +Type=oneshot
 +RemainAfterExit=yes
 +EnvironmentFile=/etc/conf.d/console.conf
-+ExecStartPre=/usr/bin/kbd_mode -u -C /dev/%I
-+ExecStart=/usr/bin/loadkeys windowkeys ${KEYMAP} -C /dev/%I
++ExecStartPre=-/usr/bin/kbd_mode -u -C /dev/%I
++ExecStart=-/usr/bin/loadkeys windowkeys ${KEYMAP} -C /dev/%I
 +ExecStartPost=-/usr/bin/dumpkeys | /usr/bin/loadkeys --unicode -C /dev/%I
 +ExecStartPost=-/usr/bin/echo -n -e $'\033%G' > /dev/%I
 +
