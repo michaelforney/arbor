@@ -78,5 +78,35 @@ src_install() {
 
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
+
+    # Install a sample console.conf
+    insinto /etc/conf.d
+    hereins console.conf <<EOF
+# To actually use these settings, you need to enable the services:
+# systemctl enable keymap@.service
+# systemctl enable font@.service
+FONT=lat9w-16
+KEYMAP=us
+EOF
+
+    # Install a default hostname file
+    insinto /etc
+    hereins hostname <<EOF
+localhost
+EOF
+}
+
+pkg_postinst() {
+    default
+
+    # Enable basic services
+    edo ln -sf /$(get_libdir)/systemd/system/remount-rootfs.service /etc/systemd/system/sysinit.target.wants/remount-rootfs.service
+    edo ln -sf /$(get_libdir)/systemd/system/sysinit.service /etc/systemd/system/sysinit.target.wants/sysinit.service
+
+    # Enable syslog
+    edo ln -sf /$(get_libdir)/systemd/system/syslog.service /etc/systemd/system/multi-user.target.wants/syslog.service
+    if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
+        edo ln -sf /$(get_libdir)/systemd/system/syslog.socket /etc/systemd/system/multi-user.target.wants/syslog.socket
+    fi
 }
 
