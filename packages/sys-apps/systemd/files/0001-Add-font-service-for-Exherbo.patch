@@ -1,4 +1,4 @@
-From fa946b35d28022e6e5304452d353ee3de730c29a Mon Sep 17 00:00:00 2001
+From f9feb67540a6837c0d318d5bd366b9316a7e86c2 Mon Sep 17 00:00:00 2001
 From: Michael Forney <mforney@mforney.org>
 Date: Sun, 29 Aug 2010 05:42:15 -0700
 Subject: [PATCH] Add font service for Exherbo
@@ -12,10 +12,10 @@ Subject: [PATCH] Add font service for Exherbo
  create mode 100644 units/exherbo/font@.service
 
 diff --git a/Makefile.am b/Makefile.am
-index 725685d..f961a9f 100644
+index d93442a..94eb005 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -259,6 +259,12 @@ dist_systemunit_DATA += \
+@@ -256,6 +256,12 @@ dist_systemunit_DATA += \
  	units/arch/reboot.service
  endif
  
@@ -30,7 +30,7 @@ index 725685d..f961a9f 100644
  	LICENSE \
 diff --git a/units/exherbo/font.target b/units/exherbo/font.target
 new file mode 100644
-index 0000000..22983be
+index 0000000..51587e6
 --- /dev/null
 +++ b/units/exherbo/font.target
 @@ -0,0 +1,12 @@
@@ -45,7 +45,7 @@ index 0000000..22983be
 +Description=Console fonts
 +
 +[Install]
-+WantedBy=multi-user.target
++WantedBy=getty.target
 diff --git a/units/exherbo/font@.service b/units/exherbo/font@.service
 new file mode 100644
 index 0000000..e4fbedd
