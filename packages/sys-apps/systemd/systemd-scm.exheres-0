@@ -100,13 +100,13 @@ pkg_postinst() {
     default
 
     # Enable basic services
-    edo ln -sf "${ROOT}"/$(get_libdir)/systemd/system/remount-rootfs.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/remount-rootfs.service
-    edo ln -sf "${ROOT}"/$(get_libdir)/systemd/system/sysinit.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/sysinit.service
+    edo ln -sf /$(get_libdir)/systemd/system/remount-rootfs.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/remount-rootfs.service
+    edo ln -sf /$(get_libdir)/systemd/system/sysinit.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/sysinit.service
 
     # Enable syslog
-    edo ln -sf "${ROOT}"/$(get_libdir)/systemd/system/syslog.service "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.service
-    if [[ -e "${ROOT}"/$(get_libdir)/systemd/system/syslog.socket ]]; then
-        edo ln -sf "${ROOT}"/$(get_libdir)/systemd/system/syslog.socket "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.socket
+    edo ln -sf /$(get_libdir)/systemd/system/syslog.service "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.service
+    if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
+        edo ln -sf /$(get_libdir)/systemd/system/syslog.socket "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.socket
     fi
 }
 
