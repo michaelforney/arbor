@@ -99,14 +99,16 @@ EOF
 pkg_postinst() {
     default
 
+    [[ -d /etc/systemd/system/sysinit.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/sysinit.target.wants || ewarn "creating dir failed"
+
     # Enable basic services
-    edo ln -sf /$(get_libdir)/systemd/system/remount-rootfs.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/remount-rootfs.service
-    edo ln -sf /$(get_libdir)/systemd/system/sysinit.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/sysinit.service
+    nonfatal edo ln -sf /$(get_libdir)/systemd/system/remount-rootfs.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/remount-rootfs.service || ewarn "remount symlink failed"
+    nonfatal edo ln -sf /$(get_libdir)/systemd/system/sysinit.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/sysinit.service || ewarn "sysinit symlink failed"
 
     # Enable syslog
-    edo ln -sf /$(get_libdir)/systemd/system/syslog.service "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.service
+    nonfatal edo ln -sf /$(get_libdir)/systemd/system/syslog.service "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.service || ewarn "syslog symlink failed"
     if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
-        edo ln -sf /$(get_libdir)/systemd/system/syslog.socket "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.socket
+        nonfatal edo ln -sf /$(get_libdir)/systemd/system/syslog.socket "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.socket || ewarn "socket symlink failed"
     fi
 }
 
