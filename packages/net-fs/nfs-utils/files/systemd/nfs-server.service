@@ -1,0 +1,16 @@
+[Unit]
+Description=NFS server
+Requires=network.target
+After=rpcbind.service
+
+[Service]
+Type=forking
+ExecStartPre=-/sbin/modprobe -q nfsd
+ExecStartPre=-/bin/mount -t nfsd -o nodev,noexec,nosuid nfsd /proc/fs/nfs
+ExecStartPre=/usr/bin/mkdir -p /var/lib/nfs/rpc_pipefs /var/lib/nfs/v4recovery /var/lib/nfs/v4root
+ExecStartPre=/usr/sbin/exportfs -r
+ExecStartPre=/usr/sbin/rpc.mountd
+ExecStart=/usr/sbin/rpc.nfsd --syslog 8
+
+[Install]
+WantedBy=network.target
