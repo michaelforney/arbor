@@ -3,6 +3,8 @@
 # Based in part upon 'sqlite-3.5.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
+require flag-o-matic
+
 SUMMARY="An embedded SQL database engine"
 HOMEPAGE="http://www.sqlite.org/"
 DOWNLOADS="http://www.sqlite.org/${PN}-amalgamation-${PV}.tar.gz
@@ -13,7 +15,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="public-domain"
 SLOT="3"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc readline"
+MYOPTIONS="doc readline unlock-notify"
 
 DEPENDENCIES="
     build:
@@ -24,6 +26,12 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( readline )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threadsafe )
+
+src_configure() {
+    option unlock-notify && append-cppflags -DSQLITE_ENABLE_UNLOCK_NOTIFY
+
+    default
+}
 
 src_install() {
     default
