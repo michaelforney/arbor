@@ -2,7 +2,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases pkg_pretend src_unpack src_prepare src_configure src_compile src_install
+export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
@@ -49,6 +49,12 @@ glibc_pkg_pretend() {
             ewarn "-march setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to native"
         fi
     done
+}
+
+glibc_pkg_setup() {
+    # glibc doesn't compile with -Os. See bug:
+    # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
+    replace-flags -Os -O2
 }
 
 glibc_src_unpack() {

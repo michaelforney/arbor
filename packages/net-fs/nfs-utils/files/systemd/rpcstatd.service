@@ -1,10 +1,12 @@
 [Unit]
 Description=NSM service daemon
 Requires=rpcbind.service
+Before=rpcbind.target
 After=rpcbind.service
 
 [Service]
 ExecStart=/sbin/rpc.statd -F
+ExecStop=/bin/umount -a -f -t nfs,nfs4
 
 [Install]
 WantedBy=multi-user.target
