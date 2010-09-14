@@ -30,7 +30,7 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( readline )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threadsafe )
 
-src_configure() {
+configure_one_multibuild() {
     option unlock-notify && append-cppflags -DSQLITE_ENABLE_UNLOCK_NOTIFY
 
     default
