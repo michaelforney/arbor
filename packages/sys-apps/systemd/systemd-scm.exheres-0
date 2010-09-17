@@ -22,7 +22,7 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="gtk"
+MYOPTIONS="gtk tcpd"
 
 # 7. 9. 2010: You'll need at least kernel v2.6.36-rc1.
 DEPENDENCIES="
@@ -34,7 +34,11 @@ DEPENDENCIES="
         sys-apps/sysvinit
         sys-fs/udev[systemd(-)][>=162]
         sys-libs/libcap
-        gtk? ( x11-libs/gtk+:2[>=2.20] )
+        sys-libs/pam
+        gtk? (
+            x11-libs/gtk+:2[>=2.20]
+            x11-libs/libnotify
+        )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -49,15 +53,20 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
     --exec-prefix=/
     --libdir=/$(get_libdir)
+    --enable-pam
+    --disable-audit
+    --disable-selinux
     --with-distro=exherbo
-    --with-udevrulesdir=/$(get_libdir)/udev/rules.d
     --with-pamlibdir=/$(get_libdir)/security
     --with-rootdir=/
+    --with-udevrulesdir=/$(get_libdir)/udev/rules.d
     --with-syslog-service=syslog.service
-    --disable-selinux
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    gtk
+    "tcpd tcpwrap"
+)
 
 AT_M4DIR=m4
 
