@@ -1,37 +1,39 @@
-From e01b336d34c7d63a3d8698dfc203545a1c7af028 Mon Sep 17 00:00:00 2001
+From e257b53240208eae96da972ceb932896c98d901d Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
 Date: Sun, 29 Aug 2010 13:05:45 +0200
 Subject: [PATCH] Add basic services for Exherbo.
 
 ---
- Makefile.am                    |    6 +++++-
+ Makefile.am                    |    8 ++++++++
  units/exherbo/halt.service     |   20 ++++++++++++++++++++
  units/exherbo/killall.service  |   21 +++++++++++++++++++++
  units/exherbo/poweroff.service |   20 ++++++++++++++++++++
  units/exherbo/reboot.service   |   19 +++++++++++++++++++
- 5 files changed, 85 insertions(+), 1 deletions(-)
+ 5 files changed, 88 insertions(+), 0 deletions(-)
  create mode 100644 units/exherbo/halt.service
  create mode 100644 units/exherbo/killall.service
  create mode 100644 units/exherbo/poweroff.service
  create mode 100644 units/exherbo/reboot.service
 
 diff --git a/Makefile.am b/Makefile.am
-index f961a9f..244dad4 100644
+index 8711a52..191e807 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -262,7 +262,11 @@ endif
- if TARGET_EXHERBO
- dist_systemunit_DATA += \
- 	units/exherbo/font.target \
--	units/exherbo/font@.service
-+	units/exherbo/font@.service \
+@@ -272,6 +272,14 @@ dist_systemunit_DATA += \
+ 	units/arch/reboot.service
+ endif
+ 
++if TARGET_EXHERBO
++dist_systemunit_DATA += \
 +	units/exherbo/halt.service \
 +	units/exherbo/killall.service \
 +	units/exherbo/reboot.service \
 +	units/exherbo/poweroff.service
- endif
- 
++endif
++
  dist_doc_DATA = \
+ 	README \
+ 	LICENSE \
 diff --git a/units/exherbo/halt.service b/units/exherbo/halt.service
 new file mode 100644
 index 0000000..bbc90ed
@@ -137,5 +139,5 @@ index 0000000..8ae0d6f
 +ExecStart=/sbin/reboot -dpkif
 +StandardOutput=tty
 -- 
-1.7.2.2
+1.7.2.3
 

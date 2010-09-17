@@ -49,14 +49,14 @@ DEPENDENCIES="
             x11-libs/gtk+:2[>=2.20]
             x11-libs/libnotify
         )
+    run:
+        sys-apps/kbd[>=1.15.2-r1]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Add-Exherbo-distribution.patch
     "${FILES}"/0001-Add-hostname-handling-for-Exherbo.patch
-    "${FILES}"/0001-Add-font-service-for-Exherbo.patch
     "${FILES}"/0001-Add-basic-services-for-Exherbo.patch
-    "${FILES}"/0001-Add-a-preliminary-keymap-service-for-Exherbo.patch
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -100,18 +100,15 @@ systemd_src_install() {
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
 
-    # Install a sample console.conf
-    insinto /etc/conf.d
-    hereins console.conf <<EOF
-# To actually use these settings, you need to enable the services:
-# systemctl enable keymap@.service
-# systemctl enable font@.service
-FONT=lat9w-16
-KEYMAP=us
+    insinto /etc
+
+    # Install a sample vconsole file
+    hereins vconsole <<EOF
+VCONSOLE_FONT="lat9w-16"
+VCONSOLE_KEYMAP="us"
 EOF
 
     # Install a default hostname file
-    insinto /etc
     hereins hostname <<EOF
 localhost
 EOF
