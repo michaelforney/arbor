@@ -10,10 +10,15 @@ unpack_makeself() {
     input=${1:-${ARCHIVES}}
 
     v=$(edo grep -a '#.*Makeself' "${FETCHEDDIR}/${input}" | edo awk '{print $NF}')
-    skip=$(edo grep -a ^skip= "${FETCHEDDIR}/${input}" | edo cut -d= -f2)
 
     case ${v} in
-        1.6.0-nv) : ;;
+        1.6.0-nv)
+            skip=$(edo grep -a ^skip= "${FETCHEDDIR}/${input}" | edo cut -d= -f2)
+            ;; # NVIDIA version
+        2.*)
+            skip=$(edo grep -a ^SKIP= "${FETCHEDDIR}/${input}" | edo cut -d\" -f2)
+            (( skip++ )) # tail starts with $skip, makeself starts after $skip
+            ;; # makeself 2.x.x
         *) die "makeself sanity check failed" ;;
     esac
 
