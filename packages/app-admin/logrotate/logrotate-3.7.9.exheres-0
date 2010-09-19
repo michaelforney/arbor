@@ -5,9 +5,7 @@
 
 SUMMARY="Rotates, compresses and mails system logs"
 HOMEPAGE="https://fedorahosted.org/${PN}"
-# The fedora link leads to a https host which has got certificate issues.
-#DOWNLOADS="http://fedorahosted.org/releases/l/o/${PN}/${PNV}.tar.gz"
-DOWNLOADS="http://dev.exherbo.org/~arkanoid/distfiles/${PNV}.tar.gz"
+DOWNLOADS="https://fedorahosted.org/releases/l/o/${PN}/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -18,6 +16,8 @@ DEPENDENCIES="
     build+run:
         dev-libs/popt[>=1.5]
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-no-mmap-empty-file.patch" )
 
 DEFAULT_SRC_COMPILE_PARAMS=(
     "CC=${CC}"
