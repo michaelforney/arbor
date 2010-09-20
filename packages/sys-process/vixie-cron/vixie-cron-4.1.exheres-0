@@ -68,7 +68,7 @@ src_install() {
 
     if option systemd ; then
         insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/vixie-cron.service
+        doins "${FILES}"/systemd/vixie-cron.service
     fi
 
     option pam && newpamd "${FILES}"/pamd.compatible cron
