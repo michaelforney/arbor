@@ -73,7 +73,7 @@ src_install() {
 
     if option systemd ; then
         insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/ntpd.service
+        doins "${FILES}"/systemd/ntpd.service
     fi
 
     newinitd "${FILES}"/ntpd.initd ntpd
