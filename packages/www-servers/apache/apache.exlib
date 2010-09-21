@@ -1,7 +1,7 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib systemd-service [ systemd_files=[ apache.service ] ]
 
 export_exlib_phases src_prepare src_install
 
@@ -33,7 +33,7 @@ UPSTREAM_RELEASE_NOTES="http://httpd.apache.org/docs/${PV2}/new_features_${PV2//
 
 LICENCES="Apache-2.0"
 SLOT="0"
-MYOPTIONS="ssl systemd
+MYOPTIONS="ssl
     apache_modules: ${APACHE_MODULES[*]}
 "
 
@@ -95,9 +95,8 @@ apache_src_install() {
     newconfd "${FILES}"/apache-confd apache2
     newinitd "${FILES}"/apache-initd apache2
 
+    install_systemd_files
     if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/systemd/apache.service
         insinto /etc/conf.d
         doins "${FILES}"/systemd/apache.conf
     fi
