@@ -3,7 +3,7 @@
 # Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam systemd-service
 
 # Make it more portable between straight releases and _p? releases.
 PARCH=${PNV/_/}
@@ -25,7 +25,6 @@ MYOPTIONS="pam tcpd X
     hpn  [[ description = [ Enable high performance ssh ] ]]
     gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
     X509 [[ description = [ Adds support for X.509 certificate authentication ] ]]
-    systemd
 "
 # Unfortunately, the tests need to be run as root.
 RESTRICT="userpriv"
@@ -143,12 +142,7 @@ src_install() {
         newbin contrib/gnome-ssh-askpass2 gnome-ssh-askpass
     fi
 
-    if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins \
-            "${FILES}"/systemd/sshd{@,}.service \
-            "${FILES}"/systemd/sshd.socket
-    fi
+    install_systemd_files
 }
 
 pkg_postinst() {
