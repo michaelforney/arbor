@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib systemd-service
 
 export_exlib_phases pkg_pretend src_install # src_test pkg_config
 
@@ -25,7 +25,7 @@ http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="big-tables debug embedded-server ssl systemd
+MYOPTIONS="big-tables debug embedded-server ssl
     big-tables      [[ description = [ Make tables contain up to 1.844E+19 rows ] ]]
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
 "
@@ -128,8 +128,6 @@ EOF
     newinitd "${FILES}"/mysql.rc6 mysql
     newconfd "${FILES}"/mysql.conf.d mysql
 
-    if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/systemd/mysql.service
-    fi
+    install_systemd_files
 }
+
