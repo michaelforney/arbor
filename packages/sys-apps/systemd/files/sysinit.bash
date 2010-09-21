@@ -25,6 +25,9 @@ sulogin="/sbin/sulogin"
 touch="/bin/touch"
 xargs="/bin/busybox xargs"
 
+# Clean up console output. Syslog and dmesg can be used to check for problems.
+${dmesg} -n 1
+
 retval=0
 
 [[ -x ${lvm} ]] && ${lvm} vgscan --mknodes
