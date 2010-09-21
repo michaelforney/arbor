@@ -1,7 +1,7 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require systemd-service [ systemd_files=[ kexec.service ] ]
 
 export_exlib_phases src_install
 
@@ -21,7 +21,7 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="systemd"
+MYOPTIONS=""
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -46,9 +46,9 @@ src_install() {
     newinitd "${FILES}"/kexec.init kexec
     newconfd "${FILES}"/kexec.conf kexec
 
+    install_systemd_files
+
     if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/systemd/kexec.service
         insinto /etc/conf.d
         doins "${FILES}"/systemd/kexec.conf
     fi
