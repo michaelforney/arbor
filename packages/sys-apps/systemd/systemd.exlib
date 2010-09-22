@@ -28,7 +28,7 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="gtk tcpd"
+MYOPTIONS="gtk tcpd tmpwatch"
 
 # 7. 9. 2010: You'll need at least kernel v2.6.36-rc1.
 DEPENDENCIES="
@@ -51,7 +51,7 @@ DEPENDENCIES="
             x11-libs/libnotify
         )
     run:
-        app-admin/tmpwatch
+        tmpwatch? ( app-admin/tmpwatch )
         sys-apps/kbd[>=1.15.2-r1]
 "
 
@@ -113,7 +113,6 @@ systemd_src_install() {
     # sysinit.service
     insinto /$(get_libdir)/systemd/system
     doins "${FILES}"/sysinit.service
-
     exeinto /etc/init.d
     doexe "${FILES}"/sysinit.bash
 
@@ -121,7 +120,13 @@ systemd_src_install() {
     keepdir /etc/systemd/system/graphical.target.wants
 
     # We're not some other OS so we disable that shortcut.
-    edo rm "${IMAGE}"/etc/systemd/system/ctrl-alt-del.target
+    edo rm "${IMAGE}"/$(get_libdir)/systemd/system/ctrl-alt-del.target
+
+    # Using tmpwatch should be optional.
+    if ! option tmpwatch; then
+        edo rm "${IMAGE}"/$(get_libdir)/systemd/system/sysinit.target.wants/tmpwatch.service
+        edo rm "${IMAGE}"/$(get_libdir)/systemd/system/sysinit.target.wants/tmpwatch.timer
+    fi
 
     insinto /etc
 
@@ -141,6 +146,7 @@ systemd_pkg_postinst() {
     default
 
     [[ -d /etc/systemd/system/sysinit.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/sysinit.target.wants || ewarn "creating dir failed"
+    [[ -d /etc/systemd/system/local-fs.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/local-fs.target.wants || ewarn "creating dir failed"
 
     # Enable basic services
     nonfatal edo ln -sf /$(get_libdir)/systemd/system/remount-rootfs.service "${ROOT}"/etc/systemd/system/sysinit.target.wants/remount-rootfs.service || ewarn "remount symlink failed"
@@ -151,5 +157,8 @@ systemd_pkg_postinst() {
     if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
         nonfatal edo ln -sf /$(get_libdir)/systemd/system/syslog.socket "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.socket || ewarn "socket symlink failed"
     fi
+
+    # Enable tmp.service
+    nonfatal edo ln -sf /$(get_libdir)/systemd/system/tmp.service "${ROOT}"/etc/systemd/system/local-fs.target.wants/tmp.service || ewarn "tmp symlink failed"
 }
 
