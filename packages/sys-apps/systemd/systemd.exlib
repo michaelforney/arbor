@@ -45,7 +45,6 @@ DEPENDENCIES="
         sys-fs/udev[systemd(-)][>=162]
         sys-libs/libcap
         sys-libs/pam
-        group/lock [[ note = [ Required for var-lock service ] ]]
         gtk? (
             x11-libs/gtk+:2[>=2.20]
             x11-libs/libnotify
@@ -53,6 +52,7 @@ DEPENDENCIES="
     run:
         tmpwatch? ( app-admin/tmpwatch )
         sys-apps/kbd[>=1.15.2-r1]
+        group/lock [[ note = [ Required for var-lock service ] ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
