@@ -25,10 +25,10 @@ sulogin="/sbin/sulogin"
 touch="/bin/touch"
 xargs="/bin/busybox xargs"
 
+retval=0
+
 # Clean up console output. Syslog and dmesg can be used to check for problems.
 ${dmesg} -n 1
-
-retval=0
 
 [[ -x ${lvm} ]] && ${lvm} vgscan --mknodes
 
@@ -163,17 +163,6 @@ if [[ -d /tmp ]] ; then
     # First kill most files, then kill empty dirs
     eval ${find} . -xdev -depth ${exceptions} ! -type d -print0 | ${xargs} -0 ${rm} -f --
     eval ${find} . -xdev -depth ${exceptions}   -type d ! -name "." -print0 | ${sort} -rz | ${xargs} -0 ${rmdir} --ignore-fail-on-non-empty
-
-    (
-        # Make sure our X11 stuff have the correct permissions
-        # Omit the chown as bootmisc is run before network is up
-        # and users may be using lame LDAP auth #139411
-        ${rm} -rf /tmp/.{ICE,X11}-unix
-        ${mkdir} -p /tmp/.{ICE,X11}-unix
-        #chown 0:0 /tmp/.{ICE,X11}-unix
-        ${chmod} 1777 /tmp/.{ICE,X11}-unix
-        [[ -x ${restorecon} ]] && ${restorecon} /tmp/.{ICE,X11}-unix
-    ) &> /dev/null
 fi
 
 # Create an 'after-boot' dmesg log
