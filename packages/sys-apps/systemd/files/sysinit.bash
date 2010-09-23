@@ -7,17 +7,13 @@
 # Only use commands from / to avoid the need to mount /usr at this point of the boot process.
 # Consider using busybox if need be.
 awk="/bin/awk"
-chmod="/bin/chmod"
 dmesg="/bin/dmesg"
 find="/bin/busybox find"
 fsck="/sbin/fsck"
 grep="/bin/grep"
 lvm="/sbin/lvm"
-mkdir="/bin/mkdir"
 mount="/bin/mount"
-ps="/bin/ps"
 reboot="/sbin/reboot"
-restorecon="/sbin/restorecon"
 rm="/bin/rm"
 rmdir="/bin/rmdir"
 sort="/bin/sort"
@@ -112,32 +108,9 @@ for x in $(${awk} '{ print $2 }' /proc/mounts | sort -u) ; do
     done
 done
 
-# Remove stale backups
-${rm} -f /etc/mtab~ /etc/mtab~~
-
-# Take care of random stuff [ /var/lock | /var/run | pam ]
-${rm} -rf /var/run/console.lock /var/run/console/*
-
-# Clean up any stale locks.
-${find} /var/lock -type f -print0 | ${xargs} -0 ${rm} -f --
-
-# Clean up /var/run and create /var/run/utmp so that we can login.
-for x in $(${find} /var/run/ ! -type d ! -name utmp ! -name innd.pid ! -name random-seed) ; do
-    daemon=${x##*/}
-    daemon=${daemon%*.pid}
-    # Do not remove pidfiles of already running daemons
-    if [[ -z $(${ps} --no-heading -C "${daemon}") ]] ; then
-        if [[ -f ${x} || -L ${x} ]] ; then
-            ${rm} -f "${x}"
-        fi
-    fi
-done
-
-# Create the .keep to stop the PM from removing /var/lock
-> /var/lock/.keep
-
-# Clean up /tmp directory
-if [[ -d /tmp ]] ; then
+# Clean up /tmp directory if it's not on a tmpfs anyway.
+# Can't check /proc/self/mountinfo since tmp.service is started later than this.
+if ! [[ -L /etc/systemd/system/local-fs.target.wants/tmp.service ]] && [[ -d /tmp ]]; then
     cd /tmp
     exceptions="
         '!' -name . -a
@@ -166,8 +139,7 @@ if [[ -d /tmp ]] ; then
 fi
 
 # Create an 'after-boot' dmesg log
-${touch} /var/log/dmesg
-${chmod} 640 /var/log/dmesg
+> /var/log/dmesg
 ${dmesg} > /var/log/dmesg
 
 # Check for /etc/resolv.conf, and create if missing
