@@ -42,6 +42,7 @@ DEPENDENCIES="
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff )
         app-text/poppler [[ note = [ pdftops ] ]]
+        dev-libs/libpaper
         media-libs/jpeg
         media-libs/libpng
         group/lpadmin
@@ -99,6 +100,7 @@ src_configure() {
     # XXX Withs: java php
     econf \
         --enable-jpeg \
+        --enable-libpaper \
         --enable-png \
         --enable-raw-printing \
         --enable-static \
