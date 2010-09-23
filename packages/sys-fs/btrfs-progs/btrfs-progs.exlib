@@ -21,3 +21,9 @@ DEPENDENCIES="
 
 DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS="${CFLAGS}" )
 
+src_install() {
+    default
+    # For the benefit of init scripts like /etc/init.d/checkfs from baselayout-1
+    dosym /usr/bin/btrfsck /usr/bin/fsck.btrfs
+}
+
