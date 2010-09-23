@@ -1,0 +1,27 @@
+# Copyright 2010 Brett Witherspoon <spoonb@cdspooner.com>
+# Distributed under the terms of the GNU General Public Liscense v2
+
+SUMMARY="A utility to remove directories and files after a specified period of time"
+DESCRIPTION="
+The ${PN} utility recursively searches through specified directories and removes
+files which have not been accessed in a specified period of time. It is normally
+used to clean up directories which are used for temporarily holding files (for
+example, /tmp).
+"
+HOMEPAGE="https://fedorahosted.org/${PN}/"
+DOWNLOADS="https://fedorahosted.org/releases/t/m/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        sys-process/psmisc
+"
+
+BUGS_TO="spoonb@cdspooner.com"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-fuser )
+

@@ -3,7 +3,7 @@
 # Based in part upon 'ntp-4.2.4_p4.ebuild' which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require multilib
+require systemd-service
 
 MY_PNV=${PNV/_p/p}
 
@@ -28,7 +28,7 @@ UPSTREAM_RELEASE_NOTES="http://www.eecis.udel.edu/~${PN}/${PN}_spool/${PN}4/NEWS
 
 SLOT="0"
 
-MYOPTIONS="caps debug ipv6 parse-clocks systemd"
+MYOPTIONS="caps debug ipv6 parse-clocks"
 
 DEPENDENCIES="
     build+run:
@@ -71,10 +71,7 @@ src_install() {
     keepdir /var/lib/ntp
     edo chown ntp:ntp "${IMAGE}"/var/lib/ntp
 
-    if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/ntpd.service
-    fi
+    install_systemd_files
 
     newinitd "${FILES}"/ntpd.initd ntpd
     # As of ntp-4.2.4_p7-RC1 ntp will only drop privileges if linuxcaps is enabled

@@ -12,21 +12,23 @@ DOWNLOADS="http://ghostscript.com/releases/${PNV}.tar.xz"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="cairo cups gtk jpeg2000 X
-    gtk [[ requires = [ cairo X ] ]]"
+MYOPTIONS="cups gtk idn jpeg2000 X
+    gtk [[ requires = [ X ] ]]"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
         X? ( x11-proto/xextproto )
     build+run:
+        dev-libs/libpaper
+        media-libs/freetype:2
         media-libs/fontconfig
         media-libs/jpeg
         media-libs/libpng
         media-libs/tiff
-        cairo? ( x11-libs/cairo )
         cups? ( net-print/cups )
         gtk? ( x11-libs/gtk+:2 )
+        idn? ( net-dns/libidn )
         jpeg2000? ( media-libs/jasper )
         X? (
             x11-libs/libXext
@@ -35,12 +37,6 @@ DEPENDENCIES="
     run:
         fonts/ghostscript-fonts-std
 "
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-8.70-fPIC.patch
-    -p0 "${FILES}"/${PNV}-libpng-1.4.0-compile-fix-upstream.patch
-    -p1 "${FILES}"/${PNV}-CVE-2010-1628.patch
-)
 
 src_prepare() {
     edo rm -r ./{expat,jasper,jpeg,libpng,tiff,zlib}
@@ -64,14 +60,17 @@ src_configure() {
         --with-fontpath=/usr/share/fonts/default/ghostscript \
         --disable-compile-inits \
         --enable-dynamic \
+        --enable-freetype \
         --enable-fontconfig \
         --with-drivers=ALL \
         --with-ijs \
         --with-jbig2dec \
+        --with-libpaper \
         --with-system-libtiff \
-        $(option_enable cairo) \
         $(option_enable cups) \
         $(option_enable gtk) \
+        $(option_with cups pdftoraster) \
+        $(option_with idn libidn) \
         $(option_with X x) \
         --without-jasper
         # Doesn't compile:

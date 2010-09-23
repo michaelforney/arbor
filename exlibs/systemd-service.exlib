@@ -1,0 +1,28 @@
+# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+myexparam systemd_files=[ "${FILES}"/systemd ]
+
+MYOPTIONS="systemd"
+
+
+install_systemd_files() {
+    local systemd_files object=
+
+    exparam -v systemd_files systemd_files[@]
+
+    if option systemd ; then
+        insinto /$(get_libdir)/systemd/system
+
+        for object in "${systemd_files[@]}"; do
+            if [[ -d ${object} ]]; then
+                doins "${object}"/*
+            else
+                doins "${FILES}"/systemd/"${object}"
+            fi
+        done
+    fi
+}
+

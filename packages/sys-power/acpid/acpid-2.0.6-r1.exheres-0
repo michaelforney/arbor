@@ -3,6 +3,8 @@
 # Based in part upon 'acpid-1.0.6-r1.ebuild', which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
+require systemd-service
+
 SUMMARY="A configurable ACPI policy daemon for Linux"
 DESCRIPTION="
 acpid is designed to notify user-space programs of ACPI events. It will
@@ -19,7 +21,6 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
-
 DEPENDENCIES=""
 
 BUGS_TO="pioto@exherbo.org"
@@ -40,6 +41,8 @@ src_install() {
 
     newinitd "${FILES}"/acpid.init.d-0 acpid
     newconfd "${FILES}"/acpid.conf.d-0 acpid
+
+    install_systemd_files
 
     keepdir /etc/acpi/events
 

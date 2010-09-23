@@ -20,7 +20,7 @@ DEPENDENCIES="
     build:
         dev-libs/libxslt
     build+run:
-        glib? ( dev-libs/glib:2[>=2.7.0][multibuild_c:*(?)?] )
+        glib? ( dev-libs/glib:2[>=2.22.0][multibuild_c:*(?)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
         sound? ( sys-apps/usbutils
                  sys-apps/pciutils )
@@ -28,7 +28,7 @@ DEPENDENCIES="
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-allow-building-of-only-gudev.patch"
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-163-allow-building-of-only-gudev.patch"
                               "${FILES}/0002-allow-building-only-the-sound-rules.patch" )
 
 AT_M4DIR=( m4 )
@@ -66,7 +66,7 @@ configure_one_multibuild() {
         $(option_enable sound usb-db) \
         $(option_enable sound pci-db) \
         $(option_enable sound sound-rules) \
-        $(option_with systemd systemdsystemunitdir /$(get_libdir)/systemd/system)
+        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
 }
 
 install_one_multibuild() {

@@ -3,7 +3,7 @@
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require pam
+require pam systemd-service
 
 PATCH_VER="1.0"
 
@@ -15,7 +15,7 @@ DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="pam systemd"
+MYOPTIONS="pam"
 
 DEPENDENCIES="
     build+run:
@@ -66,10 +66,7 @@ src_install() {
     keepdir /etc/cron.d
     newinitd "${FILES}"/vixie-cron.rc6 vixie-cron
 
-    if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/vixie-cron.service
-    fi
+    install_systemd_files
 
     option pam && newpamd "${FILES}"/pamd.compatible cron
 
