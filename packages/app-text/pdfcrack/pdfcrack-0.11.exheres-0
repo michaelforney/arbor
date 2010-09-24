@@ -3,14 +3,12 @@
 
 require sourceforge [ suffix=tar.gz ]
 
-SUMMARY="${PN} is a command line password recovery tool for PDF files"
+SUMMARY="A command line password recovery tool for PDF files"
 DESCRIPTION="
-${PN} is a GNU/Linux (other POSIX-compatible systems should work too) tool for
+PDFCrack is a GNU/Linux (other POSIX-compatible systems should work too) tool for
 recovering passwords and content from PDF files. It is small, command line driven
 without external dependencies.
-${PN} features both a dictionary and brute-force mode. Thus, it's *not* removing
-the password instantly but can take its time. Furthermore, ${PN} does *not*
-remove the actual DRM features but just removes the password.
+PDFCrack features both a dictionary and brute-force mode.
 "
 
 BUGS_TO="philantrop@exherbo.org"
@@ -27,10 +25,7 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-Makefile.patch )
 
 src_install() {
-    dodoc \
-        changelog \
-        README \
-        TODO
+    emagicdocs
 
     dobin pdfcrack
 }
