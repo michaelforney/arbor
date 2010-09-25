@@ -7,7 +7,6 @@
 # Only use commands from / to avoid the need to mount /usr at this point of the boot process.
 # Consider using busybox if need be.
 awk="/bin/awk"
-dmesg="/bin/dmesg"
 find="/bin/busybox find"
 fsck="/sbin/fsck"
 grep="/bin/grep"
@@ -22,9 +21,6 @@ touch="/bin/touch"
 xargs="/bin/busybox xargs"
 
 retval=0
-
-# Clean up console output. Syslog and dmesg can be used to check for problems.
-${dmesg} -n 1
 
 [[ -x ${lvm} ]] && ${lvm} vgscan --mknodes
 
@@ -88,26 +84,6 @@ then
     fi
 fi
 
-# Create /etc/mtab
-# Clear the existing mtab
-> /etc/mtab
-
-# Add the entry for / to mtab
-${mount} -f /
-
-# Don't list root more than once
-${awk} '$2 != "/" {print}' /proc/mounts >> /etc/mtab
-
-# Now make sure /etc/mtab have additional info (gid, etc) in there
-for x in $(${awk} '{ print $2 }' /proc/mounts | sort -u) ; do
-    for y in $(${awk} '{ print $2 }' /etc/fstab) ; do
-        if [[ ${x} == ${y} ]] ; then
-            ${mount} -f -o remount $x
-            continue
-        fi
-    done
-done
-
 # Clean up /tmp directory if it's not on a tmpfs anyway.
 # Can't check /proc/self/mountinfo since tmp.service is started later than this.
 if ! [[ -L /etc/systemd/system/local-fs.target.wants/tmp.service ]] && [[ -d /tmp ]]; then
@@ -137,10 +113,6 @@ if ! [[ -L /etc/systemd/system/local-fs.target.wants/tmp.service ]] && [[ -d /tm
     eval ${find} . -xdev -depth ${exceptions} ! -type d -print0 | ${xargs} -0 ${rm} -f --
     eval ${find} . -xdev -depth ${exceptions}   -type d ! -name "." -print0 | ${sort} -rz | ${xargs} -0 ${rmdir} --ignore-fail-on-non-empty
 fi
-
-# Create an 'after-boot' dmesg log
-> /var/log/dmesg
-${dmesg} > /var/log/dmesg
 
 # Check for /etc/resolv.conf, and create if missing
 [[ -f /etc/resolv.conf ]] || ${touch} /etc/resolv.conf &> /dev/null
