@@ -58,8 +58,13 @@ DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 WORK="${WORKBASE}"/LVM2.${PV}
 
 lvm2_src_test_expensive() {
-    # This test still fails or succeeds pretty much randomly for no apparent reason.
+    # These tests still fail or succeed pretty much randomly for no apparent reason.
     edo rm test/t-lvcreate-usage.sh
+    edo rm test/t-snapshots-of-mirrors.sh
+
+    # These tests fail due to the above tests being disabled.
+    edo rm test/t-lvcreate-operation.sh
+    edo rm test/t-vgsplit-operation.sh
 
     # The tests call several tools and need a few devices.
     sydboxcmd sandunbox/exec
