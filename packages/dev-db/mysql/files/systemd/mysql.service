@@ -11,6 +11,8 @@ After=syslog.target
 
 [Service]
 Type=simple
+ExecStartPre=/bin/mkdir -p /var/run/mysqld
+ExecStartPre=/bin/chown mysql:mysql /var/run/mysqld
 ExecStart=/usr/sbin/mysqld --defaults-file=/etc/mysql/my.cnf --basedir=/usr --datadir=/var/lib/mysql --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --user=mysql --log-error=/var/log/mysql/mysql.log -W
 
 [Install]
