@@ -1,0 +1,17 @@
+[Unit]
+Description=Logical Volume Manager
+DefaultDependencies=no
+Before=sysinit.service
+Before=sysinit.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/sbin/pvscan --quiet --config 'global { locking_dir = "/dev/.lvm" }'
+ExecStartPre=/sbin/vgscan --quiet --mknodes --config 'global { locking_dir = "/dev/.lvm" }'
+ExecStart=/sbin/vgchange --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a y
+ExecStop=-/sbin/lvchange --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a n /dev/mapper/*
+ExecStop=-/sbin/vgchange --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a n
+
+[Install]
+WantedBy=sysinit.target
