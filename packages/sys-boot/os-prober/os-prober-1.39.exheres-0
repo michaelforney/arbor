@@ -11,7 +11,7 @@ HOMEPAGE="http://joey.kitenet.net/code/os-prober/"
 
 LICENCES="GPL-3"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -32,7 +32,7 @@ src_prepare() {
     edo sed -i "s:/lib/ld\*\.so\*:/lib*/ld*.so*:g" "${WORK}"/os-probes/mounted/common/90linux-distro
     echo 'fgrep -rlZ "/usr/lib" "${WORK}" | xargs -0 sed -i "s:/usr/lib/:/usr/libexec/:g"' >&2
     fgrep -rlZ "/usr/lib" "${WORK}" | xargs -0 sed -i "s:/usr/lib/:/usr/libexec/:g" || die
-    
+
     default
 }
 
@@ -63,3 +63,4 @@ src_install() {
 
     keepdir /var/lib/os-prober
 }
+
