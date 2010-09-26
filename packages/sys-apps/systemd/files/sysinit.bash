@@ -22,8 +22,6 @@ xargs="/bin/busybox xargs"
 
 retval=0
 
-[[ -x ${lvm} ]] && ${lvm} vgscan --mknodes
-
 # If / root is already mounted rw for some reason, re-mount it ro.
 if ${touch} -c / >& /dev/null ; then
     ${mount} -n -o remount,ro /
