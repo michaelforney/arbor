@@ -72,7 +72,9 @@ alternatives_for() {
             dodir "${ALTERNATIVES_DIR}/${alternative}/${provider}${src%/*}"
             dosym "${reltarget}" "${ALTERNATIVES_DIR}/${alternative}/${provider}${src}"
 
-            if [[ -e ${IMAGE}${src} ]]; then
+            # say ${IMAGE}/sbin/init exists and links to /bin/systemd (which doesn't exist yet)
+            # the -e test will fail, so check for -L also
+            if [[ -e ${IMAGE}${src} || -L ${IMAGE}${src} ]]; then
                 local fulltarget=${target}
                 [[ ${fulltarget} != /* ]] && fulltarget=${src%/*}/${fulltarget}
                 edo mv "${IMAGE}${src}" "${IMAGE}${fulltarget}"
