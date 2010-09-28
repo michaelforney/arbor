@@ -1,15 +1,15 @@
-From 02f89c79d1635871e2d66a9f5e1171ca9bf7a162 Mon Sep 17 00:00:00 2001
+From b6612a8d984f272ffa0143322a2e9b61d0dd16a1 Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
-Date: Mon, 20 Sep 2010 00:15:41 +0200
-Subject: [PATCH] Add basic services for Exherbo.
+Date: Tue, 28 Sep 2010 13:17:27 +0200
+Subject: [PATCH 2/3] Add basic services for Exherbo.
 
 ---
  Makefile.am                    |    8 ++++++++
- units/exherbo/halt.service     |   19 +++++++++++++++++++
+ units/exherbo/halt.service     |   18 ++++++++++++++++++
  units/exherbo/killall.service  |   21 +++++++++++++++++++++
- units/exherbo/poweroff.service |   19 +++++++++++++++++++
- units/exherbo/reboot.service   |   19 +++++++++++++++++++
- 5 files changed, 86 insertions(+), 0 deletions(-)
+ units/exherbo/poweroff.service |   18 ++++++++++++++++++
+ units/exherbo/reboot.service   |   18 ++++++++++++++++++
+ 5 files changed, 83 insertions(+), 0 deletions(-)
  create mode 100644 units/exherbo/halt.service
  create mode 100644 units/exherbo/killall.service
  create mode 100644 units/exherbo/poweroff.service
@@ -36,10 +36,10 @@ index aa4798d..fba6966 100644
  	LICENSE \
 diff --git a/units/exherbo/halt.service b/units/exherbo/halt.service
 new file mode 100644
-index 0000000..acb1e8b
+index 0000000..9c93791
 --- /dev/null
 +++ b/units/exherbo/halt.service
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,18 @@
 +#  This file is part of systemd.
 +#
 +#  systemd is free software; you can redistribute it and/or modify it
@@ -57,7 +57,6 @@ index 0000000..acb1e8b
 +Type=oneshot
 +RemainAfterExit=yes
 +ExecStart=/sbin/halt -d
-+ExecStartPost=/sbin/halt -f
 +StandardOutput=tty
 diff --git a/units/exherbo/killall.service b/units/exherbo/killall.service
 new file mode 100644
@@ -88,10 +87,10 @@ index 0000000..ac5ae05
 +StandardOutput=tty
 diff --git a/units/exherbo/poweroff.service b/units/exherbo/poweroff.service
 new file mode 100644
-index 0000000..1f6d732
+index 0000000..eac12bc
 --- /dev/null
 +++ b/units/exherbo/poweroff.service
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,18 @@
 +#  This file is part of systemd.
 +#
 +#  systemd is free software; you can redistribute it and/or modify it
@@ -108,15 +107,14 @@ index 0000000..1f6d732
 +[Service]
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=/sbin/poweroff -dp
-+ExecStartPost=/sbin/poweroff -df
++ExecStart=/sbin/poweroff -d
 +StandardOutput=tty
 diff --git a/units/exherbo/reboot.service b/units/exherbo/reboot.service
 new file mode 100644
-index 0000000..1ccd35f
+index 0000000..4276f24
 --- /dev/null
 +++ b/units/exherbo/reboot.service
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,18 @@
 +#  This file is part of systemd.
 +#
 +#  systemd is free software; you can redistribute it and/or modify it
@@ -134,7 +132,6 @@ index 0000000..1ccd35f
 +Type=oneshot
 +RemainAfterExit=yes
 +ExecStart=/sbin/reboot -d
-+ExecStartPost=/sbin/reboot -df
 +StandardOutput=tty
 -- 
 1.7.2.3
