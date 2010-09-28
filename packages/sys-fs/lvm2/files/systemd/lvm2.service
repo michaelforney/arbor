@@ -1,8 +1,8 @@
 [Unit]
 Description=Logical Volume Manager
 DefaultDependencies=no
+Before=basic.target
 Before=sysinit.service
-Before=sysinit.target
 
 [Service]
 Type=oneshot
@@ -14,4 +14,4 @@ ExecStop=-/sbin/lvchange --quiet --config 'global { locking_dir = "/dev/.lvm" }'
 ExecStop=-/sbin/vgchange --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a n
 
 [Install]
-WantedBy=sysinit.target
+WantedBy=basic.target
