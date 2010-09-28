@@ -166,6 +166,22 @@ EOF
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
+
+    # From here on, we're creating a basic configuration.
+    dodir /etc/systemd/system/basic.target.wants
+    dodir /etc/systemd/system/local-fs.target.wants
+
+    # Enable basic services
+    dosym /$(get_libdir)/systemd/system/sysinit.service /etc/systemd/system/basic.target.wants/sysinit.service
+
+    # Enable tmp.service
+    dosym /$(get_libdir)/systemd/system/tmp.service /etc/systemd/system/local-fs.target.wants/tmp.service
+
+    # Enable syslog
+    dosym /$(get_libdir)/systemd/system/syslog.service /etc/systemd/system/multi-user.target.wants/syslog.service
+    if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
+        dosym /$(get_libdir)/systemd/system/syslog.socket /etc/systemd/system/multi-user.target.wants/syslog.socket
+    fi
 }
 
 systemd_pkg_postinst() {
@@ -184,20 +200,5 @@ systemd_pkg_postinst() {
             nonfatal edo mv "${file}" "${file}".conf || ewarn "moving ${file} failed"
         fi
     done
-
-    [[ -d /etc/systemd/system/basic.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/basic.target.wants || ewarn "creating dir failed"
-    [[ -d /etc/systemd/system/local-fs.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/local-fs.target.wants || ewarn "creating dir failed"
-
-    # Enable basic services
-    nonfatal edo ln -sf /$(get_libdir)/systemd/system/sysinit.service "${ROOT}"/etc/systemd/system/basic.target.wants/sysinit.service || ewarn "sysinit symlink failed"
-
-    # Enable syslog
-    nonfatal edo ln -sf /$(get_libdir)/systemd/system/syslog.service "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.service || ewarn "syslog symlink failed"
-    if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
-        nonfatal edo ln -sf /$(get_libdir)/systemd/system/syslog.socket "${ROOT}"/etc/systemd/system/multi-user.target.wants/syslog.socket || ewarn "socket symlink failed"
-    fi
-
-    # Enable tmp.service
-    nonfatal edo ln -sf /$(get_libdir)/systemd/system/tmp.service "${ROOT}"/etc/systemd/system/local-fs.target.wants/tmp.service || ewarn "tmp symlink failed"
 }
 
