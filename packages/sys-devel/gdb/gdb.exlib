@@ -4,10 +4,14 @@
 # Inspired by gdb-6.7.1.ebuild which is Copyright 1999-2007 Gentoo Foundation
 
 SUMMARY="The GNU Project Debugger"
-HOMEPAGE="http://sourceware.org/gdb/"
+HOMEPAGE="http://sourceware.org/${PN}"
 DOWNLOADS="mirror://sourceware/${PN}/releases/${PNV}.tar.bz2"
 
-LICENCES="GPL-2 LGPL-2"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation/index.html [[ lang = en ]]"
+
+LICENCES="GPL-3 LGPL-3"
 SLOT="0"
 MYOPTIONS="python"
 
@@ -20,9 +24,11 @@ DEPENDENCIES="
         dev-util/dejagnu
     build+run:
         dev-libs/expat
-        dev-libs/gmp
-        dev-libs/mpfr
+        dev-libs/gmp[>=4.2]
+        dev-libs/mpc[>=0.8.0]
+        dev-libs/mpfr[>=2.3.1]
         sys-libs/ncurses[>=5.2]
+        sys-libs/readline
         python? ( dev-lang/python:= )
 "
 
@@ -30,11 +36,11 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-gold
     --disable-werror
+    --enable-nls
     --enable-tui
     --with-curses
     --with-expat
-    # FIXME Still breaks with readline-6.0*
-    #--with-system-readline
+    --with-system-readline
 )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( gdb sim )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CONTRIBUTE )
@@ -46,6 +52,14 @@ src_test_expensive() {
     else
         elog "Not running tests because gdb doesn't work under sydbox"
         elog "set PALUDIS_DO_NOTHING_SANDBOXY=1 if you want to run the tests"
+    fi
+}
+
+src_install() {
+    default
+
+    if option python ; then
+        rmdir "${IMAGE}"/usr/share/gdb/python/{gdb,} || die "Removing empty directories failed"
     fi
 }
 

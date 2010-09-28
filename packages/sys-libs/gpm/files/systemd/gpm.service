@@ -1,0 +1,13 @@
+[Unit]
+Description=Console Mouse manager
+After=syslog.target
+
+# This could probably benefit from socket activation, but honestly I think it
+# is time for gpm to go away, and hence I am not planning to spend the time
+# to add socket activation here.
+
+[Service]
+ExecStart=/usr/sbin/gpm -m /dev/input/mice -t imps2 -l \"a-zA-Z0-9_.:~/\300-\326\330-\366\370-\377\" -D
+
+[Install]
+WantedBy=multi-user.target

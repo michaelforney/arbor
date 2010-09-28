@@ -1,0 +1,11 @@
+[Unit]
+Description=ulog daemon
+After=network.target
+
+[Service]
+Environment=TMPDIR=
+ExecStart=/usr/sbin/ulogd
+ExecReload=/bin/kill -HUP $(MAINPID)
+
+[Install]
+WantedBy=multi-user.target

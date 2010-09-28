@@ -28,7 +28,11 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="gtk tcpd tmpwatch"
+MYOPTIONS="
+    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
+    tcpd
+    tmpwatch [[ description = [ Enable watching /tmp for unused files to delete ] ]]
+"
 
 # 7. 9. 2010: You'll need at least kernel v2.6.36-rc1.
 # We don't support metalog as a syslogger (yet) so we do NOT use virtual/syslog here.
@@ -58,7 +62,6 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Add-Exherbo-distribution.patch
-    "${FILES}"/0001-Add-hostname-handling-for-Exherbo.patch
     "${FILES}"/0001-Add-basic-services-for-Exherbo.patch
     "${FILES}"/0001-Add-Exherbo-welcome-message.patch
 )
@@ -114,8 +117,9 @@ systemd_src_install() {
     # sysinit.service
     insinto /$(get_libdir)/systemd/system
     doins "${FILES}"/sysinit.service
-    exeinto /etc/init.d
+    exeinto /$(get_libdir)/systemd
     doexe "${FILES}"/sysinit.bash
+    edo sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/$(get_libdir)/systemd/system/sysinit.service
 
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
@@ -145,6 +149,13 @@ EOF
 
 systemd_pkg_postinst() {
     default
+
+    local cruft=( /etc/init.d/sysinit.bash )
+    for file in ${cruft[@]}; do
+        if test -f "${file}" ; then
+            nonfatal edo rm "${file}" || ewarn "removing ${file} failed"
+        fi
+    done
 
     [[ -d /etc/systemd/system/sysinit.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/sysinit.target.wants || ewarn "creating dir failed"
     [[ -d /etc/systemd/system/local-fs.target.wants ]] || nonfatal edo mkdir "${ROOT}"/etc/systemd/system/local-fs.target.wants || ewarn "creating dir failed"

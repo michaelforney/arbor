@@ -43,6 +43,7 @@ DEPENDENCIES="
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff[multibuild_c:*(?)?] )
         app-text/poppler [[ note = [ pdftops ] ]]
+        dev-libs/libpaper[multibuild_c:*(?)?]
         group/lpadmin
         media-libs/jpeg[multibuild_c:*(?)?]
         media-libs/libpng[multibuild_c:*(?)?]
@@ -115,6 +116,7 @@ configure_one_multibuild() {
     # XXX Withs: java php
     econf \
         --enable-jpeg \
+        --enable-libpaper \
         --enable-png \
         --enable-raw-printing \
         --enable-static \

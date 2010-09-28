@@ -3,7 +3,7 @@
 # Based in part upon 'gpm-1.20.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require easy-multibuild [ work=${PNV} ]
+require easy-multibuild [ work=${PNV} ] systemd-service
 
 SUMMARY="Console-based mouse driver"
 HOMEPAGE="http://www.nico.schottelius.org/software/${PN}"
@@ -61,5 +61,7 @@ install_one_multibuild() {
 
     newinitd "${FILES}"/${PN}.init.d ${PN}
     newconfd "${FILES}"/${PN}.conf.d ${PN}
+
+    install_systemd_files
 }
 

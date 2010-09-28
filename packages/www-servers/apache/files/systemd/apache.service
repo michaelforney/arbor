@@ -5,6 +5,7 @@ After=network.target
 [Service]
 Type=forking
 EnvironmentFile=/etc/conf.d/apache.conf
+ExecStartPre=/bin/mkdir -p /var/run/apache2
 ExecStartPre=/usr/bin/rm -f /var/run/apache2/ssl_scache
 ExecStartPre=/usr/bin/apachectl $APACHE2_OPTS -t
 ExecStart=/usr/bin/apachectl $APACHE2_OPTS -k start

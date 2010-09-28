@@ -2,6 +2,8 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 export_exlib_phases src_configure src_install pkg_postinst
 
 MY_PV=${PV/_p/-P}
@@ -129,6 +131,8 @@ EOF
     # Installing init file as well as confd file
     newinitd "${FILES}"/named.init named
     newconfd "${FILES}"/named.confd named
+
+    install_systemd_files
 
     # Install standard zones and root cache
     insinto /var/bind

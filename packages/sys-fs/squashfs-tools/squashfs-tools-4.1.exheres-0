@@ -1,4 +1,4 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009-2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge [ project=squashfs suffix=tar.gz pnv=squashfs${PV} ]
@@ -15,8 +15,6 @@ overhead is needed. This package allows you to create such filesystems.
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS+="freshmeat:squashfs"
 
-UPSTREAM_RELEASE_NOTES="http://sourceforge.net/project/shownotes.php?group_id=63835&release_id=622329"
-
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -27,23 +25,11 @@ DEPENDENCIES="
         sys-libs/zlib
 "
 
-WORK="${WORKBASE}"/squashfs${PV}/squashfs-tools
+WORK="${WORKBASE}"/squashfs${PV}/${PN}
 
-DEFAULT_SRC_COMPILE_PARAMS=(
-    CC="${CC}"
-    LDFLAGS="${LDFLAGS}"
-)
-
+DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PNV}-Respect-flags.patch )
+DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" LDFLAGS="${LDFLAGS}" )
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_DIR="${IMAGE}"/usr/bin )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( ../ )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
-    ACKNOWLEDGEMENTS
-    PERFORMANCE.README
-)
-
-src_prepare() {
-    edo sed -e 's:-O2:$(CFLAGS):' \
-            -e 's:$(CC):$(CC) $(LDFLAGS):' \
-            -i Makefile
-}
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ACKNOWLEDGEMENTS PERFORMANCE.README )
 

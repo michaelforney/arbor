@@ -1,0 +1,10 @@
+[Unit]
+Description=Domain Name Server
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/named -f -u named -n 1
+ExecReload=/bin/kill -HUP $(MAINPID)
+
+[Install]
+WantedBy=multi-user.target
