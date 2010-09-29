@@ -1,7 +1,7 @@
 # Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] easy-multibuild
 
 SUMMARY="Software-based implementation of the codec specified in the JPEG-2000 Part-1 standard"
 HOMEPAGE="http://www.ece.uvic.ca/~mdadams/jasper/"
@@ -12,21 +12,21 @@ DOWNLOADS="${HOMEPAGE}/software/${PNV}.zip
 LICENCES="Jasper-2.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="jpeg opengl"
+MYOPTIONS="jpeg opengl multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         app-arch/unzip
     build+run:
-        jpeg? ( media-libs/jpeg )
+        jpeg? ( media-libs/jpeg[multibuild_c:*(?)?] )
         opengl? (
-            x11-dri/freeglut
-            x11-dri/mesa
-            x11-libs/libX11
-            x11-libs/libXext
-            x11-libs/libXi
-            x11-libs/libXmu
-            x11-libs/libXt
+            x11-dri/freeglut[multibuild_c:*(?)?]
+            x11-dri/mesa[multibuild_c:*(?)?]
+            x11-libs/libX11[multibuild_c:*(?)?]
+            x11-libs/libXext[multibuild_c:*(?)?]
+            x11-libs/libXi[multibuild_c:*(?)?]
+            x11-libs/libXmu[multibuild_c:*(?)?]
+            x11-libs/libXt[multibuild_c:*(?)?]
         )
 "
 
