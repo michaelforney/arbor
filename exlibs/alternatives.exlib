@@ -77,7 +77,11 @@ alternatives_for() {
             if [[ -e ${IMAGE}${src} || -L ${IMAGE}${src} ]]; then
                 local fulltarget=${target}
                 [[ ${fulltarget} != /* ]] && fulltarget=${src%/*}/${fulltarget}
-                edo mv "${IMAGE}${src}" "${IMAGE}${fulltarget}"
+                if [[ -e ${IMAGE}${fulltarget} || -L ${IMAGE}${fulltarget} ]]; then
+                    die "${src} defined as provider for ${fulltarget}, but both already exist in \${IMAGE}"
+                else
+                    edo mv "${IMAGE}${src}" "${IMAGE}${fulltarget}"
+                fi
             fi
         fi
         shift 2
