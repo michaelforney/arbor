@@ -2,6 +2,8 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service [ systemd_files=[ dhcpd.service ] ]
+
 export_exlib_phases src_install pkg_postinst
 
 MY_PNV="${PNV/_rc/rc}"
@@ -52,6 +54,12 @@ dhcp_src_install() {
 
     newinitd "${FILES}"/dhcpd.init dhcpd
     newconfd "${FILES}"/dhcpd.conf dhcpd
+
+    install_systemd_files
+    if option systemd; then
+        insinto /etc/conf.d
+        doins "${FILES}"/systemd/dhcpd.conf
+    fi
 
     dodoc -r doc/*
 }
