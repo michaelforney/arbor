@@ -15,6 +15,7 @@ DEPENDENCIES="
     build+run:
         app-misc/ca-certificates
         dev-libs/openssl
+        net-libs/libssh2
         ares? ( net-dns/c-ares )
         idn? ( net-dns/libidn )
 "
@@ -25,9 +26,10 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-werror
     --disable-{gssapi,ldap,sspi}
-    --without-{gnutls,nss,krb4,librtmp,libssh2,polarssl,spnego}
+    --without-{gnutls,nss,krb4,librtmp,polarssl,spnego}
     --without-ca-bundle
     --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
+    --with-libssh2
     --with-ssl
     --with-ca-path=/etc/ssl/certs
 )
