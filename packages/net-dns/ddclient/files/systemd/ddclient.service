@@ -1,0 +1,13 @@
+[Unit]
+Description=Dynamic DNS updater client
+Requires=network.target
+
+[Service]
+Type=forking
+User=ddclient
+Group=ddclient
+ExecStart=/usr/sbin/ddclient -pid /var/run/ddclient/ddclient.pid -file /etc/ddclient/ddclient.conf -syslog
+PIDFile=/var/run/ddclient/ddclient.pid
+
+[Install]
+WantedBy=multi-user.target

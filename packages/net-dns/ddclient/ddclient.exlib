@@ -3,8 +3,9 @@
 # Based in part upon 'ddclient-3.7.3-r1.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
+require sourceforge [ suffix=tar.gz ] systemd-service
+
 export_exlib_phases src_install
-require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Perl updater client for dynamic DNS services"
 DESCRIPTION="
@@ -35,13 +36,21 @@ ddclient_src_install() {
     dosbin ${PN}
 
     newinitd "${FILES}"/${PN}.initd ${PN}
-    hereconfd "${PN}" <<EOF
+    hereconfd ${PN} <<EOF
 # PID file
 PIDFILE=/var/run/ddclient/ddclient.pid
 
 # Config file
 CONFIGFILE=/etc/ddclient/ddclient.conf
 EOF
+
+    if option systemd; then
+        insinto /etc/tmpfiles.d
+        hereins ${PN}.conf <<EOF
+d /var/run/ddclient 0755 ddclient ddclient
+EOF
+    fi
+    install_systemd_files
 
     keepdir /var/{cache,run}/${PN}
     edo chown ${PN}:${PN} "${IMAGE}"/var/{cache,run}/${PN}
