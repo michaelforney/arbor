@@ -31,6 +31,7 @@ SLOT="0"
 MYOPTIONS="
     gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
     tcpd
+    simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tmpwatch [[ description = [ Enable watching /tmp for unused files to delete ] ]]
 "
 
@@ -121,6 +122,12 @@ systemd_src_install() {
     exeinto /$(get_libdir)/systemd
     doexe "${FILES}"/fsck.bash
     edo sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/$(get_libdir)/systemd/system/fsck.service
+
+    if option simple-net; then
+        doins "${FILES}"/network.service
+        insinto /etc/conf.d
+        doins "${FILES}"/network.conf
+    fi
 
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants

@@ -1,0 +1,16 @@
+[Unit]
+Description=Static networking
+Before=network.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/conf.d/network.conf
+ExecStartPre=/sbin/ifconfig lo up
+ExecStartPre=/sbin/ifconfig ${IFACE} ${IPV4} netmask ${MASK} broadcast ${BCAST} up
+ExecStart=/sbin/route add default gw ${GATEWAY}
+ExecStop=/sbin/ifconfig ${IFACE} down
+ExecStopPost=/sbin/ifconfig lo down
+RemainAfterExit=yes
+
+[Install]
+WantedBy=network.target
