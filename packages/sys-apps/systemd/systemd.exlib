@@ -114,12 +114,13 @@ systemd_src_install() {
     )
     alternatives_for "${alternatives[@]}"
 
-    # sysinit.service
+    # Install basic services
     insinto /$(get_libdir)/systemd/system
-    doins "${FILES}"/sysinit.service
+    doins "${FILES}"/basic.service
+    doins "${FILES}"/fsck.service
     exeinto /$(get_libdir)/systemd
-    doexe "${FILES}"/sysinit.bash
-    edo sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/$(get_libdir)/systemd/system/sysinit.service
+    doexe "${FILES}"/fsck.bash
+    edo sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/$(get_libdir)/systemd/system/fsck.service
 
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
@@ -169,13 +170,12 @@ EOF
 
     # From here on, we're creating a basic configuration.
     dodir /etc/systemd/system/basic.target.wants
-    dodir /etc/systemd/system/local-fs.target.wants
 
     # Enable basic services
-    dosym /$(get_libdir)/systemd/system/sysinit.service /etc/systemd/system/basic.target.wants/sysinit.service
-
-    # Enable tmp.service
-    dosym /$(get_libdir)/systemd/system/tmp.service /etc/systemd/system/local-fs.target.wants/tmp.service
+    dosym /$(get_libdir)/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
+    dosym /$(get_libdir)/systemd/system/fsck.service /etc/systemd/system/basic.target.wants/fsck.service
+    dosym /$(get_libdir)/systemd/system/fsck.target /etc/systemd/system/basic.target.wants/fsck.target
+    dosym /$(get_libdir)/systemd/system/tmp.mount /etc/systemd/system/basic.target.wants/tmp.mount
 
     # Enable syslog
     dosym /$(get_libdir)/systemd/system/syslog.service /etc/systemd/system/multi-user.target.wants/syslog.service

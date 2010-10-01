@@ -1,17 +1,17 @@
 [Unit]
-Description=System Initialization
+Description=fsck
 DefaultDependencies=no
 Conflicts=shutdown.target
 Before=shutdown.target emergency.service emergency.target
 RefuseManualStart=yes
 RefuseManualStop=yes
-Before=remount-rootfs.service
+Requires=remount-rootfs.service
+Before=basic.target fsck.target
 
 [Service]
 Type=oneshot
 StandardInput=tty
-RemainAfterExit=yes
-ExecStart=/LIBDIR/systemd/sysinit.bash
+ExecStart=/LIBDIR/systemd/fsck.bash
 
 [Install]
 WantedBy=basic.target
