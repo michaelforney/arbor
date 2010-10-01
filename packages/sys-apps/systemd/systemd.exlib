@@ -187,16 +187,22 @@ EOF
 systemd_pkg_postinst() {
     default
 
-    local cruft=( /etc/init.d/sysinit.bash )
+    local cruft=(
+        /etc/init.d/sysinit.bash
+        /etc/systemd/system/basic.target.wants/sysinit.service
+        /etc/systemd/system/local-fs.target.wants/tmp.service
+        /etc/systemd/system/sysinit.target.wants/remount-rootfs.service
+        /etc/systemd/system/sysinit.target.wants/sysinit.service
+    )
     for file in ${cruft[@]}; do
-        if test -f "${file}" ; then
+        if [[ -f ${file} ]] || [[ -L ${file} ]]; then
             nonfatal edo rm "${file}" || ewarn "removing ${file} failed"
         fi
     done
 
     local renamed=( /etc/locale /etc/vconsole )
     for file in ${renamed[@]}; do
-        if test -f "${file}" ; then
+        if [[ -f ${file} ]] ; then
             nonfatal edo mv "${file}" "${file}".conf || ewarn "moving ${file} failed"
         fi
     done
