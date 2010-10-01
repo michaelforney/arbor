@@ -1,6 +1,8 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="A library implementing the SSH2 protocol"
 HOMEPAGE="http://www.libssh2.org/"
 DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
@@ -8,14 +10,14 @@ DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 # keyboard-interactive tests fail: Failed requesting pty
 RESTRICT=test
 
 DEPENDENCIES="
     build+run:
-        dev-libs/openssl
+        dev-libs/openssl[multibuild_c:*(?)?]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
