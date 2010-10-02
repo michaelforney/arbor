@@ -4,10 +4,11 @@
 
 require udev
 
-PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-163-allow-building-of-only-gudev.patch
-    "${FILES}"/0002-allow-building-only-the-sound-rules.patch
+    "${FILES}/0001-allow-building-of-only-gudev.patch"
+    "${FILES}/0002-allow-building-only-the-sound-rules.patch"
+    "${FILES}/0001-systemd-hook-into-basic-target.patch"
 )
 
