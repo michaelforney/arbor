@@ -6,13 +6,13 @@
 
 # Only use commands from / to avoid the need to mount /usr at this point of the boot process.
 # Consider using busybox if need be.
-awk="/bin/awk"
+awk="/bin/busybox awk"
 fsck="/sbin/fsck"
-grep="/bin/grep"
+grep="/bin/busybox grep"
 mount="/bin/mount"
 reboot="/sbin/reboot"
 rm="/bin/rm"
-sulogin="/sbin/sulogin"
+sulogin="/bin/busybox sulogin"
 
 retval=0
 

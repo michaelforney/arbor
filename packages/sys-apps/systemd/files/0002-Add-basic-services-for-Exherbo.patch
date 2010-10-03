@@ -1,4 +1,4 @@
-From d829900c86a2b5329f540049955814d6aab0c268 Mon Sep 17 00:00:00 2001
+From c038036e20a37b3907897caa8881cf919fa35c5d Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
 Date: Tue, 28 Sep 2010 13:17:27 +0200
 Subject: [PATCH 2/3] Add basic services for Exherbo.
@@ -16,10 +16,10 @@ Subject: [PATCH 2/3] Add basic services for Exherbo.
  create mode 100644 units/exherbo/reboot.service
 
 diff --git a/Makefile.am b/Makefile.am
-index aa4798d..fba6966 100644
+index 0a33c06..9e72a40 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -276,6 +276,14 @@ dist_systemunit_DATA += \
+@@ -305,6 +305,14 @@ dist_systemunit_DATA += \
  	units/arch/reboot.service
  endif
  
@@ -61,7 +61,7 @@ index 0000000..ac47b1b
 +StandardOutput=tty
 diff --git a/units/exherbo/killall.service b/units/exherbo/killall.service
 new file mode 100644
-index 0000000..ac5ae05
+index 0000000..4e6de96
 --- /dev/null
 +++ b/units/exherbo/killall.service
 @@ -0,0 +1,21 @@
@@ -81,9 +81,9 @@ index 0000000..ac5ae05
 +[Service]
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=-/sbin/killall5 -15
++ExecStart=-/bin/busybox killall5 -15
 +ExecStartPost=-/usr/bin/sleep 1
-+ExecStartPost=-/sbin/killall5 -9
++ExecStartPost=-/bin/busybox killall5 -9
 +ExecStartPost=-/usr/bin/sleep 1
 +StandardOutput=tty
 diff --git a/units/exherbo/poweroff.service b/units/exherbo/poweroff.service
