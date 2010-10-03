@@ -1,0 +1,40 @@
+# Copyright 2010 Ali Polatel <alip@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases src_test
+
+SUMMARY="Pink's Tracing Library"
+DESCRIPTION="
+pinktrace is a wrapper around ptrace(2) system call.
+It provides a robust API for tracing processes.
+Note this is a work in progress and the API is *not* stable.
+"
+HOMEPAGE="http://dev.exherbo.org/~alip/${PN}"
+if [[ ${PV} == scm ]]; then
+    DOWNLOADS=""
+    SCM_REPOSITORY="git://github.com/alip/pinktrace.git"
+    require scm-git
+else
+    DOWNLOADS="http://dev.exherbo.org/~alip/pinktrace/release/${PNV}.tar.bz2"
+fi
+
+LICENCES="BSD-3"
+SLOT="0"
+
+BUGS_TO="alip@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_DOCUMENTATION="
+    ${HOMEPAGE}/api/c      [[ lang = en description = [ API documentation ] ]]
+    ${HOMEPAGE}/api/python [[ lang = en description = [ Python bindings API documentation ] ]]
+    ${HOMEPAGE}/api/ruby   [[ lang = en description = [ Ruby bindings API documentation ] ]]
+"
+
+src_test() {
+    if ! sydboxcheck 2>/dev/null; then
+        default
+    else
+        elog "Not running tests due to ptrace limitations"
+        elog "set PALUDIS_DO_NOTHING_SANDBOXY=1 if you want to run the tests"
+    fi
+}
+
