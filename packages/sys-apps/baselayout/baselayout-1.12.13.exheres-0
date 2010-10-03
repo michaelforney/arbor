@@ -109,9 +109,6 @@ src_install() {
 
     insinto /etc
     doins -r "${WORK}"/etc/*
-    edo chmod 0640 "${IMAGE}"/etc/sysctl.conf
-
-    edo chmod 0600 "${IMAGE}"/etc/shadow
 
     dodir /etc/init.d
     # doinitd doesnt respect symlinks
@@ -148,6 +145,31 @@ src_install() {
 
     edo rm -rf "${IMAGE}"/dev/pts
     edo rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4
+
+    # Remove basic /etc files and dirs now installed by skeleton-filesystem-layout.
+    for x in \
+        /etc/filesystems \
+        /etc/passwd \
+        /etc/protocols \
+        /etc/networks \
+        /etc/hosts \
+        /etc/shadow \
+        /etc/env.d/00basic \
+        /etc/shells \
+        /etc/sysctl.conf \
+        /etc/fstab \
+        /etc/issue \
+        /etc/group \
+        /etc/inputrc \
+        /etc/issue.devfix \
+        /etc/services \
+        /etc/profile \
+        /etc/modprobe.d/i386.conf \
+        /etc/modprobe.d/aliases.conf ;
+    do
+        edo rm "${IMAGE}${x}"
+    done
+    rmdir "${IMAGE}"/etc/env.d "${IMAGE}"/etc/modprobe.d
 }
 
 pkg_preinst() {
