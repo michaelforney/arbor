@@ -3,7 +3,9 @@
 # Based in part upon 'libev-3.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+MY_PV=${PV%0}
 
 SUMMARY="Full-featured and high performance event loop library"
 DESCRIPTION="
@@ -17,7 +19,7 @@ embedded into your programs without the need for complex configuration support.
 A full-featured and well-documented perl interface is also available.
 "
 HOMEPAGE="http://software.schmorp.de/pkg/libev"
-DOWNLOADS="http://dist.schmorp.de/libev/Attic/${PNV}.tar.gz"
+DOWNLOADS="http://dist.schmorp.de/libev/Attic/${PN}-${MY_PV}.tar.gz"
 
 LICENCES="BSD-2"
 SLOT="0"
@@ -26,4 +28,9 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/${PNV}-autotools.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PN}-3.44-autotools.patch
+    -p3 "${FILES}"/${PN}-3.90-ev++.patch
+)
+
+WORK=${WORKBASE}/${PN}-${MY_PV}
