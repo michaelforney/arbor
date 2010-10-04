@@ -1,23 +1,150 @@
 # Copyright 2010 Wulf C. Krueger <philanthrop@exherbo.org>
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
 
-if [[ ${PV} == "scm" ]] ; then
+if ever at_least scm ; then
     SCM_REPOSITORY="git://git.kernel.org/pub/scm/linux/hotplug/udev.git"
     require scm-git
 else
     DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
 fi
 
-require multilib
+require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
 SUMMARY="Dynamic userspace /dev manager for Linux"
+DESCRIPTION="
+udev provides Linux systems with a dynamic /dev directory and features the ability
+to have persistent device names. It uses sysfs and runs entirely in userspace.
+"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
+BUGS_TO="philanthrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
 LICENCES="( GPL-2 LGPL-2 )"
-MYOPTIONS=""
+SLOT="0"
 
-REMOTE_IDS="freshmeat:udev"
+MYOPTIONS="
+    extras [[ description = [ Extras for mobile devices (and then some), e. g. special keymaps ] ]]
+    glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
+    gobject-introspection [[ requires = [ glib ] ]]
+    sound [[ description = [ install extra rules for sound cards ] ]]
+    systemd [[ description = [ install systemd service files ] ]]
+    multibuild_c: 32 64
+    platform: ia64
+" # ppc s390
 
-pkg_postinst() {
+DEPENDENCIES="
+    build:
+        dev-libs/libxslt
+    build+run:
+        extras? (
+            dev-libs/libusb:0.1[>=0.1.12][multibuild_c:*(?)?]
+            dev-util/gperf[>=3.0.4]
+            sys-apps/acl[>=2.2.49][multibuild_c:*(?)?]
+            sys-apps/usbutils[>=0.82]
+        )
+        glib? ( dev-libs/glib:2[>=2.22.0] )
+        gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
+        sound? (
+            sys-apps/pciutils
+            sys-apps/usbutils
+        )
+    suggestion:
+        glib? ( sys-auth/ConsoleKit[>=0.4.1] )
+"
+
+AT_M4DIR=( m4 )
+
+udev_pkg_pretend() {
+    local f nuke_f=()
+    for f in "${ROOT%%/}"/etc/init.d/udev{,-mount,-dev-tarball}; do
+        [[ -e ${f} ]] && nuke_f+=( "${f}" )
+    done
+
+    if [[ -n ${nuke_f[@]} ]]; then
+        echo >&2
+        ewarn "The following Exherbo provided init scripts have been removed as of udev[=160]."
+        for f in "${nuke_f[@]}"; do
+            ewarn "    ${f}"
+        done
+        ewarn "Since they are under config protection you need to remove them manually."
+    fi
+}
+
+udev_src_prepare() {
+    edo cp "${FILES}"/gtk-doc.make "${WORK}"
+    autotools_src_prepare
+}
+
+configure_one_multibuild() {
+    econf \
+        --sbindir=/sbin \
+        --with-rootlibdir=/${LIBDIR} \
+        --libexecdir=/${LIBDIR}/udev/ \
+        --without-selinux \
+        $(option_enable extras) \
+        $(option_enable glib gudev) \
+        $(option_enable gobject-introspection introspection) \
+        $(option_enable sound usb-db) \
+        $(option_enable sound pci-db) \
+        $(option_enable sound sound-rules) \
+        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+}
+
+install_one_multibuild() {
+    default
+    keepdir /${LIBDIR}/udev/{devices,state}
+}
+
+udev_src_install() {
+    easy-multibuild_src_install
+
+    keepdir /etc/udev/rules.d
+
+    # platform rules {{{
+    insinto /${LIBDIR}/udev/rules.d
+
+    option platform:ia64 && doins "rules/arch/40-ia64.rules"
+    # }}}
+
+    # module loading configuration {{{
+    insinto /etc/modprobe.d
+
+    doins "${FILES}"/blacklist.conf
+    doins "${FILES}"/pnp-aliases.conf
+    # }}}
+
+    # config protect {{{
+    hereenvd 20udev <<EOT
+CONFIG_PROTECT_MASK=\"/${LIBDIR}/udev/rules.d\"
+EOT
+    # }}}
+
+    # fix lib paths {{{
+    if [[ ${LIBDIR} != lib ]] ; then
+        if option glib && [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
+            edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
+        fi
+        [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
+    fi
+    # }}}
+
+    # baselayout init scripts {{{
+    doinitd "${FILES}"/udev-postmount
+
+    insinto /${LIBDIR}/rcscripts/addons
+
+    doins "${FILES}"/udev-start.sh
+    doins "${FILES}"/udev-stop.sh
+
+    edo sed -e "s,@@libdir@@,${LIBDIR},g"                           \
+            -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-start.sh  \
+            -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-stop.sh
+    # }}}
+}
+
+udev_pkg_postinst() {
     [[ "${ROOT}" == "/" ]] || return
 
     pkill -TERM udevd &> /dev/null

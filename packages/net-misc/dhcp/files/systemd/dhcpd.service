@@ -1,0 +1,10 @@
+[Unit]
+Description=DHCP Daemon
+Requires=network.target
+
+[Service]
+EnvironmentFile=/etc/conf.d/dhcpd.conf
+ExecStart=/sbin/dhcpd -cf ${DHCPD_CONF} -q -f $DHCPD_OPTS ${DHCPD_IFACE}
+
+[Install]
+WantedBy=multi-user.target

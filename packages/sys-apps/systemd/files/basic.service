@@ -1,0 +1,19 @@
+[Unit]
+Description=Miscellaneous basic configurations
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target emergency.service emergency.target
+RefuseManualStart=yes
+RefuseManualStop=yes
+Requires=remount-rootfs.service
+After=remount-rootfs.service fsck.target
+
+[Service]
+Type=oneshot
+StandardInput=tty
+RemainAfterExit=yes
+ExecStartPre=/bin/dmesg -n 1
+ExecStart=-/bin/ln -sf /proc/mounts /etc/mtab
+
+[Install]
+WantedBy=basic.target

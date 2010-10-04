@@ -1,7 +1,7 @@
-From 02f89c79d1635871e2d66a9f5e1171ca9bf7a162 Mon Sep 17 00:00:00 2001
+From c038036e20a37b3907897caa8881cf919fa35c5d Mon Sep 17 00:00:00 2001
 From: Wulf C. Krueger <philantrop@exherbo.org>
-Date: Mon, 20 Sep 2010 00:15:41 +0200
-Subject: [PATCH] Add basic services for Exherbo.
+Date: Tue, 28 Sep 2010 13:17:27 +0200
+Subject: [PATCH 2/3] Add basic services for Exherbo.
 
 ---
  Makefile.am                    |    8 ++++++++
@@ -16,10 +16,10 @@ Subject: [PATCH] Add basic services for Exherbo.
  create mode 100644 units/exherbo/reboot.service
 
 diff --git a/Makefile.am b/Makefile.am
-index aa4798d..fba6966 100644
+index 0a33c06..9e72a40 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -276,6 +276,14 @@ dist_systemunit_DATA += \
+@@ -305,6 +305,14 @@ dist_systemunit_DATA += \
  	units/arch/reboot.service
  endif
  
@@ -36,7 +36,7 @@ index aa4798d..fba6966 100644
  	LICENSE \
 diff --git a/units/exherbo/halt.service b/units/exherbo/halt.service
 new file mode 100644
-index 0000000..acb1e8b
+index 0000000..ac47b1b
 --- /dev/null
 +++ b/units/exherbo/halt.service
 @@ -0,0 +1,19 @@
@@ -56,12 +56,12 @@ index 0000000..acb1e8b
 +[Service]
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=/sbin/halt -d
-+ExecStartPost=/sbin/halt -f
++ExecStartPre=/sbin/halt -d
++ExecStart=/sbin/halt -f
 +StandardOutput=tty
 diff --git a/units/exherbo/killall.service b/units/exherbo/killall.service
 new file mode 100644
-index 0000000..ac5ae05
+index 0000000..4e6de96
 --- /dev/null
 +++ b/units/exherbo/killall.service
 @@ -0,0 +1,21 @@
@@ -81,14 +81,14 @@ index 0000000..ac5ae05
 +[Service]
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=-/sbin/killall5 -15
++ExecStart=-/bin/busybox killall5 -15
 +ExecStartPost=-/usr/bin/sleep 1
-+ExecStartPost=-/sbin/killall5 -9
++ExecStartPost=-/bin/busybox killall5 -9
 +ExecStartPost=-/usr/bin/sleep 1
 +StandardOutput=tty
 diff --git a/units/exherbo/poweroff.service b/units/exherbo/poweroff.service
 new file mode 100644
-index 0000000..1f6d732
+index 0000000..c39919a
 --- /dev/null
 +++ b/units/exherbo/poweroff.service
 @@ -0,0 +1,19 @@
@@ -108,12 +108,12 @@ index 0000000..1f6d732
 +[Service]
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=/sbin/poweroff -dp
-+ExecStartPost=/sbin/poweroff -df
++ExecStartPre=/sbin/poweroff -d
++ExecStart=/sbin/poweroff -f
 +StandardOutput=tty
 diff --git a/units/exherbo/reboot.service b/units/exherbo/reboot.service
 new file mode 100644
-index 0000000..1ccd35f
+index 0000000..45cbbdd
 --- /dev/null
 +++ b/units/exherbo/reboot.service
 @@ -0,0 +1,19 @@
@@ -133,8 +133,8 @@ index 0000000..1ccd35f
 +[Service]
 +Type=oneshot
 +RemainAfterExit=yes
-+ExecStart=/sbin/reboot -d
-+ExecStartPost=/sbin/reboot -df
++ExecStartPre=/sbin/reboot -d
++ExecStart=/sbin/reboot -f
 +StandardOutput=tty
 -- 
 1.7.2.3

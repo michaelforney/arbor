@@ -6,7 +6,7 @@ require multilib
 
 SUMMARY="Skeleton filesystem layout"
 HOMEPAGE="http://www.exherbo.org/"
-DOWNLOADS=""
+DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PN}-base-etc-0.1.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -60,6 +60,18 @@ src_install() {
 LDPATH="${ldpath}"
 EOF
     fi
+
+    doins -r "${WORK}"/${PN}-base-etc-0.1/*
+}
+
+pkg_preinst() {
+    local x y
+    for x in "${IMAGE}"/etc/*.sample; do
+        y=${x/${IMAGE}}
+        if [[ ! -f ${ROOT}${y/%.sample} ]]; then
+            nonfatal edo cp "${x}" "${ROOT}${y/%.sample}" || ewarn "installing example ${x} failed"
+        fi
+    done
 }
 
 pkg_postinst() {
@@ -70,6 +82,9 @@ pkg_postinst() {
         opt proc sbin sys; do
             create_root_owned_directory "${ROOT}${x}"
     done
+
+    edo chmod 0640 "${ROOT}"/etc/sysctl.conf
+    edo chmod 0600 "${ROOT}"/etc/shadow
 
     # create device nodes
     create_device_node console 5 1 root:root 0600

@@ -103,8 +103,8 @@ pkg_postinst() {
         if grpck -r ; then
             grpconv
         else
-            ewarn "Running 'grpck -r' returned errors. Please run it by hand, and then"
-            ewarn "run 'grpconv' afterwards."
+            eerror "Running 'grpck -r' returned errors. Please run it by hand, and then"
+            eerror "run 'grpconv' afterwards."
         fi
     fi
 }
