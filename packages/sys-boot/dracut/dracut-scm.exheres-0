@@ -27,9 +27,17 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        dev-libs/libxml2:2.0
+        app-text/docbook-xml-dtd:4.5
+        dev-libs/libxslt
     run:
-        app-shells/dash
+        app-shells/bash
+        (
+            sys-apps/module-init-tools
+            sys-apps/util-linux-ng
+            sys-apps/sysvinit
+        ) [[ description = [ Required for base module ] ]]
+    recommendation:
+        app-shells/dash [[ description = [ Needed for dash module ] ]]
     suggestion:
         app-misc/bootchart     [[ description = [ Support for graphical analysis of boot process ] ]]
         net-misc/open-iscsi    [[ description = [ Support for rootfs on iSCSI ] ]]
@@ -49,8 +57,11 @@ DEPENDENCIES="
 
 BUGS_TO="eternaleye@gmail.com"
 
+DEFAULT_SRC_COMPILE_PARAMS=( WITH_SWITCH_ROOT=0 )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr sysconfdir=/etc )
+
 src_install() {
     default
-    keepdir /usr/etc/dracut.conf.d
+    keepdir /etc/dracut.conf.d
 }
 
