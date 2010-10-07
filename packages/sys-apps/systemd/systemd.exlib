@@ -218,5 +218,7 @@ systemd_pkg_postinst() {
             nonfatal edo mv "${file}" "${file}".conf || ewarn "moving ${file} failed"
         fi
     done
+
+    alternatives_pkg_postinst
 }
 
