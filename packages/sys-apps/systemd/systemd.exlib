@@ -10,7 +10,7 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib alternatives
 
-export_exlib_phases src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
 SUMMARY="${PN} is a system and session manager for Linux"
 DESCRIPTION="
@@ -91,6 +91,16 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 )
 
 AT_M4DIR=m4
+
+systemd_pkg_pretend() {
+    local kv=$(uname -r)
+
+    if [[ ${kv} < 2.6.36 ]] ; then
+        ewarn "You MUST install a kernel >= 2.6.36-rc1 to use systemd."
+        ewarn "This check is based upon the kernel currently running, thus, if you already"
+        ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
+    fi
+}
 
 systemd_src_prepare() {
     # Set the correct libdir.
