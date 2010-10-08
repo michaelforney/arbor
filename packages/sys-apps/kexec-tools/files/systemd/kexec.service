@@ -6,7 +6,7 @@ Before=reboot.service
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/conf.d/kexec.conf
-ExecStart=/usr/sbin/kexec -l ${KERNEL} --reuse-cmdline
+ExecStart=/sbin/kexec -l ${KERNEL} --reuse-cmdline
 
 [Install]
 WantedBy=shutdown.target

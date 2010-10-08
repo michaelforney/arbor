@@ -16,6 +16,11 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-ps-cgroup.patch
+    "${FILES}"/${PNV}-ps-cgroup-suppress-root-group.patch
+)
+
 DEFAULT_SRC_INSTALL_PARAMS=( ldconfig="true" )
 
 src_install() {
