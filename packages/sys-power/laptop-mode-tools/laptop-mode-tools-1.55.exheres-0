@@ -17,7 +17,7 @@ DOWNLOADS="http://samwel.tk/laptop_mode/tools/downloads/${MY_PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     run:
@@ -41,6 +41,6 @@ src_install() {
     keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
 
     edo rm "${IMAGE}"/etc/init.d/laptop-mode
-    newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
+    option baselayout && newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
 }
 
