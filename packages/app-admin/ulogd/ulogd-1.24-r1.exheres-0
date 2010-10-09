@@ -20,7 +20,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="pcap sqlite"
+MYOPTIONS="baselayout pcap sqlite"
 # FIXME: mysql and postgres could be added but only if requested.
 
 DEPENDENCIES="
@@ -59,7 +59,7 @@ src_install() {
 
     install_systemd_files
 
-    newinitd "${FILES}"/${PNV}.init ulogd
+    option baselayout && newinitd "${FILES}"/${PNV}.init ulogd
 
     insinto /etc/logrotate.d
     doins ulogd.logrotate
