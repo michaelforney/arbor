@@ -2,16 +2,18 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A library implementing the SSH2 protocol"
-HOMEPAGE="http://www.libssh2.org/"
+HOMEPAGE="http://www.libssh2.org"
 DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changes.html [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.html [[ lang = en ]]"
 
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
-
-# keyboard-interactive tests fail: Failed requesting pty
-RESTRICT=test
 
 DEPENDENCIES="
     build+run:
@@ -24,4 +26,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-openssl
     --with-libz
 )
+
+src_prepare() {
+    # keyboard-interactive tests fail: Failed requesting pty
+    edo sed -e "s:ssh2.sh::" \
+        -i tests/Makefile.{am,in}
+}
 
