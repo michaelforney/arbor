@@ -8,7 +8,7 @@ SUMMARY="Filesystems in Userspace"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES=""
 
@@ -16,6 +16,6 @@ src_install() {
     default
     rm -r "${IMAGE}"/etc/init.d/
     rm -r "${IMAGE}"/dev
-    newinitd "${FILES}"/${PN}.initd ${PN}
+    option baselayout && newinitd "${FILES}"/${PN}.initd ${PN}
 }
 
