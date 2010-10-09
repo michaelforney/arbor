@@ -17,7 +17,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="static"
+MYOPTIONS="baselayout static"
 
 DEPENDENCIES="
     build:
@@ -48,7 +48,9 @@ src_install() {
     insinto /etc
     doins "${WORKBASE}"/inittab
 
-    doinitd "${WORKBASE}"/{reboot,shutdown}.sh
+    if option baselayout ; then
+        doinitd "${WORKBASE}"/{reboot,shutdown}.sh
+    fi
 
     # alternatives
     local a t alternatives=( init ${PN} 10 )
