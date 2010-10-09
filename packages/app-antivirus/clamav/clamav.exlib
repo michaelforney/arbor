@@ -15,7 +15,7 @@ REMOTE_IDS+=" freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="ipv6 milter unrar"
+MYOPTIONS="baselayout ipv6 milter unrar"
 
 RESTRICT="test" ## Sydbox violations, failures
 
@@ -46,8 +46,9 @@ DEFAULT_SRC_TEST_PARAMS=( VALGRIND=no )
 clamav_src_install() {
     default
 
-    # Install /etc/logrotate.d/clamavd ?
-    hereconfd clamd <<EOF
+    if option baselayout ; then
+        # Install /etc/logrotate.d/clamavd ?
+        hereconfd clamd <<EOF
 # NOTICE: Since clamav-0.85-r1, only START_CLAMD and START_FRESHCLAM settings
 #      are used, other are silently ignored
 
@@ -56,8 +57,8 @@ START_FRESHCLAM=yes
 CLAMD_NICELEVEL=3
 FRESHCLAM_NICELEVEL=19
 EOF
-    newinitd "${FILES}"/clamd.rc clamd
-
+        newinitd "${FILES}"/clamd.rc clamd
+    fi
     dodir /var/{log,run}/${PN}
     keepdir /var/{log,run}/${PN}
     edo chown clamav:clamav "${IMAGE}"/var/{log,run}/${PN}
