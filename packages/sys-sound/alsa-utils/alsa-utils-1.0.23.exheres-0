@@ -8,7 +8,7 @@ DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     build:
@@ -29,8 +29,10 @@ src_install() {
 
     keepdir /var/lib/alsa
 
-    newinitd "${FILES}/alsasound.initd" alsasound
-    newconfd "${FILES}/alsasound.confd" alsasound
+    if option baselayout ; then
+        newinitd "${FILES}/alsasound.initd" alsasound
+        newconfd "${FILES}/alsasound.confd" alsasound
+    fi
 
     edo rmdir "${IMAGE}"/usr/share/man/man7
 }
