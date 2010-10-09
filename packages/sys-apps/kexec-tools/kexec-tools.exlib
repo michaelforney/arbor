@@ -21,7 +21,7 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -44,8 +44,10 @@ src_install() {
         doc/multiboot.html \
         doc/nbi-spec.txt
 
-    newinitd "${FILES}"/kexec.init kexec
-    newconfd "${FILES}"/kexec.conf kexec
+    if option baselayout ; then
+        newinitd "${FILES}"/kexec.init kexec
+        newconfd "${FILES}"/kexec.conf kexec
+    fi
 
     install_systemd_files
 
