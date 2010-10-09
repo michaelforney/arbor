@@ -28,7 +28,7 @@ REMOTE_IDS="freshmeat:iscdhcp"
 
 LICENCES="ISC"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     run:
@@ -52,8 +52,10 @@ WORK=${WORKBASE}/${MY_PNV}
 dhcp_src_install() {
     default
 
-    newinitd "${FILES}"/dhcpd.init dhcpd
-    newconfd "${FILES}"/dhcpd.conf dhcpd
+    if option baselayout ; then
+        newinitd "${FILES}"/dhcpd.init dhcpd
+        newconfd "${FILES}"/dhcpd.conf dhcpd
+    fi
 
     install_systemd_files
     if option systemd; then
