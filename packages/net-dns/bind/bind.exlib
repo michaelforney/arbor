@@ -27,6 +27,7 @@ UPSTREAM_RELEASE_NOTES="http://oldwww.isc.org/sw/${PN}/view/?release=${MY_PV}&no
 LICENCES="as-is"
 SLOT="0"
 MYOPTIONS="
+    baselayout
     berkdb
     idn
     ipv6
@@ -51,14 +52,11 @@ DEPENDENCIES="
         user/named
 "
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 
 # Parallel make is not supported upstream
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
-    KNOWN-DEFECTS
-)
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( KNOWN-DEFECTS )
 
 bind_src_configure() {
     myoption() {
@@ -127,9 +125,12 @@ bind_src_install() {
     hereenvd 30bind <<EOF
 CONFIG_PROTECT="/var/bind"
 EOF
-    # Installing init file as well as confd file
-    newinitd "${FILES}"/named.init named
-    newconfd "${FILES}"/named.confd named
+
+    if option baselayout ; then
+        # Installing init file as well as confd file
+        newinitd "${FILES}"/named.init named
+        newconfd "${FILES}"/named.confd named
+    fi
 
     install_systemd_files
 
