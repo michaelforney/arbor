@@ -2,15 +2,23 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="neon is an HTTP and WebDAV client library"
-HOMEPAGE="http://www.webdav.org/neon/"
-DOWNLOADS="http://www.webdav.org/neon/${PNV}.tar.gz"
+HOMEPAGE="http://www.webdav.org/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/doc/html/ [[ lang = en ]]"
 
 LICENCES="LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="expat
-        libproxy [[ description = [ Support for automatic configuration management through libproxy ] ]]
+MYOPTIONS="
+    expat
+    libproxy [[ description = [ Support for automatic configuration management through libproxy ] ]]
 "
+
+# Tests need >=openssl-1.0.0a, which is still masked.
+RESTRICT="test"
 
 DEPENDENCIES="
     build:
