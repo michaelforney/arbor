@@ -18,6 +18,7 @@ PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="
     acpi
     apm
+    baselayout
     partition-data [[ description = [ Allows HAL to use libparted from sys-apps/parted to read raw partition data from your disks and process that data. Future versions of HAL (possibly 0.5.11 and higher) will allow you to create, modify, delete and format partitions from a GUI interface agnostic of your desktop environment. ] ]]
     policykit
     verbose
@@ -116,16 +117,18 @@ src_install() {
     exeinto /$(get_libdir)/udev
     newexe "${FILES}/hal-unmount.dev" hal_unmount
 
-    # initscript
-    newinitd "${FILES}/0.5.11-hald.rc" hald
-
     install_systemd_files
 
-    # configuration
-    hereconfd hald <<EOF
+    if option baselayout ; then
+        # initscript
+        newinitd "${FILES}/0.5.11-hald.rc" hald
+
+        # configuration
+        hereconfd hald <<EOF
 # Should HAL be verbose to syslog? Useful for debugging
 HALD_VERBOSE="$(option verbose && echo yes || echo no)"
 EOF
+    fi
 
     # example configuration
     dodoc "${WORKBASE}/hal-config-examples/"*.fdi
