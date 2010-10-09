@@ -16,7 +16,7 @@ DOWNLOADS="ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/${PNV}.tgz"
 
 LICENCES="OpenLDAP-2.8"
 SLOT="0"
-MYOPTIONS="debug ipv6"
+MYOPTIONS="baselayout debug ipv6"
 
 # Expensive tests
 RESTRICT="test"
@@ -98,7 +98,9 @@ openldap_src_install() {
     edo chown root:ldap "${IMAGE}"/etc/openldap/slapd.conf
     edo chmod 0640 "${IMAGE}"/etc/openldap/slapd.conf
 
-    newinitd "${FILES}"/slapd-initd slapd
-    newconfd "${FILES}"/slapd-confd slapd
+    if option baselayout ; then
+        newinitd "${FILES}"/slapd-initd slapd
+        newconfd "${FILES}"/slapd-confd slapd
+    fi
 }
 
