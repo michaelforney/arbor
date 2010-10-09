@@ -4,9 +4,8 @@
 require python sourceforge [ suffix=tar.gz ]
 
 SUMMARY="A proactive password sanity library"
-HOMEPAGE="http://sourceforge.net/projects/cracklib"
 
-LICENCES="GPL-2"
+LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="python"
@@ -37,8 +36,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    cracklib-format "${ROOT}/usr/share/dict/cracklib-small" \
-        | cracklib-packer "${ROOT}/var/cache/${PN}/cracklib_dict" ||
-        die "Failed to create cracklib dictionary"
+    edo cracklib-format "${ROOT}/usr/share/dict/cracklib-small" \
+        | cracklib-packer "${ROOT}/var/cache/${PN}/cracklib_dict"
 }
 
