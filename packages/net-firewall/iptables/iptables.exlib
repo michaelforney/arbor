@@ -24,7 +24,7 @@ UPSTREAM_DOCUMENTATION="http://netfilter.org/documentation/"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -45,9 +45,11 @@ iptables_src_install() {
     keepdir /var/lib/iptables
     keepdir /var/lib/ip6tables
 
-    newinitd "${FILES}"/${PN}-1.4.2.init iptables
-    dosym /etc/init.d/${PN} /etc/init.d/ip6tables
-    newconfd "${FILES}"/${PN}-1.4.2.confd iptables
-    newconfd "${FILES}"/ip6tables-1.4.2.confd ip6tables
+    if option baselayout ; then
+        newinitd "${FILES}"/${PN}-1.4.2.init iptables
+        dosym /etc/init.d/${PN} /etc/init.d/ip6tables
+        newconfd "${FILES}"/${PN}-1.4.2.confd iptables
+        newconfd "${FILES}"/ip6tables-1.4.2.confd ip6tables
+    fi
 }
 
