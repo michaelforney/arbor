@@ -25,7 +25,7 @@ http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="big-tables debug embedded-server ssl
+MYOPTIONS="baselayout big-tables debug embedded-server ssl
     big-tables      [[ description = [ Make tables contain up to 1.844E+19 rows ] ]]
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
 "
@@ -125,8 +125,10 @@ EOF
     insinto /etc/logrotate.d
     newins "${FILES}"/logrotate.mysql mysql
 
-    newinitd "${FILES}"/mysql.rc6 mysql
-    newconfd "${FILES}"/mysql.conf.d mysql
+    if option baselayout ; then
+        newinitd "${FILES}"/mysql.rc6 mysql
+        newconfd "${FILES}"/mysql.conf.d mysql
+    fi
 
     install_systemd_files
 }
