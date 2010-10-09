@@ -20,7 +20,7 @@ REMOTE_IDS="freshmeat:{PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 DEPENDENCIES=""
 
 BUGS_TO="pioto@exherbo.org"
@@ -39,8 +39,10 @@ src_install() {
 
     dobin kacpimon/kacpimon
 
-    newinitd "${FILES}"/acpid.init.d-0 acpid
-    newconfd "${FILES}"/acpid.conf.d-0 acpid
+    if option baselayout ; then
+        newinitd "${FILES}"/acpid.init.d-0 acpid
+        newconfd "${FILES}"/acpid.conf.d-0 acpid
+    fi
 
     install_systemd_files
 
