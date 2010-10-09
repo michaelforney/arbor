@@ -20,7 +20,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation"
 LICENCES="Sendmail"
 
 SLOT="0"
-MYOPTIONS="ipv6 ldap mbox nis sasl sockets ssl tcpd"
+MYOPTIONS="baselayout ipv6 ldap mbox nis sasl sockets ssl tcpd"
 
 DEPENDENCIES="
     build+run:
@@ -189,8 +189,10 @@ sendmail_src_install() {
     echo "# local-host-names - include all aliases for your machine here" \
         > "${IMAGE}"/etc/mail/local-host-names
 
-    newconfd "${FILES}"/sendmail.confd-1 sendmail
-    newinitd "${FILES}"/sendmail.initd-1 sendmail
+    if option baselayout ; then
+        newconfd "${FILES}"/sendmail.confd-1 sendmail
+        newinitd "${FILES}"/sendmail.initd-1 sendmail
+    fi
 
     install_systemd_files
 
