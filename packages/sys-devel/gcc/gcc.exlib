@@ -106,6 +106,7 @@ src_configure() {
     econf \
         $(ever at_least 4.5.0 || echo --hates=docdir) \
         --disable-multilib \
+        --enable-clocale=gnu \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \
