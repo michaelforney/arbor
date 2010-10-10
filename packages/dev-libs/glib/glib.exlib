@@ -29,8 +29,8 @@ glib_src_install() {
 glib_src_test() {
     unset DBUS_SESSION_BUS_ADDRESS
 
-    export XDG_CONFIG_DIRS="${TEMP}/etc"
-    export XDG_DATA_DIRS="${TEMP}/usr/share"
+    export XDG_CONFIG_DIRS="/etc/xdg"
+    export XDG_DATA_DIRS="/usr/share"
     export XDG_DATA_HOME="${TEMP}"
 
     sydboxcmd 'net/whitelist/connect/unix:///tmp/g-dbus-tests-pid-*'
