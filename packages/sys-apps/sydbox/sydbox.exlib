@@ -22,9 +22,15 @@ DEPENDENCIES="
     build+run:
         dev-libs/glib:2[>=2.18]
 "
-ever at_least 0.7.0 && DEPENDENCIES+="
+if ever at_least 0.7.1; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/pinktrace[>=0.0.3][ipv6?]"
+elif ever at_least 0.7.0; then
+    DEPENDENCIES+="
         build+run:
             dev-libs/pinktrace[>=0.0.1][ipv6?]"
+fi
 
 BUGS_TO="alip@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
