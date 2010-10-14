@@ -54,6 +54,7 @@ DEPENDENCIES="
             x11-libs/gtk+:2[>=2.20]
             x11-libs/libnotify
         )
+        tcpd? ( sys-apps/tcp-wrappers )
     run:
         sys-apps/busybox
         sys-apps/coreutils
@@ -64,6 +65,8 @@ DEPENDENCIES="
         tmpwatch? ( app-admin/tmpwatch )
     post:
         sys-apps/module-init-tools
+    suggestion:
+        sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
