@@ -71,9 +71,12 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Add-Exherbo-distribution.patch
-    "${FILES}"/0002-Add-basic-services-for-Exherbo.patch
     "${FILES}"/0003-Add-Exherbo-welcome-message.patch
 )
+
+if ! ever is_scm ; then
+    DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0002-Add-basic-services-for-Exherbo.patch )
+fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
