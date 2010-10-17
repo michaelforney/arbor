@@ -21,6 +21,8 @@ DEPENDENCIES="
     build+run:
         sys-devel/gnuconfig"
 
+RESTRICT="test"
+
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( docs/PLATFORMS )
 
 WORK="${WORKBASE}/${PNV%a}"
@@ -29,6 +31,10 @@ src_prepare() {
     # Force regeneration of broken infopages
     edo rm doc/libtool.info{,-{1,2}}
     default
+}
+
+src_test_expensive() {
+    emake check
 }
 
 src_install() {
