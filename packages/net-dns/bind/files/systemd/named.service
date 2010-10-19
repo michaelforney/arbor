@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/sbin/named -f -u named -n 1
-ExecReload=/bin/kill -HUP $(MAINPID)
+ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target
