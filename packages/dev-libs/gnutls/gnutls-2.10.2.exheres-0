@@ -19,13 +19,8 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PN}-sydbox.patch"
-)
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-guile
-    --disable-valgrind-tests
-    --with-zlib
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-sydbox.patch")
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-guile --disable-valgrind-tests --with-zlib )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
