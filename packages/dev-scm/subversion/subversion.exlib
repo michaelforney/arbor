@@ -20,8 +20,8 @@ UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 LICENCES="Apache-1.1"
 SLOT="0"
 MYOPTIONS="berkdb perl python ruby
-    keyring [[ description = [ Adds support to store passwords in gnome-keyring ] ]]
-    kde [[ description = [ Adds support to store passwords in kwallet ] ]]
+    keyring [[ description = [ Adds support for storing passwords in GNOME Keyring ] ]]
+    kwallet [[ description = [ Adds support for storing passwords in KWallet ] ]]
 "
 RESTRICT="test" # Expensive tests
 
@@ -29,7 +29,7 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
         keyring? ( dev-util/pkg-config )
-        kde? ( dev-util/pkg-config )
+        kwallet? ( dev-util/pkg-config )
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
@@ -45,7 +45,7 @@ DEPENDENCIES="
             gnome-desktop/libgnome-keyring:1
             sys-apps/dbus
         )
-        kde? (
+        kwallet? (
             kde/kdelibs:4
             sys-apps/dbus[>=1.0]
             x11-libs/qt:4[dbus][X]
@@ -55,8 +55,8 @@ DEPENDENCIES="
         ruby? ( dev-lang/ruby:= )
     run:
         keyring? ( gnome-desktop/gnome-keyring:1 )
+        kwallet? ( kde/kdebase-runtime:4 )
         perl? ( dev-perl/URI )
-        kde? ( kde/kdebase-runtime:4 )
     suggestion:
         net-misc/neon[ssl(+)] [[ description = [ Enables support for https:// URIs ] ]]
         net-misc/openssh [[ description = [ Enables support for svn+ssh:// URIs ] ]]"
@@ -88,8 +88,8 @@ subversion_src_configure() {
         ${myconf} \
         $(option_with berkdb berkeley-db $(option berkdb &&
             echo "db.h:$(berkdb_includedir)::db-$(berkdb_slot)")) \
-        $(option_with kde kwallet) \
-        $(option_with keyring gnome-keyring)
+        $(option_with keyring gnome-keyring) \
+        $(option_with kwallet)
 }
 
 subversion_src_compile() {
