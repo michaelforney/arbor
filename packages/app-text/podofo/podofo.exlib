@@ -45,6 +45,10 @@ DEPENDENCIES="
         dev-cpp/cppunit[>=1.12.1]
 "
 
+# Enough is enough. Too many tests are bogus and I've had enough of fixing upstream's
+# crap.
+RESTRICT="test"
+
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PN}-0.8.0-automagic-deps.patch )
 
 CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE -DWANT_FONTCONFIG:BOOL=TRUE)
