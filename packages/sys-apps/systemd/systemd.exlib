@@ -4,6 +4,8 @@
 if ever is_scm ; then
     SCM_REPOSITORY="git://anongit.freedesktop.org/systemd"
     require scm-git
+elif [[ ${PV} == 11_p20101023 ]]; then
+    DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PNV}.tar.bz2"
 else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.bz2"
 fi
@@ -31,10 +33,9 @@ MYOPTIONS="
     gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
     tcpd
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
-    tmpwatch [[ description = [ Enable watching /tmp for unused files to delete ] ]]
 "
 
-# 7. 9. 2010: You'll need at least kernel v2.6.36-rc1.
+# You'll need at least kernel v2.6.36-rc1.
 # We don't support metalog as a syslogger (yet) so we do NOT use virtual/syslog here.
 DEPENDENCIES="
     build:
@@ -62,7 +63,6 @@ DEPENDENCIES="
         sys-apps/util-linux-ng
         group/lock [[ note = [ Required for var-lock service ] ]]
         simple-net? ( sys-apps/net-tools )
-        tmpwatch? ( app-admin/tmpwatch )
     post:
         sys-apps/module-init-tools
     suggestion:
@@ -73,10 +73,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Add-Exherbo-distribution.patch
     "${FILES}"/0003-Add-Exherbo-welcome-message.patch
 )
-
-if ! ever is_scm ; then
-    DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0002-Add-basic-services-for-Exherbo.patch )
-fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
@@ -139,10 +135,6 @@ systemd_src_install() {
     # Install basic services
     insinto /$(get_libdir)/systemd/system
     doins "${FILES}"/basic.service
-    doins "${FILES}"/fsck.service
-    exeinto /$(get_libdir)/systemd
-    doexe "${FILES}"/fsck.bash
-    edo sed -i -e "s:LIBDIR:$(get_libdir):" "${IMAGE}"/$(get_libdir)/systemd/system/fsck.service
 
     if option simple-net; then
         doins "${FILES}"/network.service
@@ -155,12 +147,6 @@ systemd_src_install() {
 
     # We're not some other OS so we disable that shortcut.
     edo rm "${IMAGE}"/$(get_libdir)/systemd/system/ctrl-alt-del.target
-
-    # Using tmpwatch should be optional.
-    if ! option tmpwatch; then
-        edo rm "${IMAGE}"/$(get_libdir)/systemd/system/basic.target.wants/tmpwatch.service
-        edo rm "${IMAGE}"/$(get_libdir)/systemd/system/basic.target.wants/tmpwatch.timer
-    fi
 
     insinto /etc
 
@@ -201,8 +187,6 @@ EOF
 
     # Enable basic services
     dosym /$(get_libdir)/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
-    dosym /$(get_libdir)/systemd/system/fsck.service /etc/systemd/system/basic.target.wants/fsck.service
-    dosym /$(get_libdir)/systemd/system/fsck.target /etc/systemd/system/basic.target.wants/fsck.target
     dosym /$(get_libdir)/systemd/system/tmp.mount /etc/systemd/system/basic.target.wants/tmp.mount
 
     # Enable syslog
@@ -217,13 +201,15 @@ systemd_pkg_postinst() {
 
     local cruft=(
         /etc/init.d/sysinit.bash
+        /etc/systemd/system/basic.target.wants/fsck.service
+        /etc/systemd/system/basic.target.wants/fsck.target
         /etc/systemd/system/basic.target.wants/sysinit.service
         /etc/systemd/system/local-fs.target.wants/tmp.service
         /etc/systemd/system/sysinit.target.wants/remount-rootfs.service
         /etc/systemd/system/sysinit.target.wants/sysinit.service
     )
     for file in ${cruft[@]}; do
-        if [[ -f ${file} ]] || [[ -L ${file} ]]; then
+        if [[ -f ${file} || -L ${file} ]]; then
             nonfatal edo rm "${file}" || ewarn "removing ${file} failed"
         fi
     done
