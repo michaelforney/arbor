@@ -58,9 +58,17 @@ DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 WORK="${WORKBASE}"/LVM2.${PV}
 
 lvm2_src_test_expensive() {
-    # These tests still fail or succeed pretty much randomly for no apparent reason.
+    # These tests still fail or succeed pretty much randomly for no apparent reason...
     edo rm test/t-lvcreate-usage.sh
     edo rm test/t-snapshots-of-mirrors.sh
+
+    # ... and these do, too, if the dmeventd option is set.
+    if option dmeventd; then
+        edo rm test/t-lvconvert-repair-dmeventd.sh
+        edo rm test/t-metadata.sh
+        edo rm test/t-lvextend-snapshot-dmeventd.sh
+        edo rm test/t-vgchange-maxlv.sh
+    fi
 
     # These tests fail due to the above tests being disabled.
     edo rm test/t-lvcreate-operation.sh
