@@ -1,6 +1,8 @@
 # Copyright (c) 2008 Alexander Færøy <eroyf@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 SUMMARY="ALSA utilities"
 HOMEPAGE="http://www.alsa-project.org/"
 DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
@@ -35,5 +37,7 @@ src_install() {
     fi
 
     edo rmdir "${IMAGE}"/usr/share/man/man7
+
+    install_systemd_files
 }
 
