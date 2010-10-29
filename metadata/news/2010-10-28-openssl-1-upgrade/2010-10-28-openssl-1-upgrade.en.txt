@@ -1,0 +1,46 @@
+Title: OpenSSL 1.0.0 upgrade procedure
+Author: Sterling X. Winter <replica@exherbo.org>
+Content-Type: text/plain
+Posted: 2010-10-28
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: dev-libs/openssl
+
+dev-libs/openssl[>=1.0.0] has been unmasked. Although this upgrade
+breaks ABI we've opted not to slot openssl at this time. This means that
+to avoid mass breakage you must follow this upgrade procedure.
+
+Before upgrading, do a global sync, then make sure you have the distfile
+for wget stored in your local cache:
+
+    cave sync
+    cave resolve -fx0 '*/*' wget
+
+Now upgrade openssl (version 1.0.0a should be unmasked) and merge its
+configuration changes:
+
+    cave resolve -1zx openssl
+    eclectic config interactive
+
+This breaks some parts of Paludis and a few of its dependencies and
+sub-dependencies. To navigate safely out of this mess, rebuild/upgrade
+the following packages in order:
+
+1. wget
+2. libssh2, curl (you can skip these here if you don't have git[curl]
+   enabled)
+3. git
+4. neon, subversion (you can skip these here if you don't use
+   libarchive-scm)
+5. libarchive
+6. paludis (make sure to build the latest -scm revision)
+
+At this point Paludis and its dependencies should be working again. If
+something failed to build, it probably depends on something not listed
+here that depends on openssl, so identify and rebuild the offending
+package(s).
+
+Finally, let cave fix everything else for you:
+
+    cave fix-linkage -x
+
