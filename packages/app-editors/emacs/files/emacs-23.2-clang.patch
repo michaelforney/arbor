@@ -1,0 +1,23 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: The return type should be void, not int
+--- emacs-23.2/oldXMenu/XDelAssoc.c
++++ emacs-23.2/oldXMenu/XDelAssoc.c
+@@ -17,6 +17,7 @@
+  * an XId.  An association may be removed only once.  Redundant
+  * deletes are meaningless (but cause no problems).
+  */
++void
+ XDeleteAssoc(dpy, table, x_id)
+         register Display *dpy;
+ 	register XAssocTable *table;
+--- emacs-23.2/oldXMenu/XMakeAssoc.c
++++ emacs-23.2/oldXMenu/XMakeAssoc.c
+@@ -27,6 +27,7 @@
+  * meaningless (but cause no problems).  The queue in each association
+  * bucket is sorted (lowest XId to highest XId).
+  */
++void
+ XMakeAssoc(dpy, table, x_id, data)
+ 	register Display *dpy;
+ 	register XAssocTable *table;
