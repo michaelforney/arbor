@@ -10,7 +10,7 @@ MY_PNV=${PNV/_pre/pre}
 
 SUMMARY="Compiler cache"
 HOMEPAGE="http://ccache.samba.org/"
-DOWNLOADS="http://samba.org/ftp/${PN}/${MY_PNV}.tar.bz2"
+DOWNLOADS="http://samba.org/ftp/${PN}/${MY_PNV}.tar.xz"
 
 UPSTREAM_RELEASE_NOTES="http://samba.org/ftp/${PN}/${MY_PNV}-NEWS"
 
@@ -20,6 +20,8 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
+    build:
+        app-arch/xz
     build+run:
         sys-libs/zlib[>=1.2.3]
 "
@@ -27,7 +29,9 @@ DEPENDENCIES="
 WORK=${WORKBASE}/${MY_PNV}
 
 src_prepare() {
-    edo sed -e "/installcmd/s/-s//" -i Makefile.in
+    # The check is broken and configure.ac is not shipped
+    # this has already been fixed upstream
+    edo sed -e '/^if test -z "$ac_ct_AR"; then/s:ac_ct_AR:AR:' -i configure
 }
 
 src_install() {
@@ -39,10 +43,5 @@ src_install() {
     for f in {${CHOST}-,}{gcc,g++,c++}; do
         dosym /usr/bin/ccache /usr/libexec/ccache/${f}
     done
-}
-
-pkg_postinst() {
-    elog "ccache now installs gcc, g++, c++ symlinks into /usr/libexec/ccache/ instead of"
-    elog "/usr/$(get_libdir)/ccache/bin, so you will have to update your paludis bashrc"
 }
 
