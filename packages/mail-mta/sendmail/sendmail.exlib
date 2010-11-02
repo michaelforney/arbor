@@ -8,19 +8,21 @@ require multilib alternatives systemd-service
 export_exlib_phases src_prepare src_compile src_install
 
 SUMMARY="Widely-used Mail Transfer Agent (MTA)"
-HOMEPAGE="http://www.${PN}.org/"
+DESCRIPTION="
+Sendmail is a Mail Transfer Agent, which is the program that moves mail from one
+machine to another. Sendmail implements a general internetwork mail routing facility,
+featuring aliasing and forwarding, automatic routing to network gateways, and
+flexible configuration.
+"
+HOMEPAGE="http://www.${PN}.com/sm/open_source/"
 DOWNLOADS="ftp://ftp.${PN}.org/pub/${PN}/${PN}.${PV}.tar.gz"
 
 REMOTE_IDS="freshmeat:${PN}"
 BUGS_TO="philantrop@exherbo.org"
-UPSTREAM_CHANGELOG="${HOMEPAGE}/releases/${PV} [[ lang = en ]]"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}#RS"
-UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation"
-
 LICENCES="Sendmail"
 
 SLOT="0"
-MYOPTIONS="ipv6 ldap mbox nis sasl sockets ssl tcpd"
+MYOPTIONS="baselayout ipv6 ldap mbox nis sasl sockets ssl tcpd"
 
 DEPENDENCIES="
     build+run:
@@ -189,8 +191,10 @@ sendmail_src_install() {
     echo "# local-host-names - include all aliases for your machine here" \
         > "${IMAGE}"/etc/mail/local-host-names
 
-    newconfd "${FILES}"/sendmail.confd-1 sendmail
-    newinitd "${FILES}"/sendmail.initd-1 sendmail
+    if option baselayout ; then
+        newconfd "${FILES}"/sendmail.confd-1 sendmail
+        newinitd "${FILES}"/sendmail.initd-1 sendmail
+    fi
 
     install_systemd_files
 

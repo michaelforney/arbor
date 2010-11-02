@@ -1,0 +1,32 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ suffix=tar.gz ]
+
+SUMMARY="Utilities for process information including ps, top and kill"
+
+DOWNLOADS="http://${PN}.sourceforge.net/${PNV}.tar.gz"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changelog.html"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-ps-cgroup.patch
+    "${FILES}"/${PNV}-ps-cgroup-suppress-root-group.patch
+    "${FILES}"/${PNV}-make-3.82.patch
+)
+
+DEFAULT_SRC_INSTALL_PARAMS=( ldconfig="true" )
+
+src_install() {
+    default
+    insinto /usr/include/proc
+    doins proc/*.h
+}
+

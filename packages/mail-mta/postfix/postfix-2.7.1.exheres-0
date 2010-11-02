@@ -17,7 +17,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/announcements/${PNV}.html [[ lang = en ]]"
 LICENCES="IPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="cyrus ssl"
+MYOPTIONS="baselayout cyrus ssl"
 
 DEPENDENCIES="
     dev-libs/pcre
@@ -98,6 +98,6 @@ src_install() {
 
     dosym /usr/share/doc/${PNVR} /usr/share/doc/${PN}
 
-    newinitd "${FILES}"/postfix.init.d-0 postfix
+    option baselayout && newinitd "${FILES}"/postfix.init.d-0 postfix
 }
 

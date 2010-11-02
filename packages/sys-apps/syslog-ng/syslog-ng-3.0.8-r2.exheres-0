@@ -15,7 +15,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="caps ipv6 pcre systemd tcpd vim-syntax"
+MYOPTIONS="baselayout caps ipv6 pcre systemd tcpd vim-syntax"
 RESTRICT="test"
 
 DEPENDENCIES="
@@ -70,8 +70,10 @@ src_install() {
     insinto /etc/syslog-ng
     newins "${FILES}"/syslog-ng.conf.sample syslog-ng.conf
 
-    newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
-    newconfd "${FILES}"/syslog-ng.confd syslog-ng
+    if option baselayout ; then
+        newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
+        newconfd "${FILES}"/syslog-ng.confd syslog-ng
+    fi
 
     if option systemd ; then
         insinto /$(get_libdir)/systemd/system

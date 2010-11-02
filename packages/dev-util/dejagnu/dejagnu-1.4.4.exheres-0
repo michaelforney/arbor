@@ -17,32 +17,23 @@ in Expect, which in turn uses Tcl -- Tool command language."
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="doc"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
         dev-lang/tcl
-        dev-tcl/expect"
-#    test:
-#        dev-util/dejagnu
+        dev-tcl/expect
+    test:
+        dev-util/dejagnu
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 
-src_test() {
-    if ! has_version --slash dev-util/dejagnu; then
-        ewarn "You need to build dejagnu a second time to run the tests"
-        return
-    fi
-
-    default
-}
-
 src_install() {
     default
-    if option doc; then
-        dodoc doc/overview.{pdf,ps,rtf}
-        docinto html
-        dodoc doc/html/*
-    fi
+
+    dodoc doc/overview.{pdf,ps,rtf}
+    docinto html
+    dodoc doc/html/*
 }
 

@@ -1,0 +1,10 @@
+[Unit]
+Description=DHCP client (dhcpcd)
+Before=network.target
+After=local-fs.target
+
+[Service]
+ExecStart=/sbin/dhcpcd -q -B
+
+[Install]
+WantedBy=network.target

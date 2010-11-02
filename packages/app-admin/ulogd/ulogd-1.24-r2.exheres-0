@@ -1,0 +1,73 @@
+# Copyright 2008-2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ulogd-1.24.ebuild' from Gentoo, which is:
+#       Copyright 1999-2008 Gentoo Foundation
+
+require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] systemd-service
+
+SUMMARY="A userspace logging daemon for netfilter/iptables related logging"
+DESCRIPTION="
+${PN} is a userspace logging daemon for netfilter/iptables related logging. This
+includes per-packet logging of security violations, per-packet logging for
+accounting purpose as well as per-flow logging.
+"
+HOMEPAGE="http://netfilter.org/projects/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PN}/files/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="baselayout pcap sqlite"
+# FIXME: mysql and postgres could be added but only if requested.
+
+DEPENDENCIES="
+    build+run:
+        sqlite? ( dev-db/sqlite[>=3.5.9] )
+        pcap? ( dev-libs/libpcap[>=0.9.8] )
+    run:
+        net-firewall/iptables[>=1.4.1]
+    suggestion:
+        app-admin/logrotate[>=3.7.7] [[ description = [ Use logrotate for rotating logs ] ]]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PNV}-automagic.patch )
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "--without-mysql"
+    "--without-pgsql"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "sqlite sqlite3"
+    "pcap"
+)
+
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
+
+src_configure() {
+    # enables logfiles over 2G (cf. Gentoo bug 74924)
+    append-lfs-flags
+
+    default
+}
+
+src_install() {
+    default
+
+    install_systemd_files
+
+    option baselayout && newinitd "${FILES}"/${PNV}.init ulogd
+
+    insinto /etc/logrotate.d
+    doins ulogd.logrotate
+
+    insinto /usr/share/doc/${PNVR}/contrib
+    doins -r contrib
+
+    doman ulogd.8
+    dodoc doc/*
+}
+

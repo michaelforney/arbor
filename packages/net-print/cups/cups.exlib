@@ -13,7 +13,7 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="acl dbus debug gnutls ldap libusb pam perl python tcpd tiff threads xinetd
+MYOPTIONS="acl baselayout dbus debug gnutls ldap libusb pam perl python tcpd tiff threads xinetd
 
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
@@ -182,7 +182,10 @@ install_one_multibuild() {
 
     install_systemd_files
 
-    hereinitd cupsd <<EOF
+#   WTF, Timo/tgurr?! Please, next time you're in here, make an external init
+#   script (in ${FILES}) instead of creating a huge inline mess.
+    if option baselayout ; then
+        hereinitd cupsd <<EOF
 #!/sbin/runscript
 
 depend() {
@@ -204,6 +207,7 @@ stop() {
     eend \$?
 }
 EOF
+    fi
 
     echo "ServerName localhost" >> "${IMAGE}"/etc/cups/client.conf
 }

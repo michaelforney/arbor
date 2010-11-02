@@ -17,6 +17,8 @@ DEPENDENCIES="
 src_prepare() {
     edo cd "${ECONF_SOURCE}"
     expatch -p0 "${FILES}"/${PNV}-i686.patch
+    expatch -p0 "${FILES}"/${PNV}-make-3.82.patch
+
     glibc_src_prepare
 }
 

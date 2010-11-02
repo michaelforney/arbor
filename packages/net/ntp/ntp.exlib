@@ -28,7 +28,7 @@ UPSTREAM_RELEASE_NOTES="http://www.eecis.udel.edu/~${PN}/${PN}_spool/${PN}4/NEWS
 
 SLOT="0"
 
-MYOPTIONS="caps debug ipv6 parse-clocks"
+MYOPTIONS="baselayout caps debug ipv6 parse-clocks"
 
 DEPENDENCIES="
     build+run:
@@ -73,14 +73,16 @@ src_install() {
 
     install_systemd_files
 
-    newinitd "${FILES}"/ntpd.initd ntpd
-    # As of ntp-4.2.4_p7-RC1 ntp will only drop privileges if linuxcaps is enabled
-    hereconfd ntpd <<EOF
+    if option baselayout ; then
+        newinitd "${FILES}"/ntpd.initd ntpd
+        # As of ntp-4.2.4_p7-RC1 ntp will only drop privileges if linuxcaps is enabled
+        hereconfd ntpd <<EOF
 # Options to pass to the ntpd process
 # Most people should leave this line alone ...
 # however, if you know what you're doing, feel free to tweak
 NTPD_OPTS="$(option caps && echo '-u ntp:ntp')"
 EOF
+    fi
 
     edo find "${IMAGE}"/usr/ -type d -empty -delete
 }

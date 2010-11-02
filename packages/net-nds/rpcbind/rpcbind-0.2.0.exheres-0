@@ -14,7 +14,7 @@ into universal addresses.
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     build+run:
@@ -30,7 +30,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/sbin )
 src_install() {
     default
 
-    newinitd "${FILES}"/rpcbind.initd rpcbind
-    newconfd "${FILES}"/rpcbind.confd rpcbind
+    if option baselayout ; then
+        newinitd "${FILES}"/rpcbind.initd rpcbind
+        newconfd "${FILES}"/rpcbind.confd rpcbind
+    fi
 }
 

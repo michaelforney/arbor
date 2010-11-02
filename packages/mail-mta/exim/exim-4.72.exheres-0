@@ -14,7 +14,7 @@ DOWNLOADS="ftp://ftp.exim.org/pub/${PN}/${PN}${PV%.*}/${PNV}.tar.bz2
 LICENCES="GPL-2"
 SLOT="0"
 # XXX X? for eximon
-MYOPTIONS="dnsdb doc dovecot-sasl embedded-perl exiscan ipv6 lmtp mbx nis pam sasl ssl tcpd
+MYOPTIONS="baselayout dnsdb doc dovecot-sasl embedded-perl exiscan ipv6 lmtp mbx nis pam sasl ssl tcpd
     dnsdb         [[ description = [ Adds support for a DNS search for a record whose domain name is the supplied query ] ]]
     dovecot-sasl  [[ description = [ Adds support for Dovecot's authentication ] ]]
     embedded-perl [[ description = [ Use Perl code in Exim's string manipulation language. Using embedded Perl costs quite a lot of resources. Enable only if needed. ] ]]
@@ -139,8 +139,10 @@ src_install() {
         doins -r "${WORKBASE}/${PN}-html-${PV}/doc/html"
     fi
 
-    newinitd "${FILES}"/${PN}.rc exim
-    newconfd "${FILES}"/${PN}.confd exim
+    if option baselayout ; then
+        newinitd "${FILES}"/${PN}.rc exim
+        newconfd "${FILES}"/${PN}.confd exim
+    fi
 
     diropts "-m0750"
     dodir /var/log/${PN} /var/spool/${PN}

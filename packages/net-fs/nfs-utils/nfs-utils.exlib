@@ -17,6 +17,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="
+    baselayout
     caps
     ipv6
     nfsv4 [[ description = [ Enable support for NFSv4 ] ]]
@@ -81,13 +82,15 @@ nfs-utils_src_install() {
     dodir /sbin
     edo mv "${IMAGE}"/usr/sbin/rpc.statd "${IMAGE}"/sbin/
 
-    local f list=""
-    option nfsv4 && list+="rpc.idmapd"
+    if option baselayout ; then
+        local f list=""
+        option nfsv4 && list+="rpc.idmapd"
 
-    for f in nfs nfsmount rpc.statd ${list} ; do
-        newinitd "${FILES}"/${f}.initd ${f}
-    done
-    newconfd "${FILES}"/nfs.confd nfs
+        for f in nfs nfsmount rpc.statd ${list} ; do
+            newinitd "${FILES}"/${f}.initd ${f}
+        done
+        newconfd "${FILES}"/nfs.confd nfs
+    fi
 }
 
 nfs-utils_pkg_postinst() {

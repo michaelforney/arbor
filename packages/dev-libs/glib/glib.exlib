@@ -29,9 +29,13 @@ install_one_multibuild() {
 test_one_multibuild() {
     unset DBUS_SESSION_BUS_ADDRESS
 
-    export XDG_CONFIG_DIRS="${TEMP}/etc"
-    export XDG_DATA_DIRS="${TEMP}/usr/share"
+    export XDG_CONFIG_DIRS="/etc/xdg"
+    export XDG_DATA_DIRS="/usr/share"
     export XDG_DATA_HOME="${TEMP}"
+
+    # Requires 700 permissions and TEMP is 755
+    export G_DBUS_COOKIE_SHA1_KEYRING_DIR_IGNORE_PERMISSION=1
+    export G_DBUS_COOKIE_SHA1_KEYRING_DIR="${TEMP}"
 
     sydboxcmd 'net/whitelist/connect/unix:///tmp/g-dbus-tests-pid-*'
     sydboxcmd 'net/whitelist/bind/unix:///tmp/g-dbus-tests-pid-*'

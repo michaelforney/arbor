@@ -22,10 +22,11 @@ HOMEPAGE="http://www.lm-sensors.org/"
 DOWNLOADS="http://dl.lm-sensors.org/lm-sensors/releases/${PNV}.tar.bz2"
 
 BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
 
-LICENCES="GPL-2"
+LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
-MYOPTIONS="sensord [[ description = [ Enable sensord, a daemon that can be used to periodically log sensor readings from hardware health-monitoring chips ] ]]"
+MYOPTIONS="baselayout sensord [[ description = [ Enable sensord, a daemon that can be used to periodically log sensor readings from hardware health-monitoring chips ] ]]"
 
 DEPENDENCIES="
     build+run:
@@ -66,12 +67,13 @@ lm_sensors_src_install() {
 
     keepdir /etc/sensors.d
 
-    newinitd "${FILES}"/lm_sensors-init.d lm_sensors
-    newinitd "${FILES}"/fancontrol-init.d fancontrol
-
-    if option sensord; then
-        newconfd "${FILES}"/sensord-conf.d sensord
-        newinitd "${FILES}"/sensord-init.d sensord
+    if option baselayout ; then
+        newinitd "${FILES}"/lm_sensors-init.d lm_sensors
+        newinitd "${FILES}"/fancontrol-init.d fancontrol
+        if option sensord; then
+            newconfd "${FILES}"/sensord-conf.d sensord
+            newinitd "${FILES}"/sensord-init.d sensord
+        fi
     fi
 
     docinto chips

@@ -1,0 +1,123 @@
+# Copyright 2010 Alex Elsayed <eternaleye@gmail.com>
+# Copyright 2010 Brett Witherspoon <spoonb@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+if ever is_scm; then
+    SCM_REPOSITORY="git://dracut.git.sourceforge.net/gitroot/dracut/dracut"
+    require scm-git
+else
+    DOWNLOADS="mirror://sourceforge/$(PN)/${PNV}.tar.bz2"
+fi
+
+export_exlib_phases src_prepare src_install
+
+SUMMARY="Dracut is a modular initramfs infrastructure."
+DESCRIPTION="
+Unlike existing initramfs's, this is an attempt at having as little as possible hard-coded into
+the initramfs as possible. The initramfs has (basically) one purpose in life -- getting the rootfs
+mounted so that we can transition to the real rootfs. This is all driven off of device availability.
+Therefore, instead of scripts hard-coded to do various things, we depend on udev to create device
+nodes for us and then when we have the rootfs's device node, we mount and carry on. This helps to
+keep the time required in the initramfs as little as possible so that things like a 5 second boot
+aren't made impossible as a result of the very existence of an initramfs. It's likely that we'll
+grow some hooks for running arbitrary commands in the flow of the script, but it's worth trying
+to resist the urge as much as we can as hooks are guaranteed to be the path to slow-down. Also,
+there is an attempt to keep things as distribution-agnostic as possible.
+"
+HOMEPAGE="http://sourceforge.net/apps/trac/dracut/"
+
+BUGS_TO="eternaleye@gmail.com spoonb@exherbo.org"
+REMOTE_IDS="sourceforge:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        app-text/docbook-xml-dtd:4.5
+        dev-libs/libxslt
+    run:
+        app-shells/bash
+        sys-apps/module-init-tools
+        sys-apps/util-linux-ng
+        sys-apps/sysvinit [[ note = [ For killall5 ] ]]
+    recommendation+test:
+        app-shells/dash
+    suggestion:
+        app-misc/bootchart [[
+            description = [ Support for graphical analysis of the boot process ]
+        ]]
+        net-misc/open-iscsi [[
+            description = [ Support for rootfs on iSCSI ]
+        ]]
+        sys-apps/eject [[
+            description = [ Used by the dmsquash-live module for livecds ]
+        ]]
+        sys-boot/plymouth [[
+            description = [ Provides boot splash support ]
+        ]]
+        sys-fs/btrfs-progs [[
+            description = [ Support for multi-device btrfs filesystems ]
+        ]]
+        sys-fs/cryptsetup [[
+            description = [ Support for an encrypted rootfs using dmcrypt ]
+        ]]
+        sys-fs/lvm2 [[
+            description = [ Support for LVM volumes and devicemapper partitions for various modules ]
+        ]]
+        sys-fs/multipath-tools [[
+            description = [ Support for rootfs on multipath devices ]
+        ]]
+        net-misc/bridge-utils [[
+            description = [ Required by the network boot module for brctl ]
+        ]]
+        net-misc/dhcp [[
+            description = [ Required by the network boot module for dhclient ]
+        ]]
+        net-misc/iputils [[
+            description = [ Required by the network boot and debug module for arping and ping ]
+        ]]
+        sys-apps/iproute2 [[
+            description = [ Required by the network boot module for ip ]
+        ]]
+        sys-apps/net-tools [[
+            description = [ Required by the iSCSI and debug module for hostname and netstat ]
+        ]]
+"
+
+# TODO
+#   - Remove or modify distro specific modules that are not compatible with Exherbo (e.g. ifcfg).
+#   - Some modules (e.g. network) could probably benefit from better dependency tracking using
+#     options rather then suggestions.
+#   - Get the dmsquash-live and uswsusp modules functioning. This will require additional
+#     dependencies such as isomd5sum, squashfs-tools, and tuxonice-userui respectfully.
+
+DEFAULT_SRC_COMPILE_PARAMS=( WITH_SWITCH_ROOT=0 )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr sysconfdir=/etc )
+
+# Dracut's "Test Matrix" has excessive dependencies and would require significant re-configuration.
+# This second series of tests requires root privileges and relies on hard-coded paths, thus they
+# have been disabled. It does not yet appear that these are meant to be executable by anybody.
+dracut_src_prepare() {
+    default
+    edo sed -i -e '/$(MAKE) -C test check/d' Makefile
+}
+
+dracut_src_install() {
+    default
+
+    insinto /etc/dracut.conf.d
+    hereins i18n.conf << EOF
+# Console configuration for systemd
+i18n_vars="/etc/vconsole.conf:FONT-SYSFONT"
+keyboard_vars="/etc/vconsole.conf:KEYMAP"
+
+# Uncomment for baselayout
+#i18n_vars="/etc/conf.d/consolefont:CONSOLEFONT-SYSFONT"
+#keyboard_vars="/etc/conf.d/keymaps:KEYMAP"
+EOF
+
+    keepdir /etc/dracut.conf.d
+}
+

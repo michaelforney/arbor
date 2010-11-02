@@ -23,7 +23,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE} [[ lang = en ]]"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     build+run:
@@ -63,12 +63,14 @@ multipath-tools_src_install() {
     edo chmod 644 "${IMAGE}"/$(get_libdir)/udev/rules.d/{65-multipath,66-kpartx}.rules
     edo find "${IMAGE}"/etc -type d -empty -delete
 
-    # This is the monitoring daemon
-    newinitd "${FILES}"/rc-multipathd multipathd
+    if option baselayout ; then
+        # This is the monitoring daemon
+        newinitd "${FILES}"/rc-multipathd multipathd
 
-    # Handle early-boot startup as well as shutdown of multipath devices
-    insinto /$(get_libdir)/rcscripts/addons
-    doins "${FILES}"/multipath-{start,stop}.sh
+        # Handle early-boot startup as well as shutdown of multipath devices
+        insinto /$(get_libdir)/rcscripts/addons
+        doins "${FILES}"/multipath-{start,stop}.sh
+    fi
 }
 
 multipath-tools_pkg_postinst() {

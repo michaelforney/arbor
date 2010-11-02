@@ -1,32 +1,57 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2010 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnome.org
+require alternatives gnome.org
 
-export_exlib_phases src_test
+export_exlib_phases src_test src_install
 
 SUMMARY="A modern C#-like language for GNOME development"
 HOMEPAGE="http://live.gnome.org/Vala"
 
 LICENCES="LGPL-2.1"
-SLOT="0.10"
 MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         dev-libs/libxslt
         dev-util/pkg-config[>=0.20]
+        sys-devel/bison
+        sys-devel/flex
     build+run:
         dev-libs/glib:2[>=2.25.9]
+    test:
+        sys-apps/dbus
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-vapigen' )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    '--disable-unversioned'
+    '--enable-vapigen'
+)
 
 vala_src_test() {
     unset DISPLAY
-
     sydboxcmd "net/whitelist/bind/unix-abstract:///tmp/dbus-*"
-
     default
+}
+
+vala_src_install() {
+    default
+
+    edo mv "${IMAGE}"usr/share/aclocal/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
+
+    local src target alternatives=()
+    edo pushd "${IMAGE}"
+
+    alternatives+=( /usr/bin/vala valac-${SLOT} )
+
+    for src in usr/bin/{valac,vala-gen-introspect,vapigen,vapicheck}-${SLOT} \
+               usr/share/man/man1/*-${SLOT}.1; do
+        target=${src/-${SLOT}}
+        alternatives+=( /${target} ${src##*/} )
+    done
+    edo popd
+
+    alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
 }
 

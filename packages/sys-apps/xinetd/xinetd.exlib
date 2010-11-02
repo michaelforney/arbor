@@ -8,7 +8,7 @@ DESCRIPTION="${PN} listens on specific ports to launch programs configured for t
 
 LICENCES="BSD-3"
 SLOT="0"
-MYOPTIONS="perl tcpd"
+MYOPTIONS="baselayout perl tcpd"
 
 DEPENDENCIES="
     build+run:
@@ -51,8 +51,10 @@ src_prepare() {
 src_install() {
     default
 
-    newconfd "${FILES}/xinetd.conf.d" xinetd
-    newinitd "${FILES}/xinetd.init.d" xinetd
+    if option baselayout ; then
+        newconfd "${FILES}/xinetd.conf.d" xinetd
+        newinitd "${FILES}/xinetd.init.d" xinetd
+    fi
 
     insinto /etc
     doins -r "${WORK}"/contrib/xinetd.d

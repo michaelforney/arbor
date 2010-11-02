@@ -10,7 +10,7 @@ DOWNLOADS="ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/${NTP_PNV}.tar.gz"
 LICENCES="BSD-2 BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="ssl"
+MYOPTIONS="baselayout ssl"
 
 DEPENDENCIES="
     build+run:
@@ -29,13 +29,15 @@ src_install() {
     default
     rmdir "${IMAGE}"/var{/empty,}
 
-    newinitd "${FILES}/${PN}.rc" ${PN}
-    hereconfd "${PN}" <<EOF
+    if option baselayout ; then
+        newinitd "${FILES}/${PN}.rc" ${PN}
+        hereconfd "${PN}" <<EOF
 NTPD_HOME=/var/empty
 
 # See ntpd(8) man page ... some popular options:
 #  -s   Set the time immediately at startup
 NTPD_OPTS=""
 EOF
+    fi
 }
 

@@ -1,8 +1,6 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service [ systemd_files=[ kexec.service ] ]
-
 export_exlib_phases src_install
 
 SUMMARY="Boot a new kernel over the currently running one - and more."
@@ -21,7 +19,7 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -44,14 +42,9 @@ src_install() {
         doc/multiboot.html \
         doc/nbi-spec.txt
 
-    newinitd "${FILES}"/kexec.init kexec
-    newconfd "${FILES}"/kexec.conf kexec
-
-    install_systemd_files
-
-    if option systemd ; then
-        insinto /etc/conf.d
-        doins "${FILES}"/systemd/kexec.conf
+    if option baselayout ; then
+        newinitd "${FILES}"/kexec.init kexec
+        newconfd "${FILES}"/kexec.conf kexec
     fi
 }
 

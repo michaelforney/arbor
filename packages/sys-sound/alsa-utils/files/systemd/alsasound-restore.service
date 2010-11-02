@@ -1,0 +1,9 @@
+[Unit]
+Description=Restore ALSA Mixer Settings
+
+[Service]
+ExecStart=/usr/sbin/alsactl -g restore
+
+[Install]
+Also=alsasound-store.service
+WantedBy=multi-user.target

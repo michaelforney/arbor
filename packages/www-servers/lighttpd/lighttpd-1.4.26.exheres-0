@@ -19,7 +19,7 @@ UPSTREAM_DOCUMENTATION="http://redmine.lighttpd.net/wiki/lighttpd"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug doc fam gdbm ipv6 lua pcre ssl
+MYOPTIONS="baselayout debug doc fam gdbm ipv6 lua pcre ssl
     webdav [[ description = [ Enables webdev properties ] ]]
     xattr  [[ description = [ Enable extended attributes support ] ]]
 "
@@ -77,8 +77,10 @@ src_install() {
             -e '/^#server.groupname[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
             doc/lighttpd.conf > "${IMAGE}"/etc/lighttpd/lighttpd.conf
 
-    newinitd "${FILES}"/lighttpd.initd lighttpd
-    newconfd "${FILES}"/lighttpd.confd lighttpd
+    if option baselayout ; then
+        newinitd "${FILES}"/lighttpd.initd lighttpd
+        newconfd "${FILES}"/lighttpd.confd lighttpd
+    fi
 
     keepdir /var/{log,run}/lighttpd
     keepdir /srv/www/htdocs

@@ -1,0 +1,28 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: submitted
+Reason: Fails to link with make 3.82
+--- procps-3.2.8/Makefile
++++ procps-3.2.8/Makefile
+@@ -174,7 +174,7 @@
+ # want this rule first, use := on ALL, and ALL not filled in yet
+ all: do_all
+ 
+--include */module.mk
++-include proc/module.mk ps/module.mk
+ 
+ do_all:    $(ALL)
+ 
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Different linking order leads to odd behavior
+--- procps-3.2.8/proc/module.mk
++++ procps-3.2.8/proc/module.mk
+@@ -76,7 +76,7 @@
+ 
+ #proc/$(SONAME): proc/library.map
+ proc/$(SONAME): $(LIBOBJ)
+-	$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -shared -Wl,-soname,$(SONAME) -Wl,--version-script=proc/library.map -o $@ $^ -lc
++	$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -shared -Wl,-soname,$(SONAME) -Wl,--version-script=proc/library.map -o $@ $(sort $^) -lc
+ 
+ 
+ # AUTOMATIC DEPENDENCY GENERATION -- GCC AND GNUMAKE DEPENDENT

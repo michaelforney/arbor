@@ -10,16 +10,23 @@ myexparam pv=${MY_PV:-${PV}}
 myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
 
 HOMEPAGE="http://$(exparam project).sourceforge.net/"
-if ! ever is_scm; then
+
+if ! ever is_scm ; then
     DOWNLOADS="mirror://sourceforge/$(exparam project)/$(exparam pnv).$(exparam suffix)"
 fi
 
 #FIXME: handle project != pn if remote ids gets extended to allow it
 REMOTE_IDS+=" sourceforge:$(exparam project) "
 
-if has $(exparam suffix) tar.lzma tar.xz; then
+if has $(exparam suffix) tar.lzma tar.xz ; then
     DEPENDENCIES+="
         build:
             app-arch/xz"
+fi
+
+if has $(exparam suffix) zip ; then
+    DEPENDENCIES+="
+        build:
+            app-arch/unzip"
 fi
 

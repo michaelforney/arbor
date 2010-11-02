@@ -116,6 +116,7 @@ src_configure() {
         ${multilib} \
         --libdir=/usr/${LIBDIR} \
         $(ever at_least 4.5.0 || echo --hates=docdir) \
+        --enable-clocale=gnu \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \

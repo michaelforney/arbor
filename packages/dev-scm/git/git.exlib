@@ -30,7 +30,7 @@ UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${P
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="curl ipv6 tk xinetd
+MYOPTIONS="baselayout curl ipv6 tk xinetd
     python [[ description = [ Install helper scripts for git remote helpers, a compatibility layer with other SCMs ] ]]
     webdav [[ requires = curl description = [ Adds support for pushing using http:// and https:// transports ] ]]"
 exparam -b htmldocs && MYOPTIONS+=" doc"
@@ -151,8 +151,10 @@ git_src_install() {
 
     fixlocalpod
 
-    newinitd "${FILES}"/git-daemon.initd git-daemon
-    newconfd "${FILES}"/git-daemon.confd git-daemon
+    if option baselayout ; then
+        newinitd "${FILES}"/git-daemon.initd git-daemon
+        newconfd "${FILES}"/git-daemon.confd git-daemon
+    fi
     if option xinetd ; then
         dodir /etc/xinetd.d
         insinto /etc/xinetd.d

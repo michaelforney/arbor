@@ -21,7 +21,7 @@ DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="pam tcpd X
+MYOPTIONS="baselayout pam tcpd X
     hpn  [[ description = [ Enable high performance ssh ] ]]
     gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
     X509 [[ description = [ Adds support for X.509 certificate authentication ] ]]
@@ -111,8 +111,12 @@ src_install() {
     emake install-nokeys DESTDIR="${IMAGE}"
     edo chmod 600 "${IMAGE}"/etc/ssh/sshd_config
     dobin contrib/ssh-copy-id
-    newinitd "${FILES}"/sshd.rc6 sshd
-    newconfd "${FILES}"/sshd.confd sshd
+
+    if option baselayout ; then
+        newinitd "${FILES}"/sshd.rc6 sshd
+        newconfd "${FILES}"/sshd.confd sshd
+    fi
+
     keepdir /etc/ssh/ca
     keepdir /etc/skel/.ssh
     keepdir /var/run
@@ -140,9 +144,11 @@ src_install() {
 pkg_postinst() {
     [[ ! -d ${ROOT}/var/empty ]] && mkdir -p "${ROOT}"/var/empty
 
-    ewarn "Remember to merge your config files in /etc/ssh/ and then"
-    ewarn "restart sshd: '/etc/init.d/sshd restart'."
-    echo
+    if option baselayout ; then
+        ewarn "Remember to merge your config files in /etc/ssh/ and then"
+        ewarn "restart sshd: '/etc/init.d/sshd restart'."
+        echo
+    fi
     ewarn "Please be aware users need a valid shell in /etc/passwd"
     ewarn "in order to be allowed to login."
 }
