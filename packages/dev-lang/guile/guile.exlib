@@ -37,8 +37,10 @@ src_test() {
 src_install() {
     default
 
-    # TODO: Handle emacs files
-    rm -rf "${IMAGE}/usr/share/emacs"
+    if ! ever at_least 1.9.13; then
+        # Guile 1.9.13 no longer ships any files for emacs
+        rm -rf "${IMAGE}/usr/share/emacs"
+    fi
 
     local alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
 
