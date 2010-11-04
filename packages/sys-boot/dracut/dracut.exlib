@@ -45,9 +45,14 @@ DEPENDENCIES="
     recommendation+test:
         app-shells/dash
     suggestion:
-        app-misc/bootchart [[
-            description = [ Support for graphical analysis of the boot process ]
-        ]]
+        || (
+            app-misc/bootchart2 [[
+                description = [ Support for graphical analysis of the boot process. More efficient implementation. ]
+            ]]
+            app-misc/bootchart [[
+                description = [ Support for graphical analysis of the boot process ]
+            ]]
+        )
         net-misc/open-iscsi [[
             description = [ Support for rootfs on iSCSI ]
         ]]
