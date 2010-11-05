@@ -133,7 +133,7 @@ sendmail_src_install() {
     dosym /var/spool/mail /var/mail
     dodir /usr/bin /usr/$(get_libdir)
     dodir /usr/share/man/man{1,5,8} /usr/sbin /usr/share/sendmail-cf
-    dodir /var/spool/{mqueue,clientmqueue} /etc/conf.d
+    dodir /var/spool/{mqueue,clientmqueue}
     keepdir /var/spool/{clientmqueue,mqueue}
 
     for dir in libsmutil sendmail mailstats praliases smrsh makemap vacation editmap; do
@@ -192,6 +192,7 @@ sendmail_src_install() {
         > "${IMAGE}"/etc/mail/local-host-names
 
     if option baselayout ; then
+        dodir /etc/conf.d
         newconfd "${FILES}"/sendmail.confd-1 sendmail
         newinitd "${FILES}"/sendmail.initd-1 sendmail
     fi
