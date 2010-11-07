@@ -3,9 +3,10 @@
 
 require multilib
 
+BASE_TARBALL_PV="0.2"
 SUMMARY="Skeleton filesystem layout"
 HOMEPAGE="http://www.exherbo.org/"
-DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PN}-base-etc-0.1.tar.bz2"
+DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PN}-base-etc-${BASE_TARBALL_PV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -14,7 +15,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-WORK="${WORKBASE}"
+WORK=${WORKBASE}
 
 create_root_owned_directory() {
     if [[ ! -e "${1}" ]]; then
@@ -47,7 +48,7 @@ pkg_pretend() {
 src_install() {
     insinto /etc
     doins "${FILES}"/exherbo-release
-    doins -r "${WORK}"/${PN}-base-etc-0.1/*
+    doins -r "${WORK}"/${PN}-base-etc-${BASE_TARBALL_PV}/*
 }
 
 pkg_preinst() {
