@@ -20,6 +20,10 @@ SLOT="0"
 MYOPTIONS="
     X alsa dbus freetype gif gpm gtk jpeg otf png svg tiff tiff xpm
     ( freetype gif gtk jpeg otf png svg tiff tiff xpm ) [[ requires = X ]]
+    gconf [[
+        description = [ Allows emacs to determine the system font ]
+        requires = X
+    ]]
     otf [[
         description = [ Support for OpenType fonts ]
         requires = freetype
@@ -60,6 +64,7 @@ DEPENDENCIES="
             media-libs/freetype:2
             x11-libs/libXft[>=0.13.0]
         )
+        gconf? ( gnome-platform/GConf:2 )
         gpm? ( sys-libs/gpm )
    suggestion:
         app-spell/aspell [[ description = [ For ispell and flyspell mode ] ]]
@@ -81,7 +86,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'gtk x-toolkit gtk' 'gtk toolkit-scroll-bars'
     'otf libotf'
     'svg rsvg'
-    'dbus' 'gif' 'gpm' 'jpeg' 'png' 'tiff' 'xpm'
+    'dbus' 'gconf' 'gif' 'gpm' 'jpeg' 'png' 'tiff' 'xpm'
 )
 
 emacs_src_prepare() {
