@@ -2,7 +2,9 @@
 Description=Restore ALSA Mixer Settings
 
 [Service]
+Type=oneshot
 ExecStart=/usr/sbin/alsactl -g restore
+RemainAfterExit=yes
 
 [Install]
 Also=alsasound-store.service

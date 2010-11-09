@@ -6,8 +6,6 @@ require python-build
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 src_test() {
-    # Hangs under sydbox
-    edo rm Lib/test/test_threading.py
     # Fails under network sandboxing
     edo rm Lib/test/test_{ftplib,httpservers,multiprocessing,socket,urllib2}.py
     # Fails for fresh installs

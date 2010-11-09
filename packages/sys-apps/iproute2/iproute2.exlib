@@ -3,18 +3,16 @@
 # Based in part upon 'iproute2-2.6.26-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-MY_PV="${PV/_p/-}"
-MY_PNV="${PN}-${MY_PV}"
-MY_PVR="${PVR/_p/-}"
-MY_PNVR="${PN}-${MY_PVR}"
-
 myexparam headers_version='[>=2.6.33]'
 
 require multilib
 
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux."
 HOMEPAGE="http://www.linuxfoundation.org/en/Net:Iproute2"
-DOWNLOADS="http://devresources.linux-foundation.org/dev/${PN}/download/${MY_PNV}.tar.bz2"
+DOWNLOADS="
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}.tar.bz2
+    http://devresources.linux-foundation.org/dev/${PN}/download/${PNV}.tar.bz2
+"
 DESCRIPTION="A replacement for the inadequately behaving ifconfig/route programs in modern networks"
 LICENCES="GPL-2"
 SLOT="0"
@@ -53,7 +51,7 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
     MANDIR=/usr/share/man
 )
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK="${WORKBASE}/${PNV}"
 
 src_prepare() {
     # apply version-specific patches

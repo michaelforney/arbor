@@ -67,18 +67,13 @@ diff --git a/Makefile.pre.in b/Makefile.pre.in
 index 8451445..d06be9d 100644
 --- a/Makefile.pre.in
 +++ b/Makefile.pre.in
-@@ -87,11 +87,11 @@ datarootdir=    @datarootdir@
- 
- # Expanded directories
- BINDIR=		$(exec_prefix)/bin
--LIBDIR=		$(exec_prefix)/lib
-+LIBDIR=		$(exec_prefix)/@@EXHERBO_LIBDIR@@
+@@ -91,7 +91,7 @@
  MANDIR=		@mandir@
  INCLUDEDIR=	@includedir@
  CONFINCLUDEDIR=	$(exec_prefix)/include
 -SCRIPTDIR=	$(prefix)/lib
 +SCRIPTDIR=	$(prefix)/@@EXHERBO_LIBDIR@@
- 
+
  # Detailed destination directories
  BINLIBDEST=	$(LIBDIR)/python$(VERSION)
 diff --git a/Modules/Setup.dist b/Modules/Setup.dist
@@ -107,13 +102,13 @@ index 09fbe10..234f2f4 100644
  
  static void
  reduce(char *dir)
-@@ -524,7 +524,7 @@ calculate_path(void)
+@@ -524,7 +524,7 @@
      }
      else
          strncpy(zip_path, PREFIX, MAXPATHLEN);
 -    joinpath(zip_path, "lib/python00.zip");
 +    joinpath(zip_path, "@@EXHERBO_LIBDIR@@/python00.zip");
-     bufsz = strlen(zip_path);	/* Replace "00" with version */
+     bufsz = strlen(zip_path);   /* Replace "00" with version */
      zip_path[bufsz - 6] = VERSION[0];
      zip_path[bufsz - 5] = VERSION[2];
 @@ -534,7 +534,7 @@ calculate_path(void)
