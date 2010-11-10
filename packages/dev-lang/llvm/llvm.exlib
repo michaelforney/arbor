@@ -85,7 +85,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
 llvm_src_prepare() {
-    default
     if option clang; then
         ever is_scm || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
         edo sed \
@@ -94,7 +93,13 @@ llvm_src_prepare() {
         edo sed \
             -e "/^PROJ_headers :=/s|/lib/|/$(get_libdir)/|" \
             -i tools/clang/lib/Headers/Makefile
+        if ever is_scm; then
+            edo pushd tools/clang
+            expatch -p1 "${FILES}/0001-Add-support-for-Exherbo-Linux.patch"
+            edo popd
+        fi
     fi
+    default
 }
 
 llvm_src_test() {
