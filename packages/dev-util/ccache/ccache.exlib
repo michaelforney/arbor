@@ -1,22 +1,22 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
-#
 # Inspired from Gentoo's ccache-2.4-r7.ebuild which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
 require multilib
 
+export_exlib_phases src_install
+
 MY_PNV=${PNV/_pre/pre}
 
 SUMMARY="Compiler cache"
-HOMEPAGE="http://ccache.samba.org/"
+HOMEPAGE="http://${PN}.samba.org/"
 DOWNLOADS="http://samba.org/ftp/${PN}/${MY_PNV}.tar.xz"
 
 UPSTREAM_RELEASE_NOTES="http://samba.org/ftp/${PN}/${MY_PNV}-NEWS"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -28,13 +28,7 @@ DEPENDENCIES="
 
 WORK=${WORKBASE}/${MY_PNV}
 
-src_prepare() {
-    # The check is broken and configure.ac is not shipped
-    # this has already been fixed upstream
-    edo sed -e '/^if test -z "$ac_ct_AR"; then/s:ac_ct_AR:AR:' -i configure
-}
-
-src_install() {
+ccache_src_install() {
     default
 
     dodir /usr/libexec/ccache/
@@ -43,5 +37,7 @@ src_install() {
     for f in {${CHOST}-,}{gcc,g++,c++}; do
         dosym /usr/bin/ccache /usr/libexec/ccache/${f}
     done
+
+    keepdir /var/cache/ccache
 }
 
