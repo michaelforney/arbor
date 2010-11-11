@@ -3,7 +3,10 @@
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 
-DEB_PATCHLEVEL=24
+DEB_PATCHLEVEL="${PNV##*_p}"
+MY_PV="${PV%_p*}"
+MY_PNV="${PN}-${MY_PV}"
+
 SUMMARY="rcs - the Revision Control System"
 DESCRIPTION="
 The Revision Control System (RCS) manages multiple revisions of files. RCS
@@ -13,8 +16,8 @@ documentation, graphics, papers, and form letters.
 You don't want to use this unless it's a dependency for something you really need.
 "
 HOMEPAGE="http://www.cs.purdue.edu/homes/trinkle/RCS/"
-DOWNLOADS="mirror://gnu/rcs/${PNV}.tar.gz
-    mirror://debian//pool/main/r/${PN}/${PN}_${PV}-${DEB_PATCHLEVEL}.diff.gz"
+DOWNLOADS="mirror://gnu/rcs/${MY_PNV}.tar.gz
+    mirror://debian//pool/main/r/${PN}/${PN}_${MY_PV}-${DEB_PATCHLEVEL}.diff.gz"
 
 REMOTE_IDS="freshmeat:${PN}"
 
@@ -23,15 +26,16 @@ LICENCES="GPL-2"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
+WORK="${WORKBASE}/${MY_PNV}"
+
 DEPENDENCIES="
     run:
         sys-apps/diffutils
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${WORKBASE}"/${PN}_${PV}-${DEB_PATCHLEVEL}.diff
+    "${WORKBASE}"/${PN}_${MY_PV}-${DEB_PATCHLEVEL}.diff
     "${WORK}"/debian/patches
 )
 
 DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}"/usr )
-
