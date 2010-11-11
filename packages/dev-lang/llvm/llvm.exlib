@@ -93,11 +93,6 @@ llvm_src_prepare() {
         edo sed \
             -e "/^PROJ_headers :=/s|/lib/|/$(get_libdir)/|" \
             -i tools/clang/lib/Headers/Makefile
-        if ever is_scm; then
-            edo pushd tools/clang
-            expatch -p1 "${FILES}/0001-Add-support-for-Exherbo-Linux.patch"
-            edo popd
-        fi
     fi
     default
 }
