@@ -3,7 +3,7 @@
 # Based in part upon 'libxslt-1.1.23.ebuild', which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild python
 
 SUMMARY="XSLT libraries and tools"
 HOMEPAGE="http://www.xmlsoft.org/XSLT/"
@@ -17,9 +17,9 @@ MYOPTIONS="crypt debug examples python
 
 DEPENDENCIES="
     build+run:
-        dev-libs/libxml2[>=2.6.27]
-        crypt?  ( dev-libs/libgcrypt[>=1.1.92] )
-        python? ( dev-lang/python:= )
+        dev-libs/libxml2[>=2.6.27][multibuild_c:*(?)?]
+        crypt?  ( dev-libs/libgcrypt[>=1.1.92][multibuild_c:*(?)?] )
+        python? ( dev-lang/python:=[multibuild_c:*(?)?] )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -41,19 +41,23 @@ src_prepare() {
     eautomake
 }
 
-# Always pass --with-debugger. It is required by third parties (see
-# e.g. Gentoo bug #98345)
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-debugger )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "crypt crypto"
-    debug
-    "debug mem-debug"
-    python
-)
+configure_one_multibuild() {
+    local python_prefix='/usr'
+    multibuild_default_target C || python_prefix="/usr/${CHOST}"
+    # Always pass --with-debugger. It is required by third parties (see
+    # e.g. Gentoo bug #98345)
+    econf --with-debugger \
+        $(option_with crypt crypto) $(option_with debug) $(option_with debug mem-debug) \
+        $(option_with python python "${python_prefix}")
+}
 
 install_one_multibuild() {
     default
-    keepdir /usr/${LIBDIR}/libxslt-plugins
+    keepdir /usr/${LIBDIR}/${PN}-plugins
+    if ! multibuild_default_target C; then
+        dodir "/usr/${CHOST}/bin"
+        edo mv "${IMAGE}"/usr/bin/"${PN#lib}"-config "${IMAGE}"/usr/"${CHOST}"/bin
+    fi
 }
 
 src_install() {

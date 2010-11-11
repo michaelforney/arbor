@@ -26,8 +26,8 @@ MYOPTIONS="python readline
 
 DEPENDENCIES="
     build+run:
-        sys-libs/zlib[>=1.2.5-r1]
-        python? ( dev-lang/python:= )
+        sys-libs/zlib[>=1.2.5-r1][multibuild_c:*(?)?]
+        python? ( dev-lang/python:=[multibuild_c:*(?)?] )
         readline? ( sys-libs/readline[multibuild_c:*(?)?] )
 "
 
@@ -46,6 +46,14 @@ src_unpack() {
 src_prepare() {
     # prevent fetching with wget during src_test
     edo ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/
+}
+
+configure_one_multibuild() {
+    local python_prefix='/usr'
+    multibuild_default_target C || python_prefix="/usr/${CHOST}"
+    econf --with-threads --enable-ipv6 \
+        $(option_with python python "${python_prefix}") \
+        $(option_with readline) $(option_with readline history)
 }
 
 test_one_multibuild() {
