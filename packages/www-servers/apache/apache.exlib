@@ -103,6 +103,8 @@ apache_src_install() {
     if option systemd ; then
         insinto /etc/conf.d
         doins "${FILES}"/systemd/apache.conf
+        insinto /etc/tmpfiles.d
+        newins "${FILES}"/systemd/apache.conf.tmpfiles apache.conf
     fi
 
     # Fix user/group.
