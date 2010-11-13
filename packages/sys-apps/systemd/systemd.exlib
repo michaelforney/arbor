@@ -4,13 +4,13 @@
 if ever is_scm ; then
     SCM_REPOSITORY="git://anongit.freedesktop.org/systemd"
     require scm-git
-elif [[ ${PV} == 11_p20101105 ]]; then
+elif [[ ${PV} == 11_p20101113 ]]; then
     DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PNV}.tar.bz2"
 else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.bz2"
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib alternatives
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib alternatives bash-completion
 
 export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
@@ -30,12 +30,13 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="
+    bash-completion
+    cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
     gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
     tcpd
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
 "
 
-# You'll need at least kernel v2.6.36-rc1.
 # We don't support metalog as a syslogger (yet) so we do NOT use virtual/syslog here.
 DEPENDENCIES="
     build:
@@ -51,6 +52,7 @@ DEPENDENCIES="
         sys-fs/udev[systemd(-)][>=162]
         sys-libs/libcap
         sys-libs/pam[>=1.1.2]
+        cryptsetup? ( sys-fs/cryptsetup )
         gtk? (
             x11-libs/gtk+:2[>=2.20]
             x11-libs/libnotify
@@ -71,7 +73,7 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Add-Exherbo-distribution.patch
-    "${FILES}"/0003-Add-Exherbo-welcome-message.patch
+    "${FILES}"/0002-Add-Exherbo-welcome-message.patch
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -88,6 +90,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "cryptsetup libcryptsetup"
     gtk
     "tcpd tcpwrap"
 )
@@ -108,6 +111,7 @@ systemd_src_prepare() {
     # Set the correct libdir.
     edo sed -i -e "/rootlibexecdir=/s:/lib/:/$(get_libdir)/:" Makefile.am
     edo sed -i -e "/systemunitdir=/s:lib:$(get_libdir):" Makefile.am
+    edo sed -i -e "/systemgeneratordir=/s:lib:$(get_libdir):" Makefile.am
 
     autotools_src_prepare
 }
@@ -132,29 +136,38 @@ systemd_src_install() {
     )
     alternatives_for "${alternatives[@]}"
 
-    # Install basic services
+    # Handle bash-completion
+    if option bash-completion ; then
+        dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemctl-bash-completion.sh
+    fi
+    edo rm -r "${IMAGE}"/etc/bash_completion.d
+
+    # Install basic.service
     insinto /$(get_libdir)/systemd/system
     doins "${FILES}"/basic.service
 
+    # Install simple-net if requested
     if option simple-net; then
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
     fi
 
-    keepdir /etc/systemd/session
-    keepdir /etc/systemd/system/graphical.target.wants
-    keepdir /$(get_libdir)/systemd/system/graphical.target.wants
-
-    # We're not some other OS so we disable that shortcut.
+    # We're not some other OS so we disable the three-finger-salute.
     edo rm "${IMAGE}"/$(get_libdir)/systemd/system/ctrl-alt-del.target
 
     insinto /etc
 
     # Install a sample vconsole file
     hereins vconsole.conf <<EOF
+# The console font to use.
 FONT="lat9w-16"
+# The charset map file to use. Look in /usr/share/consoletrans for map files.
+#FONT_MAP=""
+#FONT_UNIMAP=""
+# The keyboard layout to use.
 KEYMAP="us"
+#KEYMAP_TOGGLE=""
 EOF
 
     # Install a default hostname file
@@ -179,6 +192,12 @@ LC_MEASUREMENT=C
 LC_IDENTIFICATION=C
 LC_ALL=
 EOF
+
+    # keepdir some stuff
+    keepdir /etc/systemd/session
+    keepdir /etc/systemd/system/graphical.target.wants
+    keepdir /$(get_libdir)/systemd/system/graphical.target.wants
+    keepdir /$(get_libdir)/systemd/system-generators
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
