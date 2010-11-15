@@ -13,7 +13,7 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="acl baselayout dbus debug gnutls ldap libusb pam perl python tcpd tiff threads xinetd
+MYOPTIONS="acl baselayout dbus debug gnutls kerberos ldap libusb pam perl python tcpd tiff threads xinetd
 
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
@@ -35,6 +35,7 @@ DEPENDENCIES="
         acl? ( sys-apps/acl )
         dbus? ( sys-apps/dbus )
         gnutls? ( dev-libs/gnutls )
+        kerberos? ( app-crypt/heimdal )
         ldap? ( net-directory/openldap )
         libusb? ( dev-libs/libusb:0.1 )
         pam? ( sys-libs/pam )
@@ -112,7 +113,7 @@ configure_one_multibuild() {
 
     [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
 
-    # XXX Enables: 'kerberos glssapi' slp
+    # XXX Enables: slp
     # XXX Withs: java php
     econf \
         --enable-jpeg \
@@ -132,6 +133,7 @@ configure_one_multibuild() {
         $(option_enable pam) \
         $(option_enable gnutls ssl) \
         $(option_enable !gnutls openssl) \
+        $(option_enable kerberos gssapi) \
         $(option_enable ldap) \
         $(option_enable libusb) \
         $(option_enable tcpd tcp-wrappers) \

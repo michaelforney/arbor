@@ -1,8 +1,6 @@
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-
 SUMMARY="Advanced POSIX 1003.1e capabilities library and tools"
 DESCRIPTION="
 The libcap-ng library is intended to make programming with POSIX capabilities
@@ -36,11 +34,4 @@ BUGS_TO="replica@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( debug python )
-
-src_prepare() {
-    # Add '-I..' to INCLUDES so `make check` can find cap-ng.h in build tree.
-    # Patch sent to maintainer.
-    edo sed -i -e '/^check_PROGRAMS/i\INCLUDES = -I. -I.. -I${top_srcdir}' src/test/Makefile.am
-    autotools_src_prepare
-}
 
