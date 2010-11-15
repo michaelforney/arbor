@@ -14,15 +14,16 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] mul
 
 export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
-SUMMARY="${PN} is a system and session manager for Linux"
+SUMMARY="${PN} is a(n) (init) system and session manager for Linux"
 DESCRIPTION="
-${PN} is a system and session manager for Linux, compatible with SysV and LSB
-init scripts. ${PN} provides aggressive parallelization capabilities, uses
-socket and D-Bus activation for starting services, offers on-demand starting of
-daemons, keeps track of processes using Linux cgroups, supports snapshotting and
-restoring of the system state, maintains mount and automount points and implements
-an elaborate transactional dependency-based service control logic. It can work as
-a drop-in replacement for sysvinit.
+${PN} is a(n) (init) system and session manager for Linux. It provides aggressive
+parallelization capabilities, uses socket and D-Bus activation for starting services,
+offers on-demand starting of daemons, keeps track of processes using Linux cgroups,
+supports snapshotting and restoring of the system state, maintains mount and
+automount points and implements an elaborate transactional dependency-based service
+control logic.
+SysVinit compatibility is deactivated in our package because we don't want it nor
+do we support it.
 "
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
 BUGS_TO="philantrop@exherbo.org"
