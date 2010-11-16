@@ -1,6 +1,8 @@
 # Copyright (c) 2007 Alexander Færøy <ahf@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 NTP_PNV="${PNV/_/}"
 
 SUMMARY="OpenNTPD is a free implementation of the Network Time Protocol"
@@ -29,15 +31,19 @@ src_install() {
     default
     rmdir "${IMAGE}"/var{/empty,}
 
+    install_systemd_files
+
     if option baselayout ; then
         newinitd "${FILES}/${PN}.rc" ${PN}
-        hereconfd "${PN}" <<EOF
+    fi
+
+    hereconfd "${PN}" <<EOF
 NTPD_HOME=/var/empty
 
 # See ntpd(8) man page ... some popular options:
 #  -s   Set the time immediately at startup
 NTPD_OPTS=""
 EOF
-    fi
+
 }
 
