@@ -2,17 +2,22 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require glib
+require glib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="doc fam man-pages"
+MYOPTIONS="
+    dbus [[ description = [ Build GDbus tests which require dbus ] ]]
+    doc
+    fam
+    man-pages
+"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext[>=0.11]
+        dev-doc/gtk-doc[>=1.15] [[ note = [ required for gtk-doc.m4 due to eautoreconf ] ]]
         dev-util/pkg-config[>=0.16]
-        doc? ( dev-doc/gtk-doc[>=1.15] )
         man-pages? ( dev-libs/libxslt
                      app-text/docbook-xml-dtd:4.1.2 )
     build+run:
@@ -22,15 +27,24 @@ DEPENDENCIES="
         dev-util/desktop-file-utils
         gnome-bindings/pygobject
         dev-python/dbus-python
+        dbus? ( sys-apps/dbus[>=1.2.14] )
     recommendation:
         gnome-desktop/dconf [[ note = [ required for gsettings ] ]]
     suggestion:
         gnome-desktop/gvfs
-        sys-apps/dbus
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.24.1-assert-test.patch )
-
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-2.24.1-assert-test.patch
+    "${FILES}"/${PNV}-optionalize-dbus-tests.patch
+)
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' 'fam' 'man-pages man' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
+
+# eautoreconf required for dbus tests patch
+src_prepare() {
+    default
+    eautoreconf
+}
 
