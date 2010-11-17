@@ -37,7 +37,7 @@ src_install() {
         newinitd "${FILES}/${PN}.rc" ${PN}
     fi
 
-    hereconfd "${PN}" <<EOF
+    hereconfd ${PN}.conf <<EOF
 NTPD_HOME=/var/empty
 
 # See ntpd(8) man page ... some popular options:
