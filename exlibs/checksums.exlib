@@ -16,7 +16,7 @@ exparam -v CHECKSUMS_SHA1 sha1[@]
 
 export_exlib_phases src_fetch_extra
 
-src_fetch_extra() {
+checksums_src_fetch_extra() {
     local x f s
     for x in "${CHECKSUMS_SHA1[@]}" ; do
         f="${x%=*}" ; s="${x#*=}"
