@@ -8,9 +8,7 @@ SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="
     dbus [[ description = [ Build GDbus tests which require dbus ] ]]
-    doc
-    fam
-    man-pages
+    fam  [[ description = [ Enable FAM support for file system monitoring ] ]]
 "
 
 DEPENDENCIES="
@@ -18,8 +16,6 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.11]
         dev-doc/gtk-doc[>=1.15] [[ note = [ required for gtk-doc.m4 due to eautoreconf ] ]]
         dev-util/pkg-config[>=0.16]
-        man-pages? ( dev-libs/libxslt
-                     app-text/docbook-xml-dtd:4.1.2 )
     build+run:
         fam? ( app-admin/gamin )
     test:
@@ -39,7 +35,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-optionalize-dbus-tests.patch
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' 'fam' 'man-pages man' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
 
 # eautoreconf required for dbus tests patch
