@@ -36,6 +36,7 @@ MYOPTIONS="
 DEPENDENCIES="
     build:
         dev-libs/libxslt
+        app-doc/gtk-doc-autotools[>=1.15-r1]
     build+run:
         extras? (
             dev-libs/libusb:0.1[>=0.1.12]
@@ -90,7 +91,7 @@ udev_pkg_pretend() {
 }
 
 udev_src_prepare() {
-    edo cp "${FILES}"/gtk-doc.make "${WORK}"
+    edo gtkdocize --copy
     autotools_src_prepare
 }
 
