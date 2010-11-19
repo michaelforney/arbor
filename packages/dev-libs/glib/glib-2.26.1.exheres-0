@@ -4,10 +4,12 @@
 
 require glib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
+# Regenerating autotools is required for the dbus tests patch
+
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="
-    dbus [[ description = [ Build GDbus tests which require dbus ] ]]
+    dbus [[ description = [ Build GDBus tests which require DBus ] ]]
     fam  [[ description = [ Enable FAM support for file system monitoring ] ]]
 "
 
@@ -16,6 +18,7 @@ DEPENDENCIES="
         app-doc/gtk-doc-autotools
         sys-devel/gettext[>=0.11]
         dev-util/pkg-config[>=0.16]
+        dbus? ( sys-apps/dbus[>=1.2.14] ) [[ note = [ only required for building a gdbus test ] ]]
     build+run:
         fam? ( app-admin/gamin )
     test:
@@ -23,11 +26,10 @@ DEPENDENCIES="
         dev-util/desktop-file-utils
         gnome-bindings/pygobject
         dev-python/dbus-python
-        dbus? ( sys-apps/dbus[>=1.2.14] )
     recommendation:
-        gnome-desktop/dconf [[ note = [ required for gsettings ] ]]
+        gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
     suggestion:
-        gnome-desktop/gvfs
+        gnome-desktop/gvfs  [[ description = [ Provides utilities and support for GIO ] ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
