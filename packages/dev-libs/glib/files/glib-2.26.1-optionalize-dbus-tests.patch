@@ -1,0 +1,44 @@
+Source: Brett Witherspoon <spoonb@exherbo.org>
+Upstream: Yes, submitted.
+Reason: Fix automagic dep on dbus. The GDbus test gdbus-serialization
+        was being built depending on the existence of dbus.
+
+---
+From b544a8d0b86af50d71a1fdfa7ed75c716d1cfe1d Mon Sep 17 00:00:00 2001
+From: Brett Witherspoon <spoonb@exherbo.org>
+Date: Tue, 16 Nov 2010 23:00:14 -0600
+Subject: [PATCH] Allow explicitly disabling tests which require dbus
+
+---
+ configure.ac |   15 +++++++++++----
+ 1 files changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 930bbdd..5e03f49 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -3619,10 +3619,17 @@ fi
+ # Check for libdbus1 - Optional - is only used in the GDBus test cases
+ #
+ # 1.2.14 required for dbus_message_set_serial
+-PKG_CHECK_MODULES(DBUS1,
+-                  dbus-1 >= 1.2.14,
+-                  [AC_DEFINE(HAVE_DBUS1, 1, [Define if dbus-1 is available]) have_dbus1=yes],
+-                  have_dbus1=no)
++AC_ARG_WITH(dbus,
++            [AC_HELP_STRING([--without-dbus],
++                            [do not build GDBus tests with require dbus [default=auto]])],,
++            [with_dbus=yes])
++
++AS_IF([test "x$with_dbus" = "xyes"],
++      [PKG_CHECK_MODULES(DBUS1,
++                        dbus-1 >= 1.2.14,
++                        [AC_DEFINE(HAVE_DBUS1, 1, [Define if dbus-1 is available]) have_dbus1=yes],
++                        have_dbus1=no)])
++
+ AC_SUBST(DBUS1_CFLAGS)
+ AC_SUBST(DBUS1_LIBS)
+ AM_CONDITIONAL(HAVE_DBUS1, [test "x$have_dbus1" = "xyes"])
+-- 
+1.7.3.2
+

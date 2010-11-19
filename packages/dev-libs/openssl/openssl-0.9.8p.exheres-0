@@ -58,5 +58,8 @@ install_one_multibuild() {
     emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANDIR=/usr/share/man install
     keepdir /etc/ssl/{certs,private}
     emagicdocs
+
+    # emake install installs to /usr/${LIBDIR} but creates /usr/lib/engines whenever it's run
+    [[ ${LIBDIR} != lib ]] && edo rmdir "${IMAGE}"/usr/lib/{engines/,}
 }
 

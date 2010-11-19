@@ -5,7 +5,7 @@
 
 require multilib
 
-export_exlib_phases src_install
+export_exlib_phases src_install pkg_postinst
 
 MY_PNV=${PNV/_pre/pre}
 
@@ -41,3 +41,6 @@ ccache_src_install() {
     keepdir /var/cache/ccache
 }
 
+ccache_pkg_postinst() {
+    edo chown paludisbuild:paludisbuild /var/cache/ccache
+}

@@ -15,7 +15,8 @@ MYOPTIONS="platform: ppc64 multibuild_c: 32 64"
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-CFLAGS.patch
+    "${FILES}"/${PN}-0.9.8o-CFLAGS.patch
+    "${FILES}"/${PNV}-tests.patch
 )
 # Tests don't run in parallel
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
@@ -58,8 +59,5 @@ install_one_multibuild() {
     emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANDIR=/usr/share/man install
     keepdir /etc/ssl/{certs,private}
     emagicdocs
-
-    # emake install installs to /usr/${LIBDIR} but creates /usr/lib/engines whenever it's run
-    [[ ${LIBDIR} != lib ]] && edo rmdir "${IMAGE}"/usr/lib/{engines/,}
 }
 

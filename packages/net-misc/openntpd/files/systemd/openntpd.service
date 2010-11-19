@@ -1,0 +1,10 @@
+[Unit]
+Description=OpenNTP Daemon
+
+[Service]
+EnvironmentFile=/etc/conf.d/openntpd.conf
+ExecStart=/usr/sbin/ntpd -d $NTPD_OPTS
+StandardOutput=syslog
+
+[Install]
+WantedBy=multi-user.target
