@@ -1,13 +1,15 @@
 # Copyright 2010 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'gtk-doc-am-1.15.ebuild' from Gentoo, which is:
+#     Copyright 1999-2010 Gentoo Foundation
 
-MY_PN="${PN%-*}"
+MY_PN="gtk-doc"
 MY_PNV="${MY_PN}-${PV}"
 
-SUMMARY="Autotools macros and utilities from gtk-doc"
+SUMMARY="Macros and utilities used by autotools from gtk-doc"
 DESCRIPTION="
-This package installs m4 macros and utilities from the gtk-doc package that are
-used by autotools based build systems that install gtk-doc documentation.
+This package installs macros and utilities from the gtk-doc package that are
+used by autotools based build systems that use gtk-doc documentation.
 "
 HOMEPAGE="http://www.gtk.org/gtk-doc/"
 DOWNLOADS="mirror://gnome/sources/${MY_PN}/$(ever range 1-2)/${MY_PNV}.tar.bz2"
@@ -27,13 +29,13 @@ DEPENDENCIES="
         dev-util/pkg-config[>=0.19]
     build+run:
         !dev-doc/gtk-doc[<=1.15-r1] [[
-            description = [ these versions install the same files ]
+            description = [ These versions install the same files ]
             resolution = uninstall-blocked-after
         ]]
         dev-lang/perl:=[>=5.6]
 "
 
-RESTRICT="test" # we don't build anything so don't run tests
+RESTRICT="test" # we don't build anything so we can't run tests
 
 WORK="${WORKBASE}/${MY_PNV}"
 
@@ -43,9 +45,12 @@ src_compile() {
 
 src_install() {
     exeinto /usr/bin/
-    doexe gtkdoc-rebase
+    doexe gtkdoc-rebase gtkdocize
 
     insinto /usr/share/aclocal/
     doins gtk-doc.m4
+
+    insinto /usr/share/gtk-doc/data/
+    doins gtk-doc.make gtk-doc.notmpl.make
 }
 
