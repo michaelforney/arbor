@@ -4,18 +4,14 @@
 
 require multilib
 
-MY_PNV="${PNV/_/-}"
-
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://userweb.kernel.org/~kzak/util-linux-ng/"
-DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${MY_PNV}.tar.bz2"
 
 UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}-ChangeLog"
 
-LICENCES="GPL-2 GPL-3"
+LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
-PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="pam"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
@@ -24,14 +20,21 @@ DEPENDENCIES="
         dev-lang/perl:*
         sys-fs/udev[>=112]
         sys-libs/ncurses[>=5.6]
+        sys-libs/pam
         sys-libs/zlib
-        pam? ( sys-libs/pam )
 "
 
-WORK="${WORKBASE}/${MY_PNV}"
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-cramfs' '--enable-libblkid' '--enable-nls' '--without-selinux' "--libdir=/$(get_libdir)" )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --libdir=/$(get_libdir)
+    --enable-cramfs
+    --enable-libblkid
+    --enable-libmount
+    --enable-nls
+    --enable-partx
+    --with-pam
+    --without-utempter
+    --without-selinux
+)
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
