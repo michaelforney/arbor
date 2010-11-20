@@ -12,7 +12,7 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib alternatives bash-completion
 
-export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
 
 SUMMARY="${PN} is a(n) (init) system and session manager for Linux"
 DESCRIPTION="
@@ -79,7 +79,10 @@ DEPENDENCIES="
 
 if ever is_scm || [[ ${PV} == 11_p20101115 ]]; then
     DEPENDENCIES+="
+        build:
             dev-lang/vala:0.12
+        run:
+            sys-apps/util-linux-ng[>=2.18_p20101120]
     "
 fi
 
@@ -125,6 +128,16 @@ systemd_src_prepare() {
     edo sed -i -e "/systemgeneratordir=/s:lib:$(get_libdir):" Makefile.am
 
     autotools_src_prepare
+}
+
+systemd_src_configure() {
+    # The vala check in configure.ac needs proper fixing but I can't get it right,
+    # so I'm cheating here:
+    if ! ever is_scm ; then
+        export VALAC="/bin/true"
+    fi
+
+    default
 }
 
 systemd_src_install() {
@@ -202,6 +215,11 @@ LC_TELEPHONE=C
 LC_MEASUREMENT=C
 LC_IDENTIFICATION=C
 LC_ALL=
+EOF
+
+    hereins os-release <<EOF
+PRETTY_NAME="Exherbo Linux"
+ANSI_COLOR="0;32"
 EOF
 
     # keepdir some stuff

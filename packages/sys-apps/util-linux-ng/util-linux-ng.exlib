@@ -4,18 +4,14 @@
 
 require easy-multibuild
 
-MY_PNV="${PNV/_/-}"
-
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://userweb.kernel.org/~kzak/util-linux-ng/"
-DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${MY_PNV}.tar.bz2"
 
 UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}-ChangeLog"
 
-LICENCES="GPL-2 GPL-3"
+LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
-PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="pam multibuild_c: 32 64"
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -34,6 +30,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
     econf '--enable-cramfs' '--enable-libblkid' '--enable-nls' \
-    '--without-selinux' "--libdir=/${LIBDIR}" $(option_with pam)
+    '--without-selinux' "--libdir=/${LIBDIR}" '--enable-libmount' \
+    '--enable-partx' '--without-utempter' '--enable-pam'
 }
 
