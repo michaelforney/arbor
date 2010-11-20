@@ -1,10 +1,9 @@
-# Copyright 2008, 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2008-2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge [ suffix=tar.gz project=xmlstar ] \
-        autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require sourceforge [ suffix=tar.gz project=xmlstar ]
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_install
 
 SUMMARY="Command line tools to transform, query, validate, and edit XML documents"
 DESCRIPTION="
@@ -17,7 +16,6 @@ tr/diff/patch.
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
 
-UPSTREAM_RELEASE_NOTES="http://sourceforge.net/forum/forum.php?forum_id=453900"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.php [[ lang = en ]]"
 
 LICENCES="MIT"
@@ -37,13 +35,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-libxml-prefix=/usr
     --with-libxslt-prefix=/usr
 )
-
-xmlstarlet_src_prepare() {
-    # We force libxslt[crypt] so we need to link against libgcrypt here, too.
-    edo sed -i -e '/LIBXSLT_LIBS=/s:\(-lpthread\):\1 -lgcrypt:' configure.in
-
-    autotools_src_prepare
-}
 
 xmlstarlet_src_install() {
     default
