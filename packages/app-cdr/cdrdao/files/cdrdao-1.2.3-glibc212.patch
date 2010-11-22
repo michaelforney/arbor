@@ -1,0 +1,17 @@
+Source: http://cdrdao.cvs.sourceforge.net/viewvc/cdrdao/cdrdao/dao/ScsiIf-linux.cc?r1=1.9&r2=1.10
+Upstream: yes
+Reason: Build with glibc-2.12
+
+
+--- dao/ScsiIf-linux.cc	2009/09/28 10:12:03	1.9
++++ dao/ScsiIf-linux.cc	2010/08/06 12:20:46	1.10
+@@ -19,6 +19,9 @@
+ 
+ #include <config.h>
+ 
++#include <sys/types.h>
++#include <sys/stat.h>
++
+ #include <stdio.h>
+ #include <fcntl.h>
+ #include <unistd.h>
