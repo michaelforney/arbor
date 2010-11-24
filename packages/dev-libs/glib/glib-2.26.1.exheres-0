@@ -11,6 +11,7 @@ PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="
     dbus [[ description = [ Build GDBus tests which require DBus ] ]]
     fam  [[ description = [ Enable FAM support for file system monitoring ] ]]
+    gtk-doc
 "
 
 DEPENDENCIES="
@@ -19,6 +20,7 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.11]
         dev-util/pkg-config[>=0.16]
         dbus? ( sys-apps/dbus[>=1.2.14] ) [[ note = [ only required for building a gdbus test ] ]]
+        gtk-doc? ( dev-dev/gtk-doc[>=1.15] )
     build+run:
         fam? ( app-admin/gamin )
     test:
@@ -37,6 +39,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-optionalize-dbus-tests.patch
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
 
