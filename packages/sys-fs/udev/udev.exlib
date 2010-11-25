@@ -25,6 +25,7 @@ LICENCES="( GPL-2 LGPL-2 )"
 SLOT="0"
 
 MYOPTIONS="
+    baselayout
     extras [[ description = [ Extras for mobile devices (and then some), e. g. special keymaps ] ]]
     glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
     gobject-introspection [[ requires = [ glib ] ]]
@@ -129,16 +130,18 @@ EOT
     # }}}
 
     # baselayout init scripts {{{
-    doinitd "${FILES}"/udev-postmount
+    if option baselayout; then
+        doinitd "${FILES}"/udev-postmount
 
-    insinto /$(get_libdir)/rcscripts/addons
+        insinto /$(get_libdir)/rcscripts/addons
 
-    doins "${FILES}"/udev-start.sh
-    doins "${FILES}"/udev-stop.sh
+        doins "${FILES}"/udev-start.sh
+        doins "${FILES}"/udev-stop.sh
 
-    edo sed -e "s,@@libdir@@,$(get_libdir),g"                           \
-            -i "${IMAGE}"/$(get_libdir)/rcscripts/addons/udev-start.sh  \
-            -i "${IMAGE}"/$(get_libdir)/rcscripts/addons/udev-stop.sh
+        edo sed -e "s,@@libdir@@,$(get_libdir),g"                           \
+                -i "${IMAGE}"/$(get_libdir)/rcscripts/addons/udev-start.sh  \
+                -i "${IMAGE}"/$(get_libdir)/rcscripts/addons/udev-stop.sh
+    fi
     # }}}
 }
 
