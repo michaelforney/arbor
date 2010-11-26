@@ -1,0 +1,44 @@
+Title: Switch to new profiles structure
+Author: Kim Højgaard-Hansen <kimrhh@exherbo.org>
+Content-Type: text/plain
+Posted: 2010-11-25
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Profile: default-linux/amd64/2007.0/desktop/
+Display-If-Profile: default-linux/amd64/2007.0/server/
+Display-If-Profile: default-linux/amd64/
+Display-If-Profile: default-linux/x86/2007.0/desktop/ 
+Display-If-Profile: default-linux/x86/2007.0/server/
+Display-If-Profile: default-linux/x86/
+Display-If-Profile: default-linux/ia64/2007.0/desktop/ 
+Display-If-Profile: default-linux/ia64/2007.0/server/
+Display-If-Profile: default-linux/ia64/
+Display-If-Profile: default-linux/ppc64/
+Display-If-Profile: x86_64-pc-linux-gnu/
+
+New profiles were pushed to arbor on 2010-02-23, and it's now time to 
+remove the old profiles. You are currently using one of the old profiles
+and should switch to one from the new structure instead.
+
+The new profiles structure looks like this:
+
+    profiles/
+        amd64/
+            desktop/
+        arm/
+            desktop/
+        ia64/
+            desktop/
+        ppc64/
+            desktop/
+        x86/
+            desktop/
+
+All the desktop subprofiles refer to the top-level desktop profile so:
+    profiles = ${location}/profiles/amd64 ${location}/profiles/desktop
+is equivalent to
+    profiles = ${location}/profiles/amd64/desktop
+
+For users of the multilib branch the amd64/multilib profiles will replace the 
+old x86_64-pc-linux-gnu for now.
+
