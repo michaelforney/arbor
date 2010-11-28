@@ -1,7 +1,7 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu
+require gnu flag-o-matic
 
 SUMMARY="AutoGen is a tool designed to simplify the creation and maintenance of programs that contain large amounts of repetitious text"
 
@@ -15,4 +15,10 @@ DEPENDENCIES="
         dev-lang/guile:1.8
         dev-libs/libxml2
 "
+
+pkg_setup() {
+    # Work around https://sourceforge.net/tracker/?func=detail&aid=3112570&group_id=3593&atid=103593
+    append-flags -O0
+}
+
 
