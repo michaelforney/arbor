@@ -10,6 +10,7 @@ HOMEPAGE="http://linux-usb.sourceforge.net"
 DOWNLOADS="mirror://kernel/linux/utils/usb/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
+SLOT="0"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -26,11 +27,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --datadir=/usr/share/misc
     --disable-zlib
 )
-
-src_prepare() {
-    edo sed -i -e '/^pkgconfigdir/s:datadir:datarootdir:' Makefile.in
-    default
-}
 
 src_install() {
     default
