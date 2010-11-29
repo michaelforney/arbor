@@ -145,40 +145,18 @@ src_install() {
         pamd_mimic_system cups auth account
     fi
 
-    # add init.d dependencies to the cups init script
-    local neededservices=
-    option dbus && neededservices+=" dbus"
+    if option baselayout ; then
+        # add init.d dependencies to the cups init script
+        local neededservices=
+        option dbus && neededservices+=" dbus"
 
-    [[ -n "${neededservices}" ]] && neededservices="need${neededservices}"
+        [[ -n "${neededservices}" ]] && neededservices="need${neededservices}"
+
+        newinitd "${FILES}"/cupsd.initd cupsd
+        edo sed "s:\$neededservices:$neededservices:" -i "${IMAGE}"/etc/init.d/cupsd
+    fi
 
     install_systemd_files
-
-#   WTF, Timo/tgurr?! Please, next time you're in here, make an external init
-#   script (in ${FILES}) instead of creating a huge inline mess.
-    if option baselayout ; then
-        hereinitd cupsd <<EOF
-#!/sbin/runscript
-
-depend() {
-    use net
-    $neededservices
-    before nfs
-    after logger
-}
-
-start() {
-    ebegin "Starting cupsd"
-    start-stop-daemon --start --quiet --exec /usr/sbin/cupsd
-    eend \$?
-}
-
-stop() {
-    ebegin "Stopping cupsd"
-    start-stop-daemon --stop --quiet --exec /usr/sbin/cupsd
-    eend \$?
-}
-EOF
-    fi
 
     echo "ServerName /var/run/cups/cups.sock" >> "${IMAGE}"/etc/cups/client.conf
 }
