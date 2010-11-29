@@ -1,7 +1,7 @@
 # Copyright 2007-2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require python
+require python autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="XML C Parser and Toolkit v2"
 HOMEPAGE="http://www.xmlsoft.org/"
@@ -30,7 +30,8 @@ DEPENDENCIES="
         readline? ( sys-libs/readline )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--with-threads' '--enable-ipv6' )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-Reactivate-the-shared-library-versionning-script.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-threads --enable-ipv6 --without-icu )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python readline "readline history" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
 
@@ -44,6 +45,7 @@ src_unpack() {
 
 src_prepare() {
     edo ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/
+    autotools_src_prepare
 }
 
 src_install() {
