@@ -25,7 +25,9 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}/${PNV}-sni.patch"
-    "${FILES}/${PNV}-sae.patch"
+    -p1 "${FILES}/${PNV}-debug-tests.patch"
+    -p0 "${FILES}/${PNV}-CVE-2010-2252.patch"
+    -p0 "${FILES}/${PNV}-sae.patch"
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
