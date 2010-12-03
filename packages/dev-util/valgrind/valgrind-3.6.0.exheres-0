@@ -18,8 +18,6 @@ MYOPTIONS="platform: amd64"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-glibc-2.11.patch )
-
 src_prepare() {
     edo sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
     edo sed -e "s:doc/${PN}:doc/${PNV}:" -i docs/Makefile.am

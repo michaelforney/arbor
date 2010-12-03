@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require glibc [ source_uri="mirror://gnu/${PN}/${PNV}.tar.xz" libidn_uri= \
-                ports_uri= ]
+                ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2" ]
 
-# FIXME: ~arm dropped until there is a glibc-ports tarball
+# FIXME: ~arm dropped pending testing
 # FIXME: ~ia64, ~ppc64, and ~x86" have not been tested
 PLATFORMS="~amd64"
 
@@ -20,6 +20,7 @@ src_prepare() {
     edo cd "${ECONF_SOURCE}"
     expatch -p0 "${FILES}"/${PN}-2.11.2-i686.patch
     expatch -p0 "${FILES}"/${PN}-2.11.2-make-3.82.patch
+    expatch -p1 "${FILES}"/${PN}-2.12-static-glro-init.patch
     glibc_src_prepare
 }
 

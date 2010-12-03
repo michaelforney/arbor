@@ -18,6 +18,7 @@ DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 
 src_prepare() {
     sed -i -e '/^prefix/s:/usr/local:/usr:' \
-           -e "/^docdir/s:${PN}:${PNVR}:" Makefile
+           -e "/^docdir/s:${PN}:${PNVR}:" \
+           -e "/^PROGRAMS !=/d" Makefile
 }
 

@@ -9,20 +9,17 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] 
 PARCH=${PNV/_/}
 
 X509_VERSION="6.2.3" X509_PATCH="${PARCH}+x509-${X509_VERSION}.diff.gz"
-HPN_PATCH="${PARCH}-hpn13v6.diff.gz"
 
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
 HOMEPAGE="http://www.openssh.org/"
 DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
     X509? ( http://roumenpetrov.info/${PN}/x509-${X509_VERSION}/${X509_PATCH} )
 "
-#   hpn? ( http://www.psc.edu/networking/projects/hpn-ssh/${HPN_PATCH} )
 
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="baselayout pam tcpd X
-    hpn  [[ description = [ Enable high performance ssh ] ]]
     gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
     X509 [[ description = [ Adds support for X.509 certificate authentication ] ]]
 "
@@ -46,16 +43,6 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${PARCH}"
 
-pkg_pretend() {
-    local err=()
-    option hpn && err+=( "option=hpn: HPN patch disabled for ${PNVR}: No patch is available for this version" )
-    if (( ${#err} )) ; then
-        ewarn "Following options are disabled in this release:"
-        ewarn "${err[@]/#/$'\n'}"
-        die "Mask ${PNVR} or disable all of the above options"
-    fi
-}
-
 src_prepare() {
     edo sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h
 
@@ -65,10 +52,6 @@ src_prepare() {
         expatch \
             -p1 "${WORKBASE}/${X509_PATCH%.gz}" \
             -p0 "${FILES}/${PN}-4.7_p1-GSSAPI-dns.patch"
-    fi
-
-    if [[ -n ${HPN_PATCH} ]] && option hpn ; then
-        expatch -p1 "${WORKBASE}/${HPN_PATCH%.gz}"
     fi
 
     edo sed -i "s:-lcrypto:$(pkg-config --libs openssl):" configure.ac
