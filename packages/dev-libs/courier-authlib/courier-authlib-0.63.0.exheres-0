@@ -1,0 +1,55 @@
+# Copyright 2010 Alex Elsayed <eternaleye@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ project=courier ]
+
+SUMMARY="A generic authentication API that encapsulates the process of validating account passwords."
+DESCRIPTION="
+In addition to reading the traditional account passwords from /etc/passwd, the account information
+can alternatively be obtained from an LDAP directory; a MySQL or a PostgreSQL database; or a GDBM
+or DB file.
+"
+HOMEPAGE="http://www.courier-mta.org/authlib/"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    daemon   [[ description = [ Also build all auth modules into a daemon to mux authentications ] ]]
+    ldap
+    mysql    [[ description = [ Support using MySQL for mail user authentication ] ]]
+    postgres [[ description = [ Support using PostgreSQL for mail user authentication ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*
+    build+run:
+        dev-libs/gmp
+        dev-libs/openssl[>=0.9.6]
+        net-libs/cyrus-sasl
+        sys-libs/gdbm
+        ldap? ( net-directory/openldap )
+        mysql? ( dev-db/mysql )
+        postgres? ( dev-db/postgresql )
+    run:
+        user/courier
+        group/courier
+    suggestion:
+        dev-tcl/expect [[ description = [ Support for changing passwords in Courier's web UI ] ]]
+"
+
+BUGS_TO="Alex Elsayed <eternaleye@gmail.com>"
+
+src_configure() {
+    econf --with-authpam --with-authpwd --with-authshadow --with-authpipe \
+        --with-mailuser=courier --with-mailgroup=courier --with-authuserdb --with-db=gdbm \
+        $(option_with daemon authdaemon) $(option_with ldap authldap) \
+        $(option_with mysql authmysql) $( option_with postgres authpgsql)
+}
+
+src_install() {
+    default
+    keepdir /var/lib/spool/authdaemon
+}
+

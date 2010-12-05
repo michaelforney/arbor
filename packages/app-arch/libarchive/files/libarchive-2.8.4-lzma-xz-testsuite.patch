@@ -1,0 +1,34 @@
+From: Timo Gurr <tgurr@exherbo.org>
+Reason: Don't fail tests if test files compressed with level 0 are smaller than compressed with default compression level.
+Upstream: Reported (http://code.google.com/p/libarchive/issues/detail?id=122)
+
+diff -Naur libarchive-2.8.4/libarchive/test/test_write_compress_lzma.c libarchive-2.8.4.new//libarchive/test/test_write_compress_lzma.c
+--- libarchive-2.8.4/libarchive/test/test_write_compress_lzma.c	2010-03-07 19:07:31.000000000 +0100
++++ libarchive-2.8.4.new//libarchive/test/test_write_compress_lzma.c	2010-12-03 21:42:14.136046000 +0100
+@@ -185,11 +185,6 @@
+ 	archive_write_close(a);
+ 	assert(0 == archive_write_finish(a));
+ 
+-	/* Level 0 really does result in larger data. */
+-	failure("Compression-level=0 wrote %d bytes; default wrote %d bytes",
+-	    (int)used2, (int)used1);
+-	assert(used2 > used1);
+-
+ 	assert((a = archive_read_new()) != NULL);
+ 	assertA(0 == archive_read_support_format_all(a));
+ 	assertA(0 == archive_read_support_compression_all(a));
+diff -Naur libarchive-2.8.4/libarchive/test/test_write_compress_xz.c libarchive-2.8.4.new//libarchive/test/test_write_compress_xz.c
+--- libarchive-2.8.4/libarchive/test/test_write_compress_xz.c	2010-03-07 19:07:31.000000000 +0100
++++ libarchive-2.8.4.new//libarchive/test/test_write_compress_xz.c	2010-12-03 21:42:37.320046000 +0100
+@@ -193,11 +193,6 @@
+ 	archive_write_close(a);
+ 	assert(0 == archive_write_finish(a));
+ 
+-	/* Level 0 really does result in larger data. */
+-	failure("Compression-level=0 wrote %d bytes; default wrote %d bytes",
+-	    (int)used2, (int)used1);
+-	assert(used2 > used1);
+-
+ 	assert((a = archive_read_new()) != NULL);
+ 	assertA(0 == archive_read_support_format_all(a));
+ 	assertA(0 == archive_read_support_compression_all(a));

@@ -1,0 +1,197 @@
+# Copyright 2010 Alex Elsayed <eternaleye@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'courier-0.65.0.ebuild', which is:
+#     Copyright 1999-2010 Gentoo Foundation 
+
+require sourceforge
+
+# Tests are known to upstream to fail
+RESTRICT="test"
+
+SUMMARY="A powerful and configurable MTA which uses maildirs"
+DESCRIPTION="
+The Courier mail transfer agent (MTA) is an integrated mail/groupware server based on open
+commodity protocols, such as ESMTP, IMAP, POP3, LDAP, SSL, and HTTP. Courier provides ESMTP,
+IMAP, POP3, webmail, and mailing list services within a single, consistent, framework.
+Individual components can be enabled or disabled at will. The Courier mail server now
+implements basic web-based calendaring and scheduling services integrated in the webmail
+module. Advanced groupware calendaring services will follow soon.
+"
+HOMEPAGE="http://www.courier-mta.org"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64"
+# OpenSSL is automagic, but disabled if gnutls is enabled. So, require exactly one
+MYOPTIONS="
+    idn        [[ description = [ Support internationalized domain names ] ]]
+    ipv6
+    ldap       [[ description = [ Support aliases and contact books from LDAP ] ]]
+    nls
+    paranoid   [[
+                  requires = [ courier_modules: esmtp ]
+                  description = [ Be paranoid about advertising SMTP extensions ]
+               ]]
+    smap       [[ description = [ Support the Simple Mail Access Protocol ] ]]
+    socks      [[ description = [ Support sending all traffic via socks proxies ] ]]
+    spell      [[ description = [ Support spelling correction in webmail ] ]]
+    ssl
+    gnutls
+    trashquota [[ description = [ Count deleted messages as part of the quota ] ]]
+    ( ssl gnutls ) [[ number-selected = exactly-one ]]
+
+    courier_modules:
+    dsn        [[
+                  requires = [ courier_modules: esmtp ]
+                  description = [ Support the Delivery Status Notification SMTP extension ]
+               ]]
+    esmtp      [[ description = [ Send mail via SMTP ] ]]
+    fax        [[ description = [ Send faxes via email ] ]]
+    local      [[ description = [ Deliver mail to local users ] ]]
+    uucp       [[ description = [ Send mail over UUCP ] ]]
+"
+
+DEPENDENCIES="
+    build:
+    build+run:
+        app-admin/gamin
+        app-crypt/gnupg
+        dev-lang/perl:*
+        dev-libs/pcre
+        sys-libs/db
+        sys-process/procps
+        courier_modules:fax? (
+            media-libs/netpbm
+            net-dialup/mgetty
+            app-text/ghostscript
+        )
+        gnutls? ( dev-libs/gnutls )
+        ldap? ( net-directory/openldap )
+        nls? (
+            text-libs/libiconv
+            sys-devel/gettext
+        )
+        socks? ( dev-libs/courier-sox )
+        spell? ( app-spell/aspell )
+        ssl? ( dev-libs/openssl )
+    run:
+        group/mail
+        group/courier
+        user/courier
+"
+
+BUGS_TO="Alex Elsayed <eternaleye@gmail.com>"
+
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( webmail courier/doc )
+
+pkg_pretend() {
+    elog "Courier will NOT be ready to run immediately after installation!"
+    elog "You will need to copy several pam files into place (/usr/lib/courier/etc/*.authpam)"
+    elog "Please see http://www.courier-mta.org/install.html#postinst and the subsequent"
+    elog "sections for further post-install setup."
+}
+
+src_configure() {
+    local modules;
+    if option courier_modules:dsn; then
+        modules="dsn"
+    fi
+
+    if option courier_modules:esmtp; then
+        modules+=" esmtp"
+    fi
+
+    if option courier_modules:fax; then
+        modules+=" fax"
+    fi
+
+    if option courier_modules:local; then
+        modules+=" local"
+    fi
+
+    if option courier_modules:uucp; then
+        modules+=" uucp"
+    fi
+
+# NOTE: --enable-https=auto does NOT do anything automagic - it merely makes webmail generate https:// urls
+#       based on the current url, rather than unconditionally or not at all
+# NOTE: --with-dirsync tries to call non-existent std::string::ReverseFind in courier/setup2.C
+    econf \
+        --disable-rpath \
+        --enable-autorenamesent \
+        --enable-crlf-term=1 \
+        --enable-https=auto \
+        --enable-keep-fromline=1 \
+        --enable-mimecharset=utf8 \
+        --enable-mimecharset=utf8 \
+        --enable-mimecharset=utf8 \
+        --enable-restrict-trusted=1 \
+        --enable-static=no \
+        --enable-syslog=1 \
+        --enable-trusted-groups=mail \
+        --enable-use-flock=1 \
+        --enable-workarounds-for-imap-client-bugs \
+        --with-alias \
+        --with-calendardir=/var/spool/courier-calendar \
+        --with-calendarpurge=30 \
+        --with-certdb=/etc/ssl/certs \
+        --with-certsdir=/var/lib/courier/certs \
+        --with-db=gdbm \
+        --with-defaultlang=en \
+        --with-explicitsync \
+        --with-formdata \
+        --with-gzip \
+        --with-mailer=sendmail \
+        --with-mailgroup=courier \
+        --with-mailuser=courier \
+        --with-perlfilter \
+        --with-piddir=/var/run/courier \
+        --with-pthreads \
+        --with-qdircount=100 \
+        --with-random=/dev/urandom \
+        --with-spipe=socketpair \
+        --with-threads=posix \
+        --with-transport="$modules" \
+        --with-waitfunc=wait3 \
+        --without-dirsync \
+        --without-included-gettext \
+        --without-libcharset \
+        --without-tcpddns \
+        $(option_enable nls) \
+        $(option_with gnutls) \
+        $(option_with idn libidn) \
+        $(option_with ipv6 ) \
+        $(option_with spell ispell aspell) \
+        $(option_with ldap ldapaddressbook) \
+        $(option_with ldap ldapaliasd) \
+        $(option_with smap) \
+        $(option_with socks) \
+        $(option_with trashquota) \
+        --datadir=/usr/share/courier \
+        --localstatedir=/var/lib/courier \
+        --sysconfdir=/etc/courier
+    # This is the one line from the Gentoo ebuild, fixing Gentoo bug #73468
+    edo sed -e'/^install-perms-local:/a\	sed -e\"s|^|'"${IMAGE}"'|g\" -i permissions.dat' -i Makefile 
+}
+
+src_install() {
+    # For some reason the Makefile doing this itself doesn't work
+    edo chmod +x courier/setperms.sh
+    edo chmod +x courier/perms.sh
+    default
+    sleep 1
+    emake DESTDIR="${IMAGE}" install-configure
+    keepdir \
+        /var/spool/courier-calendar/{public,private,localcache} \
+        /var/lib/courier/{webmail-logincache,filters,allfilters,tmp,track,msgs,msgq} \
+        /var/run/courier \
+        /etc/courier/{webadmin/added,webadmin/removed,filters/active,shared,shared.tmp,aliasdir}
+    if option courier_modules:fax; then
+        keepdir /var/lib/courier/faxtmp
+    fi
+    if option courier_modules:esmtp; then
+        keepdir /etc/courier/esmtpacceptmailfor.dir
+        keepdir /etc/courier/esmtppercentrelay.dir
+    fi
+}
+
