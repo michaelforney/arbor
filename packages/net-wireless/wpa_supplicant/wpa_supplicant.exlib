@@ -27,24 +27,30 @@ fi
 LICENCES="|| ( BSD GPL-2 )"
 SLOT="0"
 
-#TODO:
-# docbook2{pdf,man,html} in doc/docbook
-# doxygen in doc
-# pcsc support testing needed, once available
 MYOPTIONS="
-    dbus     [[ description = [ Enable the DBus control interface                       ] ]]
-    debug    [[ description = [ Support printing out debug message to stdout and a file ] ]]
-    nl80211  [[ description = [ Support the new 802.11 netlink interface                ] ]]
-    pcap     [[ description = [ Use libdnet and libpcap for Layer 2 processing          ] ]]
+    dbus     [[ description = [ Enable the DBus control interface                    ] ]]
+    debug    [[ description = [ Support printing out debug message to stdout         ] ]]
+    eap-fast [[ description = [
+        Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
+        implementation
+    ] ]]
+    nl80211  [[ description = [ Support the new 802.11 netlink interface             ] ]]
+    pcap     [[ description = [
+        Use libdnet/libpcap for Layer 2 processing instead of Linux packet sockets
+    ] ]]
     pcsc     [[ description = [
         Include GSM SIM/USIM interface for GSM/UMTS authentication algorithm (for EAP-SIM/EAP-AKA)
     ] ]]
-    qt4      [[ description = [ Build the Qt4-based wpa_gui program                     ] ]]
-    readline [[ description = [ Use readline for line processing in wpa_cli             ] ]]
+    qt4      [[ description = [ Build the Qt4-based wpa_gui program                  ] ]]
+    readline [[ description = [ Use readline for line editing and history in wpa_cli ] ]]
 
     (
-        gnutls [[ description = [ Use GnuTLS for TLS connections  ] ]]
-        ssl    [[ description = [ Use OpenSSL for TLS connections ] ]]
+        gnutls [[ description = [
+            Use GnuTLS for TLS connections instead of internal implementation
+        ] ]]
+        ssl    [[ description = [
+            Use OpenSSL for TLS connections instead of internal implementation
+        ] ]]
     ) [[ number-selected = at-most-one ]]
 "
 
@@ -53,26 +59,40 @@ DEPENDENCIES="
         dbus? ( dev-util/pkg-config )
 
     build+run:
-        dbus?     ( sys-apps/dbus       )
-        gnutls?   ( dev-libs/gnutls     )
-        nl80211?  ( net-libs/libnl      )
-        pcap?     (
+        dbus?     ( sys-apps/dbus )
+        eap-fast? (
+            ssl? ( dev-libs/openssl[>=0.9.9] )
+        )
+        gnutls?  ( dev-libs/gnutls )
+        nl80211? ( net-libs/libnl  )
+        pcap?    (
             dev-libs/libdnet
             dev-libs/libpcap
         )
-        pcsc?     ( sys-apps/pcsc-lite  )
-        qt4?      ( x11-libs/qt:4       )
+        pcsc?     ( sys-apps/pcsc-lite )
+        qt4?      ( x11-libs/qt:4      )
         readline? (
             sys-libs/ncurses
             sys-libs/readline
         )
-        ssl?      ( dev-libs/openssl    )
+        ssl? ( dev-libs/openssl )
 
-        !gnutls?  (
+        !gnutls? (
             !ssl? ( dev-libs/libtommath )
         )
 "
 
+if ever is_scm ; then
+DEPENDENCIES+="
+    build:
+        app-text/docbook-sgml-dtd:4.1
+        app-text/docbook-utils
+"
+fi
+
+# FIXME: Tests don't seem to get along with external crypto -- needs further
+# investigation. Be sure to uncomment *all* test-related code below when this
+# is resolved.
 RESTRICT="test"
 
 WORK=${WORKBASE}/${PNV}/${PN}
@@ -81,6 +101,7 @@ DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/$(get_libdi
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( eap_testing.txt wpa_supplicant.conf )
 
+# Enable CONFIG_* options
 config_enable() {
     for config in ${@} ; do
         local str="CONFIG_${config}"
@@ -90,12 +111,14 @@ config_enable() {
     done
 }
 
+# Enable CONFIG_DRIVER_* options
 config_enable_driver() {
     for driver in ${@} ; do
         config_enable "DRIVER_${driver}"
     done
 }
 
+# Enable CONFIG_EAP_* options
 config_enable_eap() {
     for eap in ${@} ; do
         config_enable "EAP_${eap}"
@@ -105,72 +128,88 @@ config_enable_eap() {
 src_prepare() {
     default
     edo sed -i -e 's:/usr/local/sbin/:/usr/bin/:g' Makefile
+
+    # FILES is a reserved exheres-0 variable
+    ever is_scm && edo sed -i -e 's:FILES:DOC_FILES:g' doc/docbook/Makefile
 }
 
 src_configure() {
     config_enable \
-        AUTHENTICATOR \
-        CLIENT_MLME \
+        BACKEND=file \
         CTRL_IFACE=unix \
+        ELOOP=eloop \
         IEEE80211R \
-        IPV6 \
+        IEEE8021X_EAPOL \
+        MAIN=main \
+        OS=unix \
         PEERKEY \
         PKCS12 \
-        RADIUS_CLIENT \
-        SIM_SIMULATOR \
-        USIM_SIMULATOR \
-        WPA_AUTHENTICATOR \
         WPS
-
-    # Enable mitigation against certain attacks against TKIP by delaying Michael
-    # MIC error reports by a random amount of time between 0 and 60 seconds
-    #config_enable DELAYED_MIC_ERROR_REPORT
 
     option dbus     && config_enable CTRL_IFACE_DBUS
     option debug    && config_enable DEBUG_FILE ||
                        config_enable NO_STDOUT_DEBUG
     option pcap     && config_enable L2_PACKET=pcap ||
                        config_enable L2_PACKET=linux
-    option pcsc     && config_enable PCSC
     option readline && config_enable READLINE
 
-    # EAP_FAST only works with OpenSSL-0.9.9 or private implementation
+    # EAP_AKA, EAP_AKA_PRIME, and EAP_SIM require PCSC. USIM_SIMULATOR is used
+    # by EAP_AKA.
+    if option pcsc ; then
+        config_enable \
+            PCSC \
+            USIM_SIMULATOR
+
+        config_enable_eap \
+            AKA \
+            AKA_PRIME \
+            SIM
+    fi
+
+    option build_options:trace &&
+        config_enable \
+            WPA_TRACE \
+            WPA_TRACE_BFD
+
+#    if option build_options:recommended_tests ; then
+#        config_enable \
+#            CLIENT_MLME \
+#            EAPOL_TEST
+#
+#        config_enable_driver TEST
+#    fi
+
+    # EAP_FAST requires EAP_TLS (which is always enabled), and only works with
+    # OpenSSL-0.9.9 or internal TLS implementation
     if option gnutls ; then
-        config_enable TLS=gnutls
-        config_enable GNUTLS_EXTRA
+        config_enable \
+            TLS=gnutls \
+            GNUTLS_EXTRA
     elif option ssl ; then
-        config_enable TLS=openssl
-        config_enable SMARTCARD
+        config_enable \
+            TLS=openssl \
+            SMARTCARD
+        option eap-fast && config_enable_eap FAST
     else
         config_enable TLS=internal
-        config_enable_eap FAST
+        option eap-fast && config_enable_eap FAST
     fi
 
     config_enable_driver \
         ATMEL \
         HOSTAP \
-        IPW \
-        NDISWRAPPER \
-        PRISM54 \
         RALINK \
         ROBOSWITCH \
         WEXT \
         WIRED
-        #BROADCOM \
-        #BSD \
-        #HERMES \
-        #IPHONE \
-        #NDIS \
-        #OSX \
-        #PS3 \
+        #HERMES # FIXME: Not sure why Hermes driver doesn't build
 
     option nl80211 && config_enable_driver NL80211
 
-    # EAP options PEAP, TTLS, TLS and FAST require TLS (which is always enabled)
+    # EAP_PEAP, EAP_TLS, and EAP_TTLS require TLS (which is always enabled)
     config_enable_eap \
-        AKA \
-        AKA_PRIME \
         GPSK \
+        GPSK_SHA256 \
         GTC \
         IKEV2 \
         LEAP \
@@ -179,16 +218,59 @@ src_configure() {
         OTP \
         PAX \
         PEAP \
-        PSK \
         SAKE \
-        SERVER \
-        SHA256 \
-        SIM \
         TLS \
-        TNC \
-        TTLS \
-        VENDOR_TEST \
-        WCS
+        TTLS
+
+    # Enabling this is a PITA, especially for the user. For details see the
+    # file 'wpa_supplicant/defconfig' in the source.
+    #config_enable DYNAMIC_EAP_METHODS
+
+    # Enable privilege separation (see README)
+    #config_enable PRIVSEP
+
+    # Enable mitigation against certain attacks against TKIP by delaying
+    # Michael MIC error reports by a random amount of time between 0 and 60
+    # seconds.
+    #config_enable DELAYED_MIC_ERROR_REPORT
+
+    # Remove WPA support, e.g., for wired-only IEEE 802.1X supplicant, to save
+    # 35-50 kB in code size.
+    #config_enable NO_WPA
+
+    # Remove WPA2 support. This allows WPA to be used, but removes WPA2 code to
+    # save about 1 kB in code size when building only WPA-Personal (no EAP
+    # support) or 6 kB if building for WPA-Enterprise.
+    #config_enable NO_WPA2
+
+    # Remove IEEE 802.11i/WPA-Personal ASCII passphrase support This option can
+    # be used to reduce code size by removing support for converting ASCII
+    # passphrases into PSK. If this functionality is removed, the PSK can only
+    # be configured as the 64-octet hexstring (e.g., from wpa_passphrase). This
+    # saves about 0.5 kB in code size.
+    #config_enable NO_WPA_PASSPHRASE
+
+    # Don't enable the new DBus control interface until NetworkManager supports
+    # it (as of NetworkManager 0.8.2 it's still unsupported).
+    #config_enable CTRL_IFACE_DBUS_INTRO
+    #config_enable CTRL_IFACE_DBUS_NEW
+
+    # Experimental; unset by default
+    #config_enable IEEE80211W
+    #config_enable_eap PSK
+    #config_enable_eap TNC
+
+    # Don't use internal libtommath
+    #config_enable INTERNAL_LIBTOMMATH
+    #config_enable INTERNAL_LIBTOMMATH_FAST
+
+    # Utterly useless options
+    #config_enable NO_CONFIG_BLOBS
+    #config_enable NO_CONFIG_WRITE
+    #config_enable NO_SCAN_PROCESSING
+
+    # Driver interface for no driver (e.g., WPS ER only)
+    #config_enable_driver NONE
 
     option qt4 && eqmake4 -o wpa_gui-qt4/{Makefile,wpa_gui.pro}
 }
@@ -196,37 +278,40 @@ src_configure() {
 src_compile() {
     default
     option qt4 && emake -C wpa_gui-qt4
+    ever is_scm && emake -C doc/docbook man
 }
 
-src_test() {
-    emake tests
-}
+#src_test() {
+#    emake tests
+#}
 
 src_install() {
-    default
+    dobin wpa_cli wpa_passphrase
+    dosbin wpa_supplicant
 
-    ### INTERFACES
+    # Symlinks for compatibility with baselayout-1
+    if has_version "sys-apps/baselayout[<2.0.0]" ; then
+        dodir /bin
+        dosym /usr/bin/wpa_cli /bin/wpa_cli
+        dodir /sbin
+        dosym /usr/sbin/wpa_supplicant /sbin/wpa_supplicant
+    fi
+
     option qt4 && dobin wpa_gui-qt4/wpa_gui
 
     if option dbus ; then
-        local service_file=dbus-wpa_supplicant.service
-        local service_name=$(sed -n 's:^Name=::p' ${service_file})
+        pushd dbus
+
         insinto /etc/dbus-1/system.d/
         newins {dbus-,}wpa_supplicant.conf
 
-        edo sed -i -e 's:/sbin:/usr/sbin:' ${service_file}
-
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
-        newins ${service_file} ${service_name}.service
+        doins fi.epitest.hostap.WPASupplicant.service
+
+        popd
     fi
 
-    ### DOCUMENTATION
-    if ! ever is_scm ; then
-        doman doc/docbook/*.{5,8}
-    fi
-
-    ### CONFIGURATION FILES
     exeinto /etc/wpa_supplicant
     doexe "${FILES}"/wpa_cli.sh
 
@@ -240,8 +325,8 @@ network={
 }
 EOF
 
-    dodir /usr/sbin
-    edo mv "${IMAGE}"/usr/{,s}bin/wpa_supplicant
+    emagicdocs
+    doman doc/docbook/*.{5,8}
 
     ### PRIVILEGE SEPARATION
     ### TODO once genesis handling is known
