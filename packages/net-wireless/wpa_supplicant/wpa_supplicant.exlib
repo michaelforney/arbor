@@ -305,6 +305,8 @@ src_install() {
         insinto /etc/dbus-1/system.d/
         newins {dbus-,}wpa_supplicant.conf
 
+        edo sed -i -e '/^Exec=/s:/sbin:/usr/sbin:' fi.epitest.hostap.WPASupplicant.service
+
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
         doins fi.epitest.hostap.WPASupplicant.service
