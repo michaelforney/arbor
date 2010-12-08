@@ -38,7 +38,7 @@ DOWNLOADS="
 
 LICENCES="UoI-NCSA"
 SLOT="0"
-MYOPTIONS="clang"
+MYOPTIONS="clang gold"
 
 if ! ever is_scm; then
     MYOPTIONS+=" doc"
@@ -52,6 +52,7 @@ DEPENDENCIES="
         sys-devel/flex
     build+run:
         clang? ( sys-devel/gcc[~${GCC_VERSION}] )
+        gold? ( sys-devel/binutils[>=2.21.51.0.2-r1] )
 "
 
 if ! ever is_scm; then
@@ -74,7 +75,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 if ! ever is_scm; then
     DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc doxygen' )
 fi
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'clang built-clang' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'clang built-clang' 'gold binutils-include /usr/include' )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     --enable-optimized
