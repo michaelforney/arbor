@@ -22,9 +22,13 @@ src_prepare() {
     default
 
     edo sed \
-        -e '/^CFLAGS/s/=/+=/' \
+        -e 's|^AR=|AR ?=|' \
+        -e 's|^CC=|CC ?=|' \
+        -e 's|^CFLAGS=|CFLAGS +=|' \
         -e '/^CFLAGS/s/-O.//' \
         -e '/^CFLAGS/s/-g//' \
+        -e 's|^LDFLAGS=|LDFLAGS +=|' \
+        -e 's|^RANLIB=|RANLIB ?=|' \
         -i Makefile Makefile-libbz2_so
 
     edo sed -e "s:1\.0\.4:${PV}:" \
@@ -37,16 +41,9 @@ src_prepare() {
 }
 
 src_compile() {
-    local myemake=(
-        CC="${CC}"
-        AR="${AR}"
-        RANLIB="${RANLIB}"
-    )
-
-    emake "${myemake[@]}" -f Makefile-libbz2_so
-    emake "${myemake[@]}"
+    emake -f Makefile-libbz2_so
+    emake
 }
-
 
 src_install() {
     default
