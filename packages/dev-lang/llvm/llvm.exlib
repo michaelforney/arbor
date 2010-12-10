@@ -110,5 +110,9 @@ llvm_src_install() {
         PROJ_docsdir=/usr/share/doc/${PNVR} \
         PROJ_libdir=/usr/$(get_libdir) \
         VERBOSE=1
+
+    # Make sure nm and ar find the gold plugin
+    dodir /usr/${CHOST}/lib/bfd-plugins
+    dosym /usr/$(get_libdir)/libLLVMgold.so /usr/${CHOST}/lib/bfd-plugins
 }
 
