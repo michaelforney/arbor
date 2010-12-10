@@ -27,3 +27,8 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 DEFAULT_SRC_INSTALL_PARAMS=( instroot="${IMAGE}" )
 
+src_prepare() {
+    default
+    edo sed -e 's/\$(LINK_SHLIB)/& $(LDFLAGS)/' -i lib/Makefile.in
+}
+
