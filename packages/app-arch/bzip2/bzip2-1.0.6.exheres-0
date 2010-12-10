@@ -21,10 +21,11 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 src_prepare() {
     default
 
-    edo sed -e '/^CFLAGS/s/=/+=/' \
-            -e '/^CFLAGS/s/-O.//' \
-            -e '/^CFLAGS/s/-g//' \
-            -i Makefile Makefile-libbz2_so
+    edo sed \
+        -e '/^CFLAGS/s/=/+=/' \
+        -e '/^CFLAGS/s/-O.//' \
+        -e '/^CFLAGS/s/-g//' \
+        -i Makefile Makefile-libbz2_so
 
     edo sed -e "s:1\.0\.4:${PV}:" \
             -i bzip2.1 bzip2.txt Makefile-libbz2_so manual.{html,ps,xml}
