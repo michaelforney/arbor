@@ -1,7 +1,10 @@
 Source: Brett Witherspoon <spoonb@exherbo.org>
-Upstream: Yes, submitted.
+Upstream: No, this is not the correct solution. A patch to either build
+	  the tests in the check target or a --enable-test switch should
+	  be submitted upstream instead.
 Reason: Fix automagic dep on dbus. The GDbus test gdbus-serialization
-        was being built depending on the existence of dbus.
+        uses libdbus and is enabled when detected. This can cause build
+	problems.
 
 ---
 From b544a8d0b86af50d71a1fdfa7ed75c716d1cfe1d Mon Sep 17 00:00:00 2001
