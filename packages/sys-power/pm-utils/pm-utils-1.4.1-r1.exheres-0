@@ -30,7 +30,7 @@ src_install() {
     default
 
     keepdir /etc/pm/{config,power,sleep}.d
-    edo rm "${IMAGE}/usr/$(get_libdir)/pm-utils/sleep.d/01grub"
+    edo rm "${IMAGE}"/usr/$(get_libdir)/pm-utils/sleep.d/{01grub,55NetworkManager}
 
     insinto /usr/$(get_libdir)/pm-utils/video-quirks
     doins "${WORKBASE}"/video-quirks/*.quirkdb
