@@ -1,0 +1,100 @@
+# Copyright 2010 Brett Witherspoon <spoonb@cdspooner.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+if ever is_scm; then
+    SCM_REPOSITORY="git://anongit.freedesktop.org/plymouth"
+    require scm-git
+else
+    DOWNLOADS="http://www.freedesktop.org/software/${PN}/releases/${PNV}.tar.bz2"
+fi
+
+DOWNLOADS+="http://www.cdspooner.com/exherbo/distfiles/${PN}-exherbo.tar.bz2"
+
+export_exlib_phases src_unpack src_prepare src_install
+
+SUMMARY="An application that provides graphical boot animation"
+DESCRIPTION="
+Plymouth is an application that runs very early in the boot process (even before the root filesystem
+is mounted!) that provides a graphical boot animation while the boot process happens in the
+background. It is designed to work on systems with DRM modesetting drivers. The idea is that early on in the
+boot process the native mode for the computer is set, plymouth uses that mode, and that mode stays
+throughout the entire boot process up to and after X starts. Ideally, the goal is to get rid of all
+flicker during startup. 
+"
+HOMEPAGE="http://freedesktop.org/wiki/Software/Plymouth"
+
+BUGS_TO="spoonb@cdspooner.com"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        media-libs/libpng[>=1.2.16]
+        x11-dri/libdrm[video_drivers:intel][video_drivers:nouveau][video_drivers:radeon] [[
+            note = [ Needs patch ]
+        ]]
+        x11-libs/pango[>=1.21.0]
+        x11-libs/gtk+:2[>=2.12.0]
+    suggestion:
+        sys-boot/dracut [[
+            description = [ Provides mkinitrd functions and includes a plymouth module ]
+        ]]
+"
+
+# TODO: Complete systemd services
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --localstatedir=/var
+    --enable-libkms
+    --enable-pango
+    --enable-tracing
+    --without-system-root-install
+    --without-rhgb-compat-link # Fedoraism
+    --with-release-file=/etc/exherbo-release
+    --with-boot-tty=/dev/tty7
+    --with-shutdown-tty=/dev/tty63
+    --with-logo=/usr/share/plymouth/logo.png
+    --with-background-color=0x3391CD
+    --with-background-start-color-stop=0x0073B3
+    --with-background-end-color-stop=0x00457E
+    --disable-more-warnings
+    --disable-gdm-transition # Fedoraism
+    --without-gdm-autostart-file
+    --without-log-viewer
+)
+
+plymouth_src_unpack() {
+    default
+    ever is_scm && scm_src_unpack
+}
+
+plymouth_src_prepare() {
+    default
+
+    # Disable problematic tests. Can any of these be fixed?
+    sed -i -e '/$(srcdir)\/ply-command-parser-test.am/d' \
+           -e '/$(srcdir)\/ply-terminal-session-test.am/d' src/libply/tests/Makefile.am
+    sed -i -e '/$(srcdir)\/ply-boot-server-test.am/d' \
+           -e '/$(srcdir)\/ply-boot-splash-test.am/d' src/tests/Makefile.am
+
+    autotools_src_prepare
+}
+
+plymouth_src_install() {
+    default
+
+    keepdir /var/spool/plymouth
+    keepdir /var/lib/plymouth
+    edo rmdir ${IMAGE}/var/run/{plymouth,}
+
+    insinto /usr/share/plymouth/
+    doins "${WORKBASE}"/plymouth-exherbo/logo.png
+
+    install_systemd_files
+}
+

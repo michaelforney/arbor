@@ -1,0 +1,10 @@
+[Unit]
+Description=Plymouth Initialization
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/plymouth --sysinit
+
+[Install]
+WantedBy=multi-user.target
