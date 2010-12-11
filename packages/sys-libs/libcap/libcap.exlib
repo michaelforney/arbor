@@ -5,7 +5,7 @@
 
 require multilib pam
 
-export_exlib_phases src_compile src_install
+export_exlib_phases src_prepare src_compile src_install
 
 SUMMARY="POSIX 1003.1e capabilities"
 HOMEPAGE="http://sites.google.com/site/fullycapable/"
@@ -24,6 +24,15 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_INSTALL_PARAMS=( lib=$(get_libdir) )
+
+libcap_src_prepare() {
+    edo sed -f - -i Make.Rules <<'EOF'
+    /^\(AR\|CC\|CFLAGS\|LDFLAGS\|RANLIB\) :=/{
+        s|:=|?=|;
+    }
+EOF
+    edo sed -e 's/\$(BUILD_CC)/& $(LDFLAGS)/' -i libcap/Makefile
+}
 
 libcap_src_compile() {
     export PAM_CAP=$(option pam && echo yes || echo no)
