@@ -8,6 +8,8 @@
 export_exlib_phases src_install
 
 myexparam -b has_rdoc=true
+myexparam ruby=ruby
+myexparam gem=gem
 
 if [[ -z ${DOWNLOADS} ]]; then
     DOWNLOADS="http://gems.rubyforge.org/gems/${PNV}.gem"
@@ -19,20 +21,24 @@ HOMEPAGE="http://${PN}.rubyforge.org"
 DEPENDENCIES="
     build+run:
         dev-lang/ruby:=
+        || (
+            dev-lang/ruby:1.9
+            dev-ruby/rubygems[>=1.2.0]
+        )
 "
 
 exparam -b has_rdoc && MYOPTIONS="doc"
-DEPENDENCIES+="
-    build+run:
-        dev-ruby/rubygems[>=1.2.0]
-"
 
 WORK=${WORKBASE}
+
+RUBY="$(exparam ruby)"
+GEM="$(exparam gem)"
 
 gem_src_install() {
     unset GEM_HOME GEM_PATH RUBYOPT
 
-    site_gem_dir=$(ruby -rubygems -e 'print Gem.dir')
+
+    site_gem_dir=$(${RUBY} -rubygems -e 'print Gem.dir')
     vendor_gem_dir=${site_gem_dir/gems/vendor_gems}
 
     export GEM_HOME="${IMAGE}/${vendor_gem_dir}"
@@ -49,7 +55,7 @@ gem_src_install() {
         myconf+="--no-ri --no-rdoc"
     fi
 
-    edo gem install "${GEM_SOURCE_DIR:-${FETCHEDDIR}}/${GEM_FILENAME:-${PNV}.gem}" --local ${myconf}
+    edo ${GEM} install "${GEM_SOURCE_DIR:-${FETCHEDDIR}}/${GEM_FILENAME:-${PNV}.gem}" --local ${myconf}
 
     if [[ -d ${IMAGE}/${vendor_gem_dir}/bin ]]; then
         exeinto /usr/bin
