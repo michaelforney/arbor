@@ -1,7 +1,7 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose Licence v2
 
-require sourceforge
+require sourceforge elisp-optional [ source_directory=contrib/xcscope ]
 
 SUMMARY="A developer's tool for browsing source code"
 HOMEPAGE="http://cscope.sourceforge.net/"
@@ -9,7 +9,7 @@ HOMEPAGE="http://cscope.sourceforge.net/"
 LICENCES="BSD"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS=""
+MYOPTIONS="emacs"
 
 DEPENDENCIES="
     build+run:
@@ -19,4 +19,18 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/cscope-${PV}-ocs-sysdir.patch" )
 
 DEFAULT_SRC_COMPILE_PARAMS=( STRIP="no" )
+
+src_compile() {
+    default
+    elisp-optional_src_compile
+}
+
+src_install() {
+    default
+    elisp-optional_src_install
+
+    if option emacs; then
+        dobin contrib/xcscope/cscope-indexer
+    fi
+}
 
