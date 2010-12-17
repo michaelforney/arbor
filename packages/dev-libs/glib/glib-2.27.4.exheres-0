@@ -1,0 +1,40 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require glib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+# Regenerating autotools is required for the dbus tests patch
+
+SLOT="2"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="
+    dbus [[ description = [ Build GDBus tests which require DBus ] ]]
+    fam  [[ description = [ Enable FAM support for file system monitoring ] ]]
+    gtk-doc
+"
+
+DEPENDENCIES="
+    build:
+        app-doc/gtk-doc-autotools
+        sys-devel/gettext[>=0.11]
+        dev-util/pkg-config[>=0.16]
+        dbus? ( sys-apps/dbus[>=1.2.14] ) [[ note = [ only required for building a gdbus test ] ]]
+        gtk-doc? ( dev-dev/gtk-doc[>=1.15] )
+    build+run:
+        fam? ( app-admin/gamin )
+    test:
+        x11-misc/shared-mime-info
+        dev-util/desktop-file-utils
+        gnome-bindings/pygobject
+        dev-python/dbus-python
+    recommendation:
+        gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
+    suggestion:
+        gnome-desktop/gvfs  [[ description = [ Provides utilities and support for GIO ] ]]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
+
