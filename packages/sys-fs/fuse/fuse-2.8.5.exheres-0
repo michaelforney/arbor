@@ -1,0 +1,28 @@
+# Copyright 2009 Maxime Coste <frrrwww@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ suffix=tar.gz ]
+
+SUMMARY="Filesystems in Userspace"
+DESCRIPTION="
+FUSE (Filesystem in Userspace) is a simple interface for userspace
+programs to export a virtual filesystem to the Linux kernel.  FUSE
+also aims to provide a secure method for non privileged users to
+create and mount their own filesystem implementations.
+"
+
+LICENCES="|| ( GPL-2 LGPL-2 )"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="baselayout"
+DEPENDENCIES=""
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-example' )
+
+src_install() {
+    default
+    edo rm -r "${IMAGE}"/etc/init.d/
+    edo rm -r "${IMAGE}"/dev
+    option baselayout && newinitd "${FILES}"/${PN}.initd ${PN}
+}
+
