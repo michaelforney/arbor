@@ -9,6 +9,8 @@ else
     require gnu [ suffix=gz ]
 fi
 
+require alternatives
+
 export_exlib_phases src_test_expensive src_install
 
 SUMMARY="Tool used to automatically generate Makefile.in files"
@@ -46,9 +48,14 @@ automake_src_install() {
     if [[ -e ${slotslot[0]} ]]; then
         edo rm "${slotslot[@]}"
     fi
+
     edo cd "${IMAGE}"/usr/share/info
-    for info in automake.info* ; do
-        edo mv ${info} automake-${SLOT}.${info##*.}
+    local alternatives=( info-${PN} ${PNV} 0 ) info sinfo
+    for info in ${PN}.info*; do
+        sinfo=${PN}-${SLOT}.${info##*.}
+        alternatives+=( /usr/share/info/${info} ${sinfo} )
+        edo mv ${info} ${sinfo}
     done
+    alternatives_for "${alternatives[@]}"
 }
 

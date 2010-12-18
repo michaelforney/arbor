@@ -3,7 +3,7 @@
 
 myexparam suffix=gz
 
-require gnu [ suffix=$(exparam suffix) ]
+require gnu [ suffix=$(exparam suffix) ] alternatives
 
 SUMMARY="Extensible M4 macro package producing configure scripts"
 
@@ -35,5 +35,18 @@ DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 src_test_expensive() {
    emake check
+}
+
+src_install() {
+    default
+
+    edo cd "${IMAGE}"/usr/share/info
+    local alternatives=( info-${PN} ${PNV} 0 ) info sinfo
+    for info in ${PN}.info*; do
+        sinfo=${PN}-${SLOT}.${info##*.}
+        alternatives+=( /usr/share/info/${info} ${sinfo} )
+        edo mv ${info} ${sinfo}
+    done
+    alternatives_for "${alternatives[@]}"
 }
 

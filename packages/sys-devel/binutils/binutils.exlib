@@ -59,6 +59,7 @@ binutils_src_test_expensive() {
 binutils_src_install() {
     if option gold ; then
         emake -j1 -C "${WORKBASE}/builddir-gold/gold" DESTDIR="${IMAGE}" install
+        emake -j1 -C "${WORKBASE}/builddir-gold/bfd" DESTDIR="${IMAGE}" install-bfdincludeHEADERS
         edo mv "${IMAGE}"/usr/${CHOST}/bin/{ld,gold}
         edo rm "${IMAGE}"/usr/bin/gold
     fi

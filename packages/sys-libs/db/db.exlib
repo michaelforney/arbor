@@ -2,7 +2,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-MY_PNV=${PV%_p*}
+MY_PV=${PV%_p*}
 PATCH_LEVEL=${PNV##*_p}
 
 require multilib alternatives
@@ -13,11 +13,11 @@ SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
 
 # Upstream moved the patches; mirror them until we find out where.
-DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PNV}.tar.gz
+DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PV}.tar.gz
     $(for ((i=1 ; i<=PATCH_LEVEL ; i++ )) ; do
-        echo "http://dev.exherbo.org/~replica/distfiles/${PN}-${MY_PNV}.${i}.patch"
+        echo "http://dev.exherbo.org/~replica/distfiles/${PN}-${MY_PV}.${i}.patch"
       done)"
-#        echo "http://www.oracle.com/technology/products/berkeley-db/${PN}/update/${MY_PNV}/patch.${MY_PNV}.${i} -> ${PN}-${MY_PNV}.${i}.patch"
+#        echo "http://www.oracle.com/technology/products/berkeley-db/${PN}/update/${MY_PV}/patch.${MY_PV}.${i} -> ${PN}-${MY_PNV}.${i}.patch"
 
 LICENCES="as-is"
 SLOT="$(ever range 1-2)"
@@ -32,8 +32,8 @@ DEPENDENCIES="
         tcl? ( dev-lang/tcl )
 "
 
-ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PNV}/dist"
-WORK="${WORKBASE}/${PN}-${MY_PNV}/build_unix"
+ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PV}/dist"
+WORK="${WORKBASE}/${PN}-${MY_PV}/build_unix"
 
 AT_M4DIR=( aclocal aclocal_java )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -47,15 +47,15 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcl tcl /usr/$(get_libdir)" )
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
 db_src_prepare() {
-    edo cd "${WORKBASE}/${PN}-${MY_PNV}/"
+    edo cd "${WORKBASE}/${PN}-${MY_PV}/"
 
     local patches=()
     for ((i=1; i<=PATCH_LEVEL; i++)); do
-        patches+=( "${FETCHEDDIR}/${PN}-${MY_PNV}.${i}.patch" )
+        patches+=( "${FETCHEDDIR}/${PN}-${MY_PV}.${i}.patch" )
     done
     expatch -p0 "${patches[@]}"
 
-    edo cd "${WORKBASE}/${PN}-${MY_PNV}/dist/"
+    edo cd "${WORKBASE}/${PN}-${MY_PV}/dist/"
 
     # Allow --docdir to work
     edo sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in

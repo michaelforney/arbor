@@ -16,3 +16,14 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_COMPILE_PARAMS=( STRIP=: )
 
+src_prepare() {
+    default
+
+    edo sed -f - -i Makefile <<'EOF'
+    /LDFLAGS =/{
+        s:LDFLAGS =:LDFLAGS +=:;
+        s:-s::
+    }
+EOF
+}
+

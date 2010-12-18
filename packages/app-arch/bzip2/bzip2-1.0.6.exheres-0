@@ -20,14 +20,29 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 src_prepare() {
     default
 
-    edo sed -e '/^CFLAGS/s/=/+=/' \
-            -e '/^CFLAGS/s/-O.//' \
-            -e '/^CFLAGS/s/-g//' \
-            -i Makefile Makefile-libbz2_so
+    # Respect variables from the environment
+    edo sed \
+        -e 's|^AR=|AR ?=|' \
+        -e 's|^CC=|CC ?=|' \
+        -e 's|^CFLAGS=|CFLAGS +=|' \
+        -e '/^CFLAGS/s/-O.//' \
+        -e '/^CFLAGS/s/-g//' \
+        -e 's|^LDFLAGS=|LDFLAGS +=|' \
+        -e 's|^RANLIB=|RANLIB ?=|' \
+        -i Makefile Makefile-libbz2_so
 
+    # Use CFLAGS and LDFLAGS properly
+    edo sed \
+        -e '/^all/a\	$(CC) $(CFLAGS) -c bzip2.c -o bzip2.o' \
+        -e 's/$(CC) -shared/& $(LDFLAGS)/' \
+        -e '/$(CC).*\.so/s:CFLAGS:LDFLAGS:' \
+        -i Makefile-libbz2_so
+
+    # Update version
     edo sed -e "s:1\.0\.4:${PV}:" \
             -i bzip2.1 bzip2.txt Makefile-libbz2_so manual.{html,ps,xml}
 
+    # Fix up paths
     edo sed -e 's:$(PREFIX)/lib:$(PREFIX)/$(LIBDIR):g' \
             -e 's:$(PREFIX)/include:$(PREFIX)/usr/include:g' \
             -e 's:$(PREFIX)/man:$(PREFIX)/usr/share/man:g' \
