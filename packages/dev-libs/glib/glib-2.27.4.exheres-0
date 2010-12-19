@@ -19,10 +19,10 @@ DEPENDENCIES="
         app-doc/gtk-doc-autotools
         sys-devel/gettext[>=0.11]
         dev-util/pkg-config[>=0.16]
-        dbus? ( sys-apps/dbus[>=1.2.14] ) [[ note = [ only required for building a gdbus test ] ]]
+        dbus? ( sys-apps/dbus[>=1.2.14][multibuild_c:*(?)?] ) [[ note = [ only required for building a gdbus test ] ]]
         gtk-doc? ( dev-dev/gtk-doc[>=1.15] )
     build+run:
-        fam? ( app-admin/gamin )
+        fam? ( app-admin/gamin[multibuild_c:*(?)?] )
     test:
         x11-misc/shared-mime-info
         dev-util/desktop-file-utils
@@ -31,7 +31,7 @@ DEPENDENCIES="
     recommendation:
         gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
     suggestion:
-        gnome-desktop/gvfs  [[ description = [ Provides utilities and support for GIO ] ]]
+        gnome-desktop/gvfs[multibuild_c:*(?)?] [[ description = [ Provides utilities and support for GIO ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
