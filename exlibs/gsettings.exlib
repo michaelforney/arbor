@@ -10,6 +10,12 @@ gsettings_exlib_compile_gsettings_schemas() {
     XDG_DATA_DIRS= "${GLIB_COMPILE_SCHEMAS}" "${ROOT}usr/share/glib-2.0/schemas/"
 }
 
+gsettings_src_install() {
+    export GSETTINGS_DISABLE_SCHEMAS_COMPILE=1
+    default
+    unset GSETTINGS_DISABLE_SCHEMAS_COMPILE
+}
+
 gsettings_pkg_postinst() {
     default
     gsettings_exlib_compile_gsettings_schemas
