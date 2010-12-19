@@ -1,7 +1,7 @@
 # Copyright (c) 2007 Alexander Færøy <ahf@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service
+require systemd-service alternatives
 
 NTP_PNV="${PNV/_/}"
 
@@ -45,5 +45,7 @@ NTPD_HOME=/var/empty
 NTPD_OPTS=""
 EOF
 
+    alternatives_for ntpd ${PN} 1 /usr/sbin/ntpd ${PN}
+    alternatives_for ntpd ${PN} 1 /usr/share/man/man8/ntpd.8 ${PN}
 }
 
