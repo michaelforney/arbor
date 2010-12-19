@@ -3,7 +3,7 @@
 # Based in part upon 'ntp-4.2.4_p4.ebuild' which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require systemd-service
+require systemd-service alternatives
 
 MY_PNV=${PNV/_p/p}
 
@@ -85,5 +85,8 @@ EOF
     fi
 
     edo find "${IMAGE}"/usr/ -type d -empty -delete
+
+    alternatives_for ntpd ${PN} 1 /usr/sbin/ntpd ${PN}-ntpd
+    alternatives_for ntpd ${PN} 1 /usr/share/man/man8/ntpd.8 ${PN}-ntpd
 }
 
