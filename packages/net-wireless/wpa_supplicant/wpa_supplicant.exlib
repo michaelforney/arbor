@@ -30,10 +30,13 @@ SLOT="0"
 MYOPTIONS="
     dbus     [[ description = [ Enable the DBus control interface                    ] ]]
     debug    [[ description = [ Support printing out debug message to stdout         ] ]]
-    eap-fast [[ description = [
-        Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
-        implementation
-    ] ]]
+    eap-fast [[
+        description = [
+            Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
+            implementation
+        ]
+        requires = -gnutls
+    ]]
     nl80211  [[ description = [ Support the new 802.11 netlink interface             ] ]]
     pcap     [[ description = [
         Use libdnet/libpcap for Layer 2 processing instead of Linux packet sockets
@@ -44,7 +47,6 @@ MYOPTIONS="
     qt4      [[ description = [ Build the Qt4-based wpa_gui program                  ] ]]
     readline [[ description = [ Use readline for line editing and history in wpa_cli ] ]]
 
-    eap-fast [[ requires = -gnutls ]]
     (
         gnutls [[ description = [
             Use GnuTLS for TLS connections instead of internal implementation
