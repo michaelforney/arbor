@@ -44,6 +44,7 @@ MYOPTIONS="
     qt4      [[ description = [ Build the Qt4-based wpa_gui program                  ] ]]
     readline [[ description = [ Use readline for line editing and history in wpa_cli ] ]]
 
+    eap-fast [[ requires = -gnutls ]]
     (
         gnutls [[ description = [
             Use GnuTLS for TLS connections instead of internal implementation
@@ -202,7 +203,9 @@ src_configure() {
         ROBOSWITCH \
         WEXT \
         WIRED
-        #HERMES # FIXME: Not sure why Hermes driver doesn't build
+        #HERMES # Requires additional files not included in the distribution.
+                # http://www.agere.com/support/drivers/ 
+                # See wpa_supplicant/README
 
     option nl80211 && config_enable_driver NL80211
 
