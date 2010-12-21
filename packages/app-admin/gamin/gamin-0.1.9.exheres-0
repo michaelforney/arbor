@@ -3,7 +3,8 @@
 # Based in part upon 'gamin-0.1.9-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic python autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require easy-multibuild flag-o-matic python
 
 SUMMARY="A library providing the File Alteration Monitor API"
 HOMEPAGE="http://www.gnome.org/~veillard/gamin/"
@@ -12,13 +13,13 @@ DOWNLOADS="http://www.gnome.org/~veillard/${PN}/sources/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug python"
+MYOPTIONS="debug python multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        dev-libs/glib:2
+        dev-libs/glib:2[multibuild_c:*(?)?]
         python? ( dev-lang/python:= )
 "
 
@@ -30,7 +31,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/debugging.txt doc/socket.txt )
 
-src_configure() {
+configure_one_multibuild() {
     # Fix compilation with >=glibc-2.8, Gentoo #225403
     append-flags "-D_GNU_SOURCE"
 
@@ -38,7 +39,7 @@ src_configure() {
 }
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     dodir /usr/share/doc/${PNVR}/html
     insinto /usr/share/doc/${PNVR}/html
