@@ -1,0 +1,14 @@
+Source: written by Pierre Lejeune <superheron@gmail.com>, for Exherbo
+Upstream: no
+Reason: fix Python paths for multibuild
+--- configure.in.orig	2010-12-06 20:42:48.992921044 +0100
++++ configure.in	2010-12-06 21:05:24.685963050 +0100
+@@ -458,7 +458,7 @@
+     if test "$PYTHON_VERSION" != ""
+     then
+ 	if test -r $with_python/include/python$PYTHON_VERSION/Python.h -a \
+-	   -d $with_python/lib/python$PYTHON_VERSION/site-packages
++	   -d $libdir/python$PYTHON_VERSION/site-packages
+ 	then
+ 	    PYTHON_INCLUDES=$with_python/include/python$PYTHON_VERSION
+ 	    PYTHON_SITE_PACKAGES=$libdir/python$PYTHON_VERSION/site-packages
