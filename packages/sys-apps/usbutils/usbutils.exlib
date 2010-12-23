@@ -17,8 +17,7 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config[>=0.9.0]
     build+run:
-        dev-libs/libusb:0.1[>=0.1.12]
-        dev-libs/libusb:1
+        dev-libs/libusb:1[>=1.0.0]
     run:
         sys-apps/usbutils-data
 "
@@ -36,5 +35,8 @@ src_install() {
     edo rm -f "${IMAGE}/usr/sbin/update-usbids.sh"
     edo rm -f "${IMAGE}/usr/share/misc/usb.ids"
     edo rmdir "${IMAGE}/usr/share/misc/"
+
+    # emtpy directory
+    edo rmdir "${IMAGE}"/usr/sbin
 }
 
