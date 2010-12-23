@@ -30,10 +30,13 @@ SLOT="0"
 MYOPTIONS="
     dbus     [[ description = [ Enable the DBus control interface                    ] ]]
     debug    [[ description = [ Support printing out debug message to stdout         ] ]]
-    eap-fast [[ description = [
-        Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
-        implementation
-    ] ]]
+    eap-fast [[
+        description = [
+            Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
+            implementation
+        ]
+        requires = -gnutls
+    ]]
     nl80211  [[ description = [ Support the new 802.11 netlink interface             ] ]]
     pcap     [[ description = [
         Use libdnet/libpcap for Layer 2 processing instead of Linux packet sockets
@@ -202,7 +205,9 @@ src_configure() {
         ROBOSWITCH \
         WEXT \
         WIRED
-        #HERMES # FIXME: Not sure why Hermes driver doesn't build
+        #HERMES # Requires additional files not included in the distribution.
+                # http://www.agere.com/support/drivers/
+                # See wpa_supplicant/README
 
     option nl80211 && config_enable_driver NL80211
 

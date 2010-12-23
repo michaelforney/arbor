@@ -1,0 +1,9 @@
+[Unit]
+Description=lighttpd web server
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/lighttpd -f /etc/lighttpd/lighttpd.conf -D
+
+[Install]
+WantedBy=http-daemon.target

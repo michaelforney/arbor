@@ -2,9 +2,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require glib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-
-# Regenerating autotools is required for the dbus tests patch
+require bash-completion glib
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -34,7 +33,19 @@ DEPENDENCIES="
         gnome-desktop/gvfs[multibuild_c:*(?)?] [[ description = [ Provides utilities and support for GIO ] ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/glib-2.26.1-optionalize-dbus-tests.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
+
+src_install() {
+    default
+    glib_src_install
+
+    edo rm "${IMAGE}"/etc/bash_completion.d/{gdbus-bash-completion.sh,gsettings-bash-completion.sh}
+    edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
+    dobashcompletion "${WORK}"/gio/gdbus-bash-completion.sh gdbus
+    dobashcompletion "${WORK}"/gio/gsettings-bash-completion.sh gsettings
+}
+
 

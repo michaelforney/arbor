@@ -1,7 +1,7 @@
 # Copyright 2008 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib systemd-service [ systemd_files=[ lighttpd.service ] ]
 
 SUMMARY="Lightweight, fast, secure, compliant, flexible,  web-server"
 DESCRIPTION="A secure, fast, compliant and very flexible web-server
@@ -87,5 +87,12 @@ src_install() {
 
     edo chown lighttpd:lighttpd "${IMAGE}"/var/{log,run}/lighttpd
     edo chmod 0750 "${IMAGE}"/var/log/lighttpd
+
+    install_systemd_files
+
+    if option systemd ; then
+        insinto /etc/tmpfiles.d
+        doins "${FILES}"/systemd/lighttpd.conf
+    fi
 }
 

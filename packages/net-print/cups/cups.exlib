@@ -18,6 +18,7 @@ MYOPTIONS="acl baselayout dbus debug gnutls kerberos ldap libusb pam perl python
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
+pdf [[ description = [ Support pdf printing via pdftops from poppler ] ]]
 tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
 linguas: ( ${LANGS} )
 multibuild_c: ( 32 64 )"
@@ -39,12 +40,14 @@ DEPENDENCIES="
         ldap? ( net-directory/openldap )
         libusb? ( dev-libs/libusb:0.1 )
         pam? ( sys-libs/pam )
+        pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
         perl? ( dev-lang/perl )
         python? ( dev-lang/python:* )
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff[multibuild_c:*(?)?] )
-        app-text/poppler [[ note = [ pdftops ] ]]
         dev-libs/libpaper[multibuild_c:*(?)?]
+        media-libs/jpeg[multibuild_c:*(?)?]
+        media-libs/libpng[multibuild_c:*(?)?]
         group/lpadmin
         media-libs/jpeg[multibuild_c:*(?)?]
         media-libs/libpng[multibuild_c:*(?)?]
@@ -125,7 +128,6 @@ configure_one_multibuild() {
         --with-cups-{group,user}=lp \
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
         --with-languages="${CUPSLANGS}" \
-        --with-pdftops=pdftops \
         --with-system-groups=lpadmin \
         $(option_enable acl) \
         $(option_enable dbus) \
@@ -139,6 +141,7 @@ configure_one_multibuild() {
         $(option_enable tcpd tcp-wrappers) \
         $(option_enable tiff) \
         $(option_enable threads) \
+        $(option_with pdf pdftops pdftops) \
         $(option_with perl) \
         $(option_with python) \
         $(option_with xinetd xinetd /etc/xinetd.d) \
