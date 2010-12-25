@@ -1,0 +1,25 @@
+# Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnome.org
+
+SUMMARY="A simple network library"
+HOMEPAGE="http://www.gnome.org/"
+
+LICENCES="LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="gnutls libproxy"
+
+DEPENDENCIES="
+    build:
+        dev-util/intltool[>=0.35.0]
+    build+run:
+        dev-libs/glib:2[>=2.27.5]
+        gnutls? ( dev-libs/gnutls[>=2.1.7] )
+        libproxy? ( net-libs/libproxy:1[>=0.3.1] )
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( libproxy gnutls )
+
+
