@@ -92,11 +92,19 @@ src_prepare() {
 }
 
 src_configure() {
+    local myconf=()
+
     for lang in ${LANGS}; do
         option "linguas:${lang}" && CUPSLANGS="${lang} ${CUPSLANGS}"
     done
 
     [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
+
+    if option pdf ; then
+        myconf+=( '--with-pdftops=pdftops' )
+    else
+        myconf+=( '--with-pdftops=none' )
+    fi
 
     # XXX Enables: slp
     # XXX Withs: java php
@@ -123,10 +131,10 @@ src_configure() {
         $(option_enable tcpd tcp-wrappers) \
         $(option_enable tiff) \
         $(option_enable threads) \
-        $(option_with pdf pdftops pdftops) \
         $(option_with perl) \
         $(option_with python) \
-        $(option_with xinetd xinetd /etc/xinetd.d)
+        $(option_with xinetd xinetd /etc/xinetd.d) \
+        "${myconf[@]}"
 }
 
 src_install() {
