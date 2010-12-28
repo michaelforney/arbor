@@ -1,0 +1,56 @@
+# Copyright 2010 Paul Seidler
+# Distributed under the terms of the GNU General Public License v2
+
+require python-build
+
+PLATFORMS="~amd64"
+
+DEPENDENCIES+="
+    build:
+        sys-devel/autoconf[>=2.65]
+    build+run:
+        dev-libs/expat
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS+=( '--with-system-expat' )
+
+src_prepare() {
+    # support autoconf versions other than 2.65
+    edo sed -ie '8,14d' "${WORK}"/configure.in
+
+    python-build_src_prepare
+
+    # replace still to be done libdir variables
+    edo sed -ie "s:@@EXHERBO_LIBDIR@@:$(get_libdir):g" \
+        Lib/sysconfig.py \
+        Lib/test/test_site.py
+}
+
+src_test() {
+    # strange file access wishes
+    edo rm Lib/test/test_socket.py
+
+    # problems with path resolution
+    edo rm Lib/test/test_distutils.py
+
+    sydboxcmd "net/whitelist/bind/unix://${TEMP}/pymp-*/listener-*"
+
+    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@0"
+    sydboxcmd "net/whitelist/bind/inet6://::@0"
+
+    sydboxcmd "net/whitelist/connect/inet://0.0.0.0@0"
+
+    # TODO: not sure about the port range, use passive ports
+    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@1024-65535"
+    sydboxcmd "net/whitelist/connect/inet://127.0.0.1@1024-65535"
+
+    python-build_src_test
+}
+
+src_install() {
+    python-build_src_install
+
+    # remove empty directory
+    edo rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}${SLOT}/lib-old
+}
+

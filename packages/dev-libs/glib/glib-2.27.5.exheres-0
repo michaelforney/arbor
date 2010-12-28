@@ -29,6 +29,7 @@ DEPENDENCIES="
         dev-python/dbus-python
     recommendation:
         gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
+        dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
     suggestion:
         gnome-desktop/gvfs[multibuild_c:*(?)?] [[ description = [ Provides utilities and support for GIO ] ]]
 "
@@ -39,7 +40,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
 
 src_install() {
-    default
     glib_src_install
 
     edo rm "${IMAGE}"/etc/bash_completion.d/{gdbus-bash-completion.sh,gsettings-bash-completion.sh}

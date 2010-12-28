@@ -5,8 +5,8 @@
 # Based in part upon 'python-2.5.2-r4.ebuild' from Gentoo, which is:
 #  Copyright 1999-2008 Gentoo Foundation
 
-# TODO: alternatives
-require flag-o-matic multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] python
+require flag-o-matic multilib python alternatives \
+        autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 
 export_exlib_phases src_prepare src_configure src_test src_install
 
@@ -105,11 +105,23 @@ python-build_src_install() {
     default
 
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
+    ever at_least 3 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
     edo mv "${IMAGE}"/usr/$(get_libdir)/{${PN}${SLOT}/config,}/libpython${SLOT}.a
 
-    # NOTE regarding alternatives:
-    # python[=2*] & py3k don't collide, except for /usr/bin/2to3, which would be easy to fix.
-    # Therefore there should probably be separate alternative modules for both branches
-    # (eclectic python, eclectic py3k?)
+    # alternatives handling
+    local alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
+    PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
+    edo rm "${IMAGE}/usr/bin/python${SLOT}"
+    edo mv "${IMAGE}/usr/bin/python${SLOT}-config" "${IMAGE}/usr/bin/python${PYTHON_MAJOR}-config"
+
+    alternatives+=(
+        /usr/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3${SLOT}
+        /usr/bin/idle${PYTHON_MAJOR} idle${SLOT}
+        /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
+        /usr/bin/python${PYTHON_MAJOR} python${SLOT}
+        /usr/bin/python${PYTHON_MAJOR}-config python${SLOT}-config
+    )
+
+    alternatives_for "${alternatives[@]}"
 }
 
