@@ -1,0 +1,23 @@
+Upstream: Wants it the way it is for their development.
+Source: philantrop@exherbo.org, adjusted for 2.0.x by pipping@exherbo.org
+Summary: The test "regress" needs a local web server and can be safely disabled.
+--- libevent-2.0.10-stable/test/test.sh
++++ libevent-2.0.10-stable/test/test.sh
+@@ -92,6 +92,7 @@
+ 		FAILED=yes
+ 	fi
+ 	announce_n " regress: "
++if false; then
+ 	if test "$TEST_OUTPUT_FILE" = "/dev/null" ;
+ 	then
+ 		$TEST_DIR/regress --quiet
+@@ -105,6 +106,8 @@
+ 		announce FAILED ;
+ 		FAILED=yes
+ 	fi
++fi
++	announce SKIPPED
+ }
+ 
+ announce "Running tests:"
+
