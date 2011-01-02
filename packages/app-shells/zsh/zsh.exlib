@@ -1,15 +1,20 @@
-# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Copyright 2008-2010 Bernd Steinhauser <berniyh@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'zsh-4.3.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require multilib
 
-export_exlib_phases src_configure src_test src_install
+export_exlib_phases pkg_pretend src_configure src_test src_install
 
 myexparam -b docs=true
 
-SUMMARY="UNIX Shell similar to the Korn shell"
+SUMMARY="Feature-rich UNIX Shell designed for interactive use"
+DESCRIPTION="
+Zsh is a shell designed for interactive use, although it is also a powerful scripting language. Many
+of the useful features of bash, ksh, and tcsh were incorporated into zsh; many original features
+were added.
+"
 HOMEPAGE="http://www.zsh.org/"
 DOWNLOADS="
     ftp://ftp.zsh.org/pub/${PNV}.tar.bz2
@@ -35,7 +40,8 @@ DEPENDENCIES="
         sys-libs/ncurses[>=5.1]
         caps? ( sys-libs/libcap )
         gdbm? ( sys-libs/gdbm )
-        pcre? ( dev-libs/pcre[>=3.9] )"
+        pcre? ( dev-libs/pcre[>=3.9] )
+"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install install.info )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( Etc/ Functions/ )
@@ -65,11 +71,6 @@ zsh_src_test() {
     # This test might fail, depending on your mount options and your file system.
     edo rm "${WORK}"/Test/C02cond.ztst
 
-    # This test starts a zsh process which in turn sources /etc/profile.env through /etc/zsh/zshenv,
-    # which gets locales from the user env, which make this test fail. Reported upstream.
-    # See http://www.zsh.org/mla/workers/2008/msg01505.html
-    edo rm "${WORK}"/Test/Y02compmatch.ztst
-
     # Some tests need a homedir, so we create a pseudo homedir
     edo mkdir "${WORK}"/pseudo-home
     HOME="${WORK}"/pseudo-home
@@ -85,7 +86,7 @@ zsh_src_install() {
 
     dodir /etc/zsh
     insinto /etc/zsh
-    doins "${FILES}"/{zshenv,zshrc}
+    doins "${FILES}"/{zprofile,zshrc}
     keepdir /etc/zsh/site-functions
 
     keepdir /usr/share/zsh/site-functions
@@ -99,6 +100,14 @@ zsh_src_install() {
 
     if exparam -b docs && option doc ; then
         doins "${WORK}"/Doc/${PN}.pdf
+    fi
+}
+
+zsh_pkg_pretend() {
+    if [[ -e /etc/zsh/zshenv ]]; then
+        ewarn "Previously we installed the zprofile as zshenv which is wrong. Since this file is"
+        ewarn "under config protection, you will have to remove it yourself or some test will fail:"
+        ewarn "rm /etc/zsh/zshenv"
     fi
 }
 

@@ -10,7 +10,10 @@ SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        dev-libs/libxml2
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-acl
@@ -19,6 +22,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-openmp
     --with-included-glib
     --with-included-libcroco
+    --with-included-libunistring
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' )
 DEFAULT_SRC_PREPARE_PATCHES=(

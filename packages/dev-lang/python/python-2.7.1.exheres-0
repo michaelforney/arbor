@@ -20,10 +20,17 @@ src_prepare() {
 
     python-build_src_prepare
 
-    # replace still to be done libdir variables
+    # Replace still-to-be-done libdir variables. This must be done *after*
+    # `eautoreconf` is called above.
     edo sed -ie "s:@@EXHERBO_LIBDIR@@:$(get_libdir):g" \
         Lib/sysconfig.py \
         Lib/test/test_site.py
+
+    # Python 2.7.1 requires top-level config.sub and config.guess, so run
+    # `automake` to copy these files from /usr/share/gnuconfig (`eautomake`
+    # would be a no-op here due to the absence of Makefile.am and
+    # GNUmakefile.am).
+    automake --add-missing --copy
 }
 
 src_test() {

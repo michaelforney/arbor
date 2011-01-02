@@ -33,10 +33,10 @@ SLOT="0"
 MYOPTIONS="
     bash-completion
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
-    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
     tcpd
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
 "
+#    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
 
 # We don't support metalog as a syslogger (yet) so we do NOT use virtual/syslog here.
 DEPENDENCIES="
@@ -52,11 +52,6 @@ DEPENDENCIES="
         sys-libs/libcap
         sys-libs/pam[>=1.1.2]
         cryptsetup? ( sys-fs/cryptsetup )
-        gtk? (
-            dev-libs/dbus-glib[>=0.86]
-            x11-libs/gtk+:2[>=2.20]
-            x11-libs/libnotify[>=0.7.0]
-        )
         tcpd? ( sys-apps/tcp-wrappers )
     run:
         sys-apps/busybox
@@ -70,6 +65,12 @@ DEPENDENCIES="
     suggestion:
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
 "
+
+#        gtk? (
+#            dev-libs/dbus-glib[>=0.86]
+#            x11-libs/gtk+:2[>=2.20]
+#            x11-libs/libnotify[>=0.7.0]
+#        )
 
 if ever is_scm || [[ ${PV} == 11_p20101115 ]]; then
     DEPENDENCIES+="
@@ -97,9 +98,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "cryptsetup libcryptsetup"
-    gtk
     "tcpd tcpwrap"
 )
+#    gtk
 
 AT_M4DIR=m4
 
