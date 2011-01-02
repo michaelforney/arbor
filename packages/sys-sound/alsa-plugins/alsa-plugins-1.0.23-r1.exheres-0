@@ -14,30 +14,34 @@ DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ffmpeg pulseaudio jack samplerate speex"
+MYOPTIONS="ffmpeg pulseaudio jack libsamplerate speex"
 
 DEPENDENCIES="
     build+run:
         sys-sound/alsa-lib[>=1.0.11]
-        ffmpeg? ( media/ffmpeg )
-        pulseaudio? ( media-sound/pulseaudio[>=0.9.11] )
-        jack? ( media-sound/jack-audio-connection-kit[>=0.98] )
-        samplerate? ( media-libs/libsamplerate )
-        speex? ( media-libs/speex[>=1.2_rc] )
+
+        ffmpeg?        ( media/ffmpeg )
+        jack?          ( media-sound/jack-audio-connection-kit[>=0.98] )
+        libsamplerate? ( media-libs/libsamplerate )
+        pulseaudio?    ( media-sound/pulseaudio[>=0.9.11] )
+        speex?         ( media-libs/speex[>=1.2_rc] )
 "
 
 AT_M4DIR=( m4 )
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-1.0.22-automagic-speex.patch"
-                              "${FILES}/${PN}-1.0.22-quote-quote-quote-quote.patch"
-                              -p0 "${FILES}/${PN}-1.0.22-missing-avutil.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PN}-1.0.22-automagic-speex.patch"
+    "${FILES}/${PN}-1.0.22-quote-quote-quote-quote.patch"
+    -p0 "${FILES}/${PN}-1.0.22-missing-avutil.patch"
+)
 
 src_configure() {
-    econf $(option_enable ffmpeg avcodec) \
-          $(option_enable pulseaudio) \
-          $(option_enable jack) \
-          $(option_enable samplerate) \
-          --with-speex=$(option speex && echo lib || echo no)
+    econf \
+        $(option_enable ffmpeg avcodec) \
+        $(option_enable jack) \
+        $(option_enable libsamplerate samplerate) \
+        $(option_enable pulseaudio) \
+        --with-speex=$(option speex && echo lib || echo no)
 }
 
 src_install() {
@@ -47,8 +51,8 @@ src_install() {
     dodoc README-pcm-oss upmix.txt vdownmix.txt
     option ffmpeg && dodoc a52.txt lavcrate.txt
     option jack && dodoc README-jack
+    option libsamplerate && dodoc samplerate.txt
     option pulseaudio && dodoc README-pulse
-    option samplerate && dodoc samplerate.txt
     option speex && dodoc speexdsp.txt speexrate.txt
 }
 
