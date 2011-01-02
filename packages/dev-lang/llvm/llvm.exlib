@@ -3,7 +3,7 @@
 
 require multilib
 
-export_exlib_phases src_prepare src_test src_install
+export_exlib_phases src_prepare src_configure src_test src_install
 
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
@@ -58,7 +58,7 @@ DEPENDENCIES="
 if ! ever is_scm; then
     DEPENDENCIES+="
     build:
-            doc? (
+        doc? (
             app-doc/doxygen
             media-gfx/graphviz
         )
@@ -72,17 +72,6 @@ REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_DOCUMENTATION="http://llvm.org/docs [[ lang = en ]]"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 
-if ! ever is_scm; then
-    DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc doxygen' )
-fi
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'clang built-clang' 'gold binutils-include /usr/include' )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-shared
-    --enable-optimized
-    --hates=docdir
-    --with-cxx-include-arch="${CHOST}"
-    --with-cxx-include-root="/usr/include/c++/${GCC_VERSION}/"
-)
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
 llvm_src_prepare() {
@@ -98,6 +87,18 @@ llvm_src_prepare() {
     default
 }
 
+llvm_src_configure() {
+    econf \
+        --enable-shared \
+        --enable-optimized \
+        --hates=docdir \
+        --with-cxx-include-arch="${CHOST}" \
+        --with-cxx-include-root="/usr/include/c++/${GCC_VERSION}/" \
+        $(option_with clang built-clang) \
+        $(option gold && echo --with-binutils-include=/usr/include) \
+        $(ever is_scm || option_enable doc doxygen)
+}
+
 llvm_src_test() {
     emake check
     option clang && emake test -C tools/clang
@@ -111,8 +112,10 @@ llvm_src_install() {
         PROJ_libdir=/usr/$(get_libdir) \
         VERBOSE=1
 
-    # Make sure nm and ar find the gold plugin
-    dodir /usr/${CHOST}/lib/bfd-plugins
-    dosym /usr/$(get_libdir)/libLLVMgold.so /usr/${CHOST}/lib/bfd-plugins
+    if option gold ; then
+        # Make sure nm and ar find the gold plugin
+        dodir /usr/${CHOST}/lib/bfd-plugins
+        dosym /usr/$(get_libdir)/libLLVMgold.so /usr/${CHOST}/lib/bfd-plugins
+    fi
 }
 
