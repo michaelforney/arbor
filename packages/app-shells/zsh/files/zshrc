@@ -1,11 +1,19 @@
-# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Copyright 2008-2011 Bernd Steinhauser <berniyh@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'zprofile' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
 
 # Load environment settings from profile.env, which is created by
 # "eclectic env update" from the files in /etc/env.d
 if [[ -e /etc/profile.env ]] ; then
     . /etc/profile.env
 fi
+
+# Although not all binaries in sbin are useful for normal users, some are.
+# Thus, it is a common practice to include sbin in PATH.
+	PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH}:${ROOTPATH}"
+export PATH
+unset ROOTPATH
 
 # Add a local FPATH
 if [[ -d /etc/zsh/site-functions ]]; then
