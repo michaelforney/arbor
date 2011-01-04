@@ -151,6 +151,16 @@ glibc_src_install() {
         dosym ../lib32/ld-linux.so.2 /lib64/ld-linux.so.2
     fi
 
+    # link every non default locale dir to the default one which is created below
+    local final_libdir=${LIBDIR}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        if [[ "${multibuild_c_target}" != "${MULTIBUILD_C_DEFAULT_TARGET}" ]] ; then
+            dosym /usr/{${final_libdir},${LIBDIR}}/locale
+        fi
+    done
+
     # localedef fails if /usr/lib/locale does not exist
     keepdir "/usr/${LIBDIR}/locale"
 
