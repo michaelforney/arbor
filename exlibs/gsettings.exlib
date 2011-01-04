@@ -3,7 +3,7 @@
 
 : ${GLIB_COMPILE_SCHEMAS:=${ROOT}usr/bin/glib-compile-schemas}
 
-export_exlib_phases pkg_postinst pkg_postrm
+export_exlib_phases src_install pkg_postinst pkg_postrm
 
 gsettings_exlib_compile_gsettings_schemas() {
     echo "${GLIB_COMPILE_SCHEMAS}" "${ROOT}usr/share/glib-2.0/schemas/"
