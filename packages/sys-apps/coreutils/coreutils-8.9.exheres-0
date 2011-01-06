@@ -10,11 +10,7 @@ DEPENDENCIES="
         sys-apps/sydbox[>=0.6.8] [[ note = [ tests fail with sydbox older than 0.6.8 ] ]]
 "
 
-src_prepare() {
-    expatch "${FILES}"/${PN}-8.6-sydbox.patch
-    expatch "${FILES}"/${PN}-sydbox-gnulib.patch
-    expatch "${FILES}"/0001-Disable-a-test-that-hangs-with-sydbox.patch
-    edo find "${WORK}/tests" -name \*.orig -delete
-}
-
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/0001-Disable-tests-that-fail-with-sydbox.patch
+)
 
