@@ -35,6 +35,13 @@ DEPENDENCIES="
         gdbm? ( sys-libs/gdbm )
 "
 
+if ever at_least "1.9" ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/libyaml
+    "
+fi
+
 DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
 
 WORK="${WORKBASE}"/${MY_PNV}
@@ -74,6 +81,8 @@ ruby_src_configure() {
 ruby_src_test() {
     # FIXME Multithreaded test, takes a lifetime under sydbox
     # test/ruby/test_thread.rb
+    # I/O tests fail unter sydbox
+    edo rm "${WORK}/bootstraptest/test_io.rb"
 
     # make test finally runs miniruby, set LD_LIBRARY_PATH so it can find libruby19.so.1.9
     ever at_least 1.9 && export LD_LIBRARY_PATH="${WORK}${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
@@ -113,8 +122,10 @@ ruby_src_install() {
 
     MINIRUBY=$(echo -e 'include Makefile\ngetminiruby:\n\t@echo $(MINIRUBY)'|make -f - getminiruby)
     edo ${MINIRUBY} -e "p 'Hello world from miniruby.'"
-    keepdir "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['vendorarchdir']")" \
-            "$(${MINIRUBY} -rrbconfig -e "print Config::CONFIG['sitearchdir']")"
+    keepdir "$(${MINIRUBY} -r./rbconfig.rb -e "print Config::CONFIG['vendorarchdir']")" \
+            "$(${MINIRUBY} -r./rbconfig.rb -e "print Config::CONFIG['sitearchdir']")"
+
+    ruby_libdir=$(${MINIRUBY} -r ./rbconfig.rb -e "print Config::CONFIG['rubylibdir']")
 
     if option examples; then
         insinto /usr/share/doc/${PNVR}
@@ -122,15 +133,23 @@ ruby_src_install() {
     fi
 
     edo pushd "${IMAGE}"
-    if ever at_least "1.9"; then
-        edo rm usr/bin/{gem,rake}${SLOT}
-        edo rm usr/share/man/man1/rake${SLOT}.1
-    fi
     local src target alternatives=()
     for src in usr/bin/*${SLOT} usr/share/man/man1/*${SLOT}.1; do
         target=${src/${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done
+    if ever at_least 1.9; then
+        # rubygems support
+        # operating_system.rb doesn't seem to be supported anymore
+        # we used this and now we have to suffer
+        edo sed -e "s/default_dir]/default_dir, default_dir.gsub\('gems','vendor_gems'\)]/" -i \
+            "${IMAGE}"/${ruby_libdir}/rubygems/defaults.rb
+
+        # the included ruby gems are vendor gems
+        edo mv "${IMAGE}"/usr/$(get_libdir)/ruby/{,vendor_}gems
+        # keep the gem dirs
+        edo keepdir /usr/$(get_libdir)/ruby/{vendor_,}gems/1.9/{gems,doc,cache,specifications}
+    fi
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
     edo popd
 

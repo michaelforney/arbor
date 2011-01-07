@@ -6,16 +6,8 @@ require ruby autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] 
 LICENCES="|| ( Ruby-1.9 GPL-2 )"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV} )
-
 src_prepare() {
     default
     eautoconf
-}
-
-src_install() {
-    edo rmdir lib/rdoc/{markup/simple_markup,generator/template}
-
-    ruby_src_install
 }
 
