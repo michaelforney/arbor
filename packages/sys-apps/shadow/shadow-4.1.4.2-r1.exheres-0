@@ -79,7 +79,11 @@ src_install() {
         dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
         newpamd "${FILES}/login.pamd.2" login
 
-        for x in chage chsh chfn chpasswd newusers user{add,del,mod} group{add,del,mod} ; do
+        for x in passwd chpasswd chgpasswd; do
+            newpamd "${FILES}"/pam.d-include/passwd ${x}
+        done
+
+        for x in chage chsh chfn newusers user{add,del,mod} group{add,del,mod} ; do
             newpamd "${FILES}"/pam.d-include/shadow ${x}
         done
 
