@@ -31,7 +31,7 @@ REMOTE_IDS="sourceforge:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     build:
@@ -109,16 +109,14 @@ dracut_src_prepare() {
 dracut_src_install() {
     default
 
-    insinto /etc/dracut.conf.d
-    hereins i18n.conf << EOF
-# Console configuration for systemd
-i18n_vars="/etc/vconsole.conf:FONT-SYSFONT"
-keyboard_vars="/etc/vconsole.conf:KEYMAP"
-
-# Uncomment for baselayout
-#i18n_vars="/etc/conf.d/consolefont:CONSOLEFONT-SYSFONT"
-#keyboard_vars="/etc/conf.d/keymaps:KEYMAP"
+    if option baselayout ; then
+        insinto /etc/dracut.conf.d
+        hereins i18n.conf << EOF
+# i18n variable mapping for baselayout
+i18n_vars="/etc/conf.d/consolefont:CONSOLEFONT-SYSFONT"
+keyboard_vars="/etc/conf.d/keymaps:KEYMAP"
 EOF
+    fi
 
     keepdir /etc/dracut.conf.d
 }
