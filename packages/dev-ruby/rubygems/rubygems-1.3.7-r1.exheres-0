@@ -3,6 +3,8 @@
 # Based in part upon 'rubygems-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
+require alternatives
+
 SUMMARY="Centralised Ruby extension management"
 HOMEPAGE="http://rubyforge.org/projects/rubygems/"
 DOWNLOADS="mirror://rubyforge/${PN}/${PNV}.tgz"
@@ -14,16 +16,15 @@ MYOPTIONS="doc"
 
 DEPENDENCIES="
     build+run:
-        dev-lang/ruby[>=1.8.7]
+        dev-lang/ruby:1.8[>=1.8.7]
 "
 
 src_install() {
     unset GEM_HOME GEM_PATH RUBYOPT
 
-    vendor_dir=$(ruby -rrbconfig -e 'print Config::CONFIG["vendorlibdir"]')
+    vendor_dir=$(ruby1.8 -rrbconfig -e 'print Config::CONFIG["vendorlibdir"]')
     vendor_gem_dir=${vendor_dir/vendor_ruby/vendor_gems}
     site_gem_dir=${vendor_dir/vendor_ruby/gems}
-    ruby_version=$(basename ${site_gem_dir})
 
     keepdir {${site_gem_dir},${vendor_gem_dir}}/{doc,gems,cache,specifications}
     #Set this to avoid installer upsetting sandbox
@@ -34,9 +35,7 @@ src_install() {
         myconf+="--no-rdoc --no-ri"
     fi
 
-    edo ruby setup.rb ${myconf} --vendor --destdir="${IMAGE}"
-
-    dosym "gem${ruby_version}" /usr/bin/gem
+    edo ruby1.8 setup.rb ${myconf} --vendor --destdir="${IMAGE}"
 
     # Release Notes missing in 1.3.5
     #dodoc README doc/release_notes/rel_$(ever replace_all '_').rdoc
@@ -44,11 +43,15 @@ src_install() {
 
     insinto ${vendor_dir}/rubygems/defaults/
     doins "${FILES}"/operating_system.rb
+
+    alternatives_for ruby 1.8 1.8 /usr/bin/gem{,1.8}
 }
 
 pkg_postinst() {
     if [[ -e ${site_gem_dir}/source_cache ]]; then
         edo rm ${site_gem_dir}/source_cache
     fi
+
+    alternatives_pkg_postinst
 }
 

@@ -6,6 +6,10 @@ require easy-multibuild
 
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://userweb.kernel.org/~kzak/util-linux-ng/"
+DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${PNV}.tar.bz2"
+
+# The util-linux-ng project has been renamed back to util-linux with v2.19.
+# We should rename the package with the final release of v2.19.
 
 UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}-ChangeLog"
 
@@ -27,6 +31,7 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
+# --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
     econf '--enable-cramfs' '--enable-libblkid' '--enable-nls' \
     '--without-selinux' "--libdir=/${LIBDIR}" '--enable-libmount' \
     '--enable-partx' '--without-utempter' '--with-pam'

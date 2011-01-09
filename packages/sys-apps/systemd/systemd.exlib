@@ -1,4 +1,4 @@
-# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -65,7 +65,6 @@ DEPENDENCIES="
     suggestion:
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
 "
-
 #        gtk? (
 #            dev-libs/dbus-glib[>=0.86]
 #            x11-libs/gtk+:2[>=2.20]
@@ -169,9 +168,6 @@ systemd_src_install() {
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
     fi
-
-    # We're not some other OS so we disable the three-finger-salute.
-    edo rm "${IMAGE}"/$(get_libdir)/systemd/system/ctrl-alt-del.target
 
     insinto /etc
 

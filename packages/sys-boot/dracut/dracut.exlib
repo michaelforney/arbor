@@ -31,7 +31,7 @@ REMOTE_IDS="sourceforge:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     build:
@@ -41,8 +41,8 @@ DEPENDENCIES="
         app-shells/bash
         sys-apps/module-init-tools
         sys-apps/util-linux-ng
-        sys-apps/sysvinit [[ note = [ For killall5 ] ]]
-    recommendation+test:
+        sys-apps/sysvinit [[ note = [ For killall5/pidof ] ]]
+    test:
         app-shells/dash
     suggestion:
         || (
@@ -69,7 +69,7 @@ DEPENDENCIES="
             description = [ Support for an encrypted rootfs using dmcrypt ]
         ]]
         sys-fs/lvm2 [[
-            description = [ Support for LVM volumes and devicemapper partitions for various modules ]
+            description = [ Support for LVM volumes and device-mapper partitions for various modules ]
         ]]
         sys-fs/multipath-tools [[
             description = [ Support for rootfs on multipath devices ]
@@ -93,17 +93,14 @@ DEPENDENCIES="
 
 # TODO
 #   - Remove or modify distro specific modules that are not compatible with Exherbo (e.g. ifcfg).
-#   - Some modules (e.g. network) could probably benefit from better dependency tracking using
-#     options rather then suggestions.
-#   - Get the dmsquash-live and uswsusp modules functioning. This will require additional
-#     dependencies such as isomd5sum, squashfs-tools, and tuxonice-userui respectfully.
+#   - Some modules (e.g. network, dmsquash-live) may need additional run dependencies and dependency
+#     tracking using option group-name annotations.
 
 DEFAULT_SRC_COMPILE_PARAMS=( WITH_SWITCH_ROOT=0 )
 DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr sysconfdir=/etc )
 
-# Dracut's "Test Matrix" has excessive dependencies and would require significant re-configuration.
-# This second series of tests requires root privileges and relies on hard-coded paths, thus they
-# have been disabled. It does not yet appear that these are meant to be executable by anybody.
+# Dracut's "Test Matrix" requires root privileges and are excessive.
+# This disables them and only runs the syntax check with dash.
 dracut_src_prepare() {
     default
     edo sed -i -e '/$(MAKE) -C test check/d' Makefile
@@ -112,16 +109,14 @@ dracut_src_prepare() {
 dracut_src_install() {
     default
 
-    insinto /etc/dracut.conf.d
-    hereins i18n.conf << EOF
-# Console configuration for systemd
-i18n_vars="/etc/vconsole.conf:FONT-SYSFONT"
-keyboard_vars="/etc/vconsole.conf:KEYMAP"
-
-# Uncomment for baselayout
-#i18n_vars="/etc/conf.d/consolefont:CONSOLEFONT-SYSFONT"
-#keyboard_vars="/etc/conf.d/keymaps:KEYMAP"
+    if option baselayout ; then
+        insinto /etc/dracut.conf.d
+        hereins i18n.conf << EOF
+# i18n variable mapping for baselayout
+i18n_vars="/etc/conf.d/consolefont:CONSOLEFONT-SYSFONT"
+keyboard_vars="/etc/conf.d/keymaps:KEYMAP"
 EOF
+    fi
 
     keepdir /etc/dracut.conf.d
 }

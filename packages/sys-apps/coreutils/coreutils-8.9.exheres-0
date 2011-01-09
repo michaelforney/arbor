@@ -5,9 +5,12 @@ require coreutils
 
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
+DEPENDENCIES="
+    test:
+        sys-apps/sydbox[>=0.6.8] [[ note = [ tests fail with sydbox older than 0.6.8 ] ]]
+"
+
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-sydbox.patch
-    "${FILES}"/${PN}-sydbox-gnulib.patch
-    "${FILES}"/0001-Disable-a-test-that-hangs-with-sydbox.patch
+    "${FILES}"/0001-Disable-tests-that-fail-with-sydbox.patch
 )
 

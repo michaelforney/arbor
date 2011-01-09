@@ -211,6 +211,7 @@ scm_fetch_one() {
 
 scm_src_fetch_extra() {
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
+    [[ -n $(declare -F scm_user_customize) ]] && scm_user_customize
     scm_{for_each,access_checkout,fetch_one}
 }
 
@@ -262,6 +263,7 @@ scm_unpack_one() {
 
 scm_src_unpack() {
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
+    [[ -n $(declare -F scm_user_customize) ]] && scm_user_customize
     scm_{for_each,access_checkout,unpack_one}
     SCM_IS_BUILT=1
 }

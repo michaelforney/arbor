@@ -48,6 +48,15 @@ DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( Etc/ Functions/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( META-FAQ FEATURES Etc/{completion-style-guide,relnote_4.3.{5..10.txt},zsh-development-guide )
 DEFAULT_SRC_INSTALL_EXCLUDE=( FAQ.yo )
 
+zsh_pkg_pretend() {
+    if [[ -e "${ROOT}"/etc/zsh/zshenv ]]; then
+        ewarn "Previously we installed the zprofile as zshenv which is wrong. Since this file is"
+        ewarn "under config protection, you will have to remove it yourself or some test will fail:"
+        ewarn "    rm ${ROOT}/etc/zsh/zshenv"
+        die "Resolve the ${ROOT}/etc/zsh/zshenv issues explained above before continuing"
+    fi
+}
+
 zsh_src_configure() {
     econf \
         --bindir=/bin \
@@ -100,14 +109,6 @@ zsh_src_install() {
 
     if exparam -b docs && option doc ; then
         doins "${WORK}"/Doc/${PN}.pdf
-    fi
-}
-
-zsh_pkg_pretend() {
-    if [[ -e /etc/zsh/zshenv ]]; then
-        ewarn "Previously we installed the zprofile as zshenv which is wrong. Since this file is"
-        ewarn "under config protection, you will have to remove it yourself or some test will fail:"
-        ewarn "rm /etc/zsh/zshenv"
     fi
 }
 

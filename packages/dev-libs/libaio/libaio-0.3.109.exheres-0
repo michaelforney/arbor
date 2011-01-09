@@ -1,9 +1,9 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'libaio-0.3.107.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-require debian-upstream [ debian_pv="${PV}.orig" ] multilib
+require multilib
 
 SUMMARY="Asynchronous input/output library that uses the kernels native interface"
 DESCRIPTION="
@@ -14,6 +14,7 @@ one system call (io_submit()) without waiting for completion, and a separate int
 group. Support for kernel AIO has been included in the 2.6 Linux kernel.
 "
 HOMEPAGE="http://www.kernel.org/pub/linux/kernel/people/andrea/libaio/ http://lse.sourceforge.net/io/aio.html"
+DOWNLOADS="mirror://kernel/linux/libs/aio/${PNV}.tar.bz2"
 
 BUGS_TO="philantrop@exherbo.org"
 
@@ -22,7 +23,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-# Tests fail, need root, require expect
+# Tests want to mount things, need root, require expect
 RESTRICT="test userpriv"
 
 DEPENDENCIES=""
@@ -36,15 +37,15 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 src_prepare() {
     default
 
-    sed -i "/^libdir=/s:lib$:$(get_libdir):" src/Makefile Makefile
+    edo sed -i "/^libdir=/s:lib$:$(get_libdir):" src/Makefile Makefile
 }
 
 src_test() {
     addwrite /dev/loop
-    pushd "${WORK}"/harness >/dev/null
-    mkdir testdir
+    edo pushd "${WORK}"/harness >/dev/null
+    edo mkdir testdir
     emake -j1 check prefix="${WORK}/src" libdir="${WORK}/src"
-    popd >/dev/null
+    edo popd >/dev/null
 }
 
 src_install() {
@@ -53,6 +54,6 @@ src_install() {
     doman man/*
 
     # remove stuff provided by man-pages now
-    rm "${IMAGE}"usr/share/man/man3/aio_{cancel,error,fsync,read,return,suspend,write}.*
+    edo rm "${IMAGE}"usr/share/man/man3/aio_{cancel,error,fsync,read,return,suspend,write}.*
 }
 

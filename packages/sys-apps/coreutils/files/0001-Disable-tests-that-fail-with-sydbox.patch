@@ -1,0 +1,62 @@
+From e59774517f93352a2a801757a1185a8c9ecc608e Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Thu, 6 Jan 2011 16:25:58 +0000
+Subject: [PATCH] Disable tests that fail with sydbox
+
+Edit: Daniel Mierswa <impulze@impulze.org>
+I removed the disabling of 2 tests here since they seem to work fine
+with 7.5. There's another test failing on my machine (tail-2/assert)
+but since it works for alip, let's see if more people run into it.
+
+Edit: Elias Pipping <pipping@exherbo.org>
+All but two tests that originally failed still do (the others are
+skipped automatically if strace does not work). Made the patch apply
+again
+---
+ tests/install/basic-1     |    2 ++
+ tests/mkdir/p-3           |    2 ++
+ tests/tail-2/inotify-race |    2 ++
+ 3 files changed, 6 insertions(+), 0 deletions(-)
+
+diff --git a/tests/install/basic-1 b/tests/install/basic-1
+index 688e6be..914491c 100755
+--- a/tests/install/basic-1
++++ b/tests/install/basic-1
+@@ -92,6 +92,8 @@ test -d xx/rel && fail=1
+ # inaccessible parent.  coreutils 5.97 fails this test.
+ # Perform this test only if "." is on a local file system.
+ # Otherwise, it would fail e.g., on an NFS-mounted file system.
++
++skip_test_ "Test fails under sydbox, see bug #204. -alip"
+ if is_local_dir_ .; then
+   mkdir -p sub1/d || fail=1
+   (cd sub1/d && chmod a-r . && chmod a-rx .. &&
+diff --git a/tests/mkdir/p-3 b/tests/mkdir/p-3
+index 0adfbea..2a963a3 100755
+--- a/tests/mkdir/p-3
++++ b/tests/mkdir/p-3
+@@ -38,6 +38,8 @@ test -d "$p/b/b" && test -d "$p/z" || fail=1
+ # whose parent is inaccessible.  coreutils 5.97 fails this test.
+ # Perform this test only if "." is on a local file system.
+ # Otherwise, it would fail e.g., on an NFS-mounted file system.
++skip_test_ "Test fails under sydbox, see bug #204. -alip"
++
+ if is_local_dir_ .; then
+   (cd no-acce3s/d && chmod a-r . && chmod a-rx .. &&
+       mkdir -p a/b "$p/b/c" d/e && test -d a/b && test -d d/e) || fail=1
+diff --git a/tests/tail-2/inotify-race b/tests/tail-2/inotify-race
+index 7e23100..ce8767c 100755
+--- a/tests/tail-2/inotify-race
++++ b/tests/tail-2/inotify-race
+@@ -23,6 +23,8 @@
+ . "${srcdir=.}/init.sh"; path_prepend_ ../src
+ print_ver_ tail
+ 
++skip_test_ 'This test (using gdb) hangs under sydbox'
++
+ # Don't run this test by default because sometimes it's skipped as noted below.
+ # Also gdb has a bug in Debian's gdb-6.8-3 at least that causes it to not
+ # cleanup and exit correctly when it receives a SIGTERM, thus hanging the test.
+-- 
+1.7.3.5
+

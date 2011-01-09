@@ -1,0 +1,16 @@
+Upstream: Yes
+Source: Daniel Mierswa <impulze@impulze.org>
+Reason: --enable-gnutls requires pkg-config
+
+See http://cups.org/str.php?L3761+P0+S-2+C0+I0+E0+M20+Q
+diff -Naur cups-1.5svn-r9412.orig/config-scripts/cups-ssl.m4 cups-1.5svn-r9412/config-scripts/cups-ssl.m4
+--- cups-1.5svn-r9412.orig/config-scripts/cups-ssl.m4	2010-08-10 02:02:02.000000000 +0200
++++ cups-1.5svn-r9412/config-scripts/cups-ssl.m4	2010-12-27 01:55:54.000000000 +0100
+@@ -74,6 +74,7 @@
+     fi
+ 
+     dnl Then look for GNU TLS...
++    AC_PATH_PROG(PKGCONFIG, pkg-config)
+     if test $have_ssl = 0 -a "x${enable_gnutls}" != "xno" -a "x$PKGCONFIG" != x; then
+     	AC_PATH_PROG(LIBGNUTLSCONFIG,libgnutls-config)
+     	AC_PATH_PROG(LIBGCRYPTCONFIG,libgcrypt-config)

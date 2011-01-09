@@ -5,8 +5,9 @@
 
 require systemd-service alternatives
 
-MY_PNV=${PNV/_p/p}
+export_exlib_phases src_install
 
+MY_PNV=${PNV/_p/p}
 SUMMARY="Network Time Protocol suite/programs"
 DESCRIPTION="
 The Network Time Protocol (NTP) is used to synchronize the time of a computer
@@ -22,12 +23,10 @@ DOWNLOADS="
     mirror://gentoo/${MY_PNV}-manpages.tar.bz2
 "
 
-LICENCES="as-is"
-
 UPSTREAM_RELEASE_NOTES="http://www.eecis.udel.edu/~${PN}/${PN}_spool/${PN}4/NEWS"
 
+LICENCES="as-is"
 SLOT="0"
-
 MYOPTIONS="baselayout caps debug ipv6 parse-clocks"
 
 DEPENDENCIES="
@@ -40,13 +39,21 @@ DEPENDENCIES="
         user/${PN}
 "
 
-WORK="${WORKBASE}/${MY_PNV}"
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--hates=docdir' '--enable-crypto' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "caps linuxcaps" "parse-clocks" "ipv6" "debug debugging" )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --enable-crypto
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "caps linuxcaps"
+    "debug debugging"
+    ipv6
+    parse-clocks
+)
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( WHERE-TO-START )
 
-src_install() {
+WORK=${WORKBASE}/${MY_PNV}
+
+ntp_src_install() {
     default
 
     dodir /usr/sbin
