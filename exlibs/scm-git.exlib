@@ -290,6 +290,7 @@ scm-git_do_revision() {
 
 scm-git_do_unpack() {
     scm-git_git clone -s -n "$(scm_get_var CHECKOUT_TO)" "$(scm_get_var UNPACK_TO)"
+    scm-git_git -q --git-dir="$(scm_get_var UNPACK_TO)"/.git config advice.detachedhead false
     scm-git_git --git-dir="$(scm_get_var UNPACK_TO)"/.git --work-tree="$(scm_get_var UNPACK_TO)" checkout -f $(
         if [[ -n $(scm_get_var TAG) ]]; then
             echo refs/tags/$(scm_get_var TAG)
