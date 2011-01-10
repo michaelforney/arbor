@@ -123,6 +123,7 @@ src_configure() {
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
         --with-languages="${CUPSLANGS}" \
         --with-system-groups=lpadmin \
+        --without-rcdir \
         $(option_enable acl) \
         $(option_enable dbus) \
         $(option_enable pam) \
@@ -146,8 +147,6 @@ src_install() {
             /var/spool/cups/tmp
 
     keepdir /etc/cups/{interfaces,ppd,ssl}
-
-    edo rm -r "${IMAGE}/etc"/rc.d
 
     # provide our own pam script
     if option pam ; then
