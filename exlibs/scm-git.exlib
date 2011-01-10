@@ -42,11 +42,31 @@ scm-git_do_check_vars() {
     [[ -z $(scm_get_var BRANCH) && -z $(scm_get_var REVISION) &&
             -z $(scm_get_var TAG) ]] && scm_set_var BRANCH master
     local rev=$(scm_get_var REVISION)
-    [[ -n ${rev} ]] && [[ ${rev} == *[^0-9a-f]* || ${#rev} -ne 40 ]] \
+    [[ -n ${rev} && ${rev} != _ ]] && [[ ${rev} == *[^0-9a-f]* || ${#rev} -ne 40 ]] \
         && die "for git, $(scm_var_name REVISION) must be a 40-character lowercase hexadecimal SHA-1 sum"
     [[ -n $(scm_get_var SUBPATH) ]] && die "for git, $(scm_var_name SUBPATH) must not be set"
 
     scm_modify_var REPOSITORY scm_trim_slashes -scheme -trailing
+
+    local submodules=( $(scm_get_var GIT_SUBMODULES) ) idx
+    if [[ -n ${submodules[@]} ]]; then
+        for idx in ${!submodules[@]}; do
+            [[ ${submodules[${idx}]} == ?*:* ]] || die "$(scm_var_name GIT_SUBMODULES) entry ${submodules[${idx}]} is malformed"
+            local path=$(scm_trim_slashes -leading -trailing "${submodules[${idx}]%:*}")
+            local that=${submodules[${idx}]##*:}
+            submodules[${idx}]=${path}:${that}
+            if [[ -n ${that} ]]; then
+                has ${that} ${SCM_SECONDARY_REPOSITORIES} || die "$(scm_var_name GIT_SUBMODULES) references non-existent repository ${that}"
+                local othertype=$(SCM_THIS=${that} scm_get_var TYPE)
+                [[ ${othertype:-${SCM_TYPE}} == git ]] || die "$(scm_var_name GIT_SUBMODULES) references non-git repository ${that}"
+                if [[ -z $(SCM_THIS=${that} scm_get_var UNPACK_TO) ]]; then
+                    local my_unpack_to=$(scm_get_var UNPACK_TO)
+                    SCM_THIS=${that} scm_set_var UNPACK_TO "${my_unpack_to}/${path}"
+                fi
+            fi
+        done
+        scm_set_var GIT_SUBMODULES "${submodules[*]}"
+    fi
 }
 
 scm-git_git() {
@@ -69,6 +89,8 @@ scm-git_git() {
 }
 
 scm-git_do_appraise() {
+    [[ $(scm_get_var REVISION) == _ ]] && die "$(scm_var_name REVISION) is _, but was not filled in by a submodule declaration"
+
     local dir=$(scm_get_var CHECKOUT_TO)
 
     if ! nonfatal scm-git_git -q rev-parse 2>/dev/null; then
@@ -142,6 +164,97 @@ EOF
     fi
 
     return 0
+}
+
+scm-git_do_resolve_externals() {
+    local errors=( )
+    local submodules=( $(scm_get_var GIT_SUBMODULES) ) idx
+
+    local revspec=$(
+        if [[ -n $(scm_get_var TAG) ]]; then
+            echo refs/tags/$(scm_get_var TAG)
+        elif [[ -n $(scm_get_var REVISION) ]]; then
+            scm_get_var REVISION
+        else
+            echo refs/heads/$(scm_get_var BRANCH)
+            fi)
+    local gitmodules=$(nonfatal scm-git_git -q rev-parse -q --verify ${revspec}:.gitmodules)
+
+    local entry name value submodule revision uri dir fulldir
+    [[ -n ${gitmodules} ]] && while read -r -d $'\0' entry; do
+        name=${entry%%$'\n'*}
+        value=${entry#*$'\n'}
+        [[ ${name} == submodule.*.path ]] || continue
+        submodule=${name#submodule.}
+        submodule=${submodule%.path}
+
+        dir=$(scm_trim_slashes -leading -trailing "${value}")
+        [[ -n ${dir} ]] || die ".gitmodules key ${name} for ${SCM_THIS:-primary repository} is empty or contains only slashes"
+        fulldir=$(scm_get_var UNPACK_TO)/${dir}
+
+        uri=$(scm_trim_slashes -scheme -trailing "$(scm-git_git -q config --file <(scm-git_git -q cat-file blob ${gitmodules}) "submodule.${submodule}.url")")
+        [[ -n ${uri} ]] || die ".gitmodules key submodule.${submodule}.url for ${SCM_THIS:-primary repository} is empty"
+        if [[ ${uri} == ./* ]]; then
+            uri=$(scm_get_var REPOSITORY)/${uri#./}
+        elif [[ ${uri} == ../* ]]; then
+            local myuri=$(scm_get_var REPOSITORY)
+            while [[ ${uri} == ../* ]]; do
+                uri=${uri#../}
+                myuri=${myuri%/*}
+            done
+            uri=${myuri}/${uri}
+        fi
+
+        revision=$(scm-git_git -q ls-tree -z ${revspec} "${dir}")
+        [[ -n ${revision} ]] || die "Could not find a submodule commit reference at ${dir} in ${SCM_THIS:-primary repository}"
+        revision=${revision%%$'\t'*}
+        [[ ${revision} == *" commit "* ]] || die "Tree entry for ${dir} does not reference a commit object for submodule in ${SCM_THIS:-primary repository}"
+        revision=${revision##* }
+
+        for idx in ${!submodules[@]}; do
+            if [[ ${submodules[${idx}]} == ${dir}:* ]]; then
+                local that=${submodules[${idx}]##*:}
+                if [[ -n ${that} ]]; then
+                    local got
+
+                    got=$(SCM_THIS=${that} scm_get_var UNPACK_TO)
+                    [[ ${got} == ${fulldir} ]] \
+                        || errors+=( "$(SCM_THIS=${that} scm_var_name UNPACK_TO) is ${got}, but wanted ${fulldir}" )
+
+                    got=$(SCM_THIS=${that} scm_get_var REPOSITORY)
+                    [[ ${got} == ${uri} ]] \
+                        || errors+=( "git URI for ${that} is ${got}, but wanted ${uri}" )
+
+                    got=$(SCM_THIS=${that} scm_get_var REVISION)
+                    if [[ ${got} == _ ]]; then
+                        SCM_THIS=${that} scm_set_var REVISION "${revision}"
+                    else
+                        [[ ${got} == ${revision} ]] \
+                            || errors+=( "$(SCM_THIS=${that} scm_var_name REVISION) is ${got:-unset}, but wanted ${revision:-unset}" )
+                    fi
+
+                fi
+                unset submodules[${idx}]
+                continue 2
+            fi
+        done
+
+        errors+=( "no repository declared for submodule ${dir}" )
+    done < <(scm-git_git -q config --file <(scm-git_git -q cat-file blob ${gitmodules}) --list --null)
+
+    if [[ -n ${!submodules[@]} ]]; then
+        for idx in ${!submodules[@]}; do
+            errors+=( "${submodules[${idx}]%:*} does not match any submodule" )
+        done
+    fi
+
+    if [[ ${#errors[@]} -gt 0 ]]; then
+        local error
+        for error in "${errors[@]}"; do
+            eerror "${error}"
+        done
+        die "$(scm_var_name GIT_SUBMODULES) is not compatible with actual submodule declarations in the repository"
+    fi
 }
 
 scm-git_do_checkout() {
