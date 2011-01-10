@@ -178,7 +178,7 @@ scm-git_do_resolve_externals() {
         else
             echo refs/heads/$(scm_get_var BRANCH)
             fi)
-    local gitmodules=$(nonfatal scm-git_git -q rev-parse -q --verify ${revspec}:.gitmodules)
+    local gitmodules=$(nonfatal scm-git_git -q rev-parse -q --verify ${revspec}:.gitmodules 2>/dev/null)
 
     local entry name value submodule revision uri dir fulldir
     [[ -n ${gitmodules} ]] && while read -r -d $'\0' entry; do
