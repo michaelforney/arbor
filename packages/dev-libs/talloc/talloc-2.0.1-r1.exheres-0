@@ -54,8 +54,8 @@ DEFAULT_SRC_INSTALL_EXCLUDE=( release-script.sh )
 
 # FIXME The install target in talloc.mk installs swig files (talloc.i) if swig is found
 
-src_install() {
-    easy-multibuild_src_install
+install_one_multibuild() {
+    default
 
     dosym /usr/${LIBDIR}/libtalloc.so.${PV} /usr/${LIBDIR}/libtalloc.so
 }
