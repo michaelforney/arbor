@@ -106,10 +106,6 @@ src_configure() {
         myconf+=( '--with-pdftops=none' )
     fi
 
-    if option gnutls ; then
-        myconf+=( '--enable-gnutls' '--disable-openssl' )
-    fi
-
     # XXX Enables: slp
     # XXX Withs: java php
     econf \
@@ -124,6 +120,9 @@ src_configure() {
         --with-languages="${CUPSLANGS}" \
         --with-system-groups=lpadmin \
         --without-rcdir \
+        --disable-cdsassl \
+        $(option_enable gnutls gnutls) \
+        $(option_enable !gnutls openssl) \
         $(option_enable acl) \
         $(option_enable dbus) \
         $(option_enable pam) \
