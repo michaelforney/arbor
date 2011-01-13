@@ -1,0 +1,48 @@
+Source: J?rg Billeter <j@bitron.ch>
+Upstream: Yes
+Reason: fix test failure
+
+From 6608153f85d671eca275a31fe01180c901d85be4 Mon Sep 17 00:00:00 2001
+From: Jürg Billeter <j@bitron.ch>
+Date: Sat, 08 Jan 2011 15:49:46 +0000
+Subject: Do not install GObject properties for D-Bus interfaces
+---
+diff --git a/codegen/valagobjectmodule.vala b/codegen/valagobjectmodule.vala
+index 2eadee5..2159941 100644
+--- a/codegen/valagobjectmodule.vala
++++ b/codegen/valagobjectmodule.vala
+@@ -1,6 +1,6 @@
+ /* valagobjectmodule.vala
+  *
+- * Copyright (C) 2006-2010  Jürg Billeter
++ * Copyright (C) 2006-2011  Jürg Billeter
+  * Copyright (C) 2006-2008  Raffaele Sandrini
+  *
+  * This library is free software; you can redistribute it and/or
+@@ -720,12 +720,9 @@ public class Vala.GObjectModule : GTypeModule {
+ 			return false;
+ 		}
+ 
+-		if (prop.base_interface_property != null) {
+-			var iface = (Interface) prop.base_interface_property.parent_symbol;
+-			if (!iface.is_subtype_of (gobject_type)) {
+-				// implementing non-GObject property
+-				return false;
+-			}
++		if (type_sym is Class && prop.base_interface_property != null &&
++		    !is_gobject_property (prop.base_interface_property)) {
++			return false;
+ 		}
+ 
+ 		if (!prop.name[0].isalpha ()) {
+@@ -733,6 +730,11 @@ public class Vala.GObjectModule : GTypeModule {
+ 			return false;
+ 		}
+ 
++		if (type_sym is Interface && type_sym.get_attribute ("DBus") != null) {
++			// GObject properties not currently supported in D-Bus interfaces
++			return false;
++		}
++
+ 		return true;
+ 	}
