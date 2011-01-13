@@ -32,9 +32,16 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-Reactivate-the-shared-library-versionning-script.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-threads --enable-ipv6 --without-icu )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python readline "readline history" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
+
+pkg_pretend() {
+    if option multibuild_c:32 && option python; then
+        ewarn "The 32bit python portion in libxml2 needs a 32bit python,"
+        ewarn "which is not available yet. The 32bit libxml2 will be built"
+        ewarn "without python support."
+    fi
+}
 
 src_unpack() {
     unpack ${PNV}.tar.gz
@@ -50,6 +57,23 @@ src_prepare() {
     autotools_src_prepare
 }
 
+configure_one_multibuild() {
+    local myconf
+    if ! multibuild_default_target C; then
+        # Needs 32bit python
+        myconf+="--without-python"
+    fi
+
+    econf \
+        --with-threads \
+        --enable-ipv6 \
+        --without-icu \
+        $(option_with python) \
+        $(option_with readline) \
+        $(option_with readline history) \
+        "${myconf}"
+}
+
 test_one_multibuild() {
     # tests don't support out-of-source builds
     edo ln -s "${WORK}"/{result,test} .
@@ -60,6 +84,9 @@ install_one_multibuild() {
     # devhelp doesn't support out-of-source builds
     edo cp -pPR "${WORK}"/doc/devhelp/* doc/devhelp/
     default
-    option python && python_bytecompile
+    if multibuild_default_target C; then
+        # python part disabled for 32bit
+        option python && python_bytecompile
+    fi
 }
 
