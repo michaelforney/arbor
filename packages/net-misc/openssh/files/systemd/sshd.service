@@ -4,6 +4,9 @@ After=syslog.target
 
 [Service]
 ExecStart=/usr/sbin/sshd -D
+KillMode=process
+Restart=always
+ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target
