@@ -39,6 +39,10 @@ DEPENDENCIES="
         user/${PN}
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/ntp-4.2.4p7-nano.patch"
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --hates=docdir
     --enable-crypto
@@ -49,6 +53,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     ipv6
     parse-clocks
 )
+
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( WHERE-TO-START )
 
 WORK=${WORKBASE}/${MY_PNV}
