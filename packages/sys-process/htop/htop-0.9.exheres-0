@@ -11,8 +11,8 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="
-    cgroups [[ description = [ Support cgroups-managed processes (requires in-kernel cgroups support) ] ]]
-    openvz  [[ description = [ Support OpenVZ-managed processes (requires in-kernel OpenVZ support) ] ]]
+    cgroup [[ description = [ Enable listing a process's cgroup                           ] ]]
+    openvz [[ description = [ Enable listing a process's container and virtual process id ] ]]
 "
 
 DEPENDENCIES="
@@ -23,6 +23,6 @@ DEPENDENCIES="
         sys-process/lsof [[ description = [ Display open files for a process           ] ]]
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "cgroups cgroup" openvz )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( cgroup openvz )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-taskstats --enable-unicode )
 
