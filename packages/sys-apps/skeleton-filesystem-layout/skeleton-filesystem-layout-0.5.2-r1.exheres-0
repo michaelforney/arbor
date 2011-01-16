@@ -90,7 +90,7 @@ pkg_postinst() {
     done
 
     # /var structure
-    for x in var{,/cache,/empty,/lib,/local,/lock,/log,/run,/spool}; do
+    for x in var{,/adm,/cache,/empty,/lib,/local,/lock,/log,/run,/spool{,/lpd,/news,/uucp}}; do
         create_root_owned_directory "${ROOT}${x}"
     done
 
