@@ -10,21 +10,19 @@ REMOTE_IDS+="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="openvz"
+MYOPTIONS="
+    cgroups [[ description = [ Support cgroups-managed processes (requires in-kernel cgroups support) ] ]]
+    openvz  [[ description = [ Support OpenVZ-managed processes (requires in-kernel OpenVZ support) ] ]]
+"
 
 DEPENDENCIES="
     build+run:
         sys-libs/ncurses
     suggestion:
-        sys-process/lsof [[ description = [ Display open files for a process ] ]]
+        dev-util/strace  [[ description = [ Trace system calls of the selected process ] ]]
+        sys-process/lsof [[ description = [ Display open files for a process           ] ]]
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( openvz )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "cgroups cgroup" openvz )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-taskstats --enable-unicode )
-
-src_install() {
-    default
-    rmdir "${IMAGE}"/usr/include
-    rmdir "${IMAGE}"/usr/$(get_libdir)
-}
 

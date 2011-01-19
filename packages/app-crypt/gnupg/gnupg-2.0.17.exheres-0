@@ -9,7 +9,9 @@ DOWNLOADS="mirror://gnupg/gnupg/${PNV}.tar.bz2"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc"
+MYOPTIONS="doc
+    smartcard [[ description = [ Install the smartcard daemon ( includes CCID support ). ] ]]
+"
 
 DEPENDENCIES="
     build:
@@ -17,29 +19,39 @@ DEPENDENCIES="
         doc? ( sys-apps/texinfo )
     build+run:
         app-arch/bzip2
-        app-crypt/pinentry
         dev-libs/libassuan[>=2.0.0]
         dev-libs/libgcrypt[>=1.4]
-        dev-libs/libgpg-error[>=1.4]
-        dev-libs/libksba[>=1.0.2]
-        dev-libs/libusb:0.1 [[ note = [ Automagic dependency, patches welcome ] ]]
+        dev-libs/libgpg-error[>=1.7]
+        dev-libs/libksba[>=1.0.7]
         dev-libs/pth
-        net-misc/curl
+        net-misc/curl[>=7.10]
+        sys-libs/readline
+        smartcard? ( dev-libs/libusb:0.1 )
+    recommendation:
+        app-crypt/pinentry [[ description = [
+            Provides GTK+, QT, and ncurses password prompts
+        ] ]]
+        smartcard? ( sys-apps/pcsc-lite ) [[ description = [
+            Provides the default pcsc library for accessing smartcards
+        ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
-    --enable-symcryptrun
     --enable-gpg
     --enable-gpgsm
     --enable-agent
+    --enable-tools
+    --enable-symcryptrun
     --enable-bzip2
     --disable-ldap
-    # Needs a kernel patch
-    --without-capabilities
+    --without-capabilities # This option doesn't do anything.
+    --without-adns # Requires GNU adns
 )
-DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( DETAILS KEYSERVER OpenPGP TRANSLATE)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    'smartcard scdaemon'
+    'smartcard ccid-driver'
+)
 
 src_compile() {
     default
