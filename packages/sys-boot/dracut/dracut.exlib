@@ -26,6 +26,10 @@ there is an attempt to keep things as distribution-agnostic as possible.
 "
 HOMEPAGE="http://sourceforge.net/apps/trac/dracut/"
 
+UPSTREAM_DOCUMENTATION="
+    http://people.redhat.com/harald/dracut.html [[ description = [ Manual ] lang = en ]]
+"
+
 BUGS_TO="eternaleye@gmail.com spoonb@exherbo.org"
 REMOTE_IDS="sourceforge:${PN}"
 
@@ -41,9 +45,13 @@ DEPENDENCIES="
         app-shells/bash
         sys-apps/module-init-tools
         sys-apps/util-linux-ng
-        sys-apps/sysvinit [[ note = [ For killall5/pidof ] ]]
+        sys-fs/udev
     test:
         app-shells/dash
+    recommendation:
+        sys-apps/sysvinit [[
+            description = [ Required by the base module for pidof if not using busybox ]
+        ]]
     suggestion:
         || (
             app-misc/bootchart2 [[
@@ -53,8 +61,16 @@ DEPENDENCIES="
                 description = [ Support for graphical analysis of the boot process ]
             ]]
         )
+        net-fs/nfs-utils [[
+            description = [ Required by the NFS module for rootfs on NFS ]
+            group-name = [ dracut-nfs-module ]
+        ]]
         net-misc/open-iscsi [[
             description = [ Support for rootfs on iSCSI ]
+        ]]
+        net-nds/rpcbind [[
+            description = [ Reguired by the NFS module for rootfs on NFS ]
+            group-name = [ dracut-nfs-module ]
         ]]
         sys-apps/eject [[
             description = [ Used by the dmsquash-live module for livecds ]
@@ -76,38 +92,54 @@ DEPENDENCIES="
         ]]
         net-misc/bridge-utils [[
             description = [ Required by the network boot module for brctl ]
+            group-name = [ dracut-network-module ]
         ]]
         net-misc/dhcp [[
             description = [ Required by the network boot module for dhclient ]
+            group-name = [ dracut-network-module ]
         ]]
         net-misc/iputils [[
             description = [ Required by the network boot and debug module for arping and ping ]
+            group-name = [ dracut-network-module ]
         ]]
         sys-apps/iproute2 [[
             description = [ Required by the network boot module for ip ]
+            group-name = [ dracut-network-module ]
         ]]
         sys-apps/net-tools [[
             description = [ Required by the iSCSI and debug module for hostname and netstat ]
         ]]
+        virtual/syslog [[
+            description = [ Support for logging to a remote server with the syslog module ]
+        ]]
+        !build_options:recommended_tests? ( app-shells/dash [[
+            description = [ Support for dash as the initramfs shell ]
+        ]] )
 "
 
 # TODO
-#   - Remove or modify distro specific modules that are not compatible with Exherbo (e.g. ifcfg).
-#   - Some modules (e.g. network, dmsquash-live) may need additional run dependencies and dependency
-#     tracking using option group-name annotations.
+#   - Some modules need additional/unpackaged dependencies and testing.
+#     See the check and install files in the module directory,
 
 DEFAULT_SRC_COMPILE_PARAMS=( WITH_SWITCH_ROOT=0 )
 DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr sysconfdir=/etc )
 
-# Dracut's "Test Matrix" requires root privileges and are excessive.
-# This disables them and only runs the syntax check with dash.
 dracut_src_prepare() {
     default
+
+    # Dracut's "Test Matrix" requires root privileges and are excessive.
+    # This disables them and only runs the syntax check with dash.
     edo sed -i -e '/$(MAKE) -C test check/d' Makefile
+
+    # Remove modules that are not compatible with Exherbo.
+    edo rm -r modules.d/{10rpmversion,45ifcfg}
 }
 
 dracut_src_install() {
     default
+
+    insinto /usr/share/doc/${PNVR}/html/
+    doins dracut.html dracut.png
 
     if option baselayout ; then
         insinto /etc/dracut.conf.d
