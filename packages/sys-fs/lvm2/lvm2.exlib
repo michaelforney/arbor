@@ -1,11 +1,10 @@
 # Copyright 2008 Kim Højgaard-Hansen
-# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib systemd-service
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require multilib systemd-service autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
-export_exlib_phases src_test_expensive src_install
+export_exlib_phases src_prepare src_test_expensive src_install
 
 SUMMARY="Userspace toolset providing logical volume management facilities"
 DESCRIPTION="
@@ -16,8 +15,10 @@ This package also includes device-mapper.
 "
 BASE_URL="sources.redhat.com"
 HOMEPAGE="http://${BASE_URL}/${PN}/"
-DOWNLOADS="ftp://${BASE_URL}/pub/${PN}/LVM2.${PV}.tgz
-    ftp://${BASE_URL}/pub/${PN}/old/LVM2.${PV}.tgz"
+DOWNLOADS="
+    ftp://${BASE_URL}/pub/${PN}/LVM2.${PV}.tgz
+    ftp://${BASE_URL}/pub/${PN}/old/LVM2.${PV}.tgz
+"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -26,14 +27,22 @@ MYOPTIONS="
     debug
     dmeventd [[ description = [ DM event daemon to monitor active mapped devices ] ]]
     fsadm [[ description = [ Utility to resize or check filesystem on a device ] ]]
+    udev [[ description = [ Install udev rules and enable synching with udev. ] ]]
 "
 
 UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        udev? ( sys-fs/udev[>=165-r1] )
+"
 
 # The tests are expensive and need to run as root.
 RESTRICT="test userpriv"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/no-export-dynamic.patch" )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
@@ -43,24 +52,32 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-pkgconfig
     --enable-readline
     --enable-static_link
-    --enable-udev_rules
-    --disable-udev_sync # disabled by default
     --disable-nls
     --disable-selinux
-    --with-udevdir=/$(get_libdir)/udev/rules.d
     --with-usrlibdir=/usr/$(get_libdir)
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     dmeventd
     fsadm
+    "udev udev_rules"
+    "udev udev_sync"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "udev udevdir /$(get_libdir)/udev/rules.d"
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/no-export-dynamic.patch" )
+WORK=${WORKBASE}/LVM2.${PV}
 
-WORK="${WORKBASE}"/LVM2.${PV}
+lvm2_src_prepare() {
+    # The build system doesn't pick up all libraries needed for linking.
+    edo sed -i -e 's:\(LIBS += $(UDEV_LIBS)\):\1 -lrt:' tools/Makefile.in
+
+    autotools_src_prepare
+}
 
 lvm2_src_test_expensive() {
     # These tests still fail or succeed pretty much randomly for no apparent reason...
