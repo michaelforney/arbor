@@ -22,7 +22,7 @@ _update_icon_theme_cache()
         [[ -f "${ROOT}${dir}/index.theme" ]] || continue
 
         if [[ -x ${GTK_UPDATE_ICON_CACHE} ]] ; then
-            nonfatal edo "${GTK_UPDATE_ICON_CACHE} -qf ${ROOT}${dir}"
+            nonfatal edo "${GTK_UPDATE_ICON_CACHE}" -qf "${ROOT}${dir}"
         fi
     done
 }
