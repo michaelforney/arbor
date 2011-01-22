@@ -1,7 +1,7 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib alternatives
+require multilib systemd-service
 
 SUMMARY="An enhanced syslog daemon for Linux (and Unix)"
 DESCRIPTION="
@@ -34,7 +34,6 @@ MYOPTIONS="
     mysql [[ description = [ Support logging to a MySQL database ] ]]
     postgresql [[ description = [ Support logging to a PostgreSQL database ] ]]
     relp [[ description = [ Support relp network protocol ] ]]
-    systemd
 "
 
 DEPENDENCIES="
@@ -88,16 +87,9 @@ src_install() {
 
     # html docs
     insinto /usr/share/doc/${PNVR}/html
-    doins -r "${WORK}"/doc/*
+    doins -r "${WORK}"/doc/*.{html,png,jpg}
     dodoc "${WORK}"/rsyslog.conf
 
-    if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins \
-            "${FILES}"/systemd/syslog.service.${PN} \
-            "${FILES}"/systemd/syslog.socket.${PN}
-        alternatives_for systemd-logger ${PN} 10 /$(get_libdir)/systemd/system/syslog.service syslog.service.${PN}
-        alternatives_for systemd-logger ${PN} 10 /$(get_libdir)/systemd/system/syslog.socket syslog.socket.${PN}
-    fi
+    install_systemd_files
 }
 
