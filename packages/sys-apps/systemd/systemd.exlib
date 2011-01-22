@@ -46,7 +46,6 @@ DEPENDENCIES="
     build+run:
         dev-libs/glib:2[>=2.25.9]
         sys-apps/dbus[>=1.4.0][systemd]
-        || ( sys-apps/rsyslog sys-apps/syslog-ng )
         sys-apps/skeleton-filesystem-layout
         sys-fs/udev[>=163][systemd]
         sys-libs/libcap
@@ -64,6 +63,8 @@ DEPENDENCIES="
         sys-apps/module-init-tools
     suggestion:
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
+        sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
+        sys-apps/syslog-ng   [[ description = [ Provides a standard syslog daemon ] ]]
 "
 #        gtk? (
 #            dev-libs/dbus-glib[>=0.86]
@@ -228,12 +229,6 @@ EOF
 
     # Enable basic.service
     dosym /$(get_libdir)/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
-
-    # Enable syslog
-    dosym /$(get_libdir)/systemd/system/syslog.service /etc/systemd/system/multi-user.target.wants/syslog.service
-    if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
-        dosym /$(get_libdir)/systemd/system/syslog.socket /etc/systemd/system/multi-user.target.wants/syslog.socket
-    fi
 }
 
 systemd_pkg_postinst() {
