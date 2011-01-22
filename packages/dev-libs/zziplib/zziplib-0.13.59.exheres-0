@@ -4,9 +4,9 @@
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 1.11 ] ]
 require sourceforge
 
-SUMMARY="A library to read zip files."
-DESCRIPTION="The implementation is based only on the (free) subset of
-compression with the zlib algorithm."
+SUMMARY="A library to read zip files"
+DESCRIPTION="
+The implementation is based only on the (free) subset of compression with the zlib algorithm."
 
 LICENCES="|| ( LGPL-2 MPL-1.1 )"
 SLOT="0"
@@ -15,11 +15,11 @@ MYOPTIONS="sdl"
 
 DEPENDENCIES="
     build:
-        dev-lang/python
+        dev-lang/python:*
         dev-util/pkg-config
     build+run:
-        sdl? ( media-libs/SDL )
         sys-libs/zlib
+        sdl? ( media-libs/SDL )
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=( sdl )
