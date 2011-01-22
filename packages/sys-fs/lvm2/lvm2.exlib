@@ -75,6 +75,7 @@ WORK=${WORKBASE}/LVM2.${PV}
 lvm2_src_prepare() {
     # The build system doesn't pick up all libraries needed for linking.
     edo sed -i -e 's:\(LIBS += $(UDEV_LIBS)\):\1 -lrt:' tools/Makefile.in
+    edo sed -i -e 's:\($(STATIC_LIBS)\):\1 -lrt:' daemons/dmeventd/Makefile.in
 
     autotools_src_prepare
 }
