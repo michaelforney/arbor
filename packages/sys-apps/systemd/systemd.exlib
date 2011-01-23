@@ -1,4 +1,4 @@
-# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -38,13 +38,12 @@ MYOPTIONS="
 "
 #    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
 
-# We don't support metalog as a syslogger (yet) so we do NOT use virtual/syslog here.
 DEPENDENCIES="
     build:
         dev-libs/libxslt
         dev-util/pkg-config[>=0.20]
     build+run:
-        dev-libs/glib:2[>=2.25.9]
+        dev-libs/glib:2[>=2.26]
         sys-apps/dbus[>=1.4.0][systemd]
         sys-apps/skeleton-filesystem-layout
         sys-fs/udev[>=163][systemd]
@@ -64,10 +63,8 @@ DEPENDENCIES="
     suggestion:
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
         sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
-        sys-apps/syslog-ng   [[ description = [ Provides a standard syslog daemon ] ]]
 "
 #        gtk? (
-#            dev-libs/dbus-glib[>=0.86]
 #            x11-libs/gtk+:2[>=2.20]
 #            x11-libs/libnotify[>=0.7.0]
 #        )
