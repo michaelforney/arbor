@@ -91,6 +91,7 @@ src_install() {
     edo cp -a "${IMAGE}"/usr/$(get_libdir)/librt.a "${IMAGE}"/$(get_libdir)/
     edo rm "${IMAGE}"/usr/$(get_libdir)/librt.a
     dosym /$(get_libdir)/librt.a /usr/$(get_libdir)/
+    dosym /$(get_libdir)/librt.so.1 /$(get_libdir)/librt.so
 
     hereenvd 02locale <<EOF
 LANG=en_GB.utf8
