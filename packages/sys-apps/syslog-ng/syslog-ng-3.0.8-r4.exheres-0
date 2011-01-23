@@ -1,5 +1,5 @@
 # Copyright 2007 Bryan Østergaard
-# Copyright 2009, 2010 Wulf C. Krueger
+# Copyright 2009-2011 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -79,5 +79,16 @@ src_install() {
     newins "${FILES}"/syslog-ng.logrotate syslog-ng
 
     install_systemd_files
+}
+
+pkg_postinst() {
+    default
+
+    if [[ -d /etc/env.d/alternatives/systemd-logger ]]; then
+        nonfatal edo rm -r /etc/env.d/alternatives/systemd-logger || ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
+    fi
+    [[ -f /usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
+        nonfatal edo rm /usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
+            ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
 }
 
