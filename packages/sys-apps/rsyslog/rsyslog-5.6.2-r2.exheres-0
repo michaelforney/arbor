@@ -30,10 +30,9 @@ MYOPTIONS="
     debug
     gnutls
     kerberos
-    mail [[ description = [ Enable email support (for alerts, etc) ] ]]
-    mysql [[ description = [ Support logging to a MySQL database ] ]]
+    mysql      [[ description = [ Support logging to a MySQL database ] ]]
     postgresql [[ description = [ Support logging to a PostgreSQL database ] ]]
-    relp [[ description = [ Support relp network protocol ] ]]
+    relp       [[ description = [ Support relp network protocol ] ]]
 "
 
 DEPENDENCIES="
@@ -46,30 +45,42 @@ DEPENDENCIES="
         postgresql? ( dev-db/postgresql )
         relp? ( net-libs/librelp )
     suggestion:
-        app-admin/logrotate
+        app-admin/logrotate [[ description = [ Support for rotating log files ] ]]
 "
 
-# Todo: libdbi, "snmp net-snmp"
+# TODO: libdbi, "snmp net-snmp"
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-extended-tests
+    --enable-imdiag
+    --enable-imptcp
+    --enable-imfile
     --enable-inet
     --enable-klog
+    --enable-mail
+    --enable-omprog
+    --enable-omuxsock
     --enable-pthreads
-    --enable-testbench
     --enable-regexp
     --enable-rsyslogd
     --enable-rsyslogrt
     --enable-zlib
+    --disable-imtemplate
     --disable-libdbi
+    --disable-omtemplate
     --disable-oracle
     --disable-snmp
+
+    # This is not a mistake and passing it to configure is correct.
+    # Java is not being used at all yet, however the tests depend on it.
+    HAVE_JAVAC=yes
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "build_options:recommended_tests testbench"
+    "build_options:recommended_tests extended-tests"
     debug
+    "debug diagtools"
     gnutls
     "kerberos gssapi-krb5"
-    mail
     mysql
     "postgresql pgsql"
     relp
@@ -93,6 +104,33 @@ src_install() {
     install_systemd_files
 }
 
+# The imdiag, imptcp, and omuxsock modules are required for the tests.
+src_test() {
+    # This test uses the standard syslog port 514.
+    edo sed \
+        -e 's/^source .*/echo \[sndrcv_udp.sh\]: disabled since we are not root/' \
+        -i "${WORK}"/tests/sndrcv_udp.sh
+
+    # FIXME: This still fails due to network sandboxing. The whitelist bellow should work.
+    edo echo \
+        "echo \[uxsock_simple.sh\]: omuxsock test disabled" > "${WORK}"/tests/uxsock_simple.sh
+
+    sydboxcmd "net/whitelist/bind/unix:///${WORK}/tests/rsyslog-testbench-dgram-uxsock"
+
+    # There is currently no support to configure which interface the server binds to.
+    # However, the tests are only performed on the loopback and this is generally safe.
+    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@13500-13501"
+    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@13514-13516"
+    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@2514"
+
+    # These clients connect without first binding since the server binds on 0.0.0.0.
+    sydboxcmd "net/whitelist/connect/LOOPBACK@13500"
+    sydboxcmd "net/whitelist/connect/LOOPBACK@13514-13516"
+    sydboxcmd "net/whitelist/connect/LOOPBACK@2514"
+
+    default
+}
+
 pkg_postinst() {
     default
 
@@ -102,6 +140,6 @@ pkg_postinst() {
     fi
     [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
         nonfatal edo rm "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
-            ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
+            ewarn "Removing /usr/share/eclectic/modules/auto/systemd-logger.eclectic failed"
 }
 
