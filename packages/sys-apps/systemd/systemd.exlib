@@ -240,6 +240,7 @@ systemd_pkg_postinst() {
         /etc/systemd/system/local-fs.target.wants/tmp.service
         /etc/systemd/system/sysinit.target.wants/remount-rootfs.service
         /etc/systemd/system/sysinit.target.wants/sysinit.service
+        /$(get_libdir)/systemd/system/syslog.service
     )
     for file in ${cruft[@]}; do
         if [[ -f ${file} || -L ${file} ]]; then
