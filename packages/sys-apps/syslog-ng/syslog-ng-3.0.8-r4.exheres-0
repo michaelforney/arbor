@@ -84,11 +84,12 @@ src_install() {
 pkg_postinst() {
     default
 
-    if [[ -d /etc/env.d/alternatives/systemd-logger ]]; then
-        nonfatal edo rm -r /etc/env.d/alternatives/systemd-logger || ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
+    if [[ -d "${ROOT}"/etc/env.d/alternatives/systemd-logger ]]; then
+        nonfatal edo rm -r "${ROOT}"/etc/env.d/alternatives/systemd-logger || \
+            ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
     fi
-    [[ -f /usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
-        nonfatal edo rm /usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
+    [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
+        nonfatal edo rm "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
             ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
 }
 
