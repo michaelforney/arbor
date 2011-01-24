@@ -5,8 +5,6 @@
 #   Copyright 1999-2007 Gentoo Foundation
 #
 
-require multilib
-
 SUMMARY="A library for network packet capturing"
 HOMEPAGE="http://www.tcpdump.org"
 DOWNLOADS="${HOMEPAGE}/release/${PNV}.tar.gz"
@@ -16,7 +14,9 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="bluetooth ipv6"
+MYOPTIONS="bluetooth ipv6
+    libnl [[ description = [ Use libnl to support monitor mode on mac80211 devices ] ]]
+"
 
 DEPENDENCIES="
     build:
@@ -24,8 +24,9 @@ DEPENDENCIES="
         sys-devel/flex
     build+run:
         bluetooth? ( net-wireless/bluez )
+        libnl? ( net-libs/libnl )
 "
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( --without-libnl )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bluetooth ipv6 )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --without-snf )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bluetooth ipv6 libnl )
+DEFAULT_SRC_INSTALL_EXCLUDE=( README.{Win32,aix,dag,hpux,macosx,septel,sita,tru64} )
 
