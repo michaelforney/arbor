@@ -138,8 +138,9 @@ pkg_postinst() {
         nonfatal edo rm -r "${ROOT}"/etc/env.d/alternatives/systemd-logger || \
             ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
     fi
-    [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
+    if [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]]; then
         nonfatal edo rm "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
             ewarn "Removing /usr/share/eclectic/modules/auto/systemd-logger.eclectic failed"
+    fi
 }
 
