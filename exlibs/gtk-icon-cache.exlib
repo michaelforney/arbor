@@ -7,6 +7,8 @@ export_exlib_phases pkg_preinst pkg_postinst pkg_postrm
 
 _save_icon_theme_directories()
 {
+    illegal_in_global_scope
+
     pushd "${IMAGE}" &> /dev/null
     export GTK_ICON_CACHE_ICON_THEME_DIRECTORIES=$(find 'usr/share/icons' -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
     popd "${IMAGE}" &> /dev/null
@@ -14,6 +16,8 @@ _save_icon_theme_directories()
 
 _update_icon_theme_cache()
 {
+    illegal_in_global_scope
+
     [[ -n ${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES} ]] || return
 
     echo "Updating icon cache ..."
@@ -22,25 +26,29 @@ _update_icon_theme_cache()
         [[ -f "${ROOT}${dir}/index.theme" ]] || continue
 
         if [[ -x ${GTK_UPDATE_ICON_CACHE} ]] ; then
-            nonfatal edo "${GTK_UPDATE_ICON_CACHE}" -qf "${ROOT}${dir}"
+            nonfatal edo "${GTK_UPDATE_ICON_CACHE}" -qf "${ROOT}${dir}" ||
+                ewarn "Failed to update icon cache in ${dir}"
         fi
     done
 }
 
 gtk-icon-cache_pkg_preinst()
 {
+    illegal_in_global_scope
+
     _save_icon_theme_directories
-    default
 }
 
 gtk-icon-cache_pkg_postinst()
 {
+    illegal_in_global_scope
+
     _update_icon_theme_cache
-    default
 }
 
 gtk-icon-cache_pkg_postrm() {
+    illegal_in_global_scope
+
     _update_icon_theme_cache
-    default
 }
 
