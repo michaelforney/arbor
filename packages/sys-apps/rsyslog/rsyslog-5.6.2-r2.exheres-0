@@ -115,20 +115,28 @@ src_test() {
     edo echo \
         "echo \[uxsock_simple.sh\]: omuxsock test disabled" > "${WORK}"/tests/uxsock_simple.sh
 
-    sydboxcmd "net/whitelist/bind/unix:///${WORK}/tests/rsyslog-testbench-dgram-uxsock"
+    esandbox allow_net "unix:${WORK}/tests/rsyslog-testbench-dgram-uxsock"
 
     # There is currently no support to configure which interface the server binds to.
     # However, the tests are only performed on the loopback and this is generally safe.
-    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@13500-13501"
-    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@13514-13516"
-    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@2514"
+    esandbox allow_net "inet:0.0.0.0@13500-13501"
+    esandbox allow_net "inet:0.0.0.0@13514-13516"
+    esandbox allow_net "inet:0.0.0.0@2514"
 
     # These clients connect without first binding since the server binds on 0.0.0.0.
-    sydboxcmd "net/whitelist/connect/LOOPBACK@13500"
-    sydboxcmd "net/whitelist/connect/LOOPBACK@13514-13516"
-    sydboxcmd "net/whitelist/connect/LOOPBACK@2514"
+    esandbox allow_net --connect "LOOPBACK@13500"
+    esandbox allow_net --connect "LOOPBACK@13514-13516"
+    esandbox allow_net --connect "LOOPBACK@2514"
 
     default
+
+    esandbox disallow_net "inet:0.0.0.0@13500-13501"
+    esandbox disallow_net "inet:0.0.0.0@13514-13516"
+    esandbox disallow_net "inet:0.0.0.0@2514"
+
+    esandbox disallow_net --connect "LOOPBACK@13500"
+    esandbox disallow_net --connect "LOOPBACK@13514-13516"
+    esandbox disallow_net --connect "LOOPBACK@2514"
 }
 
 pkg_postinst() {

@@ -99,9 +99,9 @@ lvm2_src_test_expensive() {
     edo rm test/t-vgsplit-operation.sh
 
     # The tests call several tools and need a few devices.
-    sydboxcmd sandunbox/exec
-    sydboxcmd write /dev
-    sydboxcmd write /etc
+    esandbox disable_exec
+    esandbox allow /dev
+    esandbox allow /etc
 
     emake -j1 check
 }

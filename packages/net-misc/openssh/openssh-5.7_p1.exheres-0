@@ -88,23 +88,23 @@ src_compile() {
 }
 
 src_test() {
-    sydboxcmd 'net/whitelist/bind/unix:///tmp/ssh-*/agent.*'
-    sydboxcmd 'net/whitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
-    sydboxcmd 'net/whitelist/connect/unix:///nonexistent'
+    esandbox allow_net 'unix:/tmp/ssh-*/agent.*'
+    esandbox allow_net 'unix:/tmp/openssh.regress.ctl-sock.*'
+    esandbox allow_net --connect 'unix:/nonexistent'
 
     # There's a sandbox violation I can't whitelist:
     # Reason: bind{family=AF_UNIX path=/var/tmp/paludis/build/net-misc-openssh-5.7_p1/temp//ssh-GbKiXikI4746/agent.4746 abstract=false}
     # Using net/whitelist/bind/unix doesn't fix it so I'll sandunbox/net here for now.
-    sydboxcmd 'sandunbox/net'
+    esandbox disable_net
 
     option X509 && export SSH_X509TESTS="blob_auth"
     emake -j1 tests
 
-    sydboxcmd 'sandbox/net'
+    esandbox enable_net
 
-    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/ssh-*/agent.*'
-    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
-    sydboxcmd 'net/unwhitelist/connect/unix:///nonexistent'
+    esandbox disallow_net 'unix:/tmp/ssh-*/agent.*'
+    esandbox disallow_net 'unix:/tmp/openssh.regress.ctl-sock.*'
+    esandbox disallow_net --connect 'unix:/nonexistent'
 }
 
 src_install() {

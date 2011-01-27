@@ -133,7 +133,7 @@ scm_check_timestamp() {
 scm_perform_fetch() {
     illegal_in_global_scope
 
-    sydboxcmd sandunbox/net
+    esandbox disable_net
 
     local dir=$(scm_get_var CHECKOUT_TO)
 
@@ -199,7 +199,7 @@ scm_perform_fetch() {
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
     fi
 
-    sydboxcmd sandbox/net
+    esandbox enable_net
 }
 
 scm_fetch_one() {
