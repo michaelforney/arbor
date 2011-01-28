@@ -29,7 +29,7 @@ diff -ur LVM2.2.02.72.orig/daemons/dmeventd/Makefile.in LVM2.2.02.72/daemons/dme
  dmeventd.static: $(LIB_STATIC) dmeventd.o $(interfacebuilddir)/libdevmapper.a
 -	$(CC) $(CFLAGS) $(LDFLAGS) -static -L. -L$(interfacebuilddir) -o $@ \
 +	$(CC) $(CFLAGS) $(LDFLAGS) $(STATIC_LDFLAGS) -static -L. -L$(interfacebuilddir) -o $@ \
- 	dmeventd.o $(DL_LIBS) $(LVMLIBS) $(LIBS) $(STATIC_LIBS)
+ 	dmeventd.o $(DL_LIBS) $(LVMLIBS) $(LIBS) $(STATIC_LIBS) -lrt
  
  ifeq ("@PKGCONFIG@", "yes")
 diff -ur LVM2.2.02.72.orig/make.tmpl.in LVM2.2.02.72/make.tmpl.in

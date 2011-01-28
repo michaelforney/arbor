@@ -1,16 +1,31 @@
 # Copyright 2008 Gaute Hope <eg@gaute.vetsj.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'docbook-sgml-utils-0.6.14.ebuild' from Gentoo, which is:
-#   Copyright 1999-2008 Gentoo Foundation.
+#     Copyright 1999-2008 Gentoo Foundation
 
 SUMMARY="Shell scripts to manage DocBook documents"
+DESCRIPTION="
+docbook-utils (aka docbook-tools) is a collection of all the free software
+tools you need to work on and format DocBook documents:
+ * docbook2dvi
+ * docbook2html
+ * docbook2man
+ * docbook2pdf
+ * docbook2ps
+ * docbook2rtf
+ * docbook2tex
+ * docbook2texi
+ * docbook2txt
+ * jw
+ * sgmldiff
+"
 HOMEPAGE="http://sourceware.org/docbook-tools/"
 DOWNLOADS="mirror://sourceware/docbook-tools/new-trials/SOURCES/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="jadetex"
+MYOPTIONS="jadetex [[ description = [ Install docbook2{dvi,pdf,ps} (requires jadetex) ] ]]"
 
 DEPENDENCIES="
     build:

@@ -85,7 +85,7 @@ zsh_src_test() {
     HOME="${WORK}"/pseudo-home
 
     # Some tests need to write to /dev/ptmx, they fail otherwise
-    addwrite /dev/ptmx
+    esandbox allow /dev/ptmx
 
     default
 }

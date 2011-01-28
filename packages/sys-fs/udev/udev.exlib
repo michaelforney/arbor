@@ -82,6 +82,7 @@ udev_src_prepare() {
 configure_one_multibuild() {
     econf \
         --sbindir=/sbin \
+        --enable-static \
         --with-rootlibdir=/${LIBDIR} \
         --libexecdir=/${LIBDIR}/udev/ \
         --without-selinux \
@@ -157,11 +158,11 @@ udev_pkg_postinst() {
 
     # Change the wait mode to wait/eldest so
     # sydbox doesn't wait for udevd to exit.
-    sydboxcmd wait/eldest
+    esandbox wait_eldest
 
     # Allow network access for udevd
-    sydboxcmd net/whitelist/bind/unix-abstract:///org/kernel/udev/udevd
-    sydboxcmd net/whitelist/connect/unix:///dev/log
+    esandbox allow_net unix-abstract:/org/kernel/udev/udevd
+    esandbox allow_net --connect unix:/dev/log
 
     /sbin/udevd --daemon
     /sbin/udevadm info --convert-db

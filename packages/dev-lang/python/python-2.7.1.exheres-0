@@ -40,16 +40,16 @@ src_test() {
     # problems with path resolution
     edo rm Lib/test/test_distutils.py
 
-    sydboxcmd "net/whitelist/bind/unix://${TEMP}/pymp-*/listener-*"
+    esandbox allow_net "unix:${TEMP}/pymp-*/listener-*"
 
-    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@0"
-    sydboxcmd "net/whitelist/bind/inet6://::@0"
-
-    sydboxcmd "net/whitelist/connect/inet://0.0.0.0@0"
+    # FIXME: Binding to 0.0.0.0 is bad mmkay? -alip
+    esandbox allow_net "inet:0.0.0.0@0"
+    esandbox allow_net "inet6:::@0"
+    esandbox allow_net --connect "inet:0.0.0.0@0"
 
     # TODO: not sure about the port range, use passive ports
-    sydboxcmd "net/whitelist/bind/inet://0.0.0.0@1024-65535"
-    sydboxcmd "net/whitelist/connect/inet://127.0.0.1@1024-65535"
+    esandbox allow_net "inet:0.0.0.0@1024-65535"
+    esandbox allow_net --connect "inet:127.0.0.1@1024-65535"
 
     python-build_src_test
 }

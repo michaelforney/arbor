@@ -1,0 +1,142 @@
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib systemd-service
+
+export_exlib_phases pkg_pretend src_install # src_test pkg_config
+
+MYSQL_MAJOR_VERSION=$(ever range 1-2)
+
+SUMMARY="A relational database management system (RDBMS)"
+HOMEPAGE="http://www.mysql.com/"
+DOWNLOADS="
+mirror://mysql/Downloads/MySQL-$(ever range 1-2)/${PNV}.tar.gz
+http://downloads.mysql.com/archives/${PN}-$(ever range 1-2)/${PNV}.tar.gz
+"
+
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_CHANGELOG="
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/news-$(ever replace_all '-').html
+"
+UPSTREAM_DOCUMENTATION="
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/index.html               [[ lang = [ en ] ]]
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html   [[ lang = [ en ] note = [ Post installation documentation ] ]]
+"
+
+LICENCES="GPL-2" # with-exceptions
+SLOT="0"
+MYOPTIONS="baselayout big-tables debug embedded-server ssl
+    big-tables      [[ description = [ Make tables contain up to 1.844E+19 rows ] ]]
+    embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        ssl? ( dev-libs/openssl )
+        group/${PN}
+        user/${PN}
+    suggestion:
+        app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    big-tables
+    debug
+    'embedded-server' 'embedded-server embedded-privilege-control'
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-assembler
+    # Compile the client with threads
+    --enable-thread-safe-client
+    # Where to put mysqld, mysqlmanager
+    --libexecdir="/usr/sbin"
+    # mysqld puts its data directly in this
+    --localstatedir=/var/lib/mysql
+    --with-comment="Exherbo, ${PNVR}"
+    --with-mysqld-user=mysql
+    # Use the system readline, libedit. --with-readline builds the internal readling copy.
+    --without-readline --without-libedit
+    # Use system openssl, takes either (no|bundled|DIR) (config/ac-macros/ssl.m4)
+    --with-ssl=/usr
+    --with-extra-charsets=all
+    --with-server
+
+    # Pre-built man-pages
+    --with-man
+    # And info page/ChangeLog
+    --with-docs
+    # Enable the InnoDB plugin as it's the most efficient backend. Akonadi needs this, too.
+    --with-plugins=innobase
+)
+
+mysql_pkg_pretend() {
+    # Sanity check when upgrading to a different x.y version of mysql
+    if [[ -z ${MYSQL_MAJOR_UPGRADE} ]] && has_version ${CATEGORY}/${PN} && \
+        ! has_version ${CATEGORY}/${PN}[=${MYSQL_MAJOR_VERSION}*] ; then
+        ewarn "To install a different major version of MySQL, you have to dump/reload your database."
+        ewarn "When you've done this, please set 'MYSQL_MAJOR_UPGRADE=YesPlease', to continue the upgrade."
+        ewarn "For more information visit:"
+        ewarn "http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/upgrade.html"
+        ewarn "http://dev.mysql.com/doc/refman/${PV}/en/downgrading.html"
+        die "Dump your databases before doing a major version upgrade of MySQL."
+    fi
+
+    # Pending genesis integration:
+    # Upgrading to any version requires starting/stopping the MySQL server.
+}
+
+if false; then
+# FIXME Write me
+mysql_pkg_config() {
+    :
+}
+fi
+
+if false; then
+# FIXME Write me
+# See mysql-test/README
+mysql_src_test() {
+    :
+}
+fi
+
+mysql_src_install() {
+    default
+
+    # Contains lots of cruft & some empty dirs
+    rm -r "${IMAGE}"/usr/{mysql-test,sql-bench} || die "Couldn't nuke /usr/mysql-test"
+
+    keepdir /etc/mysql
+    cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf || die "copying default config failed"
+    sed -i -e "/socket/s:=.*:= /var/run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf || die "fixing socket path failed"
+
+    keepdir /var/{lib,log}/mysql
+    edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
+    edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
+
+    keepdir /var/run/mysqld
+    edo chown mysql:mysql "${IMAGE}"/var/run/mysqld
+    edo chmod 755 "${IMAGE}"/var/run/mysqld
+
+    hereenvd 46mysql <<EOF
+LDPATH=/usr/$(get_libdir)/${PN}
+EOF
+
+    insinto /etc/logrotate.d
+    newins "${FILES}"/logrotate.mysql mysql
+
+    if option baselayout ; then
+        newinitd "${FILES}"/mysql.rc6 mysql
+        newconfd "${FILES}"/mysql.conf.d mysql
+    fi
+
+    install_systemd_files
+
+    if option systemd; then
+        insinto /etc/tmpfiles.d
+        hereins ${PN}.conf <<EOF
+d /var/run/mysqld 0755 mysql mysql
+EOF
+    fi
+}
+

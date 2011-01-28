@@ -1,4 +1,4 @@
-# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -38,15 +38,13 @@ MYOPTIONS="
 "
 #    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
 
-# We don't support metalog as a syslogger (yet) so we do NOT use virtual/syslog here.
 DEPENDENCIES="
     build:
         dev-libs/libxslt
         dev-util/pkg-config[>=0.20]
     build+run:
-        dev-libs/glib:2[>=2.25.9]
+        dev-libs/glib:2[>=2.26]
         sys-apps/dbus[>=1.4.0][systemd]
-        || ( sys-apps/rsyslog sys-apps/syslog-ng )
         sys-apps/skeleton-filesystem-layout
         sys-fs/udev[>=163][systemd]
         sys-libs/libcap
@@ -64,9 +62,9 @@ DEPENDENCIES="
         sys-apps/module-init-tools
     suggestion:
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
+        sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
 "
 #        gtk? (
-#            dev-libs/dbus-glib[>=0.86]
 #            x11-libs/gtk+:2[>=2.20]
 #            x11-libs/libnotify[>=0.7.0]
 #        )
@@ -228,12 +226,6 @@ EOF
 
     # Enable basic.service
     dosym /$(get_libdir)/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
-
-    # Enable syslog
-    dosym /$(get_libdir)/systemd/system/syslog.service /etc/systemd/system/multi-user.target.wants/syslog.service
-    if [[ -e /$(get_libdir)/systemd/system/syslog.socket ]]; then
-        dosym /$(get_libdir)/systemd/system/syslog.socket /etc/systemd/system/multi-user.target.wants/syslog.socket
-    fi
 }
 
 systemd_pkg_postinst() {
@@ -248,6 +240,7 @@ systemd_pkg_postinst() {
         /etc/systemd/system/local-fs.target.wants/tmp.service
         /etc/systemd/system/sysinit.target.wants/remount-rootfs.service
         /etc/systemd/system/sysinit.target.wants/sysinit.service
+        /$(get_libdir)/systemd/system/syslog.service
     )
     for file in ${cruft[@]}; do
         if [[ -f ${file} || -L ${file} ]]; then

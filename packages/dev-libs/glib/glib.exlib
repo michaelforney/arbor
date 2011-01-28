@@ -41,11 +41,16 @@ test_one_multibuild() {
     export G_DBUS_COOKIE_SHA1_KEYRING_DIR_IGNORE_PERMISSION=1
     export G_DBUS_COOKIE_SHA1_KEYRING_DIR="${TEMP}"
 
-    sydboxcmd 'net/whitelist/connect/unix:///tmp/g-dbus-tests-pid-*'
-    sydboxcmd 'net/whitelist/bind/unix:///tmp/g-dbus-tests-pid-*'
-    sydboxcmd 'net/whitelist/connect/unix:///tmp/gdbus-test-does-not-exist-pid'
-    sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/gdbus-test-/dbus-*'
+    esandbox allow_net --connect 'unix:/tmp/g-dbus-tests-pid-*'
+    esandbox allow_net 'unix:/tmp/g-dbus-tests-pid-*'
+    esandbox allow_net --connect 'unix:/tmp/gdbus-test-does-not-exist-pid'
+    esandbox allow_net 'unix-abstract:/tmp/gdbus-test-/dbus-*'
 
     default
+
+    esandbox disallow_net --connect 'unix:/tmp/g-dbus-tests-pid-*'
+    esandbox disallow_net 'unix:/tmp/g-dbus-tests-pid-*'
+    esandbox disallow_net --connect 'unix:/tmp/gdbus-test-does-not-exist-pid'
+    esandbox disallow_net 'unix-abstract:/tmp/gdbus-test-/dbus-*'
 }
 

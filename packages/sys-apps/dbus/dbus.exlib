@@ -105,9 +105,10 @@ fi
 
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
-    sydboxcmd 'net/whitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
+<<<<<<< HEAD
+    esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
     easy-multibuild_src_configure
-    sydboxcmd 'net/unwhitelist/bind/unix-abstract:///tmp/dbus-fake-socket-*'
+    esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
 }
 
 dbus_src_compile() {

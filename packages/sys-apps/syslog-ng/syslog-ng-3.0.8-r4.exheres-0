@@ -1,10 +1,10 @@
 # Copyright 2007 Bryan Østergaard
-# Copyright 2009, 2010 Wulf C. Krueger
+# Copyright 2009-2011 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib alternatives
+require multilib systemd-service
 
 SUMMARY="Popular system logger"
 HOMEPAGE="http://www.balabit.com/network-security/${PN}/"
@@ -15,7 +15,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="baselayout caps ipv6 pcre systemd tcpd vim-syntax"
+MYOPTIONS="baselayout caps ipv6 pcre tcpd vim-syntax"
 RESTRICT="test"
 
 DEPENDENCIES="
@@ -75,13 +75,21 @@ src_install() {
         newconfd "${FILES}"/syslog-ng.confd syslog-ng
     fi
 
-    if option systemd ; then
-        insinto /$(get_libdir)/systemd/system
-        doins "${FILES}"/systemd/syslog.service.${PN}
-        alternatives_for systemd-logger ${PN} 5 /$(get_libdir)/systemd/system/syslog.service syslog.service.${PN}
-    fi
-
     insinto /etc/logrotate.d
     newins "${FILES}"/syslog-ng.logrotate syslog-ng
+
+    install_systemd_files
+}
+
+pkg_postinst() {
+    default
+
+    if [[ -d "${ROOT}"/etc/env.d/alternatives/systemd-logger ]]; then
+        nonfatal edo rm -r "${ROOT}"/etc/env.d/alternatives/systemd-logger || \
+            ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
+    fi
+    [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
+        nonfatal edo rm "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
+            ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
 }
 

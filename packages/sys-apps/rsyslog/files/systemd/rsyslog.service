@@ -1,0 +1,13 @@
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=System Logging Service
+
+[Service]
+ExecStart=/usr/sbin/rsyslogd -n -c4
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Also=rsyslog.socket

@@ -1,0 +1,20 @@
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=MySQL server (single instance)
+After=syslog.target
+
+# The bl-1 init script contains a mass of possible configurations and options to
+# run several MySQL server instances, define nice-ness and configure everything
+# up to different defaults for databases on an SSD.
+# In most usecases, a single server instance is enough. That's what this service
+# does; it starts a single server instance with sensible defaults.
+# If you need more, provide a patch.
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/mysqld --defaults-file=/etc/mysql/my.cnf --basedir=/usr --datadir=/var/lib/mysql --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --user=mysql --log-error=/var/log/mysql/mysql.log -W
+
+[Install]
+WantedBy=multi-user.target

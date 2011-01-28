@@ -20,9 +20,9 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
 src_configure() {
     # Configuration takes a million years without this hack.
-    sydboxcmd nowrap/lstat
+    esandbox hack_toolong
     default
-    sydboxcmd wrap/lstat
+    esandbox nohack_toolong
 }
 
 src_compile() {

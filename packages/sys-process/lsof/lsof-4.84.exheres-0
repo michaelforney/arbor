@@ -46,11 +46,9 @@ DEFAULT_SRC_COMPILE_PARAMS=( DEBUG="" )
 
 src_test() {
     edo cd tests
-    sydboxcmd "sandunbox/net"
-    sydboxcmd "sandunbox/exec"
+    esandbox disable_net
+    esandbox disable_exec
     emake -j1 test opt
-    sydboxcmd "sandbox/net"
-    sydboxcmd "sandbox/exec"
 }
 
 src_install() {

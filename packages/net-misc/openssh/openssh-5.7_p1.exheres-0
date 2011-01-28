@@ -3,16 +3,16 @@
 # Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] pam systemd-service
 
 # Make it more portable between straight releases and _p? releases.
 PARCH=${PNV/_/}
 
-X509_VERSION="6.2.3"
+X509_VERSION="6.2.4"
 X509_PATCH="${PARCH}+x509-${X509_VERSION}.diff.gz"
 
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools."
-HOMEPAGE="http://www.openssh.org/"
+HOMEPAGE="http://www.${PN}.org/"
 DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
     X509? ( http://roumenpetrov.info/${PN}/x509-${X509_VERSION}/${X509_PATCH} )
 "
@@ -20,7 +20,7 @@ DOWNLOADS="mirror://openbsd/OpenSSH/portable/${PARCH}.tar.gz
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="baselayout pam tcpd X
+MYOPTIONS="baselayout kerberos pam tcpd X
     gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
     X509 [[ description = [ Adds support for X.509 certificate authentication ] ]]
 "
@@ -37,6 +37,7 @@ DEPENDENCIES="
         sys-apps/shadow
         sys-libs/zlib[>=1.2.3]
         gtk? ( x11-libs/gtk+:2 )
+        kerberos? ( app-crypt/heimdal )
         pam? ( sys-libs/pam[>=0.78] )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
         X? ( x11-apps/xauth )
@@ -64,16 +65,16 @@ src_configure() {
     export LD="${CC}"
 
     econf \
-        --with-ldflags="${LDFLAGS}" \
-        --disable-strip \
         --sysconfdir=/etc/ssh \
         --datadir=/usr/share/openssh \
+        --disable-strip \
+        --with-ldflags="${LDFLAGS}" \
         --with-privsep-path=/var/empty \
         --with-privsep-user=sshd \
         --with-md5-passwords \
         --with-ssl-engine \
         --without-libedit \
-        --without-kerberos5 \
+        $(option_with kerberos kerberos5) \
         $(option_with pam) \
         $(option_with tcpd tcp-wrappers)
 }
@@ -87,14 +88,23 @@ src_compile() {
 }
 
 src_test() {
-    sydboxcmd 'net/whitelist/bind/unix:///tmp/ssh-*/agent.*'
-    sydboxcmd 'net/whitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
+    esandbox allow_net 'unix:/tmp/ssh-*/agent.*'
+    esandbox allow_net 'unix:/tmp/openssh.regress.ctl-sock.*'
+    esandbox allow_net --connect 'unix:/nonexistent'
+
+    # There's a sandbox violation I can't whitelist:
+    # Reason: bind{family=AF_UNIX path=/var/tmp/paludis/build/net-misc-openssh-5.7_p1/temp//ssh-GbKiXikI4746/agent.4746 abstract=false}
+    # Using net/whitelist/bind/unix doesn't fix it so I'll sandunbox/net here for now.
+    esandbox disable_net
 
     option X509 && export SSH_X509TESTS="blob_auth"
     emake -j1 tests
 
-    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/ssh-*/agent.*'
-    sydboxcmd 'net/unwhitelist/bind/unix:///tmp/openssh.regress.ctl-sock.*'
+    esandbox enable_net
+
+    esandbox disallow_net 'unix:/tmp/ssh-*/agent.*'
+    esandbox disallow_net 'unix:/tmp/openssh.regress.ctl-sock.*'
+    esandbox disallow_net --connect 'unix:/nonexistent'
 }
 
 src_install() {
@@ -134,7 +144,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    [[ ! -d ${ROOT}/var/empty ]] && mkdir -p "${ROOT}"/var/empty
+    [[ ! -d ${ROOT}/var/empty ]] && edo mkdir -p "${ROOT}"/var/empty
 
     if option baselayout ; then
         ewarn "Remember to merge your config files in /etc/ssh/ and then"

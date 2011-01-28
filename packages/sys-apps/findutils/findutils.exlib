@@ -32,9 +32,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 findutils_src_configure() {
     # Configuration takes a million years without this hack.
-    sydboxcmd nowrap/lstat
+    esandbox hack_toolong
     default
-    sydboxcmd wrap/lstat
+    esandbox nohack_toolong
 }
 
 findutils_src_test_expensive() {

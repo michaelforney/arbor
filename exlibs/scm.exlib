@@ -90,13 +90,13 @@ scm_access_checkout() {
             dir_search=${dir_search%/*}
         done
         (
-            addwrite "${dir_addwrite}"
+            esandbox allow "${dir_addwrite}"
             mkdir -p "${dir_base}"
         ) || die "mkdir failed"
     fi
 
-    addwrite "${dir}"
-    addwrite "${lock}"
+    esandbox allow "${dir}"
+    esandbox allow "${lock}"
 
     local fd
     for fd in {3..20}; do
@@ -113,8 +113,8 @@ scm_access_checkout() {
         } ${fd}>\"\${lock}\" || die \"opening lock file failed\"
     "
 
-    rmwrite "${dir}"
-    rmwrite "${lock}"
+    esandbox disallow "${dir}"
+    esandbox disallow "${lock}"
 
     return ${status}
 }
@@ -133,7 +133,7 @@ scm_check_timestamp() {
 scm_perform_fetch() {
     illegal_in_global_scope
 
-    sydboxcmd sandunbox/net
+    esandbox disable_net
 
     local dir=$(scm_get_var CHECKOUT_TO)
 
@@ -199,7 +199,7 @@ scm_perform_fetch() {
         touch "${dir}/.scm.exlib.timestamp" || die "touch failed"
     fi
 
-    sydboxcmd sandbox/net
+    esandbox enable_net
 }
 
 scm_fetch_one() {
