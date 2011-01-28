@@ -41,7 +41,7 @@ src_prepare() {
 }
 
 src_test() {
-    addwrite /dev/loop
+    esandbox allow /dev/loop
     edo pushd "${WORK}"/harness >/dev/null
     edo mkdir testdir
     emake -j1 check prefix="${WORK}/src" libdir="${WORK}/src"
