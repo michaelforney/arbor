@@ -1,4 +1,4 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2008-2011 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'sysvinit-2.86-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -22,6 +22,11 @@ MYOPTIONS="baselayout static"
 DEPENDENCIES="
     build:
         sys-kernel/linux-headers
+    build+run:
+        !sys-apps/sysvinit-tools [[
+            description = [ sys-apps/sysvinit-tools and this package collide. You probably want sys-apps/sysvinit-tools. ]
+            resolution = manual
+        ]]
 "
 
 WORK=${WORKBASE}/${PNV}dsf
@@ -66,6 +71,9 @@ src_install() {
     done
     alternatives+=( /usr/share/man/man5/inittab.5 ${PN}.inittab.5 )
     alternatives_for "${alternatives[@]}"
+
+    # wall is provided by util-linux(-ng).
+    edo rm "${IMAGE}"/usr/bin/wall "${IMAGE}"/usr/share/man/man1/wall.1
 }
 
 pkg_postinst() {
