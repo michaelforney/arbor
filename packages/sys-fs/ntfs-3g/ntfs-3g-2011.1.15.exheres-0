@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A read/write NTFS driver"
@@ -25,7 +25,10 @@ DEPENDENCIES="
         hal? ( sys-apps/hal )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-ldconfig )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-ldconfig
+    --enable-xattr-mappings
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 
 src_install() {
