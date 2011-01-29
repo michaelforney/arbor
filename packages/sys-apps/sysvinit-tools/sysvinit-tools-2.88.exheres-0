@@ -10,6 +10,7 @@ These are only the useful tools from old, crufty, obsolete sysvinit:
 - last
 - mesg
 - mountpoint
+- pidof
 - sulogin
 - utmpdump
 "
@@ -57,5 +58,7 @@ src_install() {
         src/last \
         src/mesg \
         src/utmpdump
+
+    dosym /bin/killall5 /bin/pidof
 }
 
