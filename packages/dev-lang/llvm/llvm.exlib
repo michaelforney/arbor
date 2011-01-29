@@ -1,9 +1,9 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib toolchain-funcs
 
-export_exlib_phases src_prepare src_configure src_test src_install
+export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
@@ -73,6 +73,13 @@ UPSTREAM_DOCUMENTATION="http://llvm.org/docs [[ lang = en ]]"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
+
+llvm_pkg_pretend() {
+    local gcc_version=$(gcc-major-version).$(gcc-minor-version)
+    if ever at_least 4.5 ${gcc_version}; then
+        die "gcc 4.5 leads to segfaults in the tests Clang::Coverage/ast-printing.(c|cpp|m) and Clang::Parser/char-literal-printing.c"
+    fi
+}
 
 llvm_src_prepare() {
     if option clang; then
