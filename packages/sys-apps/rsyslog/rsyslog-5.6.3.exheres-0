@@ -1,4 +1,4 @@
-# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib systemd-service
@@ -47,6 +47,9 @@ DEPENDENCIES="
     suggestion:
         app-admin/logrotate [[ description = [ Support for rotating log files ] ]]
 "
+
+# sydbox fails it: !!! sydbox_internal_net: unexpected argument "LOOPBACK@13500"
+RESTRICT="test"
 
 # TODO: libdbi, "snmp net-snmp"
 DEFAULT_SRC_CONFIGURE_PARAMS=(
