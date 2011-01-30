@@ -1,4 +1,4 @@
-# Copyright 2009, 2011 Ingmar Vanhassel
+# Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib systemd-service [ systemd_files=[ apache.service ] ]
@@ -45,17 +45,17 @@ MYOPTIONS="
 DEPENDENCIES="
     build:
         dev-util/pkg-config
-        || (
-            net-www/links
-            net-www/elinks
-            net-www/lynx
-        )
     build+run:
         dev-libs/apr:1[>=1.2.0]
         dev-libs/apr-util:1[>=1.2.0]
         dev-libs/pcre
         group/apache
         user/apache
+        || (
+            net-www/links
+            net-www/elinks
+            net-www/lynx
+        )
         ssl? ( dev-libs/openssl )
 "
 
