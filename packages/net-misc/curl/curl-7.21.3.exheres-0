@@ -1,4 +1,4 @@
-# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
@@ -17,13 +17,10 @@ DEPENDENCIES="
         dev-libs/openssl
         net-libs/libssh2
         sys-libs/zlib
-        ares? ( net-dns/c-ares )
+        ares? ( net-dns/c-ares[>=1.6.0] )
         idn? ( net-dns/libidn )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-sydbox.patch
-)
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-werror
     --disable-{gssapi,ldap,sspi}
