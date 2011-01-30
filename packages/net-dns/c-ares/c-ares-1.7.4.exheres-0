@@ -1,4 +1,4 @@
-# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A C library that performs DNS requests and name resolves asynchronously"
@@ -6,10 +6,18 @@ DESCRIPTION='
 c-ares is a C library that performs DNS requests and name resolves asynchronously.
 c-ares is a fork of the library named 'ares', written by Greg Hudson at MIT.
 '
-HOMEPAGE="http://daniel.haxx.se/projects/${PN}/"
+HOMEPAGE="http://c-ares.haxx.se/"
 DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
 
-LICENCES="MIT"
+UPSTREAM_CHANGELOG="http://github.com/bagder/c-ares/blob/master/CHANGES"
 
-UPSTREAM_CHANGELOG="http://cool.haxx.se/cvs.cgi/curl/ares/CHANGES?rev=HEAD&content-type=text/vnd.viewcvs-markup"
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="debug"
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
 
