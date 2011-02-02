@@ -19,7 +19,7 @@ unpack_makeself() {
             skip=$(edo grep -a ^SKIP= "${FETCHEDDIR}/${input}" | edo cut -d\" -f2)
             (( skip++ )) # tail starts with $skip, makeself starts after $skip
             ;; # makeself 2.x.x
-        *) die "makeself sanity check failed" ;;
+        *) die "makeself sanity check failed, v=${v}" ;;
     esac
 
     edo tail -n +${skip} "${FETCHEDDIR}/${input}" > ./${PNV}.tar.gz
