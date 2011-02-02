@@ -1,5 +1,7 @@
-# Copyright 2009, 2010 Ingmar Vanhassel
+# Copyright 2009, 2010, 2011 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="A C library for encoding, decoding and manipulating JSON data"
 DESCRIPTION="
@@ -25,4 +27,6 @@ DEPENDENCIES="
     test:
         dev-python/Sphinx
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-Run-Sphinx-without-the-W-flag-when-building-document.patch" )
 

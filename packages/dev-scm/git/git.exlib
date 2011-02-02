@@ -1,4 +1,4 @@
-# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 myexparam -b htmldocs=true
@@ -12,21 +12,21 @@ SUMMARY="A distributed VCS focused on speed, effectivity and real-world usabilit
 DESCRIPTION="Git is a fast, scalable, distributed revision control system with an unusually rich command set
 that provides both high-level operations and full access to internals"
 HOMEPAGE="http://git-scm.com/ http://git.or.cz/index.html"
-DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV}.tar.bz2"
-exparam -b htmldocs && DOWNLOADS+=" doc? ( mirror://kernel/software/scm/${PN}/${PN}-htmldocs-${PV}.tar.bz2 )"
-exparam -b manpages && DOWNLOADS+=" mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV}.tar.bz2"
+DOWNLOADS="mirror://kernel/software/scm/${PN}/${PNV/_/.}.tar.bz2"
+exparam -b htmldocs && DOWNLOADS+=" doc? ( mirror://kernel/software/scm/${PN}/${PN}-htmldocs-${PV/_/.}.tar.bz2 )"
+exparam -b manpages && DOWNLOADS+=" mirror://kernel/software/scm/${PN}/${PN}-manpages-${PV/_/.}.tar.bz2"
 
 BUGS_TO="ferdy@exherbo.org ingmar@exherbo.org"
 
 REMOTE_IDS="freshmeat:${PN}"
 
 UPSTREAM_DOCUMENTATION="
-http://www.kernel.org/pub/software/scm/git/docs/v${PV}/gittutorial.html     [[ description = [ A short tutorial, to get started ] ]]
-http://www.kernel.org/pub/software/scm/git/docs/v${PV}/everyday.html        [[ description = [ Some example workflows with git, a minimum set of commands ] ]]
-http://www.kernel.org/pub/software/scm/git/docs/v${PV}/user-manual.html     [[ description = [ An in-depth user manual ] ]]
+http://www.kernel.org/pub/software/scm/git/docs/v${PV/_/.}/gittutorial.html     [[ description = [ A short tutorial, to get started ] ]]
+http://www.kernel.org/pub/software/scm/git/docs/v${PV/_/.}/everyday.html        [[ description = [ Some example workflows with git, a minimum set of commands ] ]]
+http://www.kernel.org/pub/software/scm/git/docs/v${PV/_/.}/user-manual.html     [[ description = [ An in-depth user manual ] ]]
 http://git.wiki.kernel.org/index.php/GitFaq                                 [[ description = [ The Git FAQ (wiki) ] ]]
 "
-UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${PV}.txt"
+UPSTREAM_RELEASE_NOTES="http://kernel.org/pub/software/scm/git/docs/RelNotes-${PV/_/.}.txt"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -65,14 +65,16 @@ DEPENDENCIES="
         curl? ( net-misc/curl[ssl(+)]  [[ description = [ Enables support for https:// URIs ] ]] )
 "
 
+WORK=${WORKBASE}/${PNV/_/.}
+
 git_src_unpack() {
-    unpack ${PNV}.tar.bz2
+    unpack ${PNV/_/.}.tar.bz2
     edo cd "${WORK}"
-    exparam -b manpages && unpack ${PN}-manpages-${PV}.tar.bz2
+    exparam -b manpages && unpack ${PN}-manpages-${PV/_/.}.tar.bz2
 
     if exparam -b htmldocs && option doc; then
         edo cd Documentation
-        unpack ${PN}-htmldocs-${PV}.tar.bz2
+        unpack ${PN}-htmldocs-${PV/_/.}.tar.bz2
     fi
 }
 
