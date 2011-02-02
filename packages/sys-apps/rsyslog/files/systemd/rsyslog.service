@@ -5,9 +5,9 @@
 Description=System Logging Service
 
 [Service]
-ExecStart=/usr/sbin/rsyslogd -n -c4
+ExecStart=/usr/sbin/rsyslogd -c4 -n
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=syslog.target
 Also=rsyslog.socket
