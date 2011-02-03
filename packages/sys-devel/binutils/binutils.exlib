@@ -33,24 +33,24 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-lto
 )
 
-binutils-new_src_unpack() {
+binutils_src_unpack() {
     default
     edo mkdir "${WORK}"
 }
 
-binutils-new_src_prepare() {
+binutils_src_prepare() {
     edo cd "${WORKBASE}/${PNV}"
     default
 }
 
-binutils-new_src_test_expensive() {
+binutils_src_test_expensive() {
     emake -j1 check
 }
 
 # FIXME: Make this the default behavior for dosym
 dosymv() { echo dosym $@; dosym $@; }
 
-binutils-new_src_install() {
+binutils_src_install() {
     local alternatives=() bin e ec=(
         # Managed by eclectic
         /usr/${CHOST}/bin/ld
