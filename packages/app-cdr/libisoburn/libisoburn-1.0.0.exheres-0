@@ -14,22 +14,22 @@ DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.pl00.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="cdio"
+MYOPTIONS="acl cdio readline xattr"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
         app-cdr/libburn[>=1.0.0][cdio(-)?]
-        app-cdr/libisofs[>=1.0.0]
-        sys-apps/acl
-        sys-apps/attr
-        sys-libs/readline
+        app-cdr/libisofs[>=1.0.0][acl(+)?][xattr(+)?]
         text-libs/libiconv
+        acl? ( sys-apps/acl )
         cdio? ( dev-libs/libcdio[>=0.83] )
+        readline? ( sys-libs/readline )
+        xattr? ( sys-apps/attr )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-libjte --enable-external-filters --enable-libacl --enable-libreadline --enable-xattr --enable-zlib )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'cdio libcdio' )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-libjte --enable-external-filters --enable-zlib )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'acl libacl' 'cdio libcdio' readline xattr )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/comments )
 
