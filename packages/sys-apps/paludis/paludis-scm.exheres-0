@@ -75,8 +75,7 @@ src_prepare() {
 
 src_configure() {
     local clients environments repositories
-    clients=$(echo default accerso adjutrix cave importare inquisitio \
-        instruo paludis reconcilio | tr -s \  ,)
+    clients=$(echo default accerso adjutrix cave instruo paludis | tr -s \  ,)
     environments="default"
     repositories=$(echo default accounts $(optionv cran) $(optionv gemcutter) repository | tr -s \  ,)
 
@@ -98,7 +97,7 @@ src_configure() {
         --with-repositories=${repositories} \
         --with-default-distribution=exherbo \
         --with-config-framework=eclectic \
-        --hates=--disable-silent-rules
+        --hates=disable-silent-rules
 }
 
 src_compile() {
@@ -128,12 +127,12 @@ src_install() {
     option python && python_bytecompile
 
     local bashcomp bashcompletions
-    bashcompletions="accerso adjutrix cave importare inquisitio instruo paludis reconcilio"
+    bashcompletions="accerso adjutrix cave instruo paludis"
     for bashcomp in ${bashcompletions}; do
         dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
     done
 
-    for zshcomp in _adjutrix _cave _importare _inquisitio _paludis{,_packages} _reconcilio
+    for zshcomp in _adjutrix _cave _paludis{,_packages}
     do
         dozshcompletion "${WORK}/zsh-completion/${zshcomp}"
     done
