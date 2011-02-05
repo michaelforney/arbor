@@ -111,10 +111,6 @@ src_test() {
         -e 's/^source .*/echo \[sndrcv_udp.sh\]: disabled since we are not root/' \
         -i "${WORK}"/tests/sndrcv_udp.sh
 
-    # FIXME: This still fails due to network sandboxing. The whitelist bellow should work.
-    edo echo \
-        "echo \[uxsock_simple.sh\]: omuxsock test disabled" > "${WORK}"/tests/uxsock_simple.sh
-
     esandbox allow_net "unix:${WORK}/tests/rsyslog-testbench-dgram-uxsock"
 
     # There is currently no support to configure which interface the server binds to.

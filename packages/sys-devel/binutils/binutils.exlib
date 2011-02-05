@@ -3,94 +3,82 @@
 
 require multilib gnu alternatives
 
-export_exlib_phases src_configure src_compile src_test_expensive src_install
+export_exlib_phases src_unpack src_prepare src_test_expensive src_install
 
 SUMMARY="Collection of binary tools including ld and as"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="gold [[ description = [ Build gold, an experimental linker for ELF files. ] ]]"
+MYOPTIONS=""
 
 RESTRICT="test"
 
 DEPENDENCIES="
     test-expensive:
         dev-tcl/expect
+        sys-apps/bc
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/76_all_use-new-ld-dtags.patch"
+ECONF_SOURCE="${WORKBASE}/${PNV}"
+WORK=${WORKBASE}/build
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/76_all_use-new-ld-dtags.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-werror
+    --enable-plugins
+    --enable-threads
+    # Install gold as ld.gold, ld as ld.bfd
+    --enable-ld
+    --enable-gold
+    --enable-lto
 )
-ECONF_SOURCE="${WORK}"
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-werror )
 
-binutils_src_configure() {
-    edo mkdir "${WORKBASE}"/builddir-{gnu,gold}
-
-    edo cd "${WORKBASE}"/builddir-gnu
+binutils_src_unpack() {
     default
-    emake configure-host
-
-    if option gold ; then
-        edo cd "${WORKBASE}"/builddir-gold
-        econf \
-            "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-            --enable-gold \
-            --enable-plugins \
-            --enable-threads \
-            --program-transform-name='s/ld/gold/'
-        emake configure-host
-    fi
+    edo mkdir "${WORK}"
 }
 
-binutils_src_compile() {
-    emake -C "${WORKBASE}/builddir-gnu"
-
-    if option gold ; then
-        emake -C "${WORKBASE}/builddir-gold/bfd" headers
-        emake -C "${WORKBASE}/builddir-gold"
-    fi
+binutils_src_prepare() {
+    edo cd "${WORKBASE}/${PNV}"
+    default
 }
 
 binutils_src_test_expensive() {
-    emake -C "${WORKBASE}/builddir-gnu" check
+    emake -j1 check
 }
 
+# FIXME: Make this the default behavior for dosym
+dosymv() { echo dosym $@; dosym $@; }
+
 binutils_src_install() {
-    if option gold ; then
-        emake -j1 -C "${WORKBASE}/builddir-gold/gold" DESTDIR="${IMAGE}" install
-        emake -j1 -C "${WORKBASE}/builddir-gold/bfd" DESTDIR="${IMAGE}" install-bfdincludeHEADERS
-        edo mv "${IMAGE}"/usr/${CHOST}/bin/{ld,gold}
-        edo rm "${IMAGE}"/usr/bin/gold
-    fi
+    local alternatives=() bin e ec=(
+        # Managed by eclectic
+        /usr/${CHOST}/bin/ld
+        /usr/bin/${CHOST}-ld
+        /usr/bin/ld
+    ) f ld priority target name
 
-    emake -j1 -C "${WORKBASE}/builddir-gnu" DESTDIR="${IMAGE}" install
+    emake -j1 DESTDIR="${IMAGE}" install
 
-    local f target name
     for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
         target=${f#${IMAGE}}
         name=${f##*/}
 
-        case ${name} in
-            ld)
-                edo rm "${IMAGE}"/usr/bin/${name}
-                ;;
-            *)
-                echo dosym ${target} /usr/bin/${CHOST}-${name}
-                dosym ${target} /usr/bin/${CHOST}-${name}
-                echo dosym ${target} /usr/bin/${name}
-                dosym ${target} /usr/bin/${name}
-                ;;
-        esac
+        dosymv ${target} /usr/bin/${CHOST}-${name}
+        dosymv ${target} /usr/bin/${name}
     done
 
-    alternatives_for ld gnu 100 \
-        /usr/bin/ld /usr/${CHOST}/bin/ld \
-        /usr/bin/${CHOST}-ld /usr/${CHOST}/bin/ld
-    if option gold ; then
-        alternatives_for ld gold 10 \
-            /usr/bin/ld /usr/${CHOST}/bin/gold \
-            /usr/bin/${CHOST}-ld /usr/${CHOST}/bin/gold
-    fi
+    for e in ${ec[@]}; do edo rm -f "${IMAGE}"/${e}; done
+
+    for ld in bfd gold; do
+        case ${ld} in
+            bfd)  priority=100;;
+            gold) priority=10;;
+        esac
+
+        alternatives=( ld ${ld} ${priority} )
+        for e in ${ec[@]}; do alternatives+=( ${e} /usr/${CHOST}/bin/ld.${ld} ); done
+        alternatives_for "${alternatives[@]}"
+    done
 }
 

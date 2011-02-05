@@ -1,0 +1,29 @@
+# Copyright 2008 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2011 Alex Elsayed <eternaleye@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A library to create an ISO-9660 filesystem with extensions like RockRidge or Joliet."
+DESCRIPTION="
+libburnia is a project for reading, mastering and writing optical discs.
+Currently it is comprised of libraries named libisofs, libburn, libisoburn,
+a cdrecord emulator named cdrskin, and an integrated multi-session tool named
+xorriso. The software runs on Linux and FreeBSD."
+HOMEPAGE="http://libburnia-project.org"
+DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        sys-apps/acl
+        sys-apps/attr
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-libjte --enable-libacl --enable-xattr --enable-zlib )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/Tutorial doc/zisofs_format.txt )
+

@@ -6,7 +6,7 @@ if ever is_scm; then
     SCM_REPOSITORY="git://dracut.git.sourceforge.net/gitroot/dracut/dracut"
     require scm-git
 else
-    DOWNLOADS="mirror://sourceforge/$(PN)/${PNV}.tar.bz2"
+    DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2"
 fi
 
 export_exlib_phases src_prepare src_install
@@ -114,7 +114,7 @@ DEPENDENCIES="
 
 # TODO
 #   - Some modules need additional/unpackaged dependencies and testing.
-#     See the check and install files in the module directory,
+#     See module-info.sh or module-setup.sh in the module directory,
 
 DEFAULT_SRC_COMPILE_PARAMS=( WITH_SWITCH_ROOT=0 )
 DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr sysconfdir=/etc )
