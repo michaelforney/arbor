@@ -1,0 +1,52 @@
+Source: Upstream commit 330d34cdf9e1c8f97f30e6ba65150ea7c7944fbe
+Upstream: Yes, >5.11.6pre21
+Reason: This test fails and upstream has disabled them so lets do the same.
+
+--- a/agen5/test/error.test
++++ b/agen5/test/error.test
+@@ -140,42 +140,8 @@
+   failure "expected->actual${nl}`diff -c ${testname}.base2 ${testname}.res2`"
+ 
+ # # # # # # # # # # # # # TEST 3 # # # # # # # # # # # #
+-
+-echo creating ${testname}.base3
+-# this is the output we should expect to see
+-cat > ${testname}.base3 <<_EOF_
+-Killing AutoGen <pid>:  testing death
+-AutoGen aborting on signal <text-varies> in state EMITTING
+-processing template error2.tpl
+-            on line 2
+-       for function EXPR (12)
+-_EOF_
+-
+-sed '/THIS TEXT/,/ESAC/d;s,this is never seen,<= `die testing death` =>,' \
+-  < ${testname}.tpl > ${testname}2.tpl
+-
+-ag_err 3 ${agl_opts} -T${testname}2.tpl ${agopts}3
+-test -f ${testname}-task3-OK \
+-  && failure unexpected success for test-3
+-
+-# Lots of variations happen based on timing.
+-# Remove the variations and verify the basic.
+-#
+-sedcmd='
+-	s,on signal .* in state,on signal <text-varies> in state,
+-	/trapped on [0-9]/d
+-	/^Killing AutoGen/s/ [0-9]*:/ <pid>:/
+-	/ signal.*Child exited/d
+-	/Abort/d
+-	/Broken pipe/d
+-	/Last command issued:/,/ShElL-OuTpUt-HaS-bEeN-cOmPlEtEd/d
+-	/^[ 	]*$/d
+-	/defs: line .*: .* Hangup/d
+-'
+-sed -e "${sedcmd}" ${testname}.err3 > ${testname}.res3
+-cmp -s ${testname}.res3 ${testname}.base3 || \
+-  failure "expected->actual${nl}`diff -c ${testname}.base3 ${testname}.res3`"
+-
++# REMOVED:  This test always worked, but the exact results
++#           vary all over the place.  Too hard to test.
+ # # # # # # # # # # # # # TEST 4 # # # # # # # # # # # #
+ 
+ sed 's,^#error.*,this is broken;,' ${testname}.def > ${testname}2.def
+
