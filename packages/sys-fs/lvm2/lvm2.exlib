@@ -39,8 +39,8 @@ DEPENDENCIES="
         udev? ( sys-fs/udev[>=165-r1] )
 "
 
-# The tests are expensive and need to run as root.
-RESTRICT="test userpriv"
+# The tests are expensive, unreliable, they need write access to /dev and /etc and leave stale volumes lingering around if they fail
+RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/no-export-dynamic.patch" )
 
@@ -78,32 +78,6 @@ lvm2_src_prepare() {
     edo sed -i -e 's:\($(STATIC_LIBS)\):\1 -lrt:' daemons/dmeventd/Makefile.in
 
     autotools_src_prepare
-}
-
-lvm2_src_test_expensive() {
-    # These tests still fail or succeed pretty much randomly for no apparent reason...
-    edo rm test/t-lvcreate-usage.sh
-    edo rm test/t-snapshots-of-mirrors.sh
-    edo rm test/t-lvconvert-mirror-basic-3.sh
-
-    # ... and these do, too, if the dmeventd option is set.
-    if option dmeventd; then
-        edo rm test/t-lvconvert-repair-dmeventd.sh
-        edo rm test/t-metadata.sh
-        edo rm test/t-lvextend-snapshot-dmeventd.sh
-        edo rm test/t-vgchange-maxlv.sh
-    fi
-
-    # These tests fail due to the above tests being disabled.
-    edo rm test/t-lvcreate-operation.sh
-    edo rm test/t-vgsplit-operation.sh
-
-    # The tests call several tools and need a few devices.
-    esandbox disable_exec
-    esandbox allow /dev
-    esandbox allow /etc
-
-    emake -j1 check
 }
 
 lvm2_src_install() {
