@@ -22,21 +22,32 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 
+configure_one_multibuild() {
+    if option python; then
+        local prefix='/usr'
+        multibuild_default_target C || prefix="/usr/${CHOST}"
+
+        export PYTHON="${prefix}/bin/python"
+        export CPPFLAGS="-I${prefix}/include $(multibuild_get_var C ${MULTIBUILD_TARGET} CPPFLAGS)"
+    fi
+
+    default
+}
+
+install_one_multibuild() {
+    default
+    option python && python_bytecompile
+}
+
 src_install() {
     easy-multibuild_src_install
 
     dodir /var/cache/cracklib
     keepdir /var/cache/cracklib
 
-    option python && python_bytecompile
-
     dodir /usr/share/dict
     insinto /usr/share/dict
     doins dicts/cracklib-small
-}
-
-install_one_multibuild() {
-    default
 }
 
 pkg_postinst() {
