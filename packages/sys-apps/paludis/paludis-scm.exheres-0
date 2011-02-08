@@ -75,7 +75,7 @@ src_prepare() {
 
 src_configure() {
     local clients environments repositories
-    clients=$(echo default accerso adjutrix cave instruo paludis | tr -s \  ,)
+    clients=$(echo default accerso cave instruo | tr -s \  ,)
     environments="default"
     repositories=$(echo default accounts $(optionv cran) $(optionv gemcutter) repository | tr -s \  ,)
 
@@ -127,15 +127,12 @@ src_install() {
     option python && python_bytecompile
 
     local bashcomp bashcompletions
-    bashcompletions="accerso adjutrix cave instruo paludis"
+    bashcompletions="accerso cave instruo"
     for bashcomp in ${bashcompletions}; do
         dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
     done
 
-    for zshcomp in _adjutrix _cave _paludis{,_packages}
-    do
-        dozshcompletion "${WORK}/zsh-completion/${zshcomp}"
-    done
+    dozshcompletion "${WORK}"/zsh-completion/_cave
     keepdir /var/lib/exherbo/news
     rm -rf "${IMAGE}"/var/lib/gentoo || die 'rm -r /var/lib/gentoo failed'
 }

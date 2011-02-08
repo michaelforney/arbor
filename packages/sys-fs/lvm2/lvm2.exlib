@@ -4,7 +4,7 @@
 
 require multilib systemd-service autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
-export_exlib_phases src_prepare src_test_expensive src_install
+export_exlib_phases src_prepare src_install
 
 SUMMARY="Userspace toolset providing logical volume management facilities"
 DESCRIPTION="
@@ -27,7 +27,6 @@ MYOPTIONS="
     debug
     dmeventd [[ description = [ DM event daemon to monitor active mapped devices ] ]]
     fsadm [[ description = [ Utility to resize or check filesystem on a device ] ]]
-    udev [[ description = [ Install udev rules and enable synching with udev. ] ]]
 "
 
 UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
@@ -36,11 +35,11 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        udev? ( sys-fs/udev[>=165-r1] )
+        sys-fs/udev[>=165-r1]
 "
 
-# The tests are expensive and need to run as root.
-RESTRICT="test userpriv"
+# The tests are expensive, unreliable, they need write access to /dev and /etc and leave stale volumes lingering around if they fail
+RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/no-export-dynamic.patch" )
 
@@ -52,6 +51,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-pkgconfig
     --enable-readline
     --enable-static_link
+    --enable-udev_rules
+    --enable-udev_sync
+    --with-udevdir=/$(get_libdir)/udev/rules.d
     --disable-nls
     --disable-selinux
     --with-usrlibdir=/usr/$(get_libdir)
@@ -60,12 +62,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     dmeventd
     fsadm
-    "udev udev_rules"
-    "udev udev_sync"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "udev udevdir /$(get_libdir)/udev/rules.d"
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
@@ -78,32 +74,6 @@ lvm2_src_prepare() {
     edo sed -i -e 's:\($(STATIC_LIBS)\):\1 -lrt:' daemons/dmeventd/Makefile.in
 
     autotools_src_prepare
-}
-
-lvm2_src_test_expensive() {
-    # These tests still fail or succeed pretty much randomly for no apparent reason...
-    edo rm test/t-lvcreate-usage.sh
-    edo rm test/t-snapshots-of-mirrors.sh
-    edo rm test/t-lvconvert-mirror-basic-3.sh
-
-    # ... and these do, too, if the dmeventd option is set.
-    if option dmeventd; then
-        edo rm test/t-lvconvert-repair-dmeventd.sh
-        edo rm test/t-metadata.sh
-        edo rm test/t-lvextend-snapshot-dmeventd.sh
-        edo rm test/t-vgchange-maxlv.sh
-    fi
-
-    # These tests fail due to the above tests being disabled.
-    edo rm test/t-lvcreate-operation.sh
-    edo rm test/t-vgsplit-operation.sh
-
-    # The tests call several tools and need a few devices.
-    esandbox disable_exec
-    esandbox allow /dev
-    esandbox allow /etc
-
-    emake -j1 check
 }
 
 lvm2_src_install() {
