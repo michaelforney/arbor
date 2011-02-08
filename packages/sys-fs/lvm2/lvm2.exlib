@@ -27,7 +27,6 @@ MYOPTIONS="
     debug
     dmeventd [[ description = [ DM event daemon to monitor active mapped devices ] ]]
     fsadm [[ description = [ Utility to resize or check filesystem on a device ] ]]
-    udev [[ description = [ Install udev rules and enable synching with udev. ] ]]
 "
 
 UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
@@ -36,7 +35,7 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        udev? ( sys-fs/udev[>=165-r1] )
+        sys-fs/udev[>=165-r1]
 "
 
 # The tests are expensive, unreliable, they need write access to /dev and /etc and leave stale volumes lingering around if they fail
@@ -52,6 +51,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-pkgconfig
     --enable-readline
     --enable-static_link
+    --enable-udev_rules
+    --enable-udev_sync
+    --with-udevdir=/$(get_libdir)/udev/rules.d
     --disable-nls
     --disable-selinux
     --with-usrlibdir=/usr/$(get_libdir)
@@ -60,12 +62,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     dmeventd
     fsadm
-    "udev udev_rules"
-    "udev udev_sync"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "udev udevdir /$(get_libdir)/udev/rules.d"
 )
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
