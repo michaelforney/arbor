@@ -30,6 +30,7 @@ scm-bzr_do_check_vars() {
     [[ -n ${rev} ]] && [[ ! ${rev} =~ ^.*-[0-9]{14}-[0-9a-z]{16}$ && ! ${rev} =~ ^[0-9]+$ ]] \
         && die "for bzr, $(scm_var_name REVISION) must be either a revision ID or an integer (non-dotted) revision number"
     [[ -n $(scm_get_var SUBPATH) ]] && die "for bzr, $(scm_var_name SUBPATH) must not be set"
+    [[ -n $(scm_get_var EXTERNAL_REFS) ]] && die "for bzr, $(scm_var_name EXTERNAL_REFS) must not be set"
 
     scm_modify_var REPOSITORY scm_trim_slashes -scheme -trailing
     scm_modify_var BRANCH scm_trim_slashes -leading -trailing
