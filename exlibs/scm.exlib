@@ -211,7 +211,7 @@ scm_fetch_one() {
 
 scm_src_fetch_extra() {
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
-    [[ -n $(declare -F scm_user_customize) ]] && scm_user_customize
+    scm_run_user_customize
     scm_{for_each,access_checkout,fetch_one}
 }
 
@@ -263,7 +263,7 @@ scm_unpack_one() {
 
 scm_src_unpack() {
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
-    [[ -n $(declare -F scm_user_customize) ]] && scm_user_customize
+    scm_run_user_customize
     scm_{for_each,access_checkout,unpack_one}
     SCM_IS_BUILT=1
 }
@@ -274,6 +274,13 @@ scm_do_info() {
 
 scm_pkg_info() {
     [[ -n ${SCM_IS_BUILT} ]] && scm_{for_each,call} info
+}
+
+scm_run_user_customize() {
+    if [[ -n $(declare -F scm_user_customize) ]]; then
+        scm_user_customize
+        scm_{for_each,check_vars}
+    fi
 }
 
 scm_trim_slashes() {
@@ -312,16 +319,7 @@ scm_do_check_vars() {
     :
 }
 
-scm_global_stuff() {
-    if [[ -z $(scm_get_var TYPE) ]]; then
-        if [[ -n ${SCM_THIS} ]]; then
-            scm_set_var TYPE ${SCM_TYPE}
-        else
-            die "$(scm_var_name TYPE) must be set"
-        fi
-    fi
-    has scm-$(scm_get_var TYPE) ${INHERITED} || require scm-$(scm_get_var TYPE)
-
+scm_check_vars() {
     [[ -z $(scm_get_var REPOSITORY) ]] \
         && die "$(scm_var_name REPOSITORY) must be set"
 
@@ -338,6 +336,19 @@ scm_global_stuff() {
     scm_set_var UNPACK_TO "$(scm_trim_slashes -trailing "${unpack_to}")"
 
     scm_call check_vars
+}
+
+scm_global_stuff() {
+    if [[ -z $(scm_get_var TYPE) ]]; then
+        if [[ -n ${SCM_THIS} ]]; then
+            scm_set_var TYPE ${SCM_TYPE}
+        else
+            die "$(scm_var_name TYPE) must be set"
+        fi
+    fi
+    has scm-$(scm_get_var TYPE) ${INHERITED} || require scm-$(scm_get_var TYPE)
+
+    scm_check_vars
 
     DEPENDENCIES+=" $(scm_call dependencies)"
 }
