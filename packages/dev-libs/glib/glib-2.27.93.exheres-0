@@ -26,11 +26,13 @@ DEPENDENCIES="
         gnome-bindings/pygobject
         dev-python/dbus-python
     recommendation:
-        gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
         dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
     suggestion:
+        gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
         gnome-desktop/gvfs  [[ description = [ Provides utilities and support for GIO ] ]]
 "
+# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
+# anything not in ::arbor, that means no recommendations, just suggestions
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )

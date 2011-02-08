@@ -28,11 +28,12 @@ DEPENDENCIES="
         dev-util/desktop-file-utils
         gnome-bindings/pygobject
         dev-python/dbus-python
-    recommendation:
-        gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
     suggestion:
+        gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
         gnome-desktop/gvfs  [[ description = [ Provides utilities and support for GIO ] ]]
 "
+# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
+# anything not in ::arbor, that means no recommendations, just suggestions
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-2.24.1-assert-test.patch
