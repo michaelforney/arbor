@@ -1,4 +1,4 @@
-# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases pkg_pretend src_test src_install
@@ -91,11 +91,8 @@ postgresql_src_install() {
 }
 
 postgresql_src_test() {
-    # 55432 is a hardcoded number.
-    esandbox allow_net 'unix:/tmp/.s.PGSQL.55432'
-    esandbox allow_net 'unix:/tmp/.s.PGSQL.64020'
+    esandbox allow_net 'unix:/tmp/.s.PGSQL.*'
     default
-    esandbox disallow_net 'unix:/tmp/.s.PGSQL.55432'
-    esandbox disallow_net 'unix:/tmp/.s.PGSQL.64020'
+    esandbox disallow_net 'unix:/tmp/.s.PGSQL.*'
 }
 
