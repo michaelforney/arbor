@@ -1,7 +1,7 @@
 # Copyright (c) 2008 Alexander Færøy <eroyf@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service
+require multilib systemd-service
 
 SUMMARY="ALSA utilities"
 HOMEPAGE="http://www.alsa-project.org/"
@@ -16,6 +16,7 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
+        media-libs/libsamplerate [[ note = [ Used by alsaloop, which is optional ] ]]
         sys-libs/ncurses
         sys-sound/alsa-lib
     run:
@@ -24,6 +25,9 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-xmlto
     --enable-nls
+    --enable-alsaloop
+    --with-udev-rules-dir=/$(get_libdir)/udev/rules.d
+    --without-systemdsystemunitdir
 )
 
 src_install() {
