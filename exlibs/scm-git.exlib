@@ -181,7 +181,7 @@ scm-git_do_resolve_externals() {
             fi)
     local gitmodules=$(nonfatal scm-git_git -q rev-parse -q --verify ${revspec}:.gitmodules 2>/dev/null)
 
-    local entry name value submodule revision uri dir fulldir
+    local entry name value submodule revision dir fulldir
     [[ -n ${gitmodules} ]] && while read -r -d $'\0' entry; do
         name=${entry%%$'\n'*}
         value=${entry#*$'\n'}
@@ -192,19 +192,6 @@ scm-git_do_resolve_externals() {
         dir=$(scm_trim_slashes -leading -trailing "${value}")
         [[ -n ${dir} ]] || die ".gitmodules key ${name} for ${SCM_THIS:-primary repository} is empty or contains only slashes"
         fulldir=$(scm_get_var UNPACK_TO)/${dir}
-
-        uri=$(scm_trim_slashes -scheme -trailing "$(scm-git_git -q config --file <(scm-git_git -q cat-file blob ${gitmodules}) "submodule.${submodule}.url")")
-        [[ -n ${uri} ]] || die ".gitmodules key submodule.${submodule}.url for ${SCM_THIS:-primary repository} is empty"
-        if [[ ${uri} == ./* ]]; then
-            uri=$(scm_get_var REPOSITORY)/${uri#./}
-        elif [[ ${uri} == ../* ]]; then
-            local myuri=$(scm_get_var REPOSITORY)
-            while [[ ${uri} == ../* ]]; do
-                uri=${uri#../}
-                myuri=${myuri%/*}
-            done
-            uri=${myuri}/${uri}
-        fi
 
         revision=$(scm-git_git -q ls-tree -z ${revspec} "${dir}")
         [[ -n ${revision} ]] || die "Could not find a submodule commit reference at ${dir} in ${SCM_THIS:-primary repository}"
@@ -221,10 +208,6 @@ scm-git_do_resolve_externals() {
                     got=$(SCM_THIS=${that} scm_get_var UNPACK_TO)
                     [[ ${got} == ${fulldir} ]] \
                         || errors+=( "$(SCM_THIS=${that} scm_var_name UNPACK_TO) is ${got}, but wanted ${fulldir}" )
-
-                    got=$(SCM_THIS=${that} scm_get_var REPOSITORY)
-                    [[ ${got} == ${uri} ]] \
-                        || errors+=( "git URI for ${that} is ${got}, but wanted ${uri}" )
 
                     got=$(SCM_THIS=${that} scm_get_var REVISION)
                     if [[ ${got} == _ ]]; then
