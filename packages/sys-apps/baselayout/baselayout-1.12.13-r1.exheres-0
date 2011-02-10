@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
 # Copyright 2008, 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
@@ -19,7 +19,7 @@ MYOPTIONS="" # static || Always build statically
 
 DEPENDENCIES="
     build+run:
-        sys-apps/skeleton-filesystem-layout
+        sys-apps/skeleton-filesystem-layout[>=0.5.3]
     run:
         sys-apps/coreutils[>=6.11-r1]
         sys-apps/sysvinit[>=2.86-r1][baselayout]
@@ -37,6 +37,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-1.12.12-dhcpcd-4.x-compatibility.patch"
     "${FILES}/${PN}-1.12.12-exherbify.patch"
     "${FILES}/${PNV}-arping-path.patch"
+    "${FILES}/0001-Baselayout-should-no-longer-touch-etc-mtab.patch"
 )
 
 pkg_pretend() {

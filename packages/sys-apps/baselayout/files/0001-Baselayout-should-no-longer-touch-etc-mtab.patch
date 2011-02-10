@@ -1,0 +1,71 @@
+Upstream: No (dead), somewhat Exherbo specific
+
+From 8e7f451b11f6912e0f6dc15dd30a152acbc799b1 Mon Sep 17 00:00:00 2001
+From: Ingmar Vanhassel <ingmar@exherbo.org>
+Date: Thu, 10 Feb 2011 18:50:50 +0000
+Subject: [PATCH] Baselayout should no longer touch /etc/mtab
+
+/etc/mtab is now a symlink to /proc/self/mounts, installed by
+skeleton-filesystem-layout.
+---
+ init.d/checkroot |   20 +-------------------
+ init.d/halt.sh   |    3 ---
+ 2 files changed, 1 insertions(+), 22 deletions(-)
+
+diff --git a/init.d/checkroot b/init.d/checkroot
+index 24c23f6..6be45e7 100755
+--- a/init.d/checkroot
++++ b/init.d/checkroot
+@@ -91,25 +91,9 @@ start() {
+ 		local x=
+ 		local y=
+ 
+-		#
+-		# Create /etc/mtab
+-		#
+-
+-		# Don't create mtab if /etc is readonly
+-		if ! touch /etc/mtab 2> /dev/null ; then
+-			ewarn "Skipping /etc/mtab initialization (ro root?)"
+-			return 0
+-		fi
+-
+-		# Clear the existing mtab
+-		> /etc/mtab
+-
+-		# Add the entry for / to mtab
++		# Add the entry for /
+ 		mount -f /
+ 
+-		# Don't list root more than once
+-		awk '$2 != "/" {print}' /proc/mounts >> /etc/mtab
+-
+ 		# Now make sure /etc/mtab have additional info (gid, etc) in there
+ 		for x in $(awk '{ print $2 }' /proc/mounts | sort -u) ; do
+ 			for y in $(awk '{ print $2 }' /etc/fstab) ; do
+@@ -120,8 +104,6 @@ start() {
+ 			done
+ 		done
+ 
+-		# Remove stale backups
+-		rm -f /etc/mtab~ /etc/mtab~~
+ 	fi
+ }
+ 
+diff --git a/init.d/halt.sh b/init.d/halt.sh
+index 4b54a54..a8fced8 100755
+--- a/init.d/halt.sh
++++ b/init.d/halt.sh
+@@ -169,9 +169,6 @@ mount_readonly() {
+ 	return ${retval}
+ }
+ 
+-# Since we use `mount` in mount_readonly(), but we parse /proc/mounts, we 
+-# have to make sure our /etc/mtab and /proc/mounts agree
+-cp /proc/mounts /etc/mtab &>/dev/null
+ ebegin "Remounting remaining filesystems readonly"
+ mount_worked=0
+ if ! mount_readonly ; then
+-- 
+1.7.4
+
