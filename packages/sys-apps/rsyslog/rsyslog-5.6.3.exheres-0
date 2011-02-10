@@ -27,6 +27,7 @@ LICENCES="GPL-3 LGPL-3"
 SLOT="4"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="
+    baselayout
     debug
     gnutls
     kerberos
@@ -102,6 +103,11 @@ src_install() {
     dodoc "${WORK}"/rsyslog.conf
 
     install_systemd_files
+
+    if option baselayout ; then
+        newinitd "${FILES}"/${PN}.initd ${PN}
+        newconfd "${FILES}"/${PN}.confd ${PN}
+    fi
 }
 
 # The imdiag, imptcp, and omuxsock modules are required for the tests.
