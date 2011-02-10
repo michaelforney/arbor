@@ -3,5 +3,8 @@
 # Based in part upon 'gnome.org.eclass' from Gentoo which is:
 #     Copyright 1999-2004 Gentoo Foundation
 
-DOWNLOADS="mirror://gnome/sources/${PN}/$(ever range 1-2)/${PNV}.tar.bz2"
-
+if ever is_scm ; then
+    SCM_REPOSITORY="git://git.gnome.org/${PN}.git"
+else
+    DOWNLOADS="mirror://gnome/sources/${PN}/$(ever range 1-2)/${PNV}.tar.bz2"
+fi
