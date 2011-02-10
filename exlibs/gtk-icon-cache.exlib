@@ -5,7 +5,7 @@
 
 export_exlib_phases pkg_preinst pkg_postinst pkg_postrm
 
-_save_icon_theme_directories()
+gtk_icon_cache_exlib_save_theme_directories()
 {
     illegal_in_global_scope
 
@@ -14,7 +14,7 @@ _save_icon_theme_directories()
     popd "${IMAGE}" &> /dev/null
 }
 
-_update_icon_theme_cache()
+gtk_icon_cache_exlib_update_theme_cache()
 {
     illegal_in_global_scope
 
@@ -36,19 +36,19 @@ gtk-icon-cache_pkg_preinst()
 {
     illegal_in_global_scope
 
-    _save_icon_theme_directories
+    gtk_icon_cache_exlib_save_theme_directories
 }
 
 gtk-icon-cache_pkg_postinst()
 {
     illegal_in_global_scope
 
-    _update_icon_theme_cache
+    gtk_icon_cache_exlib_update_theme_cache
 }
 
 gtk-icon-cache_pkg_postrm() {
     illegal_in_global_scope
 
-    _update_icon_theme_cache
+    gtk_icon_cache_exlib_update_theme_cache
 }
 
