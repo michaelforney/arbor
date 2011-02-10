@@ -1,10 +1,16 @@
-# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2008-2011 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the the GNU General Public License
 # Based in part upon 'gnome.org.eclass' from Gentoo which is:
 #     Copyright 1999-2004 Gentoo Foundation
 
+myexparam pn=${PN}
+myexparam pnv=${PNV}
+
+HOMEPAGE="http://www.gnome.org/"
+
 if ever is_scm ; then
-    SCM_REPOSITORY="git://git.gnome.org/${PN}.git"
+    SCM_REPOSITORY="git://git.gnome.org/$(exparam pn).git"
 else
-    DOWNLOADS="mirror://gnome/sources/${PN}/$(ever range 1-2)/${PNV}.tar.bz2"
+    DOWNLOADS="mirror://gnome/sources/$(exparam pn)/$(ever range 1-2)/$(exparam pnv).tar.bz2"
 fi
+
