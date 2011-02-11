@@ -76,7 +76,7 @@ DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
 llvm_pkg_pretend() {
     local gcc_version=$(gcc-major-version).$(gcc-minor-version)
-    if ever at_least 4.5 ${gcc_version}; then
+    if option clang && ever at_least 4.5 ${gcc_version}; then
         die "gcc 4.5 leads to segfaults in the tests Clang::Coverage/ast-printing.(c|cpp|m) and Clang::Parser/char-literal-printing.c"
     fi
 }
