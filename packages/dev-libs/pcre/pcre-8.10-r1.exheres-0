@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge multilib
+require sourceforge easy-multibuild
 
 SUMMARY="Perl Compatible Regular Expression library"
 DESCRIPTION="
@@ -26,7 +26,7 @@ UPSTREAM_RELEASE_NOTES="http://pcre.org/news.txt"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
@@ -37,17 +37,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     # Move libpcre to /$(get_libdir) to keep grep and thus baselayout working
     # without requiring /usr to be mounted
-    edo cd "${IMAGE}"/usr/$(get_libdir)
-    dodir /$(get_libdir)
+    edo cd "${IMAGE}"/usr/${LIBDIR}
+    dodir /${LIBDIR}
 
     local f
     for f in libpcre*; do
-        edo mv $f "${IMAGE}"/$(get_libdir)/
-        dosym /$(get_libdir)/${f} /usr/$(get_libdir)/${f}
+        edo mv $f "${IMAGE}"/${LIBDIR}/
+        dosym /${LIBDIR}/${f} /usr/${LIBDIR}/${f}
     done
 }
 
