@@ -29,6 +29,7 @@ scm-hg_do_check_vars() {
     [[ -n ${rev} ]] && [[ ${rev} == *[^0-9a-f]* || ${#rev} -ne 40 ]] \
         && die "for hg, $(scm_var_name REVISION) must be a 40-character lowercase hexadecimal SHA-1 sum"
     [[ -n $(scm_get_var SUBPATH) ]] && die "for hg, $(scm_var_name SUBPATH) must not be set"
+    [[ -n $(scm_get_var EXTERNAL_REFS) ]] && die "for hg, $(scm_var_name EXTERNAL_REFS) must not be set"
 
     if [[ $(scm_get_var REPOSITORY) == ssh://* ]]; then
         local repo=$(scm_get_var REPOSITORY)

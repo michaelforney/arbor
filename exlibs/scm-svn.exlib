@@ -35,24 +35,25 @@ scm-svn_do_check_vars() {
     scm_modify_var TAG        scm_trim_slashes -leading -trailing
     scm_modify_var SUBPATH    scm_trim_slashes -leading -trailing
 
-    local externals=( $(scm_get_var SVN_EXTERNALS) ) idx
+    local externals=( $(scm_get_var EXTERNAL_REFS) ) idx
     if [[ -n ${externals[@]} ]]; then
         for idx in ${!externals[@]}; do
-            [[ ${externals[${idx}]} == ?*:* ]] || die "$(scm_var_name SVN_EXTERNALS) entry ${externals[${idx}]} is malformed"
+            [[ ${externals[${idx}]} == ?*:* ]] || die "$(scm_var_name EXTERNAL_REFS) entry ${externals[${idx}]} is malformed"
             local path=$(scm_trim_slashes -leading -trailing "${externals[${idx}]%:*}")
             local that=${externals[${idx}]##*:}
             externals[${idx}]=${path}:${that}
             if [[ -n ${that} ]]; then
-                has ${that} ${SCM_SECONDARY_REPOSITORIES} || die "$(scm_var_name SVN_EXTERNALS) references non-existent repository ${that}"
+                has ${that} ${SCM_SECONDARY_REPOSITORIES} || die "$(scm_var_name EXTERNAL_REFS) references non-existent repository ${that}"
                 local othertype=$(SCM_THIS=${that} scm_get_var TYPE)
-                [[ ${othertype:-${SCM_TYPE}} == svn ]] || die "$(scm_var_name SVN_EXTERNALS) references non-svn repository ${that}"
+                [[ ${othertype:-${SCM_TYPE}} == svn ]] || die "$(scm_var_name EXTERNAL_REFS) references non-svn repository ${that}"
+                [[ -z $(SCM_THIS=${that} scm_get_var REVISION) ]] && SCM_THIS=${that} scm_set_var REVISION _
                 if [[ -z $(SCM_THIS=${that} scm_get_var UNPACK_TO) ]]; then
                     local my_unpack_to=$(scm_get_var UNPACK_TO)
                     SCM_THIS=${that} scm_set_var UNPACK_TO "${my_unpack_to}/${path}"
                 fi
             fi
         done
-        scm_set_var SVN_EXTERNALS "${externals[*]}"
+        scm_set_var EXTERNAL_REFS "${externals[*]}"
     fi
 }
 
@@ -136,7 +137,7 @@ scm-svn_do_appraise() {
 
 scm-svn_do_resolve_externals() {
     local errors=( )
-    local externals=( $(scm_get_var SVN_EXTERNALS) ) idx
+    local externals=( $(scm_get_var EXTERNAL_REFS) ) idx
 
     local extbase part1 part2 part3 part4 revision uri dir fulldir
     while read -r extbase; do
@@ -235,7 +236,7 @@ scm-svn_do_resolve_externals() {
         for error in "${errors[@]}"; do
             eerror "${error}"
         done
-        die "$(scm_var_name SVN_EXTERNALS) is not compatible with actual svn externals declarations in the repository"
+        die "$(scm_var_name EXTERNAL_REFS) is not compatible with actual svn externals declarations in the repository"
     fi
 }
 

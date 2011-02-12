@@ -91,6 +91,9 @@ pkg_postinst() {
     create_device_node console 5 1 root:root 0600
     create_device_node null    1 3 root:root 0666
 
+    # create /etc/mtab
+    edo ln -sf /proc/self/mounts "${ROOT}"/etc/mtab
+
     # /usr structure
     for x in usr{,/bin,/include,/sbin,/share,/src}; do
         create_root_owned_directory "${ROOT}${x}"

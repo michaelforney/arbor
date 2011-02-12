@@ -24,6 +24,7 @@ scm-cvs_do_check_vars() {
     [[ -n $(scm_get_var REVISION) && ! $(scm_get_var REVISION) =~ ^[0-9]{4}(.[0-9]{2}){5}$ ]] \
         && die "for cvs, $(scm_var_name REVISION) must be in the form YYYY.MM.DD.hh.mm.ss"
     [[ -z $(scm_get_var SUBPATH) ]] && scm_set_var SUBPATH "${SCM_THIS:-${PN}}"
+    [[ -n $(scm_get_var EXTERNAL_REFS) ]] && die "for cvs, $(scm_var_name EXTERNAL_REFS) must not be set"
 
     scm_modify_var REPOSITORY scm_trim_slashes -trailing
     scm_modify_var SUBPATH    scm_trim_slashes -leading -trailing
