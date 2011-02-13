@@ -37,7 +37,8 @@ src_install() {
 
     # Move the pkg-config file into the correct dir.
     dodir /usr/$(get_libdir)/pkgconfig
-    edo mv "${IMAGE}"/$(get_libdir)/pkgconfig/libcryptsetup.pc "${IMAGE}"/usr/$(get_libdir)/pkgconfig
+    edo cp "${IMAGE}"/$(get_libdir)/pkgconfig/libcryptsetup.pc "${IMAGE}"/usr/$(get_libdir)/pkgconfig
+    edo rm "${IMAGE}"/$(get_libdir)/pkgconfig/libcryptsetup.pc
     edo rmdir "${IMAGE}"/$(get_libdir)/pkgconfig
 
     # Create compatibility symlinks.
