@@ -18,6 +18,9 @@ DEPENDENCIES="
     build:
         sys-devel/gettext[>=0.14.1]
     build+run:
+        !sys-apps/util-linux-ng [[
+            description = [ Upstream renamed util-linux-ng to util-linux ] resolution = uninstall-blocked-after
+        ]]
         dev-lang/perl:*
         sys-fs/udev[>=112]
         sys-libs/ncurses[>=5.6][multibuild_c:*(?)?]
