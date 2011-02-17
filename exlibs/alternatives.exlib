@@ -133,7 +133,7 @@ EOF
         fi
 
         echo eclectic "${alt}" update "${provider}"
-        eclectic "${alt}" update "${provider}"
+        eclectic "${alt}" update "${provider}" || exlogfailure
 
         cleanup_old_alternatives_module ${alt}
     done
@@ -150,12 +150,18 @@ alternatives_pkg_prerm() {
         echo "Making sure ${alt} has a valid provider"
         echo eclectic "${alt}" update${ignore} "${provider}"
         eclectic "${alt}" update${ignore} "${provider}" && continue
-        if [[ $? -eq 2 ]]; then
-            einfo "Cleaning up unused alternatives module for ${alt}"
-            echo rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic"
-            rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic" ||
-                eerror rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic" failed
-        fi
+        case $? in
+            0) : ;;
+            2)
+                einfo "Cleaning up unused alternatives module for ${alt}"
+                echo rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic"
+                rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic" ||
+                    eerror rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic" failed
+                ;;
+            *)
+                exlogfailure
+                ;;
+        esac
     done
 }
 
