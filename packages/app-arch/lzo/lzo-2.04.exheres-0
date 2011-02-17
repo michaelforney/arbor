@@ -5,8 +5,8 @@ SUMMARY="Portable and very fast lossless data compression library"
 HOMEPAGE="http://www.oberhumer.com/opensource/lzo/"
 DOWNLOADS="http://www.oberhumer.com/opensource/lzo/download/${PNV}.tar.gz"
 
-LICENCES="GPL-2"
-SLOT="${PV%%.*}"
+LICENCES="|| ( GPL-3 GPL-2 )"
+SLOT="$(ever major)"
 PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
@@ -14,5 +14,5 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/lzonews.php"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared --hates=docdir )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared )
 
