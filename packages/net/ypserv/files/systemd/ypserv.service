@@ -1,0 +1,11 @@
+[Unit]
+Description=NIS Server: ypserv
+Requires=rpcbind.service
+After=rpcbind.service network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/ypserv
+
+[Install]
+WantedBy=multi-user.target
