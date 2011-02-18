@@ -89,6 +89,12 @@ glibc_src_prepare() {
 }
 
 glibc_src_configure() {
+    if [[ $(eclectic ld show) == gold ]]; then
+        edo mkdir "${TEMP}"/bin
+        edo ln -sf /usr/${CHOST}/bin/ld.bfd "${TEMP}"/bin/ld
+        CC="${CC} -B${TEMP}/bin/"
+    fi
+
     local multibuild_c_target
 
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do

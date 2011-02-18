@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'valgrind-3.3.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -26,15 +26,17 @@ src_prepare() {
 }
 
 src_configure() {
+    local myconf=()
+
     filter-flags -fomit-frame-pointer
     # -ggdb3 causes segfaults at startup
     replace-flags -ggdb3 -ggdb2
 
     # FIXME multilib: option platform:amd64 && ! has_multilib_profile
-    if option platform:amd64; then
-        myconf='--enable-only64bit'
+    if option platform:amd64 ; then
+        myconf=( --enable-only64bit )
     fi
 
-    econf ${myconf} --hates=docdir
+    econf "${myconf[@]}"
 }
 

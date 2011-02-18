@@ -18,12 +18,9 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/community/release-history/"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug hal"
+MYOPTIONS="debug"
 
-DEPENDENCIES="
-    run:
-        hal? ( sys-apps/hal )
-"
+DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-ldconfig
@@ -36,10 +33,5 @@ src_install() {
 
     insinto /etc/udev/rules.d
     doins "${FILES}/99-${PN}.rules"
-
-    if option hal ; then
-        insinto /etc/hal/fdi/policy
-        doins "${FILES}/10-${PN}.fdi"
-    fi
 }
 
