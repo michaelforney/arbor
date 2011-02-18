@@ -23,7 +23,7 @@ DEPENDENCIES="
         dev-libs/popt[>=1.5]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-no-mmap-empty-file.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-no-mmap-empty-file.patch )
 
 DEFAULT_SRC_COMPILE_PARAMS=(
     "CC=${CC}"
@@ -47,12 +47,12 @@ src_install() {
 
     if option cron; then
         exeinto /etc/cron.daily
-        doexe ${FILES}/logrotate.cron
+        doexe "${FILES}"/logrotate.cron
     fi
     install_systemd_files
 
     insinto /etc
-    doins ${FILES}/logrotate.conf
+    doins "${FILES}"/logrotate.conf
 
     keepdir /etc/logrotate.d
 }
