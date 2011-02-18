@@ -3,7 +3,7 @@
 
 [Unit]
 Description=NFS server
-Requires=network.target
+Requires=network.target rpcbind.service rpcstatd.service
 After=rpcbind.service rpcstatd.service
 
 [Service]
@@ -12,9 +12,9 @@ ExecStartPre=-/bin/mount -t nfsd -o nodev,noexec,nosuid nfsd /proc/fs/nfs
 ExecStartPre=/usr/sbin/exportfs -r
 ExecStartPre=/usr/sbin/rpc.mountd
 ExecStart=/usr/sbin/rpc.nfsd --syslog 8
-ExecReload=/usr/sbin/exportfs -r 1>&2
-ExecStop=-/bin/kill -9 rpc.mountd
-ExecStopPost=-/bin/kill -9 rpc.nfsd
+ExecStopPre=/usr/sbin/exportfs -u
+ExecStop=/usr/sbin/rpc.nfsd 0
+ExecReload=/usr/sbin/exportfs -r
 
 [Install]
 WantedBy=network.target
