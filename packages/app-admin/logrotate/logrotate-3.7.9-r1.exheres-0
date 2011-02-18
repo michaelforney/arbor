@@ -3,6 +3,8 @@
 # Based in part upon 'logrotate-3.7.2.ebuild' from Gentoo, which is:
 #       Copyright 1999-2007 Gentoo Foundation
 
+require systemd-service
+
 SUMMARY="Rotates, compresses and mails system logs"
 HOMEPAGE="https://fedorahosted.org/${PN}"
 DOWNLOADS="https://fedorahosted.org/releases/l/o/${PN}/${PNV}.tar.gz"
@@ -12,7 +14,9 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+    cron [[ description = [ Install launcher script to cron.daily path ] ]]
+"
 
 DEPENDENCIES="
     build+run:
@@ -41,8 +45,11 @@ src_install() {
     doman logrotate.8
     dodoc examples/*
 
-    exeinto /etc/cron.daily
-    doexe ${FILES}/logrotate.cron
+    if option cron; then
+        exeinto /etc/cron.daily
+        doexe ${FILES}/logrotate.cron
+    fi
+    install_systemd_files
 
     insinto /etc
     doins ${FILES}/logrotate.conf
