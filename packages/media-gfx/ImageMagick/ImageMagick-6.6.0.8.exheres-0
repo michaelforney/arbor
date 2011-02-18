@@ -51,16 +51,40 @@ DEPENDENCIES="
 
 RESTRICT="test" # Multiple failures, possibly caused by sandbox
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static=no' '--enable-shared=yes'
-'--disable-openmp' '--without-included-ltdl' '--with-quantum-depth=16'
-'--with-threads' '--with-modules' '--enable-hdri' '--with-bzlib' '--with-gslib' '--with-zlib'
-'--with-jpeg' '--with-png'
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    '--enable-static=no'
+    '--enable-shared=yes'
+    '--disable-openmp'
+    '--without-included-ltdl'
+    '--with-quantum-depth=16'
+    '--with-threads'
+    '--with-modules'
+    '--enable-hdri'
+    '--with-bzlib'
+    '--with-gslib'
+    '--with-zlib'
+    '--with-jpeg'
+    '--with-png'
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' 'cxx magick-plus-plus' 'djvu' 'fft fftw'
-'fontconfig' 'fpx' 'graphviz gvc' 'jpeg2000 jp2' 'lcms' 'openexr' 'perl' 'svg rsvg'
-'tiff' 'truetype freetype' 'truetype windows-font-dir /usr/share/fonts/X11/fonts/corefonts'
-'xml' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'X x'
+    'cxx magick-plus-plus'
+    'djvu'
+    'fft fftw'
+    'fontconfig'
+    'fpx'
+    'graphviz gvc'
+    'jpeg2000 jp2'
+    'lcms'
+    'openexr'
+    'perl'
+    'svg rsvg'
+    'tiff'
+    'truetype freetype'
+    'truetype windows-font-dir /usr/share/fonts/X11/fonts/corefonts'
+    'xml'
+)
 
 src_configure() {
     default
