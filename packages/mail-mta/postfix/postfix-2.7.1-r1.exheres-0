@@ -3,7 +3,7 @@
 # Based in part upon 'postfix-2.5.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib pam alternatives
+require multilib pam alternatives systemd-service
 
 SUMMARY="Fast, easy to administer and secure mail transport agent"
 HOMEPAGE="http://www.postfix.org"
@@ -98,6 +98,7 @@ src_install() {
 
     dosym /usr/share/doc/${PNVR} /usr/share/doc/${PN}
 
+    install_systemd_files
     option baselayout && newinitd "${FILES}"/postfix.init.d-0 postfix
 }
 
