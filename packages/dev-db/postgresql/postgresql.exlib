@@ -35,7 +35,7 @@ DOWNLOADS="mirror://${PN}/source/v${PV}/${PNV}.tar.bz2"
 
 LICENCES="PostgreSQL"
 SLOT="0"
-MYOPTIONS="pam perl python readline ssl tcl"
+MYOPTIONS="pam perl python readline ssl tcl xml [[ description = [ Add support for XML data type ] ]]"
 
 DEPENDENCIES="
     build:
@@ -50,11 +50,15 @@ DEPENDENCIES="
         readline? ( sys-libs/readline )
         ssl? ( dev-libs/openssl )
         tcl? ( dev-lang/tcl:= )
+        xml? (
+            dev-libs/libxml2:=[>=2.6.23]
+            dev-libs/libxslt
+        )
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     # 'kerberos krb5'
-    pam perl python readline 'ssl openssl' tcl
+    pam perl python readline 'ssl openssl' tcl 'xml libxml' 'xml libxslt'
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --hates=docdir
