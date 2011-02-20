@@ -1,4 +1,5 @@
 # Copyright 2009 Pierre Lejeune <superheron@gmail.com>
+# Copyright 2011 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Lightweight DNS forwarder and DHCP server"
@@ -20,7 +21,8 @@ UPSTREAM_CHANGELOG="${BASEURI}/CHANGELOG [[ lang = en ]]"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS="baselayout dbus doc"
+MYOPTIONS="baselayout dbus doc
+    idn [[ description = [ Support for international domain names ] ]] "
 
 DEPENDENCIES="
     build:
@@ -28,12 +30,14 @@ DEPENDENCIES="
         dev-util/pkg-config
         sys-devel/gettext
     build+run:
-        net-dns/libidn
         dbus? ( sys-apps/dbus )
+        idn? ( net-dns/libidn )
 "
-
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( 'dnsmasq.conf.example' )
-
+src_prepare() {
+    # Use a more sane lease directory
+    edo sed -e 's:^#dhcp-leasefile=.*:dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases:' \
+            dnsmasq.conf.example > dnsmasq.conf
+}
 src_configure() {
     if option dbus ; then
         echo '#define HAVE_DBUS' >> src/config.h
@@ -41,11 +45,18 @@ src_configure() {
 }
 
 src_compile() {
-    emake CFLAGS="${CFLAGS}" PREFIX="/usr" all-i18n
+    emake CC="${CC}" CFLAGS="${CFLAGS}" PREFIX=/usr all$(option idn && echo "-i18n")
 }
 
 src_install() {
-    emake -j1 DESTDIR="${IMAGE}" PREFIX="/usr" install-i18n
+    emake -j1 DESTDIR="${IMAGE}" PREFIX="/usr" install$(option idn && echo "-i18n")
+
+    insinto /etc
+    doins dnsmasq.conf
+
+    # Lease directory
+    dodir /var/lib/dnsmasq
+    keepdir /var/lib/dnsmasq
 
     if option baselayout ; then
         newinitd "${FILES}"/dnsmasq.init dnsmasq
