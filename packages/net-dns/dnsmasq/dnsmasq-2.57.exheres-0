@@ -22,34 +22,34 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
 MYOPTIONS="baselayout dbus doc
-    idn [[ description = [ Support for international domain names ] ]] "
+    i18n [[ description = [ Support locales and international domain names ] ]]
+"
 
 DEPENDENCIES="
     build:
         app-arch/xz
         dev-util/pkg-config
-        sys-devel/gettext
+        i18n? ( sys-devel/gettext )
     build+run:
         dbus? ( sys-apps/dbus )
-        idn? ( net-dns/libidn )
+        i18n? ( net-dns/libidn )
 "
 src_prepare() {
     # Use a more sane lease directory
     edo sed -e 's:^#dhcp-leasefile=.*:dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases:' \
             dnsmasq.conf.example > dnsmasq.conf
 }
-src_configure() {
-    if option dbus ; then
-        echo '#define HAVE_DBUS' >> src/config.h
-    fi
-}
 
 src_compile() {
-    emake CC="${CC}" CFLAGS="${CFLAGS}" PREFIX=/usr all$(option idn && echo "-i18n")
+    emake \
+        CC="${CC}" \
+        CFLAGS="${CFLAGS}" \
+        COPTS=$(option dbus && echo "-DHAVE_DBUS") \
+        all$(option i18n && echo "-i18n")
 }
 
 src_install() {
-    emake -j1 DESTDIR="${IMAGE}" PREFIX="/usr" install$(option idn && echo "-i18n")
+    emake -j3 DESTDIR="${IMAGE}" PREFIX=/usr install$(option i18n && echo "-i18n")
 
     insinto /etc
     doins dnsmasq.conf
