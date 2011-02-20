@@ -218,13 +218,7 @@ scm_src_fetch_extra() {
 scm_scmrevision_one() {
     local rev=$(scm_call revision)
     [[ -n ${rev} ]] || die "could not determine revision for ${SCM_THIS:-primary repository}"
-    SCM_PKG_SCM_REVISION_RESULT+=,${SCM_THIS}=${rev}
-}
-
-scm_pkg_scm_revision() {
-    local SCM_PKG_SCM_REVISION_RESULT=
-    scm_{for_each,access_checkout,scmrevision_one}
-    echo ${SCM_PKG_SCM_REVISION_RESULT#,=}
+    SCM_SCM_REVISION_RESULT+=,${SCM_THIS}=${rev}
 }
 
 scm_do_unpack() {
@@ -259,13 +253,17 @@ scm_unpack_one() {
     scm_call unpack
     rm -f "${dir}/.scm.exlib.timestamp"{,.*}
     scm_call set_actual_vars
+    scm_scmrevision_one
 }
 
 scm_src_unpack() {
     [[ -n ${SCM_CHECKOUT_TO} ]] || die "SCM_CHECKOUT_TO is unset; you probably set SCM_NO_AUTOMATIC_FINALISE but forgot to call scm_finalise manually"
     scm_run_user_customize
+    local SCM_SCM_REVISION_RESULT=
     scm_{for_each,access_checkout,unpack_one}
     SCM_IS_BUILT=1
+    SCM_SCM_REVISION_RESULT=${SCM_SCM_REVISION_RESULT#,=}
+    [[ -n "${SCM_SCM_REVISION_RESULT}" ]] && exsetscmrevision "${SCM_SCM_REVISION_RESULT}"
 }
 
 scm_do_info() {
@@ -372,6 +370,5 @@ scm_finalise() {
 }
 [[ -z ${SCM_NO_AUTOMATIC_FINALISE} ]] && scm_finalise
 
-#export_exlib_phases src_fetch_extra pkg_scm_revision src_unpack pkg_info
 export_exlib_phases src_fetch_extra src_unpack pkg_info
 
