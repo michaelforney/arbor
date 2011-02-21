@@ -1,7 +1,7 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require systemd-service autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 export_exlib_phases src_prepare src_configure src_install
 
@@ -75,6 +75,8 @@ sysstat_src_install() {
     edo rm "${IMAGE}"/usr/share/doc/${PNVR}/COPYING
     dodoc -r contrib xml
     dodoc cron/{crontab,sysstat.crond,sysstat.cron.daily,sysstat.cron.hourly,sysstat.crond.sample,sysstat.crond.sample,crontab.sample}
+
+    install_systemd_files
 
     keepdir /var/log/sa
 }
