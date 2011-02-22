@@ -1,19 +1,15 @@
-# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
-# Distributed under the terms of the GNU General Public License v2
-
 [Unit]
-Description=Logical Volume Manager
+Description=LVM activation
 DefaultDependencies=no
-Before=fsck.target basic.target
+After=udev-settle.service
+Before=basic.target shutdown.target
+Conflicts=shutdown.target
 
 [Service]
+ExecStart=/sbin/vgchange -a y
 Type=oneshot
+TimeoutSec=0
 RemainAfterExit=yes
-ExecStartPre=/sbin/pvscan --quiet --config 'global { locking_dir = "/dev/.lvm" }'
-ExecStartPre=/sbin/vgscan --quiet --mknodes --config 'global { locking_dir = "/dev/.lvm" }'
-ExecStart=/sbin/vgchange --sysinit --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a y
-ExecStop=-/sbin/lvchange --sysinit --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a n /dev/mapper/*
-ExecStop=-/sbin/vgchange --sysinit --quiet --config 'global { locking_dir = "/dev/.lvm" }' -a n
 
 [Install]
 WantedBy=basic.target
