@@ -150,6 +150,10 @@ src_configure() {
         WPS
 
     option dbus     && config_enable CTRL_IFACE_DBUS
+    if ever at_least 0.7.3 ; then
+        option dbus     && config_enable CTRL_IFACE_DBUS_NEW
+        option dbus     && config_enable CTRL_IFACE_DBUS_INTRO
+    fi
     option debug    && config_enable DEBUG_FILE ||
                        config_enable NO_STDOUT_DEBUG
     option pcap     && config_enable L2_PACKET=pcap ||
@@ -256,11 +260,6 @@ src_configure() {
     # saves about 0.5 kB in code size.
     #config_enable NO_WPA_PASSPHRASE
 
-    # Don't enable the new DBus control interface until NetworkManager supports
-    # it (as of NetworkManager 0.8.2 it's still unsupported).
-    #config_enable CTRL_IFACE_DBUS_INTRO
-    #config_enable CTRL_IFACE_DBUS_NEW
-
     # Experimental; unset by default
     #config_enable IEEE80211W
     #config_enable_eap TNC
@@ -310,11 +309,17 @@ src_install() {
         insinto /etc/dbus-1/system.d/
         newins {dbus-,}wpa_supplicant.conf
 
-        edo sed -i -e '/^Exec=/s:/sbin:/usr/sbin:' fi.epitest.hostap.WPASupplicant.service
+        edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.epitest.hostap.WPASupplicant.service'
+        if ever at_least 0.7.3 ; then
+            edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.w1.wpa_supplicant1.service'
+        fi
 
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
-        doins fi.epitest.hostap.WPASupplicant.service
+        doins 'fi.epitest.hostap.WPASupplicant.service'
+        if ever at_least 0.7.3 ; then
+            doins 'fi.w1.wpa_supplicant1.service'
+        fi
 
         popd
     fi
