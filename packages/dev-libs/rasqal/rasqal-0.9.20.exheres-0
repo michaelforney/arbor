@@ -32,8 +32,8 @@ DEPENDENCIES="
 src_configure() {
     econf \
         --enable-xml2 \
-        --with-decimal=$(option gmp && echo "gmp" || echo "mpfr") \
-        --with-regex-library=$(option pcre && echo "pcre" || echo "posix") \
+        --with-decimal=$(optionv gmp || echo "mpfr") \
+        --with-regex-library=$(optionv pcre || echo "posix") \
         --with-raptor=system \
         --disable-raptor2 \
         $(option_enable pcre)
