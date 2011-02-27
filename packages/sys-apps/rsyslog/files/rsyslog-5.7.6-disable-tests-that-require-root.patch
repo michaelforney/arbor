@@ -1,0 +1,76 @@
+From 8b15d73cbb5f396ea5e21d5b93d786ef10aead53 Mon Sep 17 00:00:00 2001
+From: Brett Witherspoon <spoonb@exherbo.org>
+Date: Sun, 27 Feb 2011 19:21:59 -0600
+Subject: [PATCH] tests: skip tests that require root if being run as a normal user
+
+Upstream: Not yet. Needs some additional autofoo work for it to be suitable to
+be sent upstream.
+
+---
+ tests/imuxsock_ccmiddle_root.sh |    4 ++++
+ tests/imuxsock_logger_root.sh   |    4 ++++
+ tests/imuxsock_traillf_root.sh  |    4 ++++
+ tests/sndrcv_udp.sh             |    4 ++++
+ 4 files changed, 16 insertions(+), 0 deletions(-)
+
+diff --git a/tests/imuxsock_ccmiddle_root.sh b/tests/imuxsock_ccmiddle_root.sh
+index b487611..789e17d 100755
+--- a/tests/imuxsock_ccmiddle_root.sh
++++ b/tests/imuxsock_ccmiddle_root.sh
+@@ -2,6 +2,10 @@
+ # carry out this test
+ echo \[imuxsock_ccmiddle_root.sh\]: test trailing LF handling in imuxsock
+ echo This test must be run as root with no other active syslogd
++if [ "$(id -u)" != '0' ]; then
++    echo test disabled since we are not being run as root
++    exit 0
++fi
+ source $srcdir/diag.sh init
+ source $srcdir/diag.sh startup imuxsock_ccmiddle_root.conf
+ # send a message with trailing LF
+diff --git a/tests/imuxsock_logger_root.sh b/tests/imuxsock_logger_root.sh
+index 377999f..d989747 100755
+--- a/tests/imuxsock_logger_root.sh
++++ b/tests/imuxsock_logger_root.sh
+@@ -2,6 +2,10 @@
+ # carry out this test.
+ echo \[imuxsock_logger_root.sh\]: test trailing LF handling in imuxsock
+ echo This test must be run as root with no other active syslogd
++if [ "$(id -u)" != '0' ]; then
++    echo test disabled since we are not being run as root
++    exit 0
++fi
+ source $srcdir/diag.sh init
+ source $srcdir/diag.sh startup imuxsock_logger_root.conf
+ # send a message with trailing LF
+diff --git a/tests/imuxsock_traillf_root.sh b/tests/imuxsock_traillf_root.sh
+index 1b821ee..0c56544 100755
+--- a/tests/imuxsock_traillf_root.sh
++++ b/tests/imuxsock_traillf_root.sh
+@@ -2,6 +2,10 @@
+ # carry out this test
+ echo \[imuxsock_traillf_root.sh\]: test trailing LF handling in imuxsock
+ echo This test must be run as root with no other active syslogd
++if [ "$(id -u)" != '0' ]; then
++    echo test disabled since we are not being run as root
++    exit 0
++fi
+ source $srcdir/diag.sh init
+ source $srcdir/diag.sh startup imuxsock_traillf_root.conf
+ # send a message with trailing LF
+diff --git a/tests/sndrcv_udp.sh b/tests/sndrcv_udp.sh
+index 274a414..a0d0ce4 100755
+--- a/tests/sndrcv_udp.sh
++++ b/tests/sndrcv_udp.sh
+@@ -7,4 +7,8 @@
+ # This file is part of the rsyslog project, released  under GPLv3
+ echo ===============================================================================
+ echo \[sndrcv_udp.sh\]: testing sending and receiving via udp
++if [ "$(id -u)" != '0' ]; then
++    echo test disabled since we are not being run as root
++    exit 0
++fi
+ source $srcdir/sndrcv_drvr.sh sndrcv_udp 50
+-- 
+1.7.4.1
+
