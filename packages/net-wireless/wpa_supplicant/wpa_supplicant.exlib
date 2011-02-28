@@ -100,6 +100,8 @@ RESTRICT="test"
 
 WORK=${WORKBASE}/${PNV}/${PN}
 
+[[ ${PV} == "0.7.3" ]] && DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PNV}-new-dbus.patch )
+
 DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) V=1 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( eap_testing.txt wpa_supplicant.conf )
