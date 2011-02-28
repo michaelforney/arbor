@@ -1,0 +1,15 @@
+# Copyright 2011 Brett Witherspoon <spoonb@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=WPA Supplicant
+
+[Service]
+Type=dbus
+BusName=fi.w1.wpa_supplicant1
+EnvironmentFile=/etc/conf.d/wpa_supplicant.conf
+ExecStart=/usr/sbin/wpa_supplicant -u ${CONFIG} ${IFACE} ${DRIVER}
+
+[Install]
+WantedBy=network.target
+

@@ -2,7 +2,7 @@
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require qmake4 [ no_qt_dependency=true ] multilib
+require qmake4 [ no_qt_dependency=true ] multilib systemd-service
 
 SUMMARY="Linux WPA/WPA2/IEEE 802.1X Supplicant"
 DESCRIPTION="
@@ -28,6 +28,7 @@ LICENCES="|| ( BSD GPL-2 )"
 SLOT="0"
 
 MYOPTIONS="
+    baselayout
     dbus     [[ description = [ Enable the DBus control interface                    ] ]]
     debug    [[ description = [ Support printing out debug message to stdout         ] ]]
     eap-fast [[
@@ -46,6 +47,7 @@ MYOPTIONS="
     ] ]]
     qt4      [[ description = [ Build the Qt4-based wpa_gui program                  ] ]]
     readline [[ description = [ Use readline for line editing and history in wpa_cli ] ]]
+    systemd  [[ requires = dbus ]]
 
     (
         gnutls [[ description = [
@@ -326,8 +328,25 @@ src_install() {
         popd
     fi
 
-    exeinto /etc/wpa_supplicant
-    doexe "${FILES}"/wpa_cli.sh
+    if option systemd ; then
+        insinto /etc/conf.d
+        hereins wpa_supplicant.conf <<EOF
+# If you wish to start the wpa_supplicant daemon to be controlled via the DBus
+# interface by another service then IFACE can be commented out or empty.
+#
+# See man wpa_supplicant(8) for details
+
+CONFIG="-c/etc/wpa_supplicant/wpa_supplicant.conf"
+IFACE="-iwlan0"
+DRIVER="-Dnl80211,wext"
+EOF
+    fi
+    install_systemd_files
+
+    if option baselayout ; then
+        exeinto /etc/wpa_supplicant
+        doexe "${FILES}"/wpa_cli.sh
+    fi
 
     insinto /etc/wpa_supplicant
     hereins wpa_supplicant.conf <<EOF
