@@ -32,11 +32,10 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/nss_ldap-265-vers_string.patch )
 src_configure() {
     # can't pass --disable-debugging as that actually enables it
     econf \
-        --hates=disable-silent-rules \
-        --hates=enable-fast-install \
-        --libdir=/${LIBDIR:-lib} \
-        $(if optionq debug ; then echo --enable-debugging ; fi) \
+        --libdir=/$(get_libdir) \
+        $(option debug && echo --enable-debugging) \
         --enable-paged-results \
         --enable-rfc2307bis \
         --with-ldap-lib=openldap
 }
+
