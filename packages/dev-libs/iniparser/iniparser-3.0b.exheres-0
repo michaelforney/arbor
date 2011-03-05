@@ -1,7 +1,9 @@
-# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multilib
+
+MY_PNV="${PN}${PV}"
 
 SUMMARY="${PN} is a free stand-alone ini file parsing library"
 DESCRIPTION="
@@ -9,7 +11,7 @@ The ${PN} library implements the strict necessary to parse Windows-style ini
 files and return the information as a dictionary of (hashed) strings.
 "
 HOMEPAGE="http://ndevilla.free.fr/${PN}/"
-DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+DOWNLOADS="${HOMEPAGE}/${MY_PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:inifileparser"
@@ -24,7 +26,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 DEPENDENCIES=""
 
-WORK=${WORKBASE}/${PN}
+WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
     edo sed -e "s:^\(CC .*=\) .*:\1 ${CC}:" \
@@ -37,10 +39,10 @@ src_prepare() {
 
 src_test() {
     emake -j1 check
-    edo pushd test
+    edo pushd test >/dev/null
     edo ./iniexample
     edo ./parse
-    edo popd
+    edo popd >/dev/null
 }
 
 src_install() {
