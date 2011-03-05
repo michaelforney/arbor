@@ -164,7 +164,7 @@ git_src_install() {
         newins "${FILES}"/git-daemon.xinetd git-daemon
     fi
     if option systemd ; then
-    hereconfd ${PN}-daemon.conf <<EOF
+        hereconfd ${PN}-daemon.conf <<EOF
 GIT_OPTS="/var/git"
 EOF
     fi
