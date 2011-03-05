@@ -2,13 +2,15 @@
 # Distributed under the terms of the GNU General Public License v2
 
 [Unit]
-Description=git daemon
+Description=git daemon Per-connection server
 After=syslog.target
 
 [Service]
+User=nobody
+Group=nobody
 EnvironmentFile=/etc/conf.d/git-daemon.conf
 PIDFile=/var/run/git-daemon.pid
-ExecStart=/usr/bin/git daemon --pid-file=/var/run/git-daemon.pid --syslog --user=nobody --group=nobody $GIT_OPTS
+ExecStart=/usr/bin/git daemon --pid-file=/var/run/git-daemon.pid --inetd $GIT_OPTS
 
 [Install]
 WantedBy=multi-user.target
