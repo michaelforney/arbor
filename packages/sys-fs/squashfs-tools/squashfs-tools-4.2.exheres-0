@@ -1,4 +1,4 @@
-# Copyright 2009-2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge [ project=squashfs suffix=tar.gz pnv=squashfs${PV} ]
@@ -25,9 +25,8 @@ DEPENDENCIES="
         sys-libs/zlib
 "
 
-WORK="${WORKBASE}"/squashfs${PV}/${PN}
+WORK=${WORKBASE}/squashfs${PV}/${PN}
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PNV}-Respect-flags.patch )
 DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" LDFLAGS="${LDFLAGS}" )
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_DIR="${IMAGE}"/usr/bin )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( ../ )
