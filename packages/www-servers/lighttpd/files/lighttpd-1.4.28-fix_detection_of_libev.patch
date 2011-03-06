@@ -1,0 +1,18 @@
+Source: backport of eea9b56d16c705c31110e522540febc5cd0282c9 from lighttpd-2.x
+Upstream: http://redmine.lighttpd.net/issues/2300
+Reason: lighttpd doesn't detect libev[>=4.0]
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -105,7 +105,7 @@ if test "$WITH_LIBEV" != "no"; then
+ 			LIBEV_LIBS="-L$WITH_LIBEV/lib -lev"
+ 		else
+ 			AC_CHECK_HEADERS([ev.h],[
+-				AC_CHECK_LIB([ev], [ev_loop], [
++				AC_CHECK_LIB([ev], [ev_time], [
+ 						LIBEV_CFLAGS=""
+ 						LIBEV_LIBS="-lev"
+ 					],[
+-- 
+1.7.4.1
+

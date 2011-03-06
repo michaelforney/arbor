@@ -1,7 +1,8 @@
 # Copyright 2008 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib systemd-service [ systemd_files=[ lighttpd.service ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib \
+    systemd-service [ systemd_files=[ lighttpd.service ] ]
 
 SUMMARY="Lightweight, fast, secure, compliant, flexible,  web-server"
 DESCRIPTION="A secure, fast, compliant and very flexible web-server
@@ -29,6 +30,7 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
+        dev-libs/libev
         user/${PN}
         group/${PN}
         xattr? ( sys-apps/attr )
@@ -48,7 +50,7 @@ DEPENDENCIES="
 #FIXME missing packages
 #FIXME test would like fcgi
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/lighttpd-network.c-ssl.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-fix_detection_of_libev.patch )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--libdir=/usr/$(get_libdir)/${PN}"
@@ -56,6 +58,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     '--without-ldap'
     '--without-kerberos5'
     '--without-memcache'
+    '--with-libev'
     '--with-zlib'
     '--with-bzip2'
 )
@@ -71,11 +74,16 @@ src_install() {
         dodoc doc/*.txt
     fi
 
-    dodir /etc/lighttpd
+    insinto /etc/lighttpd/conf.d
+    doins doc/config/conf.d/*.conf
+    insinto /etc/lighttpd
+    doins doc/config/*.conf
     edo sed -e '/^#server.pid-file[ \t]*=/s:^#::' \
             -e '/^#server.username[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
             -e '/^#server.groupname[ \t]*=/{s:^#::;s:\"wwwrun\":\"lighttpd\":;}' \
-            doc/lighttpd.conf > "${IMAGE}"/etc/lighttpd/lighttpd.conf
+            -i "${IMAGE}"/etc/lighttpd/lighttpd.conf
+
+    dodoc doc/config/vhosts.d/vhosts.template
 
     if option baselayout ; then
         newinitd "${FILES}"/lighttpd.initd lighttpd
