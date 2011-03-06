@@ -95,8 +95,13 @@ python-build_src_test() {
 
     python_enable_pyc
 
+    # for test_multiprocessing
+    esandbox allow_net "unix:${TEMP%/}/pymp-*/listener-*"
+
     # rerun failed tests in verbose mode (regrtest -w)
     EXTRATESTOPTS="-w" emake test
+
+    esandbox disallow_net "unix:${TEMP%/}/pymp-*/listener-*"
 
     python_disable_pyc
 }

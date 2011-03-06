@@ -1,0 +1,26 @@
+From bbf2b33757bf86e4a91230b3521e232c1a2f3dab Mon Sep 17 00:00:00 2001
+From: Paul Seidler <bl4sph3my@online.de>
+Date: Sun, 6 Mar 2011 16:06:05 +0100
+Subject: [PATCH] use localhost for tests where possible
+Upstream: no
+
+---
+ Lib/test/test_httpservers.py |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Lib/test/test_httpservers.py b/Lib/test/test_httpservers.py
+index 5c48671..676504b 100644
+--- a/Lib/test/test_httpservers.py
++++ b/Lib/test/test_httpservers.py
+@@ -34,7 +34,7 @@ class TestServerThread(threading.Thread):
+         self.test_object = test_object
+ 
+     def run(self):
+-        self.server = HTTPServer(('', 0), self.request_handler)
++        self.server = HTTPServer(('localhost', 0), self.request_handler)
+         self.test_object.PORT = self.server.socket.getsockname()[1]
+         self.test_object.server_started.set()
+         self.test_object = None
+-- 
+1.7.4.1
+
