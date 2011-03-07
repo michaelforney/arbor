@@ -20,12 +20,11 @@ UPSTREAM_DOCUMENTATION="http://redmine.lighttpd.net/wiki/lighttpd"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="baselayout debug doc fam gdbm ipv6 lua pcre ssl
+MYOPTIONS="baselayout debug html-doc fam gdbm ipv6 lua pcre ssl
+    html-doc [[ description = [ Install the documentation in HTML ] ]]
     webdav [[ description = [ Enables webdev properties ] ]]
     xattr  [[ description = [ Enable extended attributes support ] ]]
 "
-#FIXME doc also needs rst2html from docutils
-
 DEPENDENCIES="
     build:
         dev-util/pkg-config
@@ -33,6 +32,7 @@ DEPENDENCIES="
         dev-libs/libev
         user/${PN}
         group/${PN}
+        html-doc? ( dev-python/docutils )
         xattr? ( sys-apps/attr )
         debug? ( dev-util/valgrind )
         fam? ( app-admin/gamin )
@@ -50,8 +50,6 @@ DEPENDENCIES="
 #FIXME missing packages
 #FIXME test would like fcgi
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-fix_detection_of_libev.patch )
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--libdir=/usr/$(get_libdir)/${PN}"
     '--without-mysql'
@@ -67,10 +65,28 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "debug valgrind" fam gdbm pcre "ssl openssl
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
+src_prepare() {
+    edo sed -e 's/rst2html/rst2html.py/' \
+        -i doc/Makefile.am
+    expatch "${FILES}"/${PNV}-fix_detection_of_libev.patch
+
+    eautoreconf
+}
+
+src_compile() {
+    default
+
+    if option html-doc; then
+        emake html
+    fi
+}
+
 src_install() {
     default
 
-    if option doc; then
+    if option html-doc; then
+        dodoc doc/*.html
+    else
         dodoc doc/*.txt
     fi
 
