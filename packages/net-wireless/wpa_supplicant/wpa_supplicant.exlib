@@ -2,7 +2,7 @@
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require qmake4 [ no_qt_dependency=true ] multilib
+require qmake4 [ no_qt_dependency=true ] multilib systemd-service
 
 SUMMARY="Linux WPA/WPA2/IEEE 802.1X Supplicant"
 DESCRIPTION="
@@ -28,6 +28,7 @@ LICENCES="|| ( BSD GPL-2 )"
 SLOT="0"
 
 MYOPTIONS="
+    baselayout
     dbus     [[ description = [ Enable the DBus control interface                    ] ]]
     debug    [[ description = [ Support printing out debug message to stdout         ] ]]
     eap-fast [[
@@ -46,6 +47,7 @@ MYOPTIONS="
     ] ]]
     qt4      [[ description = [ Build the Qt4-based wpa_gui program                  ] ]]
     readline [[ description = [ Use readline for line editing and history in wpa_cli ] ]]
+    systemd  [[ requires = dbus ]]
 
     (
         gnutls [[ description = [
@@ -100,6 +102,8 @@ RESTRICT="test"
 
 WORK=${WORKBASE}/${PNV}/${PN}
 
+[[ ${PV} == "0.7.3" ]] && DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PNV}-new-dbus.patch )
+
 DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) V=1 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( eap_testing.txt wpa_supplicant.conf )
@@ -150,6 +154,10 @@ src_configure() {
         WPS
 
     option dbus     && config_enable CTRL_IFACE_DBUS
+    if ever at_least 0.7.3 ; then
+        option dbus     && config_enable CTRL_IFACE_DBUS_NEW
+        option dbus     && config_enable CTRL_IFACE_DBUS_INTRO
+    fi
     option debug    && config_enable DEBUG_FILE ||
                        config_enable NO_STDOUT_DEBUG
     option pcap     && config_enable L2_PACKET=pcap ||
@@ -256,11 +264,6 @@ src_configure() {
     # saves about 0.5 kB in code size.
     #config_enable NO_WPA_PASSPHRASE
 
-    # Don't enable the new DBus control interface until NetworkManager supports
-    # it (as of NetworkManager 0.8.2 it's still unsupported).
-    #config_enable CTRL_IFACE_DBUS_INTRO
-    #config_enable CTRL_IFACE_DBUS_NEW
-
     # Experimental; unset by default
     #config_enable IEEE80211W
     #config_enable_eap TNC
@@ -310,17 +313,40 @@ src_install() {
         insinto /etc/dbus-1/system.d/
         newins {dbus-,}wpa_supplicant.conf
 
-        edo sed -i -e '/^Exec=/s:/sbin:/usr/sbin:' fi.epitest.hostap.WPASupplicant.service
+        edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.epitest.hostap.WPASupplicant.service'
+        if ever at_least 0.7.3 ; then
+            edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.w1.wpa_supplicant1.service'
+        fi
 
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
-        doins fi.epitest.hostap.WPASupplicant.service
+        doins 'fi.epitest.hostap.WPASupplicant.service'
+        if ever at_least 0.7.3 ; then
+            doins 'fi.w1.wpa_supplicant1.service'
+        fi
 
         popd
     fi
 
-    exeinto /etc/wpa_supplicant
-    doexe "${FILES}"/wpa_cli.sh
+    if option systemd ; then
+        insinto /etc/conf.d
+        hereins wpa_supplicant.conf <<EOF
+# If you wish to start the wpa_supplicant daemon to be controlled via the DBus
+# interface by another service then IFACE can be commented out or empty.
+#
+# See man wpa_supplicant(8) for details
+
+CONFIG="-c/etc/wpa_supplicant/wpa_supplicant.conf"
+IFACE="-iwlan0"
+DRIVER="-Dnl80211,wext"
+EOF
+    fi
+    install_systemd_files
+
+    if option baselayout ; then
+        exeinto /etc/wpa_supplicant
+        doexe "${FILES}"/wpa_cli.sh
+    fi
 
     insinto /etc/wpa_supplicant
     hereins wpa_supplicant.conf <<EOF

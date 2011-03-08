@@ -7,6 +7,7 @@ Requires=rpcbind.service
 After=rpcbind.service
 
 [Service]
+ExecStartPre=/bin/mount -t rpc_pipefs rpc_pipefs /var/lib/nfs/rpc_pipefs
 ExecStart=/usr/sbin/rpc.idmapd -f
 
 [Install]

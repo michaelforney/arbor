@@ -1,0 +1,36 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2009 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require systemd-service
+
+SUMMARY="Rsync provides fast incremental file transfers"
+HOMEPAGE="http://rsync.samba.org"
+DOWNLOADS="http://rsync.samba.org/ftp/${PN}/src/${PNV}.tar.gz"
+UPSTREAM_CHANGELOG="${DOWNLOADS/.tar.gz/-NEWS}"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="acl ipv6 xattr"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/popt
+        acl? ( sys-apps/acl )
+        xattr? ( sys-apps/attr )
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    'acl acl-support'
+    'ipv6'
+    'xattr xattr-support'
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=( --without-included-popt )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-bindlocal.patch )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( OLDNEWS )
+
+src_install() {
+    default
+    install_systemd_files
+}

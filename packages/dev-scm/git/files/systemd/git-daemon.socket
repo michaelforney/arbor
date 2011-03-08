@@ -1,0 +1,14 @@
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=git daemon activation socket
+Conflicts=git-daemon.service
+After=syslog.target
+
+[Socket]
+ListenStream=9418
+Accept=Yes
+
+[Install]
+WantedBy=sockets.target

@@ -8,7 +8,7 @@ myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 myexparam libidn_uri="mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2"
 
-require flag-o-matic multilib
+require flag-o-matic multilib systemd-service [ systemd_files=[ nscd.service ] ]
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
@@ -21,7 +21,12 @@ DOWNLOADS="${source_uri} ${ports_uri} ${libidn_uri}"
 
 LICENCES="|| ( GPL-3 GPL-2 ) || ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
-MYOPTIONS="bootstrap"
+MYOPTIONS="
+    bootstrap
+    systemd [[
+        description = [ Install systemd service file for name service cache daemon (nscd) ]
+    ]]
+"
 
 DEPENDENCIES="
     build:
@@ -194,6 +199,12 @@ glibc_src_install() {
     hereenvd 02locale <<EOF
 LANG=en_GB.utf8
 EOF
+
+    if option systemd; then
+        insinto /etc/tmpfiles.d
+        doins "${FILES}"/systemd/nscd.conf
+        install_systemd_files
+    fi
 }
 
 pkg_postinst() {

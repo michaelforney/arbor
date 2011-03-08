@@ -6,10 +6,12 @@
 myexparam pn=${PN}
 myexparam pnv=${PNV}
 
-HOMEPAGE="http://www.gnome.org/"
+HOMEPAGE="http://projects.gnome.org/$(exparam pn)"
 
 if ever is_scm ; then
+    DOWNLOADS=""
     SCM_REPOSITORY="git://git.gnome.org/$(exparam pn).git"
+    require scm-git
 else
     DOWNLOADS="mirror://gnome/sources/$(exparam pn)/$(ever range 1-2)/$(exparam pnv).tar.bz2"
 fi

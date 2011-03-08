@@ -1,0 +1,168 @@
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multilib
+
+SUMMARY="An enhanced syslog daemon for Linux (and Unix)"
+DESCRIPTION="
+rsyslog is an enhanced multi-threaded syslogd. Among others, it offers support
+for on-demand disk buffering, reliable syslog over TCP, SSL, TLS, and RELP,
+writing to databases (MySQL, PostgreSQL, Oracle, and many more), email alerting,
+fully configurable output formats (including high-precision timestamps), the
+ability to filter on any part of the syslog message, on-the-wire message
+compression, and the ability to convert text files to syslog. It is a drop-in
+replacement for stock syslogd and able to work with the same configuration file
+syntax.
+"
+HOMEPAGE="http://www.${PN}.com"
+DOWNLOADS="${HOMEPAGE}/files/download/${PN}/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org spoonb@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changelog-for-${PV/./-}-v$(ever major)-stable.txt [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/doc/manual.html [[ lang = en ]]"
+
+LICENCES="GPL-3 LGPL-3"
+SLOT="4"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="
+    baselayout
+    debug
+    gnutls
+    kerberos
+    mysql      [[ description = [ Support logging to a MySQL database ] ]]
+    postgresql [[ description = [ Support logging to a PostgreSQL database ] ]]
+    relp       [[ description = [ Support relp network protocol ] ]]
+    systemd
+"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        gnutls? ( dev-libs/gnutls )
+        kerberos? ( app-crypt/heimdal )
+        mysql? ( dev-db/mysql )
+        postgresql? ( dev-db/postgresql )
+        relp? ( net-libs/librelp )
+    suggestion:
+        app-admin/logrotate [[ description = [ Support for rotating log files ] ]]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-disable-tests-that-require-root.patch )
+
+# TODO: libdbi, "snmp net-snmp"
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-imdiag
+    --enable-imptcp
+    --enable-imfile
+    --enable-inet
+    --enable-klog
+    --enable-mail
+    --enable-omprog
+    --enable-omruleset
+    --enable-omuxsock
+    --enable-pthreads
+    --enable-regexp
+    --enable-rsyslogd
+    --enable-rsyslogrt
+    --enable-zlib
+    --disable-gui
+    --disable-impstats
+    --disable-imsolaris
+    --disable-imtemplate
+    --disable-libdbi
+    --disable-omdbalerting
+    --disable-omhdfs
+    --disable-omstdout
+    --disable-omtemplate
+    --disable-omudpspoof
+    --disable-oracle
+    --disable-pmaixforwardedfrom
+    --disable-pmcisconames
+    --disable-pmlastmsg
+    --disable-pmrfc3164sd
+    --disable-pmsnare
+    --disable-rfc3195
+    --disable-snmp
+
+    # This is not a mistake and passing it to configure is correct.
+    # Java is not being used at all yet, however the tests depend on it.
+    HAVE_JAVAC=yes
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "build_options:recommended_tests testbench"
+    "build_options:recommended_tests extended-tests"
+    debug
+    "debug diagtools"
+    gnutls
+    "kerberos gssapi-krb5"
+    mysql
+    "postgresql pgsql"
+    relp
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /$(get_libdir)/systemd/system" )
+
+src_install() {
+    default
+
+    insinto /etc/logrotate.d
+    newins "${FILES}"/rsyslog.logrotate rsyslog
+
+    # Default config
+    insinto /etc
+    doins "${FILES}"/rsyslog.conf
+
+    # html docs
+    insinto /usr/share/doc/${PNVR}/html
+    doins -r "${WORK}"/doc/*.{html,png,jpg}
+    dodoc "${WORK}"/rsyslog.conf
+
+    if option baselayout ; then
+        newinitd "${FILES}"/${PN}.initd ${PN}
+        newconfd "${FILES}"/${PN}.confd ${PN}
+    fi
+}
+
+# The imdiag, imptcp, and omuxsock modules are required for the tests.
+src_test() {
+    esandbox allow_net "unix:${WORK}/tests/rsyslog-testbench-dgram-uxsock"
+
+    # There is currently no support to configure which interface the server binds to.
+    # However, the tests are only performed on the loopback and this is generally safe.
+    esandbox allow_net "inet:0.0.0.0@13500-13501"
+    esandbox allow_net "inet:0.0.0.0@13514-13516"
+    esandbox allow_net "inet:0.0.0.0@2514"
+
+    # These clients connect without first binding since the server binds on 0.0.0.0.
+    esandbox allow_net --connect "LOOPBACK@13500"
+    esandbox allow_net --connect "LOOPBACK@13514-13516"
+    esandbox allow_net --connect "LOOPBACK@2514"
+
+    default
+
+    esandbox disallow_net "inet:0.0.0.0@13500-13501"
+    esandbox disallow_net "inet:0.0.0.0@13514-13516"
+    esandbox disallow_net "inet:0.0.0.0@2514"
+
+    esandbox disallow_net --connect "LOOPBACK@13500"
+    esandbox disallow_net --connect "LOOPBACK@13514-13516"
+    esandbox disallow_net --connect "LOOPBACK@2514"
+}
+
+pkg_postinst() {
+    default
+
+    if [[ -d "${ROOT}"/etc/env.d/alternatives/systemd-logger ]]; then
+        nonfatal edo rm -r "${ROOT}"/etc/env.d/alternatives/systemd-logger || \
+            ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
+    fi
+    if [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]]; then
+        nonfatal edo rm "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
+            ewarn "Removing /usr/share/eclectic/modules/auto/systemd-logger.eclectic failed"
+    fi
+}
+

@@ -3,6 +3,8 @@
 
 export_exlib_phases pkg_pretend src_test src_install
 
+require systemd-service
+
 PSQL_MAJOR_VERSION=$(ever range 1-2)
 
 SUMMARY="PostgreSQL is a powerful, open source relational database system"
@@ -35,7 +37,7 @@ DOWNLOADS="mirror://${PN}/source/v${PV}/${PNV}.tar.bz2"
 
 LICENCES="PostgreSQL"
 SLOT="0"
-MYOPTIONS="pam perl python readline ssl tcl"
+MYOPTIONS="pam perl python readline ssl tcl xml [[ description = [ Add support for XML data type ] ]]"
 
 DEPENDENCIES="
     build:
@@ -50,11 +52,15 @@ DEPENDENCIES="
         readline? ( sys-libs/readline )
         ssl? ( dev-libs/openssl )
         tcl? ( dev-lang/tcl:= )
+        xml? (
+            dev-libs/libxml2:=[>=2.6.23]
+            dev-libs/libxslt
+        )
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     # 'kerberos krb5'
-    pam perl python readline 'ssl openssl' tcl
+    pam perl python readline 'ssl openssl' tcl 'xml libxml' 'xml libxslt'
 )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --hates=docdir
@@ -85,9 +91,17 @@ postgresql_pkg_pretend() {
 postgresql_src_install() {
     default
 
-    keepdir /var/run/postgresql
-    edo chown postgres:postgres "${IMAGE}"/var/run/postgresql
-    edo chmod 0770 "${IMAGE}"/var/run/postgresql
+    if option systemd; then
+        install_systemd_files
+        insinto /etc/tmpfiles.d
+        hereins postgresql.conf <<EOF
+d /var/run/postgresql 0770 postgres postgres
+EOF
+    else
+        keepdir /var/run/postgresql
+        edo chown postgres:postgres "${IMAGE}"/var/run/postgresql
+        edo chmod 0770 "${IMAGE}"/var/run/postgresql
+    fi
 }
 
 postgresql_src_test() {

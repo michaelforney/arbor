@@ -1,0 +1,15 @@
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=git daemon Per-connection server
+After=syslog.target
+
+[Service]
+User=nobody
+Group=nobody
+EnvironmentFile=/etc/conf.d/git-daemon.conf
+ExecStart=/usr/bin/git daemon --pid-file=/var/run/git-daemon.pid --inetd $GIT_OPTS
+
+[Install]
+WantedBy=multi-user.target

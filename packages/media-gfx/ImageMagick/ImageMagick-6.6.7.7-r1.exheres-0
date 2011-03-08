@@ -1,0 +1,121 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
+# Distributed under the terms of the GNU General Purpose License v2
+# Based in part upon 'imagemagick-6.4.2.0.ebuild' from Gentoo Linux, which is:
+#    Copyright 1999-2008 Gentoo Foundation
+
+require ImageMagick multilib
+
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="
+    X cxx djvu
+    fft [[ description = [ Adds support for the discrete fourier transformation. ] ]]
+    fontconfig fpx graphviz jpeg2000 openexr lcms
+    lqr [[ description = [ Support for liquid rescaling (aka seam carving) image resize algorithm. ] ]]
+    perl svg tiff truetype xml
+"
+
+DEPENDENCIES="
+    build:
+        app-arch/xz
+        X? ( x11-proto/xextproto )
+    build+run:
+        app-text/ghostscript
+        media-libs/jpeg[>=6b]
+        media-libs/libpng[>=1.2.4]
+        X?  (
+            x11-libs/libSM
+            x11-libs/libICE
+            x11-libs/libX11
+            x11-libs/libXext
+        )
+        djvu? ( app-text/djvu )
+        fft? ( sci-libs/fftw )
+        fontconfig? ( media-libs/fontconfig )
+        fpx? ( media-libs/libfpx )
+        graphviz? ( media-gfx/graphviz )
+        jpeg2000? ( media-libs/jasper )
+        lcms? ( media-libs/lcms )
+        lqr? ( media-libs/liblqr )
+        openexr? ( media-libs/openexr )
+        perl? ( dev-lang/perl:=[>=5.8.6] )
+        svg? (
+            gnome-desktop/librsvg[>=2.9.0]
+            x11-libs/cairo
+        )
+        tiff? ( media-libs/tiff[>=3.5.5] )
+        truetype? (
+            fonts/corefonts
+            media-libs/freetype:2
+        )
+        xml? ( dev-libs/libxml2[>=2.4.10] )
+"
+
+RESTRICT="test" # Multiple failures, possibly caused by sandbox
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    '--disable-openmp'
+    '--enable-hdri'
+    '--enable-shared=yes'
+    '--enable-static=no'
+    '--with-bzlib'
+    '--with-gslib'
+    '--with-jpeg'
+    '--with-modules'
+    '--with-png'
+    '--with-quantum-depth=16'
+    '--with-threads'
+    '--with-zlib'
+    '--without-dps'
+    '--without-included-ltdl'
+    '--without-jbig'
+    '--without-lcms2'
+    '--without-lzma'
+    '--without-wmf'
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'X x'
+    'cxx magick-plus-plus'
+    'djvu'
+    'fft fftw'
+    'fontconfig'
+    'fpx'
+    'graphviz gvc'
+    'jpeg2000 jp2'
+    'lcms'
+    'lqr'
+    'openexr'
+    'perl'
+    'svg rsvg'
+    'tiff'
+    'truetype freetype'
+    'truetype windows-font-dir /usr/share/fonts/X11/fonts/corefonts'
+    'xml'
+)
+
+src_configure() {
+    default
+
+    if option perl; then
+        edo cd PerlMagick
+        edo perl Makefile.PL
+    fi
+}
+
+src_install() {
+    default
+
+    if option !cxx ; then
+        edo rmdir "${IMAGE}"/usr/include/ImageMagick/Magick++/
+    fi
+
+    if option perl ; then
+        local perllocal=( "${IMAGE}"/usr/$(get_libdir)/perl5/*/*/perllocal.pod )
+        edo rm "${perllocal[0]}"
+        edo rmdir "${perllocal[0]%/*}"
+        edo rmdir "${perllocal[0]%/*/*}"
+    fi
+}
+

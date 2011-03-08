@@ -78,6 +78,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
     --exec-prefix=/
     --libdir=/$(get_libdir)
+    --localstatedir=/var
     --enable-pam
     --disable-audit
     --disable-gtk
@@ -232,17 +233,7 @@ EOF
 systemd_pkg_postinst() {
     default
 
-    local cruft=(
-        /etc/init.d/sysinit.bash
-        /etc/systemd/system/basic.target.wants/fsck.service
-        /etc/systemd/system/basic.target.wants/fsck.target
-        /etc/systemd/system/basic.target.wants/sysinit.service
-        /etc/systemd/system/basic.target.wants/tmp.mount
-        /etc/systemd/system/local-fs.target.wants/tmp.service
-        /etc/systemd/system/sysinit.target.wants/remount-rootfs.service
-        /etc/systemd/system/sysinit.target.wants/sysinit.service
-        /$(get_libdir)/systemd/system/syslog.service
-    )
+    local cruft=( /etc/init.d/sysinit.bash )
     for file in ${cruft[@]}; do
         if [[ -f ${file} || -L ${file} ]]; then
             nonfatal edo rm "${file}" || ewarn "removing ${file} failed"

@@ -1,0 +1,78 @@
+# Copyright 2009 Pierre Lejeune <superheron@gmail.com>
+# Copyright 2011 Brett Witherspoon <spoonb@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Lightweight DNS forwarder and DHCP server"
+DESCRIPTION="
+Dnsmasq is a lightweight, easy to configure DNS forwarder and DHCP server. It is
+designed to provide DNS and, optionally, DHCP, to a small network. It can serve
+the names of local machines which are not in the global DNS. The DHCP server
+integrates with the DNS server and allows machines with DHCP-allocated addresses
+to appear in the DNS with names configured either in each host or in a central
+configuration file. Dnsmasq supports static and dynamic DHCP leases and BOOTP/
+TFTP/PXE for network booting of diskless machines.
+"
+BASEURI="http://www.thekelleys.org.uk/${PN}"
+HOMEPAGE="${BASEURI}/doc.html"
+DOWNLOADS="${BASEURI}/${PNV}.tar.lzma"
+
+UPSTREAM_CHANGELOG="${BASEURI}/CHANGELOG [[ lang = en ]]"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~x86"
+MYOPTIONS="baselayout dbus doc
+    i18n [[ description = [ Support locales and international domain names ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        app-arch/xz
+        dev-util/pkg-config
+        i18n? ( sys-devel/gettext )
+    build+run:
+        dbus? ( sys-apps/dbus )
+        i18n? ( net-dns/libidn )
+"
+src_prepare() {
+    # Use a more sane lease directory
+    edo sed -e 's:^#dhcp-leasefile=.*:dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases:' \
+            dnsmasq.conf.example > dnsmasq.conf
+}
+
+src_compile() {
+    emake \
+        CC="${CC}" \
+        CFLAGS="${CFLAGS}" \
+        COPTS=$(option dbus && echo "-DHAVE_DBUS") \
+        all$(option i18n && echo "-i18n")
+}
+
+src_install() {
+    emake -j3 DESTDIR="${IMAGE}" PREFIX=/usr install$(option i18n && echo "-i18n")
+
+    insinto /etc
+    doins dnsmasq.conf
+
+    # Lease directory
+    dodir /var/lib/dnsmasq
+    keepdir /var/lib/dnsmasq
+
+    if option baselayout ; then
+        newinitd "${FILES}"/dnsmasq.init dnsmasq
+        newconfd "${FILES}"/dnsmasq.conf dnsmasq
+    fi
+
+    if option dbus ; then
+        insinto /etc/dbus-1/system.d
+        doins dbus/dnsmasq.conf
+    fi
+
+    emagicdocs
+
+    if option doc ; then
+        docinto html
+        dodoc *.html
+    fi
+}
+

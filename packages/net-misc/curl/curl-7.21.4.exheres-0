@@ -1,0 +1,57 @@
+# Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+require common-metadata easy-multibuild
+
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="idn ipv6
+    ares [[ description = [ Enabled c-ares posix-threaded dns support, disables curl's own threaded resolver ] ]]
+    multibuild_c: 32 64
+"
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*
+        sys-apps/diffutils
+    build+run:
+        app-misc/ca-certificates
+        dev-libs/openssl[multibuild_c:*(?)?]
+        net-libs/libssh2[multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
+        ares? ( net-dns/c-ares[>=1.6.0] )
+        idn? ( net-dns/libidn )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-werror
+    --disable-{gssapi,ldap,sspi}
+    --without-{gnutls,nss,krb4,librtmp,polarssl,spnego,axtls}
+    --without-ca-bundle
+    --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
+    --with-libssh2
+    --with-ssl
+    --with-ca-path=/etc/ssl/certs
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares '!ares threaded-resolver' ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'idn libidn' )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
+
+test_one_multibuild() {
+    cat <<-EOF >> tests/data/DISABLED
+# Work around broken DNS servers, Exherbo #207
+20
+507
+# Fails with too many open files
+537
+EOF
+    emake test-full
+}
+
+src_install() {
+    easy-multibuild_src_install
+
+    insinto /usr/share/aclocal
+    doins docs/libcurl/libcurl.m4
+}
+

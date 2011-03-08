@@ -1,0 +1,13 @@
+[Unit]
+Description=postgresql
+After=network.target
+
+[Service]
+Type=forking
+User=postgres
+Environment=PGDATA=/var/lib/postgresql/data
+ExecStart=/usr/bin/pg_ctl start -w -t 60 -s -o --silent-mode=true
+ExecStop=/bin/sh -c "for m in s f i; do pg_ctl stop -w -t 20 -s -m $m; [[ $? -eq 0 ]] && break; done"
+
+[Install]
+WantedBy=multi-user.target

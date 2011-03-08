@@ -1,0 +1,45 @@
+# Copyright 2011 Mike Kazantsev
+# Distributed under the terms of the GNU General Public License v2
+# Based upon 'ypserv-2.23.ebuild' from Gentoo, which is:
+#  Copyright 1999-2010 Gentoo Foundation
+
+require systemd-service
+
+SUMMARY="Network Information Service server."
+DESCRIPTION=""
+
+HOMEPAGE="http://www.linux-nis.org/nis/"
+DOWNLOADS="mirror://kernel/linux/utils/net/NIS/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/gdbm[>=1.8.0]
+    run:
+        net-nds/rpcbind
+"
+
+BUGS_TO="mk.fraggod@gmail.com"
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_DOCUMENTATION="
+    http://www.linux-nis.org/nis-howto/HOWTO/ypserv.html [[ lang = en
+        description = [ Official setting up a NIS (ypserv) Server guide ] ]]"
+
+
+src_install() {
+    default
+
+    install_systemd_files
+
+    insinto /etc
+    doins etc/ypserv.conf etc/netgroup etc/netmasks
+    insinto /var/yp
+    newins etc/securenets securenets.default
+
+    # It's not under CONFIG_PROTECT and probably shouldn't be
+    edo mv "${IMAGE}"/var/yp/Makefile{,.default}
+}

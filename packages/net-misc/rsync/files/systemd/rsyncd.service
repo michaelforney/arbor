@@ -1,0 +1,9 @@
+[Unit]
+Description=rsync daemon
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/rsync --daemon --no-detach
+
+[Install]
+WantedBy=multi-user.target

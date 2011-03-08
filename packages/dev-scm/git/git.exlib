@@ -163,7 +163,11 @@ git_src_install() {
         insinto /etc/xinetd.d
         newins "${FILES}"/git-daemon.xinetd git-daemon
     fi
-
+    if option systemd ; then
+        hereconfd ${PN}-daemon.conf <<EOF
+GIT_OPTS="/var/git"
+EOF
+    fi
     install_systemd_files
 
     keepdir /usr/share/${PN}/templates/branches

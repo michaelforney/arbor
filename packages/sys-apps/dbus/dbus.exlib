@@ -1,5 +1,5 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
-# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -9,7 +9,7 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
+require flag-o-matic easy-multibuild
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -28,14 +28,11 @@ MYOPTIONS="multibuild_c: 32 64"
 BUGS_TO="philantrop@exherbo.org"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
-MYOPTIONS="baselayout debug doc X ( multibuild_c: 32 64 )"
-
-if ever at_least 1.4.0 ; then
-    MYOPTIONS+=" systemd"
-fi
+MYOPTIONS="baselayout debug doc systemd X ( multibuild_c: 32 64 )"
 
 DEPENDENCIES="
     build:
+        app-text/docbook-xml-dtd:4.1.2
         app-text/xmlto
         sys-devel/gettext
         dev-util/pkg-config[>=0.20]
@@ -54,13 +51,6 @@ DEPENDENCIES="
     recommendation:
         sys-auth/ConsoleKit
 "
-
-if ever at_least 1.4.0 ; then
-    DEPENDENCIES+="
-        build:
-            app-text/docbook-xml-dtd:4.1.2
-    "
-fi
 
 # Testing code (--enable-tests) disabled since building with tests support
 # creates an insecure (sic upstream), non-production use library
@@ -84,11 +74,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "doc doxygen-docs"
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "X x" )
-
-if ever at_least 1.4.0 ; then
-    DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=( "systemd systemdsystemunitdir /$(get_libdir)/systemd/system" )
-fi
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "systemd systemdsystemunitdir /$(get_libdir)/systemd/system"
+    "X x"
+)
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     dcop-howto.txt
@@ -96,12 +85,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
-
-if [[ ${PV} == "1.2.24" ]]; then
-    DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.2.16-abstract-sockets.patch )
-elif [[ ${PV} == 1.4.1 ]] ; then
-    DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-abstract-sockets.patch )
-fi
 
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
@@ -120,7 +103,7 @@ dbus_src_install() {
     easy-multibuild_src_install
 
     edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
-            -i "${IMAGE}/etc/dbus-1/system.conf"
+            -i "${IMAGE}"/etc/dbus-1/system.conf
 
     option baselayout && newinitd "${FILES}"/dbus.init-1.0 dbus
 

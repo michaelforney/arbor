@@ -3,18 +3,19 @@
 
 [Unit]
 Description=NFS server
-Requires=network.target
-After=rpcbind.service rpcstatd.service
+Requires=rpcbind.service rpcstatd.service
+After=network.target rpcbind.service rpcstatd.service rpcidmapd.service
 
 [Service]
 Type=forking
+ExecStartPre=-/bin/mount -t nfsd -o nodev,noexec,nosuid nfsd /proc/fs/nfsd
 ExecStartPre=-/bin/mount -t nfsd -o nodev,noexec,nosuid nfsd /proc/fs/nfs
-ExecStartPre=/usr/sbin/exportfs -r
+ExecStartPre=/usr/sbin/exportfs -ra
 ExecStartPre=/usr/sbin/rpc.mountd
 ExecStart=/usr/sbin/rpc.nfsd --syslog 8
-ExecReload=/usr/sbin/exportfs -r 1>&2
-ExecStop=-/bin/kill -9 rpc.mountd
-ExecStopPost=-/bin/kill -9 rpc.nfsd
+ExecStop=/usr/sbin/exportfs -ua
+ExecStop=/usr/sbin/rpc.nfsd 0
+ExecReload=/usr/sbin/exportfs -ra
 
 [Install]
-WantedBy=network.target
+WantedBy=multi-user.target

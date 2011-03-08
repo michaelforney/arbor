@@ -12,12 +12,10 @@ export_exlib_phases src_prepare src_test_expensive src_install
 SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
 
-# Upstream moved the patches; mirror them until we find out where.
 DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PV}.tar.gz
     $(for ((i=1 ; i<=PATCH_LEVEL ; i++ )) ; do
-        echo "http://dev.exherbo.org/~replica/distfiles/${PN}-${MY_PV}.${i}.patch"
+        echo "http://download.oracle.com/berkeley-${PN}/patches/${PN}/${MY_PV}/patch.${MY_PV}.${i} -> ${PN}-${MY_PV}.${i}.patch"
       done)"
-#        echo "http://www.oracle.com/technology/products/berkeley-db/${PN}/update/${MY_PV}/patch.${MY_PV}.${i} -> ${PN}-${MY_PNV}.${i}.patch"
 
 LICENCES="as-is"
 SLOT="$(ever range 1-2)"
