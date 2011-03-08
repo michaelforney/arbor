@@ -1,0 +1,16 @@
+# Copyright 2011 Vasiliy G Tolstov <v.tolstov@selfip.ru>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=iptables
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/iptables-restore -c /var/lib/iptables/rules-save
+ExecStart=/sbin/ip6tables-restore -c /var/lib/ip6tables/rules-save
+ExecStop=/sbin/iptables-save -c > /var/lib/iptables/rules-save
+ExecStop=/sbin/ip6tables-save -c > /var/lib/ip6tables/rules-save
+
+[Install]
+WantedBy=sysinit.target
