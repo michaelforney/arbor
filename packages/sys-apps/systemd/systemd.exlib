@@ -53,6 +53,7 @@ DEPENDENCIES="
         sys-apps/busybox
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
+        || ( sys-apps/sysvinit-tools sys-apps/sysvinit )
         sys-apps/util-linux[>=2.18_p20101120]
         group/lock [[ note = [ Required for var-lock service ] ]]
         simple-net? ( sys-apps/net-tools )
@@ -220,6 +221,9 @@ EOF
     keepdir /$(get_libdir)/systemd/system/graphical.target.wants
     keepdir /$(get_libdir)/systemd/system-generators
 
+    # Make sure /etc/machine-id exists.
+    [[ -f /etc/machine-id ]] || edo touch "${IMAGE}"/etc/machine-id
+
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
 
@@ -232,6 +236,16 @@ EOF
 
 systemd_pkg_postinst() {
     default
+
+    if [[ ${ROOT} == / ]]; then
+        if [[ ${PV} == 20 ]]; then
+            nonfatal edo /bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
+        else
+            nonfatal edo /sbin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
+        fi
+        nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
+        nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
+    fi
 
     local cruft=( /etc/init.d/sysinit.bash )
     for file in ${cruft[@]}; do

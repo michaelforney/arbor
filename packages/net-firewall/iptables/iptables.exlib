@@ -1,7 +1,7 @@
 # Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
+require multilib systemd-service
 
 export_exlib_phases src_install
 
@@ -51,5 +51,7 @@ iptables_src_install() {
         newconfd "${FILES}"/${PN}-1.4.2.confd iptables
         newconfd "${FILES}"/ip6tables-1.4.2.confd ip6tables
     fi
+
+    install_systemd_files
 }
 
