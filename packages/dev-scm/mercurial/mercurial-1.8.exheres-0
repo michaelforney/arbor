@@ -36,9 +36,7 @@ DEPENDENCIES="
 
 REMOTE_IDS="pypi:${PN}"
 
-# The tests are expensive and bind to 0.0.0.0 and do other funny stuff:
-# Ran 405 tests, 32 skipped, 35 failed.
-# The failures are due to the sandbox.
+# The tests take >= one hour to run and, thus, are expensive.
 RESTRICT="test"
 
 src_compile() {
@@ -47,9 +45,6 @@ src_compile() {
 }
 
 src_test_expensive() {
-    # see above.
-    [[ ${PV} == 1.8 ]] && return
-
     esandbox disable_net
     edo cd tests
     # At least in mercurial-1.5.4, the upstream tests break if
