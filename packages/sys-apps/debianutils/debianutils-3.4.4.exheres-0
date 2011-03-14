@@ -36,6 +36,9 @@ src_install() {
     into /usr
     dosbin savelog
 
+    # needed by run-parts (Gentoo bug #352326)
+    keepdir /etc/kernel/postinst.d
+
     doman tempfile.1 run-parts.8 savelog.8 installkernel.8
     dodoc debian/{changelog,control}
 }
