@@ -28,14 +28,6 @@ BUGS_TO="pioto@exherbo.org"
 DEFAULT_SRC_INSTALL_PARAMS=( DOCDIR="/usr/share/doc/${PNVR}" )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( kacpimon )
 
-src_prepare() {
-    default
-
-    if option systemd ; then
-        expatch -p1 "${FILES}/acpid-forking.patch"
-    fi
-}
-
 src_compile() {
     default
 
@@ -53,8 +45,6 @@ src_install() {
     fi
 
     install_systemd_files
-
-    keepdir /etc/acpi/events
 
     insinto /etc/acpi/events
     newins samples/powerbtn/powerbtn-conf powerbtn
