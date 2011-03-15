@@ -9,6 +9,8 @@ SUMMARY="Uncompress rar files"
 HOMEPAGE="http://www.rarlab.com/rar_add.htm"
 DOWNLOADS="http://www.rarlab.com/rar/${MY_PN}-${PV}.tar.gz"
 
+REMOTE_IDS="freshmeat:${PN}"
+
 LICENCES="unRAR"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -22,13 +24,13 @@ DEPENDENCIES="
         ]]
 "
 
-WORK="${WORKBASE}"/unrar
+WORK="${WORKBASE}"/${PN}
 
 src_compile() {
     export CXXFLAGS="${CXXFLAGS}"
 
     emake -f makefile.unix unrar STRIP="true"
-    mv unrar "${TEMP}"
+    edo mv unrar "${TEMP}"
     emake -f makefile.unix clean
 
     if option platform:amd64 ; then
@@ -36,10 +38,10 @@ src_compile() {
     fi
 
     # The "library" works *interactively* by default...
-    sed -i -e "s:DEFINES=\(.*\):DEFINES=-DSILENT \1:" makefile.unix
+    edo sed -i -e "s:DEFINES=\(.*\):DEFINES=-DSILENT \1:" makefile.unix
 
     emake -f makefile.unix lib
-    mv "${TEMP}"/unrar unrar
+    edo mv "${TEMP}"/unrar unrar
 }
 
 src_install() {
