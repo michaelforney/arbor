@@ -15,23 +15,20 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="platform: amd64 arm ia64 ppc64 x86"
 
-WORK="${WORKBASE}/linux-${PV}"
+WORK=${WORKBASE}/linux-${PV}
 
 # FIXME: Need to sanitize headers at some point
 
 linux-headers_pkg_pretend() {
-    local kv=$(uname -r)
-
-    # Perform a crude "starts with" string match, because kernels built with
-    # EXTRAVERSION defined can make version-aware comparisons of `uname -r` to
-    # PV ambiguous -- by default, the kernel Makefile doesn't enforce any kind
-    # of separator between the SUBLEVEL and EXTRAVERSION components of the
-    # version string:
+    # Beware that kernels built with EXTRAVERSION defined can make version-
+    # aware comparisons of `uname -r` to PV behave unexpectedly because by
+    # default the kernel Makefile doesn't enforce any kind of separator between
+    # the SUBLEVEL and EXTRAVERSION components of the version string:
     #     KERNELVERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
-    if [[ ! ${kv} =~ ^${PV} ]] ; then
-        ewarn "Kernel headers mismatch: You are attempting to install headers for the ${PV}"
-        ewarn "kernel series, but you appear to be running kernel ${kv}. You should only"
-        ewarn "proceed with this if you know what you're doing."
+    if ! ever at_least ${PV} $(uname -r) ; then
+        ewarn "Kernel headers version mismatch: Installing kernel headers newer than the"
+        ewarn "running kernel can break your system. Do not proceed unless you know what"
+        ewarn "you're doing."
     fi
 }
 
@@ -58,7 +55,7 @@ linux-headers_src_compile() {
 }
 
 linux-headers_src_install() {
-    emake INSTALL_HDR_PATH="${IMAGE}/usr" headers_install
+    emake INSTALL_HDR_PATH="${IMAGE}"/usr headers_install
 
     # remove installed .install and ..install.cmd files
     edo rm "${IMAGE}"/**/.install "${IMAGE}"/**/..install.cmd
