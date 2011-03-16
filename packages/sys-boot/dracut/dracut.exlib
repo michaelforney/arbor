@@ -3,10 +3,10 @@
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm; then
-    SCM_REPOSITORY="git://dracut.git.sourceforge.net/gitroot/dracut/dracut"
+    SCM_REPOSITORY="git://git.kernel.org/pub/scm/boot/dracut/dracut.git"
     require scm-git
 else
-    DOWNLOADS="mirror://sourceforge/${PN}/${PNV}.tar.bz2"
+    DOWNLOADS="mirror://kernel/linux/utils/boot/${PN}/${PNV}.tar.bz2"
 fi
 
 export_exlib_phases src_prepare src_install
@@ -24,10 +24,10 @@ grow some hooks for running arbitrary commands in the flow of the script, but it
 to resist the urge as much as we can as hooks are guaranteed to be the path to slow-down. Also,
 there is an attempt to keep things as distribution-agnostic as possible.
 "
-HOMEPAGE="http://sourceforge.net/apps/trac/dracut/"
+HOMEPAGE="http://dracut.wiki.kernel.org/index.php/Main_Page"
 
 UPSTREAM_DOCUMENTATION="
-    http://people.redhat.com/harald/dracut.html [[ description = [ Manual ] lang = en ]]
+    http://www.kernel.org/pub/linux/utils/boot/dracut/dracut.html [[ description = [ Manual ] lang = en ]]
 "
 
 BUGS_TO="eternaleye@gmail.com spoonb@exherbo.org"
