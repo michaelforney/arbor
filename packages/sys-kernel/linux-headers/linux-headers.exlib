@@ -20,12 +20,17 @@ WORK=${WORKBASE}/linux-${PV}
 # FIXME: Need to sanitize headers at some point
 
 linux-headers_pkg_pretend() {
-    # Beware that kernels built with EXTRAVERSION defined can make version-
-    # aware comparisons of `uname -r` to PV behave unexpectedly because by
-    # default the kernel Makefile doesn't enforce any kind of separator between
-    # the SUBLEVEL and EXTRAVERSION components of the version string:
-    #     KERNELVERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
-    if ! ever at_least ${PV} $(uname -r) ; then
+    if [[ ! $(uname -r) =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-rc[0-9]+)? ]] ; then
+        eerror "Failed to parse version string of running kernel: 'uname -r' returns"
+        eerror "'$(uname -r)'."
+        eerror "String is expected to start with a base version, optionally including a"
+        eerror "release candidate component, e.g. '2.6.38' or '2.6.38-rc1'."
+        die "Malformed kernel version string"
+    fi
+
+    local normalized_kernel_version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]:-}
+
+    if ! ever at_least ${PV} ${normalized_kernel_version} ; then
         ewarn "Kernel headers version mismatch: Installing kernel headers newer than the"
         ewarn "running kernel can break your system. Do not proceed unless you know what"
         ewarn "you're doing."
