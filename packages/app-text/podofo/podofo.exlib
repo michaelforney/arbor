@@ -1,4 +1,4 @@
-# Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require cmake sourceforge [ suffix=tar.gz ]
@@ -46,17 +46,16 @@ DEPENDENCIES="
 #        dev-cpp/cppunit[>=1.12.1]
 
 # Enough is enough. Too many tests are bogus and I've had enough of fixing upstream's
-# crap.
+# crap. Example? This is a critical test failure...
+# CRITICAL: No path was found for the specified fontname: Arial Unicode MS
 RESTRICT="test"
-
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PN}-0.8.0-automagic-deps.patch )
 
 CMAKE_SRC_CONFIGURE_PARAMS=( -DPODOFO_BUILD_SHARED:BOOL=TRUE -DWANT_FONTCONFIG:BOOL=TRUE)
 CMAKE_SRC_CONFIGURE_OPTION_WANTS=(
     "graph BOOST"
+    "lua LUA"
     "platform:amd64 LIB64"
 )
-CMAKE_SRC_CONFIGURE_OPTION_WITHS=( "lua LUA" )
 
 podofo_src_prepare() {
     default
