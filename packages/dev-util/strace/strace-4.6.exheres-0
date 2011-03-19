@@ -1,0 +1,41 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008 Richard Brown
+# Copyright 2009 Bo Ørsted Andresen
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ suffix=tar.xz ]
+
+SUMMARY="System call trace utility"
+HOMEPAGE="http://sourceforge.net/projects/${PN}/"
+LICENCES="BSD-3"
+
+BUGS_TO="philantrop@exherbo.org"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/files/${PN}/${PV}/README-${PV}.txt/view"
+REMOTE_IDS="freshmeat:${PN}"
+
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+# sydbox makes the tests fail - silently. :-/
+# esandbox is undocumented (which sucks badly) and my attempts to make it work
+# failed.
+RESTRICT="test"
+
+src_prepare() {
+    default
+
+    # /usr/bin/time might not exist but busybox does and is needed for the tests.
+    edo sed -i -e 's:/usr/bin/\(time\):"/bin/busybox \1":' tests/strace-f
+    edo sed -i -e '/check_prog $time/d' tests/strace-f
+}
+
+
+src_test() {
+    emake -j1 check
+}
+
