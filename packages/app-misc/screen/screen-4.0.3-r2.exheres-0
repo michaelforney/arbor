@@ -12,20 +12,22 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="
-pam
 setuid [[ description = [ Install screen setuid root, allowing you to share screen sessions between multiple users ] ]]
 "
 
 DEPENDENCIES="
     build+run:
         sys-libs/ncurses
-        pam? ( sys-libs/pam )
+        sys-libs/pam
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-termcap.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-colors256'
-    '--with-sys-screenrc=/etc/screenrc' '--hates=docdir' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( pam )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --enable-colors256
+    --enable-pam
+    --with-sys-screenrc=/etc/screenrc
+)
 
 src_install() {
     default
@@ -41,8 +43,6 @@ EOF
         edo chmod 2755 "${IMAGE}"/usr/bin/${PNV}
     fi
 
-    if option pam; then
-        pamd_mimic_system screen auth
-    fi
+    pamd_mimic_system screen auth
 }
 
