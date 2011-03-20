@@ -3,7 +3,7 @@
 # Based in part upon 'screen-4.0.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require gnu
+require gnu pam
 
 SUMMARY="A full-screen terminal multiplexer/window manager"
 DOWNLOADS="ftp://ftp.uni-erlangen.de/pub/utilities/${PN}/${PNV}.tar.gz"
@@ -39,6 +39,10 @@ EOF
     if ! option 'setuid'; then
         edo chown root:utmp "${IMAGE}"/usr/bin/${PNV}
         edo chmod 2755 "${IMAGE}"/usr/bin/${PNV}
+    fi
+
+    if option pam; then
+        pamd_mimic_system screen auth
     fi
 }
 
