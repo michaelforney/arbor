@@ -3,11 +3,10 @@
 
 [Unit]
 Description=NFSv4 ID <-> Name Mapper
-Requires=rpcbind.service
-After=rpcbind.service
+Requires=rpcbind.service var-lib-nfs-rpc_pipefs.mount
+After=rpcbind.service var-lib-nfs-rpc_pipefs.mount
 
 [Service]
-ExecStartPre=/bin/mount -t rpc_pipefs rpc_pipefs /var/lib/nfs/rpc_pipefs
 ExecStart=/usr/sbin/rpc.idmapd -f
 
 [Install]
