@@ -1,0 +1,22 @@
+Title: New Repository Masks Format
+Author: Bo Ørsted Andresen <zlin@exherbo.org>
+Content-Type: text/plain
+Posted: 2011-03-23
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: sys-apps/paludis[=scm]
+
+::arbor now uses a new repository masks format. If your paludis is older
+than 2011-03-20 you will see a ton of warnings like this:
+
+  ... Loading package mask spec 'app-shells/bash-completion[~scm] [[' failed due to exception 'Trailing garbage after [] block' (paludis::PackageDepSpecError)
+[...]
+cave@1300875422: [WARNING e.package_mask.bad_spec] (same context) Loading package mask spec ']]' failed due to exception 'No category/ found in ']]' (cat/pkg is required, a simple pkg is not allowed here)' (paludis::PackageDepSpecError)
+
+This will cause all repository masks to be ignored. To fix it reinstall
+paludis-scm or install latest paludis release available while avoiding
+upgrading anything that was supposed to be masked. The following command
+will probably do that:
+
+# cave resolve --lazy --slots installed-or-best paludis
+
