@@ -28,18 +28,23 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-tests' '--disable-doxygen-docs' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose verbose-mode" )
 
+src_configure() {
+    edo mkdir "${WORK}/po"
+    edo touch "${WORK}/po/POTFILES.in"
+
+    default
+}
+
 src_install() {
     easy-multibuild_src_install
 
     if option bash-completion ; then
-        dobashcompletion "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh dbus ||
-            die "failed to put bashcomp in its place"
-        rm "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh ||
-            die "failed to remove bad bashcomp"
+        edo dobashcompletion "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh dbus
+        edo rm "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh
     else
-        rmdir "${IMAGE}"/usr/libexec || die "failed to prune empty dir"
+        edo rmdir "${IMAGE}"/usr/libexec
     fi
 
-    rmdir "${IMAGE}"/etc/{bash_completion.d,} || die "failed to prune empty dirs"
+    edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
 }
 

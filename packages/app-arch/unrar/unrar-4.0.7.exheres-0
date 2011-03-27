@@ -1,0 +1,55 @@
+# Copyright 2008 Bernd Steinhauser
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'unrar-3.7.8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+MY_PN=${PN}src
+
+SUMMARY="Uncompress rar files"
+HOMEPAGE="http://www.rarlab.com/rar_add.htm"
+DOWNLOADS="http://www.rarlab.com/rar/${MY_PN}-${PV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="unRAR"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="platform: amd64"
+
+DEPENDENCIES="
+    build+run:
+        !app-arch/unrar-gpl [[
+            description = [ Provide binaries with the same name ]
+            resolution = manual
+        ]]
+"
+
+WORK="${WORKBASE}"/${PN}
+
+src_compile() {
+    export CXXFLAGS="${CXXFLAGS}"
+
+    emake -f makefile.unix unrar STRIP="true"
+    edo mv unrar "${TEMP}"
+    emake -f makefile.unix clean
+
+    if option platform:amd64 ; then
+        export CXXFLAGS+=" -fPIC"
+    fi
+
+    # The "library" works *interactively* by default...
+    edo sed -i -e "s:DEFINES=\(.*\):DEFINES=-DSILENT \1:" makefile.unix
+
+    emake -f makefile.unix lib
+    edo mv "${TEMP}"/unrar unrar
+}
+
+src_install() {
+    dobin unrar
+    dolib libunrar.so
+    dodir /usr/include/unrar
+    insinto /usr/include/unrar
+    doins dll.hpp
+    dodoc readme.txt
+}
+
