@@ -57,7 +57,12 @@ else
             ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
 fi
 
-if ever at_least 4.4.0-r1; then
+if ever at_least 4.6.0; then
+    MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
+    DEPENDENCIES+="
+        build:
+            graphite? ( dev-libs/ppl:=[>=0.11] )"
+elif ever at_least 4.4.0-r1; then
     MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
     DEPENDENCIES+="
         build:
