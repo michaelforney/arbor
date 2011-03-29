@@ -18,7 +18,7 @@ DEPENDENCIES="
         dev-util/pkg-config[>=0.16]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
-        sys-apps/dbus[>=1.2.14] [[ note = [ Required for GDBus and to build tests ] ]]
+        sys-apps/dbus[>=1.2.14] [[ note = [ Required for GDBus and to build/run tests ] ]]
         fam? ( app-admin/gamin )
     test:
         x11-misc/shared-mime-info
@@ -34,6 +34,7 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/glib-2.24.1-assert-test.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr'
                                '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
