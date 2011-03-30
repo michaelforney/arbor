@@ -1,0 +1,33 @@
+Source: Written by Michael Meskes <meskes@debian.org>
+Upstream: yes, Debian Bug #616194
+Reason: fix compilation error (due to -Werror)
+diff --git a/libnetlink.c b/libnetlink.c
+index 6f1ceea..dc1f853 100644
+--- a/kacpimon/libnetlink.c
++++ b/kacpimon/libnetlink.c
+@@ -441,7 +441,7 @@ int rtnl_from_file(FILE *rtnl, rtnl_filter_t handler,
+ 	nladdr.nl_groups = 0;
+ 
+ 	while (1) {
+-		int err, len, type;
++		int err, len;
+ 		int l;
+ 
+ 		status = fread(&buf, 1, sizeof(*h), rtnl);
+@@ -456,7 +456,6 @@ int rtnl_from_file(FILE *rtnl, rtnl_filter_t handler,
+ 			return 0;
+ 
+ 		len = h->nlmsg_len;
+-		type= h->nlmsg_type;
+ 		l = len - sizeof(*h);
+ 
+ 		if (l<0 || (unsigned)len>sizeof(buf)) {
+@@ -518,7 +517,7 @@ int addattr_l(struct nlmsghdr *n, int maxlen, int type, const void *data,
+ 
+ int addraw_l(struct nlmsghdr *n, int maxlen, const void *data, int len)
+ {
+-	if ((int)NLMSG_ALIGN(n->nlmsg_len) + NLMSG_ALIGN(len) > maxlen) {
++	if ((int)NLMSG_ALIGN(n->nlmsg_len) + (int)NLMSG_ALIGN(len) > maxlen) {
+ 		fprintf(stderr, "addraw_l ERROR: message exceeded bound of %d\n",maxlen);
+ 		return -1;
+ 	}
