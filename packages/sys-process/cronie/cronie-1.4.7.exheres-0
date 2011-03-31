@@ -1,0 +1,64 @@
+# Copyright 2011 Nathan McSween
+# Distributed under the terms of the GNU General Public License v2
+
+require pam systemd-service
+
+SUMMARY="Cronie is a standard UNIX daemon cron based on the original vixie-cron, but actually
+maintained."
+HOMEPAGE="https://fedorahosted.org/cronie/"
+DOWNLOADS="https://fedorahosted.org/releases/c/r/${PN}/${PNV}.tar.gz"
+
+LICENCES="ISC BSD BSD-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="pam systemd"
+
+# debianutils required for run-parts a.k.a cron.{daily,hourly}
+DEPENDENCIES="
+    build:
+    build+run:
+        sys-apps/debianutils
+        pam? ( sys-libs/pam )
+        group/cron
+        user/cron
+"
+
+BUGS_TO="nwmcsween@gmail.com"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    SPOOL_DIR="/var/spool/cron/crontabs"
+    --with-daemon_username=cron
+    --with-daemon_groupname=cron
+    --with-inotify
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( )
+
+src_install() {
+    default
+
+    # permissions
+    edo chown root:cron "${IMAGE}/usr/bin/crontab"
+    edo chmod 2755 "${IMAGE}/usr/bin/crontab"
+    edo chown root:wheel "${IMAGE}/usr/sbin/crond"
+    edo chmod 0755 "${IMAGE}/usr/sbin/crond"
+    # required keeps
+    keepdir /etc/cron.d
+
+    # /etc/cron.$TIME directory support
+    insinto /etc/cron.d
+    insopts -m0755
+    doins "${WORK}/contrib/dailyjobs"
+    diropts -m0750; keepdir /etc/cron.{hourly,daily,weekly,monthly}
+    diropts -m0750 -o root -g cron; keepdir /var/spool/cron
+    diropts -m0750; keepdir /var/spool/cron/lastrun
+    diropts -m1730 -o root -g cron; keepdir /var/spool/cron/crontabs
+
+    # misc
+    option pam && newpamd "${WORK}/pam/crond" crond
+
+    emagicdocs
+
+    install_systemd_files
+}
+
