@@ -79,6 +79,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
     --exec-prefix=/
     --libdir=/$(get_libdir)
+    --libexecdir=/usr/libexec
     --localstatedir=/var
     --enable-pam
     --disable-audit
@@ -87,7 +88,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-distro=other
     --with-pamlibdir=/$(get_libdir)/security
     --with-rootdir=/
-    --with-syslog-service=syslog.service
     --with-sysvinit-path=""
     --with-sysvrcd-path=""
     --with-udevrulesdir=/$(get_libdir)/udev/rules.d
@@ -116,6 +116,7 @@ systemd_src_prepare() {
     edo sed -i -e "/rootlibexecdir=/s:/lib/:/$(get_libdir)/:" Makefile.am
     edo sed -i -e "/systemunitdir=/s:lib:$(get_libdir):" Makefile.am
     edo sed -i -e "/systemgeneratordir=/s:lib:$(get_libdir):" Makefile.am
+    edo sed -i -e "/systemshutdowndir=/s:lib:$(get_libdir):" Makefile.am
 
     autotools_src_prepare
 }
@@ -207,13 +208,6 @@ LC_IDENTIFICATION=C
 LC_ALL=
 EOF
 
-    hereins os-release <<EOF
-NAME="Exherbo"
-PRETTY_NAME="Exherbo Linux"
-ID="exherbo"
-ANSI_COLOR="0;32"
-EOF
-
     # keepdir some stuff
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
@@ -221,12 +215,18 @@ EOF
     keepdir /etc/systemd/user
     keepdir /$(get_libdir)/systemd/system/graphical.target.wants
     keepdir /$(get_libdir)/systemd/system-generators
+    keepdir /$(get_libdir)/systemd/system-shutdown
+    keepdir /usr/libexec/systemd/user-generators
 
     # Make sure /etc/machine-id exists.
     [[ -f /etc/machine-id ]] || edo touch "${IMAGE}"/etc/machine-id
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
+
+    # Files in /etc/sysctl.d/?*.conf get read and applied via sysctl. Can be used
+    # in combination with sysctl.conf (sysctl.d takes precedence over sysctl.conf).
+    keepdir /etc/sysctl.d
 
     # From here on, we're creating a basic configuration.
     dodir /etc/systemd/system/basic.target.wants
@@ -239,11 +239,7 @@ systemd_pkg_postinst() {
     default
 
     if [[ ${ROOT} == / ]]; then
-        if [[ ${PV} == 20 ]]; then
-            nonfatal edo /bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
-        else
-            nonfatal edo /sbin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
-        fi
+        nonfatal edo /bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
     fi
