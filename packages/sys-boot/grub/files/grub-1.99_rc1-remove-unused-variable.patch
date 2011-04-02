@@ -1,0 +1,23 @@
+Source: written by Szymon Janc
+Upstream: yes, in master
+Reason: gcc-4.6 brings a warning
+
+=== modified file 'grub-core/fs/zfs/zfs.c'
+--- a/grub-core/fs/zfs/zfs.c	2011-01-08 00:56:09 +0000
++++ b/grub-core/fs/zfs/zfs.c	2011-03-07 21:23:06 +0000
+@@ -837,14 +837,12 @@
+ 				name))
+ 	{
+ 	  struct zap_leaf_array *la;
+-	  grub_uint8_t *ip;
+ 
+ 	  if (le->le_int_size != 8 || le->le_value_length != 1)
+ 	    return grub_error (GRUB_ERR_BAD_FS, "invalid leaf chunk entry");
+ 
+ 	  /* get the uint64_t property value */
+ 	  la = &ZAP_LEAF_CHUNK (l, blksft, le->le_value_chunk).l_array;
+-	  ip = la->la_array;
+ 
+ 	  *value = grub_be_to_cpu64 (la->la_array64);
+ 
+
