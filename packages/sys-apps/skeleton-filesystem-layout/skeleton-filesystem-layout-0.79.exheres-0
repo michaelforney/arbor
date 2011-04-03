@@ -49,6 +49,7 @@ pkg_pretend() {
 src_install() {
     insinto /etc
     doins "${FILES}"/exherbo-release
+    doins "${FILES}"/os-release
 
     if [[ ${LIBDIR} != lib ]]; then
         local multibuild_c_target ldpath=()
@@ -80,7 +81,7 @@ pkg_postinst() {
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
     for x in bin boot dev{,/pts} etc home mnt \
-        opt proc sbin sys; do
+        opt proc run sbin sys; do
             create_root_owned_directory "${ROOT}${x}"
     done
 
@@ -105,14 +106,35 @@ pkg_postinst() {
     done
 
     # /var structure
-    for x in var{,/adm,/cache,/empty,/lib,/local,/lock,/log,/run,/spool{,/lpd,/news,/uucp}}; do
+    for x in var{,/adm,/cache,/empty,/lib,/local,/log,/spool{,/lpd,/news,/uucp}}; do
         create_root_owned_directory "${ROOT}${x}"
     done
+
+    # /run structure
+    for x in run{,/lock}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    if [[ ! -L ${ROOT}var/lock ]]; then
+        nonfatal edo cp -a "${ROOT}"var/lock "${ROOT}"run/ || ewarn "cp'ing /var/lock failed"
+        nonfatal edo /bin/umount -l "${ROOT}"var/lock
+        nonfatal edo rm -rf "${ROOT}"var/lock || ewarn "rm'ing /var/lock failed"
+        nonfatal edo chmod 755 "${ROOT}"run/lock || ewarn "chmod 755 /run/lock failed"
+    fi
+
+    if [[ ! -L ${ROOT}var/run ]]; then
+        nonfatal edo cp -a "${ROOT}"var/run/* "${ROOT}"run/ || ewarn "cp'ing /var/run failed"
+        nonfatal edo /bin/umount -l "${ROOT}"var/run
+        nonfatal edo rm -rf "${ROOT}"var/run || ewarn "rm'ing /var/run failed"
+    fi
+
+    nonfatal edo ln -snTf /run/lock "${ROOT}"var/lock || ewarn "ln -snTf /run/lock failed"
+    nonfatal edo ln -snTf /run "${ROOT}"var/run || ewarn "ln -snTf /run failed"
 
     # directories with special permissions
     create_root_owned_directory "${ROOT}root" 0700
     create_root_owned_directory "${ROOT}dev/shm" 0777
-    for x in var/{lock,tmp} tmp; do
+    for x in var/tmp tmp; do
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
