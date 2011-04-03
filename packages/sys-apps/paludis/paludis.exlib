@@ -19,8 +19,6 @@ SLOT="0"
 
 DEPENDENCIES="
     build:
-        app-doc/asciidoc[>=8.6.3]
-        app-text/xmlto
         dev-util/pkg-config
         doc? (
             app-doc/doxygen
@@ -58,6 +56,23 @@ DEPENDENCIES="
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
 
+if ever is_scm; then
+    DEPENDENCIES+="
+        build:
+            app-doc/asciidoc[>=8.6.3]
+            app-text/xmlto
+    "
+else
+    MYOPTIONS+=" prebuilt-documentation [[ description = [ Use prebuilt documentation ] ]]"
+    DEPENDENCIES+="
+        build:
+            !prebuilt-documentation? (
+                app-doc/asciidoc[>=8.6.3]
+                app-text/xmlto
+            )
+    "
+fi
+
 pkg_setup() {
     replace-flags -Os -O2
 }
@@ -76,6 +91,7 @@ src_configure() {
         $(option_enable pink) \
         $(option_enable python) \
         $(option_enable ruby) \
+        $(ever is_scm || option_enable prebuilt-documentation) \
         $(option_enable search-index) \
         $(option_enable vim-syntax vim ) \
         $(option_enable xml) \
