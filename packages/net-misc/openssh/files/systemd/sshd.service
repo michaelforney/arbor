@@ -1,6 +1,7 @@
 [Unit]
 Description=SSH Secure Shell Service
-After=syslog.target
+Wants=network.target
+After=network.target syslog.target
 
 [Service]
 ExecStart=/usr/sbin/sshd -D
