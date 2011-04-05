@@ -43,7 +43,7 @@ glib_src_test() {
     # causes problems in our testing environment.
     export GSETTINGS_BACKEND=memory
 
-    # Make sure we use the built in unix backend instead of the gvfs one which
+    # Make sure we use the built-in unix backend instead of the gvfs module which
     # causes numerous issues in our testing environment.
     export GIO_USE_VOLUME_MONITOR=unix
 
@@ -53,19 +53,22 @@ glib_src_test() {
     eval "$(dbus-launch --sh-syntax)"
     [[ -z ${DBUS_SESSION_BUS_PID} ]] && die "Launching DBus session bus failed"
 
-    trap "kill ${DBUS_SESSION_BUS_PID}" EXIT
-
     esandbox allow_net --connect 'unix:/tmp/g-dbus-tests-pid-*'
     esandbox allow_net 'unix:/tmp/g-dbus-tests-pid-*'
     esandbox allow_net --connect 'unix:/tmp/gdbus-test-does-not-exist-pid'
     esandbox allow_net 'unix-abstract:/tmp/gdbus-test-/dbus-*'
 
-    default
+    if ! nonfatal emake check ; then
+        edo kill ${DBUS_SESSION_BUS_PID}
+        die "emake check failed"
+    fi
 
     esandbox disallow_net --connect 'unix:/tmp/g-dbus-tests-pid-*'
     esandbox disallow_net 'unix:/tmp/g-dbus-tests-pid-*'
     esandbox disallow_net --connect 'unix:/tmp/gdbus-test-does-not-exist-pid'
     esandbox disallow_net 'unix-abstract:/tmp/gdbus-test-/dbus-*'
     esandbox disallow_net 'unix-abstract:/tmp/dbus-*'
+
+    edo kill ${DBUS_SESSION_BUS_PID}
 }
 
