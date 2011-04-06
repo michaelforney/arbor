@@ -1,6 +1,5 @@
 [Unit]
 Description=Static networking
-Before=network.target
 
 [Service]
 Type=oneshot
@@ -13,4 +12,4 @@ ExecStopPost=/sbin/ifconfig lo down
 RemainAfterExit=yes
 
 [Install]
-WantedBy=network.target
+WantedBy=network.target multi-user.target
