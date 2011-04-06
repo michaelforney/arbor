@@ -113,10 +113,9 @@ systemd_pkg_pretend() {
 
 systemd_src_prepare() {
     # Set the correct libdir.
-    edo sed -i -e "/rootlibexecdir=/s:/lib/:/$(get_libdir)/:" Makefile.am
+    edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/$(get_libdir)/:" Makefile.am
     edo sed -i -e "/systemunitdir=/s:lib:$(get_libdir):" Makefile.am
-    edo sed -i -e "/systemgeneratordir=/s:lib:$(get_libdir):" Makefile.am
-    edo sed -i -e "/systemshutdowndir=/s:lib:$(get_libdir):" Makefile.am
+    edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/$(get_libdir)/:" Makefile.am
 
     autotools_src_prepare
 }
