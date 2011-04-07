@@ -44,7 +44,8 @@ if ! ever is_scm; then
     MYOPTIONS+=" doc"
 fi
 
-GCC_VERSION="4.4.5"
+GCC_VERSION="4.5.2"
+GCC_SLOT=$(ever range 1-2 ${GCC_VERSION})
 
 DEPENDENCIES="
     build:
@@ -52,6 +53,7 @@ DEPENDENCIES="
         sys-devel/flex
     build+run:
         sys-devel/gcc:4.4
+        sys-devel/gcc:${GCC_SLOT}
         clang? ( sys-devel/gcc[~${GCC_VERSION}] )
         gold? ( sys-devel/binutils[>=2.21][gold(+)] )
     test:
@@ -78,6 +80,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
 llvm_pkg_setup() {
+    # gcc 4.5 miscompiles clang
     eval "$(ROOT=/ eclectic gcc script 4.4)"
 }
 
