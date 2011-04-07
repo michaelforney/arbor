@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib toolchain-funcs
+require multilib toolchain-funcs flag-o-matic
 
 export_exlib_phases pkg_setup src_prepare src_configure src_test src_install
 
@@ -52,7 +52,6 @@ DEPENDENCIES="
         dev-lang/perl:*
         sys-devel/flex
     build+run:
-        sys-devel/gcc:4.4
         sys-devel/gcc:${GCC_SLOT}
         clang? ( sys-devel/gcc[~${GCC_VERSION}] )
         gold? ( sys-devel/binutils[>=2.21][gold(+)] )
@@ -80,8 +79,8 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
 llvm_pkg_setup() {
-    # gcc 4.5 miscompiles clang
-    eval "$(ROOT=/ eclectic gcc script 4.4)"
+    # gcc 4.5 miscompiles clang at -O2 and above
+    append-flags -O1
 }
 
 llvm_src_prepare() {
