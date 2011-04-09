@@ -167,6 +167,12 @@ systemd_src_install() {
         doins "${FILES}"/network.conf
     fi
 
+    # Install the legacy.conf tmpdirs.d config file.
+    # Systemd does not install it itself if sysv
+    # compatibility is not enabled.
+    insinto /etc/tmpfiles.d
+    doins "${WORK}"/tmpfiles.d/legacy.conf
+
     insinto /etc
 
     # Install a sample vconsole file
