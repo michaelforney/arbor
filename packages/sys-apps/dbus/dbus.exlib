@@ -105,6 +105,10 @@ dbus_src_test() {
 dbus_src_install() {
     default
 
+    if ! option doc ; then
+        [[ -d "${IMAGE}"/usr/share/doc/${PNV}/api ]] && edo rmdir "${IMAGE}"/usr/share/doc/${PNV}/api
+    fi
+
     edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
             -i "${IMAGE}"/etc/dbus-1/system.conf
 
