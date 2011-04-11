@@ -1,61 +1,9 @@
-# Copyright 1999-2007 Gentoo Foundation
+# Copyright 2009 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
-#
-# This eclass is for all functions pertaining to handling multilib.
-# configurations.
 
-# get_libdir:
-# Returns the libdir for the selected ABI.  This is backwards compatible
-# and simply calls get_abi_LIBDIR() on newer profiles.  You should use this
-# to determine where to install shared objects (ex: /usr/$(get_libdir))
-
-# get_abi_var <VAR> [<ABI>]:
-# returns the value of ${<VAR>_<ABI>} which should be set in make.defaults
-#
-# get_abi_LIBDIR:
-# Alias for 'get_abi_var LIBDIR', etc.
-
-### END DOCUMENTATION ###
-
-# Defaults:
-export DEFAULT_ABI=${DEFAULT_ABI:-"default"}
-export LIBDIR_default=${LIBDIR:-"lib"}
-
-# This function simply returns the desired lib directory.
 get_libdir() {
-    local CONF_LIBDIR
-    if [ -n  "${CONF_LIBDIR_OVERRIDE}" ] ; then
-        # if there is an override, we want to use that... always.
-        echo ${CONF_LIBDIR_OVERRIDE}
-    else
-        get_abi_LIBDIR
-    fi
+    ewarn "get_libdir is deprecated"
+    [[ ${EXHERES_PHASE} == metadata || -n ${LIBDIR} ]] || die "LIBDIR is unset, invalid profile"
+    echo "${LIBDIR}"
 }
-
-# get_abi_var <VAR> [<ABI>]
-# returns the value of ${<VAR>_<ABI>} which should be set in make.defaults
-#
-# If <ABI> is not specified, ${ABI} is used.
-# If <ABI> is not specified and ${ABI} is not defined, ${DEFAULT_ABI} is used.
-# If <ABI> is not specified and ${ABI} and ${DEFAULT_ABI} are not defined, we return an empty string.
-#
-# Jeremy Huddleston <eradicator@gentoo.org>
-get_abi_var() {
-    local flag=$1
-    local abi
-    if [ $# -gt 1 ]; then
-        abi=${2}
-    elif [ -n "${ABI}" ]; then
-        abi=${ABI}
-    elif [ -n "${DEFAULT_ABI}" ]; then
-        abi=${DEFAULT_ABI}
-    else
-        abi="default"
-    fi
-
-    local var="${flag}_${abi}"
-    echo ${!var}
-}
-
-get_abi_LIBDIR() { get_abi_var LIBDIR "$@"; }
 
