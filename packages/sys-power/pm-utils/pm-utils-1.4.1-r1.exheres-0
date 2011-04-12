@@ -1,8 +1,6 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Suspend and hibernation utilities"
 HOMEPAGE="http://${PN}.freedesktop.org"
 DOWNLOADS="${HOMEPAGE}/releases/${PNV}.tar.gz
@@ -27,9 +25,9 @@ src_install() {
     default
 
     keepdir /etc/pm/{config,power,sleep}.d
-    edo rm "${IMAGE}"/usr/$(get_libdir)/pm-utils/sleep.d/{01grub,55NetworkManager}
+    edo rm "${IMAGE}"/usr/${LIBDIR}/pm-utils/sleep.d/{01grub,55NetworkManager}
 
-    insinto /usr/$(get_libdir)/pm-utils/video-quirks
+    insinto /usr/${LIBDIR}/pm-utils/video-quirks
     doins "${WORKBASE}"/video-quirks/*.quirkdb
 }
 

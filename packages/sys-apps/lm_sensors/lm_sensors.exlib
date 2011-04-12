@@ -4,8 +4,6 @@
 # Based in part upon 'lm_sensors-3.0.2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib
-
 export_exlib_phases src_prepare src_install
 
 SUMMARY="Hardware Monitoring user-space utilities"
@@ -41,7 +39,7 @@ DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 DEFAULT_SRC_INSTALL_PARAMS=(
     PREFIX=/usr
     MANDIR=/usr/share/man
-    LIBDIR=/usr/$(get_libdir)
+    LIBDIR=/usr/${LIBDIR}
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(

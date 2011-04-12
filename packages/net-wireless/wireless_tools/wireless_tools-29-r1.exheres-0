@@ -3,8 +3,6 @@
 # Based in part upon 'wireless-tools-29.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib
-
 MY_PNV="${PN}.${PV}"
 WORK="${WORKBASE}/${MY_PNV}"
 
@@ -33,7 +31,7 @@ src_prepare() {
             -e "s:^\(@\$(LDCONFIG).*\):#\1:" \
             -e "s:^\(INSTALL_MAN= \$(PREFIX)\)/man/:\1/usr/share/man:" \
             -e "s:^\(INSTALL_INC= \$(PREFIX)\)/include/:\1/usr/include:" \
-            -e "s:^\(INSTALL_LIB= \$(PREFIX)\)/lib/:\1/$(get_libdir)/:" \
+            -e "s:^\(INSTALL_LIB= \$(PREFIX)\)/lib/:\1/${LIBDIR}/:" \
             -i Makefile
 }
 

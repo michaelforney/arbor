@@ -3,7 +3,7 @@
 # Based in part upon 'sendmail-8.14.2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib alternatives systemd-service
+require alternatives systemd-service
 
 export_exlib_phases src_prepare src_compile src_install
 
@@ -44,8 +44,8 @@ DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/sendmail-delivered_hdr.patch )
 
 COMMON_SENDMAIL_INSTALL_PARAMS=(
     DESTDIR="${IMAGE}"
-    LIBDIR=/usr/$(get_libdir)
-    SHAREDLIBDIR=/usr/$(get_libdir)
+    LIBDIR=/usr/${LIBDIR}
+    SHAREDLIBDIR=/usr/${LIBDIR}
     MANROOT=/usr/share/man/man
     SBINOWN=root
     SBINGRP=root
@@ -131,7 +131,7 @@ sendmail_src_install() {
     edo chown root:mail "${IMAGE}"/var/spool/mail
     edo chmod 0775 "${IMAGE}"/var/spool/mail
     dosym /var/spool/mail /var/mail
-    dodir /usr/bin /usr/$(get_libdir)
+    dodir /usr/bin /usr/${LIBDIR}
     dodir /usr/share/man/man{1,5,8} /usr/sbin /usr/share/sendmail-cf
     dodir /var/spool/{mqueue,clientmqueue}
     keepdir /var/spool/{clientmqueue,mqueue}

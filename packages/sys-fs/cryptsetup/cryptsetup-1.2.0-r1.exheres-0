@@ -3,7 +3,7 @@
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib googlecode
+require googlecode
 
 SUMMARY="Userland utilities for dm-crypt"
 
@@ -23,7 +23,7 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --sbindir=/sbin
-    --libdir=/$(get_libdir)
+    --libdir=/${LIBDIR}
     --enable-nls
     --enable-shared
     --enable-static
@@ -36,15 +36,15 @@ src_install() {
     default
 
     # Move the pkg-config file into the correct dir.
-    dodir /usr/$(get_libdir)/pkgconfig
-    edo cp "${IMAGE}"/$(get_libdir)/pkgconfig/libcryptsetup.pc "${IMAGE}"/usr/$(get_libdir)/pkgconfig
-    edo rm "${IMAGE}"/$(get_libdir)/pkgconfig/libcryptsetup.pc
-    edo rmdir "${IMAGE}"/$(get_libdir)/pkgconfig
+    dodir /usr/${LIBDIR}/pkgconfig
+    edo cp "${IMAGE}"/${LIBDIR}/pkgconfig/libcryptsetup.pc "${IMAGE}"/usr/${LIBDIR}/pkgconfig
+    edo rm "${IMAGE}"/${LIBDIR}/pkgconfig/libcryptsetup.pc
+    edo rmdir "${IMAGE}"/${LIBDIR}/pkgconfig
 
     # Create compatibility symlinks.
     dodir /usr/sbin
-    dosym /$(get_libdir)/libcryptsetup.so.1.1.0 /usr/$(get_libdir)
-    dosym /$(get_libdir)/libcryptsetup.la /usr/$(get_libdir)
+    dosym /${LIBDIR}/libcryptsetup.so.1.1.0 /usr/${LIBDIR}
+    dosym /${LIBDIR}/libcryptsetup.la /usr/${LIBDIR}
     dosym /sbin/cryptsetup /usr/sbin
 }
 

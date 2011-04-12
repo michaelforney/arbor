@@ -3,8 +3,6 @@
 # Based in part upon 'acl-2.2.47.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib
-
 SUMMARY="Access control list utilities, libraries and headers"
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
 DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
@@ -28,8 +26,8 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
-    --libdir=/$(get_libdir)
-    --libexecdir=/usr/$(get_libdir)
+    --libdir=/${LIBDIR}
+    --libexecdir=/usr/${LIBDIR}
     --enable-gettext
 )
 
@@ -56,12 +54,12 @@ src_configure() {
 src_install() {
     emake -j1 DIST_ROOT="${IMAGE}" install install-dev install-lib
 
-    # We don't install static libraries, remove symlink to /$(get_libdir)
-    edo rm "${IMAGE}"/{usr/,}$(get_libdir)/libacl.{a,la,so}
-    edo rmdir "${IMAGE}"/usr/$(get_libdir)
+    # We don't install static libraries, remove symlink to /${LIBDIR}
+    edo rm "${IMAGE}"/{usr/,}${LIBDIR}/libacl.{a,la,so}
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}
 
     # Fix circular linking
     into /
-    dosym /$(get_libdir)/libacl.so.1 /$(get_libdir)/libacl.so
+    dosym /${LIBDIR}/libacl.so.1 /${LIBDIR}/libacl.so
 }
 

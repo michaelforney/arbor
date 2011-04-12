@@ -3,7 +3,7 @@
 # Based in part upon 'tk-8.5.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 require sourceforge [ pnv=${PN}${PV}-src project=tcl suffix=tar.gz ]
 
 MY_PNV="${PN}${PV}"
@@ -44,7 +44,7 @@ DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}/${PN}-8.5.7-multilib.patch" )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'debug symbols' 'truetype xft' )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-threads
-    --with-tcl=/usr/$(get_libdir)
+    --with-tcl=/usr/${LIBDIR}
 )
 
 src_install() {
@@ -53,7 +53,7 @@ src_install() {
 
     local v1=$(ever range 1-2)
     # Fix the tkConfig.sh to eliminate references to the build directory
-    local mylibdir=$(get_libdir) ; mylibdir=${mylibdir//\/}
+    local mylibdir=${LIBDIR} ; mylibdir=${mylibdir//\/}
     edo sed -e "s,^\(TK_BUILD_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \
             -e "s,^\(TK_SRC_DIR='\)${WORK%%/}',\1/usr/${mylibdir}/${PN}${v1}/include'," \
             -e "s,^\(TK_BUILD_STUB_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \

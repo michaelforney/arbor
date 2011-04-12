@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 TZCODE_PV="${PV}"
 TZDATA_PV="${PV}"
 
@@ -30,7 +28,7 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 DEFAULT_SRC_INSTALL_PARAMS=(
     TZDIR="${IMAGE}/usr/share/zoneinfo"
     ETCDIR="${IMAGE}/usr/bin"
-    LIBDIR="${IMAGE}/usr/$(get_libdir)"
+    LIBDIR="${IMAGE}/usr/${LIBDIR}"
     MANDIR="${IMAGE}/usr/share/man"
     TOPDIR="${IMAGE}"
 )

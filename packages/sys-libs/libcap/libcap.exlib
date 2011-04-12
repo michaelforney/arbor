@@ -3,7 +3,7 @@
 # Based in part upon 'libcap-2.08-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib pam
+require pam
 
 export_exlib_phases src_prepare src_compile src_install
 
@@ -23,7 +23,7 @@ DEPENDENCIES="
         pam? ( sys-libs/pam )
 "
 
-DEFAULT_SRC_INSTALL_PARAMS=( lib=$(get_libdir) )
+DEFAULT_SRC_INSTALL_PARAMS=( lib=${LIBDIR} )
 
 libcap_src_prepare() {
     edo sed -f - -i Make.Rules <<'EOF'

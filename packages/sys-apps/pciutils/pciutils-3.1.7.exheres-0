@@ -3,8 +3,6 @@
 # Based in part upon 'pciutils-2.2.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib
-
 SUMMARY="A collection of programs for inspecting and manipulating configuration of PCI devices"
 HOMEPAGE="http://mj.ucw.cz/pciutils.shtml"
 DOWNLOADS="ftp://atrey.karlin.mff.cuni.cz/pub/linux/pci/${PNV}.tar.gz"
@@ -32,7 +30,7 @@ DEFAULT_SRC_INSTALL_EXCLUDE=( "README.Windows" )
 src_prepare() {
     default
     edo sed -e '/^PREFIX=/cPREFIX=/usr' \
-            -e "/^LIBDIR=/cLIBDIR=/usr/$(get_libdir)" \
+            -e "/^LIBDIR=/cLIBDIR=/usr/${LIBDIR}" \
             -e '/^IDSDIR=/cIDSDIR=/usr/share/misc' \
             -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
             -e '/^STRIP=-s/cSTRIP=' \

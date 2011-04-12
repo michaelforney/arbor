@@ -1,7 +1,7 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu [ suffix=gz ]
+require gnu [ suffix=gz ]
 
 SUMMARY="Free software emulation of curses using Terminfo formats"
 
@@ -13,7 +13,7 @@ DEPENDENCIES="
         gpm? ( sys-libs/gpm )"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--hates=docdir' '--with-shared' '--with-normal' '--without-termcap'
-                               "--libdir=/$(get_libdir)" '--without-hashed-db' )
+                               "--libdir=/${LIBDIR}" '--without-hashed-db' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gpm )
 
 ECONF_SOURCE="${WORK}"

@@ -4,7 +4,7 @@
 # Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require alternatives multilib
+require alternatives
 
 export_exlib_phases src_configure src_test src_install
 
@@ -49,7 +49,7 @@ ruby_src_configure() {
     if ever at_least "1.9"; then
         myconf+=(
             --with-ruby-version=minor
-            --with-rubylibprefix=/usr/$(get_libdir)/ruby
+            --with-rubylibprefix=/usr/${LIBDIR}/ruby
             --with-rubyhdrdir=/usr/include/ruby-${SLOT}
         )
     fi
@@ -99,7 +99,7 @@ fi
 
 ruby_src_install() {
     unset RUBYOPT
-    D_LIBDIR="${IMAGE}/usr/$(get_libdir)"
+    D_LIBDIR="${IMAGE}/usr/${LIBDIR}"
     LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${D_LIBDIR}"
     RUBYLIB="${WORK}:${D_LIBDIR}/ruby/${SLOT}"
 

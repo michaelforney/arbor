@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Tools to handle kernel modules"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/module-init-tools"
 DOWNLOADS="mirror://kernel/linux/utils/kernel/${PN}/${PNV}.tar.bz2"
@@ -16,7 +14,7 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
-    --with-moddir=/$(get_libdir)/modules
+    --with-moddir=/${LIBDIR}/modules
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CODING )
 

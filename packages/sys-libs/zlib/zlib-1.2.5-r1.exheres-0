@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net/"
 DOWNLOADS="http://www.zlib.net/${PNV}.tar.bz2"
@@ -22,7 +20,7 @@ src_configure() {
     # Breaks on most ./configure arguments econf passes
     edo ./configure \
         --prefix=/usr \
-        --libdir=/usr/$(get_libdir) \
+        --libdir=/usr/${LIBDIR} \
         --shared
 }
 

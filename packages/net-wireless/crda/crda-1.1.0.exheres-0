@@ -1,8 +1,6 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Central Regulatory Domain Agent"
 DESCRIPTION="
 CRDA acts as the udev helper for communication between the kernel and userspace
@@ -38,7 +36,7 @@ DEPENDENCIES="
 
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}"
 
-CRDA_DIR=/usr/$(get_libdir)/crda
+CRDA_DIR=/usr/${LIBDIR}/crda
 
 DEFAULT_SRC_PREPARE_PATCHES+=(
     "${FILES}/${PNV}-buildtool.patch"
@@ -78,7 +76,7 @@ src_install() {
     option ssl && mymake+=( USE_OPENSSL=1 )
 
     emake DESTDIR="${IMAGE}" \
-          UDEV_RULE_DIR=/$(get_libdir)/udev/rules.d \
+          UDEV_RULE_DIR=/${LIBDIR}/udev/rules.d \
           SBINDIR=/usr/sbin \
           ${mymake[@]} \
           install

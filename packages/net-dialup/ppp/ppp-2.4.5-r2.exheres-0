@@ -4,7 +4,7 @@
 # Based in part upon 'ppp-2.4.4-r21.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require multilib pam
+require pam
 
 SCRIPT_VER="20080922"
 
@@ -72,7 +72,7 @@ src_prepare() {
     edo sed -i "s/^#CBCP=y/CBCP=y/" pppd/Makefile.linux
 
     # Set correct libdir
-    edo sed -i -e "s:/lib/pppd:/$(get_libdir)/pppd:" pppd/{pathnames.h,pppd.8}
+    edo sed -i -e "s:/lib/pppd:/${LIBDIR}/pppd:" pppd/{pathnames.h,pppd.8}
 
     if option radius ; then
         # set the right paths in radiusclient.conf
@@ -120,7 +120,7 @@ src_install() {
 
     pamd_mimic_system ppp auth account session
 
-    insinto /usr/$(get_libdir)/pppd/${PV}
+    insinto /usr/${LIBDIR}/pppd/${PV}
     insopts -m0755
     doins pppd/plugins/{minconn,passprompt,passwordfd,winbind,rp-pppoe/rp-pppoe,pppol2tp/openl2tp,pppol2tp/pppol2tp}.so
 

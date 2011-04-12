@@ -6,7 +6,7 @@ myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 myexparam libidn_uri="mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2"
 
-require flag-o-matic multilib systemd-service [ systemd_files=[ nscd.service ] ]
+require flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ]
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
@@ -85,7 +85,7 @@ src_install() {
     default
 
     # localedef fails if /usr/lib/locale does not exist
-    keepdir /usr/$(get_libdir)/locale
+    keepdir /usr/${LIBDIR}/locale
 
     # Don't install /etc/{ld.so.cache,localtime}
     for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
@@ -101,10 +101,10 @@ src_install() {
     doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
 
     # Move librt.a to /lib and link it to /usr/lib.
-    edo cp -a "${IMAGE}"/usr/$(get_libdir)/librt.a "${IMAGE}"/$(get_libdir)/
-    edo rm "${IMAGE}"/usr/$(get_libdir)/librt.a
-    dosym /$(get_libdir)/librt.a /usr/$(get_libdir)/
-    dosym /$(get_libdir)/librt.so.1 /$(get_libdir)/librt.so
+    edo cp -a "${IMAGE}"/usr/${LIBDIR}/librt.a "${IMAGE}"/${LIBDIR}/
+    edo rm "${IMAGE}"/usr/${LIBDIR}/librt.a
+    dosym /${LIBDIR}/librt.a /usr/${LIBDIR}/
+    dosym /${LIBDIR}/librt.so.1 /${LIBDIR}/librt.so
 
     hereenvd 02locale <<EOF
 LANG=en_GB.utf8
@@ -118,7 +118,7 @@ EOF
 }
 
 pkg_postinst() {
-    mkdir -p "${ROOT}usr/$(get_libdir)/locale" || eerror "failed to create /usr/$(get_libdir)/locale"
+    mkdir -p "${ROOT}usr/${LIBDIR}/locale" || eerror "failed to create /usr/${LIBDIR}/locale"
 
     for lang in en_US en_GB ; do
         I18NPATH="${ROOT}usr/share/i18n" \

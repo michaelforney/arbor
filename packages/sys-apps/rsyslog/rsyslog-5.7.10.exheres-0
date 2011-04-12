@@ -1,8 +1,6 @@
 # Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="An enhanced syslog daemon for Linux (and Unix)"
 DESCRIPTION="
 rsyslog is an enhanced multi-threaded syslogd. Among others, it offers support
@@ -104,7 +102,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     relp
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /$(get_libdir)/systemd/system" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /${LIBDIR}/systemd/system" )
 
 src_install() {
     default

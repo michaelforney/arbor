@@ -1,8 +1,6 @@
 # Copyright 2007 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Some replacements for programs formerly provided by sysvinit."
 HOMEPAGE="http://www.exherbo.org/"
 DOWNLOADS=""
@@ -23,7 +21,7 @@ src_prepare() {
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
-    --libexecdir=/$(get_libdir)
+    --libexecdir=/${LIBDIR}
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( visibility )
 

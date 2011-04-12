@@ -2,8 +2,6 @@
 # Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
 DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
@@ -58,11 +56,11 @@ src_compile() {
 src_install() {
     default
 
-    # Install shared libraries to /$(get_libdir)
+    # Install shared libraries to /${LIBDIR}
     into /
     dolib.so libbz2.so.${PV}
     for v in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
-        dosym libbz2.so.${PV} /$(get_libdir)/${v}
+        dosym libbz2.so.${PV} /${LIBDIR}/${v}
     done
 
     # Fix symlinks linking to ${IMAGE}

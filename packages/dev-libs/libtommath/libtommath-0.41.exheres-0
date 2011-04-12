@@ -3,8 +3,6 @@
 # Based in part upon 'libtommath-0.41.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib
-
 SUMMARY="Highly optimized and portable routines for integer based number theoretic applications"
 DESCRIPTION="
 LibTomMath provides highly optimized and portable routines for a vast majority of
@@ -25,6 +23,6 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-LDFLAGS.patch )
 DEFAULT_SRC_COMPILE_PARAMS=( -f makefile.shared IGNORE_SPEED=1 )
-DEFAULT_SRC_INSTALL_PARAMS=( -f makefile.shared DESTDIR="${IMAGE}" LIBPATH="/usr/$(get_libdir)" )
+DEFAULT_SRC_INSTALL_PARAMS=( -f makefile.shared DESTDIR="${IMAGE}" LIBPATH="/usr/${LIBDIR}" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( changes.txt )
 

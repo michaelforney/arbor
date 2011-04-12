@@ -2,8 +2,6 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://userweb.kernel.org/~kzak/util-linux/"
 DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${PNV}.tar.bz2"
@@ -30,7 +28,7 @@ DEPENDENCIES="
 
 # --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --libdir=/$(get_libdir)
+    --libdir=/${LIBDIR}
     --enable-cramfs
     --enable-libblkid
     --enable-libmount

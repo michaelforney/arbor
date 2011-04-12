@@ -1,8 +1,6 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="A hierarchical pool based memory allocator with destructors"
 DESCRIPTION="
 Talloc is a hierarchical pool based memory allocator with destructors. It is the core memory
@@ -31,6 +29,6 @@ DEFAULT_SRC_INSTALL_EXCLUDE=( release-script.sh )
 src_install() {
     default
 
-    dosym /usr/$(get_libdir)/libtalloc.so.${PV} /usr/$(get_libdir)/libtalloc.so
+    dosym /usr/${LIBDIR}/libtalloc.so.${PV} /usr/${LIBDIR}/libtalloc.so
 }
 

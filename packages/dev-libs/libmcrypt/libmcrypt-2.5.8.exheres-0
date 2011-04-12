@@ -1,7 +1,7 @@
 # Copyright 2009 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib sourceforge [ project=mcrypt ]
+require sourceforge [ project=mcrypt ]
 
 SUMMARY="Encyption library"
 DESCRIPTION="MCrypt is a replacement for the old crypt() package and crypt(1) command, with extensions. It allows developers to use a wide range of encryption functions, without making drastic changes to their code. It allows users to encrypt files or data streams without having to be cryptographers. Above all, it allows you to have some really neat code on your machine. :)
@@ -21,6 +21,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 
 src_install() {
     default
-    rmdir ${IMAGE}/usr/$(get_libdir)/${PN}
+    rmdir ${IMAGE}/usr/${LIBDIR}/${PN}
 }
 

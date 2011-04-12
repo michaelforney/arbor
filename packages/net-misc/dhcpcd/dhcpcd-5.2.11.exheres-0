@@ -2,7 +2,7 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib systemd-service
+require systemd-service
 
 SUMMARY="RFC2131 compliant DHCP client"
 DESCRIPTION="
@@ -23,8 +23,8 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --dbdir=/var/lib/dhcpcd
-    --libdir=/$(get_libdir)
-    --libexecdir=/$(get_libdir)/dhcpcd
+    --libdir=/${LIBDIR}
+    --libexecdir=/${LIBDIR}/dhcpcd
     --rundir=/var/run
     --sbindir=/sbin
     --with-hooks="yp ntp"

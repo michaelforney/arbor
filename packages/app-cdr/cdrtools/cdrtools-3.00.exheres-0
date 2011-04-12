@@ -1,8 +1,6 @@
 # Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 MY_PNV="${PNV/_alpha/a}"
 
 SUMMARY="Highly portable CD/DVD/BluRay command line recording software"
@@ -47,8 +45,8 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     -j1
     GMAKE_NOWARN=true
     INS_BASE=/usr
-    LDPATH="-L/\$(INS_BASE)/$(get_libdir)"
-    RUNPATH="-R/\$(INS_BASE)/$(get_libdir)"
+    LDPATH="-L/\$(INS_BASE)/${LIBDIR}"
+    RUNPATH="-R/\$(INS_BASE)/${LIBDIR}"
 )
 DEFAULT_SRC_INSTALL_PARAMS=(
     INS_BASE=/usr
@@ -62,8 +60,8 @@ src_configure() {
 src_install() {
     default
 
-    if [[ $(get_libdir) != lib ]]; then
-        edo mv "${IMAGE}"/usr/{lib,$(get_libdir)}
+    if [[ ${LIBDIR} != lib ]]; then
+        edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}
     fi
 
     # Don't install man-pages that are related to the buildsystem

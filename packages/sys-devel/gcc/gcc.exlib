@@ -3,7 +3,7 @@
 # Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs multilib versionator alternatives gnu [ subdir=${PNV} ]
+require toolchain-funcs versionator alternatives gnu [ subdir=${PNV} ]
 
 SUMMARY="GNU Compiler Collection"
 
@@ -134,7 +134,7 @@ src_test_expensive() {
 src_install() {
     default
 
-    local libdir=$(get_libdir)
+    local libdir=${LIBDIR}
 
     # Precompiled headers, disable for cross-compiling
     if ! tc-is-cross-compiler ; then
@@ -284,8 +284,8 @@ pkg_preinst() {
     done
 
     # ease migration to proper slotting (i.e. prevent paludis from breaking before pkg_postinst, which would fix it)
-    if [[ -f ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1 ]]; then
-        edo touch ${ROOT}/usr/$(get_libdir)/libgcc_s.so.1
+    if [[ -f ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1 ]]; then
+        edo touch ${ROOT}/usr/${LIBDIR}/libgcc_s.so.1
     fi
 }
 

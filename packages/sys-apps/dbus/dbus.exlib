@@ -9,7 +9,7 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic multilib
+require flag-o-matic
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -74,7 +74,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "systemd systemdsystemunitdir /$(get_libdir)/systemd/system"
+    "systemd systemdsystemunitdir /${LIBDIR}/systemd/system"
     "X x"
 )
 

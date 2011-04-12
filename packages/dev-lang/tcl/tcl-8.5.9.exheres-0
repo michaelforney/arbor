@@ -4,7 +4,7 @@
 # Based in part upon 'tcl-8.5.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 require sourceforge [ suffix=tar.gz pnv=${PN}${PV}-src ]
 
 MY_PNV="${PN}${PV}"
@@ -43,13 +43,13 @@ src_install() {
     default
     nonfatal emake DESTDIR="${IMAGE}" install-private-headers || die "emake install-private-headers failed"
 
-    keepdir /usr/$(get_libdir)/${PN}8/8.3/
+    keepdir /usr/${LIBDIR}/${PN}8/8.3/
 
     local v1=$(ever range 1-2)
     dosym /usr/bin/tclsh{${v1},}
 
     # Fix the tclConfig.sh to eliminate references to the build directory
-    local mylibdir=$(get_libdir) ; mylibdir=${mylibdir//\/}
+    local mylibdir=${LIBDIR} ; mylibdir=${mylibdir//\/}
     edo sed -e "s,^TCL_BUILD_LIB_SPEC='-L.*/unix,TCL_BUILD_LIB_SPEC='-L$/usr/${mylibdir}," \
             -e "s,^TCL_SRC_DIR='.*',TCL_SRC_DIR='/usr/${mylibdir}/${PN}${v1}/include'," \
             -e "s,^TCL_BUILD_STUB_LIB_SPEC='-L.*/unix,TCL_BUILD_STUB_LIB_SPEC='-L/usr/${mylibdir}," \

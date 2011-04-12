@@ -9,8 +9,6 @@
 # builds and an implementation of the well-known option_enable and option_with
 # functions for CMake.
 
-require multilib
-
 myexparam -b out_of_source=true
 myexparam cmake_minimum_version=2.6.4
 
@@ -105,7 +103,7 @@ ecmake() {
         edo pushd "${ECMAKE_BUILD_DIR}" || return 1
     fi
 
-    local cmakeargs tmp_libdir=$(get_libdir)
+    local cmakeargs
 
     # All default CMAKE_BUILD_TYPEs come with default CFLAGS, CXXFLAGS, which are *appended* to
     # CMAKE_C_FLAGS, CMAKE_CXX_FLAGS if a given build type is used. Thus they override users' settings,
@@ -120,8 +118,8 @@ ecmake() {
         -DCMAKE_C_COMPILER:PATH="${CC}"
         -DCMAKE_CXX_COMPILER:PATH="${CXX}"
         -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX:=/usr}"
-        -DLIB_INSTALL_DIR:PATH="${PREFIX}/${tmp_libdir}"
-        -DLIB_SUFFIX:STRING=${tmp_libdir/lib}
+        -DLIB_INSTALL_DIR:PATH="${PREFIX}/${LIBDIR}"
+        -DLIB_SUFFIX:STRING=${LIBDIR/lib}
     )
 
     edo cmake "${cmakeargs[@]}" "$@" "${EXTRA_ECONF}" "${WORK}" || return 1

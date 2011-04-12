@@ -82,9 +82,9 @@ EOF
 
     # Don't overwrite existing xtab/etab, install the original
     # versions somewhere safe. cf. pkg_postinst.
-    dodir /usr/$(get_libdir)/nfs
+    dodir /usr/${LIBDIR}/nfs
     keepdir /var/lib/nfs/{sm,sm.bak}
-    edo mv "${IMAGE}"/var/lib/nfs/* "${IMAGE}"/usr/$(get_libdir)/nfs
+    edo mv "${IMAGE}"/var/lib/nfs/* "${IMAGE}"/usr/${LIBDIR}/nfs
     keepdir /var/lib/nfs
 
     # Install some client-side binaries in /sbin
@@ -104,10 +104,10 @@ EOF
 
 nfs-utils_pkg_postinst() {
     # Install default xtab and friends if there's none existing.
-    # In src_install we put them in /usr/$(get_libdir)/nfs for safe-keeping, but
+    # In src_install we put them in /usr/${LIBDIR}/nfs for safe-keeping, but
     # the daemons actually use the files in /var/lib/nfs. cf. Gentoo bug 30486.
     local f
-    for f in "${ROOT}"/usr/$(get_libdir)/nfs/*; do
+    for f in "${ROOT}"/usr/${LIBDIR}/nfs/*; do
         [[ -e ${ROOT}/var/lib/nfs/${f##*/} ]] && continue
         nonfatal edo cp -pPR "${f}" "${ROOT}"/var/lib/nfs/ || ewarn "cp failed"
     done

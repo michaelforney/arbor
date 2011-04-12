@@ -2,7 +2,7 @@
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require qmake4 [ no_qt_dependency=true ] multilib systemd-service
+require qmake4 [ no_qt_dependency=true ] systemd-service
 
 SUMMARY="Linux WPA/WPA2/IEEE 802.1X Supplicant"
 DESCRIPTION="
@@ -104,7 +104,7 @@ WORK=${WORKBASE}/${PNV}/${PN}
 
 [[ ${PV} == "0.7.3" ]] && DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PNV}-new-dbus.patch )
 
-DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/$(get_libdir) V=1 )
+DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/${LIBDIR} V=1 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( eap_testing.txt wpa_supplicant.conf )
 

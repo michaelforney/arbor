@@ -6,7 +6,7 @@
 # Based in part upon 'baselayout-1.12.12.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic multilib
+require flag-o-matic
 
 SUMMARY="Filesystem baselayout and init scripts"
 HOMEPAGE="http://www.gentoo.org/"
@@ -56,7 +56,7 @@ pkg_pretend() {
 }
 
 src_prepare() {
-    libdir=$(get_libdir)
+    libdir=${LIBDIR}
     # Use correct path to filefuncs.so on multilib systems
     edo sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:g" \
         -i "${WORK}"/src/awk/cachedepends.awk \
@@ -181,7 +181,7 @@ pkg_preinst() {
         edo touch "${ROOT}"${x}/.keep_do_not_break_me
     done
 
-    if [[ $(get_libdir) != lib ]]; then
+    if [[ ${LIBDIR} != lib ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -L ${ROOT}${x} ]]; then
                 target=$(readlink "${ROOT}${x}") || die "rewriting ${ROOT}${x} failed"

@@ -6,8 +6,6 @@
 
 V=$(ever range 1-2)
 
-require multilib
-
 SUMMARY="An Extensible Extension Language"
 HOMEPAGE="http://www.lua.org/"
 DOWNLOADS="http://www.lua.org/ftp/${PNV}.tar.gz"
@@ -31,18 +29,18 @@ src_prepare() {
     edo sed -e "/^INSTALL_TOP/s:= .*:= ${IMAGE}/usr:" \
             -e "/^INSTALL_INC/s:= .*:= ${IMAGE}/usr/include/${PN}$(ever range 1-2):" \
             -e "/^INSTALL_MAN/s:= .*:= ${IMAGE}/usr/share/man/man1:" \
-            -e "/^INSTALL/s:lib:$(get_libdir):" \
+            -e "/^INSTALL/s:lib:${LIBDIR}:" \
             -e '/MKDIR/s:$(INSTALL_LMOD) $(INSTALL_CMOD)::' \
             -i Makefile
 
     edo sed -e "/^prefix/s:/.*$:/usr:" \
             -e "/^includedir/s:$:/${PN}$(ever range 1-2):" \
             -e "/^Libs/s:-llua:&$(ever range 1-2):" \
-            -e "s:/lib:/$(get_libdir):" \
+            -e "s:/lib:/${LIBDIR}:" \
             -i etc/${PN}.pc
 
     edo sed -e 's:/usr/local/:/usr/:' \
-            -e "s:lib/:$(get_libdir)/:" \
+            -e "s:lib/:${LIBDIR}/:" \
             -i src/luaconf.h
 
     default
@@ -52,7 +50,7 @@ src_compile() {
     ARGS=(
         CC="${CC}"
         PLAT="linux"
-        RPATH="/usr/$(get_libdir)"
+        RPATH="/usr/${LIBDIR}"
     )
 
     emake "${ARGS[@]}" echo
@@ -84,7 +82,7 @@ src_install() {
         edo mv "${IMAGE}"/usr/bin/{${executable},${executable/${V}}}
     done
 
-    insinto /usr/$(get_libdir)/pkgconfig
+    insinto /usr/${LIBDIR}/pkgconfig
     doins etc/${PN}.pc
 
     insinto /usr/share/pixmaps

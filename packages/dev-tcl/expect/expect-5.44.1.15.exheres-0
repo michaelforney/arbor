@@ -1,7 +1,7 @@
 # Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] multilib sourceforge
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] sourceforge
 
 SUMMARY="Tool for automating interactive applications"
 
@@ -39,9 +39,9 @@ src_prepare() {
 
 src_configure() {
     econf \
-        --with-tcl=/usr/$(get_libdir) \
+        --with-tcl=/usr/${LIBDIR} \
         --with-tclinclude=/usr/include \
-        --with-tk=$(option tk && echo /usr/$(get_libdir) || echo no) \
+        --with-tk=$(option tk && echo /usr/${LIBDIR} || echo no) \
         --with-tkinclude=/usr/include
 }
 

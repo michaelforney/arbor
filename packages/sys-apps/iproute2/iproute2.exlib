@@ -5,8 +5,6 @@
 
 myexparam headers_version='[>=2.6.33]'
 
-require multilib
-
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux."
 HOMEPAGE="http://www.linuxfoundation.org/en/Net:Iproute2"
 DOWNLOADS="
@@ -40,12 +38,12 @@ DEPENDENCIES="
 DEFAULT_SRC_COMPILE_PARAMS+=(
     CC="${CC}"
     AR="${AR}"
-    LIBDIR=/usr/$(get_libdir)
-    IPT_LIB_DIR=/usr/$(get_libdir)
+    LIBDIR=/usr/${LIBDIR}
+    IPT_LIB_DIR=/usr/${LIBDIR}
 )
 
 DEFAULT_SRC_INSTALL_PARAMS+=(
-    LIBDIR=/usr/$(get_libdir)
+    LIBDIR=/usr/${LIBDIR}
     DESTDIR="${IMAGE}"
     DOCDIR=/usr/share/doc/${PNVR}
     MANDIR=/usr/share/man
@@ -101,7 +99,7 @@ src_install() {
     fi
 
     if ! option atm ; then
-        [[ -d "${IMAGE}"/$(get_libdir)/tc ]] && edo rmdir "${IMAGE}"/$(get_libdir)/{tc,}
+        [[ -d "${IMAGE}"/${LIBDIR}/tc ]] && edo rmdir "${IMAGE}"/${LIBDIR}/{tc,}
     fi
 }
 

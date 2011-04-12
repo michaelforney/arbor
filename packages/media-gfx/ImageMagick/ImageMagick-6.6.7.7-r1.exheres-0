@@ -4,7 +4,7 @@
 # Based in part upon 'imagemagick-6.4.2.0.ebuild' from Gentoo Linux, which is:
 #    Copyright 1999-2008 Gentoo Foundation
 
-require ImageMagick multilib
+require ImageMagick
 
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
@@ -112,7 +112,7 @@ src_install() {
     fi
 
     if option perl ; then
-        local perllocal=( "${IMAGE}"/usr/$(get_libdir)/perl5/*/*/perllocal.pod )
+        local perllocal=( "${IMAGE}"/usr/${LIBDIR}/perl5/*/*/perllocal.pod )
         edo rm "${perllocal[0]}"
         edo rmdir "${perllocal[0]%/*}"
         edo rmdir "${perllocal[0]%/*/*}"

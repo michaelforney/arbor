@@ -3,7 +3,7 @@
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic multilib pam
+require flag-o-matic pam
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
@@ -29,16 +29,16 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --libdir=/$(get_libdir)
+    --libdir=/${LIBDIR}
     --disable-audit
     --disable-prelude
     --disable-regenerate-docu
     --disable-selinux
     --enable-cracklib
     --enable-db=no
-    --enable-isadir=/$(get_libdir)/security
+    --enable-isadir=/${LIBDIR}/security
     --enable-nls
-    --enable-securedir=/$(get_libdir)/security
+    --enable-securedir=/${LIBDIR}/security
 )
 
 WORK="${WORKBASE}/${MY_PNV}"

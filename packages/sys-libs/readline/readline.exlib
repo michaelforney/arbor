@@ -11,7 +11,7 @@ else
     PATCH_LEVEL=0
 fi
 
-require multilib gnu [ suffix=gz ]
+require gnu [ suffix=gz ]
 
 export_exlib_phases src_prepare
 
@@ -45,7 +45,7 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/$(get_libdir) )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/${LIBDIR} )
 DEFAULT_SRC_INSTALL_PARAMS=(
     # only affects where examples go and only when static is enabled
     installdir="/usr/share/doc/${PNVR}/examples"

@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu [ suffix=gz ]
+require gnu [ suffix=gz ]
 
 SUMMARY="Groff produces formatted output from plain text"
 
@@ -32,7 +32,7 @@ src_install() {
 
     emake appresdir="/etc/X11/app-defaults" DESTDIR="${IMAGE}" install
 
-    edo rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/$(get_libdir)/groff/site-tmac
+    edo rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/${LIBDIR}/groff/site-tmac
 
     dosym tbl /usr/bin/gtbl
     dosym eqn /usr/bin/geqn

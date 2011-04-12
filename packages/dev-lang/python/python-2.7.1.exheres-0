@@ -21,7 +21,7 @@ src_prepare() {
     python-build_src_prepare
 
     # replace still to be done libdir variables
-    edo sed -ie "s:@@EXHERBO_LIBDIR@@:$(get_libdir):g" \
+    edo sed -ie "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
         Lib/sysconfig.py \
         Lib/test/test_site.py
 }
@@ -45,6 +45,6 @@ src_install() {
     python-build_src_install
 
     # remove empty directory
-    edo rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}${SLOT}/lib-old
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}${SLOT}/lib-old
 }
 

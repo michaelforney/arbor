@@ -3,8 +3,6 @@
 # Based in part upon 'tcp-wrappers-7.6-r8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require multilib
-
 MY_PNV="${PNV//-/_}"
 PATCH_VER="1.1"
 SUMMARY="TCP Wrappers"
@@ -64,8 +62,8 @@ src_install() {
     into /
     dolib.a libwrap.a
     newlib.so libwrap.so libwrap.so.0.${PV}
-    dosym libwrap.so.0.${PV} /$(get_libdir)/libwrap.so.0
-    dosym libwrap.so.0 /$(get_libdir)/libwrap.so
+    dosym libwrap.so.0.${PV} /${LIBDIR}/libwrap.so.0
+    dosym libwrap.so.0 /${LIBDIR}/libwrap.so
 
     dodoc BLURB CHANGES DISCLAIMER README* "${FILES}"/hosts.allow.example
 }

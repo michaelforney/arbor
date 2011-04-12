@@ -3,7 +3,7 @@
 # Based in part upon 'gpm-1.20.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib systemd-service
+require systemd-service
 
 SUMMARY="Console-based mouse driver"
 HOMEPAGE="http://www.nico.schottelius.org/software/${PN}"
@@ -20,7 +20,7 @@ DEPENDENCIES="
         sys-devel/bison
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( "--libdir=/$(get_libdir)" "--sysconfdir=/etc/${PN}" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( "--libdir=/${LIBDIR}" "--sysconfdir=/etc/${PN}" )
 DEFAULT_SRC_INSTALL_PARAMS=( EMACS=: ELISP= )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
 

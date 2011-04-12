@@ -30,7 +30,7 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/pam_ldap-185-vers_string.patch )
 
 src_configure() {
     econf \
-        --libdir=/$(get_libdir) \
+        --libdir=/${LIBDIR} \
         --with-ldap-lib=openldap \
         $(option_enable ssl)
 }

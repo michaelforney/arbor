@@ -1,8 +1,6 @@
 # Copyright 2008 Markus Rothe <markus@unixforces.net>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 BASE_TARBALL_PV="0.2"
 SUMMARY="Skeleton filesystem layout"
 HOMEPAGE="http://www.exherbo.org/"
@@ -36,7 +34,7 @@ create_device_node() {
 
 pkg_pretend() {
     local x
-    if [[ $(get_libdir) != lib ]]; then
+    if [[ ${LIBDIR} != lib ]]; then
         for x in {,/usr,/usr/local}/lib; do
             if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
                 die "${x}: Expected a symlink but found a directory"
@@ -63,7 +61,7 @@ pkg_preinst() {
 }
 
 pkg_postinst() {
-    libdir=$(get_libdir)
+    libdir=${LIBDIR}
 
     local x
     # create directory structure. for readability leave out /usr and /var

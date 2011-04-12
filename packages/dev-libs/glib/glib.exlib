@@ -1,7 +1,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require gnome.org multilib
+require gnome.org
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
@@ -23,7 +23,7 @@ export_exlib_phases src_install src_test
 
 glib_src_install() {
     default
-    keepdir "/usr/$(get_libdir)/gio/modules"
+    keepdir "/usr/${LIBDIR}/gio/modules"
 }
 
 glib_src_test() {

@@ -4,7 +4,7 @@
 # Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
 
 SUMMARY="Core file, shell and text utilities expected to be on any system."
 
@@ -25,8 +25,8 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
-    --libdir=/$(get_libdir)
-    --libexecdir=/$(get_libdir)
+    --libdir=/${LIBDIR}
+    --libexecdir=/${LIBDIR}
     --enable-gettext
 )
 DEFAULT_SRC_INSTALL_PARAMS=( DIST_ROOT="${IMAGE}" install-lib install-dev )

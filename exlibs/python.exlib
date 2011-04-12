@@ -4,8 +4,6 @@
 # Based in part upon 'python.eclass' v1.32 from Gentoo, which is:
 #   Copyright 1999-2004 Gentoo Foundation
 
-require multilib
-
 myexparam python_dep=
 
 myexparam -b has_lib=true
@@ -59,7 +57,7 @@ python_get_abi() {
 python_get_libdir() {
     illegal_in_global_scope
 
-    echo -n "/usr/$(get_libdir)/python$(python_get_abi)"
+    echo -n "/usr/${LIBDIR}/python$(python_get_abi)"
 }
 
 # Run without arguments, returns the python site-packages directory.

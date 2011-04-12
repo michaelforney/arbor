@@ -1,8 +1,6 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 export_exlib_phases src_configure src_compile src_install
 
 DEPENDENCIES="
@@ -23,7 +21,7 @@ waf_src_configure() {
     ewaf configure \
         --prefix=/usr/ \
         --bindir=/usr/bin/ \
-        --libdir=/usr/$(get_libdir)/ \
+        --libdir=/usr/${LIBDIR}/ \
         --datadir=/usr/share/ \
         ${WAF_SRC_CONFIGURE_HTMLDIR---htmldir=/usr/share/doc/${PNVR}/html/} \
         "${WAF_SRC_CONFIGURE_PARAMS[@]}" \
