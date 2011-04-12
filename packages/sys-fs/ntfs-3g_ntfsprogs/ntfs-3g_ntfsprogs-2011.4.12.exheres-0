@@ -1,0 +1,68 @@
+# Copyright 2011 Pierre Lejeune <superheron@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ntfs-3g-2011.1.15.exheres-0', which is:
+#     Copyright 2008, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon 'ntfsprogs-2.0.0.exheres-0', which is:
+#     Copyright 2009 Gaute Hope <eg@gaute.vetsj.com>
+#     Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+
+SUMMARY="Read/write NTFS driver (ntfs-3g) and userspace tools (ntfsprogs)"
+DESCRIPTION="
+NTFS-3G is a stable, full-featured, read-write NTFS driver for Linux, Android, Mac OS X, FreeBSD,
+NetBSD, OpenSolaris, QNX, Haiku, and other operating systems. It provides safe handling of the
+Windows XP, Windows Server 2003, Windows 2000, Windows Vista, Windows Server 2008 and Windows 7 NTFS
+file systems.
+"
+BASE_URL="http://www.tuxera.com"
+HOMEPAGE="${BASE_URL}/community/ntfs-3g-download"
+DOWNLOADS="${BASE_URL}/opensource/${PNV}.tgz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    crypto [[ description = [ Enable crypto related code and utilities ] ]]
+    debug
+"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+    build+run:
+        !sys-fs/ntfs-3g [[
+            description = [ ntfs-3g has been merged into this package ]
+            resolution = uninstall-blocked-after
+        ]]
+        !sys-fs/ntfsprogs [[
+            description = [ ntfsprogs has been merged into this package ]
+            resolution = uninstall-blocked-after
+        ]]
+        sys-fs/fuse[>=2.6.0]
+        crypto? (
+            dev-libs/gnutls[>=1.4.4]
+            dev-libs/libgcrypt[>=1.2.2]
+        )
+"
+
+REMOTE_IDS="sourceforge:ntfs-3g"
+
+UPSTREAM_RELEASE_NOTES="${BASE_URL}/community/release-history/"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    '--disable-ldconfig'
+    '--enable-posix-acls'
+    '--enable-xattr-mappings'
+    '--with-fuse=external'
+    '--with-uuid'
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    'crypto'
+    'debug'
+)
+
+src_install() {
+    default
+    insinto /etc/udev/rules.d
+    doins "${FILES}/99-ntfs-3g.rules"
+}
+
