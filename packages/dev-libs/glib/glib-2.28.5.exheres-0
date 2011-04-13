@@ -34,7 +34,8 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/glib-2.24.1-assert-test.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/glib-2.24.1-assert-test.patch
+                              "${FILES}"/glib-fix-message-serialize-invalid-test.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr'
                                '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
