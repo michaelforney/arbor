@@ -53,7 +53,7 @@ src_install() {
 
     local v1=$(ever range 1-2)
     # Fix the tkConfig.sh to eliminate references to the build directory
-    local mylibdir=${LIBDIR} ; mylibdir=${mylibdir//\/}
+    local mylibdir=${LIBDIR//\/}
     edo sed -e "s,^\(TK_BUILD_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \
             -e "s,^\(TK_SRC_DIR='\)${WORK%%/}',\1/usr/${mylibdir}/${PN}${v1}/include'," \
             -e "s,^\(TK_BUILD_STUB_LIB_SPEC='-L\)${WORK%%/},\1/usr/${mylibdir}," \

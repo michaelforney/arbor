@@ -39,9 +39,8 @@ WORK=${WORKBASE}
 multipath-tools_src_prepare() {
     default
 
-    local my_libdir=${LIBDIR}
-    edo sed -i -e '/KRNLLIB/s:/lib/:/'${my_libdir}'/:' Makefile
-    edo sed -i -e '/libudevdir/s:/lib/:/'${my_libdir}'/:' Makefile.inc
+    edo sed -i -e '/KRNLLIB/s:/lib/:/'${LIBDIR}'/:' Makefile
+    edo sed -i -e '/libudevdir/s:/lib/:/'${LIBDIR}'/:' Makefile.inc
 }
 
 multipath-tools_src_compile() {

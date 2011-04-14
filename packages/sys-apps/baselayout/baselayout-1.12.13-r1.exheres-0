@@ -56,9 +56,8 @@ pkg_pretend() {
 }
 
 src_prepare() {
-    libdir=${LIBDIR}
     # Use correct path to filefuncs.so on multilib systems
-    edo sed -e "s:/lib/rcscripts:/${libdir}/rcscripts:g" \
+    edo sed -e "s:/lib/rcscripts:/${LIBDIR}/rcscripts:g" \
         -i "${WORK}"/src/awk/cachedepends.awk \
         -i "${WORK}"/sbin/functions.sh \
         -i "${WORK}"/init.d/halt.sh \
@@ -99,11 +98,11 @@ src_compile() {
         CC="${CC}" \
         LD="${CC} ${LDFLAGS}" \
         CFLAGS="${CFLAGS}" \
-        LIBDIR="${libdir}"
+        LIBDIR="${LIBDIR}"
 }
 
 src_install() {
-    local x rcscripts_dir=/${libdir}/rcscripts
+    local x rcscripts_dir=/${LIBDIR}/rcscripts
 
     dodir /etc/runlevels
     keepdir /etc/runlevels
@@ -142,7 +141,7 @@ src_install() {
     dosym ../../sbin/functions.sh /etc/init.d/functions.sh
 
     edo cd "${WORK}/src"
-    emake DESTDIR="${IMAGE}" LIBDIR="${libdir}" install
+    emake DESTDIR="${IMAGE}" LIBDIR="${LIBDIR}" install
 
     edo rm -rf "${IMAGE}"/dev/pts
     edo rm "${IMAGE}"/etc/modules.autoload.d/kernel-2.4

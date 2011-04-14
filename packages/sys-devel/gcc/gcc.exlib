@@ -134,8 +134,6 @@ src_test_expensive() {
 src_install() {
     default
 
-    local libdir=${LIBDIR}
-
     # Precompiled headers, disable for cross-compiling
     if ! tc-is-cross-compiler ; then
         insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
@@ -157,18 +155,18 @@ src_install() {
     fi
 
     # nuke empty dir if applicable
-    rmdir "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
+    rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
 
     edo pushd "${IMAGE}"
 
     local p
-    for p in usr/${libdir}/*-gdb.py ; do
+    for p in usr/${LIBDIR}/*-gdb.py ; do
         [[ -f ${p} ]] || continue
         [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
 
         # http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
         local p=${p##*/}
-        edo mv "usr/${libdir}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
+        edo mv "usr/${LIBDIR}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
     done
 
     ### slots handling
@@ -183,7 +181,7 @@ src_install() {
     alternatives+=( /usr/bin/cc gcc )
 
     # libraries
-    for x in usr/${libdir}/*.*; do
+    for x in usr/${LIBDIR}/*.*; do
         if [[ -L ${x} ]]; then
             # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
             edo rm "${x}"
@@ -253,7 +251,7 @@ src_install() {
 
     # java
     if ever at_least 4.3 && option java; then
-        for x in usr/${libdir}/security/classpath.security usr/share/java/ecj.jar; do
+        for x in usr/${LIBDIR}/security/classpath.security usr/share/java/ecj.jar; do
             bn=$(basename "${x}")
             ext=${bn#*.}
             edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
@@ -266,9 +264,9 @@ src_install() {
     edo popd
 
     # fix libstdc++.so symlink
-    edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir}
+    edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${LIBDIR} /usr/${LIBDIR}
 
-    for dir in "${IMAGE}"/usr/${libdir}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
+    for dir in "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
         if [[ -d ${dir} ]] ; then
             edo find "${dir}" -type d -empty -delete
         fi
