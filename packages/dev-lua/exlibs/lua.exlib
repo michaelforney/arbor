@@ -1,4 +1,4 @@
-# Copyright 2009 Ali Polatel <alip@exherbo.org>
+# Copyright 2009, 2011 Ali Polatel <alip@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 # A utility exlib for installing Lua modules.
@@ -19,7 +19,7 @@ lua_get_sharedir() {
 
 lua_get_libdir() {
     lua_version
-    echo -n /usr/$(get_libdir)/lua/${LUAVER}
+    echo -n /usr/${LIBDIR}/lua/${LUAVER}
 }
 
 lua_install_module() {
@@ -32,6 +32,6 @@ lua_install_module() {
 lua_install_cmodule() {
     lua_version
 
-    insinto /usr/$(get_libdir)/lua/${LUAVER}
+    insinto /usr/${LIBDIR}/lua/${LUAVER}
     doins "$@"
 }
