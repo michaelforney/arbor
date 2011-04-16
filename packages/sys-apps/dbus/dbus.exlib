@@ -39,9 +39,10 @@ DEPENDENCIES="
         X? ( x11-proto/xproto )
     build+run:
         dev-libs/expat[>=1.95.8]
+        sys-apps/skeleton-filesystem-layout[>=0.5.4]
         group/messagebus
-        user/messagebus
         group/plugdev
+        user/messagebus
         X? (
             x11-libs/libICE
             x11-libs/libSM
@@ -58,9 +59,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --localstatedir=/var
     --enable-inotify
     --enable-xml-docs
+    --with-console-auth-dir=/run/console
     --with-dbus-user=messagebus
     --with-session-socket-dir=/tmp
-    --with-system-socket=/var/run/dbus/system_bus_socket
+    --with-system-pid-file=/run/dbus/pid
+    --with-system-socket=/run/dbus/system_bus_socket
     --with-xml=expat
     --disable-libaudit
     --disable-selinux
@@ -109,7 +112,7 @@ dbus_src_install() {
         [[ -d "${IMAGE}"/usr/share/doc/${PNV}/api ]] && edo rmdir "${IMAGE}"/usr/share/doc/${PNV}/api
     fi
 
-    edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
+    edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/run/dbus.pid</pidfile>,' \
             -i "${IMAGE}"/etc/dbus-1/system.conf
 
     option baselayout && newinitd "${FILES}"/dbus.init-1.0 dbus
@@ -120,8 +123,7 @@ dbus_src_install() {
     exeinto /etc/X11/xinit/xinitrc.d/
     doexe "${FILES}"/30-dbus
 
-    keepdir /var/run/dbus                       \
-            /var/lib/dbus                       \
+    keepdir /var/lib/dbus                       \
             /usr/libexec/dbus-1                 \
             /etc/dbus-1/system.d/               \
             /etc/dbus-1/session.d/              \
@@ -132,5 +134,7 @@ dbus_src_install() {
         insinto /usr/share/doc/${PNVR}/html/
         doins -r doc/*.html
     fi
+
+    edo rmdir "${IMAGE}"/var/run/{dbus,}
 }
 
