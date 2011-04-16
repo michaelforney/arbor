@@ -43,13 +43,13 @@ DEPENDENCIES="
         group/messagebus
         group/plugdev
         user/messagebus
-        X? (
-            x11-libs/libICE
-            x11-libs/libSM
-            x11-libs/libX11
-        )
+        X? ( x11-libs/libICE
+             x11-libs/libSM
+             x11-libs/libX11 )
     recommendation:
-        sys-auth/ConsoleKit
+        sys-auth/ConsoleKit [[
+            description = [ required for access to paths controlled via at_console ]
+        ]]
 "
 
 # Testing code (--enable-tests) disabled since building with tests support
