@@ -2,7 +2,7 @@
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require pam systemd-service
+require pam systemd-service cron-install [ crond=src/crond crontab=src/crontab ]
 
 export_exlib_phases src_install
 
@@ -24,6 +24,7 @@ LICENCES="ISC BSD BSD-2"
 SLOT="0"
 MYOPTIONS="
     anacron [[ description = [ Use anacron in addition to the standard cron ] ]]
+    baselayout
 "
 
 # debianutils required for run-parts a.k.a cron.{daily,hourly}
@@ -50,14 +51,8 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( anacron )
 cronie_src_install() {
     default
 
-    # permissions
-    edo chown root:cron "${IMAGE}"/usr/bin/crontab
-    edo chmod 2755 "${IMAGE}"/usr/bin/crontab
-    edo chown root:wheel "${IMAGE}"/usr/sbin/crond
-    edo chmod 0750 "${IMAGE}"/usr/sbin/crond
-
-    # required keepdirs
-    keepdir /etc/cron.d
+    do_cron_dirs
+    do_cron_exes
 
     if option anacron ; then
         insinto /etc/cron.d
@@ -66,18 +61,14 @@ cronie_src_install() {
         dodoc -r contrib
     fi
 
-    diropts -m0750
-    keepdir /etc/cron.{hourly,daily,weekly,monthly}
-    diropts -m0750 -o root -g cron
-    keepdir /var/spool/cron
-    diropts -m0750
-    keepdir /var/spool/cron/lastrun
-    diropts -m1730 -o root -g cron
-    keepdir /var/spool/cron/crontabs
+    # /etc stuff
+    insinto /etc
+    newins "${FILES}"/crontab-4.1 crontab
 
     # Install the pam file
     newpamd "${WORK}"/pam/crond crond
 
+    option baselayout && newinitd "${FILES}"/cronie.bl1 cronie
     install_systemd_files
 }
 
