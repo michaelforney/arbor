@@ -2,9 +2,9 @@
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require pam systemd-service cron-install [ crond=src/crond crontab=src/crontab ]
+require pam systemd-service cron-install [ crond=src/crond crontab=src/crontab ] alternatives
 
-export_exlib_phases src_install
+export_exlib_phases src_install pkg_postinst
 
 SUMMARY="UNIX cron daemon based on vixie-cron but actually maintained."
 DESCRIPTION="
@@ -70,5 +70,19 @@ cronie_src_install() {
 
     option baselayout && newinitd "${FILES}"/cronie.bl1 cronie
     install_systemd_files
+
+    # alternatives
+    local alternatives=(
+        cron ${PN} 10
+        /usr/bin/crontab ${PN}.crontab
+        /usr/share/man/man5/crontab.5 ${PN}.crontab.5
+        /usr/share/man/man1/crontab.1 ${PN}.crontab.1
+        /usr/share/man/man8/cron.8 ${PN}.cron.8
+    )
+    alternatives_for "${alternatives[@]}"
+}
+
+cronie_pkg_postinst() {
+    alternatives_pkg_postinst
 }
 
