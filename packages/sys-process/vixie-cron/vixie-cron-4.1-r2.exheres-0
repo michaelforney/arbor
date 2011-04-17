@@ -3,7 +3,7 @@
 # Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
-require pam systemd-service cron-install [ crond=cron crontab=crontab ]
+require pam systemd-service cron-install [ crond=cron crontab=crontab ] alternatives
 
 PATCH_VER="1.0"
 
@@ -62,5 +62,19 @@ src_install() {
     # doc stuff
     doman crontab.1 crontab.5 cron.8
     dodoc CHANGES CONVERSION FEATURES MAIL README THANKS
+
+    # alternatives
+    local alternatives=(
+        cron ${PN} 10
+        /usr/bin/crontab ${PN}.crontab
+        /usr/share/man/man5/crontab.5 ${PN}.crontab.5
+        /usr/share/man/man1/crontab.1 ${PN}.crontab.1
+        /usr/share/man/man8/cron.8 ${PN}.cron.8
+    )
+    alternatives_for "${alternatives[@]}"
+}
+
+pkg_postinst() {
+    alternatives_pkg_postinst
 }
 
