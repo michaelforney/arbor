@@ -15,28 +15,27 @@ DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="baselayout pam"
+MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     build+run:
-       pam? ( sys-libs/pam )
+       sys-libs/pam
        group/cron
        user/cron
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${WORKBASE}/${PNV}-gentoo-r4.patch"
-    -p0 "${WORKBASE}/${PNV}-crontab.5.patch"
-    -p0 "${WORKBASE}/${PNV}-commandline.patch"
-    -p1 "${WORKBASE}/${PNV}-basename.patch"
-    -p1 "${WORKBASE}/${PNV}-setuid_check.patch"
-    -p0 "${WORKBASE}/${PNV}-hardlink.patch"
+    -p1 "${WORKBASE}"/${PNV}-gentoo-r4.patch
+    -p0 "${WORKBASE}"/${PNV}-crontab.5.patch
+    -p0 "${WORKBASE}"/${PNV}-commandline.patch
+    -p1 "${WORKBASE}"/${PNV}-basename.patch
+    -p1 "${WORKBASE}"/${PNV}-setuid_check.patch
+    -p0 "${WORKBASE}"/${PNV}-hardlink.patch
+    -p1 "${WORKBASE}"/${PNV}-pam.patch
 )
 
 src_prepare() {
     default
-
-    option pam && expatch -p1 "${WORKBASE}"/${PNV}-pam.patch
 
     edo sed -i -e "s:gcc \(-Wall.*\):${CC} \1 ${CFLAGS}:" \
                -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile
@@ -68,7 +67,7 @@ src_install() {
 
     install_systemd_files
 
-    option pam && newpamd "${FILES}"/pamd.compatible cron
+    newpamd "${FILES}"/pamd.compatible cron
 
     # doc stuff
     doman crontab.1 crontab.5 cron.8
