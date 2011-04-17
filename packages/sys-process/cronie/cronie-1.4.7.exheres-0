@@ -1,63 +1,82 @@
 # Copyright 2011 Nathan McSween
+# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require pam systemd-service
 
-SUMMARY="Cronie is a standard UNIX daemon cron based on the original vixie-cron, but actually
-maintained."
-HOMEPAGE="https://fedorahosted.org/cronie/"
-DOWNLOADS="https://fedorahosted.org/releases/c/r/${PN}/${PNV}.tar.gz"
+SUMMARY="UNIX cron daemon based on vixie-cron but actually maintained."
+DESCRIPTION="
+Cronie contains the standard UNIX daemon crond (vixie-cron) that runs specified
+programs at scheduled times and related tools. It is based on the original cron
+and has security and configuration enhancements like the ability to use PAM,
+inotify and SELinux.
+"
+BASE_URI="https://fedorahosted.org"
+HOMEPAGE="${BASE_URI}/${PN}/"
+DOWNLOADS="${BASE_URI}/releases/${PN:0:1}/${PN:1:1}/${PN}/${PNV}.tar.gz"
+
+BUGS_TO="nwmcsween@gmail.com philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="ISC BSD BSD-2"
 SLOT="0"
-PLATFORMS="~amd64"
-MYOPTIONS="pam systemd"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    anacron [[ description = [ Use anacron in addition to the standard cron ] ]]
+    systemd
+"
 
 # debianutils required for run-parts a.k.a cron.{daily,hourly}
 DEPENDENCIES="
-    build:
     build+run:
-        sys-apps/debianutils
-        pam? ( sys-libs/pam )
+        sys-libs/pam
         group/cron
         user/cron
+    run:
+        sys-apps/debianutils
 "
-
-BUGS_TO="nwmcsween@gmail.com"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     SPOOL_DIR="/var/spool/cron/crontabs"
     --with-daemon_username=cron
     --with-daemon_groupname=cron
     --with-inotify
+    --with-pam
+    --without-audit
+    --without-selinux
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( anacron )
 
 src_install() {
     default
 
     # permissions
-    edo chown root:cron "${IMAGE}/usr/bin/crontab"
-    edo chmod 2755 "${IMAGE}/usr/bin/crontab"
-    edo chown root:wheel "${IMAGE}/usr/sbin/crond"
-    edo chmod 0755 "${IMAGE}/usr/sbin/crond"
-    # required keeps
+    edo chown root:cron "${IMAGE}"/usr/bin/crontab
+    edo chmod 2755 "${IMAGE}"/usr/bin/crontab
+    edo chown root:wheel "${IMAGE}"/usr/sbin/crond
+    edo chmod 0750 "${IMAGE}"/usr/sbin/crond
+
+    # required keepdirs
     keepdir /etc/cron.d
 
-    # /etc/cron.$TIME directory support
-    insinto /etc/cron.d
-    insopts -m0755
-    doins "${WORK}/contrib/dailyjobs"
-    diropts -m0750; keepdir /etc/cron.{hourly,daily,weekly,monthly}
-    diropts -m0750 -o root -g cron; keepdir /var/spool/cron
-    diropts -m0750; keepdir /var/spool/cron/lastrun
-    diropts -m1730 -o root -g cron; keepdir /var/spool/cron/crontabs
+    if option anacron ; then
+        insinto /etc/cron.d
+        insopts -m0755
+        doins contrib/dailyjobs
+        dodoc -r contrib
+    fi
 
-    # misc
-    option pam && newpamd "${WORK}/pam/crond" crond
+    diropts -m0750
+    keepdir /etc/cron.{hourly,daily,weekly,monthly}
+    diropts -m0750 -o root -g cron
+    keepdir /var/spool/cron
+    diropts -m0750
+    keepdir /var/spool/cron/lastrun
+    diropts -m1730 -o root -g cron
+    keepdir /var/spool/cron/crontabs
 
-    emagicdocs
+    # Install the pam file
+    newpamd "${WORK}"/pam/crond crond
 
     install_systemd_files
 }
