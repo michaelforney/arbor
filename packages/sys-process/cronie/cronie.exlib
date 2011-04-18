@@ -62,6 +62,7 @@ cronie_src_install() {
     fi
 
     # /etc stuff
+    insopts -m0644
     insinto /etc
     newins "${FILES}"/crontab-4.1 crontab
 
@@ -84,5 +85,7 @@ cronie_src_install() {
 
 cronie_pkg_postinst() {
     alternatives_pkg_postinst
+
+    nonfatal edo chmod 0644 /etc/crontab || eerror "chmod 0644 /etc/crontab failed"
 }
 
