@@ -161,6 +161,12 @@ vim_src_prepare() {
     # This fixes bug 43885 (20 Mar 2004 agriffis)
     #sed -i 's/ libc\.h / /' "${WORK}"/src/configure.in || die 'libc.h sed failed'
 
+    # GCC 4.6.0 miscompiles vim with -D_FORTIFY_SOURCE=1, which gets forced by
+    # the configure script for any gcc with major version 4 (to work around
+    # a bug that occurs when -D_FORTIFY_SOURCE=2 is set). Force
+    # -D_FORTIFY_SOURCE=0 instead.
+    sed -i 's/-D_FORTIFY_SOURCE=1/-D_FORTIFY_SOURCE=0/g' "${WORK}"/src/configure.in || die 'fortify sed failed'
+
     # if we're vim-7 and USE vim-pager, make the manpager.sh script
     if has vim-pager ${MYOPTIONS} && option vim-pager ; then
         cat <<END > "${WORK}"/runtime/macros/manpager.sh
