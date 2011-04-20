@@ -7,14 +7,17 @@ SCHNARF_PV="$(ever range 1)$(printf "%02d" $(ever range 2))\
 $(printf "%02d" $(ever range 3))\
 $(printf "%02d" $(ever range 4))"
 
+SCHNARF_PV_DOC="$(ever range 1)$(printf "%02d" $(ever range 2))$(printf "%02d" $(ever range 3))00"
+
 require flag-o-matic
 
 SUMMARY="An embedded SQL database engine"
 HOMEPAGE="http://www.sqlite.org/"
 DOWNLOADS="http://www.sqlite.org/${PN}-autoconf-${SCHNARF_PV}.tar.gz
-    doc? ( http://www.sqlite.org/${PN}-doc-${SCHNARF_PV}.zip )"
+    doc? ( http://www.sqlite.org/${PN}-doc-${SCHNARF_PV_DOC}.zip )"
 
 REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_CHANGELOG="${HOMEPAGE}releaselog/$(ever replace_all _).html [[ lang = en ]]"
 
 LICENCES="public-domain"
 SLOT="3"
@@ -48,7 +51,7 @@ src_install() {
 
     if option doc ; then
         insinto /usr/share/doc/${PNVR}/html
-        doins -r "${WORKBASE}"/${PN}-doc-${SCHNARF_PV}/*
+        doins -r "${WORKBASE}"/${PN}-doc-${SCHNARF_PV_DOC}/*
     fi
 }
 
