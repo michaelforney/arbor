@@ -1,0 +1,31 @@
+From cb25842615b96802f9c0e0db2ef194c9e6115d35 Mon Sep 17 00:00:00 2001
+From: Wulf C. Krueger <philantrop@exherbo.org>
+Date: Wed, 20 Apr 2011 22:19:42 +0200
+Subject: [PATCH] Allow creating mount units for /var/lib/nfs/rpc_pipefs and /proc/fs/nfsd.
+
+Mounting /var/lib/nfs/rpc_pipefs and /proc/fs/nfsd is required by rpcbind
+and the NFS server respectively. To depend on them being mounted, systemd
+needs to be allowed to create mount units for both in order to avoid having
+to implement hacks (mounting in ExecStartPre or using shell scripts).
+---
+ src/mount-setup.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+diff --git a/src/mount-setup.c b/src/mount-setup.c
+index 3b97fe4..db5c253 100644
+--- a/src/mount-setup.c
++++ b/src/mount-setup.c
+@@ -64,9 +64,7 @@ static const MountPoint mount_table[] = {
+ 
+ static const char * const ignore_paths[] = {
+         "/selinux",
+-        "/proc/bus/usb",
+-        "/var/lib/nfs/rpc_pipefs",
+-        "/proc/fs/nfsd"
++        "/proc/bus/usb"
+ };
+ 
+ bool mount_point_is_api(const char *path) {
+-- 
+1.7.4.3
+
