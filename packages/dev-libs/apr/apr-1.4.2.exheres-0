@@ -14,7 +14,10 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.3.9-sydbox.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-1.3.9-sydbox.patch 
+    "${FILES}"/${PN}-1.4.2-alias.patch
+)
 
 src_configure() {
     # FIXME: Two more configure tests try to bind 0.0.0.0:0

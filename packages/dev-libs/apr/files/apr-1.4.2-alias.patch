@@ -1,0 +1,14 @@
+diff -p -up apr-1.4.2/include/apr_ring.h.orig apr-1.4.2/include/apr_ring.h
+--- apr-1.4.2/include/apr_ring.h.orig	2010-12-01 17:34:25.278706979 -0200
++++ apr-1.4.2/include/apr_ring.h	2010-12-01 17:34:59.454706961 -0200
+@@ -90,8 +90,8 @@
+  */
+ #define APR_RING_HEAD(head, elem)					\
+     struct head {							\
+-	struct elem *next;						\
+-	struct elem *prev;						\
++	struct elem * volatile next;					\
++	struct elem * volatile prev;					\
+     }
+ 
+ /**
