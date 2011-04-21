@@ -1,19 +1,19 @@
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
 [Unit]
 Description=Miscellaneous basic configurations
 DefaultDependencies=no
 Conflicts=shutdown.target
-Before=shutdown.target emergency.service emergency.target
+Before=shutdown.target emergency.service emergency.target udev.service systemd-logger.socket
 RefuseManualStart=yes
 RefuseManualStop=yes
-Requires=remount-rootfs.service
-After=remount-rootfs.service fsck.target
 
 [Service]
 Type=oneshot
 StandardInput=tty
 RemainAfterExit=yes
-ExecStartPre=/bin/dmesg -n 1
-ExecStart=-/bin/ln -sf /proc/self/mounts /etc/mtab
+ExecStart=/bin/dmesg -n 1
 
 [Install]
 WantedBy=basic.target
