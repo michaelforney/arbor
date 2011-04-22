@@ -1,7 +1,7 @@
 # Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ alpha=true suffix=gz pv="1.99~rc1" ]
+require gnu [ alpha=true suffix=xz pv="$(ever range 1-2)~$(ever range 3)" ]
 
 SUMMARY="GRUB (Grand Unified Boot) bootloader"
 
@@ -13,21 +13,23 @@ UPSTREAM_DOCUMENTATION="
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="device-mapper [[ description = [ Ability to detect and use device-mapper devices ] ]]"
+MYOPTIONS="
+    device-mapper [[ description = [ Ability to detect and use device-mapper devices ] ]]
+    mkfont [[ description = [ Build grub-mkfont which can create GRUB font files ] ]]
+"
 
 # TODO: needs qemu-system-i386
 RESTRICT="test"
 
-# TODO: freetype and unifont are automagic
 DEPENDENCIES="
     build:
         app-arch/lzo:2
-        fonts/unifont
-        media-libs/freetype:2
         sys-apps/help2man [[ note = [ man pages won't get created otherwise resulting in empty man dirs ] ]]
         sys-devel/make
         sys-devel/bison
         device-mapper? ( sys-fs/lvm2 )
+        mkfont? ( fonts/unifont
+                  media-libs/freetype:2 )
     build+run:
         app-arch/xz
         sys-fs/udev
@@ -37,7 +39,6 @@ DEPENDENCIES="
             description = [ Ability to add other OSs automatically to grub.cfg via grub-mkconf ]
         ]]
 "
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-remove-unused-variable.patch" )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "CPP=${CC} -E"
@@ -51,16 +52,14 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     '--disable-mm-debug'
 
     '--disable-werror'
-
-    # TODO: freetype and unifont are automagic
-    '--enable-grub-mkfont'
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'device-mapper' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'device-mapper' 'mkfont grub-mkfont' )
 
 src_install() {
     default
     dodoc "${FILES}"/grub.cfg.example
+    option !mkfont && rmdir "${IMAGE}"/usr/share/grub
 }
 
 pkg_postinst() {
