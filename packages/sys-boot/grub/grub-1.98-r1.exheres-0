@@ -6,7 +6,7 @@ require gnu [ alpha=true suffix=gz pv=${PV} ]
 SUMMARY="GRUB (Grand Unified Boot) bootloader"
 
 UPSTREAM_DOCUMENTATION="
-    http://grub.enbug.org/ [[ description = [ GNU Grub Wiki ] ]]
+    http://grub.enbug.org/             [[ description = [ GNU Grub Wiki ] ]]
     http://grub.enbug.org/TestingOnX86 [[ description = [ Installing Grub 2 on x86 ] ]]
 "
 
@@ -45,5 +45,6 @@ pkg_postinst() {
     elog "device you wish to boot from."
     elog "A sample grub.cfg has been installed into /usr/share/doc/${PNVR}."
     elog "Copy this to /boot/grub and edit it to fit your configuration."
+    elog "Alternatively, you can use the provided grub-mkconfig utility."
 }
 
