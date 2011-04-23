@@ -13,7 +13,7 @@ UPSTREAM_DOCUMENTATION="
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="mkfont [[ description = [ Build grub-mkfont which can create GRUB font files ] ]]"
 
 RESTRICT="test"
 
@@ -23,18 +23,21 @@ DEPENDENCIES="
         sys-apps/help2man [[ note = [ man pages won't get created otherwise resulting in empty man dirs ] ]]
         sys-devel/make
         sys-devel/bison
+        mkfont? ( fonts/unifont
+                  media-libs/freetype:2 )
     build+run:
-        !sys-boot/grub-static [[ note = [ /sbin/grub-install collides ] ]]
+        !sys-boot/grub-static [[ description = [ /sbin/grub-install collides ] resolution = manual ]]
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ --disable-werror )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'mkfont grub-mkfont' )
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 STRIP=/usr/bin/strip )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( DISTLIST )
 
 src_install() {
     default
     dodoc "${FILES}"/grub.cfg.example
-    edo rmdir "${IMAGE}"/usr/share/grub
+    option !mkfont && edo rmdir "${IMAGE}"/usr/share/grub
 }
 
 pkg_postinst() {
