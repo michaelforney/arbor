@@ -1,0 +1,36 @@
+# Copyright 2011 <name>
+# Distributed under the terms of the GNU General Public License v2
+
+require systemd-service
+
+SUMMARY="Generates secure entropy using variances in process TSCs"
+
+HOMEPAGE="http://www.issihosts.com/haveged/"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+# TODO: add baselayout
+MYOPTIONS=""
+
+# TODO: see if gccisms are still included
+DEPENDENCIES="
+    build:
+        sys-devel/gcc"
+
+BUGS_TO="nwmcsween@gmail.com"
+
+REMOTE_IDS="freshmeat:haveged sourceforge:haveded"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/usr/sbin )
+
+# TODO: baselayout
+src_install() {
+    default
+
+    # remove debian init script
+    edo rm -rf "${IMAGE}"/etc
+
+    install_systemd_files
+}
