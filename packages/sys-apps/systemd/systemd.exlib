@@ -116,6 +116,8 @@ systemd_src_prepare() {
     edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
     edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
     edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
 
     autotools_src_prepare
 }
@@ -132,6 +134,8 @@ systemd_src_configure() {
 
 systemd_src_install() {
     default
+
+    dodoc "${FILES}"/README.exherbo
 
     # alternatives
     dodir /sbin
@@ -168,8 +172,7 @@ systemd_src_install() {
     fi
 
     # Install the legacy.conf tmpdirs.d config file.
-    # Systemd does not install it itself if sysv
-    # compatibility is not enabled.
+    # systemd does not install it itself if SysV compatibility is not enabled.
     insinto /etc/tmpfiles.d
     doins "${WORK}"/tmpfiles.d/legacy.conf
 
@@ -210,6 +213,7 @@ EOF
 # Here you configure the *system* locale, i. e. the locale daemons and other non-
 # interactive processes get. *Never* change anything here if you don't know *exactly*
 # what you're doing. For your user's locale, use an /etc/env.d file instead.
+# You must not use LC_ALL here.
 LANG=
 LC_CTYPE=en_US.UTF-8
 LC_NUMERIC=C
@@ -240,15 +244,18 @@ EOF
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
+    keepdir /${LIBDIR}/modules-load.d
 
     # Files in /etc/sysctl.d/?*.conf get read and applied via sysctl. Can be used
     # in combination with sysctl.conf (sysctl.d takes precedence over sysctl.conf).
     keepdir /etc/sysctl.d
+    keepdir /${LIBDIR}/sysctl.d
 
     # Files in /etc/binfmt.d/?*.conf contain a list of binfmt_misc kernel binary
     # format rules. Those are used to configure additional binary formats to register
     # during boot in the kernel.
     keepdir /etc/binfmt.d
+    keepdir /${LIBDIR}/binfmt.d
 
     # From here on, we're creating a basic configuration.
     dodir /etc/systemd/system/basic.target.wants
