@@ -1,36 +1,50 @@
-# Copyright 2011 <name>
+# Copyright 2011 Nathan McSween <nwmcsween@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
 require systemd-service
 
 SUMMARY="Generates secure entropy using variances in process TSCs"
-
-HOMEPAGE="http://www.issihosts.com/haveged/"
+DESCRIPTION="
+haveged is a daemon that feeds the /dev/random pool on Linux using an adaptation
+of the HArdware Volatile Entropy Gathering and Expansion algorithm invented at
+IRISA. The algorithm is self-tuning on machines with cpuid support, and has been
+tested in both 32-bit and 64-bit environments.
+"
+HOMEPAGE="http://www.issihosts.com/${PN}"
 DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+
+BUGS_TO="nwmcsween@gmail.com"
+REMOTE_IDS="freshmeat:${PN} sourceforge:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 # TODO: add baselayout
 MYOPTIONS=""
 
 # TODO: see if gccisms are still included
 DEPENDENCIES="
     build:
-        sys-devel/gcc"
-
-BUGS_TO="nwmcsween@gmail.com"
-
-REMOTE_IDS="freshmeat:haveged sourceforge:haveded"
+        sys-devel/gcc
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/usr/sbin )
+
+src_prepare() {
+    default
+
+    edo sed -e "s:/var\(/run/haveged.pid\):\1:" \
+        -i src/haveged.c
+        -i man/haveged.8
+}
 
 # TODO: baselayout
 src_install() {
     default
 
     # remove debian init script
-    edo rm -rf "${IMAGE}"/etc
+    edo rm "${IMAGE}"/etc/init.d/haveged
+    edo rmdir "${IMAGE}"/etc/{init.d,}
 
     install_systemd_files
 }
