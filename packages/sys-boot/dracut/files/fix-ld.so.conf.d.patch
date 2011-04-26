@@ -1,0 +1,23 @@
+Upstream: Yes, http://git.kernel.org/?p=boot/dracut/dracut.git;a=commitdiff;h=76353076c081ac51647214c5ce910aba027b25db
+
+commit 76353076c081ac51647214c5ce910aba027b25db
+Author: Amadeusz Żołnowski <aidecoe@aidecoe.name>
+Date:   Sat Apr 2 00:45:44 2011 +0200
+
+    dracut: don't fail on empty /etc/ld.so.conf.d/
+
+diff --git a/dracut b/dracut
+index c6605bb..15a5ee5 100755
+--- a/dracut
++++ b/dracut
+@@ -524,7 +524,9 @@ done
+ unset item
+ 
+ # make sure that library links are correct and up to date
+-dracut_install /etc/ld.so.conf /etc/ld.so.conf.d/*
++for f in /etc/ld.so.conf /etc/ld.so.conf.d/*; do
++    [[ -e $f ]] && dracut_install "$f"
++done
+ if ! ldconfig -r "$initdir"; then
+     if [[ $UID = 0 ]]; then
+         derror "ldconfig exited ungracefully"
