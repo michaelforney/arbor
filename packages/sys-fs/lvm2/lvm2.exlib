@@ -24,7 +24,6 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="
     baselayout
-    debug
     dmeventd [[ description = [ DM event daemon to monitor active mapped devices ] ]]
     fsadm [[ description = [ Utility to resize or check filesystem on a device ] ]]
 "
@@ -38,7 +37,8 @@ DEPENDENCIES="
         sys-fs/udev[>=165-r1]
 "
 
-# The tests are expensive, unreliable, they need write access to /dev and /etc and leave stale volumes lingering around if they fail
+# The tests are expensive, unreliable, they need write access to /dev and /etc
+# and leave stale volumes lingering around if they fail
 RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/no-export-dynamic.patch" )
@@ -53,10 +53,15 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-static_link
     --enable-udev_rules
     --enable-udev_sync
+    --with-clvmd-pidfile=/run/clvmd.pid
+    --with-cmirrord-pidfile=/run/cmirrord.pid
+    --with-dmeventd-pidfile=/run/dmeventd.pid
+    --with-default-locking-dir=/run/lock/lvm
+    --with-default-run-dir=/run/lvm
     --with-udevdir=/${LIBDIR}/udev/rules.d
+    --with-usrlibdir=/usr/${LIBDIR}
     --disable-nls
     --disable-selinux
-    --with-usrlibdir=/usr/${LIBDIR}
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
@@ -87,8 +92,8 @@ lvm2_src_install() {
 
     if option baselayout; then
         insinto /${LIBDIR}/rcscripts/addons
-        doins "${FILES}/lvm-start.sh"
-        doins "${FILES}/lvm-stop.sh"
+        doins "${FILES}"/lvm-start.sh
+        doins "${FILES}"/lvm-stop.sh
     fi
 }
 
