@@ -1,6 +1,8 @@
 # Copyright 2011 Ali Polatel <alip@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+
 SUMMARY="Pandora's Box"
 DESCRIPTION="
 Pandora is a ptrace(2) based sandboxing utility for Linux.
@@ -22,6 +24,8 @@ DEPENDENCIES="
 BUGS_TO="alip@exherbo.org"
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
+
+AT_M4DIR=m4
 
 src_test() {
     if ! esandbox check 2>/dev/null; then
