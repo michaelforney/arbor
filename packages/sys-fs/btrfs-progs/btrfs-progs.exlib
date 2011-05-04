@@ -22,6 +22,7 @@ DEPENDENCIES="
 DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS="${CFLAGS}" )
 
 src_prepare() {
+    default
     # btrfs binaries to "/" rather than to "/usr/"
     sed -i -e '/^bindir/s:\$(prefix)/:/s:' Makefile
 }
