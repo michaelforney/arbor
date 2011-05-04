@@ -14,6 +14,7 @@ MYOPTIONS="
     fontconfig fpx graphviz jpeg2000 openexr lcms
     lqr [[ description = [ Support for liquid rescaling (aka seam carving) image resize algorithm. ] ]]
     perl svg tiff truetype xml
+    webp [[ description = [ Support for the Webp image format ] ]]
 "
 
 DEPENDENCIES="
@@ -49,6 +50,7 @@ DEPENDENCIES="
             fonts/corefonts
             media-libs/freetype:2
         )
+        webp? ( media-libs/libwebp )
         xml? ( dev-libs/libxml2[>=2.4.10] )
 "
 
@@ -92,6 +94,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'tiff'
     'truetype freetype'
     'truetype windows-font-dir /usr/share/fonts/X11/fonts/corefonts'
+    'webp'
     'xml'
 )
 
