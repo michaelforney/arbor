@@ -22,6 +22,12 @@ DEPENDENCIES="
         ) [[ description = [ Need xsltproc to build the manual page ] ]]
 "
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    '--bundled-libraries=NONE'
+    '--hates=disable-silent-rules'
+    '--hates=enable-fast-install'
+)
+
 DEFAULT_SRC_INSTALL_EXCLUDE=( release-script.sh )
 
 # FIXME The install target in talloc.mk installs swig files (talloc.i) if swig is found
