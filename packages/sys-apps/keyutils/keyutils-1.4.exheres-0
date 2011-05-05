@@ -1,8 +1,6 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Tools for controlling the key management system in the Linux kernel"
 HOMEPAGE="http://people.redhat.com/~dhowells/keyutils/"
 DOWNLOADS="http://people.redhat.com/~dhowells/${PN}/${PNV}.tar.bz2"
@@ -10,13 +8,11 @@ DOWNLOADS="http://people.redhat.com/~dhowells/${PN}/${PNV}.tar.bz2"
 LICENCES="GPL [[ description = [ applies to the tools ] ]]
           LGPL [[ description = [ applies to the library ] ]]"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
 
-MAKEOPTS="-j1"
-
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 NO_ARLIB=1 LIBDIR="/usr/$(get_libdir)" USRLIBDIR="/usr/$(get_libdir)" )
-DEFAULT_SRC_INSTALL_PARAMS=( NO_ARLIB=1 LIBDIR="/usr/$(get_libdir)" USRLIBDIR="/usr/$(get_libdir)" )
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 NO_ARLIB=1 LIBDIR="/usr/${LIBDIR}" USRLIBDIR="/usr/${LIBDIR}" )
+DEFAULT_SRC_INSTALL_PARAMS=( NO_ARLIB=1 LIBDIR="/usr/${LIBDIR}" USRLIBDIR="/usr/${LIBDIR}" )
 
