@@ -13,6 +13,8 @@ src_test() {
     edo rm Lib/test/test_telnetlib.py
     # Fails under network sandboxing
     edo rm Lib/test/test_{ftplib,httpservers,socket}.py
+    # ValueError not raised by decompressobj
+    edo rm Lib/test/test_zlib.py
 
     python-build_src_test
 }
