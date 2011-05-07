@@ -24,9 +24,11 @@ export_exlib_phases src_install
 bash-completion_src_install() {
     default
 
-    edo mkdir -p "${IMAGE}"/usr/share/bash-completion
-    edo mv "${IMAGE}"/etc/bash_completion.d/* "${IMAGE}"/usr/share/bash-completion
-    edo rmdir "${IMAGE}"/etc/bash_completion.d/
+    if ! ever is_scm; then
+        edo mkdir -p "${IMAGE}"/usr/share/bash-completion
+        edo mv "${IMAGE}"/etc/bash_completion.d/* "${IMAGE}"/usr/share/bash-completion
+        edo rmdir "${IMAGE}"/etc/bash_completion.d/
+    fi
 
     exeinto /etc/bash/bashrc.d
     newexe "${FILES}/bash-completion-1.sh" "bash-completion.sh"
