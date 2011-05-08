@@ -31,7 +31,8 @@ bash-completion_src_install() {
     fi
 
     exeinto /etc/bash/bashrc.d
-    newexe "${FILES}/bash-completion-1.sh" "bash-completion.sh"
+    newexe "${FILES}/bash-completion.sh.eclectic" "bash-completion.sh"
+    edo tail -n +3 "${WORK}/bash_completion.sh" >> "${IMAGE}/etc/bash/bashrc.d/bash-completion.sh"
 
     if [[ -f "${IMAGE}"/etc/profile.d/bash_completion.sh ]] ; then
         edo rm "${IMAGE}"/etc/profile.d/bash_completion.sh
