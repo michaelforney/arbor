@@ -118,12 +118,7 @@ configure_one_multibuild() {
     export CPPFLAGS="$(pkg-config --cflags-only-I libffi) $(multibuild_get_var C ${MULTIBUILD_TARGET} CPPFLAGS)"
     export LDFLAGS="${CFLAGS} -L/usr/${LIBDIR}"
 
-    local dbmliborder
-    if ever at_least 2.7 && option dbm; then
-        option gdbm && dbmliborder="${dbmliborder:+:}gdbm"
-        option berkdb && dbmliborder="${dbmliborder:+:}bdb"
-    fi
-    econf ${DEFAULT_SRC_CONFIGURE_PARAMS[@]} --with-dbmliborder="${dbmliborder}"
+    default
 }
 
 python-build_test_prepare_one_multibuild() {
