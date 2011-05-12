@@ -40,44 +40,18 @@ DEPENDENCIES="
         X? ( x11-proto/xproto )
     build+run:
         dev-libs/expat[>=1.95.8]
+        sys-apps/skeleton-filesystem-layout[>=0.5.4]
         group/messagebus
-        user/messagebus
         group/plugdev
-        X? (
-            x11-libs/libICE
-            x11-libs/libSM
-            x11-libs/libX11
-        )
+        user/messagebus
+        X? ( x11-libs/libICE
+             x11-libs/libSM
+             x11-libs/libX11 )
     recommendation:
-        sys-auth/ConsoleKit
+        sys-auth/ConsoleKit [[
+            description = [ required for access to paths controlled via at_console ]
+        ]]
 "
-
-# Testing code (--enable-tests) disabled since building with tests support
-# creates an insecure (sic upstream), non-production use library
-
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --localstatedir=/var
-    --enable-inotify
-    --enable-xml-docs
-    --with-dbus-user=messagebus
-    --with-session-socket-dir=/tmp
-    --with-system-socket=/var/run/dbus/system_bus_socket
-    --with-xml=expat
-    --disable-libaudit
-    --disable-selinux
-    --disable-tests
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "debug asserts"
-    "debug verbose-mode"
-    "doc doxygen-docs"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "systemd systemdsystemunitdir /$(get_libdir)/systemd/system"
-    "X x"
-)
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     dcop-howto.txt
@@ -85,6 +59,29 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
+
+configure_one_multibuild() {
+    # Testing code (--enable-tests) disabled since building with tests support
+    # creates an insecure (sic upstream), non-production use library
+    econf                                                \
+        --localstatedir=/var                             \
+        --enable-inotify                                 \
+        --enable-xml-docs                                \
+        --with-console-auth-dir=/run/console/            \
+        --with-dbus-user=messagebus                      \
+        --with-session-socket-dir=/tmp                   \
+        --with-system-pid-file=/run/dbus.pid             \
+        --with-system-socket=/run/dbus/system_bus_socket \
+        --with-xml=expat                                 \
+        --disable-libaudit                               \
+        --disable-selinux                                \
+        --disable-tests                                  \
+        $(option_enable debug asserts)                   \
+        $(option_enable debug verbose-mode)              \
+        $(option_enable doc doxygen-docs)                \
+        $(option_with X x)                               \
+        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+}
 
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
@@ -99,11 +96,16 @@ dbus_src_compile() {
     easy-multibuild_src_compile
 }
 
+dbus_src_test() {
+    DBUS_VERBOSE=1 easy-multibuild_src_test
+}
+
 dbus_src_install() {
     easy-multibuild_src_install
 
-    edo sed -e 's,<pidfile>.*</pidfile>,<pidfile>/var/run/dbus.pid</pidfile>,' \
-            -i "${IMAGE}"/etc/dbus-1/system.conf
+    if ! option doc ; then
+        [[ -d "${IMAGE}"/usr/share/doc/${PNVR}/api ]] && edo rmdir "${IMAGE}"/usr/share/doc/${PNVR}/api
+    fi
 
     option baselayout && newinitd "${FILES}"/dbus.init-1.0 dbus
 
@@ -113,8 +115,7 @@ dbus_src_install() {
     exeinto /etc/X11/xinit/xinitrc.d/
     doexe "${FILES}"/30-dbus
 
-    keepdir /var/run/dbus                       \
-            /var/lib/dbus                       \
+    keepdir /var/lib/dbus                       \
             /usr/libexec/dbus-1                 \
             /etc/dbus-1/system.d/               \
             /etc/dbus-1/session.d/              \
@@ -125,8 +126,6 @@ dbus_src_install() {
         insinto /usr/share/doc/${PNVR}/html/
         doins -r doc/*.html
     fi
-}
 
-dbus_src_test() {
-    DBUS_VERBOSE=1 easy-multibuild_src_test
+    edo rmdir "${IMAGE}"/var/run/{dbus,}
 }

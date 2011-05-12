@@ -5,24 +5,4 @@
 require dbus
 
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="systemd"
-
-configure_one_multibuild() {
-    econf                                                      \
-        '--localstatedir=/var'                                 \
-        '--enable-inotify'                                     \
-        '--enable-xml-docs'                                    \
-        '--with-dbus-user=messagebus'                          \
-        '--with-session-socket-dir=/tmp'                       \
-        '--with-system-socket=/var/run/dbus/system_bus_socket' \
-        '--with-xml=expat'                                     \
-        '--disable-libaudit'                                   \
-        '--disable-selinux'                                    \
-        '--disable-tests'                                      \
-        $(option_enable debug asserts)                         \
-        $(option_enable debug verbose-mode)                    \
-        $(option_enable doc doxygen-docs)                      \
-        $(option_with X x)                                     \
-        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
-}
 

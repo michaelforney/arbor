@@ -1,0 +1,38 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Apache portable runtime library"
+HOMEPAGE="http://${PN}.apache.org/"
+DOWNLOADS="mirror://apache/${PN}/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="Apache-2.0"
+SLOT="1"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-1.3.9-sydbox.patch
+    "${FILES}"/${PN}-1.4.2-alias.patch
+)
+
+src_configure() {
+    # FIXME: Two more configure tests try to bind 0.0.0.0:0
+    # Since this is a net-sandboxing mess, we turn it off for now.
+    esandbox disable_net
+#   esandbox allow_net "unix:${WORK}/apr_accept4_test_socket"
+#   esandbox allow_net --connect "unix:${WORK}/apr_accept4_test_socket"
+    default
+#   esandbox disallow_net "unix:${WORK}/apr_accept4_test_socket"
+#   esandbox disallow_net --connect "unix:${WORK}/apr_accept4_test_socket"
+    esandbox enable_net
+
+    # Make sure we use the system libtool
+    edo sed -i -e 's,$(apr_builddir)/libtool,/usr/bin/libtool,' "${WORK}"/build/apr_rules.mk
+    edo sed -i -e 's,${installbuilddir}/libtool,/usr/bin/libtool,' "${WORK}"/apr-1-config
+    edo rm -f "${WORK}"/libtool
+}
+

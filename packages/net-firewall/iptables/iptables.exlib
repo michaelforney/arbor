@@ -1,7 +1,7 @@
 # Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib systemd-service
+require systemd-service
 
 export_exlib_phases src_install
 
@@ -29,7 +29,7 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--sbindir=/sbin"
-    "--libexecdir=/$(get_libdir)"
+    "--libexecdir=/${LIBDIR}"
     "--without-kernel"
     "--enable-devel"
     "--enable-libipq"

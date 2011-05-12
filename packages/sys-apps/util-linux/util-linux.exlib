@@ -31,14 +31,14 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
-# --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
+    # --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
     econf \
+        --libdir=/${LIBDIR} \
         --enable-cramfs \
         --enable-libblkid \
         --enable-libmount \
         --enable-nls \
         --enable-partx \
-        --libdir=/"${LIBDIR}" \
         --with-pam \
         --without-selinux \
         --without-utempter

@@ -3,7 +3,7 @@
 # Based in part upon 'shadow-4.1.2-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib pam
+require pam
 
 SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
@@ -44,7 +44,7 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 src_prepare() {
     default
 
-    edo sed -i -e "s:@LIBDIR@:$(get_libdir):" etc/login.defs
+    edo sed -i -e "s:@LIBDIR@:${LIBDIR}:" etc/login.defs
 }
 
 src_install() {
@@ -57,7 +57,7 @@ src_install() {
     #   Currently, libshadow.a is for internal use only, so if you see
     #   -lshadow in a Makefile of some other package, it is safe to
     #   remove it.
-    edo rm -f "${IMAGE}"/{,usr/}$(get_libdir)/lib{misc,shadow}.{a,la}
+    edo rm -f "${IMAGE}"/{,usr/}${LIBDIR}/lib{misc,shadow}.{a,la}
 
     insinto /etc
     insopts -m0600

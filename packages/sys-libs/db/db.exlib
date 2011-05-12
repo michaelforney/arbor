@@ -5,7 +5,7 @@
 MY_PV=${PV%_p*}
 PATCH_LEVEL=${PNV##*_p}
 
-require multilib alternatives
+require alternatives
 
 export_exlib_phases src_prepare src_test_expensive src_install
 
@@ -41,7 +41,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-java
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( tcl 'tcl test' )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcl tcl /usr/$(get_libdir)" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcl tcl /usr/${LIBDIR}" )
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
 db_src_prepare() {
@@ -84,9 +84,9 @@ db_src_install() {
         edo rm -r "${IMAGE}"/usr/share
     fi
 
-    edo rm "${IMAGE}"/usr/$(get_libdir)/libdb{,_cxx}{.so,.a,-$(ever major).so}
+    edo rm "${IMAGE}"/usr/${LIBDIR}/libdb{,_cxx}{.so,.a,-$(ever major).so}
 
-    option tcl && edo rm "${IMAGE}"/usr/$(get_libdir)/libdb_tcl.so
+    option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.so
 
     local alternatives=() replace_me
     edo pushd "${IMAGE}"
@@ -106,14 +106,14 @@ db_src_install() {
 
     # Libraries,    /usr/lib/lib*.*                 -> /usr/lib/lib*-${SLOT}.*
     replace_me=-${SLOT}
-    for src in usr/$(get_libdir)/lib*${replace_me}.* ; do
+    for src in usr/${LIBDIR}/lib*${replace_me}.* ; do
         target=${src/${replace_me}}
         alternatives+=( /${target} ${src##*/} )
     done
 
     # Libraries,    /usr/lib/lib*-$(ever major).so   -> /usr/lib/lib*-${SLOT}.so
     replace_me=-$(ever major)
-    for src in usr/$(get_libdir)/libdb{,_cxx}${replace_me}.so ; do
+    for src in usr/${LIBDIR}/libdb{,_cxx}${replace_me}.so ; do
         target=${src/${replace_me}/-${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done

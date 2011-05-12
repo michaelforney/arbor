@@ -39,7 +39,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 src_install() {
     easy-multibuild_src_install
 
-    # Move libpcre to /$(get_libdir) to keep grep and thus baselayout working
+    # Move libpcre to /${LIBDIR} to keep grep and thus baselayout working
     # without requiring /usr to be mounted
     edo cd "${IMAGE}"/usr/${LIBDIR}
     dodir /${LIBDIR}

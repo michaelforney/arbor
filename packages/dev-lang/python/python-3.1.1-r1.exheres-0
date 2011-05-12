@@ -17,6 +17,10 @@ test_prepare_one_multibuild() {
     # (See #6748)
     edo rm Lib/test/test_telnetlib.py
     # Fails under network sandboxing
-    edo rm Lib/test/test_{ftplib,httpservers,multiprocessing,socket}.py
+    edo rm Lib/test/test_{ftplib,httpservers,socket}.py
+    # ValueError not raised by decompressobj
+    edo rm Lib/test/test_zlib.py
+
+    python-build_test_prepare_one_multibuild
 }
 

@@ -107,6 +107,9 @@ DEPENDENCIES="
         sys-apps/net-tools [[
             description = [ Required by the iSCSI and debug module for hostname and netstat ]
         ]]
+        sys-libs/libcap [[
+            description = [ Required by the caps module for initramfs which drops capabilities ]
+        ]]
         virtual/syslog [[
             description = [ Support for logging to a remote server with the syslog module ]
         ]]
@@ -146,5 +149,8 @@ EOF
     fi
 
     keepdir /etc/dracut.conf.d
+
+    insinto /etc/logrotate.d/
+    newins dracut.logrotate dracut
 }
 

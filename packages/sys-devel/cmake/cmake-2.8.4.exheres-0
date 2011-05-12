@@ -1,0 +1,89 @@
+# Copyright 2008 Wulf Krueger <philantrop@exherbo.org>
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require elisp-optional [ source_directory=Docs ]
+
+SUMMARY="Cross platform Make"
+HOMEPAGE="http://www.cmake.org/"
+DOWNLOADS="http://www.cmake.org/files/v$(ever range 1-2)/${PNV}.tar.gz"
+
+UPSTREAM_CHANGELOG="http://www.cmake.org/files/v$(ever range 1-2)/CMakeChangeLog-${PV}"
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="CMake"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="qt4 vim-syntax"
+
+DEPENDENCIES="
+    build+run:
+        app-arch/bzip2
+        app-arch/libarchive
+        net-misc/curl[>=7.16.4][ssl(+)]
+        dev-libs/expat[>=2.0.1]
+        dev-libs/libxml2[>=2.6.28]
+        qt4? ( x11-libs/qt:4 )
+        vim-syntax? (
+            || (
+                app-editors/vim
+                app-editors/gvim
+            )
+        )
+"
+
+VIMFILE="${PN}.vim"
+
+DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/remove-test-failure-submits-via-network.patch" )
+
+src_prepare() {
+    default
+
+    if option qt4; then
+        sed -i -e '/Icon/ s/\.png$//' Source/QtDialog/CMake.desktop
+    fi
+}
+
+src_configure() {
+    edo ./bootstrap \
+        --parallel=${EXJOBS:-1} \
+        --$(option qt4 || echo "no-")qt-gui \
+        --system-libs \
+        --prefix=/usr \
+        --docdir=/share/doc/${PNVR} \
+        --datadir=/share/${PN} \
+        --mandir=/share/man
+}
+
+src_compile() {
+    default
+    elisp-optional_src_compile
+}
+
+src_test() {
+    # Setting DISPLAY breaks qtwrapping test if Qt3 is installed, #188
+    export DISPLAY=
+
+    default
+}
+
+src_install() {
+    default
+
+    elisp-optional_src_install
+
+    if option vim-syntax; then
+        insinto /usr/share/vim/vimfiles/syntax
+        doins "${WORK}"/Docs/cmake-syntax.vim
+
+        insinto /usr/share/vim/vimfiles/indent
+        doins "${WORK}"/Docs/cmake-indent.vim
+
+        insinto /usr/share/vim/vimfiles/ftdetect
+        doins "${FILES}/${VIMFILE}"
+    fi
+}
+

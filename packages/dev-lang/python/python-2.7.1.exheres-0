@@ -14,38 +14,35 @@ DEPENDENCIES+="
 
 DEFAULT_SRC_CONFIGURE_PARAMS+=( '--with-system-expat' )
 
-prepare_prepare_one_multibuild() {
-    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}"
-
+prepare_one_multibuild() {
     # support autoconf versions other than 2.65
-    edo sed -ie '8,14d' configure.in
+    edo sed -i -e '8,14d' configure.in
 
-    python-build_src_prepare
+    python-build_prepare_one_multibuild
 
     # replace still to be done libdir variables
-    edo sed -ie "s:@@EXHERBO_LIBDIR@@:$(get_libdir):g" \
+    edo sed -ie "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
         Lib/sysconfig.py \
         Lib/test/test_site.py
 }
 
 test_prepare_one_multibuild() {
-    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}"
+    # for test_ssl
+    esandbox allow_net --connect "inet:127.0.0.1@0"
 
-    # strange file access wishes
-    edo rm Lib/test/test_socket.py
+    # needed for test_socket
+    esandbox allow_net --connect "inet:127.0.0.1@80"
+    esandbox allow_net --connect "inet6:::1@80"
+    esandbox allow_net "unix-abstract:python-test-hello"
+    esandbox allow_net "unix-abstract:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
 
-    # problems with path resolution
-    edo rm Lib/test/test_distutils.py
+    python-build_test_prepare_one_multibuild
+}
 
-    esandbox allow_net "unix:${TEMP}/pymp-*/listener-*"
+install_one_multibuild() {
+    python-build_install_one_multibuild
 
-    # FIXME: Binding to 0.0.0.0 is bad mmkay? -alip
-    esandbox allow_net "inet:0.0.0.0@0"
-    esandbox allow_net "inet6:::@0"
-    esandbox allow_net --connect "inet:0.0.0.0@0"
-
-    # TODO: not sure about the port range, use passive ports
-    esandbox allow_net "inet:0.0.0.0@1024-65535"
-    esandbox allow_net --connect "inet:127.0.0.1@1024-65535"
+    # remove empty directory
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}${SLOT}/lib-old
 }
 

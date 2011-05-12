@@ -4,7 +4,7 @@
 # Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs multilib versionator alternatives gnu [ subdir=${PNV} ]
+require toolchain-funcs versionator alternatives gnu [ subdir=${PNV} ]
 
 SUMMARY="GNU Compiler Collection"
 
@@ -189,6 +189,7 @@ src_install() {
             [[ -f ${x} ]] || continue
             [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
 
+            # http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
             local x=${x##*/}
             edo mv "usr/${libdir}/${x}" "usr/share/gdb/python/auto-load/${x%-gdb.py}"
         done

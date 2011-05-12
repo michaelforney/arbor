@@ -49,7 +49,7 @@ install_one_multibuild() {
     dosym /usr/bin/tclsh{${v1},}
 
     # Fix the tclConfig.sh to eliminate references to the build directory
-    local mylibdir=${LIBDIR} ; mylibdir=${mylibdir//\/}
+    local mylibdir=${LIBDIR//\/}
     edo sed -e "s,^TCL_BUILD_LIB_SPEC='-L.*/unix,TCL_BUILD_LIB_SPEC='-L$/usr/${mylibdir}," \
             -e "s,^TCL_SRC_DIR='.*',TCL_SRC_DIR='/usr/${mylibdir}/${PN}${v1}/include'," \
             -e "s,^TCL_BUILD_STUB_LIB_SPEC='-L.*/unix,TCL_BUILD_STUB_LIB_SPEC='-L/usr/${mylibdir}," \

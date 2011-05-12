@@ -111,15 +111,15 @@ subversion_src_install() {
         fixlocalpod
 
         # We don't need packlists
-        edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
+        edo find "${IMAGE}/usr/${LIBDIR}" -type f -name .packlist -delete
     fi
 
     if option python; then
-        emake DESTDIR="${IMAGE}" DISTUTIL_PARAM="--prefix=${IMAGE}" LD_LIBRARY_PATH="-L${IMAGE}/usr/$(get_libdir)" install-swig-py
+        emake DESTDIR="${IMAGE}" DISTUTIL_PARAM="--prefix=${IMAGE}" LD_LIBRARY_PATH="-L${IMAGE}/usr/${LIBDIR}" install-swig-py
 
         dodir $(python_get_sitedir)
-        edo mv "${IMAGE}"/usr/$(get_libdir)/svn-python/{,lib}svn "${IMAGE}"/$(python_get_sitedir)
-        edo rm -rf "${IMAGE}"/usr/$(get_libdir)/svn-python
+        edo mv "${IMAGE}"/usr/${LIBDIR}/svn-python/{,lib}svn "${IMAGE}"/$(python_get_sitedir)
+        edo rm -rf "${IMAGE}"/usr/${LIBDIR}/svn-python
     fi
 
     if option ruby; then

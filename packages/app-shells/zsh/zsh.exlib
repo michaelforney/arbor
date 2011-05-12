@@ -3,8 +3,6 @@
 # Based in part upon 'zsh-4.3.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib
-
 export_exlib_phases pkg_pretend src_configure src_test src_install
 
 myexparam -b docs=true
@@ -60,7 +58,7 @@ zsh_pkg_pretend() {
 zsh_src_configure() {
     econf \
         --bindir=/bin \
-        --libdir=/usr/$(get_libdir) \
+        --libdir=/usr/${LIBDIR} \
         --htmldir=/usr/share/doc/${PNVR}/html \
         --enable-etcdir=/etc/zsh \
         --enable-fndir=/usr/share/zsh/${PV%_*}/functions \

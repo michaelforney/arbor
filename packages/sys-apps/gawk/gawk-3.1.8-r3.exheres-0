@@ -2,7 +2,7 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu alternatives
+require gnu alternatives
 
 SUMMARY="GNU awk implementation"
 
@@ -56,7 +56,7 @@ src_install() {
 
     if option baselayout; then
         cd "${WORKBASE}"/filefuncs
-        nonfatal emake DESTDIR="${IMAGE}" LIBDIR=$(get_libdir) install || die "filefuncs emake install failed"
+        nonfatal emake DESTDIR="${IMAGE}" LIBDIR=${LIBDIR} install || die "filefuncs emake install failed"
     fi
 
     alternatives_for awk ${PN} 5 \

@@ -9,7 +9,7 @@
 
 MY_PVM=$(ever range 1-3)
 
-require multilib alternatives flag-o-matic
+require alternatives flag-o-matic
 
 export_exlib_phases src_unpack src_prepare src_configure src_test src_install
 
@@ -58,7 +58,7 @@ perl-5_src_prepare() {
 perl-5_src_configure() {
     # Binaries are installed to /usr/bin/, with ${MY_PVM} appended
     # Alternatives manages executables in /usr/bin/
-    # Libraries go into /usr/$(get_libdir)/${PN}5/${MY_PVM}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
+    # Libraries go into /usr/${LIBDIR}/${PN}5/${MY_PVM}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
     # `man 1` are installed with a version
 
     # -Dfoo = define foo, -Ufoo = undefine foo.
@@ -81,12 +81,12 @@ perl-5_src_configure() {
         -Doptimize="${CFLAGS}" \
         -Darchname="${CHOST%%-*}-linux" \
         -Dlibperl="libperl.so.1.${MY_PVM}" \
-        -Dprivlib="/usr/$(get_libdir)/perl5/${MY_PVM}" \
-        -Darchlib="/usr/$(get_libdir)/perl5/${MY_PVM}/$archname" \
-        -Dsitelib="/usr/$(get_libdir)/perl5/site_perl/${MY_PVM}" \
-        -Dsitearch="/usr/$(get_libdir)/perl5/site_perl/${MY_PVM}/$archname" \
-        -Dvendorlib="/usr/$(get_libdir)/perl5/vendor_perl/${MY_PVM}" \
-        -Dvendorarch="/usr/$(get_libdir)/perl5/vendor_perl/${MY_PVM}/$archname" \
+        -Dprivlib="/usr/${LIBDIR}/perl5/${MY_PVM}" \
+        -Darchlib="/usr/${LIBDIR}/perl5/${MY_PVM}/$archname" \
+        -Dsitelib="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}" \
+        -Dsitearch="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}/$archname" \
+        -Dvendorlib="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}" \
+        -Dvendorarch="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}/$archname" \
         -Uinstallusrbinperl= \
         -Duseshrplib \
         -Dmksymlinks \
@@ -125,7 +125,7 @@ perl-5_src_install() {
     default
 
     # Library symlinks
-    local perllibdir="/usr/$(get_libdir)/${PN}5/${MY_PVM}/${CHOST%%-*}-linux/CORE/"
+    local perllibdir="/usr/${LIBDIR}/${PN}5/${MY_PVM}/${CHOST%%-*}-linux/CORE/"
     dosym ${perllibdir}/libperl.so.1{.${MY_PVM},}
     dosym ${perllibdir}/libperl.so{.1,}
 
@@ -153,10 +153,10 @@ perl-5_src_install() {
         edo mv "${manpage}" "${manpage/%.1/-${MY_PVM}.1}"
     done
 
-    keepdir /usr/$(get_libdir)/${PN}5/{site,vendor}_perl/${MY_PVM}/${CHOST%%-*}-linux
+    keepdir /usr/${LIBDIR}/${PN}5/{site,vendor}_perl/${MY_PVM}/${CHOST%%-*}-linux
 
     # We don't need packlists
-    edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
+    edo find "${IMAGE}/usr/${LIBDIR}" -type f -name .packlist -delete
 
     # Save a list of what executables & man-pages we're installing
     edo cd "${IMAGE}"

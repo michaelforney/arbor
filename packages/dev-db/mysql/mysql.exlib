@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild systemd-service
+require systemd-service easy-multibuild
 
 export_exlib_phases pkg_pretend src_install # src_test pkg_config
 
@@ -120,7 +120,7 @@ mysql_src_install() {
     edo chmod 755 "${IMAGE}"/var/run/mysqld
 
     hereenvd 46mysql <<EOF
-LDPATH=/usr/$(get_libdir)/${PN}
+LDPATH=/usr/${LIBDIR}/${PN}
 EOF
 
     insinto /etc/logrotate.d

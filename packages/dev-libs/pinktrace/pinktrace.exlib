@@ -1,4 +1,4 @@
-# Copyright 2010 Ali Polatel <alip@exherbo.org>
+# Copyright 2010, 2011 Ali Polatel <alip@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases src_test
@@ -30,7 +30,7 @@ UPSTREAM_DOCUMENTATION="
 "
 
 src_test() {
-    if ! sydboxcheck 2>/dev/null; then
+    if ! esandbox check 2>/dev/null; then
         default
     else
         elog "Not running tests due to ptrace limitations"

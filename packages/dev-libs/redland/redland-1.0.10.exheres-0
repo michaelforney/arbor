@@ -3,7 +3,7 @@
 # Based in part upon 'redland-1.0.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ deps_var=autotools_dependencies supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require autotools [ deps_var=autotools_dependencies supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="High-level interface for the Resource Description Framework"
 HOMEPAGE="http://librdf.org/"
@@ -78,7 +78,7 @@ src_install() {
     default
 
     if ! option mysql && ! option postgresql && ! option sqlite && ! option virtuoso; then
-        edo rmdir "${IMAGE}"/usr/$(get_libdir)/redland
+        edo rmdir "${IMAGE}"/usr/${LIBDIR}/redland
     fi
 }
 

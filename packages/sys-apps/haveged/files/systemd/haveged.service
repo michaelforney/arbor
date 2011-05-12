@@ -1,0 +1,13 @@
+# Copyright 2011 Nathan McSween <nwmcsween@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=HAVEGED entropy daemon
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/haveged -w 1024 -v 1
+PIDFile=/run/haveged.pid
+
+[Install]
+WantedBy=multi-user.target

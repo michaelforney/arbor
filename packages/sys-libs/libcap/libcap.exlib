@@ -1,9 +1,9 @@
-# Copyright 2009 Wulf C. Krueger
+# Copyright 2009-2011 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'libcap-2.08-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib pam
+require pam
 
 export_exlib_phases src_prepare src_compile src_install
 
@@ -13,19 +13,21 @@ DOWNLOADS="mirror://kernel/linux/libs/security/linux-privs/${PN}${PV:0:1}/${PNV}
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-MYOPTIONS="pam"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         sys-kernel/linux-headers
     build+run:
         sys-apps/attr
-        pam? ( sys-libs/pam )
+        sys-libs/pam
 "
 
-DEFAULT_SRC_INSTALL_PARAMS=( lib=$(get_libdir) )
+DEFAULT_SRC_INSTALL_PARAMS=( lib=${LIBDIR} RAISE_SETFCAP=no )
 
 libcap_src_prepare() {
+    default
+
     edo sed -f - -i Make.Rules <<'EOF'
     /^\(AR\|CC\|CFLAGS\|LDFLAGS\|RANLIB\) :=/{
         s|:=|?=|;
@@ -35,7 +37,7 @@ EOF
 }
 
 libcap_src_compile() {
-    export PAM_CAP=$(option pam && echo yes || echo no)
+    export PAM_CAP=yes
 
     default
 }
@@ -43,10 +45,8 @@ libcap_src_compile() {
 libcap_src_install() {
     default
 
-    if option pam ; then
-       dopammod pam_cap/pam_cap.so
-       dopamsecurity '' pam_cap/capability.conf
-    fi
+    dopammod pam_cap/pam_cap.so
+    dopamsecurity '' pam_cap/capability.conf
 
     dodoc doc/capability.notes
 }

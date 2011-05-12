@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PNV="${PNV/-/_}"
-require multilib sourceforge [ pnv="${MY_PNV}_src_all" ]
+require sourceforge [ pnv="${MY_PNV}_src_all" ]
 
 SUMMARY="A UNIX port of 7z"
 
@@ -23,7 +23,7 @@ src_prepare() {
             -e "/^ALLFLAGS/s:-s::" \
             -e "/^CXX/s:$: ${CXXFLAGS}:" \
             -e "/^CC/s:$: ${CFLAGS}:" \
-            -e "/^DEST_SHARE/s:lib/:$(get_libdir)/:" \
+            -e "/^DEST_SHARE/s:lib/:${LIBDIR}/:" \
             -e "/^DEST_MAN/s:man:share/&:" \
             -e "/Rar/d" \
             -i makefile*
@@ -40,12 +40,12 @@ src_install() {
 
     herebin 7z <<EOF
 #!/bin/bash
-exec /usr/$(get_libdir)/${PN}/\${0##*/} "\${@}"
+exec /usr/${LIBDIR}/${PN}/\${0##*/} "\${@}"
 EOF
     dosym /usr/bin/7z /usr/bin/7za
     dosym /usr/bin/7z /usr/bin/7zr
 
-    edo rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}/Codecs
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/Codecs
     edo find "${IMAGE}" -type f -iname "*License*" -o -iname "*copying*" -delete
 }
 

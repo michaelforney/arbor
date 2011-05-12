@@ -3,7 +3,7 @@
 # Based in part upon 'c-client-2007e.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-require flag-o-matic multilib
+require flag-o-matic
 
 MY_PNV=imap-${PV}
 SUMMARY="UW IMAP c-client library"
@@ -62,7 +62,7 @@ src_install() {
 
     # Library binary
     dolib.a c-client/c-client.a
-    dosym c-client.a /usr/$(get_libdir)/libc-client.a
+    dosym c-client.a /usr/${LIBDIR}/libc-client.a
     dolib.so c-client/libc-client.so.1.0.0
 
     # Headers

@@ -3,7 +3,7 @@
 # Based in part upon 'sysfsutils-2.1.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib sourceforge [ suffix=tar.gz project=linux-diag ]
+require sourceforge [ suffix=tar.gz project=linux-diag ]
 
 SUMMARY="System Utilities Based on Sysfs"
 
@@ -15,7 +15,7 @@ MYOPTIONS=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --hates=docdir
-    --libdir=/$(get_libdir)
+    --libdir=/${LIBDIR}
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( docs/libsysfs.txt )
 

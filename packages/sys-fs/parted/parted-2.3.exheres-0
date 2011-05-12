@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib gnu [ suffix=xz ]
+require gnu [ suffix=xz ]
 
 SUMMARY="Create, destroy, resize, check, copy partitions and file systems"
 
@@ -24,7 +24,7 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-Werror
     --enable-nls
-    --with-readline=/$(get_libdir)
+    --with-readline=/${LIBDIR}
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( device-mapper )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/{API,FAT,USER.jp} )

@@ -1,0 +1,142 @@
+From 875687407a70df24cf7c850a2f325072bd4d8103 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <bl4sph3my@online.de>
+Date: Sun, 6 Mar 2011 16:04:12 +0100
+Subject: [PATCH] disable tests which bind 0.0.0.0
+Upstream: no
+
+---
+ Lib/test/test_ftplib.py  |   32 ++++++++++++++++----------------
+ Lib/test/test_socket.py  |   36 ++++++++++++++++++------------------
+ Lib/test/test_urllib2.py |   12 ++++++------
+ 3 files changed, 40 insertions(+), 40 deletions(-)
+
+diff --git a/Lib/test/test_ftplib.py b/Lib/test/test_ftplib.py
+index 1c2ceeb..a16e30f 100644
+--- a/Lib/test/test_ftplib.py
++++ b/Lib/test/test_ftplib.py
+@@ -350,10 +350,10 @@ class TestFTPClass(TestCase):
+         self.client.dir(lambda x: l.append(x))
+         self.assertEqual(''.join(l), LIST_DATA.replace('\r\n', ''))
+ 
+-    def test_makeport(self):
+-        self.client.makeport()
+-        # IPv4 is in use, just make sure send_eprt has not been used
+-        self.assertEqual(self.server.handler.last_received_cmd, 'port')
++#    def test_makeport(self):
++#        self.client.makeport()
++#        # IPv4 is in use, just make sure send_eprt has not been used
++#        self.assertEqual(self.server.handler.last_received_cmd, 'port')
+ 
+     def test_makepasv(self):
+         host, port = self.client.makepasv()
+@@ -378,9 +378,9 @@ class TestIPv6Environment(TestCase):
+     def test_af(self):
+         self.assertEqual(self.client.af, socket.AF_INET6)
+ 
+-    def test_makeport(self):
+-        self.client.makeport()
+-        self.assertEqual(self.server.handler.last_received_cmd, 'eprt')
++#    def test_makeport(self):
++#        self.client.makeport()
++#        self.assertEqual(self.server.handler.last_received_cmd, 'eprt')
+ 
+     def test_makepasv(self):
+         host, port = self.client.makepasv()
+@@ -388,15 +388,15 @@ class TestIPv6Environment(TestCase):
+         conn.close()
+         self.assertEqual(self.server.handler.last_received_cmd, 'epsv')
+ 
+-    def test_transfer(self):
+-        def retr():
+-            received = []
+-            self.client.retrbinary('retr', received.append)
+-            self.assertEqual(''.join(received), RETR_DATA)
+-        self.client.set_pasv(True)
+-        retr()
+-        self.client.set_pasv(False)
+-        retr()
++#    def test_transfer(self):
++#        def retr():
++#            received = []
++#            self.client.retrbinary('retr', received.append)
++#            self.assertEqual(''.join(received), RETR_DATA)
++#        self.client.set_pasv(True)
++#        retr()
++#        self.client.set_pasv(False)
++#        retr()
+ 
+ 
+ class TestTimeouts(TestCase):
+diff --git a/Lib/test/test_socket.py b/Lib/test/test_socket.py
+index 3874a0f..200b6b3 100644
+--- a/Lib/test/test_socket.py
++++ b/Lib/test/test_socket.py
+@@ -465,24 +465,24 @@ class GeneralModuleTests(unittest.TestCase):
+ 
+     # XXX The following don't test module-level functionality...
+ 
+-    def testSockName(self):
+-        # Testing getsockname().  Use a temporary socket to elicit an unused
+-        # ephemeral port that we can use later in the test.
+-        tempsock = socket.socket()
+-        tempsock.bind(("0.0.0.0", 0))
+-        (host, port) = tempsock.getsockname()
+-        tempsock.close()
+-        del tempsock
+-
+-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-        sock.bind(("0.0.0.0", port))
+-        name = sock.getsockname()
+-        # XXX(nnorwitz): http://tinyurl.com/os5jz seems to indicate
+-        # it reasonable to get the host's addr in addition to 0.0.0.0.
+-        # At least for eCos.  This is required for the S/390 to pass.
+-        my_ip_addr = socket.gethostbyname(socket.gethostname())
+-        self.assert_(name[0] in ("0.0.0.0", my_ip_addr), '%s invalid' % name[0])
+-        self.assertEqual(name[1], port)
++#    def testSockName(self):
++#        # Testing getsockname().  Use a temporary socket to elicit an unused
++#        # ephemeral port that we can use later in the test.
++#        tempsock = socket.socket()
++#        tempsock.bind(("0.0.0.0", 0))
++#        (host, port) = tempsock.getsockname()
++#        tempsock.close()
++#        del tempsock
++#
++#        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
++#        sock.bind(("0.0.0.0", port))
++#        name = sock.getsockname()
++#        # XXX(nnorwitz): http://tinyurl.com/os5jz seems to indicate
++#        # it reasonable to get the host's addr in addition to 0.0.0.0.
++#        # At least for eCos.  This is required for the S/390 to pass.
++#        my_ip_addr = socket.gethostbyname(socket.gethostname())
++#        self.assert_(name[0] in ("0.0.0.0", my_ip_addr), '%s invalid' % name[0])
++#        self.assertEqual(name[1], port)
+ 
+     def testGetSockOpt(self):
+         # Testing getsockopt()
+diff --git a/Lib/test/test_urllib2.py b/Lib/test/test_urllib2.py
+index 65ad8e3..5ff695a 100644
+--- a/Lib/test/test_urllib2.py
++++ b/Lib/test/test_urllib2.py
+@@ -695,12 +695,12 @@ class HandlerTests(unittest.TestCase):
+             self.assertEqual(respurl, url)
+ 
+         for url in [
+-            "file://localhost:80%s" % urlpath,
+-            "file:///file_does_not_exist.txt",
+-            "file://%s:80%s/%s" % (socket.gethostbyname('localhost'),
+-                                   os.getcwd(), TESTFN),
+-            "file://somerandomhost.ontheinternet.com%s/%s" %
+-            (os.getcwd(), TESTFN),
++        #    "file://localhost:80%s" % urlpath,
++        #    "file:///file_does_not_exist.txt",
++        #    "file://%s:80%s/%s" % (socket.gethostbyname('localhost'),
++        #                           os.getcwd(), TESTFN),
++        #    "file://somerandomhost.ontheinternet.com%s/%s" %
++        #    (os.getcwd(), TESTFN),
+             ]:
+             try:
+                 f = open(TESTFN, "wb")
+-- 
+1.7.4.1
+

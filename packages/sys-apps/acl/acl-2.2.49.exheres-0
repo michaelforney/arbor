@@ -66,19 +66,19 @@ configure_one_multibuild() {
     export OPTIMIZER="${CFLAGS}"
     export DEBUG="-DNDEBUG"
 
-    econf --bindir=/bin --libdir=/"${LIBDIR}" \
-          --libexecdir=/usr/"${LIBDIR}" --enable-gettext
+    econf --bindir=/bin --libdir=/${LIBDIR} \
+          --libexecdir=/usr/${LIBDIR} --enable-gettext
 }
 
 install_one_multibuild() {
     emake -j1 DIST_ROOT="${IMAGE}" install install-dev install-lib
 
-    # We don't install static libraries, remove symlink to /$(get_libdir)
-    edo rm "${IMAGE}"/{usr/,}"${LIBDIR}"/libacl.{a,la,so}
-    edo rmdir "${IMAGE}"/usr/"${LIBDIR}"
+    # We don't install static libraries, remove symlink to /${LIBDIR}
+    edo rm "${IMAGE}"/{usr/,}${LIBDIR}/libacl.{a,la,so}
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}
 
     # Fix circular linking
     into /
-    dosym /"${LIBDIR}"/libacl.so.1 /"${LIBDIR}"/libacl.so
+    dosym /${LIBDIR}/libacl.so.1 /${LIBDIR}/libacl.so
 }
 

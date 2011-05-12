@@ -3,8 +3,6 @@
 # Based in part upon 'libaio-0.3.107.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-require multilib
-
 SUMMARY="Asynchronous input/output library that uses the kernels native interface"
 DESCRIPTION="
 AIO enables even a single application thread to overlap I/O operations with other
@@ -37,7 +35,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 src_prepare() {
     default
 
-    edo sed -i "/^libdir=/s:lib$:$(get_libdir):" src/Makefile Makefile
+    edo sed -i "/^libdir=/s:lib$:${LIBDIR}:" src/Makefile Makefile
 }
 
 src_test() {

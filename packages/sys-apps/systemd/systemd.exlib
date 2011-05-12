@@ -8,7 +8,7 @@ else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.bz2"
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] multilib alternatives bash-completion
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] alternatives bash-completion
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
 
@@ -78,7 +78,7 @@ fi
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
     --exec-prefix=/
-    --libdir=/$(get_libdir)
+    --libdir=/${LIBDIR}
     --libexecdir=/usr/libexec
     --localstatedir=/var
     --enable-pam
@@ -86,11 +86,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-gtk
     --disable-selinux
     --with-distro=other
-    --with-pamlibdir=/$(get_libdir)/security
+    --with-pamlibdir=/${LIBDIR}/security
     --with-rootdir=/
     --with-sysvinit-path=""
     --with-sysvrcd-path=""
-    --with-udevrulesdir=/$(get_libdir)/udev/rules.d
+    --with-udevrulesdir=/${LIBDIR}/udev/rules.d
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
@@ -113,10 +113,11 @@ systemd_pkg_pretend() {
 
 systemd_src_prepare() {
     # Set the correct libdir.
-    edo sed -i -e "/rootlibexecdir=/s:/lib/:/$(get_libdir)/:" Makefile.am
-    edo sed -i -e "/systemunitdir=/s:lib:$(get_libdir):" Makefile.am
-    edo sed -i -e "/systemgeneratordir=/s:lib:$(get_libdir):" Makefile.am
-    edo sed -i -e "/systemshutdowndir=/s:lib:$(get_libdir):" Makefile.am
+    edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
+    edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
 
     autotools_src_prepare
 }
@@ -133,6 +134,8 @@ systemd_src_configure() {
 
 systemd_src_install() {
     default
+
+    dodoc "${FILES}"/README.exherbo
 
     # alternatives
     dodir /sbin
@@ -158,7 +161,7 @@ systemd_src_install() {
     edo rm -r "${IMAGE}"/etc/bash_completion.d
 
     # Install basic.service
-    insinto /$(get_libdir)/systemd/system
+    insinto /${LIBDIR}/systemd/system
     doins "${FILES}"/basic.service
 
     # Install simple-net if requested
@@ -167,6 +170,11 @@ systemd_src_install() {
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
     fi
+
+    # Install the legacy.conf tmpdirs.d config file.
+    # systemd does not install it itself if SysV compatibility is not enabled.
+    insinto /etc/tmpfiles.d
+    doins "${WORK}"/tmpfiles.d/legacy.conf
 
     insinto /etc
 
@@ -187,11 +195,25 @@ EOF
 localhost
 EOF
 
+    # Install a default machine-info file
+    hereins machine-info <<EOF
+# A human-readable UTF-8 machine identifier string. This should contain a name like
+# "Wulf's Notebook" which should be similar to the hostname (e. g. "wulfs-notebook")
+# but may differ if you prefer because it's used for presentation only (e. g. in GDM/KDM).
+PRETTY_HOSTNAME="My Computer"
+# An icon identifying this machine according to the XDG Icon Naming Specification.
+# http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+# The default value "computer" is the most basic fallback, you could use e. g.
+# "computer-laptop" or "computer-desktop".
+ICON_NAME=computer
+EOF
+
     # Install a default *system* locale file
     hereins locale.conf <<EOF
 # Here you configure the *system* locale, i. e. the locale daemons and other non-
 # interactive processes get. *Never* change anything here if you don't know *exactly*
 # what you're doing. For your user's locale, use an /etc/env.d file instead.
+# You must not use LC_ALL here.
 LANG=
 LC_CTYPE=en_US.UTF-8
 LC_NUMERIC=C
@@ -205,7 +227,6 @@ LC_ADDRESS=C
 LC_TELEPHONE=C
 LC_MEASUREMENT=C
 LC_IDENTIFICATION=C
-LC_ALL=
 EOF
 
     # keepdir some stuff
@@ -213,9 +234,9 @@ EOF
     keepdir /etc/systemd/system/graphical.target.wants
     keepdir /etc/systemd/system/local-fs.target.wants
     keepdir /etc/systemd/user
-    keepdir /$(get_libdir)/systemd/system/graphical.target.wants
-    keepdir /$(get_libdir)/systemd/system-generators
-    keepdir /$(get_libdir)/systemd/system-shutdown
+    keepdir /${LIBDIR}/systemd/system/graphical.target.wants
+    keepdir /${LIBDIR}/systemd/system-generators
+    keepdir /${LIBDIR}/systemd/system-shutdown
     keepdir /usr/libexec/systemd/user-generators
 
     # Make sure /etc/machine-id exists.
@@ -223,16 +244,24 @@ EOF
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
+    keepdir /${LIBDIR}/modules-load.d
 
     # Files in /etc/sysctl.d/?*.conf get read and applied via sysctl. Can be used
     # in combination with sysctl.conf (sysctl.d takes precedence over sysctl.conf).
     keepdir /etc/sysctl.d
+    keepdir /${LIBDIR}/sysctl.d
+
+    # Files in /etc/binfmt.d/?*.conf contain a list of binfmt_misc kernel binary
+    # format rules. Those are used to configure additional binary formats to register
+    # during boot in the kernel.
+    keepdir /etc/binfmt.d
+    keepdir /${LIBDIR}/binfmt.d
 
     # From here on, we're creating a basic configuration.
     dodir /etc/systemd/system/basic.target.wants
 
     # Enable basic.service
-    dosym /$(get_libdir)/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
+    dosym /${LIBDIR}/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
 }
 
 systemd_pkg_postinst() {

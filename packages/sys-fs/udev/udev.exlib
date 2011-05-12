@@ -9,7 +9,7 @@ else
     DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
 fi
 
-require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
 
 export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
@@ -86,14 +86,14 @@ configure_one_multibuild() {
         --sbindir=/sbin \
         --enable-static \
         --with-rootlibdir=/${LIBDIR} \
-        --libexecdir=/${LIBDIR}/udev/ \
+        --libexecdir=/${LIBDIR}/udev \
         --without-selinux \
         $(option_enable extras) \
         $(option_enable glib gudev) \
         $(option_enable gobject-introspection introspection) \
-        $(option_enable sound usb-db) \
         $(option_enable sound pci-db) \
         $(option_enable sound sound-rules) \
+        $(option_enable sound usb-db) \
         $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
 }
 
@@ -144,9 +144,9 @@ EOT
         doins "${FILES}"/udev-start.sh
         doins "${FILES}"/udev-stop.sh
 
-        edo sed -e "s,@@libdir@@,${LIBDIR},g"                       \
-            -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-start.sh  \
-            -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-stop.sh
+        edo sed -e "s,@@libdir@@,${LIBDIR},g"                          \
+                -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-start.sh \
+                -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-stop.sh
     fi
     # }}}
 }

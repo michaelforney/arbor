@@ -4,9 +4,8 @@
 require glibc [ source_uri="mirror://gnu/${PN}/${PNV}.tar.xz" libidn_uri= \
                 ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2" ]
 
-# FIXME: ~arm dropped pending testing
 # FIXME: ~ia64 have not been tested
-PLATFORMS="~amd64 ~ppc64 ~x86"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 
 # Sandbox causes numerous test failures
 RESTRICT=test
@@ -21,6 +20,8 @@ src_prepare() {
     expatch -p0 "${FILES}"/${PN}-2.11.2-i686.patch
     expatch -p0 "${FILES}"/${PN}-2.11.2-make-3.82.patch
     expatch -p1 "${FILES}"/${PN}-2.12-static-glro-init.patch
+    expatch -p1 "${FILES}"/${PN}-fix-compilation-with-gcc46.patch
+
     glibc_src_prepare
 }
 

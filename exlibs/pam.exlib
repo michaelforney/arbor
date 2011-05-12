@@ -6,8 +6,6 @@
 # This eclass contains functions to install pamd configuration files and
 # pam modules.
 
-require multilib
-
 # dopamd <file> [more files]
 #
 # Install pam auth config file in /etc/pam.d
@@ -74,7 +72,7 @@ newpamsecurity() {
 #
 # Returns the pam modules' directory for current implementation
 getpam_mod_dir() {
-    echo /$(get_libdir)/security
+    echo /${LIBDIR}/security
 }
 
 # dopammod <file> [more files]

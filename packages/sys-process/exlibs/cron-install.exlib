@@ -1,0 +1,35 @@
+# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+# Instead of setting directory ownership and modes as well as those of the cron
+# executables inside the individual cron exheres, we use this exlib as a common
+# place for such definitions.
+
+myexparam crond
+myexparam crontab
+exparam -v crond crond
+exparam -v crontab crontab
+
+do_cron_dirs() {
+    keepdir /etc/cron.d
+
+    diropts -m 0750
+    keepdir /etc/cron.{hourly,daily,weekly,monthly}
+    diropts -m 0750 -o root -g cron
+    keepdir /var/spool/cron
+    diropts -m 0750
+    keepdir /var/spool/cron/lastrun
+    diropts -m 1730 -o root -g cron
+    keepdir /var/spool/cron/crontabs
+}
+
+do_cron_exes() {
+    exeopts -m 2755 -o root -g cron
+    exeinto /usr/bin
+    doexe "${crontab}"
+
+    exeopts -m 0750 -o root -g wheel
+    exeinto /usr/sbin
+    doexe "${crond}"
+}
+

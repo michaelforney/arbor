@@ -3,7 +3,7 @@
 # Based in part upon 'postfix-2.5.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib pam alternatives systemd-service
+require pam alternatives systemd-service
 
 SUMMARY="Fast, easy to administer and secure mail transport agent"
 HOMEPAGE="http://www.postfix.org"
@@ -45,7 +45,7 @@ src_compile() {
         ccargs+=" -DUSE_CYRUS_SASL -I/usr/include/sasl"
         auxlibs+=" -lsasl2"
     fi
-    ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'$(get_libdir)'/postfix\"'
+    ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'${LIBDIR}'/postfix\"'
     ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'
     ccargs+=' -DDEF_README_DIR=\"/usr/share/doc/'${PNVR}'/readme\"'
     ccargs+=' -DDEF_HTML_DIR=\"/usr/share/doc/'${PNVR}'/html\"'
@@ -67,7 +67,7 @@ src_install() {
     edo rmdir "${IMAGE}"/usr/bin
 
     alternatives_for mta ${PN} 9 /usr/sbin/sendmail ${PN}.sendmail
-    alternatives_for mta ${PN} 9 /usr/$(get_libdir)/sendmail ../sbin/sendmail
+    alternatives_for mta ${PN} 9 /usr/${LIBDIR}/sendmail ../sbin/sendmail
     alternatives_for mta ${PN} 9 /usr/bin/mailq ../sbin/sendmail
     alternatives_for mta ${PN} 9 /usr/bin/newaliases ../sbin/sendmail
 

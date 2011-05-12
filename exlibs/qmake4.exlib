@@ -4,8 +4,6 @@
 # EQMAKE4_SOURCES
 # TODO: CONFIG += / -=
 
-require multilib
-
 export_exlib_phases src_configure
 
 myexparam -b no_qt_dependency=false
@@ -19,7 +17,7 @@ eqmake4() {
     illegal_in_global_scope
 
     # Install into the correct libdir on 64 bit systems
-    if [[ $(get_libdir) == *64 ]] ; then
+    if [[ ${LIBDIR} == *64 ]] ; then
         export QMAKESPEC="/usr/share/qt4/mkspecs/linux-g++-64"
     else
         export QMAKESPEC="/usr/share/qt4/mkspecs/linux-g++"
@@ -30,7 +28,7 @@ eqmake4() {
     [[ ${@} == ${@%.pro} && -z ${EQMAKE4_SOURCES[@]} ]] && EQMAKE4_SOURCES=( ${PN}.pro )
 
     edo /usr/bin/qmake \
-        QTDIR="/usr/$(get_libdir)" \
+        QTDIR="/usr/${LIBDIR}" \
         QMAKE="/usr/bin/qmake" \
         QMAKE_CFLAGS_RELEASE="${CFLAGS}" \
         QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS}" \

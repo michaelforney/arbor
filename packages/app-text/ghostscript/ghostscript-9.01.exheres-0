@@ -3,7 +3,7 @@
 # Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require multilib autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://ghostscript.com/"
@@ -95,7 +95,7 @@ src_install() {
     default
 
     if option !X && option !gtk; then
-        rmdir "${IMAGE}"/usr/$(get_libdir)/${PN}{/${PV},}
+        rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}{/${PV},}
     fi
 }
 

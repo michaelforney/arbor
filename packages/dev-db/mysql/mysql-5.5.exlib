@@ -53,10 +53,10 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
     -DINSTALL_DOCREADMEDIR:PATH=share/doc/${PNVR}
     -DINSTALL_INCLUDEDIR:PATH=include/mysql
     -DINSTALL_INFODIR:PATH=share/mysql/info
-    -DINSTALL_LIBDIR:PATH=$(get_libdir)/mysql
+    -DINSTALL_LIBDIR:PATH=${LIBDIR}/mysql
     -DINSTALL_MANDIR:PATH=share/man
     -DINSTALL_MYSQLSHAREDIR:PATH=share/mysql
-    -DINSTALL_PLUGINDIR:PATH=$(get_libdir)/mysql/plugin
+    -DINSTALL_PLUGINDIR:PATH=${LIBDIR}/mysql/plugin
     -DINSTALL_SBINDIR:PATH=sbin
     -DINSTALL_SCRIPTDIR:PATH=bin
     -DINSTALL_SUPPORTFILESDIR:PATH=share/doc/${PNVR}/support-files
@@ -124,10 +124,10 @@ mysql-5.5_src_install() {
     edo chown mysql:mysql "${IMAGE}"/var/run/mysqld
     edo chmod 755 "${IMAGE}"/var/run/mysqld
 
-    ! option debug && edo rmdir "${IMAGE}"/usr/$(get_libdir)/mysql/plugin/debug
+    ! option debug && edo rmdir "${IMAGE}"/usr/${LIBDIR}/mysql/plugin/debug
 
     hereenvd 46mysql <<EOF
-LDPATH=/usr/$(get_libdir)/${PN}
+LDPATH=/usr/${LIBDIR}/${PN}
 EOF
 
     insinto /etc/logrotate.d

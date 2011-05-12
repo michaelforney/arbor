@@ -1,0 +1,58 @@
+# Copyright 2008, 2009, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sqlite-3.5.6.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+SCHNARF_PV="$(ever range 1)$(printf "%02d" $(ever range 2))\
+$(printf "%02d" $(ever range 3))\
+$(printf "%02d" $(ever range 4))"
+
+SCHNARF_PV_DOC="$(ever range 1)$(printf "%02d" $(ever range 2))$(printf "%02d" $(ever range 3))00"
+
+require flag-o-matic easy-multibuild
+
+SUMMARY="An embedded SQL database engine"
+HOMEPAGE="http://www.sqlite.org/"
+DOWNLOADS="http://www.sqlite.org/${PN}-autoconf-${SCHNARF_PV}.tar.gz
+    doc? ( http://www.sqlite.org/${PN}-doc-${SCHNARF_PV_DOC}.zip )"
+
+REMOTE_IDS="freshmeat:${PN}"
+UPSTREAM_CHANGELOG="${HOMEPAGE}releaselog/$(ever replace_all _).html [[ lang = en ]]"
+
+LICENCES="public-domain"
+SLOT="3"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="doc readline
+    unlock-notify [[ description = [ Enables an API for notifications when a database is unlocked in shared-cache mode, cf. http://www.sqlite.org/c3ref/unlock_notify.html ] ]]
+    multibuild_c: 32 64
+"
+
+DEPENDENCIES="
+    build:
+        doc? ( app-arch/unzip )
+    build+run:
+        readline? ( sys-libs/readline[multibuild_c:*(?)?] )
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( readline )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threadsafe --enable-dynamic-extensions )
+
+WORK=${WORKBASE}/${PN}-autoconf-${SCHNARF_PV}/
+
+configure_one_multibuild() {
+    append-cppflags -DSQLITE_ENABLE_COLUMN_METADATA
+
+    option unlock-notify && append-cppflags -DSQLITE_ENABLE_UNLOCK_NOTIFY
+
+    default
+}
+
+src_install() {
+    easy-multibuild_src_install
+
+    if option doc ; then
+        insinto /usr/share/doc/${PNVR}/html
+        doins -r "${WORKBASE}"/${PN}-doc-${SCHNARF_PV_DOC}/*
+    fi
+}
+

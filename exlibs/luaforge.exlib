@@ -1,8 +1,6 @@
 # Copyright 2009 Mike Kelly <pioto@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 # This exlib is useful for packages from luaforge. It'll set the basic
 # metadata properly to fetch them.
 
@@ -21,7 +19,7 @@ export_exlib_phases src_prepare src_install
 
 luaforge_src_prepare() {
     if [[ -f config ]] ; then
-        edo sed -i -e "s,/lib/,/$(get_libdir)/," config
+        edo sed -i -e "s,/lib/,/${LIBDIR}/," config
     fi
 }
 

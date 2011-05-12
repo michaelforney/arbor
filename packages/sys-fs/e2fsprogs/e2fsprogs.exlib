@@ -3,7 +3,7 @@
 # Based in part upon 'e2fsprogs-1.40.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multilib sourceforge [ suffix=tar.gz ]
+require sourceforge [ suffix=tar.gz ]
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -39,7 +39,7 @@ e2fsprogs_src_configure() {
     econf \
         --bindir=/bin \
         --sbindir=/sbin \
-        --libdir=/$(get_libdir) \
+        --libdir=/${LIBDIR} \
         --enable-elf-shlibs \
         --enable-tls \
         --enable-verbose-makecmds \
@@ -92,7 +92,7 @@ e2fsprogs_src_install() {
         done
     fi
 
-    dodir /usr/$(get_libdir)/
-    edo mv "${IMAGE}"/{,usr/}$(get_libdir)/pkgconfig
+    dodir /usr/${LIBDIR}/
+    edo mv "${IMAGE}"/{,usr/}${LIBDIR}/pkgconfig
 }
 

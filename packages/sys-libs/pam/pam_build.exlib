@@ -47,29 +47,21 @@ pam_build_src_prepare() {
     done
 }
 
-pam_build_src_configure() {
-    easy-multibuild_src_configure
-}
-
 configure_one_multibuild() {
     # Works around an autoconf 2.62 bug; libintl.h is included before
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
    append-flags -D_GNU_SOURCE
    econf \
-       --libdir=/$(get_libdir) \
+       --libdir=/${LIBDIR} \
        --disable-audit \
        --disable-prelude \
        --disable-regenerate-docu \
        --disable-selinux \
        --enable-cracklib \
        --enable-db=no \
-       --enable-isadir=/$(get_libdir)/security \
+       --enable-isadir=/${LIBDIR}/security \
        --enable-nls \
-       --enable-securedir=/$(get_libdir)/security
-}
-
-pam_build_src_test() {
-    easy-multibuild_run_phase
+       --enable-securedir=/${LIBDIR}/security
 }
 
 test_one_multibuild() {
@@ -95,9 +87,5 @@ pam_build_src_install() {
     dopamd "${FILES}"/pam.d/*
 
     dodoc doc/txt/*
-}
-
-install_one_multibuild() {
-    default
 }
 

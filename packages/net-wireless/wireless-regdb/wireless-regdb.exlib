@@ -1,8 +1,6 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib
-
 SUMMARY="Regulatory domain database"
 DESCRIPTION="
 Provides 'regulatory.bin'. A signed newly maintained regulatory database
@@ -20,7 +18,7 @@ DEPENDENCIES=""
 
 UPSTREAM_DOCUMENTATION="http://wireless.kernel.org/en/developers/Regulatory#Theregulatorydatabase"
 
-DEFAULT_SRC_INSTALL_PARAMS+=( CRDA_PATH=/usr/$(get_libdir)/crda )
+DEFAULT_SRC_INSTALL_PARAMS+=( CRDA_PATH=/usr/${LIBDIR}/crda )
 
 src_prepare() {
     default

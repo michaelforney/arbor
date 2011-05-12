@@ -7,8 +7,9 @@
 
 MY_PNV="Python-${PV}"
 
-require alternatives autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
-require easy-multibuild [ work=${MY_PNV} ] flag-o-matic python
+require flag-o-matic python alternatives \
+        autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require easy-multibuild [ work=${MY_PNV} ]
 
 export_exlib_phases src_unpack src_prepare src_install
 
@@ -46,7 +47,6 @@ DEPENDENCIES="
 "
 
 WORK="${WORKBASE}"
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     $(ever at_least 3 || echo --enable-unicode=ucs4)
@@ -62,7 +62,7 @@ python-build_src_unpack() {
     easy-multibuild_run_phase
 }
 
-prepare_one_multibuild() {
+python-build_prepare_one_multibuild() {
     [[ -d ${FILES}/${PV} ]] && expatch "${FILES}/${PV}/"
 
     edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
@@ -85,6 +85,10 @@ prepare_one_multibuild() {
     edo sed -i -e "s:@prefix@:${prefix}:g" Misc/"${PN}".pc.in
 
     eautoreconf
+}
+
+prepare_one_multibuild() {
+    python-build_prepare_one_multibuild
 }
 
 python-build_src_prepare() {
@@ -122,22 +126,32 @@ configure_one_multibuild() {
     econf ${DEFAULT_SRC_CONFIGURE_PARAMS[@]} --with-dbmliborder="${dbmliborder}"
 }
 
+python-build_test_prepare_one_multibuild() {
+    # needed for 32bit tests
+    esandbox allow_net --connect "inet:127.0.0.1@1024-65535"
+    esandbox allow_net --connect "inet6:::1@1024-65535"
+}
+
 test_one_multibuild() {
     unset DISPLAY
 
     python_enable_pyc
 
+    # for test_multiprocessing
+    esandbox allow_net "unix:${TEMP%/}/pymp-*/listener-*"
+
     # rerun failed tests in verbose mode (regrtest -w)
     EXTRATESTOPTS="-w" emake test
+
+    esandbox disallow_net "unix:${TEMP%/}/pymp-*/listener-*"
 
     python_disable_pyc
 }
 
-install_one_multibuild() {
+python-build_install_one_multibuild() {
     default
 
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
-    ! ever at_least 3.1 && edo rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}${SLOT}/lib-old
     ever at_least 3 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
     edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
 
@@ -160,6 +174,10 @@ install_one_multibuild() {
     fi
     into "${prefix}"
     newbin "${WORKBASE}"/"${MULTIBUILD_CLASS}"/"${MULTIBUILD_TARGET}"/"${MY_PNV}"/"${PN}"-config.py "${PN}${PYTHON_MAJOR}"-config
+}
+
+install_one_multibuild() {
+    python-build_install_one_multibuild
 }
 
 python-build_src_install() {

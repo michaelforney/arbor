@@ -1,0 +1,83 @@
+# Copyright 2009-2011 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'vixie-cron-4.1-r10.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require pam systemd-service cron-install [ crond=cron crontab=crontab ] alternatives
+
+PATCH_VER="1.0"
+
+HOMEPAGE="ftp://ftp.isc.org/isc/cron/"
+SUMMARY="Paul Vixie's cron daemon, a fully featured crond implementation"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}-exherbo-${PATCH_VER}.tar.bz2"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="baselayout"
+
+DEPENDENCIES="
+    build+run:
+       sys-libs/pam
+       group/cron
+       user/cron
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${WORKBASE}"/${PNV}-gentoo-r4.patch
+    -p0 "${WORKBASE}"/${PNV}-crontab.5.patch
+    -p0 "${WORKBASE}"/${PNV}-commandline.patch
+    -p1 "${WORKBASE}"/${PNV}-basename.patch
+    -p1 "${WORKBASE}"/${PNV}-setuid_check.patch
+    -p0 "${WORKBASE}"/${PNV}-hardlink.patch
+    -p1 "${WORKBASE}"/${PNV}-pam.patch
+)
+
+src_prepare() {
+    default
+
+    edo sed -i -e "s:gcc \(-Wall.*\):${CC} \1 ${CFLAGS}:" \
+               -e "s:^\(LDFLAGS[ \t]\+=\).*:\1 ${LDFLAGS}:" Makefile
+}
+
+src_install() {
+    newsbin "${WORKBASE}"/vixie-cron-4.1-run-crons run-crons
+
+    do_cron_dirs
+    do_cron_exes
+
+    # /etc stuff
+    insopts -m0644
+    insinto /etc
+    newins "${FILES}"/crontab-${PV} crontab
+    newins "${WORKBASE}"/${PNV}-cron.deny cron.deny
+
+    keepdir /etc/cron.d
+    option baselayout && newinitd "${FILES}"/vixie-cron.rc6 vixie-cron
+
+    install_systemd_files
+
+    newpamd "${FILES}"/pamd.compatible cron
+
+    # doc stuff
+    doman crontab.1 crontab.5 cron.8
+    dodoc CHANGES CONVERSION FEATURES MAIL README THANKS
+
+    # alternatives
+    local alternatives=(
+        cron ${PN} 10
+        /usr/bin/crontab ${PN}.crontab
+        /usr/share/man/man5/crontab.5 ${PN}.crontab.5
+        /usr/share/man/man1/crontab.1 ${PN}.crontab.1
+        /usr/share/man/man8/cron.8 ${PN}.cron.8
+    )
+    alternatives_for "${alternatives[@]}"
+}
+
+pkg_postinst() {
+    alternatives_pkg_postinst
+
+    nonfatal edo chmod 0644 /etc/crontab || eerror "chmod 0644 /etc/crontab failed"
+}
+

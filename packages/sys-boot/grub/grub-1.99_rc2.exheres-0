@@ -1,0 +1,79 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require bash-completion
+require gnu [ alpha=true suffix=xz pv="$(ever range 1-2)~$(ever range 3)" ]
+
+SUMMARY="GRUB (Grand Unified Boot) bootloader"
+
+UPSTREAM_DOCUMENTATION="
+    http://grub.enbug.org/             [[ description = [ GNU Grub Wiki ] ]]
+    http://grub.enbug.org/TestingOnX86 [[ description = [ Installing Grub 2 on x86 ] ]]
+"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    device-mapper [[ description = [ Ability to detect and use device-mapper devices ] ]]
+    mkfont        [[ description = [ Build grub-mkfont which can create GRUB font files ] ]]
+"
+
+# TODO: needs qemu-system-i386
+RESTRICT="test"
+
+DEPENDENCIES="
+    build:
+        app-arch/lzo:2
+        sys-apps/help2man [[ note = [ man pages won't get created otherwise resulting in empty man dirs ] ]]
+        sys-devel/make
+        sys-devel/bison
+        device-mapper? ( sys-fs/lvm2 )
+        mkfont? ( fonts/unifont
+                  media-libs/freetype:2 )
+    build+run:
+        app-arch/xz
+        sys-fs/udev
+        !sys-boot/grub-static [[ description = [ /sbin/grub-install collides ] resolution = manual ]]
+    suggestion:
+        sys-boot/os-prober [[
+            description = [ Ability to add other OSs automatically to grub.cfg via grub-mkconf ]
+        ]]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    "CPP=${CC} -E"
+    '--prefix=/'
+
+    # TODO: for now disable emulation utils
+    '--disable-efiemu'
+    '--disable-grub-emu-usb'
+    '--disable-grub-emu-sdl'
+    '--disable-grub-emu-pci'
+    '--disable-mm-debug'
+
+    '--disable-werror'
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'device-mapper' 'mkfont grub-mkfont' )
+
+src_install() {
+    default
+
+    dodoc "${FILES}"/grub.cfg.example
+
+    option !mkfont && rmdir "${IMAGE}"/usr/share/grub
+
+    edo rm "${IMAGE%/}"/etc/bash_completion.d/${PN}
+    edo rmdir "${IMAGE%/}"/etc/bash_completion.d/
+    dobashcompletion "${WORK%/}"/util/bash-completion.d/${PN}
+}
+
+pkg_postinst() {
+    elog "Use grub-install /dev/your-device e.g. sda to install grub onto the"
+    elog "device you wish to boot from."
+    elog "A sample grub.cfg has been installed into /usr/share/doc/${PNVR}."
+    elog "Copy this to /boot/grub and edit it to fit your configuration."
+    elog "Alternatively, you can use the provided grub-mkconfig utility."
+}
+

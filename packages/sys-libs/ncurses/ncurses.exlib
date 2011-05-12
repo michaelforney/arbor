@@ -1,8 +1,7 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ]
-require easy-multibuild
+require gnu [ suffix=gz ] easy-multibuild
 
 SUMMARY="Free software emulation of curses using terminfo formats"
 
@@ -19,11 +18,11 @@ configure_one_multibuild() {
 
     edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
-    econf --libdir="/${LIBDIR}" "${myconf[@]}"
+    econf --libdir=/${LIBDIR} "${myconf[@]}"
 
     edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
-    econf --libdir="/${LIBDIR}" --includedir=/usr/include/ncursesw --enable-widec "${myconf[@]}"
+    econf --libdir=/${LIBDIR} --includedir=/usr/include/ncursesw --enable-widec "${myconf[@]}"
 }
 
 compile_one_multibuild() {

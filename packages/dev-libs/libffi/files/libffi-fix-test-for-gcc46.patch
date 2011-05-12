@@ -1,0 +1,18 @@
+Source: Cherry-picked from upstream (see below).
+Upstream: Already in upstream since July 2010. Part of https://github.com/atgreen/libffi/commit/3f5b1375ab1e2b8e3d593e21b27097a4a50f9b83
+Reason: GCC 4.6 has stricter warnings, so this test that checks if there are no warnings now fails.
+
+--- libffi-3.0.9/testsuite/libffi.call/err_bad_abi.c.orig	2011-04-14 15:53:14.052569036 +0200
++++ libffi-3.0.9/testsuite/libffi.call/err_bad_abi.c	2011-04-14 15:53:29.580568989 +0200
+@@ -17,11 +17,9 @@ int main (void)
+ 	ffi_cif cif;
+         void *code;
+ 	ffi_closure *pcl = ffi_closure_alloc(sizeof(ffi_closure), &code);
+-	void* args[1];
+ 	ffi_type* arg_types[1];
+ 
+ 	arg_types[0] = NULL;
+-	args[0] = NULL;
+ 
+ 	CHECK(ffi_prep_cif(&cif, 255, 0, &ffi_type_void,
+ 		arg_types) == FFI_BAD_ABI);

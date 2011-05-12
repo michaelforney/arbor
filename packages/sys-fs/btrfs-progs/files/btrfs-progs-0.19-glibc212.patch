@@ -1,0 +1,14 @@
+Source: http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/sys-fs/btrfs-progs/files/btrfs-progs-0.19-glibc212.patch
+Upstream: Yes, as of git revision 34915ad (add missing include for btrfsck.c)
+Reason: Fails to compile with several undefined references
+
+--- a/btrfsck.c
++++ b/btrfsck.c
+@@ -21,6 +21,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <fcntl.h>
++#include <sys/stat.h>
+ #include "kerncompat.h"
+ #include "ctree.h"
+ #include "disk-io.h"

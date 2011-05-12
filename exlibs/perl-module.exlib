@@ -9,8 +9,6 @@
 #       Robin Johnson <robbat2@gentoo.org>
 #       Michael Cummings <mcummings@gentoo.org>
 
-require multilib
-
 export_exlib_phases src_configure src_compile src_test src_install
 
 myexparam module_author=
@@ -84,9 +82,9 @@ perl-module_src_install() {
         fi
     done
 
-    if [[ -d "${IMAGE}/usr/$(get_libdir)" ]] ; then
-        edo find "${IMAGE}/usr/$(get_libdir)" -type f -name .packlist -delete
-        edo find "${IMAGE}/usr/$(get_libdir)" -depth -type d -empty -delete
+    if [[ -d "${IMAGE}/usr/${LIBDIR}" ]] ; then
+        edo find "${IMAGE}/usr/${LIBDIR}" -type f -name .packlist -delete
+        edo find "${IMAGE}/usr/${LIBDIR}" -depth -type d -empty -delete
     fi
 }
 
@@ -116,6 +114,6 @@ fixlocalpod() {
         [[ -f ${perldir}/perllocal.pod ]] && edo rm -f "${perldir}/perllocal.pod"
     done
 
-    [[ -d "${IMAGE}/usr/$(get_libdir)" ]] && edo find "${IMAGE}/usr/$(get_libdir)" -depth -type d -empty -delete
+    [[ -d "${IMAGE}/usr/${LIBDIR}" ]] && edo find "${IMAGE}/usr/${LIBDIR}" -depth -type d -empty -delete
 }
 
