@@ -7,11 +7,13 @@ else
     require gnu [ suffix=gz ]
 fi
 
-export_exlib_phases src_configure src_install src_test_expensive
+export_exlib_phases src_install src_test_expensive
 
-SUMMARY="Basic directory searching utilities."
+SUMMARY="Basic directory searching utilities"
 
-LICENCES="GPL-2"
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS=""
 
@@ -28,14 +30,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
     --libexecdir=/usr/libexec/${PN}
     --without-included-regex
+    --without-selinux
 )
-
-findutils_src_configure() {
-    # Configuration takes a million years without this hack.
-    esandbox hack_toolong
-    default
-    esandbox nohack_toolong
-}
 
 findutils_src_test_expensive() {
     emake "${DEFAULT_SRC_TEST_PARAMS[@]}" check
