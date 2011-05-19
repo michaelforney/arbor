@@ -1,9 +1,11 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require gnu
 
 SUMMARY="General-purpose parser generator for LALR(1) or GLR parsers"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -12,12 +14,10 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[>=0.15]
+        sys-devel/gettext[>=0.18]
     build+run:
-        sys-devel/m4[>=1.4]
+        sys-devel/m4[>=1.4.16]
 "
-
-AT_M4DIR=( m4 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
 
