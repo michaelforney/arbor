@@ -33,7 +33,7 @@ if (( PATCH_LEVEL )) ; then
 fi
 
 REMOTE_IDS="freshmeat:gnu${PN}"
-UPSTREAM_CHANGELOG="http://tiswww.case.edu/php/chet/readline/CHANGES"
+UPSTREAM_CHANGELOG="http://cnswww.cns.cwru.edu/php/chet/${PN}/CHANGES"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -62,5 +62,10 @@ readline_src_prepare() {
 
     # Gentoo #71420
     edo sed -e 's:^SHLIB_LIBS=:SHLIB_LIBS=-lncurses:' -i support/shobj-conf
+}
+
+src_install() {
+    default
+    edo rmdir "${IMAGE}"/usr/bin
 }
 
