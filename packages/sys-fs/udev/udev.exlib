@@ -24,9 +24,19 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="( GPL-2 LGPL-2 )"
 SLOT="0"
 
-MYOPTIONS="
+if ever at_least 169; then
+    MYOPTIONS="
+        acl [[ requires = [ glib ] ]]
+        modeswitch [[ description = [ Ability to switch Mobile Action cables into serial mode ] ]]
+    "
+else
+    MYOPTIONS="
+        extras [[ description = [ Extras for mobile devices (and then some), e. g. special keymaps ] requires = [ glib ] ]]
+    "
+fi
+
+MYOPTIONS+="
     baselayout
-    extras [[ description = [ Extras for mobile devices (and then some), e. g. special keymaps ] requires = [ glib ] ]]
     glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
     gobject-introspection [[ requires = [ glib ] ]]
     sound [[ description = [ install extra rules for sound cards ] ]]
@@ -39,17 +49,11 @@ DEPENDENCIES="
         dev-libs/libxslt
         app-doc/gtk-doc-autotools[>=1.15-r1]
     build+run:
-        extras? (
-            dev-libs/libusb:0.1[>=0.1.12]
-            dev-util/gperf[>=3.0.4]
-            sys-apps/acl[>=2.2.49]
-            sys-apps/usbutils[>=0.82]
-        )
         glib? ( dev-libs/glib:2[>=2.22.0] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
         sound? (
             sys-apps/pciutils
-            sys-apps/usbutils
+            sys-apps/usbutils[>=0.82]
         )
     run:
         group/dialout
@@ -57,24 +61,22 @@ DEPENDENCIES="
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --libexecdir=/${LIBDIR}/udev
-    --sbindir=/sbin
-    --enable-static
-    --with-rootlibdir=/${LIBDIR}
-    --without-selinux
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    extras
-    "glib gudev"
-    "gobject-introspection introspection"
-    "sound pci-db"
-    "sound sound-rules"
-    "sound usb-db"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /${LIBDIR}/systemd/system" )
+if ever at_least 169; then
+    DEPENDENCIES+="
+        dev-util/gperf[>=3.0.4]
+        acl? ( sys-apps/acl[>=2.2.49] )
+        modeswitch? ( dev-libs/libusb:0.1[>=0.1.12] )
+    "
+else
+    DEPENDENCIES+="
+        extras? (
+            dev-libs/libusb:0.1[>=0.1.12]
+            dev-util/gperf[>=3.0.4]
+            sys-apps/acl[>=2.2.49]
+            sys-apps/usbutils[>=0.82]
+        )
+    "
+fi
 
 AT_M4DIR=( m4 )
 
@@ -97,6 +99,28 @@ udev_pkg_pretend() {
 udev_src_prepare() {
     edo gtkdocize --copy
     autotools_src_prepare
+}
+
+src_configure() {
+    econf --libexecdir=/${LIBDIR}/udev \
+        --sbindir=/sbin \
+        --enable-static \
+        --with-rootlibdir=/${LIBDIR} \
+        --without-selinux \
+        $(option_enable glib gudev) \
+        $(option_enable gobject-introspection introspection) \
+        $(option_with systemd systemdsystemunitdir "/${LIBDIR}/systemd/system") \
+        $(if ever at_least 169; then
+            echo --enable-edd
+            option_enable acl udev_acl
+            option_enable modeswitch action_modeswitch
+            option_enable sound hwdb
+        else
+            option_enable extras
+            option_enable sound pci-db
+            option_enable sound sound-rules
+            option_enable sound usb-db
+        fi)
 }
 
 udev_src_install() {
