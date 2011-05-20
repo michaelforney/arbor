@@ -63,18 +63,20 @@ DEPENDENCIES="
 
 if ever at_least 169; then
     DEPENDENCIES+="
-        dev-util/gperf[>=3.0.4]
-        acl? ( sys-apps/acl[>=2.2.49] )
-        modeswitch? ( dev-libs/libusb:0.1[>=0.1.12] )
+        build+run:
+            dev-util/gperf[>=3.0.4]
+            acl? ( sys-apps/acl[>=2.2.49] )
+            modeswitch? ( dev-libs/libusb:0.1[>=0.1.12] )
     "
 else
     DEPENDENCIES+="
-        extras? (
-            dev-libs/libusb:0.1[>=0.1.12]
-            dev-util/gperf[>=3.0.4]
-            sys-apps/acl[>=2.2.49]
-            sys-apps/usbutils[>=0.82]
-        )
+        build+run:
+            extras? (
+                dev-libs/libusb:0.1[>=0.1.12]
+                dev-util/gperf[>=3.0.4]
+                sys-apps/acl[>=2.2.49]
+                sys-apps/usbutils[>=0.82]
+            )
     "
 fi
 
