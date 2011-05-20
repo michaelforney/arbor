@@ -10,7 +10,7 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] alternatives bash-completion
 
-export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
+export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
 SUMMARY="${PN} is a(n) (init) system and session manager for Linux"
 DESCRIPTION="
@@ -31,10 +31,10 @@ SLOT="0"
 MYOPTIONS="
     bash-completion
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
+    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
     tcpd
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
 "
-#    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
 
 DEPENDENCIES="
     build:
@@ -48,6 +48,10 @@ DEPENDENCIES="
         sys-libs/libcap
         sys-libs/pam[>=1.1.2]
         cryptsetup? ( sys-fs/cryptsetup )
+        gtk? (
+            x11-libs/gtk+:2[>=2.20]
+            x11-libs/libnotify[>=0.7.0]
+        )
         tcpd? ( sys-apps/tcp-wrappers )
     run:
         sys-apps/busybox
@@ -63,15 +67,11 @@ DEPENDENCIES="
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
         sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
 "
-#        gtk? (
-#            x11-libs/gtk+:2[>=2.20]
-#            x11-libs/libnotify[>=0.7.0]
-#        )
 
 if ever is_scm ; then
     DEPENDENCIES+="
         build:
-            dev-lang/vala:0.10
+            dev-lang/vala:0.12
     "
 fi
 
@@ -83,7 +83,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --localstatedir=/var
     --enable-pam
     --disable-audit
-    --disable-gtk
     --disable-selinux
     --with-distro=other
     --with-pamlibdir=/${LIBDIR}/security
@@ -95,9 +94,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "cryptsetup libcryptsetup"
+    gtk
     "tcpd tcpwrap"
 )
-#    gtk
 
 AT_M4DIR=( m4 )
 
@@ -112,24 +111,16 @@ systemd_pkg_pretend() {
 }
 
 systemd_src_prepare() {
-    # Set the correct libdir.
-    edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
-    edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
-    edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-    edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-    edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    # Set the correct libdir if necessary.
+    if [[ ${LIBDIR} != lib ]]; then
+        edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
+        edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
 
-    autotools_src_prepare
-}
-
-systemd_src_configure() {
-    # The vala check in configure.ac needs proper fixing but I can't get it right,
-    # so I'm cheating here:
-    if ! ever is_scm ; then
-        export VALAC="/bin/true"
+        autotools_src_prepare
     fi
-
-    default
 }
 
 systemd_src_install() {
@@ -247,7 +238,7 @@ EOF
     keepdir /${LIBDIR}/modules-load.d
 
     # Files in /etc/sysctl.d/?*.conf get read and applied via sysctl. Can be used
-    # in combination with sysctl.conf (sysctl.d takes precedence over sysctl.conf).
+    # in combination with sysctl.conf (sysctl.conf takes precedence over sysctl.d).
     keepdir /etc/sysctl.d
     keepdir /${LIBDIR}/sysctl.d
 
