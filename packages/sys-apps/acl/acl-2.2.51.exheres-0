@@ -22,6 +22,7 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}"/${PN}-2.2.49-quote-strchr.patch
+    -p1 "${FILES}"/${PN}-2.2.51-config-shell.patch
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -29,6 +30,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --libdir=/${LIBDIR}
     --libexecdir=/usr/${LIBDIR}
     --enable-gettext
+    --enable-shared
 )
 
 src_prepare() {
