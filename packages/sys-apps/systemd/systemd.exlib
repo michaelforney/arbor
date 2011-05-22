@@ -111,6 +111,8 @@ systemd_pkg_pretend() {
 }
 
 systemd_src_prepare() {
+    default
+
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
         edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
