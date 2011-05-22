@@ -11,7 +11,7 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
-export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
 
 SUMMARY="Dynamic userspace /dev manager for Linux"
 DESCRIPTION="
@@ -77,6 +77,10 @@ else
                 sys-apps/acl[>=2.2.49]
                 sys-apps/usbutils[>=0.82]
             )
+            !net-wireless/bluez[>=4.93] [[
+                description = [ Installs the same file ]
+                resolution = uninstall-blocked-after
+            ]]
     "
 fi
 
@@ -103,7 +107,7 @@ udev_src_prepare() {
     autotools_src_prepare
 }
 
-src_configure() {
+udev_src_configure() {
     econf --libexecdir=/${LIBDIR}/udev \
         --sbindir=/sbin \
         --enable-static \
