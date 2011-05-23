@@ -4,17 +4,13 @@
 # Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] easy-multibuild [ work=${PNV} ]
-
-SUMMARY="Core file, shell and text utilities expected to be on any system."
-
-LICENCES="GPL-3"
+require flag-o-matic easy-multibuild [ work=${PNV} ]
 
 SUMMARY="Extended attributes tools"
-HOMEPAGE="http://oss.sgi.com/projects/xfs/"
-DOWNLOADS="ftp://oss.sgi.com/projects/xfs/cmd_tars-oct_09/${PNV}.src.tar.gz"
+HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
+DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 
-LICENCES="LGPL-2.1"
+LICENCES="LGPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="multibuild_c: 32 64"
@@ -23,6 +19,10 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PN}-2.4.46-config-shell.patch
+)
 
 DEFAULT_SRC_INSTALL_PARAMS=( DIST_ROOT="${IMAGE}" install-lib install-dev )
 
@@ -52,11 +52,6 @@ prepare_one_multibuild() {
     edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
             -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
             -i include/builddefs.in
-
-    # libtool will clobber install-sh which is really a custom file
-    edo mv install-sh ${PN}.install-sh
-    AT_M4DIR="m4" eautoconf # attr doesn't use automake
-    edo mv ${PN}.install-sh install-sh
 }
 
 src_prepare() {
@@ -70,7 +65,7 @@ configure_one_multibuild() {
     set_compiler_flags
 
     DEBUG="-DNDEBUG" OPTIMIZER="${CFLAGS}" \
-        econf --bindir=/bin --libdir=/${LIBDIR} --libexecdir=/${LIBDIR} --enable-gettext
+        econf --bindir=/bin --libdir=/${LIBDIR} --libexecdir=/${LIBDIR} --enable-gettext --enable-shared
 }
 
 install_one_multibuild() {

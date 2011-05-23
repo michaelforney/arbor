@@ -6,14 +6,7 @@
 SUMMARY="Common CA Certificates PEM files"
 HOMEPAGE="http://www.cacert.org/"
 
-# Upstream replaced the 20090814 .deb with non-maintainer ("+nmu") versions to
-# address Debian-specific bugs, so mirror the original until the next proper
-# upstream release. See:
-#
-# http://packages.debian.org/changelogs/pool/main/c/ca-certificates/ca-certificates_20090814+nmu2/changelog
-#
-DOWNLOADS="http://dev.exherbo.org/~replica/distfiles/${PN}_${PV}_all.deb"
-#DOWNLOADS="mirror://debian/pool/main/c/${PN}/${PN}_${PV}_all.deb"
+DOWNLOADS="mirror://debian/pool/main/c/${PN}/${PN}_${PV}_all.deb"
 
 LICENCES="MPL-1.1"
 SLOT="0"
@@ -24,7 +17,7 @@ DEPENDENCIES="
     build+run:
         sys-apps/coreutils[>=6.10]
     run:
-        dev-libs/openssl
+        dev-libs/openssl[>=1.0.0]
     install+run:
         sys-apps/debianutils [[ note = [ update-ca-certificates needs run-parts from debianutils ] ]]
 "
@@ -33,7 +26,7 @@ WORK=${WORKBASE}
 src_unpack() {
     default
     unpack ./data.tar.gz
-    rm -f {control,data}.tar.gz debian-binary
+    edo rm -f {control,data}.tar.gz debian-binary
 }
 
 src_install() {

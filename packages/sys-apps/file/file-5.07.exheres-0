@@ -1,11 +1,13 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="Small utility displaying info about file formats."
-HOMEPAGE="ftp://ftp.astron.com/pub/file"
-DOWNLOADS="ftp://ftp.astron.com/pub/${PN}/${PNV}.tar.gz"
+SUMMARY="Small utility displaying info about file formats"
+HOMEPAGE="ftp://ftp.astron.com/pub/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
 
-LICENCES="as-is"
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="BSD-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
@@ -16,6 +18,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MAINT PORTING )
 
 src_install() {
     default
-    rmdir "${IMAGE}"/usr/share/man/man5
+    edo rmdir "${IMAGE}"/usr/share/man/man5
 }
 

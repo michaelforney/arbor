@@ -27,6 +27,7 @@ WORK="${WORKBASE}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}"/${PN}-2.2.49-quote-strchr.patch
+    -p1 "${FILES}"/${PN}-2.2.51-config-shell.patch
 )
 
 unpack_prepare_one_multibuild() {
@@ -67,7 +68,7 @@ configure_one_multibuild() {
     export DEBUG="-DNDEBUG"
 
     econf --bindir=/bin --libdir=/${LIBDIR} \
-          --libexecdir=/usr/${LIBDIR} --enable-gettext
+          --libexecdir=/usr/${LIBDIR} --enable-gettext --enable-shared
 }
 
 install_one_multibuild() {

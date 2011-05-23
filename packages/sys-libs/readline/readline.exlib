@@ -33,7 +33,7 @@ if (( PATCH_LEVEL )) ; then
 fi
 
 REMOTE_IDS="freshmeat:gnu${PN}"
-UPSTREAM_CHANGELOG="http://tiswww.case.edu/php/chet/readline/CHANGES"
+UPSTREAM_CHANGELOG="http://cnswww.cns.cwru.edu/php/chet/${PN}/CHANGES"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -76,5 +76,10 @@ configure_one_multibuild() {
     esac
 
     econf --hates=libdir --libdir=/${LIBDIR}
+}
+
+install_one_multibuild() {
+    default
+    edo rmdir "${IMAGE}"/usr/bin
 }
 

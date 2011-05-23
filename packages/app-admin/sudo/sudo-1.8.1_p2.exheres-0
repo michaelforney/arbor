@@ -7,11 +7,12 @@ require pam
 
 MY_PNV="${PNV/_p/p}"
 
-SUMMARY="Allows users to run programs with the security privileges of another user."
+SUMMARY="Allows users to run programs with the security privileges of another user"
 DESCRIPTION="
 Allows a system administrator to delegate authority to give certain users (or
 groups of users) the ability to run some (or all) commands as root or another
-user while providing an audit trail of the commands and their arguments."
+user while providing an audit trail of the commands and their arguments.
+"
 HOMEPAGE="http://www.${PN}.ws/"
 DOWNLOADS="${HOMEPAGE}/${PN}/dist/${MY_PNV}.tar.gz"
 
@@ -27,25 +28,25 @@ MYOPTIONS="pam"
 
 DEPENDENCIES="
     build+run:
-        pam? ( sys-libs/pam )"
+        pam? ( sys-libs/pam )
+"
 
 WORK="${WORKBASE}/${MY_PNV}"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    "--with-all-insults"
-    "--with-env-editor"
-    "--with-insults"
-    "--with-secure-path=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin"
-    "--with-timedir=/var/db/sudo"
-    "--without-AFS"
-    "--without-DCE"
-    "--without-kerb4"
-    "--without-kerb5"
-    "--without-linux-audit"
+    --with-all-insults
+    --with-env-editor
+    --with-insults
+    --with-plugindir=/usr/${LIBDIR}/sudo
+    --with-secure-path=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin
+    --with-timedir=/var/db/sudo
+    --without-AFS
+    --without-DCE
+    --without-kerb4
+    --without-kerb5
+    --without-linux-audit
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    pam
-)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
 
 #OPTIONS is a var in the makefile
 DEFAULT_SRC_COMPILE_PARAMS=( OPTIONS= )

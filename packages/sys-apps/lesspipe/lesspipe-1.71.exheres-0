@@ -30,52 +30,52 @@ DEPENDENCIES="
     suggestion:
         app-arch/bzip2           [[ description = [ Support for bzipped files and tarballs ] ]]
         app-arch/unzip           [[ description = [ Support for Zip archives and OpenDocument/OpenOffice documents ] ]]
-        || (
-            app-arch/unrar       [[ description = [ Support for RAR archives ] ]]
-            app-arch/rar         [[ description = [ Support for RAR archives ] ]]
-        )
+
+        ( app-arch/unrar app-arch/rar ) [[
+            *description = [ Support for RAR archives ]
+        ]]
+
         app-arch/lzip            [[ description = [ Support for lzipped files and tarballs ] ]]
         app-arch/xz              [[ description = [ Support for lzma-compressed files and tarballs ] ]]
         app-arch/p7zip           [[ description = [ Support for the contents of 7-zip archives ] ]]
-
         app-arch/cpio            [[ description = [ Support for RPM packages, together with app-arch/rpm ] ]]
-        || (
-            app-text/html2text   [[ description = [ Support for HTML documents ] ]]
-            net-www/elinks       [[ description = [ Support for HTML documents ] ]]
-            net-www/links        [[ description = [ Support for HTML documents ] ]]
-            net-www/lynx         [[ description = [ Support for HTML documents ] ]]
-            net-www/w3m          [[ description = [ Support for HTML documents ] ]]
-        )
+
+        ( app-text/html2text net-www/elinks net-www/links net-www/lynx net-www/w3m ) [[
+            *description = [ Support for HTML documents ]
+        ]]
+
         sys-apps/groff           [[ description = [ Support for *roff documents of various kinds ] ]]
         sys-libs/glibc           [[ description = [ Support for some character encoding conversions on viewed files ] ]]
         app-arch/rpm             [[ description = [ Support for RPM packages, together with app-arch/cpio ] ]] 
 
-        || (
-            base/antiword        [[ description = [ Support for Microsoft Word documents ] ]]
-            app-doc/catdoc       [[ description = [ Support for Microsoft Word documents ] ]]
-        )
-        || (
-            app-text/texlive     [[ description = [ Support for TeX DVI documents ] ]]
-            app-text/dvi2tty     [[ description = [ Support for TeX DVI documents ] ]]
-        )
-        || (
-            app-text/pstotext    [[ description = [ Support for PostScript documents ] ]]
-            app-text/ghostscript [[ description = [ Support for PostScript documents ] ]]
-        )
+        ( base/antiword app-doc/catdoc ) [[
+            *description = [ Support for Microsoft Word documents ]
+        ]]
+
+        ( app-text/texlive app-text/dvi2tty ) [[
+            *description = [ Support for TeX DVI documents ]
+        ]]
+
+        ( app-text/pstotext app-text/ghostscript ) [[
+            *description = [ Support for PostScript documents ]
+        ]]
+
         app-crypt/gnupg          [[ description = [ Support for data encrypted by PGP or compatible programs ] ]]
         app-text/poppler         [[ description = [ Support for PDF documents ] ]]
 
         app-arch/cabextract      [[ description = [ Support for Windows cabinet archives ] ]]
         app-text/djvu            [[ description = [ Support for DjVu documents ] ]]
-        || (
-            media-sound/id3v2    [[ description = [ Support for ID3 tags in MP3 files ] ]]
-            media-sound/mp3info  [[ description = [ Support for ID3 tags in MP3 files ] ]]
-        )
+
+        ( media-sound/id3v2 media-sound/mp3info ) [[
+            *description = [ Support for ID3 tags in MP3 files ]
+        ]]
+
         media-gfx/ImageMagick    [[ description = [ Support for metadata about images in various formats ] ]]
-        || (
-            app-cdr/cdrtools     [[ description = [ Support for information about ISO9660 filesystem images ] ]]
-            app-cdr/cdrkit       [[ description = [ Support for information about ISO9660 filesystem images ] ]]
-        )
+
+        ( app-cdr/cdrtools app-cdr/cdrkit ) [[
+            *description = [ Support for information about ISO9660 filesystem images ]
+        ]]
+
         app-text/o3read          [[ description = [ Support for OpenDocument/OpenOffice documents, together with a suitable text-mode HTML viewer ] ]]
         app-text/unrtf           [[ description = [ Support for RTF documents ] ]]
         app-text/xlhtml          [[ description = [ Support for Microsoft Excel spreadsheets and Microsoft Powerpoint presentations, together with a suitable text-mode HTML viewer ] ]]
@@ -95,6 +95,9 @@ src_configure() {
     lesspipe_set plutil    N # OS X only (portable version exists but with different syntax)
     option hilight || lesspipe_set HILITE N
 
+    # fix pdftohtml usage
+    edo sed -i -e 's,pdftohtml -stdout,pdftohtml -dev png -stdout,' lesspipe.sh.in
+
     # Can't use econf as it's not autotools, just a hand-written perl script
     edo ./configure --prefix="${IMAGE}"/usr --fixed
 }
@@ -108,7 +111,6 @@ src_test() {
     LESS_ADVANCED_PREPROCESSOR=yes default
 }
 
-# german.txt is outdated, and everyone speaks English anyway :-P
 src_install() {
     dodir /usr/share/man/man1 # Makefile won't install man page otherwise
     default
