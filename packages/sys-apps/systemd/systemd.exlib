@@ -120,6 +120,8 @@ systemd_src_prepare() {
         edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
 
         autotools_src_prepare
+    else
+        default
     fi
 }
 

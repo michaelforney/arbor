@@ -11,7 +11,7 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
 
-export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
 
 SUMMARY="Dynamic userspace /dev manager for Linux"
 DESCRIPTION="
@@ -78,6 +78,10 @@ else
                 sys-apps/acl[>=2.2.49]
                 sys-apps/usbutils[>=0.82]
             )
+            !net-wireless/bluez[>=4.93] [[
+                description = [ Installs the same file ]
+                resolution = uninstall-blocked-after
+            ]]
     "
 fi
 
@@ -125,6 +129,10 @@ configure_one_multibuild() {
             option_enable sound sound-rules
             option_enable sound usb-db
         fi)
+}
+
+udev_src_configure() {
+    easy-multibuild_src_configure
 }
 
 install_one_multibuild() {
