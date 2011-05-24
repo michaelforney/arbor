@@ -10,10 +10,18 @@ MYOPTIONS="gpm"
 
 DEPENDENCIES="
     build+run:
-        gpm? ( sys-libs/gpm )"
+        gpm? ( sys-libs/gpm )
+"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--hates=docdir' '--with-shared' '--with-normal' '--without-termcap'
-                               "--libdir=/${LIBDIR}" '--without-hashed-db' )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --libdir=/${LIBDIR}
+    --disable-termcap
+    --with-normal
+    --with-shared
+    --without-hashed-db
+)
+
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gpm )
 
 ECONF_SOURCE="${WORK}"
