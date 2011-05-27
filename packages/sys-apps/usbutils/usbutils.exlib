@@ -11,7 +11,7 @@ DOWNLOADS="mirror://kernel/linux/utils/usb/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="python"
 
 DEPENDENCIES="
     build:
@@ -20,6 +20,7 @@ DEPENDENCIES="
         dev-libs/libusb:1[>=1.0.0]
     run:
         sys-apps/usbutils-data
+        python? ( dev-lang/python )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -28,8 +29,16 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-zlib
 )
 
+src_prepare() {
+    default
+
+    edo sed -i -e '/^usbids/s:/usr/share:/usr/share/misc:' lsusb.py
+}
+
 src_install() {
     default
+
+    option python || edo rm -f "${IMAGE}"/usr/bin/lsusb.py
 
     # this is provided by usbutils-data
     edo rm -f "${IMAGE}/usr/sbin/update-usbids.sh"

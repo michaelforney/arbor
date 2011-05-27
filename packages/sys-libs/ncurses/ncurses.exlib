@@ -10,11 +10,18 @@ MYOPTIONS="gpm multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        gpm? ( sys-libs/gpm[multibuild_c:*(?)?] )"
+        gpm? ( sys-libs/gpm[multibuild_c:*(?)?] )
+"
 
 configure_one_multibuild() {
-    local myconf=( --hates=docdir --with-shared --with-normal --without-termcap
-                   --without-hashed-db $(option_with gpm) )
+    local myconf=(
+        --hates=docdir
+        --disable-termcap
+        --with-normal
+        --with-shared
+        --without-hashed-db
+        $(option_with gpm)
+    )
 
     edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"

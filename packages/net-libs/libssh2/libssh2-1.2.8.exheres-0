@@ -4,7 +4,7 @@
 require easy-multibuild
 
 SUMMARY="A library implementing the SSH2 protocol"
-HOMEPAGE="http://www.libssh2.org"
+HOMEPAGE="http://www.${PN}.org"
 DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
 
 REMOTE_IDS="freshmeat:${PN}"
@@ -20,6 +20,7 @@ MYOPTIONS="multibuild_c: 32 64"
 DEPENDENCIES="
     build+run:
         dev-libs/openssl[multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(

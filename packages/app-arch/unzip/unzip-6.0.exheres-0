@@ -13,6 +13,8 @@ require sourceforge [ project=infozip suffix=tar.gz ]
 SUMMARY="unzipper for pkzip-compressed files"
 HOMEPAGE="http://www.info-zip.org/UnZip.html"
 
+REMOTE_IDS+=" freshmeat:${PN}"
+
 LICENCES="Info-ZIP"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -20,18 +22,19 @@ MYOPTIONS="platform: x86"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0
-        "${FILES}"/${PNV}-no-exec-stack.patch
-        "${FILES}"/${PNV}-CVE-2008-0888.patch
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-no-exec-stack.patch )
+DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )
+
+WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
     edo sed -i \
-        -e 's:-O3:$(CFLAGS) $(CPPFLAGS):' \
-        -e 's:-O :$(CFLAGS) $(CPPFLAGS) :' \
+        -e '/^CFLAGS/d' \
+        -e '/CFLAGS/s:-O[0-9]\?:$(CFLAGS) $(CPPFLAGS):' \
+        -e '/^STRIP/s:=.*:=true:' \
         -e "s:CC=gcc :CC=${CC} :" \
         -e "s:LD=gcc :LD=${CC} :" \
+        -e "s:AS=gcc :AS=$(CC) :" \
         -e 's:LF2 = -s:LF2 = :' \
         -e 's:LF = :LF = $(LDFLAGS) :' \
         -e 's:SL = :SL = $(LDFLAGS) :' \
@@ -48,8 +51,13 @@ src_compile() {
     local target=linux_noasm
     option platform:x86 && target=linux_asm
 
+    append-cppflags \
+        -DNO_LCHMOD \
+        -DUNICODE_SUPPORT \
+        -DUNICODE_WCHAR \
+        -DUTF8_MAYBE_NATIVE \
+        -DLARGE_FILE_SUPPORT
+
     emake -f unix/Makefile ${target}
 }
-
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )
 
