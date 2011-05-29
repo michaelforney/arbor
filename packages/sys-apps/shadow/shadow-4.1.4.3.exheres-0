@@ -14,14 +14,14 @@ UPSTREAM_RELEASE_NOTES="ftp://pkg-shadow.alioth.debian.org/pub/pkg-${PN}/${PNV}.
 LICENCES="|| ( BSD-3 GPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="pam"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
         sys-libs/cracklib[>=2.8.3]
-        pam? ( sys-libs/pam[>=1.0.1] )
+        sys-libs/pam[>=1.0.1]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-login.defs.patch "${FILES}"/${PN}-groupmod.patch )
@@ -32,11 +32,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-static=yes
     --with-group-name-max-length=1024
     --with-libcrack
+    --with-libpam
     --with-nscd
     --with-sha-crypt
 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'pam libpam' )
 DEFAULT_SRC_INSTALL_PARAMS=( suidperms=4711 )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
@@ -75,25 +75,23 @@ src_install() {
     insopts -m0644
     newins etc/login.defs login.defs
 
-    if option pam ; then
-        dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
-        newpamd "${FILES}/login.pamd.2" login
+    dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
+    newpamd "${FILES}/login.pamd.2" login
 
-        for x in passwd chpasswd chgpasswd; do
-            newpamd "${FILES}"/pam.d-include/passwd ${x}
-        done
+    for x in passwd chpasswd chgpasswd; do
+        newpamd "${FILES}"/pam.d-include/passwd ${x}
+    done
 
-        for x in chage chsh chfn newusers user{add,del,mod} group{add,del,mod} ; do
-            newpamd "${FILES}"/pam.d-include/shadow ${x}
-        done
+    for x in chage chsh chfn newusers user{add,del,mod} group{add,del,mod} ; do
+        newpamd "${FILES}"/pam.d-include/shadow ${x}
+    done
 
-        # comment out login.defs options that pam hates
-        edo sed -i -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs
+    # comment out login.defs options that pam hates
+    edo sed -i -f "${FILES}"/login_defs_pam.sed "${IMAGE}"/etc/login.defs
 
-        # remove manpages that pam will install for us
-        # and/or don't apply when using pam
-        edo find "${IMAGE}"/usr/share/man '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete
-    fi
+    # remove manpages that pam will install for us
+    # and/or don't apply when using pam
+    edo find "${IMAGE}"/usr/share/man '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete
 
     # Remove manpages that are handled by other packages
     edo find "${IMAGE}"/usr/share/man '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete

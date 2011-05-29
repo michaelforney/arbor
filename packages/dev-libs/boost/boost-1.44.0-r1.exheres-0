@@ -7,7 +7,9 @@ require cmake sourceforge
 
 SUMMARY="Boost Libraries for C++"
 HOMEPAGE="http://www.${PN}.org"
-DOWNLOADS+=" http://dev.exherbo.org/~tgurr/distfiles/${PN}/${PNV}-cmake.patch.bz2"
+DOWNLOADS+="
+    http://dev.exherbo.org/~philantrop/distfiles/cmakeify_boost_1440_2.patch
+"
 
 LICENCES="freedist Boost-1.0"
 SLOT="0"
@@ -31,14 +33,11 @@ DEPENDENCIES="
 "
 
 REMOTE_IDS="freshmeat:${PN}"
-
 UPSTREAM_CHANGELOG="${HOMEPAGE}/users/news/version_${PV//./_}"
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${WORKBASE}/${PNV}-cmake.patch"
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FETCHEDDIR}"/cmakeify_boost_1440_2.patch )
 
 CMAKE_SRC_CONFIGURE_PARAMS=(
     -DENABLE_MULTI_THREADED:BOOL=TRUE
