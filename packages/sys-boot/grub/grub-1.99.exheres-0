@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require bash-completion
-require gnu [ alpha=true suffix=xz pv="$(ever range 1-2)~$(ever range 3)" ]
+require gnu [ suffix=xz ]
 
 SUMMARY="GRUB (Grand Unified Boot) bootloader"
 
@@ -26,6 +26,7 @@ DEPENDENCIES="
     build:
         app-arch/lzo:2
         sys-apps/help2man [[ note = [ man pages won't get created otherwise resulting in empty man dirs ] ]]
+        sys-devel/flex[>=2.5.35]
         sys-devel/make
         sys-devel/bison
         device-mapper? ( sys-fs/lvm2 )
@@ -33,6 +34,7 @@ DEPENDENCIES="
                   media-libs/freetype:2 )
     build+run:
         app-arch/xz
+        sys-devel/gettext [[ note = [ required for grub-mkconfig, grep gettext in /etc/grub.d ] ]]
         sys-fs/udev
         !sys-boot/grub-static [[ description = [ /sbin/grub-install collides ] resolution = manual ]]
     suggestion:
