@@ -77,6 +77,10 @@ if ever at_least 4.5.0 ; then
             dev-libs/mpc[>=0.8.1]"
 fi
 
+if ever at_least 4.6; then
+    MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
+fi
+
 WORK="${WORKBASE}/${PN}_build"
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 
@@ -107,6 +111,10 @@ src_configure() {
     if ever at_least 4.3; then
         pkgversion="Exherbo ${PNVR}"
         option java && LANGS+=",java"
+    fi
+
+    if ever at_least 4.6; then
+        option go && LANGS+=",go"
     fi
 
     econf \
