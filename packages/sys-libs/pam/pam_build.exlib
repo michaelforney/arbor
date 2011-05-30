@@ -64,12 +64,20 @@ configure_one_multibuild() {
        --enable-securedir=/${LIBDIR}/security
 }
 
+pam_build_src_configure() {
+    easy-multibuild_src_configure
+}
+
 test_one_multibuild() {
     if [[ ! -f /etc/pam.d/other ]]; then
         ewarn "Skipping tests. You don't have /etc/pam.d/other."
     else
         emake -j1 check
     fi
+}
+
+pam_build_src_test() {
+    easy-multibuild_src_test
 }
 
 pam_build_src_install() {
