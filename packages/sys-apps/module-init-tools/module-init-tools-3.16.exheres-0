@@ -2,19 +2,27 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Tools to handle kernel modules"
-HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/module-init-tools"
+HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/${PN}"
 DOWNLOADS="mirror://kernel/linux/utils/kernel/${PN}/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        app-text/docbook-utils[>=0.6.14-r2] [[ note = [ Needed for generating the manpages ] ]]
+    build+run:
+        sys-libs/zlib
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
     --with-moddir=/${LIBDIR}/modules
+    --enable-zlib
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CODING )
 
@@ -28,12 +36,6 @@ pkg_pretend() {
         eerror "Files in /etc/modprobe.d should end in '.conf', please migrate the following files: ${errors[@]/#/$'\n'}"
         die "Rename your files in /etc/modprobe.d to end in '.conf'"
     fi
-}
-
-src_prepare() {
-    default
-    # Don't regenerate man-pages to avoid a docbook-utils dependency
-    edo touch *.{5,8}
 }
 
 src_test() {
