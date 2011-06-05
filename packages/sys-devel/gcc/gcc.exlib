@@ -27,6 +27,7 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
         sys-devel/make
+        ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat ) )
     test-expensive:
         dev-util/dejagnu
         sys-devel/autogen
@@ -49,16 +50,14 @@ if ever at_least 4.3; then
                     app-arch/zip )
         build+run:
             dev-libs/gmp[>=4.1]
-            dev-libs/mpfr[>=2.3]
-            ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
+            dev-libs/mpfr[>=2.3]"
 else
     DEPENDENCIES+="
         build:
             doc? ( app-doc/doxygen[>=1.3.9] )
         build+run:
             fortran? ( dev-libs/gmp[>=4.1]
-                       dev-libs/mpfr[>=2.3] )
-            ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat:${SLOT} ) )"
+                       dev-libs/mpfr[>=2.3] )"
 fi
 
 if ever at_least 4.6.0; then
@@ -81,6 +80,10 @@ if ever at_least 4.5.0 ; then
 fi
 
 WORK="${WORKBASE}/build"
+if ever at_least 4.6; then
+    MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
+fi
+
 ECONF_SOURCE="${WORKBASE}"/${PNV}
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
@@ -110,6 +113,10 @@ src_configure() {
     if ever at_least 4.3; then
         pkgversion="Exherbo ${PNVR}"
         option java && LANGS+=",java"
+    fi
+
+    if ever at_least 4.6; then
+        option go && LANGS+=",go"
     fi
 
     local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )

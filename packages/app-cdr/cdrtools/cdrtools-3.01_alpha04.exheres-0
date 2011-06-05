@@ -30,16 +30,19 @@ LICENCES="CDDL-1.0
     LGPL-2.1 [[ note = [ libcdrparanoia ] ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="acl"
 
 # Internal libfile (patched?)
 #          libcdparanoia (patched)
 DEPENDENCIES="
+    build:
+        sys-devel/gettext
     build+run:
+        acl? ( sys-apps/acl )
         !app-cdr/cdrkit [[ description = [ Various file collisions: /usr/bin/{devdump,isodebug,isodump,isoinfo,isovfy} ] ]]
 "
 
-WORK=${WORKBASE}/${PN}-$(ever range 1-3)
+WORK=${WORKBASE}/${PN}-$(ever range 1-2)
 
 DEFAULT_SRC_COMPILE_PARAMS=(
     -j1
@@ -51,6 +54,16 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 DEFAULT_SRC_INSTALL_PARAMS=(
     INS_BASE=/usr
 )
+
+src_prepare() {
+    # workaround automagic dependency on acl in isoinfo and mkisofs
+    if ! option acl ; then
+        edo sed -e 's/-lacl//g' \
+            -i autoconf/configure{,.in}
+    fi
+
+    default
+}
 
 # ./configure is a shell script that notifies people not to use ./configure anymore, and fails
 src_configure() {

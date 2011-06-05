@@ -18,16 +18,16 @@ DEPENDENCIES="
     build:
         app-doc/gtk-doc-autotools
         sys-devel/gettext[>=0.11]
-        dev-util/pkg-config[>=0.16]
-        dbus? ( sys-apps/dbus[>=1.2.14][multibuild_c:*(?)?] ) [[ note = [ only required for building a gdbus test ] ]]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
         fam? ( app-admin/gamin[multibuild_c:*(?)?] )
     test:
-        x11-misc/shared-mime-info
-        dev-util/desktop-file-utils
-        gnome-bindings/pygobject
         dev-python/dbus-python
+        dev-util/desktop-file-utils
+        dev-util/pkg-config[>=0.16]
+        gnome-bindings/pygobject
+        x11-misc/shared-mime-info
+        dbus? ( sys-apps/dbus[>=1.2.14][multibuild_c:*(?)?] ) [[ note = [ only required for building a gdbus test ] ]]
     recommendation:
         gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
     suggestion:
@@ -44,4 +44,9 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-selinux' '--disable-xattr' '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( fam gtk-doc )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( dbus )
+
+src_prepare() {
+    glib_src_prepare
+    eautoreconf
+}
 

@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Helper tool for compiling applications and libraries"
-HOMEPAGE="http://pkg-config.freedesktop.org/wiki"
+HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
 DOWNLOADS="http://pkgconfig.freedesktop.org/releases/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
@@ -12,8 +12,17 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
+        dev-libs/glib:2
         dev-libs/popt
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(  --with-installed-popt )
+
+src_configure() {
+    # workaround pkg-config needing itself during configure
+    export GLIB_CFLAGS="-I/usr/include/glib-2.0 -I/usr/${LIBDIR}/glib-2.0/include"
+    export GLIB_LIBS="-lglib-2.0"
+
+    default
+}
 

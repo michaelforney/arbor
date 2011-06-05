@@ -9,26 +9,40 @@ SUMMARY="A UNIX port of 7z"
 LICENCES="|| ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="platform: amd64 x86"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build:
+        platform:amd64? ( dev-lang/yasm )
+        platform:x86? ( dev-lang/nasm )
+"
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_COMPILE_PARAMS=( -f makefile.parallel_jobs all3 )
-DEFAULT_SRC_INSTALL_PARAMS=( -f makefile.parallel_jobs DEST_HOME="${IMAGE}/usr" )
+DEFAULT_SRC_COMPILE_PARAMS=( all3 )
+DEFAULT_SRC_INSTALL_PARAMS=( DEST_HOME="${IMAGE}/usr" )
 
 src_prepare() {
-    edo sed -e "/^OPTFLAGS/s:-O::" \
-            -e "/^ALLFLAGS/s:-s::" \
-            -e "/^CXX/s:$: ${CXXFLAGS}:" \
-            -e "/^CC/s:$: ${CFLAGS}:" \
+    edo sed -e "s:-m32 ::g" \
+            -e "s:-m64 ::g" \
+            -e "/^OPTFLAGS/s:-O::" \
+            -e "/ALLFLAGS/s:-s ::" \
+            -e "/^CC/s:\$(ALLFLAGS):${CFLAGS} \$(ALLFLAGS):g" \
+            -e "/^CXX/s:\$(ALLFLAGS):${CXXFLAGS} \$(ALLFLAGS):g" \
             -e "/^DEST_SHARE/s:lib/:${LIBDIR}/:" \
             -e "/^DEST_MAN/s:man:share/&:" \
             -e "/Rar/d" \
             -i makefile*
-    edo sed -i -e "/strip/d" install.sh
+
+    edo sed -e "/Rar/d" \
+            -e "/RAR/d" \
+            -i CPP/7zip/Bundles/Format7zFree/makefile
     edo rm -rf CPP/7zip/Compress/Rar
+
+    edo sed -i -e "/strip/d" install.sh
+
+    option platform:amd64 && edo cp -f makefile.linux_amd64_asm makefile.machine
+    option platform:x86 && edo cp -f makefile.linux_x86_asm_gcc_4.X makefile.machine
 }
 
 src_test() {

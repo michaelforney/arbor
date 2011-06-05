@@ -16,7 +16,10 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        dev-libs/gmp[>=4.2]
-        dev-libs/mpfr[>=2.3.1]
+        dev-libs/gmp[>=4.3.2]
+        dev-libs/mpfr[>=2.4.2]
 "
+
+# fixes not building the shared library, already fixed in trunk
+DEFAULT_SRC_CONFIGURE_PARAMS=( "EGREP=egrep" )
 
