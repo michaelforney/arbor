@@ -15,17 +15,18 @@ DEPENDENCIES="
     build:
         app-doc/gtk-doc-autotools
         sys-devel/gettext[>=0.11]
-        dev-util/pkg-config[>=0.16]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
-        sys-apps/dbus[>=1.2.14] [[ note = [ Required for GDBus and to build/run tests ] ]]
         fam? ( app-admin/gamin )
     test:
-        x11-misc/shared-mime-info
-        dev-util/desktop-file-utils
-        gnome-bindings/pygobject
         dev-python/dbus-python
+        dev-util/desktop-file-utils
+        dev-util/pkg-config[>=0.16]
+        gnome-bindings/pygobject
+        sys-apps/dbus[>=1.2.14] [[ note = [ Required for building GDBus tests ] ]]
+        x11-misc/shared-mime-info
     recommendation:
+        sys-apps/dbus[>=1.2.14] [[ note = [ Required for GDBus ] ]]
         dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
         gnome-desktop/dconf [[ description = [ Required for GSettings ] ]]
     suggestion:

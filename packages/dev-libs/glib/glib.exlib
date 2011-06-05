@@ -14,12 +14,20 @@ two threads manipulating the same data structure, they must use a lock to
 synchronize their operation.
 "
 HOMEPAGE="http://www.gtk.org"
+DOWNLOADS+=" http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz"
 
 LICENCES="LGPL-2"
 
 REMOTE_IDS="freshmeat:glib"
 
-export_exlib_phases src_install src_test
+AT_M4DIR=( ${WORKBASE} )
+
+export_exlib_phases src_prepare src_install src_test
+
+glib_src_prepare() {
+    edo cp "${WORKBASE}"/pkg-config-*/pkg.m4 "${WORKBASE}"/
+    default
+}
 
 glib_src_install() {
     default
