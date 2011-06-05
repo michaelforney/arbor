@@ -3,7 +3,6 @@
 # Based in part upon 'linux-atm-2.5.0.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.10 ] ]
 require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Tools for ATM in Linux"
@@ -19,13 +18,7 @@ MYOPTIONS=""
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PNV}-headers.patch"
-    "${FILES}/${PNV}-glibc28.patch"
-    "${FILES}/${PNV}-bison24.patch"
-)
-
-# The tests are completely broken.
+# The tests are completely broken
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -41,12 +34,10 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 src_prepare() {
     default
 
-    # Useless cruft.
+    # Useless cruft
     edo rm doc/README
 
+    # Gentoo bug #159823
     edo sed -i -e '/#define _LINUX_NETDEVICE_H/d' src/arpd/*.c
-    edo sed -i -e 's:cp hosts.atm /etc:cp hosts.atm ${DESTDIR}/etc:' src/config/Makefile.am
-
-    eautoreconf
 }
 
