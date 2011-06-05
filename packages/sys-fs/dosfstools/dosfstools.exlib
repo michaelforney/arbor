@@ -2,38 +2,37 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Utilities to create and check MS-DOS filesystems under Linux"
-HOMEPAGE="ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/${PN}"
-DOWNLOADS="ftp://ftp.uni-erlangen.de/pub/Linux/LOCAL/${PN}/${PNV}.src.tar.gz"
+HOMEPAGE="http://www.daniel-baumann.ch/software/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
 DESCRIPTION="MS-DOS filesystem programs mkdosfs, mkfs.msdos,vfat and the related fsck programs"
 
-LICENCES="GPL-2"
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS=""
 
+# test target doesn't exist
+RESTRICT="test"
+
 DEPENDENCIES=""
 
-DEFAULT_SRC_PREPARE_PATCHES+=(
-    -p0
-        "${FILES}/${PNV}-verify-double-count-fix.patch"
-        "${FILES}/${PNV}-fat32size.patch"
-)
 DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" )
-DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( mkdosfs dosfsck )
 
 src_prepare() {
     default
 
-    edo sed -e 's:^OPTFLAGS = -O2 -fomit-frame-pointer :OPTFLAGS = :' \
-            -e 's:^MANDIR = $(PREFIX)/usr:&/share:' \
-            -e 's:^CFLAGS = :CFLAGS += :' \
+    edo sed -e '/^PREFIX/s:/local::' \
+            -e '/^OPTFLAGS/s:=.*:=:' \
             -i Makefile
 }
 
 src_install() {
     default
 
-    dodir /usr/sbin
-    edo mv "${IMAGE}"/sbin/*fsck* "${IMAGE}"/usr/sbin
+    dodir /sbin
+    edo mv "${IMAGE}"/usr/sbin/*fsck* "${IMAGE}"/sbin
+    edo mv "${IMAGE}"/usr/share/doc/{${PN}/*,${PNVR}}
+    edo rmdir "${IMAGE}"/usr/share/doc/dosfstools
 }
 
