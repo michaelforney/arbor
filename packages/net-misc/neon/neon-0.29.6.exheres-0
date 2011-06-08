@@ -17,21 +17,21 @@ MYOPTIONS="
     libproxy [[ description = [ Support for automatic configuration management through libproxy ] ]]
 "
 
-# Tests need >=openssl-1.0.0a, which is still masked.
+# Tests still/again broken with newer openssl
 RESTRICT="test"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config[>=0.18]
     build+run:
-        dev-libs/openssl
+        dev-libs/openssl[>=0.9.7]
         sys-libs/zlib
        !expat? ( dev-libs/libxml2 )
         expat? ( dev-libs/expat )
         libproxy? ( net-libs/libproxy )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-sydbox.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-0.29.4-sydbox.patch )
 
 src_configure() {
     local myconf
