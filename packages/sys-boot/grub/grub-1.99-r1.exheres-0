@@ -3,6 +3,7 @@
 
 require bash-completion
 require gnu [ suffix=xz ]
+require flag-o-matic
 
 SUMMARY="GRUB (Grand Unified Boot) bootloader"
 
@@ -58,6 +59,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'device-mapper' 'mkfont grub-mkfont' )
+
+pkg_setup() {
+    # grub2 should be compiled with -Os, other optimizations may result in oversized core images
+    replace-flags -O* -Os
+}
 
 src_install() {
     default

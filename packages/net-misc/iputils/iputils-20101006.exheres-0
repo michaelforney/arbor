@@ -5,23 +5,22 @@ MY_PNV="${PN}-s${PV}"
 WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Small useful utilities for networking"
-HOMEPAGE="http://www.skbuff.net/iputils/"
-DOWNLOADS="http://www.skbuff.net/${PN}/${MY_PNV}.tar.bz2
-    http://dev.exherbo.org/~ingmar/distfiles/${PN}/${PNV}-manpages.tar.bz2"
+HOMEPAGE="http://www.skbuff.net/${PN}"
+DOWNLOADS="${HOMEPAGE}/${MY_PNV}.tar.bz2
+    mirror://gentoo/${MY_PNV}-manpages.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="ipv6"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        dev-libs/openssl
+        sys-fs/sysfsutils
+"
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILES}/${PNV}-linux-headers-types.patch"
-    "${FILES}/${PNV}-no-open-max.patch"
-    "${FILES}/${PNV}-kernel-ifaddr.patch"
-)
-
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PN}-20071127-kernel-ifaddr.patch" )
 DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 
 src_prepare() {

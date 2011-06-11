@@ -21,7 +21,10 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug ipv6 )
 # Yes, this is correct
-DEFAULT_SRC_CONFIGURE_PARAMS=( --docdir=/usr/share/doc/ )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --docdir=/usr/share/doc/
+    --disable-strict
+)
 
 src_install() {
     default

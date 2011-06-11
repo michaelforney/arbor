@@ -6,31 +6,35 @@
 require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Simplified Wrapper and Interface Generator"
-HOMEPAGE="http://www.swig.org/"
+HOMEPAGE="http://www.${PN}.org/"
+
+REMOTE_IDS+=" freshmeat:${PN}"
 
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc lua perl python ruby"
+MYOPTIONS="doc lua pcre perl python ruby"
 
 DEPENDENCIES="
-    test-expensive:
-        dev-libs/boost
     build+run:
         lua? ( dev-lang/lua:= )
+        pcre? ( dev-libs/pcre )
         perl? ( dev-lang/perl:=[=5*] )
         python? ( dev-lang/python:=[=2*] )
-        ruby? ( dev-lang/ruby:= )"
+        ruby? ( dev-lang/ruby:= )
+    test-expensive:
+        dev-libs/boost[>=1.20.0]
+"
 
 RESTRICT="test"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --without-{allegrocl,chicken,clisp,csharp,gcj,guile,java,mono,mzscheme,ocaml,octave,php,pike,python3,r,tcl,tk}
+    --without-{allegrocl,chicken,clisp,csharp,d,gcj,go,guile,java,mono,mzscheme,ocaml,octave,php,pike,python3,r,tcl}
     --without-doc
     # Breaks tests
     --disable-ccache
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lua "perl perl5" python ruby )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lua pcre "perl perl5" python ruby )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( NEW FUTURE )
 
 src_test_expensive() {

@@ -2,10 +2,12 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A tool to display dialog boxes from a shell"
-HOMEPAGE="http://invisible-island.net/dialog/dialog.html"
-UPSTREAM_CHANGELOG="http://invisible-island.net/dialog/CHANGES"
-REMOTE_IDS="freshmeat:dialog"
+HOMEPAGE="http://invisible-island.net/${PN}"
 DOWNLOADS="ftp://invisible-island.net/${PN}/${PNV/_p/-}.tgz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/CHANGES [[ lang = en ]]"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -16,12 +18,17 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
-        sys-libs/ncurses"
+        sys-libs/ncurses
+"
 
 WORK="${WORKBASE}/${PNV/_p/-}"
 
-# The upstream configuration scripts doesn't respect # --without-ncursesw, see #202
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls --enable-widec --with-ncursesw --hates=docdir )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --enable-nls
+    --enable-widec
+    --with-ncursesw
+)
 
 src_install() {
     default
