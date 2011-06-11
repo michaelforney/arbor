@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib toolchain-funcs flag-o-matic
+require toolchain-funcs flag-o-matic
 
 export_exlib_phases pkg_setup src_prepare src_configure src_test src_install
 
@@ -90,7 +90,7 @@ llvm_src_prepare() {
             -e "/Exherbo/{N;N;N;s/4\.4\.3/${GCC_VERSION}/g}" \
             -i tools/clang/lib/Frontend/InitHeaderSearch.cpp
         edo sed \
-            -e "/^PROJ_headers :=/s|/lib/|/$(get_libdir)/|" \
+            -e "/^PROJ_headers :=/s|/lib/|/${LIBDIR}/|" \
             -i tools/clang/lib/Headers/Makefile
     fi
     default
@@ -119,13 +119,13 @@ llvm_src_install() {
         DESTDIR="${IMAGE}" \
         KEEP_SYMBOLS=1 \
         PROJ_docsdir=/usr/share/doc/${PNVR} \
-        PROJ_libdir=/usr/$(get_libdir) \
+        PROJ_libdir=/usr/${LIBDIR} \
         VERBOSE=1
 
     if option gold ; then
         # Make sure nm and ar find the gold plugin
         dodir /usr/${CHOST}/lib/bfd-plugins
-        dosym /usr/$(get_libdir)/libLLVMgold.so /usr/${CHOST}/lib/bfd-plugins
+        dosym /usr/${LIBDIR}/libLLVMgold.so /usr/${CHOST}/lib/bfd-plugins
     fi
 }
 
