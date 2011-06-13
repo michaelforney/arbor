@@ -14,7 +14,11 @@ src_unpack() {
 }
 
 src_prepare() {
+    # autogen.sh creates config_types.h.in
+    edo sed -n '/creating config_types\.h\.in/,/^EOF/p' autogen.sh > tiny-autogen.sh
+    edo sh tiny-autogen.sh
     autotools_src_prepare
+
     jbig2dec_src_prepare
 }
 

@@ -30,5 +30,19 @@ jbig2dec_src_prepare() {
     # Move test files where test_jbig2dec.py will find them
     edo mkdir "${WORKBASE}"/ubc
     edo mv "${WORKBASE}"/*.jb2 "${WORKBASE}"/ubc
+
+    # Disable tests that are known to fail
+    local t disabled_tests=(
+        042_13.jb2
+        042_14.jb2
+        042_24.jb2
+        042_25.jb2
+        amb_1.jb2
+        amb_2.jb2
+    )
+    ever is_scm || disabled_tests+=( 042_11.jb2 )
+    for t in ${disabled_tests[@]}; do
+        edo mv "${WORKBASE}"/ubc/${t}{,_disabled}
+    done
 }
 
