@@ -23,6 +23,7 @@ DEPENDENCIES="
         dev-libs/libpaper
         media-libs/freetype:2
         media-libs/fontconfig
+        media-libs/jbig2dec
         media-libs/jpeg
         media-libs/libpng
         media-libs/tiff
@@ -39,7 +40,7 @@ DEPENDENCIES="
 "
 
 src_prepare() {
-    edo rm -r ./{expat,jasper,jpeg,libpng,tiff,zlib}
+    edo rm -r ./{expat,jasper,jbig2dec,jpeg,libpng,tiff,zlib}
 
     if option !gtk; then
         edo sed -e 's:\$(GSSOX)::' \
