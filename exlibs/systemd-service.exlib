@@ -1,10 +1,11 @@
-# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 myexparam systemd_files=[ "${FILES}"/systemd ]
 
 MYOPTIONS="systemd"
 
+export SYSTEMDSYSTEMUNITDIR="/${LIBDIR}/systemd/system"
 
 install_systemd_files() {
     local systemd_files object=
@@ -12,7 +13,7 @@ install_systemd_files() {
     exparam -v systemd_files systemd_files[@]
 
     if option systemd ; then
-        insinto /${LIBDIR}/systemd/system
+        insinto ${SYSTEMDSYSTEMUNITDIR}
 
         for object in "${systemd_files[@]}"; do
             if [[ -d ${object} ]]; then
