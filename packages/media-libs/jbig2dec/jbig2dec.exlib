@@ -31,6 +31,8 @@ jbig2dec_src_prepare() {
     edo mkdir "${WORKBASE}"/ubc
     edo mv "${WORKBASE}"/*.jb2 "${WORKBASE}"/ubc
 
+    expatch -p1 "${FILES}"/jbig2dec-test-script.patch
+
     # Disable tests that are known to fail
     local t disabled_tests=(
         042_13.jb2

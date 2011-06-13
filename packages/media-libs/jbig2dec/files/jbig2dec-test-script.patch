@@ -1,0 +1,13 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Make script return non-zero iff a test failed
+--- jbig2dec/test_jbig2dec.py
++++ jbig2dec/test_jbig2dec.py
+@@ -52,6 +52,7 @@
+ 	(len(self.fails),len(self.tests)))
+     else:
+       self.stream.write('PASSED all %d tests\n' % len(self.tests))
++    return len(self.fails) == 0
+ 
+ class KnownFileHash(SelfTest):
+   'self test to check for correct decode of known test files'
