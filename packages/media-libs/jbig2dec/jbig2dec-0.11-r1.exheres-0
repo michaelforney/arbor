@@ -1,34 +1,9 @@
 # Copyright 2011 Elias Pipping <pipping@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="Decoder implementation of the JBIG2 image compression format"
-DESCRIPTION="
-jbig2dec is a decoder implementation of the JBIG2 image compression format. JBIG2 is designed for
-lossy or lossless encoding of 'bilevel' (1-bit monochrome) images at moderately high resolution, and
-in particular scanned paper documents. In this domain it is very efficient, offering compression
-ratios on the order of 100:1.
-"
-HOMEPAGE="http://jbig2dec.sourceforge.net/"
-DOWNLOADS="
-    http://ghostscript.com/~giles/jbig2/${PN}/${PNV}.tar.gz
-    http://jbig2dec.sourceforge.net/ubc/jb2streams.zip
-"
+require jbig2dec
 
-LICENCES="GPL-3"
-SLOT="0"
+DOWNLOADS+=" http://ghostscript.com/~giles/jbig2/${PN}/${PNV}.tar.gz"
+
 PLATFORMS="~amd64"
-MYOPTIONS=""
-
-DEPENDENCIES=""
-
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-shared
-    --without-libpng # Does not detect libpng 1.4; avoid an automagic dep
-)
-
-src_prepare() {
-    # Move test files where test_jbig2dec.py will find them
-    edo mkdir "${WORKBASE}"/ubc
-    edo mv "${WORKBASE}"/*.jb2 "${WORKBASE}"/ubc
-}
 
