@@ -1,9 +1,16 @@
 # Copyright 2011 Elias Pipping <pipping@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require jbig2dec
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] jbig2dec
 
 DOWNLOADS+=" http://ghostscript.com/~giles/jbig2/${PN}/${PNV}.tar.gz"
 
 PLATFORMS="~amd64"
+
+src_prepare() {
+    jbig2dec_src_prepare
+
+    expatch -p1 "${FILES}"/jbig2dec-libpng.patch
+    autotools_src_prepare
+}
 

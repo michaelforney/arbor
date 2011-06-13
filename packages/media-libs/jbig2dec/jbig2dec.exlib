@@ -19,11 +19,13 @@ LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        media-libs/libpng
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
-    --without-libpng # Does not detect libpng 1.4; avoid an automagic dep
 )
 
 jbig2dec_src_prepare() {
