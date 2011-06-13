@@ -190,7 +190,7 @@ src_install() {
 
     # libraries
     local libdir
-    all_libdirs=$(get_all_libdirs)
+    all_libdirs=$(get_all_libdirs || die "get_all_libdirs failed")
     for libdir in ${all_libdirs}; do
         for x in usr/${libdir}/*-gdb.py ; do
             [[ -f ${x} ]] || continue
