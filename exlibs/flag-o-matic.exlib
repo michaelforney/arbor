@@ -15,10 +15,6 @@
 #### replace-flags <orig.flag> <new.flag> ###
 # Replace a flag by another one
 #
-#### replace-cpu-flags <old.cpus> <new.cpu> ###
-# Replace march/mcpu flags that specify <old.cpus>
-# with flags that specify <new.cpu>
-#
 #### strip-flags ####
 # Strip C[XX]FLAGS of everything except known
 # good options.
@@ -163,21 +159,6 @@ replace-flags() {
         eval export ${fset}=\${new_${fset}\[*]}
     done
 
-    return 0
-}
-
-replace-cpu-flags() {
-    illegal_in_global_scope
-
-    local newcpu="$#" ; newcpu="${!newcpu}"
-    while [ $# -gt 1 ] ; do
-        # quote to make sure that no globbing is done (particularly on
-        # ${oldcpu}) prior to calling replace-flags
-        replace-flags "-march=${1}" "-march=${newcpu}"
-        replace-flags "-mcpu=${1}" "-mcpu=${newcpu}"
-        replace-flags "-mtune=${1}" "-mtune=${newcpu}"
-        shift
-    done
     return 0
 }
 
