@@ -89,9 +89,7 @@ pkg_setup() {
 }
 
 src_configure() {
-    local clients repositories
-    clients=$(echo default accerso cave instruo | tr -s \  ,)
-    repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
+    local repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
 
     econf \
         $(option_enable doc doxygen) \
@@ -107,7 +105,7 @@ src_configure() {
         $(option_enable xml) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-visibility \
-        --with-clients=${clients} \
+        --with-clients=default,cave \
         --with-environments=default \
         --with-repositories=${repositories} \
         --with-default-distribution=exherbo \
@@ -141,13 +139,8 @@ src_install() {
 
     option python && python_bytecompile
 
-    local bashcomp bashcompletions
-    bashcompletions="accerso cave instruo"
-    for bashcomp in ${bashcompletions}; do
-        dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
-    done
-
-    dozshcompletion "${WORK}"/zsh-completion/_cave
+    dobashcompletion bash-completion/cave cave
+    dozshcompletion zsh-completion/_cave
     keepdir /var/lib/exherbo/news
     edo rm -rf "${IMAGE}"/var/lib/gentoo
 }
