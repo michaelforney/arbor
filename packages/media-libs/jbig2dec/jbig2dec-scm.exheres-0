@@ -1,0 +1,26 @@
+# Copyright 2011 Elias Pipping <pipping@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="git://git.ghostscript.com/jbig2dec.git"
+
+require scm-git autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] jbig2dec
+
+
+PLATFORMS="~amd64"
+
+src_unpack() {
+    default
+    scm_src_unpack
+}
+
+src_prepare() {
+    jbig2dec_src_prepare
+
+    expatch -p1 "${FILES}"/jbig2dec-libpng.patch
+
+    # autogen.sh creates config_types.h.in
+    edo sed -n '/creating config_types\.h\.in/,/^EOF/p' autogen.sh > tiny-autogen.sh
+    edo sh tiny-autogen.sh
+    autotools_src_prepare
+}
+

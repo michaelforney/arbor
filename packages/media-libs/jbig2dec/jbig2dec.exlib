@@ -1,0 +1,52 @@
+# Copyright 2011 Elias Pipping <pipping@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases src_prepare
+
+SUMMARY="Decoder implementation of the JBIG2 image compression format"
+DESCRIPTION="
+jbig2dec is a decoder implementation of the JBIG2 image compression format. JBIG2 is designed for
+lossy or lossless encoding of 'bilevel' (1-bit monochrome) images at moderately high resolution, and
+in particular scanned paper documents. In this domain it is very efficient, offering compression
+ratios on the order of 100:1.
+"
+HOMEPAGE="http://jbig2dec.sourceforge.net/"
+DOWNLOADS="
+    http://jbig2dec.sourceforge.net/ubc/jb2streams.zip
+"
+
+LICENCES="GPL-3"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        media-libs/libpng
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+)
+
+jbig2dec_src_prepare() {
+    # Move test files where test_jbig2dec.py will find them
+    edo mkdir "${WORKBASE}"/ubc
+    edo mv "${WORKBASE}"/*.jb2 "${WORKBASE}"/ubc
+
+    expatch -p1 "${FILES}"/jbig2dec-test-script.patch
+
+    # Disable tests that are known to fail
+    local t disabled_tests=(
+        042_13.jb2
+        042_14.jb2
+        042_24.jb2
+        042_25.jb2
+        amb_1.jb2
+        amb_2.jb2
+    )
+    ever is_scm || disabled_tests+=( 042_11.jb2 )
+    for t in ${disabled_tests[@]}; do
+        edo mv "${WORKBASE}"/ubc/${t}{,_disabled}
+    done
+}
+

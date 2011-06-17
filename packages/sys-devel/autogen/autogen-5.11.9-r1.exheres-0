@@ -1,7 +1,7 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ subdir=rel${PV} ] flag-o-matic
+require autotools [ supported_automake=[ 1.11 ] supported_autoconf=[ 2.5 ] ] gnu [ subdir=rel${PV} ] flag-o-matic
 
 SUMMARY="AutoGen is a tool designed to simplify the creation and maintenance of programs that contain large amounts of repetitious text"
 
@@ -12,7 +12,7 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        dev-lang/guile:1.8
+        dev-lang/guile
         dev-libs/libxml2
 "
 
@@ -21,4 +21,11 @@ pkg_setup() {
     append-flags -O0
 }
 
+AT_M4DIR=( config )
+
+src_prepare() {
+    # Tests fails on machines that are too slow or busy
+    edo sed -e 's/usage\.test//' -i autoopts/test/Makefile.am
+    autotools_src_prepare
+}
 

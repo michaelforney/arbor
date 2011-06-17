@@ -1,4 +1,5 @@
 # Copyright 1999-2008 Ciaran McCreesh
+# Copyright 2011 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
 require python bash-completion flag-o-matic zsh-completion
@@ -56,9 +57,19 @@ DEPENDENCIES="
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
 
+if ever at_least 0.62.0; then
+    DEPENDENCIES+="
+        build:
+            dev-cpp/gtest
+    "
+fi
+
 if ever is_scm; then
     DEPENDENCIES+="
         build:
+            sys-devel/autoconf:2.5
+            sys-devel/automake:1.11
+            sys-devel/m4
             app-doc/asciidoc[>=8.6.3]
             app-text/xmlto
     "
@@ -78,10 +89,7 @@ pkg_setup() {
 }
 
 src_configure() {
-    local clients environments repositories
-    clients=$(echo default accerso cave instruo | tr -s \  ,)
-    environments="default"
-    repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
+    local repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
 
     econf \
         $(option_enable doc doxygen) \
@@ -97,8 +105,8 @@ src_configure() {
         $(option_enable xml) \
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-visibility \
-        --with-clients=${clients} \
-        --with-environments=${environments} \
+        --with-clients=default,cave \
+        --with-environments=default \
         --with-repositories=${repositories} \
         --with-default-distribution=exherbo \
         --with-config-framework=eclectic \
@@ -131,13 +139,8 @@ src_install() {
 
     option python && python_bytecompile
 
-    local bashcomp bashcompletions
-    bashcompletions="accerso cave instruo"
-    for bashcomp in ${bashcompletions}; do
-        dobashcompletion bash-completion/"${bashcomp}" "${bashcomp}"
-    done
-
-    dozshcompletion "${WORK}"/zsh-completion/_cave
+    dobashcompletion bash-completion/cave cave
+    dozshcompletion zsh-completion/_cave
     keepdir /var/lib/exherbo/news
     edo rm -rf "${IMAGE}"/var/lib/gentoo
 }

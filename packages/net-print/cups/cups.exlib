@@ -13,9 +13,10 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="acl baselayout dbus debug gnutls kerberos ldap libusb pam perl python tcpd tiff threads xinetd
+MYOPTIONS="acl avahi baselayout dbus debug gnutls kerberos ldap libusb pam perl python tcpd tiff threads xinetd
 
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
+avahi [[ description = [ Enable DNS Service Discovery (DNS_SD) support (printer sharing using Avahi) ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
 pdf [[ description = [ Support pdf printing via pdftops from poppler ] ]]
@@ -24,7 +25,7 @@ linguas: ( ${LANGS} )
 multibuild_c: ( 32 64 )"
 
 # TODO:
-# options: avahi/zeroconf java kerberos php slp
+# options: java kerberos php slp
 # features: maybe ppds?
 # probably better slotting to avoid rebuilding
 
@@ -34,6 +35,7 @@ DEPENDENCIES="
         gnutls? ( dev-util/pkg-config )
     build+run:
         acl? ( sys-apps/acl )
+        avahi? ( net-dns/avahi[dns_sd] )
         dbus? ( sys-apps/dbus )
         gnutls? ( dev-libs/gnutls )
         kerberos? ( app-crypt/heimdal )
@@ -143,6 +145,8 @@ configure_one_multibuild() {
         $(option_enable !gnutls openssl) \
         $(option_enable acl) \
         $(option_enable dbus) \
+        $(option_enable avahi) \
+        $(option_enable avahi dnssd) \
         $(option_enable pam) \
         $(option_enable kerberos gssapi) \
         $(option_enable ldap) \
@@ -154,6 +158,7 @@ configure_one_multibuild() {
         $(option_with python) \
         $(option_with xinetd xinetd /etc/xinetd.d) \
         DSOFLAGS="${CFLAGS}" LDFLAGS="${CFLAGS} ${LDFLAGS}" \
+        $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
         "${myconf[@]}"
 }
 
