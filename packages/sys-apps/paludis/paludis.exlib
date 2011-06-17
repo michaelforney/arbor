@@ -1,4 +1,5 @@
 # Copyright 1999-2008 Ciaran McCreesh
+# Copyright 2011 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
 require python bash-completion flag-o-matic zsh-completion
@@ -56,9 +57,19 @@ DEPENDENCIES="
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
 
+if ever at_least 0.62.0; then
+    DEPENDENCIES+="
+        build:
+            dev-cpp/gtest
+    "
+fi
+
 if ever is_scm; then
     DEPENDENCIES+="
         build:
+            sys-devel/autoconf:2.5
+            sys-devel/automake:1.11
+            sys-devel/m4
             app-doc/asciidoc[>=8.6.3]
             app-text/xmlto
     "
@@ -78,9 +89,8 @@ pkg_setup() {
 }
 
 src_configure() {
-    local clients environments repositories
+    local clients repositories
     clients=$(echo default accerso cave instruo | tr -s \  ,)
-    environments="default"
     repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
 
     econf \
@@ -98,7 +108,7 @@ src_configure() {
         --with-vim-install-dir=/usr/share/vim/vimfiles \
         --enable-visibility \
         --with-clients=${clients} \
-        --with-environments=${environments} \
+        --with-environments=default \
         --with-repositories=${repositories} \
         --with-default-distribution=exherbo \
         --with-config-framework=eclectic \
