@@ -1,0 +1,31 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+PV_REV=${PV#*_p}
+
+require llvm [ snapshot=true ]
+
+DOWNLOADS="http://dev.exherbo.org/~pipping/distfiles/lldb-r${PV_REV}.tar.xz"
+
+PLATFORMS="~amd64 ~x86"
+
+MYOPTIONS="lldb"
+
+DEPENDENCIES+="
+    build+run:
+        lldb? ( dev-libs/libedit )
+"
+
+WORK=${WORKBASE}/${PN}
+
+src_prepare() {
+    if option lldb; then
+        edo pushd tools/lldb/source/Interpreter
+        expatch -p0 "${FILES}"/lldb-install.patch
+        edo popd
+    else
+        edo rm -rf tools/lldb
+    fi
+    llvm_src_prepare
+}
+

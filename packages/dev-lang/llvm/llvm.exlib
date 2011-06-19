@@ -5,6 +5,8 @@ require toolchain-funcs flag-o-matic
 
 export_exlib_phases pkg_setup src_prepare src_configure src_test src_install
 
+myexparam -b snapshot=false
+
 SUMMARY="Low Level Virtual Machine (LLVM)"
 DESCRIPTION="
 Low-Level Virtual Machine (LLVM) is a compiler infrastructure designed for
@@ -40,7 +42,7 @@ LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS="clang gold"
 
-if ! ever is_scm; then
+if ! ever is_scm && ! exparam -b snapshot; then
     MYOPTIONS+=" doc"
 fi
 
@@ -59,7 +61,7 @@ DEPENDENCIES="
         dev-lang/python:*
 "
 
-if ! ever is_scm; then
+if ! ever is_scm && ! exparam -b snapshot; then
     DEPENDENCIES+="
     build:
         doc? (
@@ -85,7 +87,7 @@ llvm_pkg_setup() {
 
 llvm_src_prepare() {
     if option clang; then
-        ever is_scm || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
+        ever is_scm || exparam -b snapshot || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
         edo sed \
             -e "/Exherbo/{N;N;N;s/4\.4\.3/${GCC_VERSION}/g}" \
             -i tools/clang/lib/Frontend/InitHeaderSearch.cpp
@@ -97,6 +99,8 @@ llvm_src_prepare() {
 }
 
 llvm_src_configure() {
+    local enable_docs=
+    ever is_scm || exparam -b snapshot || enable_docs=$(option_enable doc doxygen)
     econf \
         --enable-shared \
         --enable-optimized \
@@ -105,7 +109,7 @@ llvm_src_configure() {
         --with-cxx-include-root="/usr/include/c++/${GCC_VERSION}/" \
         $(option_with clang built-clang) \
         $(option gold && echo --with-binutils-include=/usr/include) \
-        $(ever is_scm || option_enable doc doxygen)
+        ${enable_docs}
 }
 
 llvm_src_test() {
