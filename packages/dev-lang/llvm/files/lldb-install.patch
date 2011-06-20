@@ -1,3 +1,6 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: http://llvm.org/bugs/show_bug.cgi?id=10157
+Reason: respect destdir, misc. fixes
 Index: Makefile
 ===================================================================
 --- Makefile	(revision 133394)
@@ -7,10 +10,10 @@ Index: Makefile
  PYTHON_DIR := $(LLDB_BIN_DIR)
  ifeq ($(HOST_OS),Darwin)
 -PYTHON_DEST_DIR := /Library/Python/$(shell python -c 'import sys; print sys.version[:3]')/site-packages
-+PYTHON_DEST_DIR := $(DESTDIR)/Library/Python/$(shell python -c 'import sys; print sys.version[:3]')/site-packages
++PYTHON_DEST_DIR := $(DESTDIR)$(realpath /Library/Python/$(shell python -c 'import sys; print sys.version[:3]')/site-packages)
  else
 -PYTHON_DEST_DIR := $(shell python -c 'import sys; print sys.exec_prefix')/lib/python$(shell python -c 'import sys; print sys.version[:3]')/site-packages
-+PYTHON_DEST_DIR := $(DESTDIR)$(shell python -c 'import sys; print sys.exec_prefix')/lib/python$(shell python -c 'import sys; print sys.version[:3]')/site-packages
++PYTHON_DEST_DIR := $(DESTDIR)$(realpath $(shell python -c 'import sys; print sys.exec_prefix')/lib/python$(shell python -c 'import sys; print sys.version[:3]')/site-packages )
  endif
  LLDB_SWIG_INCLUDE_DIRS:= -I"$(PROJ_SRC_DIR)/$(LLDB_LEVEL)/include" -I./.
 -LIBLLDB := $(DESTDIR)$(PROJ_libdir)/liblldb$(SHLIBEXT)
