@@ -20,9 +20,9 @@ WORK=${WORKBASE}/${PN}
 
 src_prepare() {
     if option lldb; then
-        edo pushd tools/lldb/source/Interpreter
-        expatch -p0 "${FILES}"/lldb-install.patch
-        edo popd
+        edo sed \
+            -e '/realpath/s|realpath|realpath,|' \
+            -i tools/lldb/source/Interpreter/Makefile
     else
         edo rm -rf tools/lldb
     fi
