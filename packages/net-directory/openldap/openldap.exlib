@@ -1,6 +1,8 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service [ systemd_files=[ "slapd.service" ] ]
+
 export_exlib_phases src_prepare src_compile src_test_expensive src_install
 
 SUMMARY="An open source implementation of the Lightweight Directory Access Protocol"
@@ -91,9 +93,13 @@ openldap_src_install() {
     edo chown ldap:ldap "${IMAGE}"/var/openldap-data
     edo chmod 0700 "${IMAGE}"/var/openldap-data
 
-    keepdir /var/run/openldap
-    edo chown ldap:ldap "${IMAGE}"/var/run/openldap
-    edo chmod 0755 "${IMAGE}"/var/run/openldap
+    if option systemd ; then
+        edo rmdir "${IMAGE}/var/run"
+    else
+        keepdir /var/run/openldap
+        edo chown ldap:ldap "${IMAGE}"/var/run/openldap
+        edo chmod 0755 "${IMAGE}"/var/run/openldap
+    fi
 
     edo chown root:ldap "${IMAGE}"/etc/openldap/slapd.conf
     edo chmod 0640 "${IMAGE}"/etc/openldap/slapd.conf
@@ -101,6 +107,14 @@ openldap_src_install() {
     if option baselayout ; then
         newinitd "${FILES}"/slapd-initd slapd
         newconfd "${FILES}"/slapd-confd slapd
+    fi
+
+    install_systemd_files
+    if option systemd ; then
+        insinto /etc/conf.d
+        newins "${FILES}/slapd-confd" slapd.conf
+        insinto "/${LIBDIR}/tmpfiles.d"
+        newins "${FILES}/systemd/openldap.conf.tmpfiles" openldap.conf
     fi
 }
 
