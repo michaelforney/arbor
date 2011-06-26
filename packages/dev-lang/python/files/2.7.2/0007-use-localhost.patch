@@ -1,15 +1,15 @@
-From d999a55a8f59b268142083f8c80ffe9aee660698 Mon Sep 17 00:00:00 2001
-From: Paul Seidler <bl4sph3my@online.de>
-Date: Sun, 6 Mar 2011 16:07:15 +0100
+From 3ecd7ac659d56f8522009b7ae017095ffb7403c1 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <pl.seidler@gmail.com>
+Date: Sun, 26 Jun 2011 01:57:45 +0000
 Subject: [PATCH] use localhost for tests where possible
 Upstream: no
 
 ---
  Lib/test/test_httplib.py     |    2 +-
  Lib/test/test_httpservers.py |    2 +-
- Lib/test/test_socket.py      |    8 ++++----
+ Lib/test/test_socket.py      |   10 +++++-----
  Lib/test/test_ssl.py         |    2 +-
- 4 files changed, 7 insertions(+), 7 deletions(-)
+ 4 files changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/Lib/test/test_httplib.py b/Lib/test/test_httplib.py
 index 2708728..89eaf9e 100644
@@ -25,7 +25,7 @@ index 2708728..89eaf9e 100644
          self.assertEqual(self.conn.sock.getsockname()[1], self.source_port)
  
 diff --git a/Lib/test/test_httpservers.py b/Lib/test/test_httpservers.py
-index cc9b93c..10c58c0 100644
+index 3de0923..f0542e9 100644
 --- a/Lib/test/test_httpservers.py
 +++ b/Lib/test/test_httpservers.py
 @@ -54,7 +54,7 @@ class TestServerThread(threading.Thread):
@@ -38,10 +38,19 @@ index cc9b93c..10c58c0 100644
          self.test_object.server_started.set()
          self.test_object = None
 diff --git a/Lib/test/test_socket.py b/Lib/test/test_socket.py
-index bd2da9b..7ae10ef 100644
+index 12e09dd..5fe33c8 100644
 --- a/Lib/test/test_socket.py
 +++ b/Lib/test/test_socket.py
-@@ -499,7 +499,7 @@ class GeneralModuleTests(unittest.TestCase):
+@@ -278,7 +278,7 @@ class GeneralModuleTests(unittest.TestCase):
+         # Testing that sendto doens't masks failures. See #10169.
+         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+         self.addCleanup(s.close)
+-        s.bind(('', 0))
++        s.bind(('localhost', 0))
+         sockname = s.getsockname()
+         # 2 args
+         with self.assertRaises(UnicodeEncodeError):
+@@ -538,7 +538,7 @@ class GeneralModuleTests(unittest.TestCase):
  
      # XXX The following don't test module-level functionality...
  
@@ -50,7 +59,7 @@ index bd2da9b..7ae10ef 100644
          """Use a temporary socket to elicit an unused ephemeral port.
  
          Args:
-@@ -563,7 +563,7 @@ class GeneralModuleTests(unittest.TestCase):
+@@ -602,7 +602,7 @@ class GeneralModuleTests(unittest.TestCase):
          sock.close()
  
      def test_getsockaddrarg(self):
@@ -59,7 +68,7 @@ index bd2da9b..7ae10ef 100644
          port = self._get_unused_port(bind_address=host)
          big_port = port + 65536
          neg_port = port - 65536
-@@ -621,7 +621,7 @@ class GeneralModuleTests(unittest.TestCase):
+@@ -661,7 +661,7 @@ class GeneralModuleTests(unittest.TestCase):
          socket.getaddrinfo(HOST, None, 0, 0, 0, socket.AI_PASSIVE)
          # a server willing to support both IPv4 and IPv6 will
          # usually do this
@@ -68,7 +77,7 @@ index bd2da9b..7ae10ef 100644
                             socket.AI_PASSIVE)
  
  
-@@ -1179,7 +1179,7 @@ class NetworkConnectionAttributesTest(SocketTCPTest, ThreadableTest):
+@@ -1226,7 +1226,7 @@ class NetworkConnectionAttributesTest(SocketTCPTest, ThreadableTest):
      testSourceAddress = _justAccept
      def _testSourceAddress(self):
          self.cli = socket.create_connection((HOST, self.port), timeout=30,
@@ -78,10 +87,10 @@ index bd2da9b..7ae10ef 100644
          self.assertEqual(self.cli.getsockname()[1], self.source_port)
          # The port number being used is sufficient to show that the bind()
 diff --git a/Lib/test/test_ssl.py b/Lib/test/test_ssl.py
-index 2567218..b24089a 100644
+index 3df4d0c..e0fdd20 100644
 --- a/Lib/test/test_ssl.py
 +++ b/Lib/test/test_ssl.py
-@@ -191,7 +191,7 @@ class BasicSocketTests(unittest.TestCase):
+@@ -189,7 +189,7 @@ class BasicSocketTests(unittest.TestCase):
          self.assertRaises(socket.error, ss.recvfrom, 1)
          self.assertRaises(socket.error, ss.recvfrom_into, bytearray(b'x'), 1)
          self.assertRaises(socket.error, ss.send, b'x')
@@ -91,5 +100,5 @@ index 2567218..b24089a 100644
  
  class NetworkedTests(unittest.TestCase):
 -- 
-1.7.4.1
+1.7.5.4
 
