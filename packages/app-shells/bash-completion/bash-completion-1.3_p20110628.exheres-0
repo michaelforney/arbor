@@ -1,11 +1,13 @@
-# Copyright 2007,2009 Mike Kelly <pioto@exherbo.org>
+# Copyright 2007, 2009, 2010 Mike Kelly <pioto@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'bash-completion-20060301-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2006 Gentoo Foundation
 
-require bash-completion
+require bash-completion autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
-RESTRICT="test"
+DOWNLOADS="http://dev.exherbo.org/~zlin/distfiles/${PNV}.tar.bz2"
 
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+RESTRICT="test"
 

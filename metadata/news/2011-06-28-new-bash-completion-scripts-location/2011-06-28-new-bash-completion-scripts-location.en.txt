@@ -1,0 +1,23 @@
+Title: New bash completion scripts location
+Author: Łukasz P. Michalik <lmi@ift.uni.wroc.pl>
+Content-Type: text/plain
+Posted: 2011-06-28
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: app-shells/bash-completion
+
+Starting with version bash-completion-1.3_p20110628 the only supported
+location for the completion scripts is
+/usr/share/bash-completion/completions/.  Scripts in the directory
+/etc/bash_completion.d/ are ignored as well as /etc/bash_completion
+and /etc/bash/bashrc.d/bash-completion.sh scripts.  It is safe to
+remove these directories and files.  Since all installed completions
+are now enabled by default, the eclectic bashcomp module is no longer
+of use and has been removed.  Packages using bash-completion.exlib
+will make use of this change automatically but need to be reinstalled.
+The following command provides a list of relevant packages:
+
+# cave print-ids --matching '*/*::/[bash-completion][.INHERITED<bash-completion]' -f '%c/%p:%s\n'
+
+Packages that make use of the deprecated locations and don't inherit
+bash-completion.exlib will need to be fixed.
