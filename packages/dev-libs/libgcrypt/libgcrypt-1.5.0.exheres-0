@@ -1,0 +1,34 @@
+# Copyright 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="General purpose crypto library based on the code used in GnuPG"
+HOMEPAGE="http://www.gnupg.org/"
+DOWNLOADS="mirror://gnupg/${PN}/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="LGPL-2.1 [[ description = [ Applies to the library ] ]]
+      GPL-2 [[ description = [ Applies to the manual & tools ] ]]"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libgpg-error[>=1.8]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-O-flag-munging
+    # Alpha code, needs kernel patches
+    --without-capabilities
+    # Suggested by upstream, also see Gentoo #201917
+    --disable-padlock-support
+)
+
+src_install() {
+    default
+    edo rmdir "${IMAGE}"/usr/sbin
+}
+
