@@ -111,12 +111,15 @@ systemd_pkg_pretend() {
 }
 
 systemd_src_prepare() {
+    expatch "${FILES}/tmpfiles-binfmt-unprefixed.patch"
+
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
         edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
         edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/binfmtdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
 
         autotools_src_prepare

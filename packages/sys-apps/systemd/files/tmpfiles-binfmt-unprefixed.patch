@@ -1,0 +1,66 @@
+From 9efaae93df0230d134a2659872f86bef937d4781 Mon Sep 17 00:00:00 2001
+From: Dan Callaghan <djc@djc.id.au>
+Date: Sun, 3 Jul 2011 17:08:11 +1000
+Subject: [PATCH] obey configured prefix for tmpfiles.d and binfmt.d
+Upstream: https://bugs.freedesktop.org/show_bug.cgi?id=38686
+
+
+diff --git a/Makefile.am b/Makefile.am
+index 7ca0ae8..e34c55b 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -32,6 +32,7 @@ bashcompletiondir=$(sysconfdir)/bash_completion.d
+ pkgsysconfdir=$(sysconfdir)/systemd
+ userunitdir=$(prefix)/lib/systemd/user
+ tmpfilesdir=$(prefix)/lib/tmpfiles.d
++binfmtdir=$(prefix)/lib/binfmt.d
+ usergeneratordir=$(pkglibexecdir)/user-generators
+ 
+ # And these are the special ones for /
+@@ -62,6 +63,8 @@ AM_CPPFLAGS = \
+ 	-DRANDOM_SEED=\"$(localstatedir)/lib/random-seed\" \
+ 	-DSYSTEMD_CRYPTSETUP_PATH=\"$(rootlibexecdir)/systemd-cryptsetup\" \
+ 	-DSYSTEM_GENERATOR_PATH=\"$(systemgeneratordir)\" \
++	-DSITE_TMPFILES_DIR=\"$(tmpfilesdir)\" \
++	-DSITE_BINFMT_DIR=\"$(binfmtdir)\" \
+ 	-DUSER_GENERATOR_PATH=\"$(usergeneratordir)\" \
+ 	-DSYSTEM_SHUTDOWN_PATH=\"$(systemshutdowndir)\" \
+ 	-I $(top_srcdir)/src
+@@ -1319,7 +1322,7 @@ install-data-hook:
+ 		$(DESTDIR)$(usergeneratordir)
+ if ENABLE_BINFMT
+ 	$(MKDIR_P) -m 0755 \
+-		$(DESTDIR)$(prefix)/lib/binfmt.d \
++		$(DESTDIR)$(binfmtdir) \
+ 		$(DESTDIR)$(sysconfdir)/binfmt.d
+ endif
+ 	$(MKDIR_P) -m 0755 \
+diff --git a/src/binfmt.c b/src/binfmt.c
+index a815a11..2e854c2 100644
+--- a/src/binfmt.c
++++ b/src/binfmt.c
+@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
+                                     "/run/binfmt.d",
+                                     "/etc/binfmt.d",
+                                     "/usr/local/lib/binfmt.d",
+-                                    "/usr/lib/binfmt.d",
++                                    SITE_BINFMT_DIR,
+                                     NULL);
+ 
+                 if (r < 0) {
+diff --git a/src/tmpfiles.c b/src/tmpfiles.c
+index 954c3b7..8a4b9ba 100644
+--- a/src/tmpfiles.c
++++ b/src/tmpfiles.c
+@@ -967,7 +967,7 @@ int main(int argc, char *argv[]) {
+                                     "/run/tmpfiles.d",
+                                     "/etc/tmpfiles.d",
+                                     "/usr/local/lib/tmpfiles.d",
+-                                    "/usr/lib/tmpfiles.d",
++                                    SITE_TMPFILES_DIR,
+                                     NULL);
+                 if (r < 0) {
+                         r = EXIT_FAILURE;
+-- 
+1.7.5.4
+
