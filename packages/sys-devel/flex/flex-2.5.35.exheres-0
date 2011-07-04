@@ -15,7 +15,11 @@ DEPENDENCIES="
         sys-devel/bison
         sys-devel/m4[>=1.4]"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-gcc-4.4-elif.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+	"${FILES}/${PNV}-gcc-4.4-elif.patch"
+	"${FILES}/${PNV}-sign.patch"
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
