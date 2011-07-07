@@ -146,9 +146,9 @@ ruby_src_install() {
             "${IMAGE}"/${ruby_libdir}/rubygems/defaults.rb
 
         # the included ruby gems are vendor gems
-        edo mv "${IMAGE}"/usr/$(get_libdir)/ruby/{,vendor_}gems
+        edo mv "${IMAGE}"/usr/${LIBDIR}/ruby/{,vendor_}gems
         # keep the gem dirs
-        edo keepdir /usr/$(get_libdir)/ruby/{vendor_,}gems/1.9/{gems,doc,cache,specifications}
+        edo keepdir /usr/${LIBDIR}/ruby/{vendor_,}gems/1.9/{gems,doc,cache,specifications}
     fi
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
     edo popd
