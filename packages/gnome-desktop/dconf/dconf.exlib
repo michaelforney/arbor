@@ -1,12 +1,14 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License
 
-require gnome.org
+require gnome.org bash-completion
 
 export_exlib_phases src_install
 
 SUMMARY="A low-level configuration system"
 HOMEPAGE="http://live.gnome.org/dconf"
+
+DEFAULT_SRC_INSTALL_PARAMS=( completiondir=/ )
 
 dconf_src_install() {
     default
@@ -14,5 +16,10 @@ dconf_src_install() {
     hereenvd 80dconf-databases << EOF
 CONFIG_PROTECT_MASK="/etc/dconf/db"
 EOF
+
+    if ever at_least 0.7.4; then
+        dobashcompletion "${IMAGE}"/dconf-bash-completion.sh
+        edo rm "${IMAGE}"/dconf-bash-completion.sh
+    fi
 }
 
