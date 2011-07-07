@@ -58,16 +58,22 @@ else
                        dev-libs/mpfr[>=2.3] )"
 fi
 
-if ever at_least 4.6.0; then
+# Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
+# >=4.4
+# TODO: for 4.6 different cloog backends (cloog-isl, cloog-parma)
+if ever at_least 4.4.0-r1; then
     MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
     DEPENDENCIES+="
-        build:
-            graphite? ( dev-libs/ppl:=[>=0.11] )"
-elif ever at_least 4.4.0-r1; then
-    MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
-    DEPENDENCIES+="
-        build:
+        build+run:
             graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
+fi
+
+# Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
+# >=4.4
+if ever at_least 4.6.0; then
+    DEPENDENCIES+="
+        build+run:
+            graphite? ( dev-libs/ppl:=[>=0.11] )"
 fi
 
 if ever at_least 4.5.0 ; then
@@ -130,6 +136,7 @@ src_configure() {
             option_with graphite cloog &&
             option_with graphite ppl &&
             echo --with-system-zlib) \
+        $(ever at_least 4.6 && option_enable graphite cloog-backend ppl-legacy) \
         $(ever at_least 4.5.0 && echo --with-libelf) \
         $(option_enable propolice libssp)
 }
