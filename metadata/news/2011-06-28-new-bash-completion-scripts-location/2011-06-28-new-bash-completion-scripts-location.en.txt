@@ -1,23 +1,35 @@
 Title: New bash completion scripts location
 Author: Łukasz P. Michalik <lmi@ift.uni.wroc.pl>
+Author: Bo Ørsted Andresen <zlin@exherbo.org>
 Content-Type: text/plain
 Posted: 2011-06-28
 Revision: 1
 News-Item-Format: 1.0
 Display-If-Installed: app-shells/bash-completion
 
-Starting with version bash-completion-1.3_p20110628 the only supported
-location for the completion scripts is
-/usr/share/bash-completion/completions/.  Scripts in the directory
-/etc/bash_completion.d/ are ignored as well as /etc/bash_completion
-and /etc/bash/bashrc.d/bash-completion.sh scripts.  It is safe to
-remove these directories and files.  Since all installed completions
-are now enabled by default, the eclectic bashcomp module is no longer
-of use and has been removed.  Packages using bash-completion.exlib
-will make use of this change automatically but need to be reinstalled.
-The following command provides a list of relevant packages:
+Starting with bash-completion-1.3_p20110628 the only supported location for bash
+completion scripts is /usr/share/bash-completion/completions/.
+
+The /etc/bash/bashrc.d/bash-completion.sh and /etc/bash_completion scripts have
+been replaced by /etc/profile.d/bash_completion.sh in order to follow upstream
+more closely. You can remove those.
+
+Since all installed completions are now enabled by default, the eclectic
+bashcomp module is no longer of use and has been removed in eclectic 2.0.7.
+
+Packages using bash-completion.exlib will make use of this change automatically,
+but need to be reinstalled. The following command provides a list of relevant
+packages:
 
 # cave print-ids --matching '*/*::/[bash-completion][.INHERITED<bash-completion]' -f '%c/%p:%s\n'
 
-Packages that make use of the deprecated locations and don't inherit
-bash-completion.exlib will need to be fixed.
+Packages that make use of the deprecated locations, /usr/share/bash-completion/
+and /etc/bash_completion.d/, and don't inherit bash-completion.exlib will need
+to be fixed manually.
+
+# cave owner /etc/bash_completion.d/
+
+If that command shows nothing, it is safe to remove /etc/bash_completion.d/.
+
+The symlinks in that directory were created by the now removed eclectic bashcomp
+module.
