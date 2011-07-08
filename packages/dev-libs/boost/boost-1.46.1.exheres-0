@@ -63,8 +63,6 @@ CMAKE_SRC_CONFIGURE_OPTION_ENABLES=( DEBUG )
 src_install() {
     cmake_src_install
 
-    edo find "${IMAGE}" -type d -empty -delete
-
     if option doc ; then
         # FIXME Should really be handled by boosts buildsystem
         local f
@@ -77,5 +75,7 @@ src_install() {
 
         dosym /usr/include/${PN} /usr/share/doc/${PNVR}/html/${PN}
     fi
+
+    edo find "${IMAGE}" -type d -empty -delete
 }
 
