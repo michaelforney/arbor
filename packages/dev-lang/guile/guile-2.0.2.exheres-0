@@ -1,7 +1,7 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require guile flag-o-matic
+require guile
 
 LICENCES="
   LGPL-3
@@ -18,9 +18,4 @@ DEPENDENCIES="
         dev-libs/libffi
         dev-libs/libunistring
 "
-
-pkg_setup() {
-    # Keep compilation of scheme code in modules/ from segfault'ing
-    append-flags -O1
-}
 
