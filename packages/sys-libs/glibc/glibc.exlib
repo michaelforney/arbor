@@ -44,6 +44,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-headers=/usr/include
     --without-gd
     --enable-kernel=2.6.22
+    # could also be enabled for <2.14 but needs testing
+    $(ever at_least 2.14 && echo "--enable-stackguard-randomization")
 )
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
