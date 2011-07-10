@@ -98,18 +98,26 @@ fi
 
 # Used for setting DOWNLOADS (when ${1} is non-zero) and for outputting the patch names (for src_prepare)
 vim_src_uri_patches() {
-    # Upstream provides patches cat'ed and gzipped per hundred, use those to fetch fewer files.
-    local i hundreds singles
-    ((hundreds=${VIM_PATCH_LEVEL}/100))
-    ((singles=${VIM_PATCH_LEVEL}-${hundreds}*100))
+    # Upstream provides patches cat'ed and gzipped per hundred until 7.2, use those to fetch fewer files.
+    local i
 
-    for((i=0;i<hundreds;i++)); do
-        printf "${1:+${VIM_BASE_URI}/patches/${VIM_VERSION}/${VIM_VERSION}.%03d-%03d.gz -> } \
-            vim-patches-${VIM_VERSION}.%03d-%03d.gz\n" ${1:+"$((i*100+1))" "$(( (i+1)*100 ))"} "$((i*100+1))" "$(( (i+1)*100 ))"
-    done
-    for((i=hundreds*100+1;i<=hundreds*100+singles;i++)); do
-        printf "${1:+${VIM_BASE_URI}/patches/${VIM_VERSION}/${VIM_VERSION}.%03d -> } vim-${VIM_VERSION}.%03d.patch\n" ${1:+"${i}"} "${i}"
-    done
+    if ever at_least 7.3; then
+        for((i=1;i<=${VIM_PATCH_LEVEL};i++)); do
+            printf "${1:+${VIM_BASE_URI}/patches/${VIM_VERSION}/${VIM_VERSION}.%03d -> } vim-${VIM_VERSION}.%03d.patch\n" ${1:+"${i}"} "${i}"
+        done
+    else
+        local hundreds singles
+        ((hundreds=${VIM_PATCH_LEVEL}/100))
+        ((singles=${VIM_PATCH_LEVEL}-${hundreds}*100))
+
+        for((i=0;i<hundreds;i++)); do
+            printf "${1:+${VIM_BASE_URI}/patches/${VIM_VERSION}/${VIM_VERSION}.%03d-%03d.gz -> } \
+                vim-patches-${VIM_VERSION}.%03d-%03d.gz\n" ${1:+"$((i*100+1))" "$(( (i+1)*100 ))"} "$((i*100+1))" "$(( (i+1)*100 ))"
+        done
+        for((i=hundreds*100+1;i<=hundreds*100+singles;i++)); do
+            printf "${1:+${VIM_BASE_URI}/patches/${VIM_VERSION}/${VIM_VERSION}.%03d -> } vim-${VIM_VERSION}.%03d.patch\n" ${1:+"${i}"} "${i}"
+        done
+    fi
 }
 
 VIM_BASE_URI="${VIM_BASE_URI:-ftp://ftp.vim.org/pub/vim}"
@@ -140,7 +148,7 @@ vim_src_prepare() {
     edo sed -i -e '1s|.*|#!/usr/bin/awk -f|' "${WORK}"/runtime/tools/mve.awk
 
     # Patch to build with ruby-1.8.0_pre5 and following
-    edo sed -i -e 's/defout/stdout/g' "${WORK}"/src/if_ruby.c
+    ! ever at_least 7.3 && edo sed -i -e 's/defout/stdout/g' "${WORK}"/src/if_ruby.c
 
     # Read vimrc and gvimrc from /etc/vim
     echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> "${WORK}"/src/feature.h
@@ -201,8 +209,9 @@ vim_src_configure() {
     # (3) Notice auto/configure is newer than auto/config.mk
     # (4) Run ./configure (with wrong args) to remake auto/config.mk
     ebegin "Creating configure script"
-    edo sed -i -e 's/ auto.config.mk:/:/' src/Makefile
-    edo rm -f src/auto/configure
+    ! ever at_least 7.3.122 && edo sed -i -e 's/ auto.config.mk:/:/' src/Makefile
+    ever at_least 7.3.122 && edo cp src/config.mk.dist src/auto/config.mk && edo touch src/auto/config.mk
+    ! ever at_least 7.3.122 && edo rm -f src/auto/configure
     # vim-6.2 changed the name of this rule from auto/configure to autoconf
     confrule=auto/configure
     grep -q ^autoconf: src/Makefile && confrule=autoconf
