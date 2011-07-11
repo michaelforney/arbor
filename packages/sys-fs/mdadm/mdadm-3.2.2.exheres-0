@@ -11,27 +11,31 @@ MYOPTIONS="baselayout"
 
 DEPENDENCIES="
     run:
-        sys-apps/util-linux[>=2.16]"
+        sys-apps/util-linux[>=2.16]
+    suggestion:
+        mail-mta/sendmail [[ description = [ Send reports via email ] ]]
+"
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-3.0-dont-make-man.patch
-    "${FILES}"/${PN}-2.6-syslog-updates.patch
-    -p0 "${FILES}"/${PN}-2.6.4-mdassemble.patch
+DEFAULT_SRC_COMPILE_PARAMS=(
+    "CXLAGS+=${CFLAGS}"
+    'mdassemble.static'
+    'all'
 )
 
-src_compile() {
-    emake \
-        CROSS_COMPILE=${CHOST}- \
-        CWFLAGS="-Wall" \
-        CXFLAGS="${CFLAGS}" \
-        all mdassemble
+src_prepare() {
+    default
+    # don't stop on warnings
+    edo sed -ie 's,-Werror,,' "${WORK}/Makefile"
+    # use proper libdir
+    edo sed -ie 's,/lib/,/${LIBDIR}/,' "${WORK}/Makefile"
 }
 
 src_install() {
-    emake DESTDIR="${IMAGE}" install
-    into /
-    dosbin mdassemble
-    dodoc ChangeLog INSTALL TODO README* ANNOUNCE-${PV}
+    default
+
+    insinto /sbin/
+    doins mdassemble.static
+    chmod +x "${IMAGE}/sbin/mdassemble.static"
 
     if option baselayout ; then
         exeinto /${LIBDIR}/rcscripts/addons
@@ -45,8 +49,5 @@ src_install() {
 
     insinto /etc
     newins mdadm.conf-example mdadm.conf
-
-    insinto /etc/udev/rules.d/
-    newins "${FILES}"/udev-145-64-md-raid.rules 64-md-raid.rules
 }
 
