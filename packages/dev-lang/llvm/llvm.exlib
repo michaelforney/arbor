@@ -38,28 +38,34 @@ DOWNLOADS="
     clang? ( ${HOMEPAGE}/releases/${PV}/clang-${PV}.tgz )
 "
 
+ADMISSIBLE_GCC_VERSIONS=( 4.4.5 4.4.6 4.5.2 4.5.3 )
+
 LICENCES="UoI-NCSA"
 SLOT="0"
-MYOPTIONS="clang gold"
+MYOPTIONS="
+    clang gold
+    gcc_version: ( ${ADMISSIBLE_GCC_VERSIONS[@]} ) [[ number-selected = exactly-one ]]
+"
 
 if ! ever is_scm && ! exparam -b snapshot; then
     MYOPTIONS+=" doc"
 fi
-
-GCC_VERSION="4.5.3"
-GCC_SLOT=$(ever range 1-2 ${GCC_VERSION})
 
 DEPENDENCIES="
     build:
         dev-lang/perl:*
         sys-devel/flex
     build+run:
-        sys-devel/gcc:${GCC_SLOT}
-        clang? ( sys-devel/gcc[~${GCC_VERSION}] )
         gold? ( sys-devel/binutils[>=2.21][gold(+)] )
     test:
         dev-lang/python:*
 "
+
+for GCC_VERSION in ${ADMISSIBLE_GCC_VERSIONS[@]}; do
+    DEPENDENCIES+="
+        build+run: gcc_version:${GCC_VERSION}? ( sys-devel/gcc[~${GCC_VERSION}] )
+    "
+done
 
 if ! ever is_scm && ! exparam -b snapshot; then
     DEPENDENCIES+="
@@ -80,6 +86,17 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releases/${PV}/docs/ReleaseNotes.html"
 
 DEFAULT_SRC_COMPILE_PARAMS=( VERBOSE=1 )
 
+get_gcc_version() {
+    local gcc_version
+    for gcc_version in ${ADMISSIBLE_GCC_VERSIONS[@]}; do
+        if option gcc_version:${gcc_version}; then
+            echo ${gcc_version}
+            return;
+        fi
+    done
+    die "No gcc_version option set"
+}
+
 llvm_pkg_setup() {
     # gcc 4.5 miscompiles clang at -O2 and above
     append-flags -O1
@@ -89,7 +106,7 @@ llvm_src_prepare() {
     if option clang; then
         ever is_scm || exparam -b snapshot || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
         edo sed \
-            -e "/Exherbo/{N;N;N;s/4\.4\.3/${GCC_VERSION}/g}" \
+            -e "/Exherbo/{N;N;N;s/4\.4\.3/$(get_gcc_version)/g}" \
             -i tools/clang/lib/Frontend/InitHeaderSearch.cpp
         edo sed \
             -e "/^PROJ_headers :=/s|/lib/|/${LIBDIR}/|" \
@@ -106,7 +123,7 @@ llvm_src_configure() {
         --enable-optimized \
         --hates=docdir \
         --with-cxx-include-arch="${CHOST}" \
-        --with-cxx-include-root="/usr/include/c++/${GCC_VERSION}/" \
+        --with-cxx-include-root="/usr/include/c++/$(get_gcc_version)/" \
         $(option_with clang built-clang) \
         $(option gold && echo --with-binutils-include=/usr/include) \
         ${enable_docs}
