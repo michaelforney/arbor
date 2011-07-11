@@ -1,0 +1,17 @@
+Source: Bo Ørsted Andresen
+Reason: Stop fighting systemd regarding the location of the HOSTNAME setting. If
+	/etc/hostname exists we might as well use what's in it.
+Upstream: No.
+
+================================================================================
+
+--- baselayout-1.12.13.orig/init.d/hostname	2007-10-24 00:59:25.000000000 +0200
++++ baselayout-1.12.13/init.d/hostname	2011-07-11 13:18:00.000000000 +0200
+@@ -8,7 +8,6 @@
+ 
+ start() {
+ 	if [[ -f /etc/hostname ]] ; then
+-		ewarn "You should stop using /etc/hostname and use /etc/conf.d/hostname"
+ 		HOSTNAME="$(< /etc/hostname)"
+ 	fi
+ 
