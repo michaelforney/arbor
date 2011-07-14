@@ -5,6 +5,8 @@ myexparam suffix=gz
 
 require gnu [ suffix=$(exparam suffix) ] alternatives
 
+export_exlib_phases src_test_expensive src_install
+
 SUMMARY="Extensible M4 macro package producing configure scripts"
 
 if ever at_least 2.65 ; then
@@ -33,11 +35,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
-src_test_expensive() {
+autoconf_src_test_expensive() {
    emake check
 }
 
-src_install() {
+autoconf_src_install() {
     default
 
     edo cd "${IMAGE}"/usr/share/info
