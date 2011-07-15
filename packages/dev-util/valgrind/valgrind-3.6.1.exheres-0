@@ -18,6 +18,8 @@ MYOPTIONS="platform: amd64"
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/valgrind-kernel-3.0-fix.patch" )
+
 src_prepare() {
     edo sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
     edo sed -e "s:doc/${PN}:doc/${PNV}:" -i docs/Makefile.am
