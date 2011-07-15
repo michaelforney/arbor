@@ -1,0 +1,30 @@
+From: Colin Guthrie <colin@mageia.org>
+Date: Tue, 26 Apr 2011 21:55:44 +0000 (+0100)
+Subject: a52: Fix build with older ffmpeg versions.
+X-Git-Url: http://git.alsa-project.org/?p=alsa-plugins.git;a=commitdiff_plain;h=826dafa673157b570eacd38e85ca13a3dc7c0c73
+
+a52: Fix build with older ffmpeg versions.
+
+This fixes a regression introduced in:
+  40c129a160f37fe9488b2828d6299f99c269703e
+
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+---
+
+diff --git a/a52/pcm_a52.c b/a52/pcm_a52.c
+index 76f21cd..00c7c59 100644
+--- a/a52/pcm_a52.c
++++ b/a52/pcm_a52.c
+@@ -436,7 +436,11 @@ static int a52_prepare(snd_pcm_ioplug_t *io)
+ 	rec->avctx->bit_rate = rec->bitrate * 1000;
+ 	rec->avctx->sample_rate = io->rate;
+ 	rec->avctx->channels = io->channels;
+-	rec->avctx->sample_fmt = AV_SAMPLE_FMT_S16;
++#if LIBAVCODEC_VERSION_MAJOR > 52 || (LIBAVCODEC_VERSION_MAJOR == 52 && LIBAVCODEC_VERSION_MINOR >= 95)
++  rec->avctx->sample_fmt = AV_SAMPLE_FMT_S16;
++#else
++  rec->avctx->sample_fmt = SAMPLE_FMT_S16;
++#endif
+ #if LIBAVCODEC_VERSION_MAJOR > 52 || (LIBAVCODEC_VERSION_MAJOR == 52 && LIBAVCODEC_VERSION_MINOR >= 3)
+ 	switch (io->channels) {
+ 	case 2:
