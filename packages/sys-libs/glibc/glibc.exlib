@@ -49,6 +49,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
+pkg_pretend() {
+    if [[ ${ROOT} == / ]]; then
+        local replacing=$(best_version --slash ${CATEGORY}/${PN})
+        replacing=${replacing#${CATEGORY}/${PN}-} # strip category and package name
+        replacing=${replacing%::+([^:])} # strip repo name
+        replacing=${replacing%:+([[:digit:]])} # strip slot
+        replacing=${replacing%-r+([[:digit:]])} # strip revision
+        ever at_least ${replacing} ${PV} || die "Downgrading glibc would almost certainly break your system. Aborting."
+    fi
+}
+
 pkg_setup() {
     # glibc doesn't compile with -Os. See bug:
     # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
