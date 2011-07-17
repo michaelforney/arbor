@@ -1,4 +1,4 @@
-# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'libwww-perl-5.812.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -13,7 +13,10 @@ MYOPTIONS="ssl"
 
 DEPENDENCIES="
     build+run:
-        dev-perl/Compress-Zlib
+        || (
+            dev-lang/perl[>=5.9.3]
+            dev-perl/Compress-Zlib
+        ) [[ note = [ newer perl ships Compress::Zlib ] ]]
         dev-perl/HTML-Parser
         dev-perl/HTML-Tree
         dev-perl/libnet
