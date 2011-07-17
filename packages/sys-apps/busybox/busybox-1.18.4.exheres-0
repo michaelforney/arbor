@@ -19,9 +19,18 @@ DEPENDENCIES=""
 RESTRICT="test"
 
 bb_make() {
-    emake AR="${AR}" AS="${AS}" CC="${CC}" \
-          CPP="${CC} -E" LD="${CC} -nostdlib" NM="${NM}" V=1 \
-          "$@"
+    local make_options=(
+        AS="${AS}"
+        AR="${AR}"
+        NM="${NM}"
+
+        CPP="${CC} -E"
+        CC="${CC}"
+        LD="${CC} -nostdlib"
+
+        V=1
+    )
+    emake "$@" "${make_options[@]}"
 }
 
 src_compile() {
