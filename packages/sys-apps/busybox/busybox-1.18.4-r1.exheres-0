@@ -20,13 +20,13 @@ RESTRICT="test"
 
 bb_make() {
     local make_options=(
-        AS="${AS}"
         AR="${AR}"
         NM="${NM}"
 
         CPP="${CC} -E"
-        CC="${CC}"
-        LD="${CC} -nostdlib"
+        CC="${CC}" CFLAGS="${CFLAGS}" HOSTCC="${CC}" HOSTCFLAGS="${CFLAGS}"
+        CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" HOSTCXX="${CXX}" HOSTCXXFLAGS="${CXXFLAGS}"
+        LD="${CC} -nostdlib" LDFLAGS="${LDFLAGS}" HOSTLD="${CC}" HOSTLDFLAGS="${LDFLAGS}"
 
         V=1
     )
