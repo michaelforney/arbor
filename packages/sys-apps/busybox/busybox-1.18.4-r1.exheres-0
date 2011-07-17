@@ -45,6 +45,10 @@ src_compile() {
     edo mv busybox_unstripped{,.static}
 }
 
+src_test() {
+    bb_make check
+}
+
 src_install() {
     into /
     newbin busybox_unstripped.dynamic busybox
