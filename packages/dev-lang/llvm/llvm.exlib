@@ -97,9 +97,18 @@ get_gcc_version() {
     die "No gcc_version option set"
 }
 
+cxx_is_gxx() {
+    [[ ${CXX} == *g++* ]] && [[ ${CXX} != *clang* ]]
+}
+
 llvm_pkg_setup() {
-    # gcc 4.5 miscompiles clang at -O2 and above
-    append-flags -O1
+    if cxx_is_gxx; then
+        local gxx_version=$(gxx-major-version).$(gxx-minor-version)
+        if ever at_least 4.5 ${gxx_version}; then
+            # gcc 4.5 miscompiles clang at -O2 and above
+            append-flags -O1
+        fi
+    fi
 }
 
 llvm_src_prepare() {
