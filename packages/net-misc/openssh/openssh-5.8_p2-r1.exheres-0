@@ -76,6 +76,7 @@ src_configure() {
         --datadir=/usr/share/openssh \
         --disable-strip \
         --with-ldflags="${LDFLAGS}" \
+        --with-pid-dir=/run \
         --with-privsep-path=/var/empty \
         --with-privsep-user=sshd \
         --with-md5-passwords \
@@ -127,8 +128,7 @@ src_install() {
 
     keepdir /etc/ssh/ca
     keepdir /etc/skel/.ssh
-    keepdir /var/run
-    edo rmdir "${IMAGE}"/var/empty
+    edo rmdir "${IMAGE}"/var{/empty,}
 
     if option pam ; then
         edo sed -i -e "/^#UsePAM /s:.*:UsePAM yes:" "${IMAGE}"/etc/ssh/sshd_config

@@ -177,7 +177,7 @@ pkg_preinst() {
     # 2008-08-20: safety measure to prevent removal of directories that were part
     # of CONTENTS in 1.12.12 and below (before sys-apps/skeleton-filesystem-layout)
     local x target
-    for x in /boot /dev/shm /var/lock; do
+    for x in /boot /dev/shm; do
         edo touch "${ROOT}"${x}/.keep_do_not_break_me
     done
 

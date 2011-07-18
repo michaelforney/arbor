@@ -28,7 +28,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --dbdir=/var/lib/dhcpcd
     --libdir=/${LIBDIR}
     --libexecdir=/${LIBDIR}/dhcpcd
-    --rundir=/var/run
+    --rundir=/run
     --sbindir=/sbin
     --with-hooks="yp ntp"
 )
@@ -38,6 +38,6 @@ src_install() {
 
     install_systemd_files
 
-    keepdir /var/lib/dhcpcd /var/run
+    keepdir /var/lib/dhcpcd
 }
 
