@@ -11,7 +11,7 @@ depend() {
 }
 
 SSHD_CONFDIR=${SSHD_CONFDIR:-/etc/ssh}
-SSHD_PIDFILE=${SSHD_PIDFILE:-/var/run/${SVCNAME}.pid}
+SSHD_PIDFILE=${SSHD_PIDFILE:-/run/${SVCNAME}.pid}
 SSHD_BINARY=${SSHD_BINARY:-/usr/sbin/sshd}
 
 checkconfig() {
@@ -48,7 +48,7 @@ gen_keys() {
 
 start() {
 	local myopts=""
-	[ "${SSHD_PIDFILE}" != "/var/run/sshd.pid" ] \
+	[ "${SSHD_PIDFILE}" != "/run/sshd.pid" ] \
 		&& myopts="${myopts} -o PidFile=${SSHD_PIDFILE}"
 	[ "${SSHD_CONFDIR}" != "/etc/ssh" ] \
 		&& myopts="${myopts} -f ${SSHD_CONFDIR}/sshd_config"

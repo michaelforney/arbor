@@ -116,12 +116,14 @@ glibc_src_configure() {
             append-flags -march=native
         fi
         append-flags -O2
+        # --enable-stackguard-randomization could also be enabled for <2.14 but needs testing
         CC="${GCC} -m${multibuild_c_target}" econf \
             --libdir="/usr/${LIBDIR}" \
             --cache-file=config.cache \
             --enable-kernel=2.6.22 \
             --with-headers=/usr/include \
             --with-add-ons --with-crypt \
+            $(ever at_least 2.14 && echo "--enable-stackguard-randomization") \
             --without-gd --without-cvs || die "configure failed"
         echo "libc_cv_gnu89_inline=yes" >> config.cache
     done

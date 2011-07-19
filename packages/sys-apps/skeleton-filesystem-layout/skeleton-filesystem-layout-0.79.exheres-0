@@ -115,14 +115,14 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}"
     done
 
-    if [[ ! -L ${ROOT}var/lock ]]; then
+    if [[ -d ${ROOT}var/lock && ! -L ${ROOT}var/lock ]]; then
         nonfatal edo cp -a "${ROOT}"var/lock "${ROOT}"run/ || ewarn "cp'ing /var/lock failed"
         nonfatal edo /bin/umount -l "${ROOT}"var/lock
         nonfatal edo rm -rf "${ROOT}"var/lock || ewarn "rm'ing /var/lock failed"
         nonfatal edo chmod 755 "${ROOT}"run/lock || ewarn "chmod 755 /run/lock failed"
     fi
 
-    if [[ ! -L ${ROOT}var/run ]]; then
+    if [[ -d ${ROOT}var/run && ! -L ${ROOT}var/run ]]; then
         nonfatal edo cp -a "${ROOT}"var/run/* "${ROOT}"run/ || ewarn "cp'ing /var/run failed"
         nonfatal edo /bin/umount -l "${ROOT}"var/run
         nonfatal edo rm -rf "${ROOT}"var/run || ewarn "rm'ing /var/run failed"

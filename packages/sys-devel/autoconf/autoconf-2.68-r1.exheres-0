@@ -1,0 +1,22 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require autoconf [ suffix=xz ]
+
+SLOT="2.5"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+DEPENDENCIES="
+    run:
+        sys-devel/autoconf-wrapper[>=0.2.5]"
+
+DELETE_ME_DIR=/usr/share/delete-me
+DEFAULT_SRC_CONFIGURE_PARAMS+=( --with-lispdir=${DELETE_ME_DIR} )
+
+src_install() {
+    autoconf_src_install
+
+    # Emacs bundles an emacs mode for autoconf already
+    edo rm -rf "${IMAGE}${DELETE_ME_DIR}"
+}
+

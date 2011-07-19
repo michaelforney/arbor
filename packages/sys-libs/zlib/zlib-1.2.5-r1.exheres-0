@@ -42,6 +42,11 @@ set_cc() {
     esac
 }
 
+prepare_one_multibuild() {
+    # Treat clang as gcc
+    edo sed -e '/gcc=1/s:\*gcc\*:*clang*|&:' -i configure
+}
+
 configure_prepare_one_multibuild() { :; }
 
 configure_one_multibuild() {

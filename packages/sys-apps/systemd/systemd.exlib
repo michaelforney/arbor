@@ -139,13 +139,13 @@ systemd_src_install() {
     dodir /sbin
     local a t alternatives=( init ${PN} 10 )
     for a in halt poweroff reboot runlevel shutdown telinit; do
-        dosym /bin/systemctl /sbin/${a}
+        dosym ../bin/systemctl /sbin/${a}
         alternatives+=(
             /sbin/${a} ${PN}.${a}
             /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
-    dosym /bin/systemd /sbin/init
+    dosym ../bin/systemd /sbin/init
     alternatives+=(
         /sbin/init ${PN}.init
         /usr/share/man/man1/init.1 ${PN}.init.1
@@ -260,7 +260,7 @@ EOF
     dodir /etc/systemd/system/basic.target.wants
 
     # Enable basic.service
-    dosym /${LIBDIR}/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
+    dosym ../../../../${LIBDIR}/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
 }
 
 systemd_pkg_postinst() {

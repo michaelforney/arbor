@@ -14,7 +14,7 @@ DEPENDENCIES="
     build+run:
         tcpd? ( sys-apps/tcp-wrappers )
     run:
-        perl? ( dev-lang/perl )
+        perl? ( dev-lang/perl:* )
 "
 
 UPSTREAM_RELEASE_NOTES="http://www.xinetd.org/#changes"
@@ -41,7 +41,7 @@ src_prepare() {
             -e 's:$(BINDIR)::' \
             -i Makefile.in
 
-    if optionq perl ; then
+    if ! optionq perl ; then
         edo sed -i -e 's:.*xconv.pl.*::' Makefile.in
     fi
 

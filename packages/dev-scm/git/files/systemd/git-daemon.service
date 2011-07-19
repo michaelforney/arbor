@@ -7,7 +7,7 @@ After=syslog.target
 
 [Service]
 EnvironmentFile=/etc/conf.d/git-daemon.conf
-ExecStart=/usr/bin/git daemon --pid-file=/var/run/git-daemon.pid --syslog --user=nobody --group=nobody $GIT_OPTS
+ExecStart=/usr/bin/git daemon --pid-file=/run/git-daemon.pid --syslog --user=nobody --group=nobody $GIT_OPTS
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+From: David Henningsson <david.henningsson@canonical.com>
+Date: Thu, 21 Apr 2011 13:10:19 +0000 (+0200)
+Subject: Pulse: Fix snd_pcm_avail returning 0 in some cases
+X-Git-Url: http://git.alsa-project.org/?p=alsa-plugins.git;a=commitdiff_plain;h=e1661e3daa22cfed67c4b74099bcd97b433af24b
+
+Pulse: Fix snd_pcm_avail returning 0 in some cases
+
+Due to a round-off error, snd_pcm_avail could in some cases
+return 0 even though more data could be written to the stream.
+
+Reported-by: Maarten Lankhorst <m.b.lankhorst@gmail.com>
+Signed-off-by: David Henningsson <david.henningsson@canonical.com>
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+---
+
+diff --git a/pulse/pcm_pulse.c b/pulse/pcm_pulse.c
+index 2df0a80..9105d4d 100644
+--- a/pulse/pcm_pulse.c
++++ b/pulse/pcm_pulse.c
+@@ -92,8 +92,8 @@ static int update_ptr(snd_pcm_pulse_t *pcm)
+ 		size -= pcm->offset;
+ 
+ 	/* Prevent accidental overrun of the fake ringbuffer */
+-	if (size >= pcm->buffer_attr.tlength)
+-		size = pcm->buffer_attr.tlength-1;
++	if (size > pcm->buffer_attr.tlength - pcm->frame_size)
++		size = pcm->buffer_attr.tlength - pcm->frame_size;
+ 
+ 	if (size > pcm->last_size) {
+ 		pcm->ptr += size - pcm->last_size;

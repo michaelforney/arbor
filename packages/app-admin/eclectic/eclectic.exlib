@@ -32,8 +32,6 @@ DEPENDENCIES="
 
 BUGS_TO="eclectic@exherbo.org"
 
-BASH_COMPLETIONS=( misc/${PN}.bashcomp )
-
 export_exlib_phases src_compile src_install
 
 eclectic_src_compile() {
@@ -44,7 +42,7 @@ eclectic_src_compile() {
 eclectic_src_install() {
     default
 
-    bash-completion_src_install
+    dobashcompletion misc/${PN}.bashcomp
     dozshcompletion misc/_eclectic
 
     dodoc doc/*.txt

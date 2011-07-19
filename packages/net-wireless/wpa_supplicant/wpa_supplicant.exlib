@@ -53,7 +53,7 @@ MYOPTIONS="
         gnutls [[ description = [
             Use GnuTLS for TLS connections instead of internal implementation
         ] ]]
-        ssl    [[ description = [
+        openssl [[ description = [
             Use OpenSSL for TLS connections instead of internal implementation
         ] ]]
     ) [[ number-selected = at-most-one ]]
@@ -66,7 +66,7 @@ DEPENDENCIES="
     build+run:
         dbus?     ( sys-apps/dbus )
         eap-fast? (
-            ssl? ( dev-libs/openssl[>=0.9.9] )
+            openssl? ( dev-libs/openssl[>=0.9.9] )
         )
         gnutls?  ( dev-libs/gnutls )
         nl80211? ( net-libs/libnl  )
@@ -80,10 +80,10 @@ DEPENDENCIES="
             sys-libs/ncurses
             sys-libs/readline
         )
-        ssl? ( dev-libs/openssl )
+        openssl? ( dev-libs/openssl )
 
         !gnutls? (
-            !ssl? ( dev-libs/libtommath )
+            !openssl? ( dev-libs/libtommath )
         )
 "
 
@@ -196,7 +196,7 @@ src_configure() {
         config_enable \
             TLS=gnutls \
             GNUTLS_EXTRA
-    elif option ssl ; then
+    elif option openssl ; then
         config_enable \
             TLS=openssl \
             SMARTCARD
