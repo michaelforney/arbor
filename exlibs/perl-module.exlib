@@ -14,16 +14,21 @@ export_exlib_phases src_configure src_compile src_test src_install
 myexparam module_author=
 myexparam module_extension=.tar.gz
 
-exparam -v MODULE_AUTHOR module_author
-exparam -v MODULE_EXTENSION module_extension
+perl-module-metadata() {
+    local module_author module_extension
 
-if [[ -z ${HOMEPAGE} && -z ${DOWNLOADS} && -n ${MODULE_AUTHOR} ]]; then
-    HOMEPAGE="http://search.cpan.org/dist/${MY_PN:-${PN}}/"
-    DOWNLOADS="mirror://cpan/authors/id/${MODULE_AUTHOR:0:1}/${MODULE_AUTHOR:0:2}/${MODULE_AUTHOR}/${MY_PNV:-${PNV}}${MODULE_EXTENSION}"
-    BUGS_TO="arkanoid@exherbo.org ingmar@exherbo.org pioto@exherbo.org"
-    REMOTE_IDS="cpan:${MY_PN:-${PN}}"
-    UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${MY_PNV:-${PNV}}/Changes"
-fi
+    exparam -v module_author module_author
+    exparam -v module_extension module_extension
+
+    if [[ -z ${HOMEPAGE} && -z ${DOWNLOADS} && -n ${module_author} ]]; then
+        HOMEPAGE="http://search.cpan.org/dist/${MY_PN:-${PN}}/"
+        DOWNLOADS="mirror://cpan/authors/id/${module_author:0:1}/${module_author:0:2}/${module_author}/${MY_PNV:-${PNV}}${module_extension}"
+        BUGS_TO="arkanoid@exherbo.org ingmar@exherbo.org pioto@exherbo.org"
+        REMOTE_IDS="cpan:${MY_PN:-${PN}}"
+        UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${MY_PNV:-${PNV}}/Changes"
+    fi
+}
+perl-module-metadata
 
 # Default license, for packages licensed under perl's terms.
 LICENCES="${LICENCES:-|| ( Artistic GPL-1 GPL-2 GPL-3 )}"
