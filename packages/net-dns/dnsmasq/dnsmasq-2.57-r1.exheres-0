@@ -2,6 +2,8 @@
 # Copyright 2011 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 SUMMARY="Lightweight DNS forwarder and DHCP server"
 DESCRIPTION="
 Dnsmasq is a lightweight, easy to configure DNS forwarder and DHCP server. It is
@@ -61,6 +63,12 @@ src_install() {
     if option baselayout ; then
         newinitd "${FILES}"/dnsmasq.init dnsmasq
         newconfd "${FILES}"/dnsmasq.conf dnsmasq
+    fi
+
+    install_systemd_files
+    if option systemd ; then
+        insinto "/etc/conf.d"
+        doins "${FILES}/dnsmasq.conf"
     fi
 
     if option dbus ; then
