@@ -20,6 +20,7 @@ SLOT="0"
 
 DEPENDENCIES="
     build:
+        dev-cpp/gtest
         dev-util/pkg-config
         doc? (
             app-doc/doxygen
@@ -56,13 +57,6 @@ DEPENDENCIES="
         bash-completion? (  app-shells/bash-completion[>=1.1] )
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
-
-if ever at_least 0.62.0; then
-    DEPENDENCIES+="
-        build:
-            dev-cpp/gtest
-    "
-fi
 
 if ever is_scm; then
     DEPENDENCIES+="
