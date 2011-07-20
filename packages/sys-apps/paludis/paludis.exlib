@@ -20,7 +20,6 @@ SLOT="0"
 
 DEPENDENCIES="
     build:
-        dev-cpp/gtest
         dev-util/pkg-config
         doc? (
             app-doc/doxygen
@@ -33,6 +32,8 @@ DEPENDENCIES="
                 dev-ruby/syntax
             )
         )
+    test:
+        dev-cpp/gtest
     build+run:
         user/paludisbuild
         app-admin/eclectic
@@ -86,6 +87,7 @@ src_configure() {
     local repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
 
     econf \
+        $(expecting_tests && echo --enable-gtest || echo --disable-gtest) \
         $(option_enable doc doxygen) \
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
