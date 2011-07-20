@@ -15,6 +15,7 @@ LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="
+    acl
     (
         cron [[ description = [ Install launcher script to cron.daily path ] ]]
         systemd [[ description = [ Use a systemd timer unit to rotate your logs (recommended) ] ]]
@@ -24,15 +25,8 @@ MYOPTIONS="
 DEPENDENCIES="
     build+run:
         dev-libs/popt[>=1.5]
+        acl? ( sys-apps/acl )
 "
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-no-mmap-empty-file.patch )
-
-DEFAULT_SRC_COMPILE_PARAMS=(
-    "CC=${CC}"
-    "CPP=${CC}"
-    "WITH_SELINUX=no"
-)
 
 src_prepare() {
     default
@@ -40,6 +34,22 @@ src_prepare() {
     edo sed -e "s:CFLAGS += -g:CFLAGS += -g ${CFLAGS}:" \
             -e "s:LDFLAGS = -g:LDFLAGS = -g ${LDFLAGS}:" \
             -i Makefile
+}
+
+src_compile() {
+    local opts=(
+        "CC=${CC}"
+        "CPP=${CC}"
+        "WITH_SELINUX=no"
+    )
+
+    if option acl; then
+        opts+=( "WITH_ACL=yes" )
+    else
+        opts+=( "WITH_ACL=no" )
+    fi
+
+    emake ${opts[@]}
 }
 
 src_install() {

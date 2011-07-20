@@ -16,7 +16,12 @@ SLOT="0"
 PLATFORMS="-* ~amd64 ~x86"
 MYOPTIONS="platform: amd64"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        sys-libs/glibc[>=2.2&<2.14]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/valgrind-kernel-3.0-fix.patch" )
 
 src_prepare() {
     edo sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in

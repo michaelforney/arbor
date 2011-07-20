@@ -1,0 +1,68 @@
+# Copyright 2009 Timothy Redaelli <timothy@redaelli.eu>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'mdadm-3.0.ebuild', which is:
+#     Copyright 1999-2009 Gentoo Foundation
+
+SUMMARY="A useful tool for running RAID systems - it can be used as a replacement for the raidtools"
+DESCRIPTION="A useful tool for running RAID systems - it can be used as a replacement for the raidtools."
+HOMEPAGE="http://neil.brown.name/blog/mdadm"
+DOWNLOADS="mirror://kernel/linux/utils/raid/${PN}/${PNV}.tar.gz"
+LICENCES="GPL-2"
+
+BUGS_TO="timothy@redaelli.eu"
+
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="baselayout"
+
+DEPENDENCIES="
+    run:
+        sys-apps/util-linux[>=2.16]
+    suggestion:
+        mail-mta/sendmail [[ description = [ Send reports via email ] ]]
+"
+
+# The tests create tons of loop devices and like to keep them hanging around in
+# case of problems.
+RESTRICT="test"
+# userpriv <-- would be needed for the tests
+
+DEFAULT_SRC_COMPILE_PARAMS=(
+    "CXLAGS+=${CFLAGS}"
+    'mdassemble.static'
+    'all'
+)
+
+src_prepare() {
+    default
+    # don't stop on warnings
+    edo sed -ie 's,-Werror,,' "${WORK}/Makefile"
+    # use proper libdir
+    edo sed -ie 's,/lib/,/${LIBDIR}/,' "${WORK}/Makefile"
+}
+
+src_test() {
+    edo "${WORK}"/test
+}
+
+src_install() {
+    default
+
+    insinto /sbin/
+    doins mdassemble.static
+    chmod +x "${IMAGE}/sbin/mdassemble.static"
+
+    if option baselayout ; then
+        exeinto /${LIBDIR}/rcscripts/addons
+        doexe "${FILES}"/raid-start.sh
+        doexe "${FILES}"/raid-stop.sh
+        newinitd "${FILES}"/mdadm.rc mdadm
+        newconfd "${FILES}"/mdadm.confd mdadm
+        newinitd "${FILES}"/mdraid.rc mdraid
+        newconfd "${FILES}"/mdraid.confd mdraid
+    fi
+
+    insinto /etc
+    newins mdadm.conf-example mdadm.conf
+}
+
