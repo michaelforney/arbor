@@ -105,8 +105,8 @@ glibc_src_configure() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        edo mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
+        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         echo "libc_cv_forced_unwind=yes" > config.cache
         echo "libc_cv_c_cleanup=yes" >> config.cache
@@ -124,7 +124,7 @@ glibc_src_configure() {
             --with-headers=/usr/include \
             --with-add-ons --with-crypt \
             $(ever at_least 2.14 && echo "--enable-stackguard-randomization") \
-            --without-gd --without-cvs || die "configure failed"
+            --without-gd --without-cvs
         echo "libc_cv_gnu89_inline=yes" >> config.cache
     done
 }
@@ -135,7 +135,7 @@ glibc_src_compile() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
@@ -153,7 +153,7 @@ glibc_src_install() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
         default
     done
