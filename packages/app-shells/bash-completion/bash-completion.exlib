@@ -19,7 +19,17 @@ DEPENDENCIES="
         app-admin/eclectic
         app-shells/bash[>=3.2_p19]"
 
-export_exlib_phases src_install
+# scripts in the default /etc/profile.d/ aren't enabled for interactive non-login shells
+DEFAULT_SRC_INSTALL_PARAMS=( "profiledir=/etc/bash/bashrc.d" )
+
+export_exlib_phases pkg_pretend src_install
+
+bash-completion_pkg_pretend() {
+    if [[ -f "${ROOT}"/etc/profile.d/bash_completion.sh ]] ; then
+        ewarn "Script /etc/profile.d/bash_completion.sh has been moved to /etc/bash/bashrc.d/"
+        ewarn "and can be safely removed after upgrade."
+    fi
+}
 
 bash-completion_src_install() {
     default
