@@ -29,29 +29,35 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="
+    acl
     bash-completion
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
     gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
-    tcpd
+    plymouth [[ description = [ Enable Plymouth (graphical boot splash) integration ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
+    tcpd
 "
 
 DEPENDENCIES="
     build:
         dev-libs/libxslt
+        dev-util/intltool[>=0.40.0]
         dev-util/pkg-config[>=0.20]
+        sys-devel/gettext
     build+run:
         dev-libs/glib:2[>=2.26]
         sys-apps/dbus[>=1.4.0][systemd]
         sys-apps/skeleton-filesystem-layout
-        sys-fs/udev[>=163][systemd]
+        sys-fs/udev[>=172][systemd]
         sys-libs/libcap
         sys-libs/pam[>=1.1.2]
+        acl? ( sys-apps/acl )
         cryptsetup? ( sys-fs/cryptsetup )
         gtk? (
             x11-libs/gtk+:2[>=2.20]
             x11-libs/libnotify[>=0.7.0]
         )
+        plymouth? ( sys-boot/plymouth )
         tcpd? ( sys-apps/tcp-wrappers )
     run:
         sys-apps/busybox
@@ -64,7 +70,7 @@ DEPENDENCIES="
     post:
         sys-apps/module-init-tools
     suggestion:
-        sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - rebooting a kernel immediately, skipping the BIOS ] ]]
+        sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
         sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
 "
 
@@ -93,8 +99,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    acl
     "cryptsetup libcryptsetup"
     gtk
+    plymouth
     "tcpd tcpwrap"
 )
 

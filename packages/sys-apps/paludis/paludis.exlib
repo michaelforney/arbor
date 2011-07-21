@@ -32,6 +32,8 @@ DEPENDENCIES="
                 dev-ruby/syntax
             )
         )
+    test:
+        dev-cpp/gtest
     build+run:
         user/paludisbuild
         app-admin/eclectic
@@ -56,13 +58,6 @@ DEPENDENCIES="
         bash-completion? (  app-shells/bash-completion[>=1.1] )
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
-
-if ever at_least 0.62.0; then
-    DEPENDENCIES+="
-        build:
-            dev-cpp/gtest
-    "
-fi
 
 if ever is_scm; then
     DEPENDENCIES+="
@@ -92,6 +87,7 @@ src_configure() {
     local repositories=$(echo default accounts $(optionv gemcutter) repository | tr -s \  ,)
 
     econf \
+        $(expecting_tests && echo --enable-gtest || echo --disable-gtest) \
         $(option_enable doc doxygen) \
         $(option doc && option python && echo '--enable-python-doc') \
         $(option doc && option ruby && echo '--enable-ruby-doc') \
