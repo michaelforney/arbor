@@ -24,7 +24,11 @@ REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
-MYOPTIONS="baselayout sensord [[ description = [ Enable sensord, a daemon that can be used to periodically log sensor readings from hardware health-monitoring chips ] ]]"
+MYOPTIONS="
+    baselayout
+    sensord [[ description = [ Enable sensord, a daemon that can be used to periodically log sensor readings from hardware health-monitoring chips ] ]]
+    systemd
+"
 
 DEPENDENCIES="
     build+run:
@@ -58,6 +62,11 @@ lm_sensors_src_prepare() {
     if option sensord; then
         edo sed -e 's:^#\(PROG_EXTRA\):\1:' -i "${WORK}"/Makefile
     fi
+
+    if option systemd; then
+        edo sed -e '/EnvironmentFile=/s:/etc/sysconfig/lm_sensors:/etc/conf.d/lm_sensors.conf:' -i "${WORK}"/prog/init/lm_sensors.service
+        edo sed -e 's:\(/etc/conf.d/lm_sensors\):\1.conf:g' -i "${WORK}"/prog/detect/sensors-detect
+    fi
 }
 
 lm_sensors_src_install() {
@@ -72,6 +81,12 @@ lm_sensors_src_install() {
             newconfd "${FILES}"/sensord-conf.d sensord
             newinitd "${FILES}"/sensord-init.d sensord
         fi
+    fi
+
+    if option systemd ; then
+        dodir /${LIBDIR}/systemd/system
+        insinto /${LIBDIR}/systemd/system
+        doins prog/init/lm_sensors.service
     fi
 
     docinto chips

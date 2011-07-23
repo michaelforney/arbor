@@ -27,7 +27,6 @@ SLOT="0"
 if ever at_least 169; then
     MYOPTIONS="
         acl [[ requires = [ glib ] ]]
-        modeswitch [[ description = [ Ability to switch Mobile Action cables into serial mode ] ]]
     "
 else
     MYOPTIONS="
@@ -67,7 +66,6 @@ if ever at_least 169; then
         build+run:
             dev-util/gperf[>=3.0.4]
             acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(?)?] )
-            modeswitch? ( dev-libs/libusb:0.1[>=0.1.12] )
     "
 else
     DEPENDENCIES+="
@@ -121,7 +119,6 @@ configure_one_multibuild() {
         $(if ever at_least 169; then
             echo --enable-edd
             option_enable acl udev_acl
-            option_enable modeswitch action_modeswitch
             option_enable sound hwdb
         else
             option_enable extras

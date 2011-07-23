@@ -149,6 +149,9 @@ src_install() {
     fi
 
     install_systemd_files
+
+    # Delete empty dir.
+    edo rmdir "${IMAGE}"/run
 }
 
 pkg_postinst() {

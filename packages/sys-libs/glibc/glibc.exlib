@@ -6,7 +6,6 @@ export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure s
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
-myexparam libidn_uri="mirror://gnu/${PN}/${PN}-libidn-${PV}.tar.bz2"
 
 require multibuild flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ]
 
@@ -15,9 +14,8 @@ HOMEPAGE="http://www.gnu.org/software/libc"
 
 exparam -v source_uri source_uri
 exparam -v ports_uri ports_uri
-exparam -v libidn_uri libidn_uri
 
-DOWNLOADS="${source_uri} ${ports_uri} ${libidn_uri}"
+DOWNLOADS="${source_uri} ${ports_uri}"
 
 LICENCES="|| ( GPL-3 GPL-2 ) || ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
@@ -68,10 +66,6 @@ glibc_src_unpack() {
     if [[ ${PV/_p*} != ${PV} ]] ; then
         edo mv glibc-${PV/_p*}-2* glibc-${PV}
         edo mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
-    fi
-
-    if [[ -n ${libidn_uri} ]] ; then
-        edo mv ${PN}-libidn-${PV} "${WORKBASE}"/${PNV}/libidn
     fi
 
     if [[ -n ${ports_uri} ]] ; then
