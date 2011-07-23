@@ -78,17 +78,17 @@ python-build_src_configure() {
     # default to gdbm when both are enabled.
     local disable="ndbm" # not available
 
-    option berkdb   || disable="${disable} _bsddb"
+    option berkdb   || disable+=" _bsddb"
     if ever at_least 3 ; then
-        option berkdb || option gdbm || disable+=" _dbm"
-        option gdbm     || disable="${disable} _gdbm"
+        option dbm  || disable+=" _dbm"
+        option gdbm || disable+=" _gdbm"
     else
-        option berkdb || option gdbm || disable+=" dbm"
-        option gdbm     || disable="${disable} gdbm"
+        option dbm  || disable+=" dbm"
+        option gdbm || disable+=" gdbm"
     fi
-    option readline || disable="${disable} readline"
-    option sqlite   || disable="${disable} _sqlite3"
-    option tk       || disable="${disable} _tkinter"
+    option readline || disable+=" readline"
+    option sqlite   || disable+=" _sqlite3"
+    option tk       || disable+=" _tkinter"
     export PYTHON_DISABLE_MODULES="${disable}"
 
     export OPT="${CFLAGS}"
