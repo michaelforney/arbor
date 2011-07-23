@@ -56,6 +56,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
 python-build_src_prepare() {
+    # linux-3 support, applied upstream
+    edo cp -r "${WORK}/Lib/plat-linux2" "${WORK}/Lib/plat-linux3"
+
     [[ -d ${FILES}/${PV} ]] && expatch "${FILES}/${PV}/"
 
     edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
