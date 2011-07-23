@@ -1,0 +1,20 @@
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require perl-module [ module_author=DAGOLDEN ] alternatives
+
+SUMMARY="Build and install Perl modules"
+
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS=""
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+src_install() {
+    perl-module_src_install
+    alternatives_for config_data ${PV} ${PV} \
+        /usr/bin/config_data config_data-${PV} \
+        /usr/share/man/man1/config_data.1 config_data-${PV}.1
+}
+
