@@ -176,7 +176,13 @@ EOT
 }
 
 udev_pkg_postinst() {
+    # If root is not the root of the filesystem, we are not merging to the system image, and we
+    # should not restart the udev process
     [[ "${ROOT}" == "/" ]] || return
+
+    # if the root of init does not match our root, we are in a chroot and should not perform the
+    # restart of the udev process
+    [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]] || return
 
     pkill -TERM udevd &> /dev/null
     sleep 1
