@@ -142,10 +142,12 @@ src_configure() {
 }
 
 src_test_expensive() {
-    # Increase stack size from 8M to 24M to make
-    # gcc.c-torture/compile/limits-exprparen.c test pass as per
-    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
-    ulimit -s 24000
+    if ! ever at_least 4.6.1; then
+        # Increase stack size from 8M to 24M to make
+        # gcc.c-torture/compile/limits-exprparen.c test pass as per
+        # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
+        ulimit -s 24000
+    fi
     emake check
 }
 
