@@ -82,7 +82,7 @@ ruby_src_test() {
     # FIXME Multithreaded test, takes a lifetime under sydbox
     # test/ruby/test_thread.rb
     # I/O tests fail unter sydbox
-    edo rm "${WORK}/bootstraptest/test_io.rb"
+    edo rm -f "${WORK}/bootstraptest/test_io.rb"
 
     # make test finally runs miniruby, set LD_LIBRARY_PATH so it can find libruby19.so.1.9
     ever at_least 1.9 && export LD_LIBRARY_PATH="${WORK}${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
