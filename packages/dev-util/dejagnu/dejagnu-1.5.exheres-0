@@ -17,9 +17,11 @@ in Expect, which in turn uses Tcl -- Tool command language."
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="doc"
 
 DEPENDENCIES="
+    build:
+        doc? ( app-text/docbook-utils[jadetex] )
     build+run:
         dev-lang/tcl
         dev-tcl/expect
@@ -31,8 +33,14 @@ DEFAULT_SRC_TEST_PARAMS=( RUNTESTFLAGS="RUNTEST=\"${WORK}\"/runtest" )
 src_install() {
     default
 
-    dodoc doc/overview.{pdf,ps,rtf}
-    docinto html
-    dodoc doc/html/*
+    if option doc; then
+        # By specifying docbook2pdf explicitly, we make sure that this fails if it is not installed
+        # We could also use texi2dvi and the `pdf` target if texlive worked
+        emake dejagnu.pdf DOCBOOK2PDF=docbook2pdf
+        dodoc dejagnu.pdf
+    fi
+
+    emake html
+    dodoc -r html
 }
 
