@@ -19,6 +19,8 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 src_prepare() {
     # Treat clang as gcc
     edo sed -e '/gcc=1/s:\*gcc\*:*clang*|&:' -i configure
+
+    default
 }
 
 src_configure() {
