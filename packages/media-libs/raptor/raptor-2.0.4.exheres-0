@@ -1,0 +1,46 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'raptor-1.4.17.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+MY_PNV="${PN}$(ever major)-${PV}"
+
+SUMMARY="The RDF Parser Toolkit"
+HOMEPAGE="http://librdf.org/${PN}"
+DOWNLOADS="http://download.librdf.org/source/${MY_PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/api/ [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/RELEASE.html [[ lang = en ]]"
+
+LICENCES="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config[>=0.9.0]
+        sys-devel/flex
+    build+run:
+        dev-libs/glib:2
+        dev-libs/libxml2[>=2.6.8]
+        dev-libs/libxslt[>=1.0.18]
+        dev-libs/yajl[>=2.0.0]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nfc-check
+    --with-www=xml
+    --with-xml-parser=libxml
+    --with-yajl
+)
+
+src_test() {
+    emake -j1 check
+}
+
