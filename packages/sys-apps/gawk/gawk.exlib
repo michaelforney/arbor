@@ -1,0 +1,78 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008 Bo Ørsted Andresen
+# Distributed under the terms of the GNU General Public License v2
+
+require alternatives
+
+if ever at_least 4.0.0; then
+    require gnu [ suffix=xz ]
+else
+    require gnu
+fi
+
+SUMMARY="GNU awk implementation"
+
+LICENCES="GPL-3"
+SLOT="0"
+MYOPTIONS="
+    baselayout [[ description = [ Build and install filefuncs
+        extension to /rcscripts, required by baselayout ] ]]"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+"
+
+if ever at_least 4.0.0; then
+    DEPENDENCIES+="
+        build:
+            app-arch/xz
+    "
+fi
+
+# Install binaries outside /usr
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --bindir=/bin
+    --enable-nls
+    ac_cv_libsigsegv=no # Do not link against libsigsegv
+)
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FUTURES LIMITATIONS POSIX.STD )
+
+src_prepare() {
+    option baselayout && edo cp -R "${FILES}"/filefuncs "${WORKBASE}"
+}
+
+src_compile() {
+    default
+
+    if option baselayout; then
+        cd "${WORKBASE}"/filefuncs
+        nonfatal emake AWKINCDIR="${WORK}" || die "filefuncs emake failed"
+    fi
+}
+
+src_install() {
+    default
+
+    dodir /usr/bin
+    local x
+    for x in "${IMAGE}"/bin/{gawk,pgawk}; do
+        # don't install the same binary twice. instead use symlinks
+        # ${x} -> ${x}-${PV} and /usr/bin/${x} -> ../../bin/${x}
+        edo rm "${x}"
+        x=${x##*/}
+        dosym ${x}-${PV} /bin/${x}
+        dosym ../../bin/${x} /usr/bin/${x}
+    done
+
+    if option baselayout; then
+        cd "${WORKBASE}"/filefuncs
+        nonfatal emake DESTDIR="${IMAGE}" LIBDIR=${LIBDIR} install || die "filefuncs emake install failed"
+    fi
+
+    alternatives_for awk ${PN} 5 \
+        /usr/bin/awk ${PN} \
+        /usr/share/man/man1/awk.1 ${PN}.1
+}
+
