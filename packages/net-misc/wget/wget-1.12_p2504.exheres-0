@@ -29,12 +29,17 @@ DEPENDENCIES="
         dev-perl/IO-Socket-SSL
 "
 
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MAILING-LIST doc/sample.wgetrc )
+
 WORK=${WORKBASE}/${MY_PNV}
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-nls
-    --with-ssl
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 "idn iri" )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MAILING-LIST doc/sample.wgetrc )
+src_configure() {
+    local myconf=(
+        --enable-nls
+        --with-ssl
+        $(option_enable ipv6)
+        $(option_enable idn iri)
+    )
+    econf ${myconf[@]}
+}
 
