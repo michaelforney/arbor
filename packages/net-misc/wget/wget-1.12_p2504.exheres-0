@@ -1,0 +1,40 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PV=$(ever range 1-2)-${PV#*_p}
+MY_PNV=${PN}-${MY_PV}
+
+require gnu [ alpha=true suffix=bz2 pv=${MY_PV} ]
+
+SUMMARY="Wget is a package for retrieving files using HTTP, HTTPS and FTP"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="
+    idn  [[ description = [ Enable support for internationalized domain names ] ]]
+    ipv6
+"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+    build+run:
+        dev-libs/openssl
+        idn? ( net-dns/libidn )
+    test:
+        dev-perl/HTTP-Daemon
+        dev-perl/IO-Socket-SSL
+"
+
+WORK=${WORKBASE}/${MY_PNV}
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
+    --with-ssl
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 "idn iri" )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MAILING-LIST doc/sample.wgetrc )
+
