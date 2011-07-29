@@ -14,6 +14,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="
     expat
+    gnutls [[ description = [ Use GnuTLS instead of OpenSSL ] ]]
     libproxy [[ description = [ Support for automatic configuration management through libproxy ] ]]
 "
 
@@ -24,10 +25,11 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config[>=0.18]
     build+run:
-        dev-libs/openssl[>=0.9.7]
         sys-libs/zlib
        !expat? ( dev-libs/libxml2 )
         expat? ( dev-libs/expat )
+       !gnutls? ( dev-libs/openssl[>=0.9.7] )
+        gnutls? ( dev-libs/gnutls )
         libproxy? ( net-libs/libproxy )
 "
 
@@ -42,6 +44,6 @@ src_configure() {
         myconf="${myconf} --with-libxml2 --without-expat"
     fi
 
-    econf --enable-shared --with-ssl=openssl ${myconf} $(option_with libproxy)
+    econf --enable-shared --with-ssl=$(option gnutls && echo gnutls || echo openssl) ${myconf} $(option_with libproxy)
 }
 
