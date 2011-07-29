@@ -7,6 +7,7 @@ require common-metadata
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="idn ipv6
     ares [[ description = [ Enabled c-ares posix-threaded dns support, disables curl's own threaded resolver ] ]]
+    gnutls [[ description = [ Use GnuTLS instead of OpenSSL ] ]]
 "
 DEPENDENCIES="
     build:
@@ -15,12 +16,18 @@ DEPENDENCIES="
         sys-apps/diffutils
     build+run:
         app-misc/ca-certificates
-        dev-libs/openssl
         net-libs/libssh2[>=1.2.8]
         sys-libs/zlib
         ares? ( net-dns/c-ares[>=1.6.0] )
+       !gnutls? ( dev-libs/openssl )
+        gnutls? (
+            dev-libs/gnutls
+            dev-libs/libgcrypt
+        )
         idn? ( net-dns/libidn )
 "
+# NOTE: curl requires that gnutls was built against libgcrypt. It only checks for presence of
+# libgcrypt, not if it actually used by gnutls, though.
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-werror
@@ -29,12 +36,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-ca-bundle
     --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
     --with-libssh2
-    --with-ssl
-    --with-ca-path=/etc/ssl/certs
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares '!ares threaded-resolver' ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'idn libidn'
+    '!gnutls ssl' '!gnutls ca-path /etc/ssl/certs'
+    gnutls
 )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
