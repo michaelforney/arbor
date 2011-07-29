@@ -14,6 +14,7 @@ LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="
+    gnutls [[ description = [ Use GnuTLS instead of OpenSSL ] ]]
     idn  [[ description = [ Enable support for internationalized domain names ] ]]
     ipv6
 "
@@ -22,7 +23,8 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
-        dev-libs/openssl
+       !gnutls? ( dev-libs/openssl )
+        gnutls? ( dev-libs/gnutls )
         idn? ( net-dns/libidn )
     test:
         dev-perl/HTTP-Daemon
@@ -39,6 +41,7 @@ src_configure() {
         --with-ssl
         $(option_enable ipv6)
         $(option_enable idn iri)
+        --with-ssl=$(option gnutls && echo gnutls || echo yes)
     )
     econf ${myconf[@]}
 }
