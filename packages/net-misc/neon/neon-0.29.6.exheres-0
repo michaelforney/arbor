@@ -36,14 +36,13 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-0.29.4-sydbox.patch )
 
 src_configure() {
-    local myconf
-
-    if option expat; then
-        myconf="${myconf} --with-expat --without-libxml2"
-    else
-        myconf="${myconf} --with-libxml2 --without-expat"
-    fi
-
-    econf --enable-shared --with-ssl=$(option gnutls && echo gnutls || echo openssl) ${myconf} $(option_with libproxy)
+    local myconf=(
+        --enable-shared
+        $(option_with !expat libxml2)
+        $(option_with expat)
+        $(option_with libproxy)
+        --with-ssl=$(option gnutls && echo gnutls || echo openssl)
+    )
+    econf ${myconf[@]}
 }
 
