@@ -1,4 +1,4 @@
-# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'c-client-2007e.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
@@ -15,12 +15,12 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="pam ssl"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        pam? ( sys-libs/pam[>=0.72] )
-        ssl? ( dev-libs/openssl[>=0.9.8j] )
+        dev-libs/openssl[>=0.9.8j]
+        sys-libs/pam[>=0.72]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -28,7 +28,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}"/${PN}-build-so.patch
 )
 
-WORK="${WORKBASE}"/${MY_PNV}
+WORK=${WORKBASE}/${MY_PNV}
 
 src_prepare() {
     default
@@ -48,13 +48,8 @@ src_prepare() {
 }
 
 src_compile() {
-    local ssltype target
-
-    option ssl && ssltype="unix" || ssltype="none"
-    option pam && target=lnp || target=lnx
-
     # no parallel builds supported!
-    emake -j1 $target SSLTYPE=${ssltype} EXTRACFLAGS="${CFLAGS}"
+    emake -j1 lnp SSLTYPE=unix EXTRACFLAGS="${CFLAGS}"
 }
 
 src_install() {
