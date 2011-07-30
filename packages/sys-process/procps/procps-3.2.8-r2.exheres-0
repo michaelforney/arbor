@@ -28,5 +28,9 @@ src_install() {
     default
     insinto /usr/include/proc
     doins proc/*.h
+
+    # Provided by coreutils
+    edo rm -f "${IMAGE}"/{bin/kill,usr/bin/uptime}
+    edo rm -f "${IMAGE}"/usr/share/man/man1/{kill,uptime}.1
 }
 
