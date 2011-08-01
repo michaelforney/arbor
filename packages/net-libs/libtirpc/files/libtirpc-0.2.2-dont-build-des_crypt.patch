@@ -1,0 +1,33 @@
+commit ebd3e644a79fa92b3b780d87d8028fcf64364abd
+Author: Mike Frysinger <vapier@gentoo.org>
+Date:   Mon Jun 20 13:52:14 2011 -0400
+Upstream: yes
+
+    Revert "Include des_crypt in build"
+    
+    The des_crypt code requires the crypt_client code (which wasn't
+    added), and that code requires a currently undefined function
+    (namely xdr_desresp).  Since I have no idea what that's about,
+    and this change ends up breaking some systems, just revert it.
+    
+    Once we have a patch that improves portability without breaking
+    existing systems, we can revisit this.
+    
+    This reverts commit 9bdcba10aa67ce3f67810c7aaac944a00dcfcee5.
+    
+    Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+    Signed-off-by: Steve Dickson <steved@redhat.com>
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 7ee8cbc..6731ff9 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -50,7 +50,7 @@ libtirpc_la_SOURCES = auth_none.c auth_unix.c authunix_prot.c bindresvport.c cln
+         rpc_callmsg.c rpc_generic.c rpc_soc.c rpcb_clnt.c rpcb_prot.c \
+         rpcb_st_xdr.c svc.c svc_auth.c svc_dg.c svc_auth_unix.c svc_generic.c \
+         svc_raw.c svc_run.c svc_simple.c svc_vc.c getpeereid.c \
+-        auth_time.c auth_des.c authdes_prot.c des_crypt.c
++        auth_time.c auth_des.c authdes_prot.c
+ 
+ ## XDR
+ libtirpc_la_SOURCES += xdr.c xdr_rec.c xdr_array.c xdr_float.c xdr_mem.c xdr_reference.c xdr_stdio.c

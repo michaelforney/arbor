@@ -1,7 +1,7 @@
 # Copyright 2010 Timo Gurr <tgurr@gentoo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge
+require sourceforge autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="Transport-Independent RPC library"
 DESCRIPTION="
@@ -9,14 +9,18 @@ Libtirpc is a port of Suns Transport-Independent RPC library to Linux.
 It's being developed by the Bull GNU/Linux NFSv4 project.
 "
 
-LICENCES="libtirpc"
+LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="gss [[ description = [ Ability to use the Generic Security Services Application Program Interface  ] ]]"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        gss? ( net-libs/libgssglue )
+"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-gss )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-dont-build-des_crypt.patch" )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gss )
 
 src_install() {
     default
