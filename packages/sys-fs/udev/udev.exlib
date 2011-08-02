@@ -79,13 +79,13 @@ udev_src_prepare() {
 udev_src_configure() {
     econf --libexecdir=/${LIBDIR}/udev \
         --sbindir=/sbin \
+        --enable-edd \
         --enable-static \
         --with-rootlibdir=/${LIBDIR} \
         --without-selinux \
         $(option_enable glib gudev) \
         $(option_enable gobject-introspection introspection) \
         $(option_with systemd systemdsystemunitdir "/${LIBDIR}/systemd/system") \
-        $(echo --enable-edd) \
         $(option_enable acl udev_acl) \
         $(option_enable sound hwdb)
 }
