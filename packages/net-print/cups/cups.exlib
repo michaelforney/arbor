@@ -66,6 +66,8 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
     BUILDROOT="${IMAGE}"
 )
 
+AT_M4DIR=( config-scripts )
+
 src_prepare() {
     # remove default optimizations and do not strip by default
     edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
@@ -90,7 +92,7 @@ src_prepare() {
 
     expatch "${FILES}/${PN}-backend-https.patch"
 
-    AT_M4DIR=config-scripts autotools_src_prepare
+    autotools_src_prepare
 }
 
 src_configure() {
