@@ -46,6 +46,15 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
 
+src_prepare() {
+    # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
+    edo sed -e '/s_addr =/s:INADDR_ANY:htonl(INADDR_LOOPBACK):' -i tests/server/*.c
+
+    # Use `whoami` instead of $USER;
+    # sshserver.pl will refuse to run as root (which $USER might claim ever if we're not)
+    edo sed -e 's/\$ENV{USER}/`whoami`/' -i tests/*.pl
+}
+
 src_test() {
     cat <<-EOF >> tests/data/DISABLED
 # Work around broken DNS servers, Exherbo #207
@@ -54,7 +63,16 @@ src_test() {
 # Fails with too many open files
 537
 EOF
-    emake test-full
+    esandbox allow_net --connect "inet:127.0.0.1@9011"
+    esandbox allow_net --connect "inet:127.0.0.1@60000"
+
+    # Default TEST_F is -a -p -r; we add -v (verbose) and remove -r (run time statistics)
+    local test_args=( -a -p -v )
+    test_args+=( '!'{600..637} )
+    emake test-full TEST_F="${test_args[*]}" # SSH tests hang
+
+    esandbox disallow_net --connect "inet:127.0.0.1@9011"
+    esandbox disallow_net --connect "inet:127.0.0.1@60000"
 }
 
 src_install() {
