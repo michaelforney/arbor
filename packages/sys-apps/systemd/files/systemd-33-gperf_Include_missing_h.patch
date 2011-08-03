@@ -1,0 +1,29 @@
+Source: http://lists.freedesktop.org/archives/systemd-devel/2011-August/003102.html
+Upstream: Submitted.
+Reason:
+
+Older GNU C libraries don't define RLIMIT_RTTIME, so including the
+missing.h is required to fix the build.
+---
+ src/load-fragment-gperf.gperf.m4 |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/src/load-fragment-gperf.gperf.m4 b/src/load-fragment-gperf.gperf.m4
+index 650f444..8e52890 100644
+--- a/src/load-fragment-gperf.gperf.m4
++++ b/src/load-fragment-gperf.gperf.m4
+@@ -2,6 +2,7 @@
+ #include <stddef.h>
+ #include "conf-parser.h"
+ #include "load-fragment.h"
++#include "missing.h"
+ %}
+ struct ConfigPerfItem;
+ %null_strings
+-- 
+1.7.6
+
+_______________________________________________
+systemd-devel mailing list
+systemd-devel@lists.freedesktop.org
+http://lists.freedesktop.org/mailman/listinfo/systemd-devel
