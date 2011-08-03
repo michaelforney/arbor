@@ -10,14 +10,14 @@ DOWNLOADS="mirror://berlios/${PN}/${PNV}.tar.xz"
 LICENCES="GPL-2 public-domain"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ipv6 ssl tk"
+MYOPTIONS="ipv6 tk"
 
 DEPENDENCIES="
     build:
         app-arch/xz
         sys-devel/gettext
     build+run:
-        ssl? ( dev-libs/openssl )
+        dev-libs/openssl
         tk? ( dev-lang/python:=[tk] )"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -31,9 +31,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-NTLM
     --enable-SDPS
     --without-gssapi --without-kerberos5 --without-kerberos --without-hesiod
+    --with-ssl
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ssl )
 # Don't run t.validate-xhtml, always fails to load DTDs here
 DEFAULT_SRC_TEST_PARAMS=( TESTS=t.smoke )
 
