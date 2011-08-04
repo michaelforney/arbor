@@ -18,9 +18,6 @@ MYOPTIONS="
     libproxy [[ description = [ Support for automatic configuration management through libproxy ] ]]
 "
 
-# Tests still/again broken with newer openssl
-RESTRICT="test"
-
 DEPENDENCIES="
     build:
         dev-util/pkg-config[>=0.18]
@@ -36,7 +33,13 @@ DEPENDENCIES="
         dev-libs/openssl
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-0.29.4-sydbox.patch )
+
+src_prepare() {
+    expatch "${FILES}"/${PN}-0.29.4-sydbox.patch
+
+    # Disable a test that fails under sydbox
+    edo sed -e '/T(session_cache)/d' -i test/ssl.c
+}
 
 src_configure() {
     local myconf=(
