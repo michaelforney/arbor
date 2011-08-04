@@ -29,7 +29,8 @@ DEPENDENCIES="
        !expat? ( dev-libs/libxml2 )
         expat? ( dev-libs/expat )
        !gnutls? ( dev-libs/openssl[>=0.9.7] )
-        gnutls? ( dev-libs/gnutls )
+        gnutls? ( dev-libs/gnutls[<2.12.0] ) [[
+            note = [ neon/src/ne_socket.c still uses gnutls_certificate_verify_peers ] ]]
         libproxy? ( net-libs/libproxy )
     test:
         dev-libs/openssl
