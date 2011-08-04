@@ -24,10 +24,9 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-hidden-symbols
-    --without-libgcrypt
     --with-libz
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'openssh !gcrypt' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( '!gcrypt openssl' 'gcrypt libgcrypt' )
 
 src_prepare() {
     # keyboard-interactive tests fail: Failed requesting pty
