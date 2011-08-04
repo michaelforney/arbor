@@ -13,20 +13,21 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.html [[ lang = en ]]"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="gcrypt"
 
 DEPENDENCIES="
     build+run:
-        dev-libs/openssl
+       !gcrypt? ( dev-libs/openssl )
+        gcrypt? ( dev-libs/libgcrypt )
         sys-libs/zlib
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-hidden-symbols
     --without-libgcrypt
-    --with-openssl
     --with-libz
 )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'openssh !gcrypt' )
 
 src_prepare() {
     # keyboard-interactive tests fail: Failed requesting pty
