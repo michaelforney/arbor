@@ -18,9 +18,15 @@ REMOTE_IDS+="freshmeat:squashfs"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+    xz  [[ description = [ Support xz compressed images ] ]]
+    lzo [[ description = [ Support lzo compressed images ] ]]
+"
 
 DEPENDENCIES="
+    build+run:
+        xz? ( app-arch/xz )
+        lzo? ( app-arch/lzo )
     run:
         sys-libs/zlib
 "
@@ -31,4 +37,10 @@ DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" LDFLAGS="${LDFLAGS}" )
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_DIR="${IMAGE}"/usr/bin )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( ../ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ACKNOWLEDGEMENTS PERFORMANCE.README )
+
+src_prepare() {
+    cd ${WORK}
+    option xz && sed -i 's/#XZ_SUPPORT = 1/XZ_SUPPORT = 1/' Makefile || die
+    option lzo && sed -i 's/#LZO_SUPPORT = 1/LZO_SUPPORT = 1/' Makefile || die
+}
 
