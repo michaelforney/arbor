@@ -61,6 +61,7 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
     -DINSTALL_SCRIPTDIR:PATH=bin
     -DINSTALL_SUPPORTFILESDIR:PATH=share/doc/${PNVR}/support-files
     -DMYSQL_DATADIR:PATH=/var/lib/mysql
+    -DMYSQL_UNIX_ADDR:PATH=/run/mysqld/mysqld.sock
     -DSYSCONFDIR:PATH=/etc/mysql
     -DWITH_COMMENT:STRING="Exherbo, ${PNVR}"
     -DWITH_EXTRA_CHARSETS:STRING=all
@@ -112,17 +113,12 @@ mysql-5.5_src_install() {
 
     keepdir /etc/mysql
     edo cp "${IMAGE}"/usr/share/doc/${PNVR}/support-files/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf
-    edo sed -i -e "/socket/s:=.*:= /var/run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf
     edo mv "${IMAGE}"/usr/bin/mysqlaccess.conf "${IMAGE}"/etc/mysql/mysqlaccess.conf
     edo chmod 644 "${IMAGE}"/etc/mysql/mysqlaccess.conf
 
     keepdir /var/{lib,log}/mysql
     edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
     edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
-
-    keepdir /var/run/mysqld
-    edo chown mysql:mysql "${IMAGE}"/var/run/mysqld
-    edo chmod 755 "${IMAGE}"/var/run/mysqld
 
     ! option debug && edo rmdir "${IMAGE}"/usr/${LIBDIR}/mysql/plugin/debug
 
@@ -143,8 +139,12 @@ EOF
     if option systemd ; then
         insinto /etc/tmpfiles.d
         hereins ${PN}.conf <<EOF
-d /var/run/mysqld 0755 mysql mysql
+d /run/mysqld 0755 mysql mysql
 EOF
+    else
+        keepdir /run/mysqld
+        edo chown mysql:mysql "${IMAGE}"/run/mysqld
+        edo chmod 755 "${IMAGE}"/run/mysqld
     fi
 }
 

@@ -14,7 +14,7 @@ After=syslog.target
 
 [Service]
 Type=simple
-ExecStart=/usr/sbin/mysqld --defaults-file=/etc/mysql/my.cnf --basedir=/usr --datadir=/var/lib/mysql --pid-file=/var/run/mysqld/mysqld.pid --socket=/var/run/mysqld/mysqld.sock --user=mysql --log-error=/var/log/mysql/mysql.log -W
+ExecStart=/usr/sbin/mysqld --defaults-file=/etc/mysql/my.cnf --basedir=/usr --datadir=/var/lib/mysql --pid-file=/run/mysqld/mysqld.pid --socket=/run/mysqld/mysqld.sock --user=mysql --log-error=/var/log/mysql/mysql.log -W
 
 [Install]
 WantedBy=multi-user.target

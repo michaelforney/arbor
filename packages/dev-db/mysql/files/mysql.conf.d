@@ -49,7 +49,7 @@
 #DEBUG=4
 #
 # The default location for the "master" pid file
-#MYSQL_GLOB_PID_FILE="/var/run/svc-started-mysqld"
+#MYSQL_GLOB_PID_FILE="/run/svc-started-mysqld"
 #
 # The timeout for a failed attempt to stop a server
 #STOPTIMEOUT=120
