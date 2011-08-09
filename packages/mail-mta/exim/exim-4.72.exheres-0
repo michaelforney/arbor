@@ -126,6 +126,7 @@ src_install() {
     # do that, so addfilter will have to do..
     addfilter /var/spool/exim
     default
+    rmfilter /var/spool/exim
 
     alternatives_for mta ${PN} 10 /usr/sbin/sendmail ${PN}
     edo mv "${IMAGE}"/etc/mail/{,${PN}.}aliases
