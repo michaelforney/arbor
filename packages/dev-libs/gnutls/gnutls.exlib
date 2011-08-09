@@ -77,15 +77,15 @@ gnutls_src_prepare() {
 
 gnutls_src_test() {
     if ever at_least 2.12.7; then
-        esandbox allow_net "inet:127.0.0.1@5559"
-        esandbox allow_net --connect "inet:127.0.0.1@5557"
-        esandbox allow_net --connect "inet:127.0.0.1@5559"
+        esandbox allow_net "LOOPBACK@5559"
+        esandbox allow_net --connect "LOOPBACK@5557"
+        esandbox allow_net --connect "LOOPBACK@5559"
     fi
     emake check
     if ever at_least 2.12.7; then
-        esandbox disallow_net "inet:127.0.0.1@5559"
-        esandbox disallow_net --connect "inet:127.0.0.1@5557"
-        esandbox disallow_net --connect "inet:127.0.0.1@5559"
+        esandbox disallow_net "LOOPBACK@5559"
+        esandbox disallow_net --connect "LOOPBACK@5557"
+        esandbox disallow_net --connect "LOOPBACK@5559"
     fi
 }
 
