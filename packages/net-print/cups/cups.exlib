@@ -3,7 +3,7 @@
 # Based in part upon 'cups-1.3.8-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] pam systemd-service
 
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
@@ -13,8 +13,7 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="acl avahi baselayout dbus debug gnutls kerberos ldap libusb pam perl python tcpd tiff threads xinetd
-
+MYOPTIONS="baselayout dbus debug gnutls kerberos pam perl python tiff threads xinetd
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
 avahi [[ description = [ Enable DNS Service Discovery (DNS_SD) support (printer sharing using Avahi) ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
@@ -33,6 +32,10 @@ DEPENDENCIES="
         dbus? ( dev-util/pkg-config )
         gnutls? ( dev-util/pkg-config )
     build+run:
+        group/lpadmin
+        dev-libs/libpaper
+        media-libs/jpeg
+        media-libs/libpng
         acl? ( sys-apps/acl )
         avahi? ( net-dns/avahi[dns_sd] )
         dbus? ( sys-apps/dbus )
@@ -41,18 +44,14 @@ DEPENDENCIES="
         ldap? ( net-directory/openldap )
         libusb? ( dev-libs/libusb:0.1 )
         pam? ( sys-libs/pam )
-        pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
         perl? ( dev-lang/perl )
         python? ( dev-lang/python:* )
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff )
-        dev-libs/libpaper
-        media-libs/jpeg
-        media-libs/libpng
-        group/lpadmin
     post:
-        xinetd? ( sys-apps/xinetd )
         app-text/ghostscript[cups] [[ note = [ pstoraster, pdftoraster ] ]]
+        pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
+        xinetd? ( sys-apps/xinetd )
 "
 
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation.php"
@@ -90,8 +89,6 @@ src_prepare() {
     # Disable silent rules
     edo sed -i '/^\.SILENT:$/d' Makedefs.in
 
-    expatch "${FILES}/${PN}-backend-https.patch"
-
     autotools_src_prepare
 }
 
@@ -105,7 +102,7 @@ src_configure() {
     [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
 
     if option pdf ; then
-        myconf+=( '--with-pdftops=pdftops' )
+        myconf+=( '--with-pdftops=/usr/bin/pdftops' )
     else
         myconf+=( '--with-pdftops=none' )
     fi
@@ -113,35 +110,35 @@ src_configure() {
     # XXX Enables: slp
     # XXX Withs: java php
     econf \
+        --localstatedir=/var \
         --enable-jpeg \
         --enable-libpaper \
         --enable-png \
         --enable-raw-printing \
         --enable-static \
-        --localstatedir=/var \
+        --disable-cdsassl \
         --with-cups-{group,user}=lp \
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
         --with-languages="${CUPSLANGS}" \
         --with-system-groups=lpadmin \
         --without-rcdir \
-        --disable-cdsassl \
-        $(option_enable gnutls gnutls) \
-        $(option_enable !gnutls openssl) \
         $(option_enable acl) \
-        $(option_enable dbus) \
         $(option_enable avahi) \
         $(option_enable avahi dnssd) \
-        $(option_enable pam) \
+        $(option_enable dbus) \
+        $(option_enable gnutls gnutls) \
+        $(option_enable !gnutls openssl) \
         $(option_enable kerberos gssapi) \
         $(option_enable ldap) \
         $(option_enable libusb) \
+        $(option_enable pam) \
         $(option_enable tcpd tcp-wrappers) \
-        $(option_enable tiff) \
         $(option_enable threads) \
+        $(option_enable tiff) \
+        $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
         $(option_with perl) \
         $(option_with python) \
         $(option_with xinetd xinetd /etc/xinetd.d) \
-        $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
         "${myconf[@]}"
 }
 
