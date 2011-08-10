@@ -38,26 +38,27 @@ UPSTREAM_CHANGELOG="${HOMEPAGE}/users/news/version_${PV//./_}"
 
 WORK=${WORKBASE}/${MY_PNV}
 
-CMAKE_SRC_CONFIGURE_PARAMS=(
-    -DENABLE_MULTI_THREADED:BOOL=TRUE
-    -DENABLE_SINGLE_THREADED:BOOL=TRUE
-    -DENABLE_SHARED:BOOL=TRUE
-    -DENABLE_STATIC:BOOL=FALSE
-    -DINSTALL_VERSIONED:BOOL=FALSE
-    -DMPI_FOUND:BOOL=FALSE # Avoid automagic dependency
-    -DWITH_VALGRIND:BOOL=FALSE # Run tests under valgrind
-)
-CMAKE_SRC_CONFIGURE_OPTIONS=(
-    'doc DOCUMENTATION'
-    'doc DOCUMENTATION_HTML'
-)
-CMAKE_SRC_CONFIGURE_OPTION_ENABLES=( DEBUG )
+src_configure() {
+    local conf=(
+        -DENABLE_MULTI_THREADED:BOOL=TRUE
+        -DENABLE_SINGLE_THREADED:BOOL=TRUE
+        -DENABLE_SHARED:BOOL=TRUE
+        -DENABLE_STATIC:BOOL=FALSE
+        -DINSTALL_VERSIONED:BOOL=FALSE
+        -DMPI_FOUND:BOOL=FALSE # Avoid automagic dependency
+        -DWITH_VALGRIND:BOOL=FALSE # Run tests under valgrind
+        $(cmake_enable DEBUG)
+        $(cmake_option doc DOCUMENTATION)
+        $(cmake_option doc DOCUMENTATION_HTML)
+        #-DBUILD_TESTS:STRING=$(expecting_tests && echo ALL || echo NONE)
+    )
+    ecmake ${conf[@]}
+}
 
-# FIXME:
-# Some tests still need their CMakeLists.txt written, current cmake patch
-# isn't quite complete
-# To build tests: cmake -DBUILD_TESTS:BOOL=ALL
-# To run tests:   src_test_expensive() { ctest ; }
+# FIXME: Some tests still need their CMakeLists.txt written
+# src_test_expensive() {
+#     cmake_run ctest
+# }
 
 src_install() {
     cmake_src_install
