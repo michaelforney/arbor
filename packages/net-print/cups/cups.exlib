@@ -13,7 +13,7 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="baselayout dbus debug gnutls kerberos pam perl python tiff threads xinetd
+MYOPTIONS="baselayout dbus debug gnutls kerberos pam perl python tiff xinetd
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
 avahi [[ description = [ Enable DNS Service Discovery (DNS_SD) support (printer sharing using Avahi) ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
@@ -116,6 +116,7 @@ src_configure() {
         --enable-png \
         --enable-raw-printing \
         --enable-static \
+        --enable-threads \
         --disable-cdsassl \
         --with-cups-{group,user}=lp \
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
@@ -133,7 +134,6 @@ src_configure() {
         $(option_enable libusb) \
         $(option_enable pam) \
         $(option_enable tcpd tcp-wrappers) \
-        $(option_enable threads) \
         $(option_enable tiff) \
         $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
         $(option_with perl) \
