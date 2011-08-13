@@ -21,7 +21,7 @@ DEPENDENCIES="
         sys-fs/udev[>=120]
 "
 
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX=${IMAGE} )
+DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" )
 
 src_prepare() {
     edo sed -e "s:^\(CC\) = gcc:\1 = ${CC}:" \
