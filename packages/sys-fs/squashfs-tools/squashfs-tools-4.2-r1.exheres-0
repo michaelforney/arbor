@@ -39,8 +39,9 @@ DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( ../ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ACKNOWLEDGEMENTS PERFORMANCE.README )
 
 src_prepare() {
-    cd ${WORK}
-    option xz && sed -i 's/#XZ_SUPPORT = 1/XZ_SUPPORT = 1/' Makefile || die
-    option lzo && sed -i 's/#LZO_SUPPORT = 1/LZO_SUPPORT = 1/' Makefile || die
+    default
+
+    option xz && edo sed -i -e 's/#XZ_SUPPORT = 1/XZ_SUPPORT = 1/' Makefile
+    option lzo && edo sed -i -e 's/#LZO_SUPPORT = 1/LZO_SUPPORT = 1/' Makefile
 }
 
