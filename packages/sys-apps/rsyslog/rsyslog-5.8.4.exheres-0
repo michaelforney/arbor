@@ -50,59 +50,65 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-disable-tests-that-require-root.patch )
 
-# TODO: libdbi, "snmp net-snmp"
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-imdiag
-    --enable-imptcp
-    --enable-imfile
-    --enable-inet
-    --enable-klog
-    --enable-mail
-    --enable-omprog
-    --enable-omruleset
-    --enable-omuxsock
-    --enable-pthreads
-    --enable-regexp
-    --enable-rsyslogd
-    --enable-rsyslogrt
-    --enable-zlib
-    --disable-gui
-    --disable-impstats
-    --disable-imsolaris
-    --disable-imtemplate
-    --disable-libdbi
-    --disable-omdbalerting
-    --disable-omhdfs
-    --disable-omstdout
-    --disable-omtemplate
-    --disable-omudpspoof
-    --disable-oracle
-    --disable-pmaixforwardedfrom
-    --disable-pmcisconames
-    --disable-pmlastmsg
-    --disable-pmrfc3164sd
-    --disable-pmsnare
-    --disable-rfc3195
-    --disable-snmp
+src_configure() {
+    # TODO: libdbi, "snmp net-snmp"
+    local myconf=(
+        --enable-imdiag
+        --enable-imptcp
+        --enable-imfile
+        --enable-inet
+        --enable-klog
+        --enable-mail
+        --enable-omprog
+        --enable-omruleset
+        --enable-omuxsock
+        --enable-pthreads
+        --enable-regexp
+        --enable-rsyslogd
+        --enable-rsyslogrt
+        --enable-zlib
+        --disable-gui
+        --disable-impstats
+        --disable-imsolaris
+        --disable-imtemplate
+        --disable-libdbi
+        --disable-omdbalerting
+        --disable-omhdfs
+        --disable-omstdout
+        --disable-omtemplate
+        --disable-omudpspoof
+        --disable-oracle
+        --disable-pmaixforwardedfrom
+        --disable-pmcisconames
+        --disable-pmlastmsg
+        --disable-pmrfc3164sd
+        --disable-pmsnare
+        --disable-rfc3195
+        --disable-snmp
 
-    # This is not a mistake and passing it to configure is correct.
-    # Java is not being used at all yet, however the tests depend on it.
-    HAVE_JAVAC=yes
-)
+        # This is not a mistake and passing it to configure is correct.
+        # Java is not being used at all yet, however the tests depend on it.
+        HAVE_JAVAC=yes
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "build_options:recommended_tests testbench"
-    "build_options:recommended_tests extended-tests"
-    debug
-    "debug diagtools"
-    gnutls
-    "kerberos gssapi-krb5"
-    mysql
-    "postgresql pgsql"
-    relp
-)
+        $(option_enable debug)
+        $(option_enable debug diagtools)
+        $(option_enable gnutls)
+        $(option_enable kerberos gssapi-krb5)
+        $(option_enable mysql)
+        $(option_enable postgresql pgsql)
+        $(option_enable relp)
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /${LIBDIR}/systemd/system" )
+        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+    )
+
+    if expecting_tests; then
+        myconf+=( --enable-{testbench,extended-tests} )
+    else
+        myconf+=( --disable-{testbench,extended-tests} )
+    fi
+
+    econf "${myconf[@]}"
+}
 
 src_install() {
     default
