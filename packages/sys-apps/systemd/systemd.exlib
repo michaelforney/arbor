@@ -82,7 +82,9 @@ if ever is_scm ; then
     "
 fi
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-gperf_Include_missing_h.patch )
+if ! ever is_scm ; then
+    DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-gperf_Include_missing_h.patch )
+fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
