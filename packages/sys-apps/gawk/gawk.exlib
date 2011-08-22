@@ -40,7 +40,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FUTURES LIMITATIONS POSIX.STD )
 
 src_prepare() {
-    option baselayout && edo cp -R "${FILES}"/filefuncs "${WORKBASE}"
+    option baselayout && edo cp -R "${FILES}"/filefuncs-$(ever major) "${WORKBASE}"/filefuncs
 }
 
 src_compile() {
