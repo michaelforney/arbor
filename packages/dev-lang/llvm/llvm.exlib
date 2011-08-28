@@ -141,7 +141,7 @@ llvm_src_configure() {
 llvm_src_test() {
     local lit_args="-v -j${EXJOBS:-1}"
     emake check LIT_ARGS="${lit_args}"
-    option clang && emake test -C tools/clang LIT_ARGS="${lit_args}"
+    option clang && emake test -C tools/clang LIT_ARGS="${lit_args}" TESTARGS=
 }
 
 llvm_src_install() {
