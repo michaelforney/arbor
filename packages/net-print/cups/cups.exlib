@@ -84,7 +84,7 @@ src_prepare() {
     edo sed -i -e '/MAN[0-9]EXT=/s:\.gz::g' config-scripts/cups-manpages.m4
 
     # disable the xinetd service by default
-    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" init/cups-lpd.in
+    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" scheduler/cups-lpd.xinetd.in
 
     # Disable silent rules
     edo sed -i '/^\.SILENT:$/d' Makedefs.in
