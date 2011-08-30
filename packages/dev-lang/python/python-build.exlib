@@ -116,6 +116,16 @@ python-build_src_test() {
 python-build_src_install() {
     default
 
+    # for backward compatibility, have plat-linux3 and plat-linux2 folders
+    # as long as they are identical, this shouldn't be a problem
+    pushd "${IMAGE}/usr/${LIBDIR}/python${SLOT}/"
+    if test -d plat-linux2; then
+        edo ln -s plat-linux2 plat-linux3
+    else
+        edo ln -s plat-linux3 plat-linux2
+    fi
+    popd
+
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
     ever at_least 3 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
     edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
