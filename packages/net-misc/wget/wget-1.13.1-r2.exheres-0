@@ -21,7 +21,11 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
        !gnutls? ( dev-libs/openssl )
-        gnutls? ( dev-libs/gnutls )
+        gnutls? (
+            dev-libs/gnutls
+            dev-libs/libgcrypt
+            dev-libs/libgpg-error
+        )
         idn? ( net-dns/libidn )
     test:
         dev-perl/HTTP-Daemon
