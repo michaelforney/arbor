@@ -34,10 +34,9 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MAILING-LIST doc/sample.wgetrc )
 src_configure() {
     local myconf=(
         --enable-nls
-        --with-ssl
         $(option_enable ipv6)
         $(option_enable idn iri)
-        --with-ssl=$(optionv gnutls || echo yes)
+        --with-ssl=$(optionv gnutls || echo openssl)
     )
     econf ${myconf[@]}
 }
