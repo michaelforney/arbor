@@ -37,7 +37,10 @@ DEPENDENCIES="
 VIMFILE="${PN}.vim"
 
 DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/remove-test-failure-submits-via-network.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/remove-test-failure-submits-via-network.patch"
+    "${FILES}"/${PN}-test-segfault.patch
+)
 
 src_prepare() {
     default
