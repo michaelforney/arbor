@@ -4,11 +4,13 @@
 
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://userweb.kernel.org/~kzak/${PN}/"
-DOWNLOADS="mirror://kernel/linux/utils/${PN}/v${PV:0:4}/${PNV}.tar.bz2"
+DOWNLOADS="mirror://kernel/linux/utils/${PN}/v$(ever range 1-2)/${PNV}.tar.bz2"
 
 REMOTE_IDS="freshmeat:${PN}"
 
-UPSTREAM_RELEASE_NOTES="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}-ReleaseNotes"
+MY_UPSTREAM="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}"
+UPSTREAM_CHANGELOG="${MY_UPSTREAM}-ChangeLog"
+UPSTREAM_RELEASE_NOTES="${MY_UPSTREAM}-ReleaseNotes"
 
 LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
