@@ -6,7 +6,7 @@
 SUMMARY="Common CA Certificates PEM files"
 HOMEPAGE="http://www.cacert.org/"
 
-DOWNLOADS="mirror://debian/pool/main/c/${PN}/${PN}_${PV}_all.deb"
+DOWNLOADS="mirror://debian/pool/main/c/${PN}/${PN}_${PV}+nmu1_all.deb"
 
 LICENCES="MPL-1.1"
 SLOT="0"
@@ -21,6 +21,7 @@ DEPENDENCIES="
     install+run:
         sys-apps/debianutils [[ note = [ update-ca-certificates needs run-parts from debianutils ] ]]
 "
+
 WORK=${WORKBASE}
 
 src_unpack() {
@@ -31,7 +32,7 @@ src_unpack() {
 
 src_install() {
     # Handle documentation & manuals Exherbo-style
-    edo find ./usr/share -type f -name '*.gz' | xargs gunzip || die 'Failed to unzip docs/man-pages'
+    edo find ./usr/share -type f -name '*.gz' | xargs gunzip || die 'Failed to unzip docs/man-pages.'
     dodoc ./usr/share/doc/ca-certificates/*
     edo rm -r ./usr/share/doc/ca-certificates
 
@@ -53,14 +54,14 @@ EOF
 }
 
 pkg_postinst() {
-    echo "Removing broken symlinks in ${ROOT}/etc/ssl/certs"
+    echo "Removing broken symlinks in ${ROOT}/etc/ssl/certs."
     find -L "${ROOT}"/etc/ssl/certs -type l -print0 | xargs -0 --no-run-if-empty rm \
         || ewarn "Some broken symlinks couldn't be removed. You must fix this manually."
 
     if [[ ${ROOT} == "/" ]]; then
-        update-ca-certificates || ewarn "update-ca-certificates failed"
+        update-ca-certificates || ewarn "update-ca-certificates failed."
     else
-        ewarn "Cannot run update-ca-certificates because ROOT == ${ROOT} != /, you need to run it manually"
+        ewarn "Cannot run update-ca-certificates because ROOT == ${ROOT} != /, you need to run it manually."
     fi
 }
 
