@@ -105,8 +105,8 @@ bind_src_configure() {
 bind_src_install() {
     default
 
-    keepdir /etc/${PN} /var/${PN}/{pri,sec} /var/run/named
-    edo chown named:named "${IMAGE}"/var/${PN}/{pri,sec} "${IMAGE}"/var/run/named
+    keepdir /etc/${PN} /var/${PN}/{pri,sec}
+    edo chown named:named "${IMAGE}"/var/${PN}/{pri,sec}
 
     # Install a basic configuration.
     insinto /etc/${PN}
@@ -141,6 +141,8 @@ EOF
     doins "${FETCHEDDIR}"/named.cache
     insinto /var/bind/pri
     doins "${FILES}"/{127,localhost}.zone
+
+    edo rmdir "${IMAGE}"/var/run
 }
 
 bind_pkg_postinst() {
