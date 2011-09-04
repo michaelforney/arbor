@@ -9,7 +9,6 @@ These are only the useful tools from old, crufty, obsolete sysvinit:
 - killall5
 - last
 - mesg
-- mountpoint
 - pidof
 - sulogin
 - utmpdump
@@ -40,15 +39,11 @@ src_compile() {
         killall5 \
         last \
         mesg \
-        mountpoint \
         sulogin \
         utmpdump
 }
 
 src_install() {
-    exeinto /bin
-    doexe src/mountpoint
-
     exeinto /sbin
     doexe \
         src/killall5 \

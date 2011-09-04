@@ -74,6 +74,9 @@ src_install() {
 
     # wall is provided by util-linux(-ng).
     edo rm "${IMAGE}"/usr/bin/wall "${IMAGE}"/usr/share/man/man1/wall.1
+
+    # mountpoint is provided by util-linux
+    edo rm "${IMAGE}"/bin/mountpoint "${IMAGE}"/usr/share/man/man1/mountpoint.1
 }
 
 pkg_postinst() {
