@@ -3,9 +3,9 @@
 # Based in part upon 'bzr-1.10.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require launchpad distutils [ python_dep=2.5 ] bash-completion
+require launchpad distutils [ python_dep=2.6 ] bash-completion
 
-export_exlib_phases src_install
+export_exlib_phases src_install src_test_expensive
 
 MY_PV=${PV/_}
 
@@ -22,15 +22,14 @@ HOMEPAGE="http://bazaar.canonical.com/"
 BUGS_TO=""
 REMOTE_IDS="freshmeat:${PN} launchpad:${PN}"
 
-UPSTREAM_RELEASE_NOTES="https://launchpad.net/${PN}/$(ever range 1-2)/${PV}"
+UPSTREAM_RELEASE_NOTES="https://launchpad.net/${PN}/$(ever range 1-2)/${PV} [[ lang = en ]]"
 UPSTREAM_DOCUMENTATION="http://doc.bazaar.canonical.com/${PN}.$(ever range 1-2)/en/ [[ lang = en ]]"
 
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS=""
 
-# The tests are very expensive in terms of runtime. (~60 minutes on a really fast
-# machine.) About 10 tests out of about 24000 (!) fail. See below for details.
+# The tests are very expensive in terms of runtime.
 RESTRICT="test"
 
 DEPENDENCIES="
@@ -38,26 +37,35 @@ DEPENDENCIES="
         dev-python/paramiko [[ description = [ Provides sftp support ] group-name = [ bzr-sftp-support ] ]]
         dev-python/pycrypto [[ description = [ Provides sftp support ] group-name = [ bzr-sftp-support ] ]]
         dev-scm/bzrtools [[ description = [ Provides rsync support, and other useful extra functionality ] ]]
+    test-expensive:
+        dev-python/paramiko
+        dev-python/pycrypto
+        dev-python/testtools[>=0.9.5]
 "
-#    test-expensive:
-#        dev-python/paramiko
-#        dev-python/pycrypto
-#        dev-python/testtools
 
 WORK="${WORKBASE}"/${PN}-${MY_PV}
 
-# Ran 23849 tests in 3434.193s
-#
-# FAILED (failures=4, errors=7, known_failure_count=42)
-# 1431 tests skipped
-#
-#bzr_src_test_expensive() {
-#    # Some tests expect the usual pyc compiling behaviour.
-#    python_enable_pyc
-#    edo "${PYTHON}" bzr --no-plugins selftest
-#    # Just to make sure we don't hit any errors on later stages.
-#    python_disable_pyc
-#}
+bzr_src_test_expensive() {
+    esandbox allow_net "inet:0.0.0.0@4155"
+    esandbox allow_net --connect "LOCAL@1"
+    esandbox allow_net --connect "LOCAL@53"
+    esandbox allow_net --connect "inet:0.0.0.0@4155"
+    esandbox allow_net --connect "inet6:::@4155"
+    esandbox allow_net "unix:${TEMP%/}/testbzr-*.tmp/*/*/socket"
+
+    # Some tests expect the usual pyc compiling behaviour.
+    python_enable_pyc
+    edo "${PYTHON}" bzr --no-plugins selftest
+    # Just to make sure we don't hit any errors on later stages.
+    python_disable_pyc
+
+    esandbox disallow_net "inet:0.0.0.0@4155"
+    esandbox disallow_net --connect "LOCAL@1"
+    esandbox disallow_net --connect "LOCAL@53"
+    esandbox disallow_net --connect "inet:0.0.0.0@4155"
+    esandbox disallow_net --connect "inet6:::@4155"
+    esandbox disallow_net "unix:${TEMP%/}/testbzr-*.tmp/*/*/socket"
+}
 
 bzr_src_install() {
     distutils_src_install
