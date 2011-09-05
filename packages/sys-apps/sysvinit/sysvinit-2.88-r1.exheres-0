@@ -27,6 +27,10 @@ DEPENDENCIES="
             description = [ sys-apps/sysvinit-tools and this package collide. You probably want sys-apps/sysvinit-tools. ]
             resolution = manual
         ]]
+        !sys-apps/util-linux[<2.20] [[
+            description = [ sys-apps/util-linux 2.20 installs /bin/mountpoint previously provided by this package ]
+            resolution = upgrade-blocked-before
+        ]]
 "
 
 WORK=${WORKBASE}/${PNV}dsf
