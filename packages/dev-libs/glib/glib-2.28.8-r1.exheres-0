@@ -22,7 +22,7 @@ DEPENDENCIES="
         dev-python/dbus-python
         dev-util/desktop-file-utils
         dev-util/pkg-config[>=0.16]
-        gnome-bindings/pygobject
+        gnome-bindings/pygobject:2
         sys-apps/dbus[>=1.2.14] [[ note = [ Required for building GDBus tests ] ]]
         x11-misc/shared-mime-info
     recommendation:
@@ -36,6 +36,7 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/glib-2.24.1-assert-test.patch )
 # The internal copy of PCRE is old but "patched to use GLib for memory management and Unicode
 # handling". Its usage is recommended by upstream, see also
 # http://developer.gimp.org/api/2.0/glib/glib-building.html#Dependencies
