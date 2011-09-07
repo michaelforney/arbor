@@ -9,7 +9,7 @@
 require flag-o-matic python [ has_lib=false ] alternatives \
         autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 
-export_exlib_phases src_prepare src_configure src_test src_install
+export_exlib_phases src_prepare src_configure src_test src_install pkg_preinst
 
 MY_PNV="Python-${PV}"
 
@@ -119,10 +119,10 @@ python-build_src_install() {
     # for backward compatibility, have plat-linux3 and plat-linux2 folders
     # as long as they are identical, this shouldn't be a problem
     pushd "${IMAGE}/usr/${LIBDIR}/python${SLOT}/"
-    if test -d plat-linux2; then
-        edo ln -s plat-linux2 plat-linux3
+    if [[ -d plat-linux2 ]]; then
+        edo cp -r plat-linux2 plat-linux3
     else
-        edo ln -s plat-linux3 plat-linux2
+        edo cp -r plat-linux3 plat-linux2
     fi
     popd
 
@@ -145,5 +145,15 @@ python-build_src_install() {
     )
 
     alternatives_for "${alternatives[@]}"
+}
+
+# replace symlinks with directories
+# accidentally incorrectly introduced with 52cca7bfe38138653fe2b329472bcb90e43a548d
+python-build_pkg_preinst() {
+    if [[ -L "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux2 ]]; then
+        edo rm "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux2
+    elif [[ -L "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux3 ]]; then
+        edo rm "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux3
+    fi
 }
 
