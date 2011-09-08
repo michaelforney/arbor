@@ -1,0 +1,39 @@
+From e2ba340bf64a65a8364584777b51672eed13c72a Mon Sep 17 00:00:00 2001
+From: Marvin Schmidt <marv@exherbo.org>
+Date: Thu, 8 Sep 2011 13:15:02 +0000
+Subject: [PATCH] configure: Fix abstract socket namespace check
+
+---
+ configure.ac |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 4ad84b1..28ff02c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -263,6 +263,7 @@ AC_CACHE_CHECK([abstract socket namespace],
+ #include <errno.h>
+ ]],
+ [[
++  size_t slen;
+   int listen_fd;
+   struct sockaddr_un addr;
+   
+@@ -277,9 +278,13 @@ AC_CACHE_CHECK([abstract socket namespace],
+   memset (&addr, '\0', sizeof (addr));
+   addr.sun_family = AF_UNIX;
+   strcpy (addr.sun_path, "X/tmp/dbus-fake-socket-path-used-in-configure-test");
++  /* SUN_LEN uses strlen() so need to calculate it before adding \0 at the
++   * beginning.
++   */
++  slen = SUN_LEN(&addr);
+   addr.sun_path[0] = '\0'; /* this is what makes it abstract */
+   
+-  if (bind (listen_fd, (struct sockaddr*) &addr, SUN_LEN (&addr)) < 0)
++  if (bind (listen_fd, (struct sockaddr*) &addr, slen) < 0)
+     {
+        fprintf (stderr, "Abstract socket namespace bind() failed: %s\n", 
+                 strerror (errno));
+-- 
+1.7.6.1
+

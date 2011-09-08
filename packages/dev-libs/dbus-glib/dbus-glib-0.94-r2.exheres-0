@@ -2,6 +2,7 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 require bash-completion
 
 SUMMARY="D-Bus GLib Bindings"
@@ -24,7 +25,10 @@ DEPENDENCIES="
         dev-libs/expat
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-marshall_objs.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/${PNV}-marshall_objs.patch"
+    "${FILES}"/0001-configure-Fix-abstract-socket-namespace-check.patch
+)
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-tests' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose verbose-mode" )
 
@@ -32,7 +36,9 @@ src_configure() {
     edo mkdir "${WORK}/po"
     edo touch "${WORK}/po/POTFILES.in"
 
+    esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
     default
+    esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
 }
 
 src_install() {
