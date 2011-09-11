@@ -1,0 +1,46 @@
+From 5319240be4724f149a291248637b4df2246c9953 Mon Sep 17 00:00:00 2001
+From: Luca Bruno <lucabru@src.gnome.org>
+Date: Thu, 08 Sep 2011 07:31:26 +0000
+Subject: Fix length access to multidimensional arrays and access to array fields
+
+Upstream: yes, in master
+---
+diff --git a/vala/valaelementaccess.vala b/vala/valaelementaccess.vala
+index 684d6e0..70a46a8 100644
+--- a/vala/valaelementaccess.vala
++++ b/vala/valaelementaccess.vala
+@@ -141,6 +141,19 @@ public class Vala.ElementAccess : Expression {
+ 			value_type = array_type.element_type.copy ();
+ 			if (!lvalue) {
+ 				value_type.value_owned = false;
++			} else {
++				var ma = container as MemberAccess;
++				if (context.profile == Profile.GOBJECT && ma != null && ma.symbol_reference is ArrayLengthField) {
++					// propagate lvalue for gobject length access
++					ma.inner.lvalue = true;
++					((MemberAccess) ma.inner).check_lvalue_struct_access ();
++				} else if (ma != null && ma.symbol_reference is Field &&
++					ma.inner != null && ma.inner.symbol_reference is Variable &&
++					ma.inner.value_type is StructValueType && !ma.inner.value_type.nullable) {
++					// propagate lvalue if container is a field and container.inner is a struct variable
++					ma.lvalue = true;
++					ma.check_lvalue_struct_access ();
++				}
+ 			}
+ 
+ 			if (array_type.rank < get_indices ().size) {
+diff --git a/vala/valamemberaccess.vala b/vala/valamemberaccess.vala
+index 1ec08da..5968e68 100644
+--- a/vala/valamemberaccess.vala
++++ b/vala/valamemberaccess.vala
+@@ -817,7 +817,7 @@ public class Vala.MemberAccess : Expression {
+ 		return !error;
+ 	}
+ 
+-	private void check_lvalue_struct_access () {
++	public void check_lvalue_struct_access () {
+ 		if (inner == null) {
+ 			return;
+ 		}
+--
+cgit v0.9.0.2
