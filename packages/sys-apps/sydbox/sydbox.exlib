@@ -22,7 +22,12 @@ DEPENDENCIES="
     build+run:
         dev-libs/glib:2[>=2.18]
 "
-if ever at_least 0.7.1; then
+
+if ever at_least 0.7.4; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/pinktrace[>=0.1.2][ipv6?]"
+elif ever at_least 0.7.1; then
     DEPENDENCIES+="
         build+run:
             dev-libs/pinktrace[>=0.0.3][ipv6?]"
