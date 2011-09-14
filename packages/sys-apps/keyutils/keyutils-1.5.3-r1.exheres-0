@@ -23,3 +23,10 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 DEFAULT_SRC_INSTALL_PARAMS=(
     NO_ARLIB=1 LIBDIR="/${LIBDIR}" USRLIBDIR="/usr/${LIBDIR}"
 )
+
+src_install() {
+    default
+
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}
+}
+
