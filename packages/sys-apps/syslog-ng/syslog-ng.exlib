@@ -1,21 +1,25 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2009-2011 Wulf C. Krueger
+# Copyright 2011 Alex Elsayed <eternaleye@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require systemd-service
+if ! ever is_scm; then
+    require systemd-service
+fi
+
+export_exlib_phases src_install pkg_postinst
 
 SUMMARY="Popular system logger"
 HOMEPAGE="http://www.balabit.com/network-security/${PN}/"
-DOWNLOADS="http://www.balabit.com/downloads/files/${PN}/open-source-edition/${PV}/source/${PN}_${PV}.tar.gz"
+ever is_scm || DOWNLOADS="http://www.balabit.com/downloads/files/${PN}/open-source-edition/${PV}/source/${PN}_${PV}.tar.gz"
 
 REMOTE_IDS="freshmeat:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-PLATFORMS="~amd64 ~ia64 ~ppc64 ~x86"
-MYOPTIONS="baselayout caps ipv6 pcre tcpd vim-syntax"
+MYOPTIONS="baselayout caps ipv6 pcre systemd tcpd vim-syntax"
 RESTRICT="test"
 
 DEPENDENCIES="
@@ -32,6 +36,11 @@ DEPENDENCIES="
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )
 "
+if ever at_least 3.3.0beta1; then
+    DEPENDENCIES+="
+    build+run:
+        systemd? ( sys-apps/systemd[>=31] )"
+fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-pidfile-dir=/var/run
@@ -50,8 +59,11 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "caps linux-caps"
     ipv6
     pcre
+    systemd
     "tcpd tcp-wrapper"
 )
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /${LIBDIR}/systemd/system" )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/syslog-ng.conf.doc )
 
@@ -78,7 +90,10 @@ src_install() {
     insinto /etc/logrotate.d
     newins "${FILES}"/syslog-ng.logrotate syslog-ng
 
-    install_systemd_files
+    keepdir /etc/syslog-ng/patterndb.d
+    if ! ever at_least 3.3.0beta1; then
+        install_systemd_files
+    fi
 }
 
 pkg_postinst() {

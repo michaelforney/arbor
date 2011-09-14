@@ -1,0 +1,20 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2009-2011 Wulf C. Krueger
+# Copyright 2011 Alex Elsayed <eternaleye@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+SCM_REPOSITORY="git://git.balabit.hu/bazsi/syslog-ng-3.3.git"
+SCM_SECONDARY_REPOSITORIES="ivykis libmongoclient"
+SCM_EXTERNAL_REFS="lib/ivykis:ivykis modules/afmongodb/libmongo-client:libmongoclient"
+SCM_ivykis_REPOSITORY="git://git.balabit.hu/bazsi/ivykis.git"
+SCM_libmongoclient_REPOSITORY="git://git.balabit.hu/bazsi/libmongo-client.git"
+
+
+require syslog-ng scm-git autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+PLATFORMS="~amd64"
+
+AT_M4DIR=( "${WORK}"/m4 )
+
