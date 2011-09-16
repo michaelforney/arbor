@@ -78,9 +78,11 @@ src_install() {
 
     dodoc "${FILES}"/syslog-ng.conf.sample
 
-    # Install default configuration
-    insinto /etc/syslog-ng
-    newins "${FILES}"/syslog-ng.conf.sample syslog-ng.conf
+    if ! ever at_least 3.3beta1; then
+        # Install default configuration
+        insinto /etc/syslog-ng
+        newins "${FILES}"/syslog-ng.conf.sample syslog-ng.conf
+    fi
 
     if option baselayout ; then
         newinitd "${FILES}"/syslog-ng.rc6 syslog-ng
