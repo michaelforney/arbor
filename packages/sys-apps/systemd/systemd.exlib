@@ -83,10 +83,9 @@ if ever is_scm ; then
 fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --prefix=/
-    --exec-prefix=/
+    --prefix=
+    --libdir=/usr/${LIBDIR}
     --includedir=/usr/include
-    --libdir=/${LIBDIR}
     --libexecdir=/usr/libexec
     --localstatedir=/var
     --enable-pam
@@ -94,7 +93,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-selinux
     --with-distro=other
     --with-pamlibdir=/${LIBDIR}/security
-    --with-rootdir=/
+    --with-rootdir=
+    --with-rootlibdir=/${LIBDIR}
     --with-sysvinit-path=""
     --with-sysvrcd-path=""
     --with-udevrulesdir=/${LIBDIR}/udev/rules.d
