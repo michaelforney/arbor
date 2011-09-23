@@ -1,0 +1,85 @@
+From 407966593732b48902d0855f30715634a24c58c9 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <pl.seidler@gmail.com>
+Date: Sun, 26 Jun 2011 16:14:19 +0000
+Subject: [PATCH] use localhost for tests where possible
+Upstream: no
+
+---
+ Lib/test/test_httpservers.py |    2 +-
+ Lib/test/test_socket.py      |   12 ++++++------
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/Lib/test/test_httpservers.py b/Lib/test/test_httpservers.py
+index 2825697..67c8e76 100644
+--- a/Lib/test/test_httpservers.py
++++ b/Lib/test/test_httpservers.py
+@@ -54,7 +54,7 @@ class TestServerThread(threading.Thread):
+         self.test_object = test_object
+ 
+     def run(self):
+-        self.server = HTTPServer(('', 0), self.request_handler)
++        self.server = HTTPServer(('localhost', 0), self.request_handler)
+         self.test_object.PORT = self.server.socket.getsockname()[1]
+         self.test_object.server_started.set()
+         self.test_object = None
+diff --git a/Lib/test/test_socket.py b/Lib/test/test_socket.py
+index 6a9497b..c99e449 100644
+--- a/Lib/test/test_socket.py
++++ b/Lib/test/test_socket.py
+@@ -278,7 +278,7 @@ class GeneralModuleTests(unittest.TestCase):
+         # Testing that sendto doens't masks failures. See #10169.
+         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+         self.addCleanup(s.close)
+-        s.bind(('', 0))
++        s.bind(('localhost', 0))
+         sockname = s.getsockname()
+         # 2 args
+         with self.assertRaises(TypeError):
+@@ -529,7 +529,7 @@ class GeneralModuleTests(unittest.TestCase):
+ 
+     # XXX The following don't test module-level functionality...
+ 
+-    def _get_unused_port(self, bind_address='0.0.0.0'):
++    def _get_unused_port(self, bind_address='localhost'):
+         """Use a temporary socket to elicit an unused ephemeral port.
+ 
+         Args:
+@@ -547,7 +547,7 @@ class GeneralModuleTests(unittest.TestCase):
+         # Testing getsockname()
+         port = self._get_unused_port()
+         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-        sock.bind(("0.0.0.0", port))
++        sock.bind(("localhost", port))
+         name = sock.getsockname()
+         # XXX(nnorwitz): http://tinyurl.com/os5jz seems to indicate
+         # it reasonable to get the host's addr in addition to 0.0.0.0.
+@@ -557,7 +557,7 @@ class GeneralModuleTests(unittest.TestCase):
+         except socket.error:
+             # Probably name lookup wasn't set up right; skip this test
+             return
+-        self.assertTrue(name[0] in ("0.0.0.0", my_ip_addr), '%s invalid' % name[0])
++        self.assertTrue(name[0] in ("localhost", my_ip_addr), '%s invalid' % name[0])
+         self.assertEqual(name[1], port)
+ 
+     def testGetSockOpt(self):
+@@ -590,7 +590,7 @@ class GeneralModuleTests(unittest.TestCase):
+         sock.close()
+ 
+     def test_getsockaddrarg(self):
+-        host = '0.0.0.0'
++        host = 'localhost'
+         port = self._get_unused_port(bind_address=host)
+         big_port = port + 65536
+         neg_port = port - 65536
+@@ -645,7 +645,7 @@ class GeneralModuleTests(unittest.TestCase):
+         socket.getaddrinfo(HOST, None, 0, 0, 0, socket.AI_PASSIVE)
+         # a server willing to support both IPv4 and IPv6 will
+         # usually do this
+-        socket.getaddrinfo(None, 0, socket.AF_UNSPEC, socket.SOCK_STREAM, 0,
++        socket.getaddrinfo(HOST, 0, socket.AF_UNSPEC, socket.SOCK_STREAM, 0,
+                            socket.AI_PASSIVE)
+ 
+ 
+-- 
+1.7.5.4
+

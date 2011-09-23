@@ -79,10 +79,10 @@ DEPENDENCIES="
         php_extensions:gdbm? ( sys-libs/gdbm[>=1.8.3] )
         php_extensions:imap? (
             php_extensions:ssl? (
-                dev-libs/c-client[>=2007e][ssl]
+                dev-libs/c-client[>=2007e][ssl(+)]
             )
             !php_extensions:ssl? (
-                dev-libs/c-client[>=2007e][-ssl]
+                dev-libs/c-client[>=2007e]
             )
         )
         php_extensions:kerberos? ( app-crypt/heimdal[>=1.2.1] )
@@ -105,7 +105,7 @@ DEPENDENCIES="
         php_extensions:ssl? (
             dev-libs/openssl[>=0.9.6]
             php_extensions:imap? (
-                dev-libs/c-client[>=2007e][ssl]
+                dev-libs/c-client[>=2007e][ssl(+)]
             )
         )
         php_extensions:tidy? ( app-text/tidy[>=20080116] )

@@ -1,0 +1,14 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require ncurses
+
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+src_prepare() {
+    edo cd "${WORKBASE}/${PNV}"
+    expatch -p1 "${FILES}"/${PNV}-clang++.patch
+}
+
+

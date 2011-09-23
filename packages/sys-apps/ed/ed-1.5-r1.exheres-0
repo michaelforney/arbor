@@ -1,0 +1,19 @@
+# Copyright 2008 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=gz ]
+
+SUMMARY="GNU ed line oriented text editor"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+src_configure() {
+    # Custom configure script
+    edo ./configure --prefix=/usr CC="${CC}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+}
+

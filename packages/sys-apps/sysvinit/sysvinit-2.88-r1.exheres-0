@@ -1,0 +1,96 @@
+# Copyright 2008-2011 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sysvinit-2.86-r10.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require flag-o-matic alternatives
+
+PATCHTBZ2_VER="1.0"
+
+SUMMARY="System V init system"
+HOMEPAGE="http://savannah.nongnu.org/projects/${PN}"
+DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}dsf.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${PN}-2.86-patches-${PATCHTBZ2_VER}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="baselayout static"
+
+DEPENDENCIES="
+    build:
+        sys-kernel/linux-headers
+    build+run:
+        !sys-apps/sysvinit-tools [[
+            description = [ sys-apps/sysvinit-tools and this package collide. You probably want sys-apps/sysvinit-tools. ]
+            resolution = manual
+        ]]
+        !sys-apps/util-linux[<2.20] [[
+            description = [ sys-apps/util-linux 2.20 installs /bin/mountpoint previously provided by this package ]
+            resolution = upgrade-blocked-before
+        ]]
+"
+
+WORK=${WORKBASE}/${PNV}dsf
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${WORKBASE}/${PN}-2.86-kexec.patch"
+    -p1 "${WORKBASE}/${PN}-2.86-shutdown-single.patch"
+)
+
+src_compile() {
+    option static && append-ldflags -static
+    emake -C src \
+        CC="${CC}" \
+        all
+}
+
+src_install() {
+    emake -C src install ROOT="${IMAGE}"
+
+    # Installing "Install", too, because it contains some information beyond
+    # simple installation instructions.
+    dodoc README doc/Changelog doc/Install doc/Propaganda doc/bootlogd.README
+
+    insinto /etc
+    doins "${WORKBASE}"/inittab
+
+    if option baselayout ; then
+        doinitd "${WORKBASE}"/{reboot,shutdown}.sh
+    fi
+
+    # alternatives
+    local a t alternatives=( init ${PN} 10 )
+    for a in halt init poweroff reboot runlevel shutdown telinit; do
+        if [[ -L "${IMAGE}"/sbin/${a} ]]; then
+            t=$(readlink "${IMAGE}"/sbin/${a})
+            edo rm "${IMAGE}"/sbin/${a}
+        else
+            t=${a}
+        fi
+        alternatives+=( /sbin/${a} ${PN}.${t}
+                        /usr/share/man/man8/${a}.8 ${PN}.${a}.8 )
+    done
+    alternatives+=( /usr/share/man/man5/inittab.5 ${PN}.inittab.5 )
+    alternatives_for "${alternatives[@]}"
+
+    # wall is provided by util-linux(-ng).
+    edo rm "${IMAGE}"/usr/bin/wall "${IMAGE}"/usr/share/man/man1/wall.1
+
+    # mountpoint is provided by util-linux
+    edo rm "${IMAGE}"/bin/mountpoint "${IMAGE}"/usr/share/man/man1/mountpoint.1
+}
+
+pkg_postinst() {
+    # Reload init to fix unmounting problems of / on next reboot.
+    # This is really needed because without it, init wouldn't quit properly during
+    # the next shutdown and would cause a fsck of / during the next reboot.
+    if [[ ${ROOT} == / ]] ; then
+        # Do not return an error if this fails
+        /sbin/telinit U &>/dev/null
+    fi
+    alternatives_pkg_postinst
+}
+

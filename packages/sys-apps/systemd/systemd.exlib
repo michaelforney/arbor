@@ -46,6 +46,7 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
         dev-libs/glib:2[>=2.26]
+        dev-util/gperf
         sys-apps/dbus[>=1.4.0][systemd]
         sys-apps/skeleton-filesystem-layout
         sys-fs/udev[>=172][systemd]
@@ -84,6 +85,7 @@ fi
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
     --exec-prefix=/
+    --includedir=/usr/include
     --libdir=/${LIBDIR}
     --libexecdir=/usr/libexec
     --localstatedir=/var

@@ -143,8 +143,8 @@ get_slot_config() {
     # some parameters
     basedir="${basedir:-"/usr"}"
     datadir="${datadir:-"/var/lib/mysql${MY_SUFFIX}"}"
-    pidfile="${pidfile:-"/var/run/mysqld/mysqld${MY_SUFFIX}.pid"}"
-    socket="${socket:-"/var/run/mysqld/mysqld${MY_SUFFIX}.sock"}"
+    pidfile="${pidfile:-"/run/mysqld/mysqld${MY_SUFFIX}.pid"}"
+    socket="${socket:-"/run/mysqld/mysqld${MY_SUFFIX}.sock"}"
     user="${user:-"mysql"}"
     unmanagedparams="${unmanagedparams} ${collations}"
 
@@ -222,7 +222,7 @@ checkconfig() {
 start() {
     wdebug 4 ">>> start()"
 
-    MYSQL_GLOB_PID_FILE=${MYSQL_GLOB_PID_FILE:-"/var/run/svc-started-${SVCNAME/mysql/mysqld}"}
+    MYSQL_GLOB_PID_FILE=${MYSQL_GLOB_PID_FILE:-"/run/svc-started-${SVCNAME/mysql/mysqld}"}
     # servers are defined in /etc/conf.d/mysql
     local serverlist=${!mysql_slot_*}
     # provide default for empty conf.d/mysql
@@ -324,7 +324,7 @@ start() {
 
 stop() {
     get_slot_config &> /dev/null
-    MYSQL_GLOB_PID_FILE=${MYSQL_GLOB_PID_FILE:-"/var/run/svc-started-${SVCNAME/mysql/mysqld}"}
+    MYSQL_GLOB_PID_FILE=${MYSQL_GLOB_PID_FILE:-"/run/svc-started-${SVCNAME/mysql/mysqld}"}
     local runwhat pidfile shutdown_elem
     local PID cnt timeout=${STOPTIMEOUT:-"120"}
     local retstatus=0

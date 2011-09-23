@@ -19,6 +19,7 @@ SLOT="0"
 MYOPTIONS="
     baselayout
     caps
+    gss [[ description = [ Enable the Generic Security Services Application Program Interface  ] ]]
     ipv6
     nfsv4 [[ description = [ Enable support for NFSv4 ] ]]
     nfsv41 [[ description = [ Enable support for NFSv4.1 (EXPERIMENTAL!) ] requires = [ nfsv4 ] ]]
@@ -29,8 +30,11 @@ MYOPTIONS="
 DEPENDENCIES="
     build+run:
         net-libs/libtirpc
+        sys-apps/keyutils
+        sys-apps/util-linux[>=2.20]
         sys-fs/e2fsprogs[>=1.40.9]
         caps? ( sys-libs/libcap )
+        gss? ( net-libs/libgssglue )
         nfsv4? (
                 dev-libs/libevent[>=1.0b]
                 net-libs/libnfsidmap[>=0.16]
@@ -45,19 +49,20 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.2.2-cpp_path.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --mandir=/usr/share/man
     --enable-largefile
+    --enable-libmount-mount
     --enable-mount
     --enable-mountconfig
     --enable-nfsv3
     --enable-tirpc
     --with-statduser=nobody
     --with-statedir=/var/lib/nfs
-    --disable-gss
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcpd tcp-wrappers" )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     caps
+    gss
     ipv6
     nfsv4
     nfsv41
@@ -70,6 +75,7 @@ nfs-utils_src_install() {
     default
 
     install_systemd_files
+    option systemd && ! option gss && edo rm "${IMAGE}/${LIBDIR}/systemd/system/rpcgssd.service"
 
     if option systemd; then
         insinto /etc/tmpfiles.d

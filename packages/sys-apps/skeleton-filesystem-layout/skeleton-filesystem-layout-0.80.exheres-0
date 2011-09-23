@@ -1,0 +1,160 @@
+# Copyright 2008 Markus Rothe <markus@unixforces.net>
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require multibuild
+
+BASE_TARBALL_PV="0.2"
+SUMMARY="Skeleton filesystem layout"
+HOMEPAGE="http://www.exherbo.org/"
+DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PN}-base-etc-${BASE_TARBALL_PV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+WORK=${WORKBASE}
+
+create_root_owned_directory() {
+    if [[ ! -e "${1}" ]]; then
+        edo mkdir -p "${1}"
+    fi
+    edo chown root:root "${1}"
+    edo chmod ${2:-0755} "${1}"
+}
+
+create_device_node() {
+    local node=${1} major=${2} minor=${3} owner=${4} perms=${5}
+    if [[ ! -e ${ROOT}dev/${node} ]]; then
+        edo mknod "${ROOT}dev/${node}" c ${major} ${minor}
+    fi
+    edo chown ${owner} "${ROOT}dev/${node}"
+    edo chmod ${perms} "${ROOT}dev/${node}"
+}
+
+pkg_pretend() {
+    local x
+    if [[ ${LIBDIR} != lib ]]; then
+        for x in {,/usr,/usr/local}/lib; do
+            if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
+                die "${x}: Expected a symlink but found a directory"
+            fi
+        done
+    fi
+}
+
+src_install() {
+    insinto /etc
+    doins "${FILES}"/exherbo-release
+    doins "${FILES}"/os-release
+
+    if [[ ${LIBDIR} != lib ]]; then
+        local multibuild_c_target ldpath=()
+        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            multibuild_switch_build_target C ${multibuild_c_target}
+            ldpath=( /usr/${LIBDIR} /${LIBDIR} "${ldpath[@]}" )
+        done
+        IFS=": " ldpath="${ldpath[*]}"
+        hereenvd 10multilib <<EOF
+LDPATH="${ldpath}"
+EOF
+    fi
+
+    doins -r "${WORK}"/${PN}-base-etc-${BASE_TARBALL_PV}/*
+}
+
+pkg_preinst() {
+    local x y
+    for x in "${IMAGE}"/etc/*.sample; do
+        y=${x/${IMAGE}}
+        if [[ ! -f ${ROOT}${y/%.sample} ]]; then
+            nonfatal edo cp "${x}" "${ROOT}${y/%.sample}" || ewarn "installing example ${x} failed"
+        fi
+    done
+}
+
+pkg_postinst() {
+    local x
+    # create directory structure. for readability leave out /usr and /var
+    # structures and create them separately.
+    for x in bin boot dev{,/pts} etc home mnt \
+        media opt proc run sbin sys; do
+            create_root_owned_directory "${ROOT}${x}"
+    done
+
+    edo chmod 0640 "${ROOT}"/etc/sysctl.conf
+    edo chmod 0600 "${ROOT}"/etc/shadow
+
+    # create device nodes
+    create_device_node console 5 1 root:root 0600
+    create_device_node null    1 3 root:root 0666
+
+    # create /etc/mtab
+    edo ln -sf /proc/self/mounts "${ROOT}"/etc/mtab
+
+    # /usr structure
+    for x in usr{,/bin,/include,/sbin,/share,/src}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # /usr/local structure
+    for x in usr/local{,/bin,/etc,/man,/sbin,/share{,/man}}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # /var structure
+    for x in var{,/adm,/cache,/empty,/lib,/local,/log,/spool{,/lpd,/news,/uucp}}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    # /run structure
+    for x in run{,/lock}; do
+        create_root_owned_directory "${ROOT}${x}"
+    done
+
+    if [[ -d ${ROOT}var/lock && ! -L ${ROOT}var/lock ]]; then
+        nonfatal edo cp -a "${ROOT}"var/lock "${ROOT}"run/ || ewarn "cp'ing /var/lock failed"
+        nonfatal edo /bin/umount -l "${ROOT}"var/lock
+        nonfatal edo rm -rf "${ROOT}"var/lock || ewarn "rm'ing /var/lock failed"
+        nonfatal edo chmod 755 "${ROOT}"run/lock || ewarn "chmod 755 /run/lock failed"
+    fi
+
+    if [[ -d ${ROOT}var/run && ! -L ${ROOT}var/run ]]; then
+        nonfatal edo cp -a "${ROOT}"var/run/* "${ROOT}"run/ || ewarn "cp'ing /var/run failed"
+        nonfatal edo /bin/umount -l "${ROOT}"var/run
+        nonfatal edo rm -rf "${ROOT}"var/run || ewarn "rm'ing /var/run failed"
+    fi
+
+    nonfatal edo ln -snTf /run/lock "${ROOT}"var/lock || ewarn "ln -snTf /run/lock failed"
+    nonfatal edo ln -snTf /run "${ROOT}"var/run || ewarn "ln -snTf /run failed"
+
+    # directories with special permissions
+    create_root_owned_directory "${ROOT}root" 0700
+    create_root_owned_directory "${ROOT}dev/shm" 0777
+    for x in var/tmp tmp; do
+        create_root_owned_directory "${ROOT}${x}" 1777
+    done
+
+    # create LIBDIRs and lib symlinks if applicable
+    if [[ ${LIBDIR} != lib ]]; then
+        local multibuild_c_target
+        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            multibuild_switch_build_target C ${multibuild_c_target}
+            create_root_owned_directory "${ROOT}${LIBDIR}"
+            create_root_owned_directory "${ROOT}usr/${LIBDIR}"
+            create_root_owned_directory "${ROOT}usr/local/${LIBDIR}"
+        done
+
+        for x in {,usr/,usr/local/}lib ; do
+            if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
+                die "${x}: Expected a symlink but found a directory"
+            fi
+
+            edo ln -sfn "${LIBDIR}" "${ROOT}${x}"
+        done
+    fi
+}
+

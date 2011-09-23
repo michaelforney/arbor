@@ -2,7 +2,13 @@
 # Copyright 2010 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require alternatives gnome.org
+require alternatives
+
+if ever at_least 0.13 ; then
+    require gnome.org [ suffix=.tar.xz ]
+else
+    require gnome.org
+fi
 
 export_exlib_phases src_test src_install
 
@@ -24,13 +30,11 @@ DEPENDENCIES="
         sys-apps/dbus
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    '--disable-unversioned'
-    '--enable-vapigen'
-)
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-unversioned' '--enable-vapigen' )
 
 vala_src_test() {
     unset DISPLAY
+
     esandbox allow_net 'unix-abstract:/tmp/dbus-*'
     default
     esandbox disallow_net 'unix-abstract:/tmp/dbus-*'

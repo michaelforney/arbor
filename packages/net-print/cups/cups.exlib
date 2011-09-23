@@ -3,7 +3,7 @@
 # Based in part upon 'cups-1.3.8-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] pam easy-multibuild [ work=${PNV} ] systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] pam easy-multibuild [ work=${PNV} ] systemd-service
 
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
@@ -13,8 +13,7 @@ DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
 LICENCES="GPL-2"
 SLOT="0"
 LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
-MYOPTIONS="acl avahi baselayout dbus debug gnutls kerberos ldap libusb pam perl python tcpd tiff threads xinetd
-
+MYOPTIONS="baselayout dbus debug gnutls kerberos pam perl python tiff xinetd
 acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
 avahi [[ description = [ Enable DNS Service Discovery (DNS_SD) support (printer sharing using Avahi) ] ]]
 ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
@@ -34,6 +33,11 @@ DEPENDENCIES="
         dbus? ( dev-util/pkg-config )
         gnutls? ( dev-util/pkg-config )
     build+run:
+        group/lpadmin
+        dev-libs/libpaper[multibuild_c:*(?)?]
+        media-libs/jpeg[multibuild_c:*(?)?]
+        media-libs/libpng[multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
         acl? ( sys-apps/acl )
         avahi? ( net-dns/avahi[dns_sd] )
         dbus? ( sys-apps/dbus )
@@ -42,19 +46,14 @@ DEPENDENCIES="
         ldap? ( net-directory/openldap )
         libusb? ( dev-libs/libusb:0.1 )
         pam? ( sys-libs/pam )
-        pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
         perl? ( dev-lang/perl )
         python? ( dev-lang/python:* )
         tcpd? ( sys-apps/tcp-wrappers )
         tiff? ( media-libs/tiff[multibuild_c:*(?)?] )
-        dev-libs/libpaper[multibuild_c:*(?)?]
-        group/lpadmin
-        media-libs/jpeg[multibuild_c:*(?)?]
-        media-libs/libpng[multibuild_c:*(?)?]
-        sys-libs/zlib[multibuild_c:*(?)?]
     post:
-        xinetd? ( sys-apps/xinetd )
         app-text/ghostscript[cups] [[ note = [ pstoraster, pdftoraster ] ]]
+        pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
+        xinetd? ( sys-apps/xinetd )
 "
 
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation.php"
@@ -74,6 +73,8 @@ src_unpack() {
     easy-multibuild_run_phase
 }
 
+AT_M4DIR=( config-scripts )
+
 prepare_one_multibuild() {
     # remove default optimizations and do not strip by default
     edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
@@ -91,14 +92,12 @@ prepare_one_multibuild() {
     edo sed -i -e '/MAN[0-9]EXT=/s:\.gz::g' config-scripts/cups-manpages.m4
 
     # disable the xinetd service by default
-    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" init/cups-lpd.in
+    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" scheduler/cups-lpd.xinetd.in
 
     # Disable silent rules
     edo sed -i '/^\.SILENT:$/d' Makedefs.in
 
-    expatch "${FILES}/${PN}-backend-https.patch"
-
-    AT_M4DIR=config-scripts autotools_src_prepare
+    autotools_src_prepare
 }
 
 src_prepare() {
@@ -119,7 +118,7 @@ configure_one_multibuild() {
     [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
 
     if option pdf ; then
-        myconf+=( '--with-pdftops=pdftops' )
+        myconf+=( '--with-pdftops=/usr/bin/pdftops' )
     else
         myconf+=( '--with-pdftops=none' )
     fi
@@ -127,36 +126,36 @@ configure_one_multibuild() {
     # XXX Enables: slp
     # XXX Withs: java php
     econf \
+        --localstatedir=/var \
         --enable-jpeg \
         --enable-libpaper \
         --enable-png \
         --enable-raw-printing \
         --enable-static \
-        --localstatedir=/var \
+        --enable-threads \
+        --disable-cdsassl \
         --with-cups-{group,user}=lp \
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
         --with-languages="${CUPSLANGS}" \
         --with-system-groups=lpadmin \
         --without-rcdir \
-        --disable-cdsassl \
-        $(option_enable gnutls gnutls) \
-        $(option_enable !gnutls openssl) \
         $(option_enable acl) \
-        $(option_enable dbus) \
         $(option_enable avahi) \
         $(option_enable avahi dnssd) \
-        $(option_enable pam) \
+        $(option_enable dbus) \
+        $(option_enable gnutls gnutls) \
+        $(option_enable !gnutls openssl) \
         $(option_enable kerberos gssapi) \
         $(option_enable ldap) \
         $(option_enable libusb) \
+        $(option_enable pam) \
         $(option_enable tcpd tcp-wrappers) \
         $(option_enable tiff) \
-        $(option_enable threads) \
+        $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
         $(option_with perl) \
         $(option_with python) \
         $(option_with xinetd xinetd /etc/xinetd.d) \
         DSOFLAGS="${CFLAGS}" LDFLAGS="${CFLAGS} ${LDFLAGS}" \
-        $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
         "${myconf[@]}"
 }
 
@@ -178,8 +177,7 @@ install_one_multibuild() {
     emagicdocs
 
     keepdir /usr/libexec/cups/driver /usr/share/cups/{model,profiles} \
-            /var/cache/cups/rss /var/log/cups /var/run/cups/certs \
-            /var/spool/cups/tmp
+            /var/cache/cups/rss /var/log/cups /var/spool/cups/tmp
 
     keepdir /etc/cups/{interfaces,ppd,ssl}
 
@@ -202,7 +200,7 @@ install_one_multibuild() {
 
     install_systemd_files
 
-    echo "ServerName /var/run/cups/cups.sock" >> "${IMAGE}"/etc/cups/client.conf
+    echo "ServerName /run/cups/cups.sock" >> "${IMAGE}"/etc/cups/client.conf
 }
 
 src_test() {

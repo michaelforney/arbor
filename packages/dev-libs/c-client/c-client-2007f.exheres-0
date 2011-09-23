@@ -1,0 +1,78 @@
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'c-client-2007e.ebuild' from Gentoo, which is:
+#     Copyright 1999-2009 Gentoo Foundation
+
+require flag-o-matic
+
+MY_PNV=imap-${PV}
+SUMMARY="UW IMAP c-client library"
+HOMEPAGE="http://www.washington.edu/imap/"
+DOWNLOADS="ftp://ftp.cac.washington.edu/imap/${MY_PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/openssl[>=0.9.8j]
+        sys-libs/pam[>=0.72]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PN}-build-needed.patch
+    -p1 "${FILES}"/${PN}-build-so.patch
+)
+
+WORK=${WORKBASE}/${MY_PNV}
+
+src_prepare() {
+    default
+
+    # lots of things need -fPIC, including various platforms, and this library
+    # generally should be built with it anyway.
+    append-flags -fPIC
+
+    # Modifications so we can build it correctly.
+    edo sed -e "s:BASECFLAGS=\".*\":BASECFLAGS=:g" \
+            -e 's:SSLDIR=/usr/local/ssl:SSLDIR=/usr:g' \
+            -e 's:SSLCERTS=$(SSLDIR)/certs:SSLCERTS=/etc/ssl/certs:g' \
+            -i src/osdep/unix/Makefile
+
+    # Remove the pesky checks about SSL stuff
+    edo sed -e '/read.*exit/d' -i Makefile
+}
+
+src_compile() {
+    # no parallel builds supported!
+    emake -j1 lnp SSLTYPE=unix EXTRACFLAGS="${CFLAGS}"
+}
+
+src_install() {
+    into /usr
+
+    # Library binary
+    dolib.a c-client/c-client.a
+    dosym c-client.a /usr/${LIBDIR}/libc-client.a
+    dolib.so c-client/libc-client.so.1.0.0
+
+    # Headers
+    edo pushd c-client
+    insinto /usr/include/imap
+    for header in *.h ; do
+        doins $(canonicalise ${header})
+    done
+    doins $(canonicalise linkage.c)
+    edo popd
+    # We need to use the correct header for our OS. The rest gets deleted.
+    edo mv "${IMAGE}"/usr/include/imap/os{_lnx,dep}.h
+    edo rm "${IMAGE}"/usr/include/imap/os_*.h
+
+    # Docs
+    dodoc README docs/*.txt docs/CONFIG docs/RELNOTES
+}
+

@@ -1,0 +1,23 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Collection of Linux man pages"
+HOMEPAGE="http://man7.org/linux/man-pages/"
+DOWNLOADS="http://man7.org/linux/man-pages/download/${PNV}.tar.gz"
+
+LICENCES="GPL"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    run:
+        sys-apps/man
+    suggestion:
+        sys-apps/man-pages-posix"
+
+src_compile() {
+    # has a Makefile with various targets, but none that we want
+    :
+}
+

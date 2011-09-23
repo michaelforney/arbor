@@ -53,6 +53,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --libexecdir="/usr/sbin"
     # mysqld puts its data directly in this
     --localstatedir=/var/lib/mysql
+    --with-unix-socket-path=/run/mysqld/mysqld.sock
     --with-comment="Exherbo, ${PNVR}"
     --with-mysqld-user=mysql
     # Use the system readline, libedit. --with-readline builds the internal readling copy.
@@ -105,19 +106,19 @@ mysql_src_install() {
     easy-multibuild_src_install
 
     # Contains lots of cruft & some empty dirs
-    rm -r "${IMAGE}"/usr/{mysql-test,sql-bench} || die "Couldn't nuke /usr/mysql-test"
+    edo rm -r "${IMAGE}"/usr/{mysql-test,sql-bench}
 
     keepdir /etc/mysql
-    cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf || die "copying default config failed"
-    sed -i -e "/socket/s:=.*:= /var/run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf || die "fixing socket path failed"
+    edo cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf
+    edo sed -i -e "/socket/s:=.*:= /run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf
 
     keepdir /var/{lib,log}/mysql
     edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
     edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
 
-    keepdir /var/run/mysqld
-    edo chown mysql:mysql "${IMAGE}"/var/run/mysqld
-    edo chmod 755 "${IMAGE}"/var/run/mysqld
+    keepdir /run/mysqld
+    edo chown mysql:mysql "${IMAGE}"/run/mysqld
+    edo chmod 755 "${IMAGE}"/run/mysqld
 
     hereenvd 46mysql <<EOF
 LDPATH=/usr/${LIBDIR}/${PN}
@@ -136,7 +137,7 @@ EOF
     if option systemd; then
         insinto /etc/tmpfiles.d
         hereins ${PN}.conf <<EOF
-d /var/run/mysqld 0755 mysql mysql
+d /run/mysqld 0755 mysql mysql
 EOF
     fi
 }

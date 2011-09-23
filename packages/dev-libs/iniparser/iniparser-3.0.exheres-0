@@ -1,0 +1,56 @@
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="${PN} is a free stand-alone ini file parsing library"
+DESCRIPTION="
+The ${PN} library implements the strict necessary to parse Windows-style ini
+files and return the information as a dictionary of (hashed) strings.
+"
+HOMEPAGE="http://ndevilla.free.fr/${PN}/"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:inifileparser"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/html/index.html [[ lang = en ]]"
+
+LICENCES="MIT"
+SLOT="0"
+
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+DEPENDENCIES=""
+
+WORK=${WORKBASE}/${PN}
+
+src_prepare() {
+    edo sed -e "s:^\(CC .*=\) .*:\1 ${CC}:" \
+            -e "s:^\(CFLAGS .*=\) -O2:\1 ${CFLAGS}:" \
+            -e "s:^\(AR\t .*=\) .*:\1 ${AR}:" \
+            -e "s:^\(LDFLAGS = .*\):\1 ${LDFLAGS}:" \
+            -e "s:/usr/lib:/usr/${LIBDIR}:g" \
+            -i Makefile test/Makefile
+}
+
+src_test() {
+    emake -j1 check
+    edo pushd test >/dev/null
+    edo ./iniexample
+    edo ./parse
+    edo popd >/dev/null
+}
+
+src_install() {
+    dolib \
+        libiniparser.a \
+        libiniparser.so.0
+
+    dosym libiniparser.so.0 /usr/${LIBDIR}/libiniparser.so
+
+    insinto /usr/include
+    doins src/*.h
+
+    emagicdocs
+}
+

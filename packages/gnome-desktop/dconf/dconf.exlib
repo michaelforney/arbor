@@ -1,7 +1,13 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License
 
-require gnome.org bash-completion
+if ever at_least 0.8 ; then
+    require gnome.org [ suffix=.tar.xz ]
+else
+    require gnome.org
+fi
+
+require bash-completion
 
 export_exlib_phases src_install
 

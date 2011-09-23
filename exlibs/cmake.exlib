@@ -93,8 +93,6 @@ cmake_with() {
 #    CMAKE_SRC_CONFIGURE_OPTIONS
 #    CMAKE_SRC_CONFIGURE_OPTION_WANTS
 #    CMAKE_SRC_CONFIGURE_OPTION_WITHS
-#    EXTRA_ECONF
-# All arguments passed to ecmake are passed on to cmake right before $EXTRA_ECONF.
 ecmake() {
     illegal_in_global_scope
 
@@ -122,7 +120,7 @@ ecmake() {
         -DLIB_SUFFIX:STRING=${LIBDIR/lib}
     )
 
-    edo cmake "${cmakeargs[@]}" "$@" "${EXTRA_ECONF}" "${WORK}" || return 1
+    edo cmake "${cmakeargs[@]}" "$@" "${WORK}" || return 1
 
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
         edo popd

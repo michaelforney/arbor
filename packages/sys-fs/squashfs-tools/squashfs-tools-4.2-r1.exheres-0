@@ -1,0 +1,47 @@
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ project=squashfs suffix=tar.gz pnv=squashfs${PV} ]
+
+SUMMARY="The Squashfs tools for creating compressed filesystems"
+DESCRIPTION="
+Squashfs is a highly compressed read-only filesystem for Linux. It uses zlib to
+compress files, inodes, and directories. All blocks are packed to minimize the
+data overhead, and block sizes of between 4K and 1M are supported. It is intended
+to be used for archival use, for live CDs, and for embedded systems where low
+overhead is needed. This package allows you to create such filesystems.
+"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS+="freshmeat:squashfs"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    xz  [[ description = [ Support xz compressed images ] ]]
+    lzo [[ description = [ Support lzo compressed images ] ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        xz? ( app-arch/xz )
+        lzo? ( app-arch/lzo )
+    run:
+        sys-libs/zlib
+"
+
+WORK=${WORKBASE}/squashfs${PV}/${PN}
+
+DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" LDFLAGS="${LDFLAGS}" )
+DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_DIR="${IMAGE}"/usr/bin )
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( ../ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( ACKNOWLEDGEMENTS PERFORMANCE.README )
+
+src_prepare() {
+    default
+
+    option xz && edo sed -i -e 's/#XZ_SUPPORT = 1/XZ_SUPPORT = 1/' Makefile
+    option lzo && edo sed -i -e 's/#LZO_SUPPORT = 1/LZO_SUPPORT = 1/' Makefile
+}
+

@@ -1,4 +1,4 @@
-# Copyright 2009, 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require systemd-service
@@ -29,6 +29,7 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--sbindir=/sbin"
+    "--libdir=/${LIBDIR}"
     "--libexecdir=/${LIBDIR}"
     "--without-kernel"
     "--enable-devel"
@@ -37,7 +38,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 DEFAULT_SRC_COMPILE_PARAMS=( V=1 )
 DEFAULT_SRC_INSTALL_EXCLUDE=( "release.sh" )
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 
 iptables_src_install() {
     default

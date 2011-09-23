@@ -1,0 +1,44 @@
+# Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'rasqal-0.9.15.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+SUMMARY="Library that handles Resource Description Framework (RDF)"
+HOMEPAGE="http://librdf.org/${PN}"
+DOWNLOADS="http://download.librdf.org/source/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs/api/ [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/RELEASE.html [[ lang = en ]]"
+
+LICENCES="|| ( LGPL-2.1 GPL-2 Apache-2.0 )"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="gmp pcre"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config[>=0.9.0]
+        sys-devel/flex[>=2.5.33]
+    test:
+        dev-perl/XML-DOM
+    build+run:
+        dev-libs/libxml2[>=2.6.8]
+        media-libs/raptor[>=2.0.4]
+        gmp? ( dev-libs/gmp )
+        !gmp? ( dev-libs/mpfr )
+        pcre? ( dev-libs/pcre[>=3.9] )
+"
+
+src_configure() {
+    econf \
+        --enable-xml2 \
+        --with-decimal=$(optionv gmp || echo "mpfr") \
+        --with-regex-library=$(optionv pcre || echo "posix") \
+        $(option_enable pcre)
+}
+
+# Note wrt src_test(): 'roqet -d debug' always fails.
+

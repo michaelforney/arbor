@@ -1,0 +1,33 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=xz ]
+
+SUMMARY="Utilities for showing file differences in various ways"
+DOWNLOADS="ftp://alpha.gnu.org/pub/gnu/${PN}/${PNV}.tar.gz
+    mirror://gnu/${PN}/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
+    ac_cv_libsigsegv=no # Do not link against libsigsegv
+)
+
+src_prepare() {
+    # This tests hangs for 10 minutes using sydbox
+    edo sed -i -e 's/10m/0/g' tests/help-version
+
+    default
+}
+

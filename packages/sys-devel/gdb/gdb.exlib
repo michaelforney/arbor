@@ -1,7 +1,7 @@
 # Copyright 2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
-#
-# Inspired by gdb-6.7.1.ebuild which is Copyright 1999-2007 Gentoo Foundation
+# Based in part upon 'gdb-6.7.1.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
 
 SUMMARY="The GNU Project Debugger"
 HOMEPAGE="http://sourceware.org/${PN}"
@@ -9,7 +9,8 @@ DOWNLOADS="mirror://sourceware/${PN}/releases/${PNV}.tar.bz2"
 
 REMOTE_IDS="freshmeat:${PN}"
 
-UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation/index.html [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation/ [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/download/ANNOUNCEMENT [[ lang = en ]]"
 
 LICENCES="GPL-3 LGPL-3"
 SLOT="0"
@@ -34,10 +35,10 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-gold
-    --disable-werror
     --enable-nls
     --enable-tui
+    --disable-gold
+    --disable-werror
     --with-curses
     --with-expat
     --with-system-readline
@@ -58,8 +59,8 @@ src_test_expensive() {
 src_install() {
     default
 
-    if option python ; then
-        rmdir "${IMAGE}"/usr/share/gdb/python/{gdb,} || die "Removing empty directories failed"
+    if option !python ; then
+        edo rm -r "${IMAGE}"/usr/share/gdb/python/{gdb,}
     fi
 }
 

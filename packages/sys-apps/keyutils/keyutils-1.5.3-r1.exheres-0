@@ -1,0 +1,32 @@
+# Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Tools for controlling the key management system in the Linux kernel"
+HOMEPAGE="http://people.redhat.com/~dhowells/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2 [[ description = [ applies to the tools ] ]]
+    LGPL-2.1 [[ description = [ applies to the library ] ]]"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/keyutils-1.5.3-makefile-fixup.patch
+)
+DEFAULT_SRC_COMPILE_PARAMS=(
+    CC="${CC}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+    NO_ARLIB=1 LIBDIR="/${LIBDIR}" USRLIBDIR="/usr/${LIBDIR}"
+)
+DEFAULT_SRC_INSTALL_PARAMS=(
+    NO_ARLIB=1 LIBDIR="/${LIBDIR}" USRLIBDIR="/usr/${LIBDIR}"
+)
+
+src_install() {
+    default
+
+    edo rmdir "${IMAGE}"/usr/${LIBDIR}
+}
+

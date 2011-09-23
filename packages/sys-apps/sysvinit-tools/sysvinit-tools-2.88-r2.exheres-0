@@ -1,0 +1,65 @@
+# Copyright 2011 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+
+require flag-o-matic
+
+SUMMARY="System V init tools"
+DESCRIPTION="
+These are only the useful tools from old, crufty, obsolete sysvinit:
+- killall5
+- last
+- mesg
+- pidof
+- sulogin
+- utmpdump
+"
+HOMEPAGE="http://savannah.nongnu.org/projects/${PN/-tools}"
+DOWNLOADS="http://download.savannah.gnu.org/releases/${PN/-tools}/${PNV/-tools}dsf.tar.bz2"
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="static"
+
+DEPENDENCIES="
+    build:
+        sys-kernel/linux-headers
+    build+run:
+        !sys-apps/sysvinit [[
+            description = [ sys-apps/sysvinit and this package collide. You might want this package if you're using systemd. ]
+            resolution = manual
+        ]]
+        !sys-apps/util-linux[<2.20] [[
+            description = [ sys-apps/util-linux 2.20 installs /bin/mountpoint previously provided by this package ]
+            resolution = upgrade-blocked-before
+        ]]
+"
+
+WORK=${WORKBASE}/${PNV/-tools}dsf
+
+src_compile() {
+    option static && append-ldflags -static
+    emake -C src \
+        CC="${CC}" \
+        killall5 \
+        last \
+        mesg \
+        sulogin \
+        utmpdump
+}
+
+src_install() {
+    exeinto /sbin
+    doexe \
+        src/killall5 \
+        src/sulogin
+
+    exeinto /usr/bin
+    doexe \
+        src/last \
+        src/mesg \
+        src/utmpdump
+
+    dodir /bin
+    dosym /sbin/killall5 /bin/pidof
+}
+

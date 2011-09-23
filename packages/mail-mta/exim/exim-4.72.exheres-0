@@ -124,8 +124,9 @@ src_install() {
     # When exim runs, it recreates the spooldir, if it doesn't exist, which causes access violations.
     # There doesn't seem to be a clean way to not run exim, or to make exim not
     # do that, so addfilter will have to do..
-    addfilter /var/spool/exim
+    esandbox addfilter /var/spool/exim
     default
+    esandbox rmfilter /var/spool/exim
 
     alternatives_for mta ${PN} 10 /usr/sbin/sendmail ${PN}
     edo mv "${IMAGE}"/etc/mail/{,${PN}.}aliases

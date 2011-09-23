@@ -1,0 +1,54 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="neon is an HTTP and WebDAV client library"
+HOMEPAGE="http://www.webdav.org/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/doc/html/ [[ lang = en ]]"
+
+LICENCES="LGPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="
+    expat
+    gnutls [[ description = [ Use GnuTLS instead of OpenSSL ] ]]
+    libproxy [[ description = [ Support for automatic configuration management through libproxy ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config[>=0.18]
+    build+run:
+        sys-libs/zlib
+       !expat? ( dev-libs/libxml2 )
+        expat? ( dev-libs/expat )
+       !gnutls? ( dev-libs/openssl[>=0.9.7] )
+        gnutls? ( dev-libs/gnutls[<2.12.0] ) [[
+            note = [ neon/src/ne_socket.c still uses gnutls_certificate_verify_peers ] ]]
+        libproxy? ( net-libs/libproxy )
+    test:
+        dev-libs/openssl
+"
+
+
+src_prepare() {
+    expatch "${FILES}"/${PN}-0.29.4-sydbox.patch
+
+    # Disable a test that fails under sydbox
+    edo sed -e '/T(session_cache)/d' -i test/ssl.c
+}
+
+src_configure() {
+    local myconf=(
+        --enable-shared
+        $(option_with !expat libxml2)
+        $(option_with expat)
+        $(option_with libproxy)
+        --with-ssl=$(option gnutls && echo gnutls || echo openssl)
+    )
+    econf ${myconf[@]}
+}
+

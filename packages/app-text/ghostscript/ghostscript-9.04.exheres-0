@@ -1,0 +1,124 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+SUMMARY="An interpreter for the PostScript language and for PDF"
+HOMEPAGE="http://${PN}.com"
+DOWNLOADS="http://downloads.${PN}.com/public/${PNV}.tar.bz2"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="cups dbus gtk idn jpeg2000 X
+    gtk [[ requires = [ X ] ]]"
+
+DEPENDENCIES="
+    build:
+        dev-util/pkg-config
+        X? ( x11-proto/xextproto )
+    build+run:
+        dev-libs/expat
+        dev-libs/libpaper
+        media-libs/fontconfig
+        media-libs/freetype:2
+        media-libs/jbig2dec
+        media-libs/jpeg
+        media-libs/lcms:0
+        media-libs/libpng
+        media-libs/tiff
+        sys-libs/zlib
+        cups? ( net-print/cups )
+        dbus? ( sys-apps/dbus )
+        gtk? ( x11-libs/gtk+:2 )
+        idn? ( net-dns/libidn )
+        jpeg2000? ( media-libs/jasper )
+        X? (
+            x11-libs/libXext
+            x11-libs/libXt
+        )
+    run:
+        app-text/poppler-data[>=0.4.4] [[ note = [ CMap encoding data ] ]]
+        fonts/urw-fonts [[ note = [ PostScript standard fonts ] ]]
+"
+
+src_prepare() {
+    edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms,libpng,tiff,zlib}
+    edo rm -r ./Resource/Font
+    edo rm -r ./Resource/CMap
+
+    if option !gtk; then
+        edo sed -e 's:\$(GSSOX)::' \
+                -e 's:.*\$(GSSOX_XENAME)$::' \
+                -i base/*.mak
+    fi
+
+    edo sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak
+
+    default
+    eautoreconf
+    edo cd "${WORK}/ijs"
+    eautoreconf
+}
+
+src_configure() {
+    local FONTPATH
+    for path in \
+        /usr/share/fonts/X11/urw-fonts \
+        /usr/share/fonts/X11/Type1 \
+        /usr/share/fonts/X11 \
+        /usr/share/poppler/cMap/Adobe-CNS1 \
+        /usr/share/poppler/cMap/Adobe-GB1 \
+        /usr/share/poppler/cMap/Adobe-Japan1 \
+        /usr/share/poppler/cMap/Adobe-Japan2 \
+        /usr/share/poppler/cMap/Adobe-Korea1
+    do
+        FONTPATH="$FONTPATH${FONTPATH:+:}$path"
+    done
+
+    econf \
+        --enable-dynamic \
+        --enable-freetype \
+        --enable-fontconfig \
+        --disable-compile-inits \
+        --with-drivers=ALL \
+        --with-fontpath="$FONTPATH" \
+        --with-ijs \
+        --with-jbig2dec \
+        --with-libpaper \
+        --with-system-libtiff \
+        --without-luratech \
+        $(option_enable cups) \
+        $(option_enable dbus) \
+        $(option_enable gtk) \
+        $(option_with cups install-cups) \
+        $(option_with cups pdftoraster) \
+        $(option_with idn libidn) \
+        $(option_with jpeg2000 jasper) \
+        $(option_with X x)
+
+    edo cd "${WORK}/ijs"
+    econf
+}
+
+src_compile() {
+    # Parallel make is broken
+    emake -j1 so all
+
+    edo cd "${WORK}/ijs"
+    emake
+}
+
+src_install() {
+    emake -j1 DESTDIR="${IMAGE}" install-so install
+
+    edo cd "${WORK}/ijs"
+    default
+
+    if option !X && option !gtk; then
+        rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}{/${PV},}
+    fi
+}
+

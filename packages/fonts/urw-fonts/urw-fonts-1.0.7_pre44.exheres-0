@@ -1,0 +1,23 @@
+# Copyright 2011 Timo Gurr <tgurr@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Free versions of the 35 standard PostScript fonts"
+HOMEPAGE="http://git.ghostscript.com/?p=ghostpdl.git;a=tree;f=urwfonts"
+DOWNLOADS="http://dev.exherbo.org/~tgurr/distfiles/${PN}/${PNV}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+WORK="${WORKBASE}"
+
+src_install() {
+    default
+
+    insinto /usr/share/fonts/X11/${PN}
+    doins *.{afm,pfb,pfm} encodings.dir fonts.{dir,scale}
+}
+

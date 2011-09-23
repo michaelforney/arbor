@@ -139,12 +139,12 @@ scm-cvs_set_branchdate() {
 
 scm-cvs_do_checkout() {
     local dir=$(scm_get_var CHECKOUT_TO)
-    addfilter "${dir%/*}/CVS"
+    esandbox addfilter "${dir%/*}/CVS"
     local what=$(scm-cvs_tagrevbranch) whatarr=
     [[ -n ${what} ]] && whatarr=( "${what}" )
     scm-cvs_cvs checkout "${whatarr[@]}" "$(scm_get_var SUBPATH)"
     scm-cvs_set_branchdate
-    rmfilter "${dir%/*}/CVS"
+    esandbox rmfilter "${dir%/*}/CVS"
 }
 
 scm-cvs_do_update() {

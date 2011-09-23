@@ -1,0 +1,117 @@
+From 7c73c3dc3c0e89e37889259528bd0abfdd57a3bd Mon Sep 17 00:00:00 2001
+From: Paul Seidler <sepek@exherbo.org>
+Date: Fri, 9 Sep 2011 18:17:26 +0200
+Subject: [PATCH] use /run for pid
+
+as it will probably become the new standard, directories are created
+automatic on startup
+
+Upstream: no, wait for FHS-3 release
+---
+ config-scripts/cups-directories.m4 |    2 +-
+ config.h.in                        |    2 +-
+ doc/help/security.html             |    2 +-
+ packaging/cups.spec                |    4 ++--
+ packaging/cups.spec.in             |    4 ++--
+ scheduler/Makefile                 |    9 ---------
+ 6 files changed, 7 insertions(+), 16 deletions(-)
+
+diff --git a/config-scripts/cups-directories.m4 b/config-scripts/cups-directories.m4
+index 4159f4c..8e21f00 100644
+--- a/config-scripts/cups-directories.m4
++++ b/config-scripts/cups-directories.m4
+@@ -429,7 +429,7 @@ case "$uname" in
+ 		;;
+ 	*)
+ 		# All others
+-		CUPS_STATEDIR="$localstatedir/run/cups"
++		CUPS_STATEDIR="/run/cups"
+ 		;;
+ esac
+ AC_DEFINE_UNQUOTED(CUPS_STATEDIR, "$CUPS_STATEDIR")
+diff --git a/config.h.in b/config.h.in
+index 4cb49bd..17ecb14 100644
+--- a/config.h.in
++++ b/config.h.in
+@@ -131,7 +131,7 @@
+ #define CUPS_SBINDIR	"/usr/sbin"
+ #define CUPS_SERVERBIN	"/usr/lib/cups"
+ #define CUPS_SERVERROOT	"/etc/cups"
+-#define CUPS_STATEDIR	"/var/run/cups"
++#define CUPS_STATEDIR	"/run/cups"
+ 
+ 
+ /*
+diff --git a/doc/help/security.html b/doc/help/security.html
+index c86151d..f626b03 100644
+--- a/doc/help/security.html
++++ b/doc/help/security.html
+@@ -53,7 +53,7 @@ authentication:</P>
+ 	<LI>Local certificate authentication passes 128-bit
+ 	"certificates" that identify an authenticated user.
+ 	Certificates are created on-the-fly from random data and
+-	stored in files under <VAR>/var/run/cups/certs</VAR>.
++	stored in files under <VAR>/run/cups/certs</VAR>.
+ 	They have restricted read permissions: root +
+ 	system-group(s) for the root certificate, and lp + lp
+ 	for CGI certificates.
+diff --git a/packaging/cups.spec b/packaging/cups.spec
+index 30b31b7..1f11e61 100644
+--- a/packaging/cups.spec
++++ b/packaging/cups.spec
+@@ -312,8 +312,8 @@ rm -rf $RPM_BUILD_ROOT
+ %dir /var/cache/cups
+ %attr(0775,root,sys) %dir /var/cache/cups/rss
+ %dir /var/log/cups
+-%dir /var/run/cups
+-%attr(0711,lp,sys) %dir /var/run/cups/certs
++%dir /run/cups
++%attr(0711,lp,sys) %dir /run/cups/certs
+ %attr(0710,lp,sys) %dir /var/spool/cups
+ %attr(1770,lp,sys) %dir /var/spool/cups/tmp
+ 
+diff --git a/packaging/cups.spec.in b/packaging/cups.spec.in
+index 6c9118f..f69abb9 100644
+--- a/packaging/cups.spec.in
++++ b/packaging/cups.spec.in
+@@ -312,8 +312,8 @@ rm -rf $RPM_BUILD_ROOT
+ %dir /var/cache/cups
+ %attr(0775,root,sys) %dir /var/cache/cups/rss
+ %dir /var/log/cups
+-%dir /var/run/cups
+-%attr(0711,lp,sys) %dir /var/run/cups/certs
++%dir /run/cups
++%attr(0711,lp,sys) %dir /run/cups/certs
+ %attr(0710,lp,sys) %dir /var/spool/cups
+ %attr(1770,lp,sys) %dir /var/spool/cups/tmp
+ 
+diff --git a/scheduler/Makefile b/scheduler/Makefile
+index 18dc80c..d780b91 100644
+--- a/scheduler/Makefile
++++ b/scheduler/Makefile
+@@ -152,13 +152,6 @@ install-data:
+ 		echo Creating $(SERVERROOT)/ssl...; \
+ 		$(INSTALL_DIR) -m 700 -g $(CUPS_GROUP) $(SERVERROOT)/ssl; \
+ 	fi
+-	if test "$(STATEDIR)" != "$(SERVERROOT)"; then \
+-		echo Creating $(STATEDIR)...; \
+-		$(INSTALL_DIR) -m 755 $(STATEDIR); \
+-	fi
+-	echo Creating $(STATEDIR)/certs...
+-	$(INSTALL_DIR) -m 511 -o $(CUPS_USER) -g $(CUPS_PRIMARY_SYSTEM_GROUP) \
+-		$(STATEDIR)/certs
+ 	echo Creating $(LOGDIR)...
+ 	$(INSTALL_DIR) -m 755 $(LOGDIR)
+ 	echo Creating $(REQUESTS)...
+@@ -286,8 +279,6 @@ uninstall:
+ 	$(RM) $(SERVERBIN)/daemon/cups-lpd
+ 	$(RM) $(SERVERBIN)/daemon/cups-polld
+ 	$(RM) $(BUILDROOT)/System/Library/Printers/Libraries/convert
+-	-$(RMDIR) $(STATEDIR)/certs
+-	-$(RMDIR) $(STATEDIR)
+ 	-$(RMDIR) $(SERVERROOT)/ppd
+ 	-$(RMDIR) $(SERVERROOT)/interfaces
+ 	-$(RMDIR) $(SERVERROOT)
+-- 
+1.7.6.1
+

@@ -26,10 +26,11 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
         sys-libs/cracklib[>=2.8.3][multibuild_c:*(?)?]
+        net-libs/libtirpc[multibuild_c:*(?)?] [[ note = [ replace automagic dep with hard ] ]]
 "
 
 WORK="${WORKBASE}/${MY_PNV}"
-AT_M4DIR=m4
+AT_M4DIR=( m4 )
 
 pam_build_pkg_pretend() {
     if [[ ! -f /etc/pam.d/other ]]; then

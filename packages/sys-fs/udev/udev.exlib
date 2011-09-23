@@ -24,17 +24,8 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="( GPL-2 LGPL-2 )"
 SLOT="0"
 
-if ever at_least 169; then
-    MYOPTIONS="
-        acl [[ requires = [ glib ] ]]
-    "
-else
-    MYOPTIONS="
-        extras [[ description = [ Extras for mobile devices (and then some), e. g. special keymaps ] requires = [ glib ] ]]
-    "
-fi
-
-MYOPTIONS+="
+MYOPTIONS="
+    acl [[ requires = [ glib -systemd ] ]]
     baselayout
     glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
     gobject-introspection [[ requires = [ glib ] ]]
@@ -49,6 +40,8 @@ DEPENDENCIES="
         dev-libs/libxslt
         app-doc/gtk-doc-autotools[>=1.15-r1]
     build+run:
+        dev-util/gperf[>=3.0.4]
+        acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(?)?] )
         glib? ( dev-libs/glib:2[>=2.22.0] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
         sound? (
@@ -60,28 +53,6 @@ DEPENDENCIES="
     suggestion:
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
-
-if ever at_least 169; then
-    DEPENDENCIES+="
-        build+run:
-            dev-util/gperf[>=3.0.4]
-            acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(?)?] )
-    "
-else
-    DEPENDENCIES+="
-        build+run:
-            extras? (
-                dev-libs/libusb:0.1[>=0.1.12]
-                dev-util/gperf[>=3.0.4]
-                sys-apps/acl[>=2.2.49]
-                sys-apps/usbutils[>=0.82]
-            )
-            !net-wireless/bluez[>=4.93] [[
-                description = [ Installs the same file ]
-                resolution = uninstall-blocked-after
-            ]]
-    "
-fi
 
 AT_M4DIR=( m4 )
 
@@ -109,23 +80,16 @@ udev_src_prepare() {
 configure_one_multibuild() {
     econf \
         --sbindir=/sbin \
+        --enable-edd \
         --enable-static \
         --with-rootlibdir=/${LIBDIR} \
         --libexecdir=/${LIBDIR}/udev \
         --without-selinux \
         $(option_enable glib gudev) \
         $(option_enable gobject-introspection introspection) \
-        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system) \
-        $(if ever at_least 169; then
-            echo --enable-edd
-            option_enable acl udev_acl
-            option_enable sound hwdb
-        else
-            option_enable extras
-            option_enable sound pci-db
-            option_enable sound sound-rules
-            option_enable sound usb-db
-        fi)
+        $(option_with systemd systemdsystemunitdir "/${LIBDIR}/systemd/system") \
+        $(option_enable acl udev_acl) \
+        $(option_enable sound hwdb)
 }
 
 udev_src_configure() {
