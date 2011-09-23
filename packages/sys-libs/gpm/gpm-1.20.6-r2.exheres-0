@@ -20,6 +20,7 @@ DEPENDENCIES="
         sys-devel/bison
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 ${FILES}/${PNV}-foreground.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( "--libdir=/${LIBDIR}" "--sysconfdir=/etc/${PN}" )
 DEFAULT_SRC_INSTALL_PARAMS=( EMACS=: ELISP= )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
