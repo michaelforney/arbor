@@ -12,12 +12,13 @@ SCHNARF_PV_DOC="$(ever range 1)$(printf "%02d" $(ever range 2))$(printf "%02d" $
 require flag-o-matic
 
 SUMMARY="An embedded SQL database engine"
-HOMEPAGE="http://www.sqlite.org/"
-DOWNLOADS="http://www.sqlite.org/${PN}-autoconf-${SCHNARF_PV}.tar.gz
-    doc? ( http://www.sqlite.org/${PN}-doc-${SCHNARF_PV_DOC}.zip )"
+HOMEPAGE="http://www.sqlite.org"
+DOWNLOADS="${HOMEPAGE}/${PN}-autoconf-${SCHNARF_PV}.tar.gz
+    doc? ( ${HOMEPAGE}/${PN}-doc-${SCHNARF_PV_DOC}.zip )"
 
 REMOTE_IDS="freshmeat:${PN}"
-UPSTREAM_CHANGELOG="${HOMEPAGE}releaselog/$(ever replace_all _).html [[ lang = en ]]"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/releaselog/$(ever replace_all _).html [[ lang = en ]]"
 
 LICENCES="public-domain"
 SLOT="3"
