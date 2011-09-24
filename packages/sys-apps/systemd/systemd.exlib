@@ -118,6 +118,10 @@ systemd_pkg_pretend() {
         ewarn "This check is based upon the kernel currently running, thus, if you already"
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
     fi
+
+    if [[ ${kv} < 2.6.39 ]] ; then
+        ewarn "You SHOULD install a kernel >= 2.6.39 to get the best results."
+    fi
 }
 
 systemd_src_prepare() {
