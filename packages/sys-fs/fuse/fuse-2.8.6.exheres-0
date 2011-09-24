@@ -11,14 +11,16 @@ also aims to provide a secure method for non privileged users to
 create and mount their own filesystem implementations.
 "
 
+REMOTE_IDS+=" freshmeat:${PN}"
+
 LICENCES="|| ( GPL-2 LGPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
 MYOPTIONS="baselayout"
+
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-example' )
-DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/"${PN}"-2.7.4-gold.patch )
 
 src_install() {
     default
