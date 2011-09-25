@@ -5,11 +5,8 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] cyr
 
 PLATFORMS="~amd64 ~x86"
 
-WORK="${WORKBASE}/${PNV%%-rc1}"
-
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-headers.patch"
     "${FILES}/${PN}-2.1.22-libsasldb.patch"
     "${FILES}/${PNV}-fpic.patch"
 )
-
