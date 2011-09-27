@@ -49,14 +49,16 @@ DEPENDENCIES="
         sys-libs/ncurses
         alsa? ( sys-sound/alsa-lib[>=1.0.0] )
         X? (
-            x11-libs/libXmu
-            x11-libs/libXt
             x11-data/xbitmaps
+            x11-libs/libX11
+            x11-libs/libICE
+            x11-libs/libSM
             gif? ( media-libs/giflib )
             gtk? (
               dev-libs/glib:2[>=2.6]
               x11-libs/gtk+:2[>=2.6]
               x11-libs/libXft[>=0.13.0]
+              x11-libs/libXrender [[ note = [ because of libXft ] ]]
             )
             jpeg? ( media-libs/jpeg )
             otf? ( dev-libs/libotf )
@@ -70,6 +72,7 @@ DEPENDENCIES="
             media-libs/fontconfig[>=2.2.0]
             media-libs/freetype:2
             x11-libs/libXft[>=0.13.0]
+            x11-libs/libXrender [[ note = [ because of libXft ] ]]
         )
         gconf? ( gnome-platform/GConf:2 )
         gpm? ( sys-libs/gpm )
@@ -85,8 +88,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-m17n-flt
     --without-xim
     $(ever at_least 24 && echo --without-compress-info) # applies to manpages as well
+    $(ever at_least 24 && echo --without-gsettings)
     $(ever at_least 24 && echo --without-imagemagick)
     $(ever at_least 24 && echo --without-selinux)
+    $(ever at_least 24 && echo --without-xml2)
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
