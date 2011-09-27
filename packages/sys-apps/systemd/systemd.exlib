@@ -83,10 +83,9 @@ if ever is_scm ; then
 fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --prefix=/
-    --exec-prefix=/
+    --prefix=
+    --libdir=/usr/${LIBDIR}
     --includedir=/usr/include
-    --libdir=/${LIBDIR}
     --libexecdir=/usr/libexec
     --localstatedir=/var
     --enable-pam
@@ -94,7 +93,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-selinux
     --with-distro=other
     --with-pamlibdir=/${LIBDIR}/security
-    --with-rootdir=/
+    --with-rootdir=
+    --with-rootlibdir=/${LIBDIR}
     --with-sysvinit-path=""
     --with-sysvrcd-path=""
     --with-udevrulesdir=/${LIBDIR}/udev/rules.d
@@ -117,6 +117,10 @@ systemd_pkg_pretend() {
         ewarn "You MUST install a kernel >= 2.6.36-rc1 to use systemd."
         ewarn "This check is based upon the kernel currently running, thus, if you already"
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
+    fi
+
+    if [[ ${kv} < 2.6.39 ]] ; then
+        ewarn "You SHOULD install a kernel >= 2.6.39 to get the best results."
     fi
 }
 

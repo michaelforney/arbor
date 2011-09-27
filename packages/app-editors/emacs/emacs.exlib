@@ -3,6 +3,8 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
+# TODO: handle --with-x-toolkit=gtk3?
+
 require game alternatives elisp-module
 
 if [[ -z $(ever range 3) ]]; then
@@ -82,6 +84,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-hesiod
     --without-m17n-flt
     --without-xim
+    $(ever at_least 24 && echo --without-compress-info) # applies to manpages as well
+    $(ever at_least 24 && echo --without-imagemagick)
+    $(ever at_least 24 && echo --without-selinux)
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(

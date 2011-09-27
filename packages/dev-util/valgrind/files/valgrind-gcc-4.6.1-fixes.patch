@@ -1,0 +1,128 @@
+Source: cherry picked from svn
+Upstream: yes (r11856 / r11904)
+Reason: valgrind fails to work with binaries produced by gcc 4.6.1
+
+commit 0b98239b3e0abd430dbc913454d63c7e3d8c8b12
+Author: tom <tom@a5019735-40e9-0310-863c-91ae7b9d1cf9>
+Date:   Tue Jul 5 09:22:32 2011 +0000
+
+    Implement some extra DWARF ops that gcc 4.6.1 seems to use. Fixes #275284.
+    
+    
+    git-svn-id: svn://svn.valgrind.org/valgrind/trunk@11856 a5019735-40e9-0310-863c-91ae7b9d1cf9
+
+diff --git a/coregrind/m_debuginfo/debuginfo.c b/coregrind/m_debuginfo/debuginfo.c
+index e000468..4177a3a 100644
+--- a/coregrind/m_debuginfo/debuginfo.c
++++ b/coregrind/m_debuginfo/debuginfo.c
+@@ -1880,6 +1880,14 @@ UWord evalCfiExpr ( XArray* exprs, Int ix,
+             case Cop_Sub: return wL - wR;
+             case Cop_And: return wL & wR;
+             case Cop_Mul: return wL * wR;
++            case Cop_Shl: return wL << wR;
++            case Cop_Shr: return wL >> wR;
++            case Cop_Eq: return wL == wR ? 1 : 0;
++            case Cop_Ge: return wL >= wR ? 1 : 0;
++            case Cop_Gt: return wL > wR ? 1 : 0;
++            case Cop_Le: return wL <= wR ? 1 : 0;
++            case Cop_Lt: return wL < wR ? 1 : 0;
++            case Cop_Ne: return wL != wR ? 1 : 0;
+             default: goto unhandled;
+          }
+          /*NOTREACHED*/
+diff --git a/coregrind/m_debuginfo/priv_storage.h b/coregrind/m_debuginfo/priv_storage.h
+index 949ae74..7921a3f 100644
+--- a/coregrind/m_debuginfo/priv_storage.h
++++ b/coregrind/m_debuginfo/priv_storage.h
+@@ -249,7 +249,15 @@ typedef
+       Cop_Add=0x321,
+       Cop_Sub,
+       Cop_And,
+-      Cop_Mul
++      Cop_Mul,
++      Cop_Shl,
++      Cop_Shr,
++      Cop_Eq,
++      Cop_Ge,
++      Cop_Gt,
++      Cop_Le,
++      Cop_Lt,
++      Cop_Ne
+    }
+    CfiOp;
+ 
+diff --git a/coregrind/m_debuginfo/readdwarf.c b/coregrind/m_debuginfo/readdwarf.c
+index 807964a..870d77e 100644
+--- a/coregrind/m_debuginfo/readdwarf.c
++++ b/coregrind/m_debuginfo/readdwarf.c
+@@ -2899,6 +2899,22 @@ static Int dwarfexpr_to_dag ( UnwindContext* ctx,
+             op = Cop_And; opname = "and"; goto binop;
+          case DW_OP_mul:
+             op = Cop_Mul; opname = "mul"; goto binop;
++         case DW_OP_shl:
++            op = Cop_Shl; opname = "shl"; goto binop;
++         case DW_OP_shr:
++            op = Cop_Shr; opname = "shr"; goto binop;
++         case DW_OP_eq:
++            op = Cop_Eq; opname = "eq"; goto binop;
++         case DW_OP_ge:
++            op = Cop_Ge; opname = "ge"; goto binop;
++         case DW_OP_gt:
++            op = Cop_Gt; opname = "gt"; goto binop;
++         case DW_OP_le:
++            op = Cop_Le; opname = "le"; goto binop;
++         case DW_OP_lt:
++            op = Cop_Lt; opname = "lt"; goto binop;
++         case DW_OP_ne:
++            op = Cop_Ne; opname = "ne"; goto binop;
+          binop:
+             POP( ix );
+             POP( ix2 );
+diff --git a/coregrind/m_debuginfo/storage.c b/coregrind/m_debuginfo/storage.c
+index 6dcd9e0..8b4060a 100644
+--- a/coregrind/m_debuginfo/storage.c
++++ b/coregrind/m_debuginfo/storage.c
+@@ -603,6 +603,14 @@ static void ppCfiOp ( CfiOp op )
+       case Cop_Sub: VG_(printf)("-"); break;
+       case Cop_And: VG_(printf)("&"); break;
+       case Cop_Mul: VG_(printf)("*"); break;
++      case Cop_Shl: VG_(printf)("<<"); break;
++      case Cop_Shr: VG_(printf)(">>"); break;
++      case Cop_Eq: VG_(printf)("=="); break;
++      case Cop_Ge: VG_(printf)(">="); break;
++      case Cop_Gt: VG_(printf)(">"); break;
++      case Cop_Le: VG_(printf)("<="); break;
++      case Cop_Lt: VG_(printf)("<"); break;
++      case Cop_Ne: VG_(printf)("!="); break;
+       default:      vg_assert(0);
+    }
+ }
+
+commit 130f6f5a47a1557a454b24db6e08431da6c8b9c1
+Author: tom <tom@a5019735-40e9-0310-863c-91ae7b9d1cf9>
+Date:   Thu Jul 21 15:07:26 2011 +0000
+
+    DWARF comparisons should be signed. Patch from Jakub Jelinek.
+    
+    
+    git-svn-id: svn://svn.valgrind.org/valgrind/trunk@11904 a5019735-40e9-0310-863c-91ae7b9d1cf9
+
+diff --git a/coregrind/m_debuginfo/debuginfo.c b/coregrind/m_debuginfo/debuginfo.c
+index 4177a3a..dcc2719 100644
+--- a/coregrind/m_debuginfo/debuginfo.c
++++ b/coregrind/m_debuginfo/debuginfo.c
+@@ -1883,10 +1883,10 @@ UWord evalCfiExpr ( XArray* exprs, Int ix,
+             case Cop_Shl: return wL << wR;
+             case Cop_Shr: return wL >> wR;
+             case Cop_Eq: return wL == wR ? 1 : 0;
+-            case Cop_Ge: return wL >= wR ? 1 : 0;
+-            case Cop_Gt: return wL > wR ? 1 : 0;
+-            case Cop_Le: return wL <= wR ? 1 : 0;
+-            case Cop_Lt: return wL < wR ? 1 : 0;
++            case Cop_Ge: return (Word) wL >= (Word) wR ? 1 : 0;
++            case Cop_Gt: return (Word) wL > (Word) wR ? 1 : 0;
++            case Cop_Le: return (Word) wL <= (Word) wR ? 1 : 0;
++            case Cop_Lt: return (Word) wL < (Word) wR ? 1 : 0;
+             case Cop_Ne: return wL != wR ? 1 : 0;
+             default: goto unhandled;
+          }
