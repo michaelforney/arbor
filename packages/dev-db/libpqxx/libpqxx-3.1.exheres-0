@@ -26,6 +26,10 @@ DEPENDENCIES="
         dev-db/postgresql
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p2 "${FILES}"/${PNV}-include-cstddef.h.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     --disable-static
