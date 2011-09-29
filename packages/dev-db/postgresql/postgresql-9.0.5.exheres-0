@@ -7,7 +7,6 @@ PLATFORMS="~amd64 ~x86"
 
 src_prepare() {
     default
-    expatch -p1 "${FILES}"/${PNV}-fix-build-with-perl-5.14.patch
     # move CREATE TABLESPACE test (which is meant to fail) to ${WORK}
     edo sed -e "s:/no/such/location:${WORK}&:" -i src/test/regress/{input,output}/tablespace.source
 }
