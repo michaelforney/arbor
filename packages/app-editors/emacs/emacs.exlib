@@ -18,7 +18,7 @@ if [[ $(ever range 3) == rc* ]]; then
     MY_PNV=${PN}-${MY_PV}
 fi
 
-export_exlib_phases src_prepare src_install pkg_postinst pkg_postrm
+export_exlib_phases src_prepare src_install pkg_postinst
 
 SUMMARY="The extensible, customizable, self-documenting, real-time display editor"
 
@@ -110,6 +110,8 @@ emacs_src_prepare() {
     # Compressing *.el files saves 25MB diskspace, which is not worth it on modern systems
     edo sed -i -e 's/@GZIP_PROG@//' {.,leim}/Makefile.in
     default
+
+    edo tar cf source.tar src/
 }
 
 emacs_src_install() {
@@ -127,6 +129,12 @@ EOF
     preserve_scores "${IMAGE}"/var/lib/games/emacs/*
     edo chown wizard:games "${IMAGE}"/usr/libexec/emacs/${MY_PV-${PV}}/${CHOST}/update-game-score
     edo chmod ug+s "${IMAGE}"/usr/libexec/emacs/${MY_PV-${PV}}/${CHOST}/update-game-score
+
+    elisp-install-site-file
+
+    local emacs_source_root=/usr/src/emacs
+    dodir ${emacs_source_root}
+    edo tar xf source.tar -C "${IMAGE}"${emacs_source_root}
 
     local i
     for i in "${IMAGE}"/usr/share/info/${PN}/*; do
@@ -149,9 +157,5 @@ emacs_pkg_postinst() {
     game_pkg_postinst
     alternatives_pkg_postinst
     elisp-generate-global-site-file
-}
-
-emacs_pkg_postrm() {
-    :
 }
 
