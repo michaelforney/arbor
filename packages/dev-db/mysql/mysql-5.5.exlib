@@ -4,7 +4,7 @@
 
 require cmake systemd-service
 
-export_exlib_phases pkg_pretend src_install src_prepare
+export_exlib_phases pkg_pretend pkg_setup src_install src_prepare
 
 MYSQL_MAJOR_VERSION=$(ever range 1-2)
 
@@ -96,6 +96,10 @@ mysql-5.5_pkg_pretend() {
 
     # Pending genesis integration:
     # Upgrading to any version requires starting/stopping the MySQL server.
+}
+
+mysql-5.5_pkg_setup() {
+    option baselayout && exdirectory --allow /run
 }
 
 mysql-5.5_src_prepare() {
