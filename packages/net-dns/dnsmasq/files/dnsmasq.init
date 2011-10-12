@@ -14,15 +14,15 @@ depend() {
 start() {
 	ebegin "Starting ${SVCNAME}"
 	start-stop-daemon --start --exec /usr/sbin/dnsmasq \
-	    --pidfile /var/run/dnsmasq.pid \
-	    -- -x /var/run/dnsmasq.pid ${DNSMASQ_OPTS}
+	    --pidfile /run/dnsmasq.pid \
+	    -- -x /run/dnsmasq.pid ${DNSMASQ_OPTS}
 	eend $?
 }
 
 stop() {
 	ebegin "Stopping ${SVCNAME}"
 	start-stop-daemon --stop --exec /usr/sbin/dnsmasq \
-	    --pidfile /var/run/dnsmasq.pid
+	    --pidfile /run/dnsmasq.pid
 	eend $?
 }
 
@@ -33,6 +33,6 @@ reload() {
 	    return 1
 	fi
 	start-stop-daemon --stop --oknodo --signal HUP \
-	    --exec /usr/sbin/dnsmasq --pidfile /var/run/dnsmasq.pid
+	    --exec /usr/sbin/dnsmasq --pidfile /run/dnsmasq.pid
 	eend $?
 }
