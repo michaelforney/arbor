@@ -67,7 +67,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /${LIBDIR}/sy
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/syslog-ng.conf.doc )
 
-src_install() {
+syslog-ng_src_install() {
     default
 
     edo rmdir "${IMAGE}"/usr/libexec
@@ -98,7 +98,7 @@ src_install() {
     fi
 }
 
-pkg_postinst() {
+syslog-ng_pkg_postinst() {
     default
 
     if [[ -d "${ROOT}"/etc/env.d/alternatives/systemd-logger ]]; then
