@@ -14,7 +14,7 @@ RESTRICT="test"
 
 LICENCES="BSD-3"
 SLOT="0"
-PLATFORMS="~amd64"
+PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -25,6 +25,10 @@ DEPENDENCIES="
         dev-libs/boost
         dev-db/postgresql
 "
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p2 "${FILES}"/${PNV}-include-cstddef.h.patch
+)
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared

@@ -5,7 +5,13 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] cyr
 
 PLATFORMS="~amd64 ~x86"
 
-WORK="${WORKBASE}/${PNV%%-rc1}"
+# Put ldap in exlib when definitely bumped
+MYOPTIONS="ldap"
+
+DEPENDENCIES="
+build+run:
+    ldap? ( net-directory/openldap )
+"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-headers.patch"
@@ -13,3 +19,10 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PNV}-fpic.patch"
 )
 
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "ldap ldapdb"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
+    "ldap ldap /usr"
+)

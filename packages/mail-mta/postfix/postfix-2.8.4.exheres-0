@@ -17,7 +17,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/announcements/${PNV}.html [[ lang = en ]]"
 LICENCES="IPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="baselayout cyrus ssl"
+MYOPTIONS="baselayout cyrus ldap ssl"
 
 DEPENDENCIES="
     dev-libs/pcre
@@ -27,6 +27,7 @@ DEPENDENCIES="
     sys-libs/pam
     user/postfix
     cyrus? ( net-libs/cyrus-sasl )
+    ldap? ( net-directory/openldap )
     ssl? ( dev-libs/openssl )
 "
 
@@ -44,6 +45,10 @@ src_compile() {
     if option cyrus ; then
         ccargs+=" -DUSE_CYRUS_SASL -I/usr/include/sasl"
         auxlibs+=" -lsasl2"
+    fi
+    if option ldap ; then
+        ccargs+=" -DHAS_LDAP"
+        auxlibs+=" -lldap -llber"
     fi
     ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'${LIBDIR}'/postfix\"'
     ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'

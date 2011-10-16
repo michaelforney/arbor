@@ -3,9 +3,9 @@
 # Based in part upon 'cyrus-sasl-2.1.22-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic pam
+require flag-o-matic pam systemd-service
 
-export_exlib_phases src_prepare src_compile src_install
+export_exlib_phases src_prepare src_configure src_compile src_install
 
 SUMMARY="Library implementing the Simple Authentication and Security Layer"
 DESCRIPTION="
@@ -56,14 +56,25 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( saslauthd )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LDAP_SASLAUTHD )
 
+
 cyrus-sasl_src_prepare()
 {
-    default
     edo sed -e 's:^sasldir = .*$:sasldir = $(plugindir):' \
             -i "${WORK}"/plugins/Makefile.{am,in}
     edo rm -f "${WORK}/config/libtool.m4"
     AT_M4DIR=( "${WORK}"/{cmulocal,config} )
+    autotools_src_prepare
+    edo pushd saslauthd
     eautoreconf
+    edo popd
+}
+
+cyrus-sasl_src_configure()
+{
+    default
+    edo pushd saslauthd
+    default
+    edo popd
 }
 
 cyrus-sasl_src_compile()
@@ -86,5 +97,14 @@ cyrus-sasl_src_install()
     dodoc doc/*.html
 
     pamd_mimic_system saslauthd auth account session
-}
 
+    if option systemd; then
+        install_systemd_files
+        insinto /etc/conf.d
+        newins "${FILES}"/saslauthd-confd saslauthd.conf
+        insinto /etc/tmpfiles.d
+        hereins saslauthd.conf <<EOF
+d /run/saslauthd 0750 root root
+EOF
+    fi
+}

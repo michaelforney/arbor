@@ -24,7 +24,10 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}"
 
-DEFAULT_SRC_PREPARE_PATCHES=( ${FILES}/${PNV}-Makefile.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    ${FILES}/${PNV}-Makefile.patch
+    -p1 ${FILES}/${PNV}-foreground.patch
+)
 DEFAULT_SRC_INSTALL_PARAMS=( EMACS=: ELISP= )
 
 unpack_prepare_one_multibuild() {

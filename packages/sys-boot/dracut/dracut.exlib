@@ -6,7 +6,8 @@ if ever is_scm; then
     SCM_REPOSITORY="git://git.kernel.org/pub/scm/boot/dracut/dracut.git"
     require scm-git
 else
-    DOWNLOADS="mirror://kernel/linux/utils/boot/${PN}/${PNV}.tar.bz2"
+    #DOWNLOADS="mirror://kernel/linux/utils/boot/${PN}/${PNV}.tar.bz2"
+    DOWNLOADS="http://dev.exherbo.org/~sepek/distfiles/${PNV}.tar.gz"
 fi
 
 export_exlib_phases src_prepare src_install
@@ -53,6 +54,9 @@ DEPENDENCIES="
             description = [ Required by the base module for pidof if not using busybox ]
         ]]
     suggestion:
+        app-crypt/gnupg [[
+            description = [ Add support for GPG-encrypted keys to the crypt module ]
+        ]]
         app-misc/bootchart2 [[
             description = [ Support for graphical analysis of the boot process. ]
         ]]
@@ -103,6 +107,9 @@ DEPENDENCIES="
         sys-apps/iproute2 [[
             description = [ Required by the network boot module for ip ]
             group-name = [ dracut-network-module ]
+        ]]
+        sys-apps/keyutils [[
+            description = [ Required by the masterkey, ecryptfs and integrity modules to decrypt keys ]
         ]]
         sys-apps/net-tools [[
             description = [ Required by the iSCSI and debug module for hostname and netstat ]

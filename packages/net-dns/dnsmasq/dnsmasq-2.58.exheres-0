@@ -1,4 +1,4 @@
-# Copyright 2009 Pierre Lejeune <superheron@gmail.com>
+# Copyright 2009-2011 Pierre Lejeune <superheron@gmail.com>
 # Copyright 2011 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
@@ -20,11 +20,13 @@ DOWNLOADS="${BASEURI}/${PNV}.tar.lzma"
 
 UPSTREAM_CHANGELOG="${BASEURI}/CHANGELOG [[ lang = en ]]"
 
-LICENCES="GPL-2"
+LICENCES="|| ( GPL-2 GPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS="baselayout dbus doc
+MYOPTIONS="baselayout conntrack dbus doc i18n
+    conntrack [[ description = [ Enables connection tracking via NetFilter ] ]]
     i18n [[ description = [ Support locales and international domain names ] ]]
+    systemd [[ requires = [ dbus ] ]]
 "
 
 DEPENDENCIES="
@@ -33,6 +35,7 @@ DEPENDENCIES="
         dev-util/pkg-config
         i18n? ( sys-devel/gettext )
     build+run:
+        conntrack? ( net-libs/libnetfilter_conntrack )
         dbus? ( sys-apps/dbus )
         i18n? ( net-dns/libidn )
 "
@@ -40,13 +43,20 @@ src_prepare() {
     # Use a more sane lease directory
     edo sed -e 's:^#dhcp-leasefile=.*:dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases:' \
             dnsmasq.conf.example > dnsmasq.conf
+    # Adapt some config.h defines
+    edo sed -i -e '/^#define RUNFILE/s:/var/run:/run:' \
+               -e '/^#      define LEASEFILE/s:/var/lib/misc:/var/lib/dnsmasq:' \
+            src/config.h
 }
 
 src_compile() {
+    local COPTS=
+    option dbus && COPTS="-DHAVE_DBUS"
+    option conntrack && COPTS="${COPTS} -DHAVE_CT"
     emake \
         CC="${CC}" \
         CFLAGS="${CFLAGS}" \
-        COPTS=$(option dbus && echo "-DHAVE_DBUS") \
+        COPTS="${COPTS}" \
         all$(option i18n && echo "-i18n")
 }
 
@@ -65,11 +75,9 @@ src_install() {
         newconfd "${FILES}"/dnsmasq.conf dnsmasq
     fi
 
-    install_systemd_files
-    if option systemd ; then
-        insinto "/etc/conf.d"
-        doins "${FILES}/dnsmasq.conf"
-    fi
+    # Only install dnsmasq.service, not README
+    insinto "/${LIBDIR}/systemd/system"
+    doins "${WORK}/contrib/systemd/${PN}.service"
 
     if option dbus ; then
         insinto /etc/dbus-1/system.d
