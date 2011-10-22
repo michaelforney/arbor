@@ -1,0 +1,23 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: https://bugzilla.gnome.org/show_bug.cgi?id=662491
+Reason: Be less strict about the message from a failed assertion
+--- glib-2.31.0/tests/run-assert-msg-test.sh
++++ glib-2.31.0/tests/run-assert-msg-test.sh
+@@ -21,7 +21,7 @@
+ 
+ echo_v "Running assert-msg-test"
+ OUT=$(./assert-msg-test 2>&1) && fail "assert-msg-test should abort"
+-echo "$OUT" | grep -q '^ERROR:.*assert-msg-test.c:.*:main: assertion failed: (42 < 0)' || \
++echo "$OUT" | grep -q '^ERROR:.*assert-msg-test.c:.*:.*main.*: assertion failed: (42 < 0)' || \
+   fail "does not print assertion message"
+ 
+ if ! type gdb >/dev/null 2>&1; then
+@@ -38,7 +38,7 @@
+   fail "failed to run gdb"
+ 
+ echo_v "Checking if assert message is in __glib_assert_msg"
+-if ! echo "$OUT" | grep -q '^$1.*"ERROR:.*assert-msg-test.c:.*:main: assertion failed: (42 < 0)"'; then
++if ! echo "$OUT" | grep -q '^$1.*"ERROR:.*assert-msg-test.c:.*:.*main.*: assertion failed: (42 < 0)"'; then
+   fail "__glib_assert_msg does not have assertion message"
+ fi
+ 
