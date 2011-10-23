@@ -112,7 +112,7 @@ llvm_pkg_setup() {
 }
 
 llvm_src_prepare() {
-    expatch "${FILES}"/0001-Respect-variables-set-by-configure.patch
+    expatch "${FILES}"/${PNV}-respect-libdir-etc.patch
     if option clang; then
         ever is_scm || exparam -b snapshot || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
         edo pushd tools/clang
