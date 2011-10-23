@@ -3,15 +3,15 @@
 # Based in part upon 'libevent-1.4.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
+MY_PNV="${PNV}-stable"
+require sourceforge [ project=levent pnv="${MY_PNV}" suffix=tar.gz ]
+
 export_exlib_phases src_test
 
-MY_PNV="${PNV}-stable"
-
 SUMMARY="A library to execute a function when a specific event occurs on a file descriptor"
-HOMEPAGE="http://monkey.org/~provos/${PN}/"
-DOWNLOADS="http://monkey.org/~provos/${MY_PNV}.tar.gz"
+HOMEPAGE="http://${PN}.org"
 
-REMOTE_IDS="freshmeat:${PN}"
+REMOTE_IDS+=" freshmeat:${PN}"
 
 LICENCES="BSD-3"
 SLOT="0"

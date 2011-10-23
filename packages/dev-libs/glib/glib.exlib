@@ -26,6 +26,8 @@ AT_M4DIR=( "${WORKBASE}" )
 
 export_exlib_phases src_prepare src_install src_test
 
+DEFAULT_SRC_PREPARE_PATCHES=(  "${FILES}"/glib-clang-test.patch )
+
 glib_src_prepare() {
     edo cp "${WORKBASE}"/pkg-config-*/pkg.m4 "${WORKBASE}"/
     default

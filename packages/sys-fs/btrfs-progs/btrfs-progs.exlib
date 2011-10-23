@@ -19,7 +19,14 @@ DEPENDENCIES="
     build+run:
         sys-fs/e2fsprogs"
 
-DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS="${CFLAGS}" )
+DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS="${CFLAGS}" \
+    all \
+    btrfs-debug-tree \
+    btrfs-zero-log \
+    btrfstune \
+    btrfs-image \
+    convert
+)
 
 src_prepare() {
     default
@@ -29,7 +36,9 @@ src_prepare() {
 
 src_install() {
     default
-    dosym /sbin/btrfsck /sbin/fsck.btrfs
-    dosym /usr/share/man/man8/btrfsck.8.gz /usr/share/man/man8/fsck.btrfs.8.gz
+    dosbin btrfstune
+    dosbin btrfs-debug-tree
+    dosbin btrfs-zero-log
+    dosbin btrfs-image
 }
 
