@@ -1,0 +1,44 @@
+# Copyright 2008, 2009, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'valgrind-3.3.0.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+
+SUMMARY="An open-source memory debugger for GNU/Linux"
+HOMEPAGE="http://www.valgrind.org"
+DOWNLOADS="http://www.valgrind.org/downloads/${PNV}.tar.bz2"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/docs/manual/dist.news.html"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS="platform: amd64"
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/glibc[>=2.2&<2.14]
+"
+
+src_prepare() {
+    edo sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
+    edo sed -e "s:doc/${PN}:doc/${PNV}:" -i docs/Makefile.am
+
+    autotools_src_prepare
+}
+
+src_configure() {
+    local myconf=()
+
+    filter-flags -fomit-frame-pointer
+    # -ggdb3 causes segfaults at startup
+    replace-flags -ggdb3 -ggdb2
+
+    # FIXME multilib: option platform:amd64 && ! has_multilib_profile
+    if option platform:amd64 ; then
+        myconf=( --enable-only64bit )
+    fi
+
+    econf "${myconf[@]}"
+}
+
