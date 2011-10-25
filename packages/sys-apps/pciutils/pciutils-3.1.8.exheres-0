@@ -20,22 +20,24 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_COMPILE_PARAMS=(
-    ZLIB="no" DNS="no" OPT="${CFLAGS} -fPIC" STRIP=""
-    CC="${CC}" AR="${AR}" RANLIB="${RANLIB}"
+    AR="${AR}"
+    CC="${CC}"
+    DNS="no"
+    OPT="${CFLAGS} -fPIC"
+    RANLIB="${RANLIB}"
+    ZLIB="no"
 )
 
-DEFAULT_SRC_INSTALL_PARAMS=( install-lib )
-DEFAULT_SRC_INSTALL_EXCLUDE=( "README.Windows" )
+DEFAULT_SRC_INSTALL_PARAMS=(
+    IDSDIR=/usr/share/misc
+    LIBDIR=/usr/${LIBDIR}
+    MANDIR=/usr/share/man
+    PREFIX=/usr
+    STRIP=""
+    install-lib
+)
 
-src_prepare() {
-    default
-    edo sed -e '/^PREFIX=/cPREFIX=/usr' \
-            -e "/^LIBDIR=/cLIBDIR=/usr/${LIBDIR}" \
-            -e '/^IDSDIR=/cIDSDIR=/usr/share/misc' \
-            -e '/^MANDIR:=/cMANDIR:=/usr/share/man' \
-            -e '/^STRIP=-s/cSTRIP=' \
-            -i Makefile
-}
+DEFAULT_SRC_INSTALL_EXCLUDE=( "README.Windows" )
 
 src_install() {
     default
