@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-TZCODE_PV="${PV/l/i}"
+TZCODE_PV="${PV/m/i}"
 TZDATA_PV="${PV}"
 
 SUMMARY="Timezone data"
@@ -33,6 +33,15 @@ DEFAULT_SRC_INSTALL_PARAMS=(
     TOPDIR="${IMAGE}"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
+
+src_prepare() {
+    default
+
+    # Bug in 2011m. Fixed for the next version.
+    if [[ ${PV} == 2011m ]]; then
+        edo sed -i -e "/Europe\/Chisinau/s:$:\tmost locations:" zone.tab
+    fi
+}
 
 src_test() {
     # Don't validate webpages as that requires dependencies on open{jade,sp}
