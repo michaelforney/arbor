@@ -4,7 +4,7 @@
 # Modifications by Wulf C. Krueger, 2008.
 
 # Default locations if not specified in /etc/conf.d/ddclient
-PIDFILE=${PIDFILE:-/var/run/ddclient/ddclient.pid}
+PIDFILE=${PIDFILE:-/run/ddclient/ddclient.pid}
 CONFIGFILE=${CONFIGFILE:-/etc/ddclient/ddclient.conf}
 
 depend() {
@@ -30,6 +30,9 @@ checkconfig() {
 
 start() {
 	checkconfig || return 1
+	mkdir -p /run/ddclient
+	chmod 0755 /run/ddclient
+	chown ddclient:ddclient /run/ddclient
 	ebegin "Starting ${SVCNAME}"
 	start-stop-daemon \
 		--start \

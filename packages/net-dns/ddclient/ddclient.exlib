@@ -39,7 +39,7 @@ ddclient_src_install() {
         newinitd "${FILES}"/${PN}.initd ${PN}
         hereconfd ${PN} <<EOF
 # PID file
-PIDFILE=/var/run/ddclient/ddclient.pid
+PIDFILE=/run/ddclient/ddclient.pid
 
 # Config file
 CONFIGFILE=/etc/ddclient/ddclient.conf
@@ -49,13 +49,13 @@ EOF
     if option systemd; then
         insinto /etc/tmpfiles.d
         hereins ${PN}.conf <<EOF
-d /var/run/ddclient 0755 ddclient ddclient
+d /run/ddclient 0755 ddclient ddclient
 EOF
     fi
     install_systemd_files
 
-    keepdir /var/{cache,run}/${PN}
-    edo chown ${PN}:${PN} "${IMAGE}"/var/{cache,run}/${PN}
+    keepdir /var/cache/${PN}
+    edo chown ${PN}:${PN} "${IMAGE}"/var/cache/${PN}
 
     insinto /etc/${PN}
     insopts -m 0640 -o root -g ${PN}
