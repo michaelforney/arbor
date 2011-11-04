@@ -1,0 +1,26 @@
+From 063120dc118d867abd2ecae9a45a00f8a1920c6c Mon Sep 17 00:00:00 2001
+From: Alexandre Rostovtsev <tetromino@gmail.com>
+Date: Wed, 19 Oct 2011 14:31:17 +0000
+Subject: Add missing comma to gnome-proxy AC_ARG_WITH
+
+This was causing "--without-gnome-proxy" to be treated as
+"--with-gnome-proxy=check".
+
+https://bugzilla.gnome.org/show_bug.cgi?id=662203
+Upstream: yes, in master
+---
+diff --git a/configure.ac b/configure.ac
+index b7833d4..38d3114 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -66,7 +66,7 @@ dnl *** Checks for GNOME proxy backend ***
+ dnl **************************************
+ AC_ARG_WITH(gnome-proxy,
+     [AC_HELP_STRING([--with-gnome-proxy],
+-                    [support for GNOME proxy configuration @<:@default=check@:>@])]
++                    [support for GNOME proxy configuration @<:@default=check@:>@])],
+     [],
+     [with_gnome_proxy=check])
+ AS_IF([test "x$with_gnome_proxy" != "xno"],
+--
+cgit v0.9.0.2
