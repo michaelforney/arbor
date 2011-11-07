@@ -56,6 +56,10 @@ pkg_pretend() {
         replacing=${replacing%-r+([[:digit:]])} # strip revision
         ever at_least ${replacing} ${PV} || die "Downgrading glibc would almost certainly break your system. Aborting."
     fi
+
+    if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
+        die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
+    fi
 }
 
 pkg_setup() {
