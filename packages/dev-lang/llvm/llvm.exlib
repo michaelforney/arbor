@@ -114,13 +114,17 @@ llvm_pkg_setup() {
 llvm_src_prepare() {
     expatch "${FILES}"/${PNV}-respect-libdir-etc.patch
     if option clang; then
-        ever is_scm || exparam -b snapshot || edo mv "${WORKBASE}/clang-${PV}" "${WORK}/tools/clang"
+        if ! ever is_scm && ! exparam -b snapshot; then
+            # A symlink will lead to problems with paths like ../../Makefile.common
+            ever at_least 3.0_rc3 && edo rm -f "${WORK}"/tools/clang
+            edo mv "${WORKBASE}/${CLANG_PV:-clang-${PV}}" "${WORK}/tools/clang"
+        fi
         edo pushd tools/clang
         edo sed \
             -e "/Exherbo/{N;N;N;s/4\.4\.3/$(get_gcc_version)/g}" \
             -i lib/Frontend/InitHeaderSearch.cpp
         expatch "${FILES}"/0001-Replace-PROJ_prefix-lib-with-PROJ_libdir.patch
-        if ever is_scm; then
+        if ever at_least 3.0_rc3; then
             # On top of requiring multilib, this test makes illegitimate assumptions on the version
             # of gcc and the CHOST, see also http://llvm.org/bugs/show_bug.cgi?id=11094
             edo rm -f test/Driver/linux-ld.c
