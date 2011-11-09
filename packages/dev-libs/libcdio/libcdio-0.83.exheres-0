@@ -1,15 +1,18 @@
 # Copyright 2008 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require gnu [ suffix=gz ]
 
-SUMMARY="libcdio is a library for CD access."
-DESCRIPTION="The GNU Compact Disc Input and Control library contains a library for CD-ROM and CD image access."
+SUMMARY="libcdio is a library for CD access"
+DESCRIPTION="
+The GNU Compact Disc Input and Control library contains a library for CD-ROM and CD
+image access.
+"
 
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="cddb vcdinfo
+MYOPTIONS="cddb
   vcdinfo [[ description = [ Support looking up VideoCD information with the cd-info tool ] ]]
 "
 
@@ -21,11 +24,5 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS+=( '--disable-example-progs' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=(
-    cddb 'vcdinfo vcd-info'
-)
-
-DEFAULT_SRC_PREPARE_PATCHES+=(
-    -p0 "${FILES}/${PNV}-automagic-cddb.patch"
-)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=( cddb 'vcdinfo vcd-info' )
 
