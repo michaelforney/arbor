@@ -47,6 +47,8 @@ DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
 
 src_prepare() {
+    expatch "${FILES}"/fix-compilation-with-newer-gnutls.patch
+
     # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
     edo sed -e '/s_addr =/s:INADDR_ANY:htonl(INADDR_LOOPBACK):' -i tests/server/*.c
 
