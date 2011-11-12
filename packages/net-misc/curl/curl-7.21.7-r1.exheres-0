@@ -42,7 +42,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares '!ares threaded-resolver' ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'idn libidn'
     '!gnutls ssl' '!gnutls ca-path /etc/ssl/certs'
-    gnutls
+    gnutls 'gnutls ca-bundle /etc/ssl/certs/ca-certificates.crt'
 )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
