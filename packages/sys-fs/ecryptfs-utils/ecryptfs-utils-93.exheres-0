@@ -1,0 +1,83 @@
+# Copyright 2011 Ali Polatel <alip@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require launchpad [ project=ecryptfs branch=trunk pnv=${PN}_${PV}.orig ]
+require pam
+
+SUMMARY="eCryptfs userspace tools"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    doc
+    gcrypt  [[ description = [ Build against gcrypt rather than NSS ] ]]
+    gpg     [[ description = [ Build GnuPG key module ] ]]
+    openssl [[ description = [ Build OpenSSL key module ] ]]
+    pkcs11  [[ description = [ Build pkcs11-helper key module ]
+               requires    = [ openssl ]
+            ]]
+"
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl [[ description = [ pod2man is required ] ]]
+        dev-util/intltool
+        sys-devel/gettext
+    build+run:
+        sys-apps/keyutils
+        sys-libs/pam
+        !gcrypt? ( dev-libs/nss )
+        gcrypt?  ( dev-libs/libgcrypt )
+        gpg?     ( app-crypt/gpgme )
+        openssl? ( dev-libs/openssl )
+        pkcs11?  ( dev-libs/pkcs11-helper )
+"
+
+BUGS_TO="alip@exherbo.org"
+
+# launchpad.exlib sets WORK taking exparam pnv into account, however WORK is
+# default "${WORKBASE}/${PNV}" unlike the awkward named tarball...
+# Below is two assignments because otherwise exheres-syntax hates me!
+WORK="${WORKBASE}"
+WORK="${WORK}/${PNV}"
+
+src_configure() {
+    local crypt_flags
+
+    if option gcrypt; then
+        crypt_flags=( --enable-gcrypt --disable-nss )
+    else
+        crypt_flags=( --disable-gcrypt --enable-nss )
+    fi
+
+    # -alip: Tests are disabled because they mount and thus require root.
+    #        Other options are only disabled because I have not tested them.
+    #        Feel free to enable them after testing and adjust DEPENDENCIES as
+    #        needed. Also see the comments in src_install.
+    econf --disable-tests \
+          --disable-gui \
+          --disable-mudflap \
+          --disable-pywrap \
+          --disable-tspi \
+          --enable-pam --with-pamdir=$(getpam_mod_dir) \
+          ${crypt_flags[@]} \
+          $(option_enable doc docs) \
+          $(option_enable gpg) \
+          $(option_enable openssl) \
+          $(option_enable pkcs11 pkcs11-helper)
+}
+
+src_install() {
+    default
+
+    # Empty directory install in case python is disabled.
+    find "${IMAGE}"/usr/${LIBDIR}/python* -type d -empty -delete
+}
+
+pkg_postinst() {
+    elog "To use pam_ecryptfs.so to automount partitions on user login, do:"
+    elog "chmod u+s /sbin/mount.ecryptfs_private"
+    elog "This exheres does not do it on behalf of you for good reason!"
+}
+
