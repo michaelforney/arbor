@@ -1,4 +1,4 @@
-# Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases src_install
@@ -12,8 +12,11 @@ Furthermore, you could even boot a different OS if you used grub.exe from grub4d
 The latter is especially interesting if you need Linux features before booting
 into Windows.
 "
-HOMEPAGE="http://kernel.org/pub/linux/utils/kernel/kexec/README.html"
-DOWNLOADS="mirror://kernel/linux/utils/kernel/kexec/${PNV}.tar.bz2"
+HOMEPAGE="http://horms.net/projects/kexec"
+DOWNLOADS="
+    mirror://kernel/linux/utils/kernel/${PN/-tools}/${PNV}.tar.bz2
+    ${HOMEPAGE}/${PN}/${PNV}.tar.bz2
+"
 
 BUGS_TO="philantrop@exherbo.org"
 
@@ -24,9 +27,9 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
+    --with-zlib
     --without-gamecube
     --without-xen
-    --with-zlib
 )
 
 kexec-tools_src_install() {
