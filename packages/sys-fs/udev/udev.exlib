@@ -156,19 +156,24 @@ udev_pkg_postinst() {
     # restart of the udev process
     [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]] || return
 
-    pkill -TERM udevd &> /dev/null
-    sleep 1
-    pkill -KILL udevd &> /dev/null
+    # No need to ewarn or something because udevd might not be running.
+    nonfatal edo pkill -TERM udevd
+    nonfatal edo sleep 1
+    nonfatal edo pkill -KILL udevd
 
     # Change the wait mode to wait/eldest so
     # sydbox doesn't wait for udevd to exit.
     esandbox wait_eldest
 
-    # Allow network access for udevd
-    esandbox allow_net unix-abstract:/org/kernel/udev/udevd
-    esandbox allow_net --connect unix:/dev/log
+    if ever at_least 174; then
+        # Allow access to /run/udev/control for udevd
+        esandbox allow_net unix:/run/udev/control
+    else
+        # Allow network access for udevd
+        esandbox allow_net unix-abstract:/org/kernel/udev/udevd
+        esandbox allow_net --connect unix:/dev/log
+    fi
 
-    /sbin/udevd --daemon
-    /sbin/udevadm info --convert-db
+    nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
 }
 
