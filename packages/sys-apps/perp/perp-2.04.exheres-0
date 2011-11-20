@@ -1,0 +1,67 @@
+# Copyright 2011 Ali Polatel <alip@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Persistent process supervision"
+DESCRIPTION="
+The perp package provides a set of daemons and utilities to reliably start,
+monitor, log, and control a collection of persistent processes.
+
+A 'persistent process' is any program intended to be long-running, highly
+available, and purpose critical. Also known and often described as a 'service',
+a persistent process normally provides some essential, on-demand system
+service. Programs that serve email, domain name queries, and http requests are
+all examples of services that are normally run as persistent processes.
+
+These are the programs that you want to start at system boot, and to continue
+running for as long as the system itself. These are the programs you need
+running in uninterrupted service, day and night, forever and ever.
+
+perp helps make sure that they do.
+"
+HOMEPAGE="http://b0llix.net/${PN}/"
+DOWNLOADS="${HOMEPAGE}/distfiles/${PNV}.tar.gz"
+
+LICENCES="perp"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+dietlibc [[ description = [ build using dietlibc instead of glibc ] ]]
+examples
+"
+
+DEPENDENCIES="
+    build+run:
+        dietlibc? ( dev-libs/dietlibc )
+"
+
+BUGS_TO="alip@exherbo.org"
+
+src_prepare() {
+    default
+
+    # Install under / instead of /usr
+    edo sed -e '/^BINDIR/s,/usr,,' \
+            -e '/^SBINDIR/s,/usr,,' \
+            -i conf.mk
+
+    if option dietlibc; then
+        edo sed -e '/^CC = gcc/d' \
+                -e '/^#CC = diet/s/^#CC/CC/' \
+                -e 's/^#CFLAGS/CFLAGS/' \
+                -i conf.mk
+    fi
+}
+
+src_compile() {
+    emake BINDIR=/bin SBINDIR=/sbin
+}
+
+src_install() {
+    default
+
+    if option examples; then
+        insinto /usr/share/doc/${PNVR}
+        doins -r examples
+    fi
+}
+

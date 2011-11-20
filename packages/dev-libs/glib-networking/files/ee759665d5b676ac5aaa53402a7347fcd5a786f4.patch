@@ -1,0 +1,26 @@
+From ee759665d5b676ac5aaa53402a7347fcd5a786f4 Mon Sep 17 00:00:00 2001
+From: Kalev Lember <kalevlember@gmail.com>
+Date: Tue, 18 Oct 2011 11:33:45 +0000
+Subject: proxy/gnome: Only build the test if we are building gnome proxy support
+
+Fixes the build with mingw32.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=662085
+Upstream: yes, in master
+---
+diff --git a/proxy/tests/Makefile.am b/proxy/tests/Makefile.am
+index 78c3d17..ec4732c 100644
+--- a/proxy/tests/Makefile.am
++++ b/proxy/tests/Makefile.am
+@@ -11,6 +11,6 @@ noinst_PROGRAMS = $(TEST_PROGS)
+ LDADD  = \
+ 	$(GLIB_LIBS)
+ 
+-TEST_PROGS +=		\
+-	gnome		\
+-	$(NULL)
++if HAVE_GNOME_PROXY
++TEST_PROGS += gnome
++endif
+--
+cgit v0.9.0.2

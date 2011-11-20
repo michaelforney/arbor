@@ -1,0 +1,63 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2009 Daniel Mierswa
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="BusyBox provides tiny replacements for many common UNIX utilities"
+HOMEPAGE="http://busybox.net"
+DOWNLOADS="${HOMEPAGE}/downloads/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-kernel/linux-headers[<3.0|>=3.0-r1]
+"
+
+#FIXME
+RESTRICT="test"
+
+bb_make() {
+    local make_options=(
+        AR="${AR}"
+        NM="${NM}"
+
+        CPP="${CC} -E"
+        CC="${CC}" CFLAGS="${CFLAGS}" HOSTCC="${CC}" HOSTCFLAGS="${CFLAGS}"
+        CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" HOSTCXX="${CXX}" HOSTCXXFLAGS="${CXXFLAGS}"
+        LD="${CC} -nostdlib" LDFLAGS="${LDFLAGS}" HOSTLD="${CC}" HOSTLDFLAGS="${LDFLAGS}"
+
+        V=1
+    )
+    emake "$@" "${make_options[@]}"
+}
+
+src_compile() {
+    bb_make defconfig
+
+    # Build dynamically linked executable and preserve it
+    bb_make busybox_unstripped
+    edo mv busybox_unstripped{,.dynamic}
+
+    # Build statically linked executable and preserve it
+    bb_make busybox_unstripped CONFIG_STATIC=y
+    edo mv busybox_unstripped{,.static}
+}
+
+src_test() {
+    bb_make check
+}
+
+src_install() {
+    into /
+    newbin busybox_unstripped.dynamic busybox
+    newbin busybox_unstripped.static busybox-static
+
+    emagicdocs
+    dodoc -r examples
+}
+

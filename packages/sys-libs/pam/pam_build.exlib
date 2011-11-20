@@ -7,12 +7,18 @@ require flag-o-matic pam easy-multibuild
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
-MY_PN="Linux-PAM"
-MY_PNV="${MY_PN}-${PV}"
+MY_PN=Linux-PAM
+MY_PNV=${MY_PN}-${PV}
 
-HOMEPAGE="http://www.kernel.org/pub/linux/libs/${PN}/"
+HOMEPAGE="
+    https://fedorahosted.org/linux-pam/
+    http://www.kernel.org/pub/linux/libs/${PN}/
+"
 SUMMARY="Linux-PAM provides Pluggable Authentication Modules"
-DOWNLOADS="mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2"
+DOWNLOADS="
+    mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2
+    https://fedorahosted.org/releases/l/i/linux-pam/${MY_PNV}.tar.bz2
+"
 
 BUGS_TO="philantrop@exherbo.org"
 
@@ -29,7 +35,7 @@ DEPENDENCIES="
         net-libs/libtirpc[multibuild_c:*(?)?] [[ note = [ replace automagic dep with hard ] ]]
 "
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 AT_M4DIR=( m4 )
 
 pam_build_pkg_pretend() {

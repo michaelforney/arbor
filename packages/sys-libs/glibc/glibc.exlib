@@ -52,6 +52,9 @@ glibc_pkg_pretend() {
             ewarn "-march setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to native"
         fi
     done
+    if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
+        die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
+    fi
 }
 
 glibc_pkg_setup() {

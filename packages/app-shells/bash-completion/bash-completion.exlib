@@ -35,5 +35,7 @@ bash-completion_src_install() {
     default
 
     edo chmod a+r "${IMAGE}"/usr/share/bash-completion/bash_completion
+
+    ever at_least scm && edo rmdir "${IMAGE}"/etc/bash_completion.d
 }
 

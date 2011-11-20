@@ -79,6 +79,8 @@ if ever is_scm ; then
     DEPENDENCIES+="
         build:
             dev-lang/vala:0.12
+        build+run:
+            gtk? ( base/libgee:1.0 )
     "
 fi
 
@@ -170,7 +172,11 @@ systemd_src_install() {
 
     # Handle bash-completion
     if option bash-completion ; then
-        dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemctl-bash-completion.sh
+        if ever is_scm ; then
+            dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemd-bash-completion.sh
+        else
+            dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemctl-bash-completion.sh
+        fi
     fi
     edo rm -r "${IMAGE}"/etc/bash_completion.d
 

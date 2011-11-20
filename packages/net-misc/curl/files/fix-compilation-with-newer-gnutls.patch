@@ -1,0 +1,35 @@
+From 8036da870c5b413a83097b3486c58d13910a471a Mon Sep 17 00:00:00 2001
+From: Tim Harder <radhermit@gmail.com>
+Date: Wed, 19 Oct 2011 10:08:56 +0200
+Subject: [PATCH] gtls: only call gnutls_transport_set_lowat with
+ <gnutls-2.12.0
+Upstream: Yes
+
+The default lowat level for gnutls-2.12* is set to zero to avoid
+unnecessary system calls and the gnutls_transport_set_lowat function has
+been totally removed in >=gnutls-3 which causes build failures.
+
+Therefore, the function shouldn't be used except for versions that
+require it, <gnutls-2.12.0.
+---
+ lib/gtls.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/lib/gtls.c b/lib/gtls.c
+index f75a815..7ca46c8 100644
+--- a/lib/gtls.c
++++ b/lib/gtls.c
+@@ -476,8 +476,10 @@ gtls_connect_step1(struct connectdata *conn,
+   gnutls_transport_set_push_function(session, Curl_gtls_push);
+   gnutls_transport_set_pull_function(session, Curl_gtls_pull);
+ 
++#if GNUTLS_VERSION_NUMBER < 0x020c00
+   /* lowat must be set to zero when using custom push and pull functions. */
+   gnutls_transport_set_lowat(session, 0);
++#endif
+ 
+   /* This might be a reconnect, so we check for a session ID in the cache
+      to speed up things */
+-- 
+1.7.7
+

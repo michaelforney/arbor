@@ -6,6 +6,8 @@
 
 export_exlib_phases src_prepare src_install
 
+require systemd-service
+
 SUMMARY="Hardware Monitoring user-space utilities"
 DESCRIPTION="
 ${PN} provides hardware health monitoring support for Linux, in the form of kernel
@@ -27,7 +29,6 @@ SLOT="0"
 MYOPTIONS="
     baselayout
     sensord [[ description = [ Enable sensord, a daemon that can be used to periodically log sensor readings from hardware health-monitoring chips ] ]]
-    systemd
 "
 
 DEPENDENCIES="
@@ -87,7 +88,11 @@ lm_sensors_src_install() {
         dodir /${LIBDIR}/systemd/system
         insinto /${LIBDIR}/systemd/system
         doins prog/init/lm_sensors.service
+        insinto /etc/conf.d
+        doins "${FILES}"/lm_sensors.conf
     fi
+
+    install_systemd_files
 
     docinto chips
     dodoc doc/chips/*

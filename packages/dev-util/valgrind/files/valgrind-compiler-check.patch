@@ -1,0 +1,71 @@
+Author: Wouter van Kesteren <woutershep@gmail.com>
+Upstream: https://bugs.kde.org/show_bug.cgi?id=286384
+Reason: compiler detection is broken (x86_64-pc-linux-gnu-gcc -> version 86)
+
+diff -Naur valgrind-3.7.0.orig/configure.in valgrind-3.7.0/configure.in
+--- valgrind-3.7.0.orig/configure.in	2011-11-09 19:03:43.000000000 +0100
++++ valgrind-3.7.0/configure.in	2011-11-09 21:06:47.000000000 +0100
+@@ -95,40 +95,44 @@
+ rm $tmpfile
+ 
+ 
+-# We don't want gcc < 3.0
+-AC_MSG_CHECKING([for a supported version of gcc])
++AC_MSG_CHECKING([for a supported compiler])
+ 
+-# Try to get the gcc version, sed-ing out some unexpected stuff
+-# that appears with the default gcc on OSX 10.6 and 10.7 respectively.
+-# Without this, the version number comes out as 686, 10 or 11 :-(
+-# 
+-# i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5666) (dot 3)
+-# i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2335.15.00)
++# Try to get the compiler version
++# GCC's first word in the output seems to be argv[0]
++# Clang does not use the executable name in the output
+ #
+-[gcc_version=`${CC} --version \
+-             | head -n 1 \
+-             | $SED 's/i686-apple-darwin10//' \
+-             | $SED 's/i686-apple-darwin11//' \
+-             | $SED 's/^[^0-9]*\([0-9.]*\).*$/\1/'`]
++# Some examples:
++#
++# Arch: i686-pc-linux-gnu-gcc (GCC) 4.6.2
++# Debian: gcc (Debian 4.3.2-1.1) 4.3.2
++# Exherbo: x86_64-pc-linux-gnu-gcc (Exherbo gcc-4.6.2) 4.6.2
++# OSX 10.6: i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5666) (dot 3)
++# OSX 10.7: i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 (Based on Apple Inc. build 5658) (LLVM build 2335.15.00)
++# Clang: clang version 2.9 (tags/RELEASE_29/final)
++#
++# So if we just skip over the first word (argv[0] / 'clang') the next number should be the version.
++
++[cc_version=`${CC} --version | head -n 1 \
++             | $SED 's/^[^ ]* [^0-9]*\([0-9.]*\).*$/\1/'`]
+ 
+ is_clang="notclang"
+ if test "x`${CC} --version | head -n 1 | $SED 's/\(clang\) version.*/\1/'`" = "xclang" ; then
+    is_clang="clang"
+ fi
+ 
+-case "${is_clang}-${gcc_version}" in
++case "${is_clang}-${cc_version}" in
+      notclang-3.*)
+-	AC_MSG_RESULT([ok (${gcc_version})])
++	AC_MSG_RESULT([ok (${cc_version})])
+ 	;;
+      notclang-4.*)
+-	AC_MSG_RESULT([ok (${gcc_version})])
++	AC_MSG_RESULT([ok (${cc_version})])
+ 	;;
+      clang-2.9)
+-	AC_MSG_RESULT([ok (clang-${gcc_version})])
++	AC_MSG_RESULT([ok (clang-${cc_version})])
+ 	;;
+      *)
+-	AC_MSG_RESULT([no (${gcc_version})])
+-	AC_MSG_ERROR([please use gcc >= 3.0 or clang >= 2.9])
++	AC_MSG_RESULT([no (${cc_version})])
++	AC_MSG_ERROR([please use gcc-3.x, gcc-4.x or clang-2.9])
+ 	;;
+ esac
+ 

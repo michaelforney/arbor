@@ -222,7 +222,8 @@ src_configure() {
                 # http://www.agere.com/support/drivers/
                 # See wpa_supplicant/README
 
-    option nl80211 && config_enable_driver NL80211
+    option nl80211 && config_enable_driver NL80211 && \
+        has_version --root "net-libs/libnl:1[>=2]" && config_enable LIBNL20
 
     # EAP_PEAP, EAP_TLS, and EAP_TTLS require TLS (which is always enabled)
     config_enable_eap \

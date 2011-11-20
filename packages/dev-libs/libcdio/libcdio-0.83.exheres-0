@@ -1,0 +1,28 @@
+# Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=gz ]
+
+SUMMARY="libcdio is a library for CD access"
+DESCRIPTION="
+The GNU Compact Disc Input and Control library contains a library for CD-ROM and CD
+image access.
+"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="cddb
+  vcdinfo [[ description = [ Support looking up VideoCD information with the cd-info tool ] ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        dev-util/pkg-config[>=0.9]
+        cddb? ( media-libs/libcddb[>=1.0.1] )
+        vcdinfo? ( media-libs/vcdimager[>=0.7.21] )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS+=( '--disable-example-progs' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=( cddb 'vcdinfo vcd-info' )
+

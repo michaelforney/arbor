@@ -222,6 +222,10 @@ checkconfig() {
 start() {
     wdebug 4 ">>> start()"
 
+    mkdir /run/mysqld
+    chown mysql:mysql /run/mysqld
+    chmod 755 /run/mysqld
+
     MYSQL_GLOB_PID_FILE=${MYSQL_GLOB_PID_FILE:-"/run/svc-started-${SVCNAME/mysql/mysqld}"}
     # servers are defined in /etc/conf.d/mysql
     local serverlist=${!mysql_slot_*}
