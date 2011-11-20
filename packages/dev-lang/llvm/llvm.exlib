@@ -129,6 +129,10 @@ llvm_src_prepare() {
             # of gcc and the CHOST, see also http://llvm.org/bugs/show_bug.cgi?id=11094
             edo rm -f test/Driver/linux-ld.c
         fi
+        if ever is_scm; then
+            # This should only run for ubuntu
+            edo rm -f test/Driver/linux-header-search.cpp
+        fi
         edo popd
     fi
     default
