@@ -35,7 +35,9 @@ DEPENDENCIES="
         group/${PN}
         user/${PN}
         dev-libs/libaio
-        dev-libs/openssl
+        dev-libs/openssl[>=0.9.7]
+        sys-libs/readline[>=5.2]
+        sys-libs/zlib[>=1.2.3]
         tcpd? ( sys-apps/tcp-wrappers )
     suggestion:
         app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
@@ -67,7 +69,7 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
     -DWITH_EXTRA_CHARSETS:STRING=all
     -DWITH_INNOBASE_STORAGE_ENGINE:BOOL=TRUE
     -DWITH_LIBEDIT:BOOL=FALSE
-    -DWITH_READLINE:BOOL=TRUE
+    -DWITH_READLINE:BOOL=FALSE
     -DWITH_SSL:STRING=system
     -DWITH_VALGRIND:BOOL=FALSE
     -DWITH_ZLIB:STRING=system
