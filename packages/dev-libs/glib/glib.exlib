@@ -24,9 +24,9 @@ REMOTE_IDS="freshmeat:glib"
 
 AT_M4DIR=( "${WORKBASE}" )
 
-export_exlib_phases src_prepare src_install src_test
-
-DEFAULT_SRC_PREPARE_PATCHES=(  "${FILES}"/glib-clang-test.patch )
+if ! ever at_least 2.31.2 ; then
+    DEFAULT_SRC_PREPARE_PATCHES=(  "${FILES}"/glib-clang-test.patch )
+fi
 
 glib_src_prepare() {
     edo cp "${WORKBASE}"/pkg-config-*/pkg.m4 "${WORKBASE}"/
@@ -91,4 +91,6 @@ test_one_multibuild() {
 glib_src_test() {
     easy-multibuild_src_test
 }
+
+export_exlib_phases src_prepare src_install src_test
 
