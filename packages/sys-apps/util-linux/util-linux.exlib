@@ -3,12 +3,12 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Common linux utilities"
-HOMEPAGE="http://userweb.kernel.org/~kzak/${PN}/"
-DOWNLOADS="mirror://kernel/linux/utils/${PN}/v$(ever range 1-2)/${PNV}.tar.bz2"
+HOMEPAGE="http://git.kernel.org/?p=utils/${PN}/${PN}.git"
+DOWNLOADS="ftp://ftp.infradead.org/pub/${PN}/v$(ever range 1-2)/${PNV}.tar.bz2"
 
 REMOTE_IDS="freshmeat:${PN}"
 
-MY_UPSTREAM="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}"
+MY_UPSTREAM="ftp://ftp.infradead.org/pub/${PN}/v$(ever range 1-2)/v${PV}"
 UPSTREAM_CHANGELOG="${MY_UPSTREAM}-ChangeLog"
 UPSTREAM_RELEASE_NOTES="${MY_UPSTREAM}-ReleaseNotes"
 
@@ -45,3 +45,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
+src_install() {
+    default
+    edo rmdir "${IMAGE}"/usr/share/man/ru/man1
+    edo rmdir "${IMAGE}"/usr/share/man/ru
+}
