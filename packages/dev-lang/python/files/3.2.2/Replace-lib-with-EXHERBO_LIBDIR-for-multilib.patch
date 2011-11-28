@@ -1,0 +1,141 @@
+From 62683df8119200228f9ae1656cbb4bf5acfb7e13 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <sepek@exherbo.org>
+Date: Mon, 21 Nov 2011 00:00:59 +0100
+Subject: [PATCH] Replace lib with @@EXHERBO_LIBDIR@@ for multilib.
+
+Upstream: no
+---
+ Lib/distutils/command/install.py    |    4 ++--
+ Lib/distutils/sysconfig.py          |    2 +-
+ Lib/distutils/tests/test_install.py |    2 +-
+ Lib/site.py                         |    4 ++--
+ Lib/sysconfig.py                    |   16 ++++++++--------
+ Lib/test/test_site.py               |    4 ++--
+ Makefile.pre.in                     |    2 +-
+ 7 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/Lib/distutils/command/install.py b/Lib/distutils/command/install.py
+index 0161898..9cc7e16 100644
+--- a/Lib/distutils/command/install.py
++++ b/Lib/distutils/command/install.py
+@@ -44,8 +44,8 @@ else:
+ 
+ INSTALL_SCHEMES = {
+     'unix_prefix': {
+-        'purelib': '$base/lib/python$py_version_short/site-packages',
+-        'platlib': '$platbase/lib/python$py_version_short/site-packages',
++        'purelib': '$base/@@EXHERBO_LIBDIR@@/python$py_version_short/site-packages',
++        'platlib': '$platbase/@@EXHERBO_LIBDIR@@/python$py_version_short/site-packages',
+         'headers': '$base/include/python$py_version_short$abiflags/$dist_name',
+         'scripts': '$base/bin',
+         'data'   : '$base',
+diff --git a/Lib/distutils/sysconfig.py b/Lib/distutils/sysconfig.py
+index 5ea724c..0768d8f 100644
+--- a/Lib/distutils/sysconfig.py
++++ b/Lib/distutils/sysconfig.py
+@@ -123,7 +123,7 @@ def get_python_lib(plat_specific=0, standard_lib=0, prefix=None):
+ 
+     if os.name == "posix":
+         libpython = os.path.join(prefix,
+-                                 "lib", "python" + get_python_version())
++                                 "@@EXHERBO_LIBDIR@@", "python" + get_python_version())
+         if standard_lib:
+             return libpython
+         else:
+diff --git a/Lib/distutils/tests/test_install.py b/Lib/distutils/tests/test_install.py
+index 5c105af..4d17a91 100644
+--- a/Lib/distutils/tests/test_install.py
++++ b/Lib/distutils/tests/test_install.py
+@@ -43,7 +43,7 @@ class InstallTestCase(support.TempdirManager,
+         dist.script_name = os.path.join(builddir, "setup.py")
+         dist.command_obj["build"] = support.DummyCommand(
+             build_base=builddir,
+-            build_lib=os.path.join(builddir, "lib"),
++            build_lib=os.path.join(builddir, "@@EXHERBO_LIBDIR@@"),
+             )
+ 
+         cmd = install(dist)
+diff --git a/Lib/site.py b/Lib/site.py
+index a2c0bec..5167e47 100644
+--- a/Lib/site.py
++++ b/Lib/site.py
+@@ -285,10 +285,10 @@ def getsitepackages():
+         if sys.platform in ('os2emx', 'riscos'):
+             sitepackages.append(os.path.join(prefix, "Lib", "site-packages"))
+         elif os.sep == '/':
+-            sitepackages.append(os.path.join(prefix, "lib",
++            sitepackages.append(os.path.join(prefix, "@@EXHERBO_LIBDIR@@",
+                                         "python" + sys.version[:3],
+                                         "site-packages"))
+-            sitepackages.append(os.path.join(prefix, "lib", "site-python"))
++            sitepackages.append(os.path.join(prefix, "@@EXHERBO_LIBDIR@@", "site-python"))
+         else:
+             sitepackages.append(prefix)
+             sitepackages.append(os.path.join(prefix, "lib", "site-packages"))
+diff --git a/Lib/sysconfig.py b/Lib/sysconfig.py
+index 2279a51..16635dc 100644
+--- a/Lib/sysconfig.py
++++ b/Lib/sysconfig.py
+@@ -21,10 +21,10 @@ __all__ = [
+ 
+ _INSTALL_SCHEMES = {
+     'posix_prefix': {
+-        'stdlib': '{base}/lib/python{py_version_short}',
+-        'platstdlib': '{platbase}/lib/python{py_version_short}',
+-        'purelib': '{base}/lib/python{py_version_short}/site-packages',
+-        'platlib': '{platbase}/lib/python{py_version_short}/site-packages',
++        'stdlib': '{base}/@@EXHERBO_LIBDIR@@/python{py_version_short}',
++        'platstdlib': '{platbase}/@@EXHERBO_LIBDIR@@/python{py_version_short}',
++        'purelib': '{base}/@@EXHERBO_LIBDIR@@/python{py_version_short}/site-packages',
++        'platlib': '{platbase}/@@EXHERBO_LIBDIR@@/python{py_version_short}/site-packages',
+         'include':
+             '{base}/include/python{py_version_short}{abiflags}',
+         'platinclude':
+@@ -81,10 +81,10 @@ _INSTALL_SCHEMES = {
+         'data'   : '{userbase}',
+         },
+     'posix_user': {
+-        'stdlib': '{userbase}/lib/python{py_version_short}',
+-        'platstdlib': '{userbase}/lib/python{py_version_short}',
+-        'purelib': '{userbase}/lib/python{py_version_short}/site-packages',
+-        'platlib': '{userbase}/lib/python{py_version_short}/site-packages',
++        'stdlib': '{userbase}/@@EXHERBO_LIBDIR@@/python{py_version_short}',
++        'platstdlib': '{userbase}/@@EXHERBO_LIBDIR@@/python{py_version_short}',
++        'purelib': '{userbase}/@@EXHERBO_LIBDIR@@/python{py_version_short}/site-packages',
++        'platlib': '{userbase}/@@EXHERBO_LIBDIR@@/python{py_version_short}/site-packages',
+         'include': '{userbase}/include/python{py_version_short}',
+         'scripts': '{userbase}/bin',
+         'data'   : '{userbase}',
+diff --git a/Lib/test/test_site.py b/Lib/test/test_site.py
+index 8168d7e..4dfa312 100644
+--- a/Lib/test/test_site.py
++++ b/Lib/test/test_site.py
+@@ -223,10 +223,10 @@ class HelperFunctionsTests(unittest.TestCase):
+             self.assertEqual(dirs[0], wanted)
+         elif os.sep == '/':
+             self.assertEqual(len(dirs), 2)
+-            wanted = os.path.join('xoxo', 'lib', 'python' + sys.version[:3],
++            wanted = os.path.join('xoxo', '@@EXHERBO_LIBDIR@@', 'python' + sys.version[:3],
+                                   'site-packages')
+             self.assertEqual(dirs[0], wanted)
+-            wanted = os.path.join('xoxo', 'lib', 'site-python')
++            wanted = os.path.join('xoxo', '@@EXHERBO_LIBDIR@@', 'site-python')
+             self.assertEqual(dirs[1], wanted)
+         else:
+             self.assertEqual(len(dirs), 2)
+diff --git a/Makefile.pre.in b/Makefile.pre.in
+index 78b85f6..e12661c 100644
+--- a/Makefile.pre.in
++++ b/Makefile.pre.in
+@@ -106,7 +106,7 @@ LIBDIR=		@libdir@
+ MANDIR=		@mandir@
+ INCLUDEDIR=	@includedir@
+ CONFINCLUDEDIR=	$(exec_prefix)/include
+-SCRIPTDIR=	$(prefix)/lib
++SCRIPTDIR=	$(prefix)/@@EXHERBO_LIBDIR@@
+ ABIFLAGS=	@ABIFLAGS@
+ 
+ # Detailed destination directories
+-- 
+1.7.7.4
+

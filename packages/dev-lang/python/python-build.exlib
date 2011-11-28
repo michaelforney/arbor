@@ -128,8 +128,15 @@ python-build_src_install() {
     popd
 
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
-    ever at_least 3 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
-    edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
+    ! ever at_least 3.2 && edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
+
+    if ever major 3; then
+        ever range 1 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
+        if ever at_least 3.2; then
+            edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
+            edo rm "${IMAGE}"/usr/bin/{2to3-3,idle3,pydoc3,python3-config}
+        fi
+    fi
 
     # alternatives handling
     local alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
