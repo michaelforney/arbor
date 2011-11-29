@@ -106,7 +106,8 @@ python-build_src_test() {
     esandbox allow_net "unix:${TEMP%/}/pymp-*/listener-*"
 
     # rerun failed tests in verbose mode (regrtest -w)
-    EXTRATESTOPTS="-w" emake test
+    # disable tests (regrtest -x)
+    EXTRATESTOPTS="-w -x ${DISABLE_TESTS}" emake test
 
     esandbox disallow_net "unix:${TEMP%/}/pymp-*/listener-*"
 

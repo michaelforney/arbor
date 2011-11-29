@@ -13,6 +13,11 @@ src_prepare() {
 }
 
 src_test() {
+    local DISABLE_TESTS
+    # test_install_lib (test_distuils) has problems with path resolution
+    # the rest want to bind to 0.0.0.0/::
+    DISABLE_TESTS="test_distutils test_ftplib test_ssl"
+
     # needed for test_socket
     esandbox allow_net --connect "inet:127.0.0.1@80"
     esandbox allow_net --connect "inet6:::1@80"
