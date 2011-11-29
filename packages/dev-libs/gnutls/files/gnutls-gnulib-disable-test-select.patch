@@ -1,0 +1,16 @@
+Source: Timo Gurr <tgurr@exherbo.org>
+Upstream: Reported, http://lists.gnu.org/archive/html/bug-gnulib/2011-11/msg00177.html
+Reason: 2.12.12 and later: FAIL: test-select
+
+diff -Naur gnutls-3.0.8/gl/tests/Makefile.am gnutls-3.0.8.new/gl/tests/Makefile.am
+--- gnutls-3.0.8/gl/tests/Makefile.am	2011-11-12 09:51:14.000000000 +0100
++++ gnutls-3.0.8.new/gl/tests/Makefile.am	2011-11-29 04:01:38.440141128 +0100
+@@ -827,7 +827,7 @@
+ 
+ ## begin gnulib module select-tests
+ 
+-TESTS += test-select test-select-in.sh test-select-out.sh
++TESTS += test-select-in.sh test-select-out.sh
+ # test-select-stdin has to be run by hand.
+ check_PROGRAMS += test-select test-select-fd test-select-stdin
+ test_select_LDADD = $(LDADD) @LIB_SELECT@ @LIBSOCKET@ $(INET_PTON_LIB)

@@ -3,8 +3,8 @@
 # Distributed under the terms of the GNU General Purpose License v2
 
 if ever at_least 3.0.0; then
-    require gnu [ suffix=xz ]
     require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+    require gnu [ suffix=xz ]
 else
     require gnu
 fi
@@ -29,22 +29,24 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3]
 "
 
-if ever at_least 3.0.0; then
+if ever at_least 3.0.8; then
     DEPENDENCIES+="
-    build:
-        app-arch/xz
-    build+run:
-        dev-libs/nettle[>=2.2]
+        build:
+            app-arch/xz
+        build+run:
+            dev-libs/libtasn1[>=2.10]
+            dev-libs/nettle[>=2.4]
     "
-elif ever at_least 2.12.7; then
+elif ever at_least 2.12.14; then
     DEPENDENCIES+="
-    build+run:
-        dev-libs/nettle[>=2.1]
+        build+run:
+            dev-libs/libtasn1[>=2.10]
+            dev-libs/nettle[>=2.1]
     "
 else
     DEPENDENCIES+="
-    build+run:
-        dev-libs/libgcrypt[>=1.2.4&<1.5]
+        build+run:
+            dev-libs/libgcrypt[>=1.2.4&<1.5]
     "
 fi
 
@@ -68,29 +70,38 @@ gnutls_src_prepare() {
         -e '/sa_serv\.sin_addr\.s_addr/s:INADDR_ANY:htonl(INADDR_LOOPBACK):' \
         -i tests/*.c
 
-    if ever at_least 3.0.0; then
+    if ever at_least 2.12.14; then
         # Fix this: ./configure: line 12825: test: too many arguments
         edo sed -e '/test x$GNUTLS_REQUIRES_PRIVATE = x/s|x$GNUTLS_REQUIRES_PRIVATE|"&"|' -i configure.ac
 
         # gnutls-serv will always run on 0.0.0.0 and these tests use it
         edo sed -e '/TESTS =/s:testdsa::' -i tests/dsa/Makefile.am
         edo sed -e '/TESTS =/s:testcerts::' -i tests/openpgp-certs/Makefile.am
+    fi
 
+    # FIXME: don't run eautoreconf since it breaks 2.12.14
+    if ever at_least 3.0.0; then
         autotools_src_prepare
+    else
+        default
     fi
 }
 
 gnutls_src_test() {
-    if ever at_least 2.12.7; then
+    if ever at_least 2.12.14; then
+        esandbox allow_net "LOOPBACK@80"
         esandbox allow_net "LOOPBACK@5559"
         esandbox allow_net --connect "LOOPBACK@5557"
         esandbox allow_net --connect "LOOPBACK@5559"
+        esandbox allow_net --connect "inet:127.0.0.1@80"
     fi
     emake check
-    if ever at_least 2.12.7; then
+    if ever at_least 2.12.14; then
+        esandbox disallow_net "LOOPBACK@80"
         esandbox disallow_net "LOOPBACK@5559"
         esandbox disallow_net --connect "LOOPBACK@5557"
         esandbox disallow_net --connect "LOOPBACK@5559"
+        esandbox disallow_net --connect "inet:127.0.0.1@80"
     fi
 }
 
