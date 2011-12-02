@@ -34,11 +34,11 @@ Some of the goals of clang include the following:
 "
 HOMEPAGE="http://llvm.org/"
 DOWNLOADS="
-    ${HOMEPAGE}/releases/${PV}/${PNV}.tgz
-    clang? ( ${HOMEPAGE}/releases/${PV}/clang-${PV}.tgz )
+    ${HOMEPAGE}/releases/${PV}/${PNV}.tar.gz
+    clang? ( ${HOMEPAGE}/releases/${PV}/clang-${PV}.tar.gz )
 "
 
-ADMISSIBLE_GCC_VERSIONS=( 4.4.5 4.4.6 4.5.2 4.5.3 )
+ADMISSIBLE_GCC_VERSIONS=( 4.4.5 4.4.6 4.5.2 4.5.3 4.6.2 )
 
 LICENCES="UoI-NCSA"
 SLOT="0"
@@ -115,8 +115,6 @@ llvm_src_prepare() {
     expatch "${FILES}"/${PNV}-respect-libdir-etc.patch
     if option clang; then
         if ! ever is_scm && ! exparam -b snapshot; then
-            # A symlink will lead to problems with paths like ../../Makefile.common
-            ever at_least 3.0_rc3 && edo rm -f "${WORK}"/tools/clang
             edo mv "${WORKBASE}/${CLANG_PV:-clang-${PV}}" "${WORK}/tools/clang"
         fi
         edo pushd tools/clang
