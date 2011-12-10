@@ -154,10 +154,8 @@ src_configure() {
         WPS
 
     option dbus     && config_enable CTRL_IFACE_DBUS
-    if ever at_least 0.7.3 ; then
-        option dbus     && config_enable CTRL_IFACE_DBUS_NEW
-        option dbus     && config_enable CTRL_IFACE_DBUS_INTRO
-    fi
+    option dbus     && config_enable CTRL_IFACE_DBUS_NEW
+    option dbus     && config_enable CTRL_IFACE_DBUS_INTRO
     option debug    && config_enable DEBUG_FILE ||
                        config_enable NO_STDOUT_DEBUG
     option pcap     && config_enable L2_PACKET=pcap ||
@@ -320,16 +318,12 @@ src_install() {
         newins {dbus-,}wpa_supplicant.conf
 
         edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.epitest.hostap.WPASupplicant.service'
-        if ever at_least 0.7.3 ; then
-            edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.w1.wpa_supplicant1.service'
-        fi
+        edo sed -e '/^Exec=/s:/sbin:/usr/sbin:' -i 'fi.w1.wpa_supplicant1.service'
 
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
         doins 'fi.epitest.hostap.WPASupplicant.service'
-        if ever at_least 0.7.3 ; then
-            doins 'fi.w1.wpa_supplicant1.service'
-        fi
+        doins 'fi.w1.wpa_supplicant1.service'
 
         popd
     fi
