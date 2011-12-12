@@ -31,42 +31,31 @@ DEPENDENCIES="
         sys-devel/autogen
 "
 
-if ever at_least 4.3; then
-    MYOPTIONS+=" java"
-    if [[ ${SLOT} == 4.4 ]]; then
-        ECJ_JAR_PV="4.3" # There is no ecj-4.4.jar
-    elif [[ ${SLOT} == 4.6 ]]; then
-        ECJ_JAR_PV="4.5" # There is no ecj-4.6.jar
-    else
-        ECJ_JAR_PV=${SLOT}
-    fi
-    DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
-    DEPENDENCIES+="
-        build:
-            doc? ( app-doc/doxygen[>=1.5.1] )
-            java? ( app-arch/unzip
-                    app-arch/zip )
-        build+run:
-            dev-libs/gmp[>=4.1]
-            dev-libs/mpfr[>=2.3]"
+MYOPTIONS+=" java"
+if [[ ${SLOT} == 4.4 ]]; then
+    ECJ_JAR_PV="4.3" # There is no ecj-4.4.jar
+elif [[ ${SLOT} == 4.6 ]]; then
+    ECJ_JAR_PV="4.5" # There is no ecj-4.6.jar
 else
-    DEPENDENCIES+="
-        build:
-            doc? ( app-doc/doxygen[>=1.3.9] )
-        build+run:
-            fortran? ( dev-libs/gmp[>=4.1]
-                       dev-libs/mpfr[>=2.3] )"
+    ECJ_JAR_PV=${SLOT}
 fi
+DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
+DEPENDENCIES+="
+    build:
+        doc? ( app-doc/doxygen[>=1.5.1] )
+        java? ( app-arch/unzip
+                app-arch/zip )
+    build+run:
+        dev-libs/gmp[>=4.1]
+        dev-libs/mpfr[>=2.3]"
 
 # Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
 # >=4.4
 # TODO: for 4.6 different cloog backends (cloog-isl, cloog-parma)
-if ever at_least 4.4.0-r1; then
-    MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
-    DEPENDENCIES+="
-        build+run:
-            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
-fi
+MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
+DEPENDENCIES+="
+    build+run:
+        graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
 
 # Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
 # >=4.4
@@ -93,7 +82,7 @@ ECONF_SOURCE="${WORKBASE}"/${PNV}
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
 src_unpack() {
-    if ever at_least 4.3 && option java ; then
+    if option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
         edo cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar
     else
@@ -108,16 +97,11 @@ src_prepare() {
 }
 
 src_configure() {
-    local i LANGS="c++" pkgversion
+    local i LANGS="c++"
 
-    for i in ada fortran objc obj-c++; do
+    for i in ada fortran java objc obj-c++; do
         option ${i} && LANGS+=",${i}"
     done
-
-    if ever at_least 4.3; then
-        pkgversion="Exherbo ${PNVR}"
-        option java && LANGS+=",java"
-    fi
 
     if ever at_least 4.6; then
         option go && LANGS+=",go"
@@ -131,11 +115,10 @@ src_configure() {
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \
         --program-suffix=-${SLOT} \
-        ${pkgversion:+--with-pkgversion="${pkgversion}"} \
-        $(ever at_least 4.4.0-r1 &&
-            option_with graphite cloog &&
-            option_with graphite ppl &&
-            echo --with-system-zlib) \
+        ${pkgversion:+--with-pkgversion="Exherbo ${PNVR}"} \
+        $(option_with graphite cloog) \
+        $(option_with graphite ppl) \
+        $(option_with graphite system-zlib) \
         $(ever at_least 4.6 && option_enable graphite cloog-backend ppl-legacy) \
         $(ever at_least 4.5.0 && echo --with-libelf) \
         $(option_enable propolice libssp)
@@ -162,15 +145,9 @@ src_install() {
 
     if option doc; then
         insinto /usr/share/doc/${PNVR}/html
-        if ever at_least 4.3; then
-            edo pushd "${WORK}"/${CHOST}/libstdc++-v3/doc
-            emake doc-html-doxygen
-            doins -r doxygen/html/*
-        else
-            edo pushd "${WORK}"/${CHOST}/libstdc++-v3
-            emake doxygen
-            doins -r docs/doxygen/html_user/*
-        fi
+        edo pushd "${WORK}"/${CHOST}/libstdc++-v3/doc
+        emake doc-html-doxygen
+        doins -r doxygen/html/*
         edo popd
     fi
 
@@ -270,7 +247,7 @@ src_install() {
     fi
 
     # java
-    if ever at_least 4.3 && option java; then
+    if option java; then
         for x in usr/${LIBDIR}/security/classpath.security usr/share/java/ecj.jar; do
             bn=$(basename "${x}")
             ext=${bn#*.}
