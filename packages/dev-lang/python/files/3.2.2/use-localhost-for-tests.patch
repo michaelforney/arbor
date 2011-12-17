@@ -1,0 +1,39 @@
+From 50b376c5dc643c3afb6cff44a7f5cb16644e8b67 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <sepek@exherbo.org>
+Date: Sun, 27 Nov 2011 14:09:36 +0100
+Subject: [PATCH] use localhost for tests
+
+---
+ Lib/test/test_httplib.py |    2 +-
+ Lib/test/test_ssl.py     |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Lib/test/test_httplib.py b/Lib/test/test_httplib.py
+index ce9e346..e3b9db5 100644
+--- a/Lib/test/test_httplib.py
++++ b/Lib/test/test_httplib.py
+@@ -389,7 +389,7 @@ class SourceAddressTest(TestCase):
+ 
+     def testHTTPConnectionSourceAddress(self):
+         self.conn = client.HTTPConnection(HOST, self.port,
+-                source_address=('', self.source_port))
++                source_address=('localhost', self.source_port))
+         self.conn.connect()
+         self.assertEqual(self.conn.sock.getsockname()[1], self.source_port)
+ 
+diff --git a/Lib/test/test_ssl.py b/Lib/test/test_ssl.py
+index 869381a..0b41e93 100644
+--- a/Lib/test/test_ssl.py
++++ b/Lib/test/test_ssl.py
+@@ -177,7 +177,7 @@ class BasicSocketTests(unittest.TestCase):
+         self.assertRaises(socket.error, ss.recvfrom, 1)
+         self.assertRaises(socket.error, ss.recvfrom_into, bytearray(b'x'), 1)
+         self.assertRaises(socket.error, ss.send, b'x')
+-        self.assertRaises(socket.error, ss.sendto, b'x', ('0.0.0.0', 0))
++        self.assertRaises(socket.error, ss.sendto, b'x', ('localhost', 0))
+ 
+     def test_timeout(self):
+         # Issue #8524: when creating an SSL socket, the timeout of the
+-- 
+1.7.7.4
+

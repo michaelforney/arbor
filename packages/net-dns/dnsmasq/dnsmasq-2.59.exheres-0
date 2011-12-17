@@ -23,9 +23,9 @@ UPSTREAM_CHANGELOG="${BASEURI}/CHANGELOG [[ lang = en ]]"
 LICENCES="|| ( GPL-2 GPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS="baselayout conntrack dbus doc i18n
+MYOPTIONS="baselayout dbus doc nls
     conntrack [[ description = [ Enables connection tracking via NetFilter ] ]]
-    i18n [[ description = [ Support locales and international domain names ] ]]
+    idn [[ description = [ Support international domain names ] ]]
     systemd [[ requires = [ dbus ] ]]
 "
 
@@ -33,12 +33,14 @@ DEPENDENCIES="
     build:
         app-arch/xz
         dev-util/pkg-config
-        i18n? ( sys-devel/gettext )
+        nls? ( sys-devel/gettext )
     build+run:
         conntrack? ( net-libs/libnetfilter_conntrack )
         dbus? ( sys-apps/dbus )
-        i18n? ( net-dns/libidn )
+        idn? ( net-dns/libidn )
+        nls? ( net-dns/libidn )
 "
+
 src_prepare() {
     # Use a more sane lease directory
     edo sed -e 's:^#dhcp-leasefile=.*:dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases:' \
@@ -53,15 +55,16 @@ src_compile() {
     local COPTS=
     option dbus && COPTS="-DHAVE_DBUS"
     option conntrack && COPTS="${COPTS} -DHAVE_CT"
+    option idn && COPTS="${COPTS} -DHAVE_IDN"
     emake \
         CC="${CC}" \
         CFLAGS="${CFLAGS}" \
         COPTS="${COPTS}" \
-        all$(option i18n && echo "-i18n")
+        all$(option nls && echo "-i18n")
 }
 
 src_install() {
-    emake -j3 DESTDIR="${IMAGE}" PREFIX=/usr install$(option i18n && echo "-i18n")
+    emake -j3 DESTDIR="${IMAGE}" PREFIX=/usr install$(option nls && echo "-i18n")
 
     insinto /etc
     doins dnsmasq.conf

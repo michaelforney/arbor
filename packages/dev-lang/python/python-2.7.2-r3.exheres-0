@@ -24,6 +24,11 @@ prepare_one_multibuild() {
 }
 
 test_prepare_one_multibuild() {
+    local DISABLE_TESTS
+    # test_install_lib (test_distuils) has problems with path resolution
+    # the rest wants to bind to 0.0.0.0/::
+    DISABLE_TESTS="test_distutils test_ftplib test_socket"
+
     # for test_ssl
     esandbox allow_net --connect "inet:127.0.0.1@0"
 

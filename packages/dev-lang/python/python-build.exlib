@@ -145,7 +145,8 @@ test_one_multibuild() {
     esandbox allow_net "unix:${TEMP%/}/pymp-*/listener-*"
 
     # rerun failed tests in verbose mode (regrtest -w)
-    EXTRATESTOPTS="-w" emake test
+    # disable tests (regrtest -x)
+    EXTRATESTOPTS="-w -x ${DISABLE_TESTS}" emake test
 
     esandbox disallow_net "unix:${TEMP%/}/pymp-*/listener-*"
 
@@ -166,8 +167,15 @@ python-build_install_one_multibuild() {
     popd
 
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
-    ever at_least 3 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
-    edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
+    ! ever at_least 3.2 && edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
+
+    if ever major 3; then
+        ever range 1 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
+        if ever at_least 3.2; then
+            edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
+            edo rm "${IMAGE}"/usr/bin/{2to3-3,idle3,pydoc3,python3-config}
+        fi
+    fi
 
     # alternatives handling
     local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"

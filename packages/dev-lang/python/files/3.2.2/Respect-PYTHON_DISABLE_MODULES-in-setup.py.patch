@@ -1,0 +1,31 @@
+From f0638ac3e2685ec3317ed811ab18819a48bd33cf Mon Sep 17 00:00:00 2001
+From: Paul Seidler <sepek@exherbo.org>
+Date: Tue, 29 Nov 2011 21:59:28 +0100
+Subject: [PATCH] Respect PYTHON_DISABLE_MODULES in setup.py
+
+Based on patch by Ali Polatel, from Gentoo
+Upstream: no
+---
+ setup.py |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+diff --git a/setup.py b/setup.py
+index 1318bc2..d5e8126 100644
+--- a/setup.py
++++ b/setup.py
+@@ -21,7 +21,11 @@ from distutils.spawn import find_executable
+ COMPILED_WITH_PYDEBUG = hasattr(sys, 'gettotalrefcount')
+ 
+ # This global variable is used to hold the list of modules to be disabled.
+-disabled_module_list = []
++pdm_env = "PYTHON_DISABLE_MODULES"
++if pdm_env in os.environ:
++    disabled_module_list = os.environ[pdm_env].split()
++else:
++    disabled_module_list = []
+ 
+ # File which contains the directory for shared mods (for sys.path fixup
+ # when running from the build dir, see Modules/getpath.c)
+-- 
+1.7.7.4
+

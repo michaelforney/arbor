@@ -10,7 +10,7 @@ SUMMARY="Userland utilities for dm-crypt"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="
+MYOPTIONS="python
 (
     gcrypt [[ description = [ Use libgcrypt library as crypto backend ] ]]
     kernel [[ description = [ Use kernel as crypto backend, needs at least the kernel userspace
@@ -31,6 +31,7 @@ DEPENDENCIES="
                   dev-libs/libgpg-error )
         nettle? ( dev-libs/nettle[>=2.4] )
         openssl? ( dev-libs/openssl[>=0.9.8] )
+        python? ( dev-lang/python:=[>=2.4] )
 "
 
 src_configure() {
@@ -41,6 +42,7 @@ src_configure() {
         --enable-static-cryptsetup \
         --enable-udev \
         --disable-selinux \
+        $(option_enable python) \
         --with-crypto_backend=$(
         if option gcrypt; then
             echo 'gcrypt'

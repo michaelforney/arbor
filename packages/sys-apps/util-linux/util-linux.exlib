@@ -5,12 +5,12 @@
 require easy-multibuild
 
 SUMMARY="Common linux utilities"
-HOMEPAGE="http://userweb.kernel.org/~kzak/${PN}/"
-DOWNLOADS="mirror://kernel/linux/utils/${PN}/v$(ever range 1-2)/${PNV}.tar.bz2"
+HOMEPAGE="http://git.kernel.org/?p=utils/${PN}/${PN}.git"
+DOWNLOADS="ftp://ftp.infradead.org/pub/${PN}/v$(ever range 1-2)/${PNV}.tar.bz2"
 
 REMOTE_IDS="freshmeat:${PN}"
 
-MY_UPSTREAM="ftp://ftp.kernel.org/pub/linux/utils/${PN}/v$(ever range 1-2)/v${PV}"
+MY_UPSTREAM="ftp://ftp.infradead.org/pub/${PN}/v$(ever range 1-2)/v${PV}"
 UPSTREAM_CHANGELOG="${MY_UPSTREAM}-ChangeLog"
 UPSTREAM_RELEASE_NOTES="${MY_UPSTREAM}-ReleaseNotes"
 
@@ -46,5 +46,11 @@ configure_one_multibuild() {
         --with-pam \
         --without-selinux \
         --without-utempter
+}
+
+src_install() {
+    easy-multibuild_src_install
+    edo rmdir "${IMAGE}"/usr/share/man/ru/man1
+    edo rmdir "${IMAGE}"/usr/share/man/ru
 }
 

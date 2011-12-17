@@ -55,7 +55,12 @@ DEPENDENCIES="
         ruby? ( dev-lang/ruby:= )
     run:
         keyring? ( gnome-desktop/gnome-keyring:1 )
-        kwallet? ( kde/kdebase-runtime:4 )
+        kwallet? (
+            || (
+                kde/kde-runtime:4
+                kde/kdebase-runtime:4
+            ) 
+        )
         perl? ( dev-perl/URI )
     suggestion:
         net-misc/neon[ssl(+)] [[ description = [ Enables support for https:// URIs ] ]]
