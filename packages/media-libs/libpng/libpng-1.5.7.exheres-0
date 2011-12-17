@@ -10,5 +10,7 @@ REMOTE_IDS+="freshmeat:${PN}"
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="arm_cpu_features: neon"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'arm_cpu_features:neon arm-neon' )
 
