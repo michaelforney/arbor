@@ -9,6 +9,11 @@ depend() {
 
 start() {
 	ebegin "Starting ldap-server"
+	
+	mkdir -p /var/run/openldap
+	chown ldap:ldap /var/run/openldap
+	chmod 755 /var/run/openldap
+
 	eval start-stop-daemon --start --pidfile /var/run/openldap/slapd.pid --exec /usr/libexec/openldap/slapd -- -u ldap -g ldap "${OPTS}"
 	eend ${?}
 }
