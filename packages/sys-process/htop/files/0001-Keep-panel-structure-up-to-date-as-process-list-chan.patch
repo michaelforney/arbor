@@ -1,0 +1,491 @@
+Source: upstream
+Upstream: yes
+Reason: do not segfault when f9 is pressed
+
+From fc79b535d7c56dd145a696570604fd6edef73616 Mon Sep 17 00:00:00 2001
+From: loderunner <loderunner@63cc0a6c-1f0e-0410-841e-f6a342073da8>
+Date: Thu, 1 Dec 2011 12:31:57 +0000
+Subject: [PATCH] Keep panel structure up-to-date as process list changes when
+ headers are updated during the screen manager. Hopefully
+ closes #3444533.
+
+git-svn-id: https://htop.svn.sourceforge.net/svnroot/htop/trunk@271 63cc0a6c-1f0e-0410-841e-f6a342073da8
+---
+ ColorsPanel.c   |    2 +-
+ ProcessList.c   |   56 ++++++++++++++++++++++++++++++++++++++++++++++
+ ProcessList.h   |   12 ++++++++++
+ ScreenManager.c |   64 +++++++++++++++++++++++++++++-----------------------
+ ScreenManager.h |    5 ++-
+ htop.c          |   67 +++++++++++++++++++++++--------------------------------
+ 6 files changed, 136 insertions(+), 70 deletions(-)
+
+diff --git a/ColorsPanel.c b/ColorsPanel.c
+index 5e58670..b4ee5f2 100644
+--- a/ColorsPanel.c
++++ b/ColorsPanel.c
+@@ -67,7 +67,7 @@ static HandlerResult ColorsPanel_EventHandler(Panel* super, int ch) {
+       this->settings->changed = true;
+       Header* header = this->settings->header;
+       CRT_setColors(mark);
+-      Panel* menu = (Panel*) Vector_get(this->scr->items, 0);
++      Panel* menu = (Panel*) Vector_get(this->scr->panels, 0);
+       Header_draw(header);
+       RichString_setAttr(&(super->header), CRT_colors[PANEL_HEADER_FOCUS]);
+       RichString_setAttr(&(menu->header), CRT_colors[PANEL_HEADER_UNFOCUS]);
+diff --git a/ProcessList.c b/ProcessList.c
+index be01ca6..224c18c 100644
+--- a/ProcessList.c
++++ b/ProcessList.c
+@@ -16,6 +16,7 @@ in the source distribution for its full text.
+ #include "UsersTable.h"
+ #include "Hashtable.h"
+ #include "String.h"
++#include "Panel.h"
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+@@ -109,6 +110,13 @@ typedef struct ProcessList_ {
+    Hashtable* processTable;
+    UsersTable* usersTable;
+ 
++   Panel* panel;
++   bool follow;
++   bool userOnly;
++   uid_t userId;
++   bool filtering;
++   const char* incFilter;
++
+    int cpuCount;
+    int totalTasks;
+    int userlandThreads;
+@@ -243,6 +251,10 @@ void ProcessList_delete(ProcessList* this) {
+    free(this);
+ }
+ 
++void ProcessList_setPanel(ProcessList* this, Panel* panel) {
++   this->panel = panel;
++}
++
+ void ProcessList_invertSortOrder(ProcessList* this) {
+    if (this->direction == 1)
+       this->direction = -1;
+@@ -888,3 +900,47 @@ void ProcessList_expandTree(ProcessList* this) {
+       process->showChildren = true;
+    }
+ }
++
++void ProcessList_rebuildPanel(ProcessList* this, bool flags, bool follow, bool userOnly, uid_t userId, bool filtering, const char* incFilter) {
++   if (!flags) {
++      follow = this->follow;
++      userOnly = this->userOnly;
++      userId = this->userId;
++      filtering = this->filtering;
++      incFilter = this->incFilter;
++   } else {
++      this->follow = follow;
++      this->userOnly = userOnly;
++      this->userId = userId;
++      this->filtering = filtering;
++      this->incFilter = incFilter;
++   }
++
++   int currPos = Panel_getSelectedIndex(this->panel);
++   pid_t currPid = 0;
++   int currScrollV = this->panel->scrollV;
++   if (follow)
++      currPid = ProcessList_get(this, currPos)->pid;
++
++   Panel_prune(this->panel);
++   int size = ProcessList_size(this);
++   int idx = 0;
++   for (int i = 0; i < size; i++) {
++      bool hidden = false;
++      Process* p = ProcessList_get(this, i);
++
++      if ( (!p->show)
++         || (userOnly && (p->st_uid != userId))
++         || (filtering && !(String_contains_i(p->comm, incFilter))) )
++         hidden = true;
++
++      if (!hidden) {
++         Panel_set(this->panel, idx, (Object*)p);
++         if ((!follow && idx == currPos) || (follow && p->pid == currPid)) {
++            Panel_setSelected(this->panel, idx);
++            this->panel->scrollV = currScrollV;
++         }
++         idx++;
++      }
++   }
++}
+diff --git a/ProcessList.h b/ProcessList.h
+index 641a08c..702f966 100644
+--- a/ProcessList.h
++++ b/ProcessList.h
+@@ -19,6 +19,7 @@ in the source distribution for its full text.
+ #include "UsersTable.h"
+ #include "Hashtable.h"
+ #include "String.h"
++#include "Panel.h"
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+@@ -111,6 +112,13 @@ typedef struct ProcessList_ {
+    Hashtable* processTable;
+    UsersTable* usersTable;
+ 
++   Panel* panel;
++   bool follow;
++   bool userOnly;
++   uid_t userId;
++   bool filtering;
++   const char* incFilter;
++
+    int cpuCount;
+    int totalTasks;
+    int userlandThreads;
+@@ -161,6 +169,8 @@ ProcessList* ProcessList_new(UsersTable* usersTable);
+ 
+ void ProcessList_delete(ProcessList* this);
+ 
++void ProcessList_setPanel(ProcessList* this, Panel* panel);
++
+ void ProcessList_invertSortOrder(ProcessList* this);
+ 
+ void ProcessList_printHeader(ProcessList* this, RichString* header);
+@@ -194,4 +204,6 @@ ProcessField ProcessList_keyAt(ProcessList* this, int at);
+ 
+ void ProcessList_expandTree(ProcessList* this);
+ 
++void ProcessList_rebuildPanel(ProcessList* this, bool flags, bool follow, bool userOnly, uid_t userId, bool filtering, const char* incFilter);
++
+ #endif
+diff --git a/ScreenManager.c b/ScreenManager.c
+index 38d4e23..9c7b392 100644
+--- a/ScreenManager.c
++++ b/ScreenManager.c
+@@ -31,13 +31,14 @@ typedef struct ScreenManager_ {
+    int x2;
+    int y2;
+    Orientation orientation;
+-   Vector* items;
++   Vector* panels;
+    Vector* fuBars;
+-   int itemCount;
++   int panelCount;
+    const FunctionBar* fuBar;
+    const Header* header;
+    time_t lastScan;
+    bool owner;
++   bool allowFocusChange;
+ } ScreenManager;
+ 
+ }*/
+@@ -51,29 +52,30 @@ ScreenManager* ScreenManager_new(int x1, int y1, int x2, int y2, Orientation ori
+    this->y2 = y2;
+    this->fuBar = NULL;
+    this->orientation = orientation;
+-   this->items = Vector_new(PANEL_CLASS, owner, DEFAULT_SIZE, NULL);
++   this->panels = Vector_new(PANEL_CLASS, owner, DEFAULT_SIZE, NULL);
+    this->fuBars = Vector_new(FUNCTIONBAR_CLASS, true, DEFAULT_SIZE, NULL);
+-   this->itemCount = 0;
++   this->panelCount = 0;
+    this->header = header;
+    this->owner = owner;
++   this->allowFocusChange = true;
+    return this;
+ }
+ 
+ void ScreenManager_delete(ScreenManager* this) {
+-   Vector_delete(this->items);
++   Vector_delete(this->panels);
+    Vector_delete(this->fuBars);
+    free(this);
+ }
+ 
+ inline int ScreenManager_size(ScreenManager* this) {
+-   return this->itemCount;
++   return this->panelCount;
+ }
+ 
+ void ScreenManager_add(ScreenManager* this, Panel* item, FunctionBar* fuBar, int size) {
+    if (this->orientation == HORIZONTAL) {
+       int lastX = 0;
+-      if (this->itemCount > 0) {
+-         Panel* last = (Panel*) Vector_get(this->items, this->itemCount - 1);
++      if (this->panelCount > 0) {
++         Panel* last = (Panel*) Vector_get(this->panels, this->panelCount - 1);
+          lastX = last->x + last->w + 1;
+       }
+       if (size > 0) {
+@@ -84,22 +86,22 @@ void ScreenManager_add(ScreenManager* this, Panel* item, FunctionBar* fuBar, int
+       Panel_move(item, lastX, this->y1);
+    }
+    // TODO: VERTICAL
+-   Vector_add(this->items, item);
++   Vector_add(this->panels, item);
+    if (fuBar)
+       Vector_add(this->fuBars, fuBar);
+    else
+       Vector_add(this->fuBars, FunctionBar_new(NULL, NULL, NULL));
+    if (!this->fuBar && fuBar) this->fuBar = fuBar;
+    item->needsRedraw = true;
+-   this->itemCount++;
++   this->panelCount++;
+ }
+ 
+ Panel* ScreenManager_remove(ScreenManager* this, int idx) {
+-   assert(this->itemCount > idx);
+-   Panel* panel = (Panel*) Vector_remove(this->items, idx);
++   assert(this->panelCount > idx);
++   Panel* panel = (Panel*) Vector_remove(this->panels, idx);
+    Vector_remove(this->fuBars, idx);
+    this->fuBar = NULL;
+-   this->itemCount--;
++   this->panelCount--;
+    return panel;
+ }
+ 
+@@ -108,15 +110,15 @@ void ScreenManager_resize(ScreenManager* this, int x1, int y1, int x2, int y2) {
+    this->y1 = y1;
+    this->x2 = x2;
+    this->y2 = y2;
+-   int items = this->itemCount;
++   int panels = this->panelCount;
+    int lastX = 0;
+-   for (int i = 0; i < items - 1; i++) {
+-      Panel* panel = (Panel*) Vector_get(this->items, i);
++   for (int i = 0; i < panels - 1; i++) {
++      Panel* panel = (Panel*) Vector_get(this->panels, i);
+       Panel_resize(panel, panel->w, LINES-y1+y2);
+       Panel_move(panel, lastX, y1);
+       lastX = panel->x + panel->w + 1;
+    }
+-   Panel* panel = (Panel*) Vector_get(this->items, items-1);
++   Panel* panel = (Panel*) Vector_get(this->panels, panels-1);
+    Panel_resize(panel, COLS-x1+x2-lastX, LINES-y1+y2);
+    Panel_move(panel, lastX, y1);
+ }
+@@ -125,7 +127,7 @@ void ScreenManager_run(ScreenManager* this, Panel** lastFocus, int* lastKey) {
+    bool quit = false;
+    int focus = 0;
+    
+-   Panel* panelFocus = (Panel*) Vector_get(this->items, focus);
++   Panel* panelFocus = (Panel*) Vector_get(this->panels, focus);
+    if (this->fuBar)
+       FunctionBar_draw(this->fuBar, NULL);
+    
+@@ -133,19 +135,21 @@ void ScreenManager_run(ScreenManager* this, Panel** lastFocus, int* lastKey) {
+ 
+    int ch = 0;
+    while (!quit) {
+-      int items = this->itemCount;
++      int panels = this->panelCount;
+       if (this->header) {
+          time_t now = time(NULL);
+          if (now > this->lastScan) {
+             ProcessList_scan(this->header->pl);
++            ProcessList_sort(this->header->pl);
+             this->lastScan = now;
+          }
+          Header_draw(this->header);
++         ProcessList_rebuildPanel(this->header->pl, false, false, false, false, false, NULL);
+       }
+-      for (int i = 0; i < items; i++) {
+-         Panel* panel = (Panel*) Vector_get(this->items, i);
++      for (int i = 0; i < panels; i++) {
++         Panel* panel = (Panel*) Vector_get(this->panels, i);
+          Panel_draw(panel, i == focus);
+-         if (i < items) {
++         if (i < panels) {
+             if (this->orientation == HORIZONTAL) {
+                mvvline(panel->y, panel->x+panel->w, ' ', panel->h+1);
+             }
+@@ -166,8 +170,8 @@ void ScreenManager_run(ScreenManager* this, Panel** lastFocus, int* lastKey) {
+             if (mevent.y == LINES - 1) {
+                ch = FunctionBar_synthesizeEvent(this->fuBar, mevent.x);
+             } else {
+-               for (int i = 0; i < this->itemCount; i++) {
+-                  Panel* panel = (Panel*) Vector_get(this->items, i);
++               for (int i = 0; i < this->panelCount; i++) {
++                  Panel* panel = (Panel*) Vector_get(this->panels, i);
+                   if (mevent.x > panel->x && mevent.x <= panel->x+panel->w &&
+                      mevent.y > panel->y && mevent.y <= panel->y+panel->h) {
+                      focus = i;
+@@ -200,21 +204,25 @@ void ScreenManager_run(ScreenManager* this, Panel** lastFocus, int* lastKey) {
+       }
+       case KEY_LEFT:
+       case KEY_CTRLB:
++         if (!this->allowFocusChange)
++            break;
+          tryLeft:
+          if (focus > 0)
+             focus--;
+-         panelFocus = (Panel*) Vector_get(this->items, focus);
++         panelFocus = (Panel*) Vector_get(this->panels, focus);
+          if (Panel_size(panelFocus) == 0 && focus > 0)
+             goto tryLeft;
+          break;
+       case KEY_RIGHT:
+       case KEY_CTRLF:
+       case 9:
++         if (!this->allowFocusChange)
++            break;
+          tryRight:
+-         if (focus < this->itemCount - 1)
++         if (focus < this->panelCount - 1)
+             focus++;
+-         panelFocus = (Panel*) Vector_get(this->items, focus);
+-         if (Panel_size(panelFocus) == 0 && focus < this->itemCount - 1)
++         panelFocus = (Panel*) Vector_get(this->panels, focus);
++         if (Panel_size(panelFocus) == 0 && focus < this->panelCount - 1)
+             goto tryRight;
+          break;
+       case KEY_F(10):
+diff --git a/ScreenManager.h b/ScreenManager.h
+index e169c30..783cf9f 100644
+--- a/ScreenManager.h
++++ b/ScreenManager.h
+@@ -33,13 +33,14 @@ typedef struct ScreenManager_ {
+    int x2;
+    int y2;
+    Orientation orientation;
+-   Vector* items;
++   Vector* panels;
+    Vector* fuBars;
+-   int itemCount;
++   int panelCount;
+    const FunctionBar* fuBar;
+    const Header* header;
+    time_t lastScan;
+    bool owner;
++   bool allowFocusChange;
+ } ScreenManager;
+ 
+ 
+diff --git a/htop.c b/htop.c
+index ff58d20..866b3fa 100644
+--- a/htop.c
++++ b/htop.c
+@@ -199,6 +199,7 @@ static Object* pickFromVector(Panel* panel, Panel* list, int x, int y, const cha
+    if (!list->eventHandler)
+       Panel_setEventHandler(list, Panel_selectByTyping);
+    ScreenManager* scr = ScreenManager_new(0, y, 0, -1, HORIZONTAL, header, false);
++   scr->allowFocusChange = false;
+    ScreenManager_add(scr, list, FunctionBar_new(keyLabels, fuKeys, fuEvents), x - 1);
+    ScreenManager_add(scr, panel, NULL, -1);
+    Panel* panelFocus;
+@@ -331,7 +332,6 @@ int main(int argc, char** argv) {
+       exit(1);
+    }
+ 
+-   Panel* panel;
+    int quit = 0;
+    int refreshTimeout = 0;
+    int resetRefreshTimeout = 5;
+@@ -384,10 +384,11 @@ int main(int argc, char** argv) {
+       break;
+    }
+ 
+-   
+    CRT_init(settings->delay, settings->colorScheme);
++
++   Panel* panel = Panel_new(0, headerHeight, COLS, LINES - headerHeight - 2, PROCESS_CLASS, false, NULL);
++   ProcessList_setPanel(pl, panel);
+    
+-   panel = Panel_new(0, headerHeight, COLS, LINES - headerHeight - 2, PROCESS_CLASS, false, NULL);
+    if (sortKey > 0) {
+       pl->sortKey = sortKey;
+       pl->treeView = false;
+@@ -439,12 +440,6 @@ int main(int argc, char** argv) {
+       if (recalculate)
+          oldTime = newTime;
+       if (doRefresh) {
+-
+-         int currPos = Panel_getSelectedIndex(panel);
+-         pid_t currPid = 0;
+-         int currScrollV = panel->scrollV;
+-         if (follow)
+-            currPid = ProcessList_get(pl, currPos)->pid;
+          if (recalculate || doRecalculate) {
+             ProcessList_scan(pl);
+             doRecalculate = false;
+@@ -453,27 +448,7 @@ int main(int argc, char** argv) {
+             ProcessList_sort(pl);
+             refreshTimeout = 1;
+          }
+-         Panel_prune(panel);
+-         int size = ProcessList_size(pl);
+-         int idx = 0;
+-         for (int i = 0; i < size; i++) {
+-            bool hidden = false;
+-            Process* p = ProcessList_get(pl, i);
+-
+-            if ( (!p->show)
+-               || (userOnly && (p->st_uid != userId))
+-               || (filtering && !(String_contains_i(p->comm, incFilter.buffer))) )
+-               hidden = true;
+-
+-            if (!hidden) {
+-               Panel_set(panel, idx, (Object*)p);
+-               if ((!follow && idx == currPos) || (follow && p->pid == currPid)) {
+-                  Panel_setSelected(panel, idx);
+-                  panel->scrollV = currScrollV;
+-               }
+-               idx++;
+-            }
+-         }
++         ProcessList_rebuildPanel(pl, true, follow, userOnly, userId, filtering, incFilter.buffer);
+       }
+       doRefresh = true;
+       
+@@ -746,6 +721,19 @@ int main(int argc, char** argv) {
+          if (!killPanel) {
+             killPanel = (Panel*) SignalsPanel_new(0, 0, 0, 0);
+          }
++         bool anyTagged = false;
++         pid_t selectedPid;
++         for (int i = 0; i < Panel_size(panel); i++) {
++            Process* p = (Process*) Panel_get(panel, i);
++            if (p->tag) {
++               anyTagged = true;
++               break;
++            }
++         }
++         if (!anyTagged) {
++            Process* p = (Process*) Panel_getSelected(panel);
++            selectedPid = p->pid;
++         }
+          SignalsPanel_reset((SignalsPanel*) killPanel);
+          const char* fuFunctions[] = {"Send  ", "Cancel ", NULL};
+          ListItem* sgn = (ListItem*) pickFromVector(panel, killPanel, 15, headerHeight, fuFunctions, defaultBar, header);
+@@ -754,17 +742,18 @@ int main(int argc, char** argv) {
+                Panel_setHeader(panel, "Sending...");
+                Panel_draw(panel, true);
+                refresh();
+-               bool anyTagged = false;
+-               for (int i = 0; i < Panel_size(panel); i++) {
+-                  Process* p = (Process*) Panel_get(panel, i);
+-                  if (p->tag) {
+-                     Process_sendSignal(p, sgn->key);
+-                     anyTagged = true;
++               if (anyTagged) {
++                  for (int i = 0; i < Panel_size(panel); i++) {
++                     Process* p = (Process*) Panel_get(panel, i);
++                     if (p->tag) {
++                        Process_sendSignal(p, sgn->key);
++                        anyTagged = true;
++                     }
+                   }
+-               }
+-               if (!anyTagged) {
++               } else {
+                   Process* p = (Process*) Panel_getSelected(panel);
+-                  Process_sendSignal(p, sgn->key);
++                  if (p->pid == selectedPid)
++                     Process_sendSignal(p, sgn->key);
+                }
+                napms(500);
+             }
+-- 
+1.7.8
+
