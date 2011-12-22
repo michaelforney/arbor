@@ -1,7 +1,11 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require gnome.org
+if ever at_least 2.31.6 ; then
+    require gnome.org [ suffix=.tar.xz ]
+else
+    require gnome.org
+fi
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
