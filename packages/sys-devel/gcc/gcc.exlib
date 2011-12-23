@@ -77,7 +77,7 @@ if ever at_least 4.6; then
 fi
 
 WORK="${WORKBASE}/${PN}_build"
-ECONF_SOURCE="${WORKBASE}"/${PNV}
+ECONF_SOURCE="${WORKBASE}"/${PNV/_p/-}
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
@@ -92,7 +92,7 @@ src_unpack() {
 }
 
 src_prepare() {
-    edo cd  "${WORKBASE}/${PNV}"
+    edo cd  "${WORKBASE}/${PNV/_p/-}"
     default
 }
 
