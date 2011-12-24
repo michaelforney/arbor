@@ -148,7 +148,7 @@ scm-cvs_do_checkout() {
 }
 
 scm-cvs_do_update() {
-    local what=$(scm-cvs_tagrevbranch) whatarr=
+    local what=$(scm-cvs_tagrevbranch) whatarr=( )
     [[ -n ${what} ]] && whatarr=( "${what}" )
     scm-cvs_cvs update -A "${whatarr[@]}"
     scm-cvs_set_branchdate
