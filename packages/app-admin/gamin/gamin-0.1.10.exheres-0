@@ -3,7 +3,6 @@
 # Based in part upon 'gamin-0.1.9-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
 require easy-multibuild flag-o-matic python
 
 SUMMARY="A library providing the File Alteration Monitor API"
@@ -23,10 +22,7 @@ DEPENDENCIES="
         python? ( dev-lang/python:=[multibuild_c:*(?)?] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILES}/${PNV}-fix_python_paths.patch"
-    -p0 "${FILES}/${PNV}-user-cflags.patch"
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-fix-newer-glib.patch" )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/debugging.txt doc/socket.txt )
 
@@ -36,7 +32,12 @@ configure_one_multibuild() {
 
     local python_prefix='/usr'
     multibuild_default_target C || python_prefix="/usr/${CHOST}"
-    econf --enable-inotify $(option_enable debug debug-api) $(option_with python python "${python_prefix}")
+    econf \
+        --enable-inotify \
+        --enable-libgamin \
+        --enable-server \
+        $(option_enable debug debug-api) \
+        $(option_with python python "${python_prefix}")
 }
 
 src_install() {
