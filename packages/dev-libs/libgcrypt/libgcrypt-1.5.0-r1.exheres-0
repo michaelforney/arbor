@@ -2,6 +2,8 @@
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="General purpose crypto library based on the code used in GnuPG"
 HOMEPAGE="http://www.gnupg.org/"
 DOWNLOADS="mirror://gnupg/${PN}/${PNV}.tar.bz2"
@@ -12,11 +14,11 @@ LICENCES="LGPL-2.1 [[ description = [ Applies to the library ] ]]
       GPL-2 [[ description = [ Applies to the manual & tools ] ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        dev-libs/libgpg-error[>=1.8]
+        dev-libs/libgpg-error[>=1.8][multibuild_c:*(?)?]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -29,8 +31,16 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-static
 )
 
-src_install() {
+install_one_multibuild() {
     default
+    if ! multibuild_default_target C; then
+        dodir "/usr/${CHOST}/bin"
+        edo mv "${IMAGE}"/usr/bin/"${PN}"-config "${IMAGE}"/usr/"${CHOST}"/bin
+    fi
+}
+
+src_install() {
+    easy-multibuild_src_install
     edo rmdir "${IMAGE}"/usr/sbin
 }
 
