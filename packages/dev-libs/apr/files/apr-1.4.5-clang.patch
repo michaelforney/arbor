@@ -1,0 +1,63 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Pass --tag=CC to libtool
+
+---
+ configure.in     |    4 ++--
+ test/Makefile.in |    8 ++++----
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/configure.in b/configure.in
+index 9c20dd7..ec9fd96 100644
+--- a/configure.in
++++ b/configure.in
+@@ -281,9 +281,9 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the
+   [ use_libtool=$withval ], [ use_libtool="yes" ] )
+ 
+ if test "x$use_libtool" = "xyes"; then
+-      lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
++      lt_compile='$(LIBTOOL) $(LTFLAGS) --tag=CC --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
+       LT_VERSION="-version-info `$get_version libtool $version_hdr APR`"
+-      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(LT_LDFLAGS) \$(COMPILE) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
++      link="\$(LIBTOOL) \$(LTFLAGS) --tag=CC --mode=link \$(LT_LDFLAGS) \$(COMPILE) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
+       so_ext='lo'
+       lib_target='-rpath $(libdir) $(OBJECTS)'
+       export_lib_target='-rpath \$(libdir) \$(OBJECTS)'
+diff --git a/test/Makefile.in b/test/Makefile.in
+index b371074..f711c40 100644
+--- a/test/Makefile.in
++++ b/test/Makefile.in
+@@ -67,7 +67,7 @@ INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
+ 
+ # link programs using -no-install to get real executables not
+ # libtool wrapper scripts which link an executable when first run.
+-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) \
++LINK_PROG = $(LIBTOOL) $(LTFLAGS) --tag=CC --mode=link $(LT_LDFLAGS) $(COMPILE) \
+ 	    @LT_NO_INSTALL@ $(ALL_LDFLAGS) -o $@
+ 
+ # STDTEST_PORTABLE;
+@@ -115,18 +115,18 @@ globalmutexchild@EXEEXT@: $(OBJECTS_globalmutexchild)
+ 
+ # Note -prefer-pic is only supported with libtool-1.4+
+ mod_test.lo: $(srcdir)/mod_test.c
+-	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -o $@ \
++	$(LIBTOOL) $(LTFLAGS) --tag=CC --mode=compile $(COMPILE) -prefer-pic -o $@ \
+ 	  -c $(srcdir)/mod_test.c
+ 
+ OBJECTS_mod_test = mod_test.lo
+ mod_test.la: $(OBJECTS_mod_test)
+-	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -module \
++	$(LIBTOOL) $(LTFLAGS) --tag=CC --mode=link $(COMPILE) -rpath `pwd` -module \
+ 	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ \
+ 	  $(OBJECTS_mod_test)
+ 
+ OBJECTS_libmod_test = mod_test.lo $(LOCAL_LIBS)
+ libmod_test.la: $(OBJECTS_libmod_test)
+-	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` \
++	$(LIBTOOL) $(LTFLAGS) --tag=CC --mode=link $(COMPILE) -rpath `pwd` \
+ 	  -avoid-version $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ \
+ 	  $(OBJECTS_libmod_test) $(ALL_LIBS)
+ 
+-- 
+1.7.8
+
