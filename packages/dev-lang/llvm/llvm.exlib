@@ -132,9 +132,6 @@ llvm_src_prepare() {
             edo mv "${WORKBASE}/${CLANG_PV:-clang-${PV}}" "${WORK}/tools/clang"
         fi
         edo pushd tools/clang
-        edo sed \
-            -e "/Exherbo/{N;N;N;s/4\.4\.3/$(get_gcc_version)/g}" \
-            -i lib/Frontend/InitHeaderSearch.cpp
         expatch "${FILES}"/0001-Replace-PROJ_prefix-lib-with-PROJ_libdir.patch
         if ever at_least 3.0_rc3; then
             # On top of requiring multilib, this test makes illegitimate assumptions on the version
