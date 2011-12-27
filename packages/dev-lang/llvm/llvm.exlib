@@ -114,11 +114,7 @@ cxx_is_gxx() {
 llvm_pkg_setup() {
     if cxx_is_gxx; then
         local gxx_version=$(gxx-major-version).$(gxx-minor-version)
-        if ever at_least 4.5 ${gxx_version}; then
-            # FIXME investigate this more further; it says just clang, not
-            # llvm. Is this already fixed in some gcc versions ? And what about
-            # dragonegg ?
-            #
+        if option clang && ever at_least 4.5 ${gxx_version} && ! ever at_least 4.6.2 ${gxx_version}; then
             # gcc 4.5 miscompiles clang at -O2 and above
             append-flags -O1
         fi
@@ -219,3 +215,4 @@ llvm_pkg_postinst() {
         elog "-fplugin-arg-dragonegg-enable-gcc-optzns."
     fi
 }
+
