@@ -1,0 +1,26 @@
+Source: written by Markus Trippelsdorf, upstream
+Upstream: yes
+Reason: libLTO is linked wrong
+
+commit 60e06d6ac2b9943537e2e22c3dfc324ae71b23e3
+Author: Rafael Espindola <rafael.espindola@gmail.com>
+Date:   Wed Nov 23 03:07:25 2011 +0000
+
+    Point to libLTO with -L/PATH/ -lLTO so that it is found in the install
+    directory.
+    Patch by Markus Trippelsdorf.
+    
+    git-svn-id: https://llvm.org/svn/llvm-project/llvm/trunk@145095 91177308-0d34-0410-b5e6-96231b3b80d8
+
+diff --git a/tools/gold/Makefile b/tools/gold/Makefile
+index 78eda03..02f66d7 100644
+--- a/tools/gold/Makefile
++++ b/tools/gold/Makefile
+@@ -24,6 +24,6 @@ include $(LEVEL)/Makefile.config
+ # Because off_t is used in the public API, the largefile parts are required for
+ # ABI compatibility.
+ CXXFLAGS+=-I$(BINUTILS_INCDIR) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+-CXXFLAGS+=$(SharedLibDir)/$(SharedPrefix)LTO$(SHLIBEXT)
++CXXFLAGS+=-L$(SharedLibDir)/$(SharedPrefix) -lLTO
+ 
+ include $(LEVEL)/Makefile.common
