@@ -10,14 +10,14 @@ export_exlib_phases src_prepare src_configure src_compile src_test_expensive src
 
 SUMMARY="A free/open source, centralised version control system"
 HOMEPAGE="http://${PN}.apache.org"
-DOWNLOADS="http://${PN}.tigris.org/downloads/${PNV}.tar.bz2"
+DOWNLOADS="mirror://apache/subversion/${PNV}.tar.bz2"
 
 REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_CHANGELOG="http://svn.apache.org/repos/asf/${PN}/tags/${PV}/CHANGES"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/docs/release-notes/$(ever range 1-2).html"
 UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
-LICENCES="Apache-1.1"
+LICENCES="Apache-2.0"
 SLOT="0"
 MYOPTIONS="berkdb perl python ruby
     keyring [[ description = [ Adds support for storing passwords in GNOME Keyring ] ]]
@@ -59,7 +59,7 @@ DEPENDENCIES="
             || (
                 kde/kde-runtime:4
                 kde/kdebase-runtime:4
-            ) 
+            )
         )
         perl? ( dev-perl/URI )
     suggestion:
@@ -85,7 +85,10 @@ subversion_src_configure() {
         myconf+=( --without-swig )
     fi
 
+    # local library preloading makes sure tests do not pick up on a version of svn that is already
+    # installed
     econf \
+        --enable-local-library-preloading \
         --disable-mod-activation \
         --without-sasl \
         --enable-nls \
