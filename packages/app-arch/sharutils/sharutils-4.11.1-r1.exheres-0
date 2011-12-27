@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=bz2 ]
+require gnu [ suffix=bz2 ] alternatives
 
 SUMMARY="Tools to deal with shar archives"
 DESCRIPTION="
@@ -27,4 +27,11 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-nls )
+
+src_install() {
+    default
+
+    alternatives_for uuencode ${PN} 1 /usr/bin/uuencode uuencode-${PN}
+    alternatives_for uudecode ${PN} 1 /usr/bin/uudecode uudecode-${PN}
+}
 
