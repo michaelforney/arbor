@@ -3,7 +3,7 @@
 # Based in part upon 'libidn-1.5-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require gnu [ suffix=gz ]
+require gnu [ suffix=gz ] easy-multibuild
 
 SUMMARY="Internationalized Domain Names (IDN) implementation"
 
@@ -11,7 +11,8 @@ LICENCES="GPL-3             [[ description = [ Command line tool, self tests, ex
     || ( LGPL-3 LGPL-2.1 )  [[ description = [ C, Java libraries ] ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="doc"
+MYOPTIONS="doc
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -30,7 +31,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     # Don't install emacs things without proper support for it
     edo rm -rf "${IMAGE}"/usr/share/emacs

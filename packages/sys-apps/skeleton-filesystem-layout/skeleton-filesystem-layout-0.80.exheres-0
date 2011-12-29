@@ -1,5 +1,8 @@
 # Copyright 2008 Markus Rothe <markus@unixforces.net>
+# Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
+
+require multibuild
 
 BASE_TARBALL_PV="0.2"
 SUMMARY="Skeleton filesystem layout"
@@ -47,6 +50,19 @@ src_install() {
     insinto /etc
     doins "${FILES}"/exherbo-release
     doins "${FILES}"/os-release
+
+    if [[ ${LIBDIR} != lib ]]; then
+        local multibuild_c_target ldpath=()
+        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            multibuild_switch_build_target C ${multibuild_c_target}
+            ldpath=( /usr/${LIBDIR} /${LIBDIR} "${ldpath[@]}" )
+        done
+        IFS=": " ldpath="${ldpath[*]}"
+        hereenvd 10multilib <<EOF
+LDPATH="${ldpath}"
+EOF
+    fi
+
     doins -r "${WORK}"/${PN}-base-etc-${BASE_TARBALL_PV}/*
 }
 
@@ -64,7 +80,7 @@ pkg_postinst() {
     local x
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
-    for x in bin boot dev{,/pts} etc home ${LIBDIR} mnt \
+    for x in bin boot dev{,/pts} etc home mnt \
         media opt proc run sbin sys; do
             create_root_owned_directory "${ROOT}${x}"
     done
@@ -80,12 +96,12 @@ pkg_postinst() {
     edo ln -sf /proc/self/mounts "${ROOT}"/etc/mtab
 
     # /usr structure
-    for x in usr{,/bin,/include,/${LIBDIR},/sbin,/share,/src}; do
+    for x in usr{,/bin,/include,/sbin,/share,/src}; do
         create_root_owned_directory "${ROOT}${x}"
     done
 
     # /usr/local structure
-    for x in usr/local{,/bin,/etc,/${LIBDIR},/man,/sbin,/share{,/man}}; do
+    for x in usr/local{,/bin,/etc,/man,/sbin,/share{,/man}}; do
         create_root_owned_directory "${ROOT}${x}"
     done
 
@@ -122,14 +138,22 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
-    # create lib -> lib64 symlinks if needed
+    # create LIBDIRs and lib symlinks if applicable
     if [[ ${LIBDIR} != lib ]]; then
-        for x in {,usr/,usr/local/}lib; do
-            if [[ ! -e "${ROOT}${x}" ]]; then
-                edo ln -s "${LIBDIR}" "${ROOT}${x}"
-            elif [[ ! -L "${ROOT}${x}" ]]; then
+        local multibuild_c_target
+        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+            multibuild_switch_build_target C ${multibuild_c_target}
+            create_root_owned_directory "${ROOT}${LIBDIR}"
+            create_root_owned_directory "${ROOT}usr/${LIBDIR}"
+            create_root_owned_directory "${ROOT}usr/local/${LIBDIR}"
+        done
+
+        for x in {,usr/,usr/local/}lib ; do
+            if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
                 die "${x}: Expected a symlink but found a directory"
             fi
+
+            edo ln -sfn "${LIBDIR}" "${ROOT}${x}"
         done
     fi
 }

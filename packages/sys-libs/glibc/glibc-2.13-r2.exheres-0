@@ -38,6 +38,8 @@ src_prepare() {
         -e '77s:tst-dir ::' \
         -e 's:tst-waitid ::' -i "${WORKBASE}"/${PNV}/posix/Makefile
     edo sed -ie '2s:tst-writev::' "${WORKBASE}"/${PNV}/sysdeps/wordsize-64/Makefile
+
+    glibc_src_prepare
 }
 
 # It takes a while.

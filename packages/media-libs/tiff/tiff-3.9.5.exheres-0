@@ -1,6 +1,8 @@
 # Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="Library and utilities for handling TIFF-files"
 HOMEPAGE="http://remotesensing.org/libtiff/"
 DOWNLOADS="http://download.osgeo.org/libtiff/${PNV}.tar.gz"
@@ -8,17 +10,15 @@ DOWNLOADS="http://download.osgeo.org/libtiff/${PNV}.tar.gz"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="jpeg opengl"
+MYOPTIONS="jpeg opengl multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        jpeg? ( media-libs/jpeg )
-        opengl? (
-            x11-dri/freeglut
-            x11-dri/mesa
-            x11-libs/libX11
-            x11-libs/libICE
-        )
+        jpeg? ( media-libs/jpeg[multibuild_c:*(?)?] )
+        opengl? ( x11-dri/freeglut[multibuild_c:*(?)?]
+                  x11-dri/mesa[multibuild_c:*(?)?]
+                  x11-libs/libX11[multibuild_c:*(?)?]
+                  x11-libs/libICE[multibuild_c:*(?)?] )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -28,4 +28,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( jpeg )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'opengl x' )
+
+src_configure() {
+    easy-multibuild_src_configure
+
+    if option multibuild_c:32 ; then
+        edo sed -e 's,lib64\/ ,lib32\/ ,g' -i "${WORKBASE}/C/32/libtool"
+    fi
+}
 

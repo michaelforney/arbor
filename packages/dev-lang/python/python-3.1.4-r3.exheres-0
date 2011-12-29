@@ -5,14 +5,14 @@ require python-build
 
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
-src_prepare() {
-    python-build_src_prepare
+prepare_one_multibuild() {
+    python-build_prepare_one_multibuild
 
     edo sed -ie "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
         Lib/distutils/tests/test_install.py
 }
 
-src_test() {
+test_prepare_one_multibuild() {
     local DISABLE_TESTS
     # test_install_lib (test_distuils) has problems with path resolution
     # the rest want to bind to 0.0.0.0/::
@@ -27,7 +27,7 @@ src_test() {
     # needed for test_xmlrpc
     esandbox allow_net --connect "inet:127.0.0.1@9999"
 
-    python-build_src_test
+    python-build_test_prepare_one_multibuild
 
     esandbox disallow_net --connect "inet:127.0.0.1@80"
     esandbox disallow_net --connect "inet6:::1@80"

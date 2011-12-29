@@ -2,6 +2,8 @@
 # Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require flag-o-matic easy-multibuild
+
 SUMMARY="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
 DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
@@ -9,11 +11,10 @@ DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
 LICENCES="( bzip2-withdocs ) [[ last-checked = 1.0.6 ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_INSTALL_PARAMS=( PREFIX="${IMAGE}" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 
 src_prepare() {
@@ -48,13 +49,40 @@ src_prepare() {
             -i Makefile
 }
 
-src_compile() {
-    emake -f Makefile-libbz2_so
-    emake
+configure_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+    edo cp "${WORK}"/* "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
 }
 
-src_install() {
-    default
+compile_one_multibuild() {
+    filter-flags -m32
+    case "${MULTIBUILD_TARGET}" in
+        32) export CC="${CC} -m32";;
+        64) export CC="${CC/ -m32/}";;
+    esac
+
+    local myemake=(
+        CC="${CC}"
+        AR="${AR}"
+        RANLIB="${RANLIB}"
+    )
+
+    emake "${myemake[@]}" -f Makefile-libbz2_so
+    emake "${myemake[@]}" $(multibuild_default_target C || echo libbz2.a)
+}
+
+test_one_multibuild() {
+    multibuild_default_target C && default
+}
+
+install_one_multibuild() {
+    if multibuild_default_target C; then
+        emake PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANPREFIX="${IMAGE}"/usr/share install
+        emagicdocs
+    else
+        into /
+        dolib.a libbz2.a
+    fi
 
     # Install shared libraries to /${LIBDIR}
     into /
@@ -63,10 +91,12 @@ src_install() {
         dosym libbz2.so.${PV} /${LIBDIR}/${v}
     done
 
-    # Fix symlinks linking to ${IMAGE}
-    dosym bzgrep /bin/bzegrep
-    dosym bzgrep /bin/bzfgrep
-    dosym bzmore /bin/bzless
-    dosym bzdiff /bin/bzcmp
+    if multibuild_default_target C; then
+        # Fix symlinks linking to ${IMAGE}
+        dosym bzgrep /bin/bzegrep
+        dosym bzgrep /bin/bzfgrep
+        dosym bzmore /bin/bzless
+        dosym bzdiff /bin/bzcmp
+    fi
 }
 

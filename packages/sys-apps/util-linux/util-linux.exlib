@@ -2,6 +2,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://git.kernel.org/?p=utils/${PN}/${PN}.git"
 DOWNLOADS="ftp://ftp.infradead.org/pub/${PN}/v$(ever range 1-2)/${PNV}.tar.bz2"
@@ -14,7 +16,7 @@ UPSTREAM_RELEASE_NOTES="${MY_UPSTREAM}-ReleaseNotes"
 
 LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -25,28 +27,30 @@ DEPENDENCIES="
         ]]
         dev-lang/perl:*
         sys-fs/udev[>=112]
-        sys-libs/ncurses[>=5.6]
-        sys-libs/pam
-        sys-libs/zlib
+        sys-libs/ncurses[>=5.6][multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
+        sys-libs/pam[multibuild_c:*(?)?]
 "
-
-# --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --libdir=/${LIBDIR}
-    --enable-cramfs
-    --enable-libblkid
-    --enable-libmount
-    --enable-nls
-    --enable-partx
-    --with-pam
-    --without-utempter
-    --without-selinux
-)
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
+configure_one_multibuild() {
+    # --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
+    econf \
+        --libdir=/${LIBDIR} \
+        --enable-cramfs \
+        --enable-libblkid \
+        --enable-libmount \
+        --enable-nls \
+        --enable-partx \
+        --with-pam \
+        --without-selinux \
+        --without-utempter
+}
+
 src_install() {
-    default
+    easy-multibuild_src_install
     edo rmdir "${IMAGE}"/usr/share/man/ru/man1
     edo rmdir "${IMAGE}"/usr/share/man/ru
 }
+

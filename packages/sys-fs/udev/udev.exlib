@@ -12,7 +12,7 @@ else
     "
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
 
@@ -34,6 +34,7 @@ MYOPTIONS="
     gobject-introspection [[ requires = [ glib ] ]]
     sound [[ description = [ install extra rules for sound cards ] ]]
     systemd [[ description = [ install systemd service files ] ]]
+    multibuild_c: 32 64
     platform: ia64
 " # ppc s390
 
@@ -43,7 +44,7 @@ DEPENDENCIES="
         app-doc/gtk-doc-autotools[>=1.15-r1]
     build+run:
         dev-util/gperf[>=3.0.4]
-        acl? ( sys-apps/acl[>=2.2.49] )
+        acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(?)?] )
         glib? ( dev-libs/glib:2[>=2.22.0] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
         sound? (
@@ -79,12 +80,13 @@ udev_src_prepare() {
     autotools_src_prepare
 }
 
-udev_src_configure() {
-    econf --libexecdir=/${LIBDIR}/udev \
+configure_one_multibuild() {
+    econf \
         --sbindir=/sbin \
         --enable-edd \
         --enable-static \
         --with-rootlibdir=/${LIBDIR} \
+        --libexecdir=/${LIBDIR}/udev \
         --without-selinux \
         $(option_enable glib gudev) \
         $(option_enable gobject-introspection introspection) \
@@ -93,10 +95,19 @@ udev_src_configure() {
         $(option_enable sound hwdb)
 }
 
-udev_src_install() {
-    default
+udev_src_configure() {
+    easy-multibuild_src_configure
+}
 
-    keepdir /etc/udev/rules.d /${LIBDIR}/udev/{devices,state}
+install_one_multibuild() {
+    default
+    keepdir /${LIBDIR}/udev/{devices,state}
+}
+
+udev_src_install() {
+    easy-multibuild_src_install
+
+    keepdir /etc/udev/rules.d
 
     # platform rules {{{
     insinto /${LIBDIR}/udev/rules.d
@@ -135,8 +146,8 @@ EOT
         doins "${FILES}"/udev-start.sh
         doins "${FILES}"/udev-stop.sh
 
-        edo sed -e "s,@@libdir@@,${LIBDIR},g"                           \
-                -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-start.sh  \
+        edo sed -e "s,@@libdir@@,${LIBDIR},g"                          \
+                -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-start.sh \
                 -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-stop.sh
     fi
     # }}}

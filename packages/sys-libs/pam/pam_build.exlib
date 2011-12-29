@@ -3,7 +3,7 @@
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic pam
+require flag-o-matic pam easy-multibuild
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
@@ -24,29 +24,16 @@ BUGS_TO="philantrop@exherbo.org"
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
-        sys-devel/flex
+        sys-devel/flex[multibuild_c:*(?)?]
         sys-devel/gettext
     build+run:
-        sys-libs/cracklib[>=2.8.3]
-        net-libs/libtirpc [[ note = [ replace automagic dep with hard ] ]]
+        sys-libs/cracklib[>=2.8.3][multibuild_c:*(?)?]
+        net-libs/libtirpc[multibuild_c:*(?)?] [[ note = [ replace automagic dep with hard ] ]]
 "
-
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --libdir=/${LIBDIR}
-    --disable-audit
-    --disable-prelude
-    --disable-regenerate-docu
-    --disable-selinux
-    --enable-cracklib
-    --enable-db=no
-    --enable-isadir=/${LIBDIR}/security
-    --enable-nls
-    --enable-securedir=/${LIBDIR}/security
-)
 
 WORK=${WORKBASE}/${MY_PNV}
 AT_M4DIR=( m4 )
@@ -67,14 +54,28 @@ pam_build_src_prepare() {
     done
 }
 
-pam_build_src_configure() {
+configure_one_multibuild() {
     # Works around an autoconf 2.62 bug; libintl.h is included before
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
-    append-flags -D_GNU_SOURCE
-    default
+   append-flags -D_GNU_SOURCE
+   econf \
+       --libdir=/${LIBDIR} \
+       --disable-audit \
+       --disable-prelude \
+       --disable-regenerate-docu \
+       --disable-selinux \
+       --enable-cracklib \
+       --enable-db=no \
+       --enable-isadir=/${LIBDIR}/security \
+       --enable-nls \
+       --enable-securedir=/${LIBDIR}/security
 }
 
-pam_build_src_test() {
+pam_build_src_configure() {
+    easy-multibuild_src_configure
+}
+
+test_one_multibuild() {
     if [[ ! -f /etc/pam.d/other ]]; then
         ewarn "Skipping tests. You don't have /etc/pam.d/other."
     else
@@ -82,12 +83,12 @@ pam_build_src_test() {
     fi
 }
 
-pam_build_src_install() {
-    default
-    dodoc doc/txt/*
+pam_build_src_test() {
+    easy-multibuild_src_test
+}
 
-    # install the base pam configuration
-    dopamd "${FILES}"/pam.d/*
+pam_build_src_install() {
+    easy-multibuild_src_install
 
     keepdir /etc/security/limits.d
     keepdir /etc/security/namespace.d
@@ -96,5 +97,10 @@ pam_build_src_install() {
     edo chmod u+s "${IMAGE}"/sbin/unix_chkpwd
 
     edo find "${IMAGE}"/var -type d -empty -delete
+
+    # install the base pam configuration
+    dopamd "${FILES}"/pam.d/*
+
+    dodoc doc/txt/*
 }
 

@@ -1,0 +1,83 @@
+# Copyright 2009 Mike Kelly
+# Distributed under the terms of the GNU General Public License v2
+
+require multibuild
+
+# Which classes should we build for? Defaults to 'C'. Any value listed must be in $MULTIBUILD_CLASSES,
+# in make.defaults in their profiles.
+myexparam classes=[ C ]
+exparam -v EASY_MULTIBUILD_CLASSES classes[@]
+
+myexparam work=
+
+export_exlib_phases src_configure src_compile src_test src_install
+
+# TODO: use less evil haxx to do this
+easy-multibuild_check_classes() {
+    local a
+    for a in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
+        has "${a}" ${MULTIBUILD_CLASSES} \
+            || die "Invalid multibuild class: ${a}"
+    done
+}
+
+easy-multibuild_run_phase() {
+    local targetsv easy_multibuild_work
+
+    # TODO: when paludis handles it better, move this to global scope.
+    easy-multibuild_check_classes
+
+    [[ ${EXHERES_PHASE} != unpack ]] && exparam -v easy_multibuild_work work
+
+    for MULTIBUILD_CLASS in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
+        targetsv="MULTIBUILD_${MULTIBUILD_CLASS}_TARGETS"
+        einfo "Multibuild Class: ${MULTIBUILD_CLASS} (${targetsv})"
+
+        for MULTIBUILD_TARGET in ${!targetsv} ; do
+            if ! option multibuild_${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
+                einfo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
+                continue
+            fi
+
+            einfo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET}"
+            multibuild_switch_build_target "${MULTIBUILD_CLASS}" "${MULTIBUILD_TARGET}"
+
+            if [[ "$(type -t "${EXHERES_PHASE}_prepare_one_multibuild")" == "function" ]] ; then
+                "${EXHERES_PHASE}_prepare_one_multibuild"
+            fi
+
+            edo pushd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${easy_multibuild_work}"
+
+            if [[ "$(type -t "${EXHERES_PHASE}_one_multibuild")" == "function" ]] ; then
+                "${EXHERES_PHASE}_one_multibuild"
+            else
+                default
+            fi
+
+            edo popd
+        done
+    done
+}
+
+configure_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+    export ECONF_SOURCE="${WORK}"
+}
+
+easy-multibuild_src_configure() {
+    easy-multibuild_run_phase
+}
+
+easy-multibuild_src_compile() {
+    easy-multibuild_run_phase
+}
+
+easy-multibuild_src_test() {
+    easy-multibuild_run_phase
+}
+
+easy-multibuild_src_install() {
+    easy-multibuild_run_phase
+    emagicdocs
+}
+

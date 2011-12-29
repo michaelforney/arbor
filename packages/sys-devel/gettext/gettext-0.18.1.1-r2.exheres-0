@@ -1,14 +1,14 @@
 # Copyright 2007, 2009 Bryan Østergaard <kloeri@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ] elisp-optional
+require gnu [ suffix=gz ] elisp-optional easy-multibuild
 
 SUMMARY="GNU localization utilties"
 
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="emacs"
+MYOPTIONS="emacs multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
@@ -31,7 +31,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 )
 
 src_install() {
-    default
+    easy-multibuild_src_install
     option emacs && elisp-install-site-file
 }
 

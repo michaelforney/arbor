@@ -3,7 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-require bash-completion
+require bash-completion easy-multibuild
 
 SUMMARY="D-Bus GLib Bindings"
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/DBusBindings"
@@ -12,7 +12,8 @@ DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="1"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="bash-completion doc verbose"
+MYOPTIONS="bash-completion doc verbose
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -20,9 +21,9 @@ DEPENDENCIES="
         dev-util/pkg-config[>=0.9.0]
         doc? ( dev-doc/gtk-doc[>=1.4] )
     build+run:
-        dev-libs/glib:2[>=2.26]
-        sys-apps/dbus[>=1.2.16]
-        dev-libs/expat
+        dev-libs/glib:2[>=2.26][multibuild_c:*(?)?]
+        sys-apps/dbus[>=1.2.16][multibuild_c:*(?)?]
+        dev-libs/expat[multibuild_c:*(?)?]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -36,12 +37,12 @@ src_configure() {
     edo touch "${WORK}/po/POTFILES.in"
 
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
-    default
+    easy-multibuild_src_configure
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
 }
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     if option bash-completion ; then
         edo dobashcompletion "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh dbus

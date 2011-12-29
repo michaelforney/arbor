@@ -9,7 +9,7 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic
+require flag-o-matic easy-multibuild
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -24,10 +24,11 @@ or 'printer queue changed') and a per-user-login-session daemon (for general IPC
 needs among user applications).
 "
 HOMEPAGE="http://${PN}.freedesktop.org/"
+MYOPTIONS="multibuild_c: 32 64"
 BUGS_TO="philantrop@exherbo.org"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
-MYOPTIONS="baselayout debug doc systemd X"
+MYOPTIONS="baselayout debug doc systemd X ( multibuild_c: 32 64 )"
 
 DEPENDENCIES="
     build:
@@ -52,35 +53,6 @@ DEPENDENCIES="
         ]]
 "
 
-# Testing code (--enable-tests) disabled since building with tests support
-# creates an insecure (sic upstream), non-production use library
-
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --localstatedir=/var
-    --enable-inotify
-    --enable-xml-docs
-    --with-console-auth-dir=/run/console/
-    --with-dbus-user=messagebus
-    --with-session-socket-dir=/tmp
-    --with-system-pid-file=/run/dbus.pid
-    --with-system-socket=/run/dbus/system_bus_socket
-    --with-xml=expat
-    --disable-libaudit
-    --disable-selinux
-    --disable-tests
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "debug asserts"
-    "debug verbose-mode"
-    "doc doxygen-docs"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "systemd systemdsystemunitdir /${LIBDIR}/systemd/system"
-    "X x"
-)
-
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     dcop-howto.txt
     system-activation.txt
@@ -88,25 +60,53 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
 
+configure_one_multibuild() {
+    # Testing code (--enable-tests) disabled since building with tests support
+    # creates an insecure (sic upstream), non-production use library
+    econf                                                \
+        --localstatedir=/var                             \
+        --enable-inotify                                 \
+        --enable-xml-docs                                \
+        --with-console-auth-dir=/run/console/            \
+        --with-dbus-user=messagebus                      \
+        --with-session-socket-dir=/tmp                   \
+        --with-system-pid-file=/run/dbus.pid             \
+        --with-system-socket=/run/dbus/system_bus_socket \
+        --with-xml=expat                                 \
+        --disable-libaudit                               \
+        --disable-selinux                                \
+        --disable-tests                                  \
+        $(option_enable debug asserts)                   \
+        $(option_enable debug verbose-mode)              \
+        $(option_enable doc doxygen-docs)                \
+        $(option_with X x)                               \
+        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+}
+
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
-    default
+    easy-multibuild_src_configure
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
 }
 
 dbus_src_compile() {
     # get backtraces from applications
     append-flags -rdynamic
-    default
+    easy-multibuild_src_compile
 }
 
 dbus_src_test() {
-    DBUS_VERBOSE=1 default
+    DBUS_VERBOSE=1 easy-multibuild_src_test
 }
 
-dbus_src_install() {
+install_one_multibuild() {
     default
+    keepdir /usr/${LIBDIR}/dbus-1.0/test
+} 
+
+dbus_src_install() {
+    easy-multibuild_src_install
 
     if ! option doc ; then
         [[ -d "${IMAGE}"/usr/share/doc/${PNVR}/api ]] && edo rmdir "${IMAGE}"/usr/share/doc/${PNVR}/api
@@ -123,7 +123,6 @@ dbus_src_install() {
     keepdir \
             /etc/dbus-1/session.d/              \
             /etc/dbus-1/system.d/               \
-            /usr/${LIBDIR}/dbus-1.0/test        \
             /usr/libexec/dbus-1                 \
             /usr/share/dbus-1/services          \
             /usr/share/dbus-1/system-services   \
@@ -136,4 +135,3 @@ dbus_src_install() {
 
     edo rmdir "${IMAGE}"/var/run/{dbus,}
 }
-

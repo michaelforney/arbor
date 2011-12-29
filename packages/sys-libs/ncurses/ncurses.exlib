@@ -1,64 +1,50 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=gz ]
+require gnu [ suffix=gz ] easy-multibuild
 
-SUMMARY="Free software emulation of curses using Terminfo formats"
+SUMMARY="Free software emulation of curses using terminfo formats"
 
 LICENCES="as-is"
-MYOPTIONS="gpm"
+MYOPTIONS="gpm multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        gpm? ( sys-libs/gpm )
+        gpm? ( sys-libs/gpm[multibuild_c:*(?)?] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --hates=docdir
-    --libdir=/${LIBDIR}
-    --disable-termcap
-    --with-normal
-    --with-shared
-    --without-hashed-db
-)
+configure_one_multibuild() {
+    local myconf=(
+        --hates=docdir
+        --disable-termcap
+        --with-normal
+        --with-shared
+        --without-hashed-db
+        $(option_with gpm)
+    )
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gpm )
+    edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
+    econf --libdir=/${LIBDIR} "${myconf[@]}"
 
-ECONF_SOURCE="${WORK}"
-WORK="${WORKBASE}/build"
-
-src_unpack() {
-    default
-    edo mkdir "${WORK}"
+    edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
+    econf --libdir=/${LIBDIR} --includedir=/usr/include/ncursesw --enable-widec "${myconf[@]}"
 }
 
-src_configure() {
-    edo mkdir "${WORK}/narrow"
-    edo cd "${WORK}/narrow"
-
+compile_one_multibuild() {
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
     default
 
-    edo mkdir "${WORK}/wide"
-    edo cd "${WORK}/wide"
-
-    econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-          --includedir=/usr/include/ncursesw \
-          --enable-widec $(option_with gpm)
-}
-
-src_compile() {
-    edo cd "${WORK}/narrow"
-    default
-
-    edo cd "${WORK}/wide"
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
     default
 }
 
-src_install() {
-    edo cd "${WORK}/narrow"
+install_one_multibuild() {
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
     default
 
-    edo cd "${WORK}/wide"
+    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
     default
 }
 

@@ -1,9 +1,10 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
+# Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
+require multilib toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
 
 SUMMARY="GNU Compiler Collection"
 
@@ -13,6 +14,7 @@ SLOT="$(ever range 1-2)"
 MYOPTIONS="ada doc fortran propolice
     objc   [[ description = [ Build support for the Objective C code language ] ]]
     obj-c++ [[ description = [ Build support for the Objective C++ language ] ]]
+    openmp [[ description = [ build support for OpenMP ] ]]
 "
 REMOTE_IDS="freshmeat:${PN}"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
@@ -76,7 +78,7 @@ if ever at_least 4.6; then
     MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
 fi
 
-WORK="${WORKBASE}/${PN}_build"
+WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}"/${PNV/_p/-}
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
@@ -107,9 +109,17 @@ src_configure() {
         option go && LANGS+=",go"
     fi
 
+    local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )
+    if [[ ${#supported_c_build_targets[@]} -gt 1 ]]; then
+        multilib=--enable-multilib
+    else
+        multilib=--disable-multilib
+    fi
+
     econf \
+        ${multilib} \
+        --libdir=/usr/${LIBDIR} \
         $(ever at_least 4.5.0 || echo --hates=docdir) \
-        --disable-multilib \
         --enable-clocale=gnu \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
@@ -121,6 +131,7 @@ src_configure() {
         $(option_with graphite system-zlib) \
         $(ever at_least 4.6 && option_enable graphite cloog-backend ppl-legacy) \
         $(ever at_least 4.5.0 && echo --with-libelf) \
+        $(option_enable openmp libgomp) \
         $(option_enable propolice libssp)
 }
 
@@ -138,7 +149,8 @@ src_install() {
     default
 
     # Precompiled headers, disable for cross-compiling
-    if ! tc-is-cross-compiler ; then
+    local precompiled_headers=( "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch )
+    if [[ -f ${precompiled_headers[0]} ]] ; then
         insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
         doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
     fi
@@ -156,18 +168,7 @@ src_install() {
 
     edo pushd "${IMAGE}"
 
-    local p
-    for p in usr/${LIBDIR}/*-gdb.py ; do
-        [[ -f ${p} ]] || continue
-        [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
-
-        # http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
-        local p=${p##*/}
-        edo mv "usr/${LIBDIR}/${p}" "usr/share/gdb/python/auto-load/${p%-gdb.py}"
-    done
-
     ### slots handling
-
     local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
 
     # binaries - slotted properly by upstream, manage with alternatives
@@ -178,39 +179,52 @@ src_install() {
     alternatives+=( /usr/bin/cc gcc )
 
     # libraries
-    for x in usr/${LIBDIR}/*.*; do
-        if [[ -L ${x} ]]; then
-            # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
-            edo rm "${x}"
-            removed+=( "/${x}" ) # just a sanity check
-        elif [[ -f ${x} ]]; then
-            bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
-            ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
-            case "${bn}" in
-                # always use newest available so version and create so symlinks
-                libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
-                    # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
-                    # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
-                    # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
-                    edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
-                    so_symlinks+=( "${x}" )
-                    ;;
-                # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
-                libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
-                    # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
-                    [[ ${bn} == libstdc++.so.* ]] && libstdcpp="${bn}"
-                    so_symlinks+=( "${x}" )
-                    ;;
-                # always use newest available version
-                *.a|*.la|*.spec|*.security|*.properties)
-                    # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
-                    # symlinks+=( usr/lib/libstdc++-4.3.la )
-                    edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-                    symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
-                    ;;
-            esac
-        fi
+    local libdir
+    all_libdirs=$(get_all_libdirs || die "get_all_libdirs failed")
+    for libdir in ${all_libdirs}; do
+        for x in usr/${libdir}/*-gdb.py ; do
+            [[ -f ${x} ]] || continue
+            [[ -d ${IMAGE}/usr/share/gdb/python/auto-load ]] || dodir /usr/share/gdb/python/auto-load
+
+            # http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
+            local x=${x##*/}
+            edo mv "usr/${libdir}/${x}" "usr/share/gdb/python/auto-load/${x%-gdb.py}"
+        done
+
+        for x in usr/${libdir}/*.* ; do
+            if [[ -L ${x} ]]; then
+                # letting the build system generate symlinks in src_install results in collisions, instead we do it in pkg_postinst
+                edo rm "${x}"
+                removed+=( "/${x}" ) # just a sanity check
+            elif [[ -f ${x} ]]; then
+                bn=$(basename "${x}") # libffi.so.4.0.1 libstdc++.so.6.0.10 libstdc++.la
+                ext=${bn#*.}          #        so.4.0.1           so.6.0.10           la
+                case "${bn}" in
+                    # always use newest available so version and create so symlinks
+                    libffi.so*|libgcc_s.so*|libgcj_bc.so*|libgomp.so*|libobjc.so*|*.so.0.0.0)
+                        # rename usr/lib/{libffi.so.4.0.1 => libffi-4.3.so.4.0.1}
+                        # symlinks+=( usr/lib/libffi-4.3.so.4.0.1 )
+                        # so_symlinks+=( usr/lib/libffi.so.4.0.1 )
+                        edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                        symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                        so_symlinks+=( "${x}" )
+                        ;;
+                    # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
+                    libgcj-tools.so*|libgcj.so*|libgfortran.so*|libgij.so*|libstdc++.so*)
+                        # so_symlinks+=( usr/lib/libstdc++.so.6.0.10 )
+                        [[ ${bn} == libstdc++.so.* ]] && libstdcpp="${bn}"
+                        so_symlinks+=( "${x}" )
+                        ;;
+                    # always use newest available version
+                    *.a|*.la|*.spec|*.security|*.properties)
+                        # rename usr/lib/{libstdc++.la => libstdc++-4.3.la}
+                        # symlinks+=( usr/lib/libstdc++-4.3.la )
+                        edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
+                        symlinks+=( "${x%.${ext}}-${SLOT}.${ext}" )
+                        ;;
+                esac
+            fi
+        done
     done
 
     # info pages
@@ -248,7 +262,11 @@ src_install() {
 
     # java
     if option java; then
-        for x in usr/${LIBDIR}/security/classpath.security usr/share/java/ecj.jar; do
+        local classpaths=()
+        for libdir in ${all_libdirs}; do
+            classpaths+=( usr/${libdir}/security/classpath.security )
+        done
+        for x in "${classpaths[@]}" usr/share/java/ecj.jar; do
             bn=$(basename "${x}")
             ext=${bn#*.}
             edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
@@ -261,7 +279,9 @@ src_install() {
     edo popd
 
     # fix libstdc++.so symlink
-    edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${LIBDIR} /usr/${LIBDIR}
+    for libdir in ${all_libdirs}; do
+        edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir}
+    done
 
     for dir in "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
         if [[ -d ${dir} ]] ; then

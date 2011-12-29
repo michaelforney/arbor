@@ -9,6 +9,8 @@ else
     require gnu [ suffix=bz2 ]
 fi
 
+require easy-multibuild
+
 export_exlib_phases src_prepare src_test
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
@@ -19,14 +21,13 @@ else
     LICENCES="GPL-3"
 fi
 SLOT="0"
-MYOPTIONS="doc"
+MYOPTIONS="doc multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         doc? ( dev-doc/gtk-doc[>=1.1] )
     build+run:
-        dev-libs/libtasn1[>=1.8]
-        sys-libs/zlib[>=1.2.3]
+        sys-libs/zlib[>=1.2.3][multibuild_c:*(?)?]
 "
 
 if ever at_least 3.0.8; then
@@ -34,19 +35,19 @@ if ever at_least 3.0.8; then
         build:
             app-arch/xz
         build+run:
-            dev-libs/libtasn1[>=2.10]
-            dev-libs/nettle[>=2.4]
+            dev-libs/libtasn1[>=2.10][multibuild_c:*(?)?]
+            dev-libs/nettle[>=2.4][multibuild_c:*(?)?]
     "
 elif ever at_least 2.12.14; then
     DEPENDENCIES+="
         build+run:
-            dev-libs/libtasn1[>=2.10]
-            dev-libs/nettle[>=2.1]
+            dev-libs/libtasn1[>=2.10][multibuild_c:*(?)?]
+            dev-libs/nettle[>=2.1][multibuild_c:*(?)?]
     "
 else
     DEPENDENCIES+="
         build+run:
-            dev-libs/libgcrypt[>=1.2.4&<1.5]
+            dev-libs/libgcrypt[>=1.2.4&<1.5][multibuild_c:*(?)?]
     "
 fi
 
@@ -60,7 +61,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
 AT_M4DIR=( m4 gl/m4 )
 
-gnutls_src_prepare() {
+prepare_one_multibuild() {
     # Source: Trond A Ekseth <troeks@gmail.com>
     # Upstream: No
     # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
@@ -87,7 +88,11 @@ gnutls_src_prepare() {
     fi
 }
 
-gnutls_src_test() {
+gnutls_src_prepare() {
+    easy-multibuild_src_prepare
+}
+
+test_one_multibuild() {
     if ever at_least 2.12.14; then
         esandbox allow_net "LOOPBACK@80"
         esandbox allow_net "LOOPBACK@5559"
@@ -103,5 +108,9 @@ gnutls_src_test() {
         esandbox disallow_net --connect "LOOPBACK@5559"
         esandbox disallow_net --connect "inet:127.0.0.1@80"
     fi
+}
+
+gnutls_src_test() {
+    easy-multibuild_src_test
 }
 

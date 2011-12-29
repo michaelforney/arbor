@@ -3,7 +3,7 @@
 # Based in part upon 'cups-1.3.8-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] pam systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] pam easy-multibuild [ work=${PNV} ] systemd-service
 
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
@@ -20,7 +20,8 @@ ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS 
 libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
 pdf [[ description = [ Support pdf printing via pdftops from poppler ] ]]
 tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
-linguas: ${LANGS}"
+linguas: ( ${LANGS} )
+multibuild_c: ( 32 64 )"
 
 # TODO:
 # options: java kerberos php slp
@@ -33,9 +34,10 @@ DEPENDENCIES="
         gnutls? ( dev-util/pkg-config )
     build+run:
         group/lpadmin
-        dev-libs/libpaper
-        media-libs/jpeg
-        media-libs/libpng
+        dev-libs/libpaper[multibuild_c:*(?)?]
+        media-libs/jpeg[multibuild_c:*(?)?]
+        media-libs/libpng[multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
         acl? ( sys-apps/acl )
         avahi? ( net-dns/avahi[dns_sd] )
         dbus? ( sys-apps/dbus )
@@ -47,7 +49,7 @@ DEPENDENCIES="
         perl? ( dev-lang/perl )
         python? ( dev-lang/python:* )
         tcpd? ( sys-apps/tcp-wrappers )
-        tiff? ( media-libs/tiff )
+        tiff? ( media-libs/tiff[multibuild_c:*(?)?] )
     post:
         app-text/ghostscript[cups] [[ note = [ pstoraster, pdftoraster ] ]]
         pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
@@ -61,13 +63,19 @@ REMOTE_IDS="freshmeat:cups"
 # testsuite has lots of FAILs for now, will check into those next version
 RESTRICT="test"
 
-DEFAULT_SRC_INSTALL_PARAMS+=(
-    BUILDROOT="${IMAGE}"
-)
+WORK="${WORKBASE}"
+
+unpack_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
+
+src_unpack() {
+    easy-multibuild_run_phase
+}
 
 AT_M4DIR=( config-scripts )
 
-src_prepare() {
+prepare_one_multibuild() {
     # remove default optimizations and do not strip by default
     edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
             -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
@@ -92,7 +100,15 @@ src_prepare() {
     autotools_src_prepare
 }
 
-src_configure() {
+src_prepare() {
+    easy-multibuild_run_phase
+}
+
+configure_prepare_one_multibuild() {
+    :
+}
+
+configure_one_multibuild() {
     local myconf=()
 
     for lang in ${LANGS}; do
@@ -139,11 +155,26 @@ src_configure() {
         $(option_with perl) \
         $(option_with python) \
         $(option_with xinetd xinetd /etc/xinetd.d) \
+        DSOFLAGS="${CFLAGS}" LDFLAGS="${CFLAGS} ${LDFLAGS}" \
         "${myconf[@]}"
 }
 
-src_install() {
-    default
+compile_one_multibuild() {
+    if multibuild_default_target C; then
+        emake
+    else
+        emake libs
+    fi
+}
+
+install_one_multibuild() {
+    if ! multibuild_default_target C; then
+        emake -j1 BUILDROOT="${IMAGE}" install-libs
+        return
+    fi
+
+    emake -j1 BUILDROOT="${IMAGE}" install
+    emagicdocs
 
     keepdir /usr/libexec/cups/driver /usr/share/cups/{model,profiles} \
             /var/cache/cups/rss /var/log/cups /var/spool/cups/tmp
@@ -173,16 +204,21 @@ src_install() {
 }
 
 src_test() {
-    # 1 = medium testsuite
-    emake unittests
-    edo cd test
-    USER=paludisbuild edo ./run-stp-tests.sh 1 2 n
+    if option multibuild_c:"${MULTIBUILD_C_DEFAULT_TARGET}" ; then
+        edo cd "${WORKBASE}/C/${MULTIBUILD_C_DEFAULT_TARGET}"
+        # 1 = medium testsuite
+        emake unittests
+        edo cd test
+        USER=paludisbuild edo ./run-stp-tests.sh 1 2 n
+    fi
 }
 
 RESTRICT_src_test_expensive() {
-    # 4 = torture testsuite :P
-    emake unittests
-    edo cd test
-    USER=paludisbuild edo ./run-stp-tests.sh 4 2 n
+    if option multibuild_c:"${MULTIBUILD_C_DEFAULT_TARGET}" ; then
+        edo cd "${WORKBASE}/C/${MULTIBUILD_C_DEFAULT_TARGET}"
+        # 4 = torture testsuite :P
+        emake unittests
+        edo cd test
+        USER=paludisbuild edo ./run-stp-tests.sh 4 2 n
+    fi
 }
-

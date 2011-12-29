@@ -1,6 +1,8 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require multibuild
+
 SUMMARY="Compatibility package for running binaries linked against a pre gcc 3.4 libstdc++"
 HOMEPAGE="http://gcc.gnu.org/${PN}/"
 DOWNLOADS="mirror://gnu/gcc/gcc-${PV}/gcc-${PV}.tar.bz2"
@@ -17,7 +19,7 @@ DEPENDENCIES="
         dev-tcl/expect
 "
 
-WORK="${WORKBASE}/${PN}_build"
+WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}/gcc-${PV}"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -32,12 +34,44 @@ src_unpack() {
     edo mkdir "${WORK}"
 }
 
+src_configure() {
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        edo mkdir "${WORK}/${multibuild_c_target}"
+        edo cd "${WORK}/${multibuild_c_target}"
+
+        default
+    done
+}
+
+src_compile() {
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        edo cd "${WORK}/${multibuild_c_target}"
+        default
+    done
+}
+
 src_test_expensive() {
     emake check
 }
 
 src_install() {
-    emake -j1 -C "${WORK}" DESTDIR="${IMAGE}" install-target-libstdc++-v3
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        edo cd "${WORK}/${multibuild_c_target}"
+
+        emake DESTDIR="${IMAGE}" install-target-libstdc++-v3
+    done
 
     # We only care about the shared library
     edo rm -rf "${IMAGE}"/usr/[^l]*

@@ -6,6 +6,7 @@ if ever at_least 2.31.6 ; then
 else
     require gnome.org
 fi
+require easy-multibuild
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
@@ -19,6 +20,8 @@ synchronize their operation.
 "
 HOMEPAGE="http://www.gtk.org"
 DOWNLOADS+=" http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz"
+
+MYOPTIONS="multibuild_c: 32 64"
 
 LICENCES="LGPL-2"
 
@@ -35,12 +38,16 @@ glib_src_prepare() {
     default
 }
 
-glib_src_install() {
+install_one_multibuild() {
     default
     keepdir "/usr/${LIBDIR}/gio/modules"
 }
 
-glib_src_test() {
+glib_src_install() {
+    easy-multibuild_src_install
+}
+
+test_one_multibuild() {
     unset DISPLAY
     unset DBUS_SESSION_BUS_ADDRESS
     unset DBUS_SESSION_BUS_PID
@@ -84,6 +91,10 @@ glib_src_test() {
     esandbox disallow_net 'unix-abstract:/tmp/dbus-*'
 
     edo kill ${DBUS_SESSION_BUS_PID}
+}
+
+glib_src_test() {
+    easy-multibuild_src_test
 }
 
 export_exlib_phases src_prepare src_install src_test

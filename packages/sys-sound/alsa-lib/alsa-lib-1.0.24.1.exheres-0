@@ -1,6 +1,9 @@
 # Copyright 2008 Alexander Færøy <eroyf@exherbo.org>
 # Copyright 2009 Bo Ørsted Andresen <zlin@exherbo.org>
+# Copyright 2010 Adriaan Leijnse <adriaan@leijnse.net>
 # Distributed under the terms of the GNU General Public License v2
+
+require easy-multibuild
 
 SUMMARY="ALSA library"
 HOMEPAGE="http://www.alsa-project.org/"
@@ -9,20 +12,20 @@ DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc python"
+MYOPTIONS="doc python multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         doc? ( app-doc/doxygen[>=1.2.6] )
     build+run:
-        python? ( dev-lang/python:= )
+        python? ( dev-lang/python:=[multibuild_c:*(?)?] )
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MEMORY-LEAK )
 
 src_compile() {
-    default
+    easy-multibuild_src_compile
 
     if option doc; then
         emake doc
@@ -32,7 +35,7 @@ src_compile() {
 }
 
 src_install() {
-    default
+    easy-multibuild_src_install
 
     if option doc; then
         docinto html

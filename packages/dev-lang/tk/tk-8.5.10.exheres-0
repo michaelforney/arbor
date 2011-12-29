@@ -3,7 +3,7 @@
 # Based in part upon 'tk-8.5.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] easy-multibuild
 require sourceforge [ pnv=${PN}${PV}-src project=tcl suffix=tar.gz ]
 
 MY_PNV="${PN}${PV}"
@@ -20,20 +20,20 @@ HOMEPAGE="http://www.tcl.tk/"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="debug truetype"
+MYOPTIONS="debug truetype multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
         x11-proto/scrnsaverproto
     build+run:
-        dev-lang/tcl[~${PV}]
-        x11-libs/libX11
-        x11-libs/libXext
-        x11-libs/libXScrnSaver
-        x11-libs/libXrender
-        x11-libs/libXt
-        truetype? ( x11-libs/libXft )
+        dev-lang/tcl[~${PV}][multibuild_c:*(?)?]
+        x11-libs/libX11[multibuild_c:*(?)?]
+        x11-libs/libXext[multibuild_c:*(?)?]
+        x11-libs/libXScrnSaver[multibuild_c:*(?)?]
+        x11-libs/libXrender[multibuild_c:*(?)?]
+        x11-libs/libXt[multibuild_c:*(?)?]
+        truetype? ( x11-libs/libXft[multibuild_c:*(?)?] )
 "
 
 WORK="${WORKBASE}/${MY_PNV}/unix"
@@ -41,13 +41,16 @@ WORK="${WORKBASE}/${MY_PNV}/unix"
 RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}/${PN}-8.5.7-multilib.patch" )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'debug symbols' 'truetype xft' )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-threads
-    --with-tcl=/usr/${LIBDIR}
-)
 
-src_install() {
+configure_one_multibuild() {
+    econf \
+        --enable-threads \
+        --with-tcl=/usr/${LIBDIR} \
+        $(option_enable debug symbols) \
+        $(option_enable truetype xft)
+}
+
+install_one_multibuild() {
     default
     nonfatal emake DESTDIR="${IMAGE}" install-private-headers || die "emake install-private-headers failed"
 

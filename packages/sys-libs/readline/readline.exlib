@@ -11,7 +11,7 @@ else
     PATCH_LEVEL=0
 fi
 
-require gnu [ suffix=gz ]
+require flag-o-matic gnu [ suffix=gz ] easy-multibuild
 
 export_exlib_phases src_prepare
 
@@ -37,16 +37,17 @@ UPSTREAM_CHANGELOG="http://cnswww.cns.cwru.edu/php/chet/${PN}/CHANGES"
 
 LICENCES="GPL-3"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/ncurses"
+        sys-libs/ncurses[multibuild_c:*(?)?]"
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --libdir=/${LIBDIR} )
 DEFAULT_SRC_INSTALL_PARAMS=(
+    htmldir="/usr/share/doc/${PNVR}/html"
+
     # only affects where examples go and only when static is enabled
     installdir="/usr/share/doc/${PNVR}/examples"
 )
@@ -62,9 +63,21 @@ readline_src_prepare() {
 
     # Gentoo #71420
     edo sed -e 's:^SHLIB_LIBS=:SHLIB_LIBS=-lncurses:' -i support/shobj-conf
+
+    default
 }
 
-src_install() {
+configure_one_multibuild() {
+    filter-flags -m32
+    case "${MULTIBUILD_TARGET}" in
+        32) export CC="${CC} -m32";;
+        64) export CC="${CC/ -m32/}";;
+    esac
+
+    econf --hates=libdir --libdir=/${LIBDIR}
+}
+
+install_one_multibuild() {
     default
     edo rmdir "${IMAGE}"/usr/bin
 }

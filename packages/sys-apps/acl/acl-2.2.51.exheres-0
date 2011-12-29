@@ -3,6 +3,8 @@
 # Based in part upon 'acl-2.2.47.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
+require flag-o-matic easy-multibuild [ work=${PNV} ]
+
 SUMMARY="Access control list utilities, libraries and headers"
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
 DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
@@ -10,30 +12,33 @@ DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="nfs [[ description = [ Add support for NFS acls ] ]]"
+MYOPTIONS="nfs [[ description = [ Add support for NFS acls ] ]]
+           multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
-        sys-apps/attr[>=2.4]
+        sys-apps/attr[>=2.4][multibuild_c:*(?)?]
         nfs? ( net-libs/libnfsidmap )
 "
+
+WORK="${WORKBASE}"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}"/${PN}-2.2.49-quote-strchr.patch
     -p1 "${FILES}"/${PN}-2.2.51-config-shell.patch
 )
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --bindir=/bin
-    --libdir=/${LIBDIR}
-    --libexecdir=/usr/${LIBDIR}
-    --enable-gettext
-    --enable-shared
-)
+unpack_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
 
-src_prepare() {
+src_unpack() {
+    easy-multibuild_run_phase
+}
+
+prepare_one_multibuild() {
     # hack PATH with AC_PATH_PROG
     edo sed -e '/^as_dummy=/s:=":="$PATH$PATH_SEPARATOR:' \
             -i configure
@@ -45,15 +50,28 @@ src_prepare() {
     default
 }
 
-src_configure() {
-    unset PLATFORM # cf. Gentoo bug 184564
-    export OPTIMIZER=${CFLAGS}
-    export DEBUG=-DNDEBUG
-
-    default
+src_prepare() {
+    easy-multibuild_run_phase
 }
 
-src_install() {
+configure_prepare_one_multibuild() { :; }
+
+configure_one_multibuild() {
+    filter-flags -m32
+    case "${MULTIBUILD_TARGET}" in
+        32) export CC="${CC} -m32";;
+        64) export CC="${CC/ -m32/}";;
+    esac
+
+    unset PLATFORM # cf. Gentoo bug 184564
+    export OPTIMIZER="${CFLAGS}"
+    export DEBUG="-DNDEBUG"
+
+    econf --bindir=/bin --libdir=/${LIBDIR} \
+          --libexecdir=/usr/${LIBDIR} --enable-gettext --enable-shared
+}
+
+install_one_multibuild() {
     emake -j1 DIST_ROOT="${IMAGE}" install install-dev install-lib
 
     # We don't install static libraries, remove symlink to /${LIBDIR}

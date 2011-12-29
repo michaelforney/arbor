@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=bz2 ]
+require gnu [ suffix=bz2 ] easy-multibuild
 
 SUMMARY="GNU Multiple Precision arithmetic library"
 HOMEPAGE="http://${PN}lib.org"
@@ -14,7 +14,8 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/${PN}$(ever range 1-2).html [[ lang = en ]]"
 LICENCES="GPL-3 LGPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="platform: amd64 ppc64 x86"
+MYOPTIONS="multibuild_c: 32 64
+    platform: amd64 ppc64 x86"
 
 DEPENDENCIES="
     build:
@@ -29,7 +30,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-readline
 )
 
-src_configure() {
+configure_one_multibuild() {
     local a platform_to_abi=( amd64:64 ppc64:mode64 x86:32 )
     for a in "${platform_to_abi[@]}"; do
         if option platform:${a%:*}; then

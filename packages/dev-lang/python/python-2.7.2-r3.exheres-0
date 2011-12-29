@@ -14,8 +14,8 @@ DEPENDENCIES+="
 
 DEFAULT_SRC_CONFIGURE_PARAMS+=( '--with-system-expat' )
 
-src_prepare() {
-    python-build_src_prepare
+prepare_one_multibuild() {
+    python-build_prepare_one_multibuild
 
     # replace still to be done libdir variables
     edo sed -ie "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
@@ -23,7 +23,7 @@ src_prepare() {
         Lib/test/test_site.py
 }
 
-src_test() {
+test_prepare_one_multibuild() {
     local DISABLE_TESTS
     # test_install_lib (test_distuils) has problems with path resolution
     # the rest wants to bind to 0.0.0.0/::
@@ -38,8 +38,6 @@ src_test() {
     esandbox allow_net "unix-abstract:python-test-hello"
     esandbox allow_net "unix-abstract:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
 
-    python-build_src_test
-
-    esandbox disallow_net --connect "inet:127.0.0.1@0"
+    python-build_test_prepare_one_multibuild
 }
 

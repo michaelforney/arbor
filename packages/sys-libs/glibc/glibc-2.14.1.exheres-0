@@ -14,7 +14,6 @@ DEPENDENCIES="
 "
 
 src_prepare() {
-    default
     edo cd "${ECONF_SOURCE}"
     expatch -p0 "${FILES}"/${PN}-2.11.2-i686.patch
     expatch "${FILES}"/${PNV}-fix-bug-regex32.patch
@@ -31,6 +30,8 @@ src_prepare() {
     edo sed -e 's:tst-writev$::' -i "${WORKBASE}"/${PNV}/sysdeps/wordsize-64/Makefile
     # libc.so: text relocations used (could cause problems, no reports yet)
     edo sed -e 's/tests: $(objpfx)check-textrel.out/tests:/' -i "${WORKBASE}"/${PNV}/elf/Makefile
+
+    glibc_src_prepare
 }
 
 src_test() {

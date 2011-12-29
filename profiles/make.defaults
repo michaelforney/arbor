@@ -7,3 +7,10 @@ CONFIG_PROTECT_MASK="/etc/env.d /etc/xdg"
 # Prevent Python from trying to violate the sandbox when importing a
 # module that doesn't already have suitable bytecode written
 PYTHONDONTWRITEBYTECODE=1
+
+MULTIBUILD_CLASSES="C"
+
+MULTIBUILD_C_REQUIRED_VARS="CHOST CBUILD LIBDIR PKG_CONFIG_PATH"
+MULTIBUILD_C_LOCKED_VARS=${MULTIBUILD_C_REQUIRED_VARS}
+MULTIBUILD_C_STACKED_VARS="CFLAGS CXXFLAGS LDFLAGS"
+

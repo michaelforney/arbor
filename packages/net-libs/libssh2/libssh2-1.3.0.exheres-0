@@ -1,6 +1,8 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="A library implementing the SSH2 protocol"
 HOMEPAGE="http://www.${PN}.org"
 DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
@@ -13,13 +15,13 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs.html [[ lang = en ]]"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="gcrypt"
+MYOPTIONS="gcrypt multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-       !gcrypt? ( dev-libs/openssl )
-        gcrypt? ( dev-libs/libgcrypt )
-        sys-libs/zlib
+        sys-libs/zlib[multibuild_c:*(?)?]
+        !gcrypt? ( dev-libs/openssl[multibuild_c:*(?)?] )
+        gcrypt? ( dev-libs/libgcrypt[multibuild_c:*(?)?] )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(

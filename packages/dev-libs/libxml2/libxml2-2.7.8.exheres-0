@@ -1,7 +1,7 @@
 # Copyright 2007-2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require python autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require python easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="XML C Parser and Toolkit v2"
 HOMEPAGE="http://www.xmlsoft.org/"
@@ -21,18 +21,20 @@ UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog.html"
 LICENCES="MIT"
 SLOT="2.0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="python readline"
+MYOPTIONS="python readline
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/zlib[>=1.2.5-r1]
-        python? ( dev-lang/python:= )
-        readline? ( sys-libs/readline )
+        sys-libs/zlib[>=1.2.5-r1][multibuild_c:*(?)?]
+        python? ( dev-lang/python:=[multibuild_c:*(?)?] )
+        readline? ( sys-libs/readline[multibuild_c:*(?)?] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/0001-Reactivate-the-shared-library-versionning-script.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-threads --enable-ipv6 --without-icu )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python readline "readline history" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/0001-Reactivate-the-shared-library-versionning-script.patch"
+    -p0 "${FILES}/${PNV}-fix_python_paths.patch"
+)
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
 
 src_unpack() {
@@ -44,11 +46,33 @@ src_unpack() {
 }
 
 src_prepare() {
+    # prevent fetching with wget during src_test
     edo ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/
     autotools_src_prepare
 }
 
-src_install() {
+configure_one_multibuild() {
+    local python_prefix='/usr'
+    multibuild_default_target C || python_prefix="/usr/${CHOST}"
+
+    econf \
+        --with-threads \
+        --enable-ipv6 \
+        --without-icu \
+        $(option_with python python "${python_prefix}") \
+        $(option_with readline) \
+        $(option_with readline history)
+}
+
+test_one_multibuild() {
+    # tests don't support out-of-source builds
+    edo ln -s "${WORK}"/{result,test} .
+    default
+}
+
+install_one_multibuild() {
+    # devhelp doesn't support out-of-source builds
+    edo cp -pPR "${WORK}"/doc/devhelp/* doc/devhelp/
     default
     option python && python_bytecompile
 }

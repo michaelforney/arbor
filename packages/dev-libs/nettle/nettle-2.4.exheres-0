@@ -1,6 +1,8 @@
 # Copyright 2011 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="A cryptographic library that is designed to fit easily in more or less any context"
 HOMEPAGE="http://www.lysator.liu.se/~nisse/nettle"
 DOWNLOADS="http://www.lysator.liu.se/~nisse/archive/${PNV}.tar.gz"
@@ -8,13 +10,13 @@ DOWNLOADS="http://www.lysator.liu.se/~nisse/archive/${PNV}.tar.gz"
 LICENCES="|| ( LGPL-2.1 LGPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/nettle.html [[ lang = en description = manual ]]"
 
 DEPENDENCIES="
     build+run:
-        dev-libs/gmp [[ note = [ for public key algorithms ] ]]
+        dev-libs/gmp[multibuild_c:*(?)?] [[ note = [ for public key algorithms ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(

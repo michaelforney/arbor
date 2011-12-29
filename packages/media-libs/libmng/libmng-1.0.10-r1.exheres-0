@@ -1,7 +1,7 @@
 # Copyright 2008 Kim Højgaard-Hansen
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] easy-multibuild
 require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="The Multiple Network Graphics reference library"
@@ -10,12 +10,12 @@ HOMEPAGE="http://www.libmng.com/"
 LICENCES="libmng"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="lcms"
+MYOPTIONS="lcms multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        media-libs/jpeg
-        lcms? ( media-libs/lcms )"
+        media-libs/jpeg[multibuild_c:*(?)?]
+        lcms? ( media-libs/lcms[multibuild_c:*(?)?] )"
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lcms )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.examples doc/{${PN}.txt,doc.readme} )

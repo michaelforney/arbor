@@ -1,0 +1,78 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008-2009 Ingmar Vanhassel
+# Copyright 2008-2009 Bo Ørsted Andresen
+# Copyright 2009 Saleem Abdulrasool
+# Distributed under the terms of the GNU General Public License v2
+
+require versionator alternatives gnu
+
+SUMMARY="Bootstrap multilib GNU Compiler Collection"
+DOWNLOADS="mirror://gnu/${PN#bootstrap-}/${PNV#bootstrap-}/${PNV#bootstrap-}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+
+MYOPTIONS=""
+
+REMOTE_IDS="freshmeat:${PN#bootstrap-}"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN#bootstrap-}-${SLOT}/"
+UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
+
+# 170 tests fail
+RESTRICT="test"
+#   test-expensive:
+#       dev-util/dejagnu
+#       sys-devel/autogen
+DEPENDENCIES="
+    build:
+        sys-devel/make
+    build+run:
+        dev-libs/gmp[>=4.1]
+        dev-libs/mpfr[>=2.3]
+"
+
+WORK="${WORKBASE}/build"
+ECONF_SOURCE="${WORKBASE}"/${PNV#bootstrap-}
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --program-prefix=bootstrap-
+    --prefix=/usr/${PN}
+    --libdir=/usr/${PN}/${LIBDIR}
+    --enable-languages=c
+    --enable-multilib
+    --with-newlib
+    --without-headers
+    --disable-shared
+    --disable-nls
+    --disable-decimal-float
+    --disable-libgomp
+    --disable-libmudflap
+    --disable-libssp
+    --disable-threads
+    --hates=docdir
+)
+DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
+
+pkg_setup() {
+    if [[ ! -e /usr/include/gnu/stubs-32.h ]] ; then
+        ewarn "/usr/include/gnu/stubs-32.h not found. Creating it."
+        edo touch "/usr/include/gnu/stubs-32.h"
+    fi
+}
+
+src_unpack() {
+    default
+    edo mkdir "${WORK}"
+}
+
+src_install() {
+    default
+
+    edo rm -rf "${IMAGE}"/usr/share/{man,info}/
+    edo rmdir "${IMAGE}"/usr/{${PN}/include,share}
+    if [[ -d "${IMAGE}"/usr/${PN}/${LIBDIR}/gcc/${CHOST}/${PV}/include-fixed ]]; then
+        edo find "${IMAGE}"/usr/${PN}/${LIBDIR}/gcc/${CHOST}/${PV}/include-fixed -type d -empty -delete
+    fi
+}
+

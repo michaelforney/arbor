@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service
+require systemd-service easy-multibuild
 
 export_exlib_phases pkg_pretend src_install # src_test pkg_config
 
@@ -28,11 +28,12 @@ SLOT="0"
 MYOPTIONS="baselayout big-tables debug embedded-server ssl
     big-tables      [[ description = [ Make tables contain up to 1.844E+19 rows ] ]]
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
+    multibuild_c: 32 64
 "
 
 DEPENDENCIES="
     build+run:
-        ssl? ( dev-libs/openssl )
+        ssl? ( dev-libs/openssl[multibuild_c:*(?)?] )
         group/${PN}
         user/${PN}
     suggestion:
@@ -102,7 +103,7 @@ mysql_src_test() {
 fi
 
 mysql_src_install() {
-    default
+    easy-multibuild_src_install
 
     # Contains lots of cruft & some empty dirs
     edo rm -r "${IMAGE}"/usr/{mysql-test,sql-bench}

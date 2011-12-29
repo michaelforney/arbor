@@ -2,10 +2,12 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install
+
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 
-require flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ] kernel
+require multibuild flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ] kernel
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
@@ -21,6 +23,7 @@ DOWNLOADS="${source_uri} ${ports_uri}"
 LICENCES="|| ( GPL-3 GPL-2 ) || ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
 MYOPTIONS="
+    bootstrap
     systemd [[
         description = [ Install systemd service file for name service cache daemon (nscd) ]
     ]]
@@ -33,33 +36,25 @@ DEPENDENCIES="
         sys-apps/sed
         sys-apps/texinfo
         sys-kernel/linux-headers
+        bootstrap? ( sys-devel/bootstrap-gcc )
     run:
         sys-libs/timezone-data"
 
-ECONF_SOURCE="${WORKBASE}"/${PNV}
-WORK="${TEMP}/build"
+WORK="${WORKBASE}/build"
+ECONF_SOURCE="${WORKBASE}/${PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --with-add-ons
-    --with-crypt
-    --with-headers=/usr/include
-    --without-gd
-    "--enable-kernel=$MINIMUM_KERNEL_VERSION"
-    # could also be enabled for <2.12.2 but needs testing
-    $(ever at_least 2.12.2 && echo "--enable-stackguard-randomization")
-)
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
-pkg_pretend() {
-    if [[ ${ROOT} == / ]]; then
-        local replacing=$(best_version --slash ${CATEGORY}/${PN})
-        replacing=${replacing#${CATEGORY}/${PN}-} # strip category and package name
-        replacing=${replacing%::+([^:])} # strip repo name
-        replacing=${replacing%:+([[:digit:]])} # strip slot
-        replacing=${replacing%-r+([[:digit:]])} # strip revision
-        ever at_least ${replacing} ${PV} || die "Downgrading glibc would almost certainly break your system. Aborting."
-    fi
+glibc_pkg_pretend() {
+    local multibuild_c_target
 
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        if ! echo ${CFLAGS} | grep -q -- -march ; then
+            ewarn "-march setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to native"
+        fi
+    done
     if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
         die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
     fi
@@ -75,15 +70,14 @@ pkg_pretend() {
     fi
 }
 
-pkg_setup() {
+glibc_pkg_setup() {
     # glibc doesn't compile with -Os. See bug:
     # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
     replace-flags -Os -O2
 }
 
-src_unpack() {
-    edo mkdir "${WORK}"
-    unpack ${ARCHIVES}
+glibc_src_unpack() {
+    default
 
     if [[ ${PV/_p*} != ${PV} ]] ; then
         edo mv glibc-${PV/_p*}-2* glibc-${PV}
@@ -93,34 +87,118 @@ src_unpack() {
     if [[ -n ${ports_uri} ]] ; then
         edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
     fi
+
+    edo mkdir "${WORK}"
 }
 
-src_configure() {
+glibc_src_prepare() {
+    if option bootstrap ; then
+        sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig" || die "failed to remove gcc_eh linkage"
+        export PATH="/usr/bootstrap-gcc/bin:$PATH"
+        export GCC="bootstrap-gcc"
+    else
+        export GCC="${CC}"
+    fi
+
+    default
+}
+
+glibc_src_configure() {
     if [[ $(eclectic ld show) == gold ]]; then
         edo mkdir "${TEMP}"/bin
         edo ln -sf /usr/${CHOST}/bin/ld.bfd "${TEMP}"/bin/ld
         CC="${CC} -B${TEMP}/bin/"
     fi
-    default
+
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        edo mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
+        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+
+        echo "libc_cv_forced_unwind=yes" > config.cache
+        echo "libc_cv_c_cleanup=yes" >> config.cache
+        echo "libc_cv_slibdir=/${LIBDIR}" >> config.cache
+
+        if ! echo ${CFLAGS} | grep -q -- -march ; then
+            append-flags -march=native
+        fi
+        append-flags -O2
+        # --enable-stackguard-randomization could also be enabled for <2.12.2 but needs testing
+        CC="${GCC} -m${multibuild_c_target}" econf \
+            --libdir="/usr/${LIBDIR}" \
+            --cache-file=config.cache \
+            "--enable-kernel=$MINIMUM_KERNEL_VERSION" \
+            --with-headers=/usr/include \
+            --with-add-ons --with-crypt \
+            $(ever at_least 2.12.2 && echo "--enable-stackguard-randomization") \
+            --without-gd --without-cvs
+        echo "libc_cv_gnu89_inline=yes" >> config.cache
+    done
 }
 
-src_install() {
-    export LANGUAGE=C LC_ALL=C
-    default
+glibc_src_compile() {
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+
+        default
+    done
+}
+
+glibc_src_install() {
+    export LANGUAGE=C
+
+    # Note: the default abi must always be staged last.  We do this as the last
+    # one to get staged will clobber all collisions.  In particular, this will
+    # be all of the executables.  The supporting libraries (libc, nss, etc), are
+    # installed into architecutre specific directories.
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+
+        default
+    done
+
+    # make ld-linux.so.2 accessible to everything that expects to find things in /lib
+    local supported_c_targets=( ${MULTIBUILD_C_TARGETS} )
+    if [[ ${#supported_c_targets[@]} -gt 1 ]]; then
+        dosym ../lib32/ld-linux.so.2 /lib64/ld-linux.so.2
+    fi
+
+    # link every non default locale dir to the default one which is created below
+    local final_libdir=${LIBDIR}
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+
+        if [[ "${multibuild_c_target}" != "${MULTIBUILD_C_DEFAULT_TARGET}" ]] ; then
+            dosym /usr/{${final_libdir},${LIBDIR}}/locale
+        fi
+    done
 
     # localedef fails if /usr/lib/locale does not exist
     keepdir /usr/${LIBDIR}/locale
 
-    # Don't install /etc/{ld.so.cache,localtime}
+    # don't install /etc/{ld.so.cache,localtime}
     for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
         if [[ -f ${file} ]] ; then
             edo rm "${file}"
         fi
     done
-    # Don't install bundled timezone info
+
+    # don't install bundled timezone info
     edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
     cd "${WORKBASE}/${PNV}"
+
     insinto /etc
     doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
 
