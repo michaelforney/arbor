@@ -12,7 +12,9 @@ DOWNLOADS="${HOMEPAGE}/pub/${PN}/ARCHIVE/${PNV}.tar.gz"
 LICENCES="CPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="jpeg png" # perl python ruby"
+MYOPTIONS="jpeg png
+           svg [[ description = [ Support node shapes in svg output ] requires = png ]]
+" # perl python ruby"
 
 DEPENDENCIES="
     build:
@@ -26,6 +28,7 @@ DEPENDENCIES="
         media-libs/fontconfig[>=2.3.95]
         media-libs/freetype:2[>=2.1.10]
         png? ( media-libs/libpng[>=1.2] )
+        svg? ( gnome-desktop/librsvg:2 )
 "
 
 TODO_DEPENDENCIES+="
@@ -71,14 +74,14 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # No swig-bindings yet
     --disable-{guile,java,io,ocaml,php,r,sharp,tcl}
     # No time to test yet :)
-    --without-{cgraph,rsvg,gnomeui,gtk,pangocairo}
+    --without-{cgraph,gnomeui,gtk,pangocairo}
 )
 TODO_DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     perl python ruby
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'svg rsvg'
     # 'cairo pangocairo'
-    # 'cairo rsvg'
     # 'cgraph'
     # 'gtk'
     # option gtk && option_enable gnome gnomeui
