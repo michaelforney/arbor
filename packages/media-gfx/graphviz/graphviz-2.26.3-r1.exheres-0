@@ -14,6 +14,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="jpeg png
            svg [[ description = [ Support node shapes in svg output ] requires = png ]]
+           gtk  [[ description = [ Provides canvas support and cairo renderer ] requires = png ]]
 " # perl python ruby"
 
 DEPENDENCIES="
@@ -29,6 +30,12 @@ DEPENDENCIES="
         media-libs/freetype:2[>=2.1.10]
         png? ( media-libs/libpng[>=1.2] )
         svg? ( gnome-desktop/librsvg:2 )
+        gtk? (
+            x11-libs/cairo[>=1.1.10]
+            x11-libs/gtk+:2[>=2.7]
+            x11-libs/libXaw
+            x11-libs/pango[>=1.12.4]
+        )
 "
 
 TODO_DEPENDENCIES+="
@@ -38,12 +45,6 @@ TODO_DEPENDENCIES+="
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
     build+run:
-        gtk? (
-            x11-libs/cairo
-            x11-libs/gtk+:2
-            x11-libs/libXaw
-            x11-libs/pango
-        )
         lua? ( dev-lang/lua:= )
         perl? ( dev-lang/perl:= )
         python? ( dev-lang/python:= )
@@ -62,11 +63,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-fontconfig
     --with-freetype2
     --with-libgd
+    --with-mylibgd=no
     --without-devil
-    --without-x # cairo,gtk
     # Deprecated crap
     --without-gdk-pixbuf
     --without-ming
+    --without-gtkgl
     # Need to fix install path for thests bindings
     --disable-{perl,python,ruby}
     # dev-lang/lua doesn't install a .so, -fPIC errors
@@ -74,17 +76,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # No swig-bindings yet
     --disable-{guile,java,io,ocaml,php,r,sharp,tcl}
     # No time to test yet :)
-    --without-{cgraph,gnomeui,gtk,pangocairo}
+    --without-cgraph
 )
 TODO_DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     perl python ruby
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'svg rsvg'
-    # 'cairo pangocairo'
+    'gtk x'
+    'gtk pangocairo'
+    'gtk'
     # 'cgraph'
-    # 'gtk'
-    # option gtk && option_enable gnome gnomeui
 )
 
 src_prepare() {
