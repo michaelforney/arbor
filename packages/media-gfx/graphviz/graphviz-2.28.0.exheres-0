@@ -9,7 +9,7 @@ SUMMARY="Open Source Graph Visualization Software"
 HOMEPAGE="http://www.graphviz.org/"
 DOWNLOADS="${HOMEPAGE}/pub/${PN}/ARCHIVE/${PNV}.tar.gz"
 
-LICENCES="CPL-1.0"
+LICENCES="EPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="jpeg png
@@ -53,12 +53,11 @@ TODO_DEPENDENCIES+="
 # Tests require ksh93
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PNV}-libtool.patch )
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --htmldir=/usr/share/doc/${PNVR}/html
     --pdfdir=/usr/share/doc/${PNVR}/pdf
     --enable-ltdl
+    --disable-ltdl-install
     --enable-nls
     --with-fontconfig
     --with-freetype2
@@ -75,8 +74,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-lua
     # No swig-bindings yet
     --disable-{guile,java,io,ocaml,php,r,sharp,tcl}
-    # No time to test yet :)
-    --without-cgraph
+    # Requires extra packages (gts, smyrna, etc.), and doesn't seem to work yet (cgraph)
+    --without-{smyrna,glade,gtkglext,cgraph,gts}
 )
 TODO_DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     perl python ruby
@@ -86,14 +85,13 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'gtk x'
     'gtk pangocairo'
     'gtk'
-    # 'cgraph'
 )
 
 src_prepare() {
     default
 
     edo rm -rf libltdl
-    edo sed -e '/libltdl/d' -i configure.ac
+    edo sed -e '/LT_CONFIG_LTDL_DIR(\[libltdl\])/d' -i configure.ac
 
     # Update bundled copy of libtool with the system one:
     for atrocious_posix_shellscript in /usr/share/libtool/{config/,}install-sh; do
