@@ -50,7 +50,7 @@ elisp-install-site-file() {
     illegal_in_global_scope
 
     local esf=${ELISP_SITE_FILE:-${FILES}/${PN}-exherbo.el.in}
-    einfo "Installing emacs lisp site file"
+    echo "Installing emacs lisp site file"
     if [[ ${esf##*/} != *-exherbo.el.in ]]; then
         # Autoloading happens by filename only.
         # If we don't stick to this convention, collisions might occur
@@ -66,7 +66,7 @@ elisp-install-site-file() {
 elisp-generate-global-site-file() {
     illegal_in_global_scope
 
-    einfo "Generating global emacs lisp site file"
+    echo "Generating global emacs lisp site file"
     local gsf=${ROOT}${ELISP_GLOBAL_SITE_FILE} file reset_shopts=`shopt -p nullglob`
     rm -f "${gsf}"
     shopt -s nullglob
