@@ -4,7 +4,7 @@
 # Copyright 2009 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
-require multilib toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
+require multibuild toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
 
 SUMMARY="GNU Compiler Collection"
 
@@ -180,7 +180,7 @@ src_install() {
 
     # libraries
     local libdir
-    all_libdirs=$(get_all_libdirs || die "get_all_libdirs failed")
+    all_libdirs=$(multibuild_get_all_var C LIBDIR || die "Could not get all LIBDIRs")
     for libdir in ${all_libdirs}; do
         for x in usr/${libdir}/*-gdb.py ; do
             [[ -f ${x} ]] || continue
