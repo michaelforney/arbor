@@ -1,11 +1,8 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-# From https://nodeload.github.com/pocb/boost/tarball/cmake-1.47.0
-DOWNLOADS="http://dev.exherbo.org/~pipping/distfiles/${PNV}.tar.gz"
-MY_MAGIC=5807c3e
-
-MY_PNV=pocb-boost-${MY_MAGIC}
+# From http://gitorious.org/boost/cmake/archive-tarball/cmake-1.48.0
+DOWNLOADS="http://dev.exherbo.org/~pipping/distfiles/boost-cmake-${PV}.tar.gz"
 
 require cmake
 
@@ -31,6 +28,8 @@ DEPENDENCIES="
         dev-lang/python:=
         dev-libs/expat
         dev-libs/icu
+    run:
+        sys-devel/cmake[>=2.8.6] [[ note = [ Contains boost cmake files ] ]]
 "
 
 REMOTE_IDS="freshmeat:${PN}"
@@ -38,7 +37,7 @@ UPSTREAM_CHANGELOG="${HOMEPAGE}/users/news/version_${PV//./_}"
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/boost-1.47.0-exceptions.patch )
 
-WORK=${WORKBASE}/${MY_PNV}
+WORK=${WORKBASE}/boost-cmake
 
 src_configure() {
     local conf=(
@@ -77,6 +76,10 @@ src_install() {
 
         dosym /usr/include/${PN} /usr/share/doc/${PNVR}/html/${PN}
     fi
+
+    # the .cmake files supplied by boost seem
+    # inferior to the ones supplied by cmake
+    edo find "${IMAGE}" -name '*.cmake' -delete
 
     edo find "${IMAGE}" -type d -empty -delete
 }
