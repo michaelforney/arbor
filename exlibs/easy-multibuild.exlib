@@ -31,15 +31,15 @@ easy-multibuild_run_phase() {
 
     for MULTIBUILD_CLASS in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
         targetsv="MULTIBUILD_${MULTIBUILD_CLASS}_TARGETS"
-        einfo "Multibuild Class: ${MULTIBUILD_CLASS} (${targetsv})"
+        echo "Multibuild Class: ${MULTIBUILD_CLASS} (${targetsv})"
 
         for MULTIBUILD_TARGET in ${!targetsv} ; do
             if ! option multibuild_${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
-                einfo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
+                echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
                 continue
             fi
 
-            einfo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET}"
+            echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET}"
             multibuild_switch_build_target "${MULTIBUILD_CLASS}" "${MULTIBUILD_TARGET}"
 
             if [[ "$(type -t "${EXHERES_PHASE}_prepare_one_multibuild")" == "function" ]] ; then
