@@ -36,9 +36,11 @@ bb_make() {
     emake "$@" "${make_options[@]}"
 }
 
-src_compile() {
+src_configure() {
     bb_make defconfig
+}
 
+src_compile() {
     # Build dynamically linked executable and preserve it
     bb_make busybox_unstripped
     edo mv busybox_unstripped{,.dynamic}
