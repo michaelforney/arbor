@@ -1,0 +1,26 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Disable inlining for clang
+See also http://clang.llvm.org/compatibility.html#inline
+--- e2fsprogs-1.41.14/lib/ext2fs/ext2fs.h
++++ e2fsprogs-1.41.14/lib/ext2fs/ext2fs.h
+@@ -25,7 +25,7 @@
+ /*
+  * Non-GNU C compilers won't necessarily understand inline
+  */
+-#if (!defined(__GNUC__) && !defined(__WATCOMC__))
++#if (!defined(__GNUC__) && !defined(__WATCOMC__) || defined(__clang__))
+ #define NO_INLINE_FUNCS
+ #endif
+ 
+--- e2fsprogs-1.41.14/lib/ext2fs/kernel-list.h
++++ e2fsprogs-1.41.14/lib/ext2fs/kernel-list.h
+@@ -24,7 +24,7 @@
+ 	(ptr)->next = (ptr); (ptr)->prev = (ptr); \
+ } while (0)
+ 
+-#if (!defined(__GNUC__) && !defined(__WATCOMC__))
++#if (!defined(__GNUC__) && !defined(__WATCOMC__) || defined(__clang__))
+ #define __inline__
+ #endif
+ 
