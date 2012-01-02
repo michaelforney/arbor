@@ -152,6 +152,7 @@ llvm_src_configure() {
     local enable_docs=
     ever is_scm || exparam -b snapshot || enable_docs=$(option_enable doc doxygen)
     econf \
+        --disable-polly \
         --enable-bindings=none \
         --enable-shared \
         --enable-optimized \
