@@ -8,7 +8,7 @@ PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 prepare_one_multibuild() {
     python-build_prepare_one_multibuild
 
-    edo sed -ie "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
+    edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
         Lib/distutils/tests/test_install.py
 }
 

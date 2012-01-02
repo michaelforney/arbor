@@ -18,7 +18,7 @@ prepare_one_multibuild() {
     python-build_prepare_one_multibuild
 
     # replace still to be done libdir variables
-    edo sed -ie "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
+    edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
         Lib/sysconfig.py \
         Lib/test/test_site.py
 }

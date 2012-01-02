@@ -35,9 +35,9 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 src_prepare() {
     default
     # don't stop on warnings
-    edo sed -ie 's,-Werror,,' "${WORK}/Makefile"
+    edo sed -i -e 's,-Werror,,' "${WORK}/Makefile"
     # use proper libdir
-    edo sed -ie 's,/lib/,/${LIBDIR}/,' "${WORK}/Makefile"
+    edo sed -i -e 's,/lib/,/${LIBDIR}/,' "${WORK}/Makefile"
 }
 
 src_test() {
