@@ -14,12 +14,7 @@ prepare_one_multibuild() {
     python-build_prepare_one_multibuild
 }
 
-test_prepare_one_multibuild() {
-    edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}"
-
-    # Fails for fresh installs
-    edo rm Lib/distutils/tests/test_build_ext.py
-
+test_one_multibuild() {
     local DISABLE_TESTS
     # test_build_ext (test_distutils) fails for fresh installs
     # I've not tested if any python version is compatible so depend on :2.6
@@ -31,7 +26,7 @@ test_prepare_one_multibuild() {
     esandbox allow_net "unix-abstract:python-test-hello"
     esandbox allow_net "unix-abstract:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
 
-    python-build_test_prepare_one_multibuild
+    python-build_test_one_multibuild
 }
 
 install_one_multibuild() {

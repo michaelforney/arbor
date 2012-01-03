@@ -130,16 +130,14 @@ configure_one_multibuild() {
     default
 }
 
-python-build_test_prepare_one_multibuild() {
-    # needed for 32bit tests
-    esandbox allow_net --connect "inet:127.0.0.1@1024-65535"
-    esandbox allow_net --connect "inet6:::1@1024-65535"
-}
-
-test_one_multibuild() {
+python-build_test_one_multibuild() {
     unset DISPLAY
 
     python_enable_pyc
+
+    # needed for 32bit tests
+    esandbox allow_net --connect "inet:127.0.0.1@1024-65535"
+    esandbox allow_net --connect "inet6:::1@1024-65535"
 
     # for test_multiprocessing
     esandbox allow_net "unix:${TEMP%/}/pymp-*/listener-*"
@@ -149,8 +147,14 @@ test_one_multibuild() {
     EXTRATESTOPTS="-w -x ${DISABLE_TESTS}" emake test
 
     esandbox disallow_net "unix:${TEMP%/}/pymp-*/listener-*"
+    esandbox disallow_net --connect "inet:127.0.0.1@1024-65535"
+    esandbox disallow_net --connect "inet6:::1@1024-65535"
 
     python_disable_pyc
+}
+
+test_one_multibuild() {
+    python-build_test_one_multibuild
 }
 
 python-build_install_one_multibuild() {

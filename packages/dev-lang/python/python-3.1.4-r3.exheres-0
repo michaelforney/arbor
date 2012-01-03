@@ -12,7 +12,7 @@ prepare_one_multibuild() {
         Lib/distutils/tests/test_install.py
 }
 
-test_prepare_one_multibuild() {
+test_one_multibuild() {
     local DISABLE_TESTS
     # test_install_lib (test_distuils) has problems with path resolution
     # the rest want to bind to 0.0.0.0/::
@@ -27,7 +27,7 @@ test_prepare_one_multibuild() {
     # needed for test_xmlrpc
     esandbox allow_net --connect "inet:127.0.0.1@9999"
 
-    python-build_test_prepare_one_multibuild
+    python-build_test_one_multibuild
 
     esandbox disallow_net --connect "inet:127.0.0.1@80"
     esandbox disallow_net --connect "inet6:::1@80"
