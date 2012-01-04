@@ -46,7 +46,7 @@ scm-cvs_cvs() {
     fi
     has "${cmd}" update up upd && extra+=( -dP -I.scm.exlib.timestamp )
 
-    ${echo} cd "${dir}" '&&' cvs "${global[@]}" "${cmd}" "${extra[@]}" "${@}"
+    ${echo} cd "${dir}" '&&' cvs "${global[@]}" "${cmd}" "${extra[@]}" "${@}" >&2
     ( cd "${dir}" && cvs "${global[@]}" "${cmd}" "${extra[@]}" "${@}" ) || die_unless_nonfatal "cvs ${cmd} failed"
 }
 

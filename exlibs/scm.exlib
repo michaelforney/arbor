@@ -172,8 +172,7 @@ scm_perform_fetch() {
     fi
 
     if [[ ${status} -eq 3 ]]; then
-        echo rm -rf "${dir}"
-        rm -rf "${dir}"
+        edo rm -rf "${dir}"
         [[ -d ${dir} ]] && die "rm failed"
     fi
 

@@ -43,7 +43,7 @@ scm-bzr_bzr() {
         echo=:
     fi
 
-    ${echo} bzr "${@}"
+    ${echo} bzr "${@}" >&2
     bzr "${@}" || die_unless_nonfatal "bzr ${1} failed"
 }
 

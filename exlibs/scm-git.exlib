@@ -85,7 +85,7 @@ scm-git_git() {
     done
     [[ ${1} != clone && -n ${need_git_dir} ]] && global+=( --git-dir="$(scm_get_var CHECKOUT_TO)" )
 
-    ${echo} git "${global[@]}" "${@}"
+    ${echo} git "${global[@]}" "${@}" >&2
     GIT_PAGER=cat git "${global[@]}" "${@}" || die_unless_nonfatal "git ${1} failed"
 }
 

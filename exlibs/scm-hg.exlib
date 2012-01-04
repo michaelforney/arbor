@@ -56,7 +56,7 @@ scm-hg_hg() {
     done
     [[ ${1} != clone && -n ${need_repository} ]] && global+=( -R"$(scm_get_var CHECKOUT_TO)" )
 
-    ${echo} hg "${global[@]}" "${@}"
+    ${echo} hg "${global[@]}" "${@}" >&2
     hg "${global[@]}" "${@}" || die_unless_nonfatal "hg ${1} failed"
 }
 
