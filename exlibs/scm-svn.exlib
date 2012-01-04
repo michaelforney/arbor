@@ -113,6 +113,10 @@ scm-svn_do_appraise() {
         return 3
     fi
 
+    if [[ "$(nonfatal scm-svn_svn -q info "$(scm_get_var CHECKOUT_TO)"@ 2>&1 >/dev/null)" == *E155036:* ]]; then
+        scm-svn_svn upgrade -q "$(scm_get_var CHECKOUT_TO)"@
+    fi
+
     if [[ $(scm-svn_info URL) != $(scm-svn_uri) ]]; then
         echo "${dir} is a checkout of $(scm-svn_info URL), but wanted $(scm-svn_uri)"
 
