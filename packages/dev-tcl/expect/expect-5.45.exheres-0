@@ -1,10 +1,11 @@
 # Copyright 2008 David Leverton <dleverton@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] sourceforge
+MY_PNV="${PN}${PV}"
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] sourceforge [ pnv=${MY_PNV} suffix=tar.gz ]
 
 SUMMARY="Tool for automating interactive applications"
-
 DESCRIPTION="Expect is a tool for automating interactive applications
 such as telnet, ftp, passwd, fsck, rlogin, tip, etc. Expect really
 makes this stuff trivial. Expect is also useful for testing these same
@@ -17,32 +18,32 @@ absolutely invaluable tool - using it, you will be able to automate
 tasks that you've never even thought of before - and you'll be able to
 do this automation quickly and easily."
 
+REMOTE_IDS+=" freshmeat:${PN}"
+
 # Some of the test files are GPL-2, but I don't think that counts
 LICENCES="public-domain"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="examples tk" # threads is supported by configure, but currently a no-op according to comments
+MYOPTIONS="examples"
 
 DEPENDENCIES="
     build+run:
         dev-lang/tcl
-        tk? ( dev-lang/tk )"
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-threads
+    --with-tcl=/usr/${LIBDIR}
+    --with-tclinclude=/usr/include
+)
+
+WORK="${WORKBASE}/${MY_PNV}"
 
 src_prepare() {
-    expatch -p0 "${FILES}"/${PN}-5.44.1.14-no-tk.patch
-
     # The mkpasswd program does not belong in here
     edo sed -e '/mkpasswd/s:mkpasswd::' -i Makefile.in
 
     autotools_src_prepare
-}
-
-src_configure() {
-    econf \
-        --with-tcl=/usr/${LIBDIR} \
-        --with-tclinclude=/usr/include \
-        --with-tk=$(option tk && echo /usr/${LIBDIR} || echo no) \
-        --with-tkinclude=/usr/include
 }
 
 src_install() {
