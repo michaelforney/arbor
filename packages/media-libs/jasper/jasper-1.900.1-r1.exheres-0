@@ -9,6 +9,8 @@ DOWNLOADS="${HOMEPAGE}/software/${PNV}.zip
      mirror://gentoo/${PNV}-fixes-20081208.patch.bz2"
 # Patches by Redhat to fix a number of security issues: Gentoo #222819. Upstream status unknown (dead?)
 
+REMOTE_IDS="freshmeat:${PN}"
+
 LICENCES="Jasper-2.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
@@ -30,7 +32,10 @@ DEPENDENCIES="
         )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${WORKBASE}/${PNV}-fixes-20081208.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${WORKBASE}"/${PNV}-fixes-20081208.patch
+    "${FILES}"/${PNV}-CVE-2011-4516-CVE-2011-4517-CERT-VU-887409.patch
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( jpeg opengl )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared )
 
