@@ -116,10 +116,6 @@ mysql_src_install() {
     edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
     edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
 
-    keepdir /run/mysqld
-    edo chown mysql:mysql "${IMAGE}"/run/mysqld
-    edo chmod 755 "${IMAGE}"/run/mysqld
-
     hereenvd 46mysql <<EOF
 LDPATH=/usr/${LIBDIR}/${PN}
 EOF
