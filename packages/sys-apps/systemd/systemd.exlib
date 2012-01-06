@@ -1,8 +1,8 @@
-# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
-    SCM_REPOSITORY="git://anongit.freedesktop.org/systemd"
+    SCM_REPOSITORY="git://git.freedesktop.org/git/systemd/systemd.git"
     require scm-git
 else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.bz2"
@@ -96,6 +96,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-distro=other
     --with-pamlibdir=/${LIBDIR}/security
     --with-rootdir=
+    --with-rootprefix=
     --with-rootlibdir=/${LIBDIR}
     --with-sysvinit-path=""
     --with-sysvrcd-path=""
@@ -127,11 +128,14 @@ systemd_pkg_pretend() {
 }
 
 systemd_src_prepare() {
-    expatch "${FILES}/tmpfiles-binfmt-unprefixed.patch"
+    if ! ever is_scm; then
+        expatch "${FILES}"/tmpfiles-binfmt-unprefixed.patch
+    fi
 
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
         edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/rootlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
         edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
@@ -259,6 +263,8 @@ EOF
     keepdir /${LIBDIR}/systemd/system-generators
     keepdir /${LIBDIR}/systemd/system-shutdown
     keepdir /usr/libexec/systemd/user-generators
+    keepdir /usr/${LIBDIR}/systemd/system-shutdown
+    keepdir /usr/${LIBDIR}/systemd/system/graphical.target.wants
 
     # Make sure /etc/machine-id exists.
     [[ -f /etc/machine-id ]] || edo touch "${IMAGE}"/etc/machine-id
