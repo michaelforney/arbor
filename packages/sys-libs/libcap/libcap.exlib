@@ -3,9 +3,9 @@
 # Based in part upon 'libcap-2.08-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require pam
+require pam easy-multibuild [ work=${PNV} ]
 
-export_exlib_phases src_prepare src_compile src_install
+export_exlib_phases src_unpack src_prepare src_compile
 
 SUMMARY="POSIX 1003.1e capabilities"
 HOMEPAGE="http://sites.google.com/site/fullycapable/"
@@ -13,7 +13,7 @@ DOWNLOADS="mirror://kernel/linux/libs/security/linux-privs/${PN}${PV:0:1}/${PNV}
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -23,11 +23,17 @@ DEPENDENCIES="
         sys-libs/pam
 "
 
-DEFAULT_SRC_INSTALL_PARAMS=( lib=${LIBDIR} RAISE_SETFCAP=no )
+WORK=${WORKBASE}
 
-libcap_src_prepare() {
-    default
+unpack_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
 
+libcap_src_unpack() {
+    easy-multibuild_run_phase
+}
+
+prepare_one_multibuild() {
     edo sed -f - -i Make.Rules <<'EOF'
     /^\(AR\|CC\|CFLAGS\|LDFLAGS\|RANLIB\) :=/{
         s|:=|?=|;
@@ -36,14 +42,22 @@ EOF
     edo sed -e 's/\$(BUILD_CC)/& $(LDFLAGS)/' -i libcap/Makefile
 }
 
+libcap_src_prepare() {
+    easy-multibuild_run_phase
+}
+
+configure_prepare_one_multibuild() { :; }
+
 libcap_src_compile() {
     export PAM_CAP=yes
 
-    default
+    easy-multibuild_src_compile
 }
 
-libcap_src_install() {
-    default
+install_one_multibuild() {
+    emagicdocs
+
+    emake -j1 DESTDIR="${IMAGE}" lib=${LIBDIR} RAISE_SETFCAP=no install
 
     dopammod pam_cap/pam_cap.so
     dopamsecurity '' pam_cap/capability.conf
