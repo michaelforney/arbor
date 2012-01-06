@@ -1,9 +1,12 @@
-# Copyright 2008 Wulf C. Krueger
+# Copyright 2008-2012 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'tcp-wrappers-7.6-r8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
 
 MY_PNV="${PNV//-/_}"
+
+require easy-multibuild [ work=${MY_PNV} ]
+
 PATCH_VER="1.1"
 SUMMARY="TCP Wrappers"
 HOMEPAGE="ftp://ftp.porcupine.org/pub/security/index.html"
@@ -13,26 +16,37 @@ DOWNLOADS="ftp://ftp.porcupine.org/pub/security/${MY_PNV}.tar.gz
 LICENCES="tcp_wrappers_license"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="ipv6"
-
+MYOPTIONS="
+    ipv6
+    multibuild_c: 32 64
+"
 DEPENDENCIES=""
 
-WORK="${WORKBASE}/${MY_PNV}"
-PATCHDIR="${WORKBASE}/${PV}"
+WORK=${WORKBASE}
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${PATCHDIR}/${PNV}-makefile.patch"
-    "${PATCHDIR}/${PNV}-shared.patch"
-    "${PATCHDIR}/generic"
-)
+unpack_prepare_one_multibuild() {
+    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
+}
 
-src_prepare() {
-    default
+src_unpack() {
+    easy-multibuild_run_phase
+}
+
+prepare_one_multibuild() {
+    PATCHDIR="${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${PV}"
+
+    expatch "${PATCHDIR}/${PNV}-makefile.patch" "${PATCHDIR}/${PNV}-shared.patch" "${PATCHDIR}/generic"
 
     option ipv6 && expatch -p2 "${PATCHDIR}"/${PNV}-ipv6-1.14.diff
 }
 
-src_compile() {
+src_prepare() {
+    easy-multibuild_run_phase
+}
+
+configure_prepare_one_multibuild() { :; }
+
+compile_one_multibuild() {
     local myconf="-DHAVE_WEAKSYMS"
     option ipv6 && myconf+=" -DINET6=1 -Dss_family=__ss_family -Dss_len=__ss_len"
 
@@ -49,7 +63,7 @@ src_compile() {
         linux
 }
 
-src_install() {
+install_one_multibuild() {
     dosbin tcpd tcpdchk tcpdmatch safe_finger try-from
 
     doman *.[358]
@@ -59,11 +73,11 @@ src_install() {
     insinto /usr/include
     doins tcpd.h
 
-    into /
+    into /usr
     dolib.a libwrap.a
     newlib.so libwrap.so libwrap.so.0.${PV}
-    dosym libwrap.so.0.${PV} /${LIBDIR}/libwrap.so.0
-    dosym libwrap.so.0 /${LIBDIR}/libwrap.so
+    dosym libwrap.so.0.${PV} /usr/${LIBDIR}/libwrap.so.0
+    dosym libwrap.so.0 /usr/${LIBDIR}/libwrap.so
 
     dodoc BLURB CHANGES DISCLAIMER README* "${FILES}"/hosts.allow.example
 }
