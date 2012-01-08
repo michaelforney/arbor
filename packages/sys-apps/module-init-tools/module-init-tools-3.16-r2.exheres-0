@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require alternatives
+
 SUMMARY="Tools to handle kernel modules"
 HOMEPAGE="http://www.kernel.org/pub/linux/utils/kernel/${PN}"
 DOWNLOADS="
@@ -51,6 +53,23 @@ src_test() {
 
 src_install() {
     default
+
+    # alternatives
+    dodir /sbin
+    local a t alternatives=( kmod-tools ${PN} 10 )
+    for a in depmod insmod modinfo modprobe rmmod ; do
+        alternatives+=(
+            /sbin/${a} ${PN}.${a}
+        )
+    done
+
     dosym ../bin/lsmod /sbin/lsmod
+
+    alternatives+=(
+        /bin/lsmod ${PN}.lsmod
+        /sbin/insmod.static ${PN}.insmod.static
+        /sbin/lsmod ${PN}.lsmod
+    )
+    alternatives_for "${alternatives[@]}"
 }
 
