@@ -143,6 +143,10 @@ llvm_src_prepare() {
 
     if option dragonegg && ! ever is_scm ; then
         edo mv "${WORKBASE}/dragonegg-${PV}.src" "${WORK}/tools/dragonegg"
+        # When svnversion is present(that means you have subversion installed)
+        # the compilation fails because "Unversioned directory" are taken as 2
+        # words, http://llvm.org/bugs/show_bug.cgi?id=11593.
+        edo sed -i "s/^REVISION:=.*/REVISION:=%{version}/" "${WORK}"/tools/dragonegg/Makefile
     fi
 
     default
