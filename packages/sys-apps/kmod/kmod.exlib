@@ -1,0 +1,56 @@
+# Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require alternatives
+
+export_exlib_phases src_install
+
+SUMMARY="kmod - handle kernel modules"
+DESCRIPTION="
+kmod is a set of tools to handle common tasks with Linux kernel modules like
+insert, remove, list, check properties, resolve dependencies, and aliases.
+It replaces module-init-tools with which it is backwards-compatible.
+"
+HOMEPAGE="http://git.profusion.mobi/cgit.cgi/kmod.git"
+DOWNLOADS="http://packages.profusion.mobi/kmod/${PNV}.tar.xz"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freshmeat:${PN}"
+
+UPSTREAM_RELEASE_NOTES="http://git.profusion.mobi/cgit.cgi/kmod.git/tree/NEWS"
+
+LICENCES="GPL-2 LGPL-2.1"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        app-arch/xz
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-xz
+    --with-zlib
+)
+
+kmod_src_install() {
+    default
+
+    # alternatives
+    dodir /bin /sbin
+    local a t alternatives=( kmod-tools ${PN} 10 )
+    for a in depmod insmod modinfo modprobe rmmod ; do
+        dosym ../usr/bin/kmod /sbin/${a}
+        alternatives+=(
+            /sbin/${a} ${PN}.${a}
+        )
+    done
+    dosym ../usr/bin/kmod /bin/lsmod
+    dosym ../usr/bin/kmod /sbin/lsmod
+    alternatives+=(
+        /bin/lsmod ${PN}.lsmod
+        /sbin/lsmod ${PN}.lsmod
+    )
+    alternatives_for "${alternatives[@]}"
+}
+
