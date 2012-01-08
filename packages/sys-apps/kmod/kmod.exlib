@@ -26,6 +26,10 @@ MYOPTIONS=""
 DEPENDENCIES="
     build+run:
         app-arch/xz
+        !sys-apps/module-init-tools[<3.16-r2] [[
+            description = [ module-init-tools and kmod provide the same things using alternatives from m-i-t-3.16-r2 on. ]
+            resolution = upgrade-blocked-before
+        ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
