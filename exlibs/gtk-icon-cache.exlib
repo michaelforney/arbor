@@ -1,14 +1,14 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
+myexparam -b no_gtk_dependency=false
+
 : ${GTK_UPDATE_ICON_CACHE:=${ROOT}usr/bin/gtk-update-icon-cache}
 
 export_exlib_phases pkg_preinst pkg_postinst pkg_postrm
 
-DEPENDENCIES="
-    build:
-        x11-libs/gtk+:*[>=2.6]
-"
+exparam -b no_gtk_dependency ||
+DEPENDENCIES="build: x11-libs/gtk+:*[>=2.6]"
 
 gtk_icon_cache_exlib_save_theme_directories()
 {
