@@ -5,7 +5,7 @@
 
 require flag-o-matic pam systemd-service
 
-export_exlib_phases src_prepare src_configure src_compile src_install
+export_exlib_phases pkg_pretend src_prepare src_configure src_compile src_install
 
 SUMMARY="Library implementing the Simple Authentication and Security Layer"
 DESCRIPTION="
@@ -56,6 +56,14 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( saslauthd )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LDAP_SASLAUTHD )
 
+cyrus-sasl_pkg_pretend()
+{
+    if [[ -f "${ROOT}"/etc/tmpfiles.d/saslauthd.conf ]] ; then
+        ewarn "The configuration file /etc/tmpfiles.d/saslauthd.conf has been moved to"
+        ewarn "/${LIBDIR}/tmpfiles.d/saslauthd.conf and can be safely removed after upgrade"
+        ewarn "if you did not make any changes to it."
+    fi
+}
 
 cyrus-sasl_src_prepare()
 {
@@ -102,7 +110,7 @@ cyrus-sasl_src_install()
         install_systemd_files
         insinto /etc/conf.d
         newins "${FILES}"/saslauthd-confd saslauthd.conf
-        insinto /etc/tmpfiles.d
+        insinto /${LIBDIR}/tmpfiles.d
         hereins saslauthd.conf <<EOF
 d /run/saslauthd 0750 root root
 EOF
