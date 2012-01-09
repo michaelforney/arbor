@@ -137,6 +137,12 @@ systemd_pkg_pretend() {
     if [[ ${kv} < 2.6.39 ]] ; then
         ewarn "You SHOULD install a kernel >= 2.6.39 to get the best results."
     fi
+
+    if [[ -f "${ROOT}"/etc/tmpfiles.d/legacy.conf ]] ; then
+        ewarn "The configuration file /etc/tmpfiles.d/legacy.conf has been moved to"
+        ewarn "/${LIBDIR}/tmpfiles.d/legacy.conf and can be safely removed after upgrade"
+        ewarn "if you did not make any changes to it."
+    fi
 }
 
 systemd_src_prepare() {
@@ -209,7 +215,7 @@ systemd_src_install() {
 
     # Install the legacy.conf tmpdirs.d config file.
     # systemd does not install it itself if SysV compatibility is not enabled.
-    insinto /etc/tmpfiles.d
+    insinto /${LIBDIR}/tmpfiles.d
     doins "${WORK}"/tmpfiles.d/legacy.conf
 
     insinto /etc
@@ -295,6 +301,12 @@ EOF
     # during boot in the kernel.
     keepdir /etc/binfmt.d
     keepdir /${LIBDIR}/binfmt.d
+
+    # Files in /etc/tmpfiles.d/?*.conf contain a list of files and/or directories.
+    # Those are automatically (re)created, removed, truncated,... during boot or after a specified time
+    # with specified owner, group and access mode.
+    keepdir /etc/tmpfiles.d
+    keepdir /${LIBDIR}/tmpfiles.d
 
     # From here on, we're creating a basic configuration.
     dodir /etc/systemd/system/basic.target.wants
