@@ -11,7 +11,7 @@ fi
 
 require easy-multibuild
 
-export_exlib_phases src_test
+export_exlib_phases src_prepare src_test
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
 
@@ -86,6 +86,10 @@ prepare_one_multibuild() {
     else
         default
     fi
+}
+
+gnutls_src_prepare() {
+    easy-multibuild_src_prepare
 }
 
 test_one_multibuild() {
