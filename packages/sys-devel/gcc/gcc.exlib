@@ -126,9 +126,9 @@ src_configure() {
         --enable-nls \
         --program-suffix=-${SLOT} \
         --with-pkgversion="Exherbo ${PNVR}" \
+        --with-system-zlib \
         $(option_with graphite cloog) \
         $(option_with graphite ppl) \
-        $(option_with graphite system-zlib) \
         $(ever at_least 4.6 && option_enable graphite cloog-backend ppl-legacy) \
         $(ever at_least 4.5.0 && echo --with-libelf) \
         $(option_enable openmp libgomp) \
