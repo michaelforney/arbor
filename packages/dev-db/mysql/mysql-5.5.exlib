@@ -96,6 +96,12 @@ mysql-5.5_pkg_pretend() {
         die "Dump your databases before doing a major version upgrade of MySQL."
     fi
 
+    if [[ -f "${ROOT}"/etc/tmpfiles.d/${PN}.conf ]] ; then
+        ewarn "The configuration file /etc/tmpfiles.d/${PN}.conf has been moved to"
+        ewarn "/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
+        ewarn "if you did not make any changes to it."
+    fi
+
     # Pending genesis integration:
     # Upgrading to any version requires starting/stopping the MySQL server.
 }
@@ -139,7 +145,7 @@ EOF
     install_systemd_files
 
     if option systemd ; then
-        insinto /etc/tmpfiles.d
+        insinto /${LIBDIR}/tmpfiles.d
         hereins ${PN}.conf <<EOF
 d /run/mysqld 0755 mysql mysql
 EOF
