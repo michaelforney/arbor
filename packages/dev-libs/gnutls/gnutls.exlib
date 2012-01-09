@@ -11,7 +11,7 @@ fi
 
 require easy-multibuild
 
-export_exlib_phases src_prepare src_test
+export_exlib_phases src_prepare
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
 
@@ -61,7 +61,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
 AT_M4DIR=( m4 gl/m4 )
 
-prepare_one_multibuild() {
+gnutls_src_prepare() {
     # Source: Trond A Ekseth <troeks@gmail.com>
     # Upstream: No
     # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
@@ -88,10 +88,6 @@ prepare_one_multibuild() {
     fi
 }
 
-gnutls_src_prepare() {
-    easy-multibuild_src_prepare
-}
-
 test_one_multibuild() {
     if ever at_least 2.12.14; then
         esandbox allow_net "LOOPBACK@80"
@@ -108,9 +104,5 @@ test_one_multibuild() {
         esandbox disallow_net --connect "LOOPBACK@5559"
         esandbox disallow_net --connect "inet:127.0.0.1@80"
     fi
-}
-
-gnutls_src_test() {
-    easy-multibuild_src_test
 }
 
