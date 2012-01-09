@@ -1,0 +1,16 @@
+Source: zlib-devel ml, patch from Enrico Weigelt, based on Daniel Mierswa's one
+Upstream: yes, in 1.2.5.2
+Reason: fix rare race condition that prevents zlib to be built with >=-j2
+
+http://mail.madler.net/pipermail/zlib-devel_madler.net/2011-February/002467.html
+
+--- zlib-1.2.5.orig/configure	2012-01-09 03:12:32.426137781 +0000
++++ zlib-1.2.5/configure	2012-01-09 03:07:20.196041196 +0000
+@@ -19,7 +19,6 @@ if [ -n "${CHOST}" ]; then
+ fi
+ 
+ STATICLIB=libz.a
+-LDFLAGS="${LDFLAGS} -L. ${STATICLIB}"
+ VER=`sed -n -e '/VERSION "/s/.*"\(.*\)".*/\1/p' < zlib.h`
+ VER3=`sed -n -e '/VERSION "/s/.*"\([0-9]*\\.[0-9]*\\.[0-9]*\).*/\1/p' < zlib.h`
+ VER2=`sed -n -e '/VERSION "/s/.*"\([0-9]*\\.[0-9]*\)\\..*/\1/p' < zlib.h`
