@@ -3,7 +3,7 @@
 
 require sourceforge [ project=nfs ] systemd-service
 
-export_exlib_phases src_install pkg_postinst
+export_exlib_phases pkg_pretend src_install pkg_postinst
 
 SUMMARY="NFS client and server daemons"
 DESCRIPTION="
@@ -69,6 +69,14 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( KNOWNBUGS NEW )
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( linux-nfs )
 
+nfs-utils_pkg_pretend() {
+    if [[ -f "${ROOT}"/etc/tmpfiles.d/${PN}.conf ]] ; then
+        ewarn "The configuration file /etc/tmpfiles.d/${PN}.conf has been moved to"
+        ewarn "/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
+        ewarn "if you did not make any changes to it."
+    fi
+}
+
 nfs-utils_src_install() {
     default
 
@@ -76,7 +84,7 @@ nfs-utils_src_install() {
     option systemd && ! option gss && edo rm "${IMAGE}/${LIBDIR}/systemd/system/rpcgssd.service"
 
     if option systemd; then
-        insinto /etc/tmpfiles.d
+        insinto /${LIBDIR}/tmpfiles.d
         hereins ${PN}.conf <<EOF
 d /var/lib/nfs/rpc_pipefs 0755 root root
 d /var/lib/nfs/v4recovery 0755 root root
