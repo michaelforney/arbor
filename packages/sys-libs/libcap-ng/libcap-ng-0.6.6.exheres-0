@@ -1,6 +1,8 @@
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="Advanced POSIX 1003.1e capabilities library and tools"
 DESCRIPTION="
 The libcap-ng library is intended to make programming with POSIX capabilities
@@ -19,6 +21,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     debug  [[ description = [ Turn on debugging ] ]]
     python [[ description = [ Install Python bindings (requires swig) ] ]]
+    multibuild_c: 32 64
 "
 
 DEPENDENCIES="
@@ -26,7 +29,7 @@ DEPENDENCIES="
         sys-kernel/linux-headers
         python? ( dev-lang/swig )
     build+run:
-        sys-apps/attr
+        sys-apps/attr[multibuild_c:*(?)?]
         python? ( dev-lang/python )
 "
 
