@@ -22,7 +22,9 @@ ar (read and write, including BSD and GNU/SysV variants)
 
 LICENCES="BSD-3"
 SLOT="0"
-MYOPTIONS="acl xattr"
+MYOPTIONS="acl nettle openssl xattr
+    ( nettle openssl ) [[ number-selected = at-most-one ]]
+"
 
 DEPENDENCIES="
     build+run:
@@ -30,8 +32,9 @@ DEPENDENCIES="
         app-arch/gzip
         app-arch/bzip2
         dev-libs/libxml2:=
-        dev-libs/openssl
         acl? ( sys-apps/acl )
+        nettle? ( dev-libs/nettle )
+        openssl? ( dev-libs/openssl )
         xattr? ( sys-apps/attr )
 "
 
@@ -45,8 +48,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-expat
     # Disable old app-arch/lzma support
     --without-lzmadec
-    # enable openssl support
-    --with-openssl
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl xattr )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( nettle openssl )
 
