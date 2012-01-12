@@ -1,7 +1,7 @@
 # Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require alternatives
+require alternatives easy-multibuild
 
 export_exlib_phases src_install
 
@@ -21,11 +21,11 @@ UPSTREAM_RELEASE_NOTES="http://git.profusion.mobi/cgit.cgi/kmod.git/tree/NEWS"
 
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        app-arch/xz
+        app-arch/xz[multibuild_c:*(?)?]
         !sys-apps/module-init-tools[<3.16-r2] [[
             description = [ module-init-tools and kmod provide the same things using alternatives from m-i-t-3.16-r2 on. ]
             resolution = upgrade-blocked-before
@@ -38,7 +38,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 kmod_src_install() {
-    default
+    easy-multibuild_src_install
 
     # alternatives
     dodir /bin /sbin
