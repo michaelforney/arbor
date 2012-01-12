@@ -1,6 +1,8 @@
 # Copyright 2009, 2011 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="XZ Utils is free general-purpose data compression software with high compression ratio"
 DESCRIPTION="
 This is achieved by providing tools and libraries which are similar to use than
@@ -26,7 +28,10 @@ LICENCES="
 "
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="debug"
+MYOPTIONS="
+    debug
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
