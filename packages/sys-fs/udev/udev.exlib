@@ -1,15 +1,14 @@
-# Copyright 2010-2011 Wulf C. Krueger <philanthrop@exherbo.org>
+# Copyright 2010-2012 Wulf C. Krueger <philanthrop@exherbo.org>
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
     SCM_REPOSITORY="git://git.kernel.org/pub/scm/linux/hotplug/udev.git"
     require scm-git
+elif ever at_least 177; then
+    DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.xz"
 else
-    DOWNLOADS="
-        mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2
-        http://people.freedesktop.org/~kay/udev/${PNV}.tar.bz2
-    "
+    DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
 fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
@@ -32,7 +31,6 @@ MYOPTIONS="
     baselayout
     glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
     gobject-introspection [[ requires = [ glib ] ]]
-    sound [[ description = [ install extra rules for sound cards ] ]]
     systemd [[ description = [ install systemd service files ] ]]
     multibuild_c: 32 64
     platform: ia64
@@ -44,18 +42,25 @@ DEPENDENCIES="
         app-doc/gtk-doc-autotools[>=1.15-r1]
     build+run:
         dev-util/gperf[>=3.0.4]
+        sys-apps/pciutils
+        sys-apps/usbutils[>=0.82]
         acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(?)?] )
         glib? ( dev-libs/glib:2[>=2.22.0] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
-        sound? (
-            sys-apps/pciutils
-            sys-apps/usbutils[>=0.82]
-        )
     run:
         group/dialout
     suggestion:
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
+
+if ever at_least 177; then
+    DEPENDENCIES+="
+        build:
+            app-arch/xz[multibuild_c:*(?)?]
+        build+run:
+            sys-apps/kmod[>=3][multibuild_c:*(?)?]
+    "
+fi
 
 AT_M4DIR=( m4 )
 
@@ -81,18 +86,28 @@ udev_src_prepare() {
 }
 
 configure_one_multibuild() {
+    local HWDB=--enable-hwdb
+    local LIBEXECDIR=/${LIBDIR}/udev
+
+    if ever at_least 177; then
+        HWDB=
+        LIBEXECDIR=/${LIBDIR}
+    fi
+
     econf \
+        --bindir=/sbin \
+        --libexecdir=${LIBEXECDIR} \
         --sbindir=/sbin \
         --enable-edd \
         --enable-static \
         --with-rootlibdir=/${LIBDIR} \
-        --libexecdir=/${LIBDIR}/udev \
+        --with-rootprefix= \
         --without-selinux \
         $(option_enable glib gudev) \
         $(option_enable gobject-introspection introspection) \
         $(option_with systemd systemdsystemunitdir "/${LIBDIR}/systemd/system") \
         $(option_enable acl udev_acl) \
-        $(option_enable sound hwdb)
+        "${HWDB}"
 }
 
 udev_src_configure() {
@@ -152,10 +167,8 @@ EOT
     fi
     # }}}
 
-    if ever at_least 174; then
-        # Create a compatibility symlink from /${LIBDIR}/udev/udevd to /sbin/udevd.
-        dosym /${LIBDIR}/udev/udevd /sbin/udevd
-    fi
+    # Create a compatibility symlink from /${LIBDIR}/udev/udevd to /sbin/udevd.
+    dosym /${LIBDIR}/udev/udevd /sbin/udevd
 }
 
 udev_pkg_postinst() {
@@ -176,14 +189,8 @@ udev_pkg_postinst() {
     # sydbox doesn't wait for udevd to exit.
     esandbox wait_eldest
 
-    if ever at_least 174; then
-        # Allow access to /run/udev/control for udevd
-        esandbox allow_net unix:/run/udev/control
-    else
-        # Allow network access for udevd
-        esandbox allow_net unix-abstract:/org/kernel/udev/udevd
-        esandbox allow_net --connect unix:/dev/log
-    fi
+    # Allow access to /run/udev/control for udevd
+    esandbox allow_net unix:/run/udev/control
 
     nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
 }
