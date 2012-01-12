@@ -1,0 +1,1457 @@
+From d1e44dd8271c0e1348bbdb0046f8fa2437c4a567 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 16:03:42 +0100
+Subject: [PATCH 01/12] journalctl: fix --help text
+
+---
+ src/journal/journalctl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/journal/journalctl.c b/src/journal/journalctl.c
+index 910259f..b2ebc7a 100644
+--- a/src/journal/journalctl.c
++++ b/src/journal/journalctl.c
+@@ -57,7 +57,7 @@ static int help(void) {
+                "  -f --follow         Follow journal\n"
+                "  -n --lines=INTEGER  Journal entries to show\n"
+                "     --no-tail        Show all lines, even in follow mode\n"
+-               "  -o --output=STRING  Change journal output mode (short, short-verbose, verbose, export, json)\n"
++               "  -o --output=STRING  Change journal output mode (short, short-monotonic, verbose, export, json)\n"
+                "     --new-id128      Generate a new 128 Bit id\n",
+                program_invocation_short_name);
+ 
+-- 
+1.7.8.1
+
+
+From e6520a0fcebb4d5e07f4c81a51382501b0beb22f Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 20:40:01 +0100
+Subject: [PATCH 02/12] journal: make requirement for ACLs optional
+
+---
+ Makefile.am            |    6 +++++-
+ src/journal/journald.c |   15 +++++++++++----
+ 2 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 4bb0609..42da4fb 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1208,9 +1208,13 @@ systemd_journald_SOURCES = \
+ 	src/journal/lookup3.c \
+ 	src/journal/journal-rate-limit.c \
+ 	src/sd-id128.c \
+-	src/acl-util.c \
+ 	src/cgroup-util.c
+ 
++if HAVE_ACL
++systemd_journald_SOURCES += \
++	src/acl-util.c
++endif
++
+ nodist_systemd_journald_SOURCES = \
+ 	src/journal/journald-gperf.c
+ 
+diff --git a/src/journal/journald.c b/src/journal/journald.c
+index d020309..0194a1b 100644
+--- a/src/journal/journald.c
++++ b/src/journal/journald.c
+@@ -25,8 +25,6 @@
+ #include <sys/signalfd.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+-#include <sys/acl.h>
+-#include <acl/libacl.h>
+ #include <stddef.h>
+ #include <sys/ioctl.h>
+ #include <linux/sockios.h>
+@@ -40,7 +38,6 @@
+ #include "hashmap.h"
+ #include "journal-file.h"
+ #include "socket-util.h"
+-#include "acl-util.h"
+ #include "cgroup-util.h"
+ #include "list.h"
+ #include "journal-rate-limit.h"
+@@ -49,6 +46,12 @@
+ #include "journald.h"
+ #include "virt.h"
+ 
++#ifdef HAVE_ACL
++#include <sys/acl.h>
++#include <acl/libacl.h>
++#include "acl-util.h"
++#endif
++
+ #define USER_JOURNALS_MAX 1024
+ #define STDOUT_STREAMS_MAX 4096
+ 
+@@ -181,10 +184,12 @@ finish:
+ }
+ 
+ static void fix_perms(JournalFile *f, uid_t uid) {
++        int r;
++#ifdef HAVE_ACL
+         acl_t acl;
+         acl_entry_t entry;
+         acl_permset_t permset;
+-        int r;
++#endif
+ 
+         assert(f);
+ 
+@@ -192,6 +197,7 @@ static void fix_perms(JournalFile *f, uid_t uid) {
+         if (r < 0)
+                 log_warning("Failed to fix access mode/rights on %s, ignoring: %s", f->path, strerror(-r));
+ 
++#ifdef HAVE_ACL
+         if (uid <= 0)
+                 return;
+ 
+@@ -224,6 +230,7 @@ static void fix_perms(JournalFile *f, uid_t uid) {
+ 
+ finish:
+         acl_free(acl);
++#endif
+ }
+ 
+ static JournalFile* find_journal(Server *s, uid_t uid) {
+-- 
+1.7.8.1
+
+
+From 5e41cfec83aa47af12e469bc62e336f8213ee066 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 21:11:58 +0100
+Subject: [PATCH 03/12] journald: set group ownership of journal files to
+ 'adm' by default
+
+---
+ src/journal/journald.c |   31 ++++++++++++++++++++++++++-----
+ src/journal/journald.h |    3 +++
+ 2 files changed, 29 insertions(+), 5 deletions(-)
+
+diff --git a/src/journal/journald.c b/src/journal/journald.c
+index 0194a1b..33865b8 100644
+--- a/src/journal/journald.c
++++ b/src/journal/journald.c
+@@ -183,7 +183,26 @@ finish:
+         return avail;
+ }
+ 
+-static void fix_perms(JournalFile *f, uid_t uid) {
++static void server_read_file_gid(Server *s) {
++        const char *adm = "adm";
++        int r;
++
++        assert(s);
++
++        if (s->file_gid_valid)
++                return;
++
++        r = get_group_creds(&adm, &s->file_gid);
++        if (r < 0)
++                log_warning("Failed to resolve 'adm' group: %s", strerror(-r));
++
++        /* if we couldn't read the gid, then it will be 0, but that's
++         * fine and we shouldn't try to resolve the group again, so
++         * let's just pretend it worked right-away. */
++        s->file_gid_valid = true;
++}
++
++static void server_fix_perms(Server *s, JournalFile *f, uid_t uid) {
+         int r;
+ #ifdef HAVE_ACL
+         acl_t acl;
+@@ -193,7 +212,9 @@ static void fix_perms(JournalFile *f, uid_t uid) {
+ 
+         assert(f);
+ 
+-        r = fchmod_and_fchown(f->fd, 0640, 0, 0);
++        server_read_file_gid(s);
++
++        r = fchmod_and_fchown(f->fd, 0640, 0, s->file_gid);
+         if (r < 0)
+                 log_warning("Failed to fix access mode/rights on %s, ignoring: %s", f->path, strerror(-r));
+ 
+@@ -277,7 +298,7 @@ static JournalFile* find_journal(Server *s, uid_t uid) {
+         if (r < 0)
+                 return s->system_journal;
+ 
+-        fix_perms(f, uid);
++        server_fix_perms(s, f, uid);
+         f->metrics = s->system_metrics;
+         f->compress = s->compress;
+ 
+@@ -1733,7 +1754,7 @@ static int system_journal_open(Server *s) {
+                         s->system_journal->metrics = s->system_metrics;
+                         s->system_journal->compress = s->compress;
+ 
+-                        fix_perms(s->system_journal, 0);
++                        server_fix_perms(s, s->system_journal, 0);
+                 } else if (r < 0) {
+ 
+                         if (r != -ENOENT && r != -EROFS)
+@@ -1786,7 +1807,7 @@ static int system_journal_open(Server *s) {
+                         s->runtime_journal->metrics = s->runtime_metrics;
+                         s->runtime_journal->compress = s->compress;
+ 
+-                        fix_perms(s->runtime_journal, 0);
++                        server_fix_perms(s, s->runtime_journal, 0);
+                 }
+         }
+ 
+diff --git a/src/journal/journald.h b/src/journal/journald.h
+index 1f1665b..6160991 100644
+--- a/src/journal/journald.h
++++ b/src/journal/journald.h
+@@ -73,6 +73,9 @@ typedef struct Server {
+ 
+         uint64_t var_available_timestamp;
+ 
++        gid_t file_gid;
++        bool file_gid_valid;
++
+         LIST_HEAD(StdoutStream, stdout_streams);
+         unsigned n_stdout_streams;
+ } Server;
+-- 
+1.7.8.1
+
+
+From 7f120cc6a2eeea1b695222ff6e8e83b4f14ace59 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 21:24:02 +0100
+Subject: [PATCH 04/12] journald: don't assume size_t and uint64_t are the
+ same
+
+---
+ src/journal/journal-file.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/journal/journal-file.c b/src/journal/journal-file.c
+index 419e15e..6ba3d8d 100644
+--- a/src/journal/journal-file.c
++++ b/src/journal/journal-file.c
+@@ -640,7 +640,8 @@ int journal_file_find_data_object_with_hash(
+ 
+                 if (o->object.flags & OBJECT_COMPRESSED) {
+ #ifdef HAVE_XZ
+-                        uint64_t l, rsize;
++                        uint64_t l;
++                        size_t rsize;
+ 
+                         l = le64toh(o->object.size);
+                         if (l <= offsetof(Object, data.payload))
+@@ -651,7 +652,7 @@ int journal_file_find_data_object_with_hash(
+                         if (!uncompress_blob(o->data.payload, l, &f->compress_buffer, &f->compress_buffer_size, &rsize))
+                                 return -EBADMSG;
+ 
+-                        if (rsize == size &&
++                        if ((uint64_t) rsize == size &&
+                             memcmp(f->compress_buffer, data, size) == 0) {
+ 
+                                 if (ret)
+-- 
+1.7.8.1
+
+
+From 52beb2c379674e066d6cf50d59874478403e4da4 Mon Sep 17 00:00:00 2001
+From: Michal Schmidt <mschmidt@redhat.com>
+Date: Tue, 10 Jan 2012 22:03:49 +0100
+Subject: [PATCH 05/12] logs-show: fix missing newline in short output
+
+Ellipsized messages were printed without a newline.
+---
+ src/logs-show.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/src/logs-show.c b/src/logs-show.c
+index 2fe205f..8d728a6 100644
+--- a/src/logs-show.c
++++ b/src/logs-show.c
+@@ -237,7 +237,7 @@ static int output_short(sd_journal *j, unsigned line, bool show_all, bool monoto
+                 if (!e)
+                         printf(": %.*s\n", (int) message_len, message);
+                 else
+-                        printf(": %s", e);
++                        printf(": %s\n", e);
+ 
+                 free(e);
+         } else
+-- 
+1.7.8.1
+
+
+From fdcad0c25579a60061b1fda956686e878a80faef Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 22:07:35 +0100
+Subject: [PATCH 06/12] tmpfiles: fix parsing of /proc/net/unix on 32Bit
+ machines
+
+Tracked down by Michael Meeks
+---
+ src/tmpfiles.c |   30 ++++++++++++++++++++----------
+ 1 files changed, 20 insertions(+), 10 deletions(-)
+
+diff --git a/src/tmpfiles.c b/src/tmpfiles.c
+index 19a7c08..44e5c9d 100644
+--- a/src/tmpfiles.c
++++ b/src/tmpfiles.c
+@@ -117,41 +117,50 @@ static void load_unix_sockets(void) {
+         /* We maintain a cache of the sockets we found in
+          * /proc/net/unix to speed things up a little. */
+ 
+-        if (!(unix_sockets = set_new(string_hash_func, string_compare_func)))
++        unix_sockets = set_new(string_hash_func, string_compare_func);
++        if (!unix_sockets)
+                 return;
+ 
+-        if (!(f = fopen("/proc/net/unix", "re")))
++        f = fopen("/proc/net/unix", "re");
++        if (!f)
+                 return;
+ 
+-        if (!(fgets(line, sizeof(line), f)))
++        /* Skip header */
++        if (!fgets(line, sizeof(line), f))
+                 goto fail;
+ 
+         for (;;) {
+                 char *p, *s;
+                 int k;
+ 
+-                if (!(fgets(line, sizeof(line), f)))
++                if (!fgets(line, sizeof(line), f))
+                         break;
+ 
+                 truncate_nl(line);
+ 
+-                if (strlen(line) < 53)
++                p = strchr(line, ':');
++                if (!p)
++                        continue;
++
++                if (strlen(p) < 37)
+                         continue;
+ 
+-                p = line + 53;
++                p += 37;
+                 p += strspn(p, WHITESPACE);
+-                p += strcspn(p, WHITESPACE);
++                p += strcspn(p, WHITESPACE); /* skip one more word */
+                 p += strspn(p, WHITESPACE);
+ 
+                 if (*p != '/')
+                         continue;
+ 
+-                if (!(s = strdup(p)))
++                s = strdup(p);
++                if (!s)
+                         goto fail;
+ 
+                 path_kill_slashes(s);
+ 
+-                if ((k = set_put(unix_sockets, s)) < 0) {
++                k = set_put(unix_sockets, s);
++                if (k < 0) {
+                         free(s);
+ 
+                         if (k != -EEXIST)
+@@ -1059,7 +1068,8 @@ int main(int argc, char *argv[]) {
+         Item *i;
+         Iterator iterator;
+ 
+-        if ((r = parse_argv(argc, argv)) <= 0)
++        r = parse_argv(argc, argv);
++        if (r <= 0)
+                 return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+ 
+         log_set_target(LOG_TARGET_AUTO);
+-- 
+1.7.8.1
+
+
+From b785c858c3baf855ec42e3b83f5d23dadfece069 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 22:44:43 +0100
+Subject: [PATCH 07/12] journal: fix more 32/64 bit issues
+
+---
+ src/journal/journal-file.c |    5 ++---
+ src/journal/journal-file.h |    2 +-
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/src/journal/journal-file.c b/src/journal/journal-file.c
+index 6ba3d8d..419e15e 100644
+--- a/src/journal/journal-file.c
++++ b/src/journal/journal-file.c
+@@ -640,8 +640,7 @@ int journal_file_find_data_object_with_hash(
+ 
+                 if (o->object.flags & OBJECT_COMPRESSED) {
+ #ifdef HAVE_XZ
+-                        uint64_t l;
+-                        size_t rsize;
++                        uint64_t l, rsize;
+ 
+                         l = le64toh(o->object.size);
+                         if (l <= offsetof(Object, data.payload))
+@@ -652,7 +651,7 @@ int journal_file_find_data_object_with_hash(
+                         if (!uncompress_blob(o->data.payload, l, &f->compress_buffer, &f->compress_buffer_size, &rsize))
+                                 return -EBADMSG;
+ 
+-                        if ((uint64_t) rsize == size &&
++                        if (rsize == size &&
+                             memcmp(f->compress_buffer, data, size) == 0) {
+ 
+                                 if (ret)
+diff --git a/src/journal/journal-file.h b/src/journal/journal-file.h
+index 0be3932..4ef4a14 100644
+--- a/src/journal/journal-file.h
++++ b/src/journal/journal-file.h
+@@ -77,7 +77,7 @@ typedef struct JournalFile {
+ 
+ #ifdef HAVE_XZ
+         void *compress_buffer;
+-        size_t compress_buffer_size;
++        uint64_t compress_buffer_size;
+ #endif
+ } JournalFile;
+ 
+-- 
+1.7.8.1
+
+
+From 8a0f04e6a283cc6734ee09a20305c13e09ba0418 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Wed, 11 Jan 2012 22:45:05 +0100
+Subject: [PATCH 08/12] journal: add SELinux context to all logged messages
+
+---
+ src/journal/journald.c |   22 ++++++++++++++++++++--
+ 1 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/src/journal/journald.c b/src/journal/journald.c
+index 33865b8..56cd313 100644
+--- a/src/journal/journald.c
++++ b/src/journal/journald.c
+@@ -52,6 +52,10 @@
+ #include "acl-util.h"
+ #endif
+ 
++#ifdef HAVE_SELINUX
++#include <selinux/selinux.h>
++#endif
++
+ #define USER_JOURNALS_MAX 1024
+ #define STDOUT_STREAMS_MAX 4096
+ 
+@@ -64,7 +68,7 @@
+ 
+ #define SYSLOG_TIMEOUT_USEC (250*USEC_PER_MSEC)
+ 
+-#define N_IOVEC_META_FIELDS 16
++#define N_IOVEC_META_FIELDS 17
+ 
+ typedef enum StdoutStreamState {
+         STDOUT_STREAM_IDENTIFIER,
+@@ -436,7 +440,7 @@ static void dispatch_message_real(Server *s,
+                 *comm = NULL, *cmdline = NULL, *hostname = NULL,
+                 *audit_session = NULL, *audit_loginuid = NULL,
+                 *exe = NULL, *cgroup = NULL, *session = NULL,
+-                *owner_uid = NULL, *unit = NULL;
++                *owner_uid = NULL, *unit = NULL, *selinux_context = NULL;
+ 
+         char idbuf[33];
+         sd_id128_t id;
+@@ -454,6 +458,9 @@ static void dispatch_message_real(Server *s,
+         if (ucred) {
+                 uint32_t audit;
+                 uid_t owner;
++#ifdef HAVE_SELINUX
++                security_context_t con;
++#endif
+ 
+                 realuid = ucred->uid;
+ 
+@@ -531,6 +538,16 @@ static void dispatch_message_real(Server *s,
+                 if (sd_pid_get_owner_uid(ucred->uid, &owner) >= 0)
+                         if (asprintf(&owner_uid, "_SYSTEMD_OWNER_UID=%lu", (unsigned long) owner) >= 0)
+                                 IOVEC_SET_STRING(iovec[n++], owner_uid);
++
++#ifdef HAVE_SELINUX
++                if (getpidcon(ucred->pid, &con) >= 0) {
++                        selinux_context = strappend("_SELINUX_CONTEXT=", con);
++                        if (selinux_context)
++                                IOVEC_SET_STRING(iovec[n++], selinux_context);
++
++                        freecon(con);
++                }
++#endif
+         }
+ 
+         if (tv) {
+@@ -602,6 +619,7 @@ retry:
+         free(session);
+         free(owner_uid);
+         free(unit);
++        free(selinux_context);
+ }
+ 
+ static void driver_message(Server *s, sd_id128_t message_id, const char *format, ...) {
+-- 
+1.7.8.1
+
+
+From 5ba081b0fb02380cee4c2ff5bc7e05f869eb8415 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Thu, 12 Jan 2012 04:34:31 +0100
+Subject: [PATCH 09/12] log: make internal log api log directly to the journal
+
+---
+ TODO                       |    2 +
+ src/journal/journal-send.c |    2 +-
+ src/log.c                  |  189 ++++++++++++++++++++++++++++++++++++-------
+ src/log.h                  |    7 +-
+ 4 files changed, 165 insertions(+), 35 deletions(-)
+
+diff --git a/TODO b/TODO
+index af60b59..97fe41a 100644
+--- a/TODO
++++ b/TODO
+@@ -21,6 +21,8 @@ Bugfixes:
+ 
+ Features:
+ 
++* clean up session cgroups that remain after logout (think sshd), but eventually run empty
++
+ * support "systemctl stop foobar@.service" to stop all units matching a certain template
+ 
+ * move to LGPL2+
+diff --git a/src/journal/journal-send.c b/src/journal/journal-send.c
+index ddf503b..d51aec9 100644
+--- a/src/journal/journal-send.c
++++ b/src/journal/journal-send.c
+@@ -195,7 +195,7 @@ _public_ int sd_journal_sendv(const struct iovec *iov, int n) {
+ 
+         zero(sa);
+         sa.sun_family = AF_UNIX;
+-        strncpy(sa.sun_path,"/run/systemd/journal/socket", sizeof(sa.sun_path));
++        strncpy(sa.sun_path, "/run/systemd/journal/socket", sizeof(sa.sun_path));
+ 
+         zero(mh);
+         mh.msg_name = &sa;
+diff --git a/src/log.c b/src/log.c
+index 3dfe654..6caa5fa 100644
+--- a/src/log.c
++++ b/src/log.c
+@@ -26,12 +26,14 @@
+ #include <fcntl.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
++#include <stddef.h>
+ 
+ #include "log.h"
+ #include "util.h"
+ #include "macro.h"
++#include "socket-util.h"
+ 
+-#define SYSLOG_TIMEOUT_USEC (5*USEC_PER_SEC)
++#define SOCKET_TIMEOUT_USEC (5*USEC_PER_SEC)
+ 
+ static LogTarget log_target = LOG_TARGET_CONSOLE;
+ static int log_max_level = LOG_INFO;
+@@ -39,6 +41,7 @@ static int log_max_level = LOG_INFO;
+ static int console_fd = STDERR_FILENO;
+ static int syslog_fd = -1;
+ static int kmsg_fd = -1;
++static int journal_fd = -1;
+ 
+ static bool syslog_is_stream = false;
+ 
+@@ -69,7 +72,8 @@ static int log_open_console(void) {
+ 
+         if (getpid() == 1) {
+ 
+-                if ((console_fd = open_terminal("/dev/console", O_WRONLY|O_NOCTTY|O_CLOEXEC)) < 0) {
++                console_fd = open_terminal("/dev/console", O_WRONLY|O_NOCTTY|O_CLOEXEC);
++                if (console_fd < 0) {
+                         log_error("Failed to open /dev/console for logging: %s", strerror(-console_fd));
+                         return console_fd;
+                 }
+@@ -122,12 +126,14 @@ static int create_log_socket(int type) {
+         if (getpid() == 1)
+                 /* systemd should not block on syslog */
+                 type |= SOCK_NONBLOCK;
+-        if ((fd = socket(AF_UNIX, type|SOCK_CLOEXEC, 0)) < 0)
++
++        fd = socket(AF_UNIX, type|SOCK_CLOEXEC, 0);
++        if (fd < 0)
+                 return -errno;
+ 
+         /* Make sure we don't block for more than 5s when talking to
+          * syslog */
+-        timeval_store(&tv, SYSLOG_TIMEOUT_USEC);
++        timeval_store(&tv, SOCKET_TIMEOUT_USEC);
+         if (setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0) {
+                 close_nointr_nofail(fd);
+                 return -errno;
+@@ -137,10 +143,7 @@ static int create_log_socket(int type) {
+ }
+ 
+ static int log_open_syslog(void) {
+-        union {
+-                struct sockaddr sa;
+-                struct sockaddr_un un;
+-        } sa;
++        union sockaddr_union sa;
+         int r;
+ 
+         if (syslog_fd >= 0)
+@@ -150,8 +153,9 @@ static int log_open_syslog(void) {
+         sa.un.sun_family = AF_UNIX;
+         strncpy(sa.un.sun_path, "/dev/log", sizeof(sa.un.sun_path));
+ 
+-        if ((syslog_fd = create_log_socket(SOCK_DGRAM)) < 0) {
+-                r = -errno;
++        syslog_fd = create_log_socket(SOCK_DGRAM);
++        if (syslog_fd < 0) {
++                r = syslog_fd;
+                 goto fail;
+         }
+ 
+@@ -161,8 +165,9 @@ static int log_open_syslog(void) {
+                 /* Some legacy syslog systems still use stream
+                  * sockets. They really shouldn't. But what can we
+                  * do... */
+-                if ((syslog_fd = create_log_socket(SOCK_STREAM)) < 0) {
+-                        r = -errno;
++                syslog_fd = create_log_socket(SOCK_STREAM);
++                if (syslog_fd < 0) {
++                        r = syslog_fd;
+                         goto fail;
+                 }
+ 
+@@ -185,6 +190,47 @@ fail:
+         return r;
+ }
+ 
++void log_close_journal(void) {
++
++        if (journal_fd < 0)
++                return;
++
++        close_nointr_nofail(journal_fd);
++        journal_fd = -1;
++}
++
++static int log_open_journal(void) {
++        union sockaddr_union sa;
++        int r;
++
++        if (journal_fd >= 0)
++                return 0;
++
++        journal_fd = create_log_socket(SOCK_DGRAM);
++        if (journal_fd < 0) {
++                r = journal_fd;
++                goto fail;
++        }
++
++        zero(sa);
++        sa.un.sun_family = AF_UNIX;
++        strncpy(sa.un.sun_path, "/run/systemd/journal/socket", sizeof(sa.un.sun_path));
++
++        if (connect(journal_fd, &sa.sa, offsetof(struct sockaddr_un, sun_path) + strlen(sa.un.sun_path)) < 0) {
++                r = -errno;
++                goto fail;
++        }
++
++        log_debug("Successfully opened journal for logging.");
++
++        return 0;
++
++fail:
++        log_close_journal();
++        log_debug("Failed to open journal for logging: %s", strerror(-r));
++        return r;
++}
++
+ int log_open(void) {
+         int r;
+ 
+@@ -195,6 +241,7 @@ int log_open(void) {
+          * because there is no reason to close it. */
+ 
+         if (log_target == LOG_TARGET_NULL) {
++                log_close_journal();
+                 log_close_syslog();
+                 log_close_console();
+                 return 0;
+@@ -205,22 +252,41 @@ int log_open(void) {
+             isatty(STDERR_FILENO) <= 0) {
+ 
+                 if (log_target == LOG_TARGET_AUTO ||
+-                    log_target == LOG_TARGET_SYSLOG_OR_KMSG ||
+-                    log_target == LOG_TARGET_SYSLOG)
+-                        if ((r = log_open_syslog()) >= 0) {
++                    log_target == LOG_TARGET_JOURNAL_OR_KMSG ||
++                    log_target == LOG_TARGET_JOURNAL) {
++                        r = log_open_journal();
++                        if (r >= 0) {
++                                log_close_syslog();
+                                 log_close_console();
+                                 return r;
+                         }
++                }
++
++                if (log_target == LOG_TARGET_SYSLOG_OR_KMSG ||
++                    log_target == LOG_TARGET_SYSLOG) {
++                        r = log_open_syslog();
++                        if (r >= 0) {
++                                log_close_journal();
++                                log_close_console();
++                                return r;
++                        }
++                }
++
+                 if (log_target == LOG_TARGET_AUTO ||
++                    log_target == LOG_TARGET_JOURNAL_OR_KMSG ||
+                     log_target == LOG_TARGET_SYSLOG_OR_KMSG ||
+-                    log_target == LOG_TARGET_KMSG)
+-                        if ((r = log_open_kmsg()) >= 0) {
++                    log_target == LOG_TARGET_KMSG) {
++                        r = log_open_kmsg();
++                        if (r >= 0) {
++                                log_close_journal();
+                                 log_close_syslog();
+                                 log_close_console();
+                                 return r;
+                         }
++                }
+         }
+ 
++        log_close_journal();
+         log_close_syslog();
+ 
+         /* Get the real /dev/console if we are PID=1, hence reopen */
+@@ -236,13 +302,14 @@ void log_set_target(LogTarget target) {
+ }
+ 
+ void log_close(void) {
+-        log_close_console();
+-        log_close_kmsg();
++        log_close_journal();
+         log_close_syslog();
++        log_close_kmsg();
++        log_close_console();
+ }
+ 
+ void log_forget_fds(void) {
+-        console_fd = kmsg_fd = syslog_fd = -1;
++        console_fd = kmsg_fd = syslog_fd = journal_fd = -1;
+ }
+ 
+ void log_set_max_level(int level) {
+@@ -382,6 +449,48 @@ static int write_to_kmsg(
+         return 1;
+ }
+ 
++static int write_to_journal(
++        int level,
++        const char*file,
++        int line,
++        const char *func,
++        const char *buffer) {
++
++        char header[LINE_MAX];
++        struct iovec iovec[3];
++        struct msghdr mh;
++
++        if (journal_fd < 0)
++                return 0;
++
++        snprintf(header, sizeof(header),
++                 "PRIORITY=%i\n"
++                 "CODE_FILE=%s\n"
++                 "CODE_LINE=%i\n"
++                 "CODE_FUNCTION=%s\n"
++                 "MESSAGE=",
++                 LOG_PRI(level),
++                 file,
++                 line,
++                 func);
++
++        char_array_0(header);
++
++        zero(iovec);
++        IOVEC_SET_STRING(iovec[0], header);
++        IOVEC_SET_STRING(iovec[1], buffer);
++        IOVEC_SET_STRING(iovec[2], "\n");
++
++        zero(mh);
++        mh.msg_iov = iovec;
++        mh.msg_iovlen = ELEMENTSOF(iovec);
++
++        if (sendmsg(journal_fd, &mh, MSG_NOSIGNAL) < 0)
++                return -errno;
++
++        return 1;
++}
++
+ static int log_dispatch(
+         int level,
+         const char*file,
+@@ -411,7 +520,19 @@ static int log_dispatch(
+                         *(e++) = 0;
+ 
+                 if (log_target == LOG_TARGET_AUTO ||
+-                    log_target == LOG_TARGET_SYSLOG_OR_KMSG ||
++                    log_target == LOG_TARGET_JOURNAL_OR_KMSG ||
++                    log_target == LOG_TARGET_JOURNAL) {
++
++                        k = write_to_journal(level, file, line, func, buffer);
++                        if (k < 0) {
++                                if (k != -EAGAIN)
++                                        log_close_journal();
++                                log_open_kmsg();
++                        } else if (k > 0)
++                                r++;
++                }
++
++                if (log_target == LOG_TARGET_SYSLOG_OR_KMSG ||
+                     log_target == LOG_TARGET_SYSLOG) {
+ 
+                         k = write_to_syslog(level, file, line, func, buffer);
+@@ -524,7 +645,8 @@ void log_assert(
+ int log_set_target_from_string(const char *e) {
+         LogTarget t;
+ 
+-        if ((t = log_target_from_string(e)) < 0)
++        t = log_target_from_string(e);
++        if (t < 0)
+                 return -EINVAL;
+ 
+         log_set_target(t);
+@@ -534,8 +656,9 @@ int log_set_target_from_string(const char *e) {
+ int log_set_max_level_from_string(const char *e) {
+         int t;
+ 
+-        if ((t = log_level_from_string(e)) < 0)
+-                return -EINVAL;
++        t = log_level_from_string(e);
++        if (t < 0)
++                return t;
+ 
+         log_set_max_level(t);
+         return 0;
+@@ -580,8 +703,9 @@ void log_show_location(bool b) {
+ int log_show_color_from_string(const char *e) {
+         int t;
+ 
+-        if ((t = parse_boolean(e)) < 0)
+-                return -EINVAL;
++        t = parse_boolean(e);
++        if (t < 0)
++                return t;
+ 
+         log_show_color(t);
+         return 0;
+@@ -590,8 +714,9 @@ int log_show_color_from_string(const char *e) {
+ int log_show_location_from_string(const char *e) {
+         int t;
+ 
+-        if ((t = parse_boolean(e)) < 0)
+-                return -EINVAL;
++        t = parse_boolean(e);
++        if (t < 0)
++                return t;
+ 
+         log_show_location(t);
+         return 0;
+@@ -599,11 +724,13 @@ int log_show_location_from_string(const char *e) {
+ 
+ static const char *const log_target_table[] = {
+         [LOG_TARGET_CONSOLE] = "console",
+-        [LOG_TARGET_SYSLOG] = "syslog",
+         [LOG_TARGET_KMSG] = "kmsg",
++        [LOG_TARGET_JOURNAL] = "journal",
++        [LOG_TARGET_JOURNAL_OR_KMSG] = "journal-or-kmsg",
++        [LOG_TARGET_SYSLOG] = "syslog",
+         [LOG_TARGET_SYSLOG_OR_KMSG] = "syslog-or-kmsg",
+-        [LOG_TARGET_NULL] = "null",
+-        [LOG_TARGET_AUTO] = "auto"
++        [LOG_TARGET_AUTO] = "auto",
++        [LOG_TARGET_NULL] = "null"
+ };
+ 
+ DEFINE_STRING_TABLE_LOOKUP(log_target, LogTarget);
+diff --git a/src/log.h b/src/log.h
+index 9942e3e..6ab07a5 100644
+--- a/src/log.h
++++ b/src/log.h
+@@ -27,14 +27,14 @@
+ 
+ #include "macro.h"
+ 
+-/* If set to SYSLOG and /dev/log can not be opened we fall back to
+- * KSMG. If KMSG fails, we fall back to CONSOLE */
+ typedef enum LogTarget{
+         LOG_TARGET_CONSOLE,
+         LOG_TARGET_KMSG,
++        LOG_TARGET_JOURNAL,
++        LOG_TARGET_JOURNAL_OR_KMSG,
+         LOG_TARGET_SYSLOG,
+         LOG_TARGET_SYSLOG_OR_KMSG,
+-        LOG_TARGET_AUTO, /* console if stderr is tty, SYSLOG_OR_KMSG otherwise */
++        LOG_TARGET_AUTO, /* console if stderr is tty, JOURNAL_OR_KMSG otherwise */
+         LOG_TARGET_NULL,
+         _LOG_TARGET_MAX,
+         _LOG_TARGET_INVALID = -1
+@@ -60,6 +60,7 @@ void log_close(void);
+ void log_forget_fds(void);
+ 
+ void log_close_syslog(void);
++void log_close_journal(void);
+ void log_close_kmsg(void);
+ void log_close_console(void);
+ 
+-- 
+1.7.8.1
+
+
+From ead51eb4ed55981f290e40a871ffbca6480c4cd3 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Thu, 12 Jan 2012 04:34:50 +0100
+Subject: [PATCH 10/12] units: make sure syslog socket goes away early during
+ shutdown
+
+---
+ units/syslog.socket |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/units/syslog.socket b/units/syslog.socket
+index 323fa86..657e791 100644
+--- a/units/syslog.socket
++++ b/units/syslog.socket
+@@ -11,6 +11,8 @@
+ Description=Syslog Socket
+ DefaultDependencies=no
+ Before=sockets.target syslog.target
++Conflicts=shutdown.target
++Before=shutdown.target
+ 
+ # Pull in syslog.target to tell people that /dev/log is now accessible
+ Wants=syslog.target
+-- 
+1.7.8.1
+
+
+From 4cfa2c999dea269ddc646bfeba6c7f1021a73843 Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Thu, 12 Jan 2012 05:09:06 +0100
+Subject: [PATCH 11/12] core: switch all log targets to go directly to the
+ journal, instead via syslog
+
+---
+ man/systemd.xml                       |   32 ++++++++++++++------------------
+ src/bridge.c                          |    2 +-
+ src/cgroups-agent.c                   |    2 +-
+ src/cryptsetup/cryptsetup-generator.c |    2 +-
+ src/getty-generator.c                 |    2 +-
+ src/initctl.c                         |    2 +-
+ src/login/user-sessions.c             |    2 +-
+ src/main.c                            |    6 +++---
+ src/manager.c                         |   12 +++++++++---
+ src/manager.h                         |    2 +-
+ src/modules-load.c                    |    2 +-
+ src/quotacheck.c                      |    2 +-
+ src/random-seed.c                     |    2 +-
+ src/rc-local-generator.c              |    2 +-
+ src/readahead/readahead-collect.c     |    2 +-
+ src/readahead/readahead-replay.c      |    2 +-
+ src/remount-api-vfs.c                 |    2 +-
+ src/reply-password.c                  |    2 +-
+ src/shutdownd.c                       |    2 +-
+ src/system.conf                       |    2 +-
+ src/unit.c                            |    2 +-
+ src/update-utmp.c                     |    2 +-
+ units/fsck-root.service.in            |    2 +-
+ units/fsck@.service.in                |    2 +-
+ 24 files changed, 47 insertions(+), 45 deletions(-)
+
+diff --git a/man/systemd.xml b/man/systemd.xml
+index c1766e2..121cb21 100644
+--- a/man/systemd.xml
++++ b/man/systemd.xml
+@@ -209,8 +209,10 @@
+                                 <listitem><para>Set log
+                                 target. Argument must be one of
+                                 <option>console</option>,
++                                <option>journal</option>,
+                                 <option>syslog</option>,
+                                 <option>kmsg</option>,
++                                <option>journal-or-kmsg</option>,
+                                 <option>syslog-or-kmsg</option>,
+                                 <option>null</option>.</para></listitem>
+                         </varlistentry>
+@@ -266,13 +268,15 @@
+                                 <option>inherit</option>,
+                                 <option>null</option>,
+                                 <option>tty</option>,
++                                <option>journal</option>,
++                                <option>journal+console</option>,
+                                 <option>syslog</option>,
+                                 <option>syslog+console</option>,
+                                 <option>kmsg</option>,
+                                 <option>kmsg+console</option>.  If the
+                                 argument is omitted
+                                 <option>--default-standard-output=</option>
+-                                defaults to <option>syslog</option>
++                                defaults to <option>journal</option>
+                                 and
+                                 <option>--default-standard-error=</option>
+                                 to
+@@ -823,19 +827,24 @@
+                         </varlistentry>
+ 
+                         <varlistentry>
++                                <term>SIGRTMIN+26</term>
+                                 <term>SIGRTMIN+27</term>
+                                 <term>SIGRTMIN+28</term>
+                                 <term>SIGRTMIN+29</term>
+ 
+                                 <listitem><para>Sets the log level to
+-                                <literal>console</literal>
+-                                (resp. <literal>kmsg</literal> on
++                                <literal>journal-or-kmsg</literal>
++                                (resp. <literal>console</literal> on
++                                <literal>SIGRTMIN+27</literal>;
++                                resp. <literal>kmsg</literal> on
+                                 <literal>SIGRTMIN+28</literal>;
+                                 resp. <literal>syslog-or-kmsg</literal>
+                                 on <literal>SIGRTMIN+29</literal>), as
+                                 controlled via
+-                                <varname>systemd.log_target=console</varname>
+-                                (resp. <varname>systemd.log_target=kmsg</varname>
++                                <varname>systemd.log_target=journal-or-kmsg</varname>
++                                (resp. <varname>systemd.log_target=console</varname>
++                                on <literal>SIGRTMIN+27</literal>;
++                                resp. <varname>systemd.log_target=kmsg</varname>
+                                 on <literal>SIGRTMIN+28</literal>;
+                                 resp
+                                 <varname>systemd.log_target=syslog-or-kmsg</varname>
+@@ -1079,19 +1088,6 @@
+                         </varlistentry>
+ 
+                         <varlistentry>
+-                                <term><filename>/run/systemd/stdout-syslog-bridge</filename></term>
+-
+-                                <listitem><para>Used internally by the
+-                                <filename>systemd-stdout-syslog-bridge.service</filename>
+-                                unit to connect STDOUT and/or STDERR
+-                                of spawned processes to
+-                                <citerefentry><refentrytitle>syslog</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+-                                or the kernel log buffer. This is an
+-                                AF_UNIX stream
+-                                socket.</para></listitem>
+-                        </varlistentry>
+-
+-                        <varlistentry>
+                                 <term><filename>/run/systemd/shutdownd</filename></term>
+ 
+                                 <listitem><para>Used internally by the
+diff --git a/src/bridge.c b/src/bridge.c
+index 878856c..1f7cf3a 100644
+--- a/src/bridge.c
++++ b/src/bridge.c
+@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_JOURNAL_OR_KMSG);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/cgroups-agent.c b/src/cgroups-agent.c
+index 7f001e6..1bbc882 100644
+--- a/src/cgroups-agent.c
++++ b/src/cgroups-agent.c
+@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
+                 goto finish;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/cryptsetup/cryptsetup-generator.c b/src/cryptsetup/cryptsetup-generator.c
+index a48b7a4..ba59b49 100644
+--- a/src/cryptsetup/cryptsetup-generator.c
++++ b/src/cryptsetup/cryptsetup-generator.c
+@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
+         if (argc > 1)
+                 arg_dest = argv[1];
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/getty-generator.c b/src/getty-generator.c
+index 6b5b254..1263785 100644
+--- a/src/getty-generator.c
++++ b/src/getty-generator.c
+@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/initctl.c b/src/initctl.c
+index e2189e9..53d03a9 100644
+--- a/src/initctl.c
++++ b/src/initctl.c
+@@ -388,7 +388,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/login/user-sessions.c b/src/login/user-sessions.c
+index df46b76..64aa3bb 100644
+--- a/src/login/user-sessions.c
++++ b/src/login/user-sessions.c
+@@ -35,7 +35,7 @@ int main(int argc, char*argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/main.c b/src/main.c
+index b23dd18..91516da 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -343,7 +343,7 @@ static int parse_proc_cmdline_word(const char *word) {
+ #ifdef HAVE_SYSV_COMPAT
+                          "systemd.sysv_console=0|1                 Connect output of SysV scripts to console\n"
+ #endif
+-                         "systemd.log_target=console|kmsg|syslog|syslog-or-kmsg|null\n"
++                         "systemd.log_target=console|kmsg|journal|journal-or-kmsg|syslog|syslog-or-kmsg|null\n"
+                          "                                         Log target\n"
+                          "systemd.log_level=LEVEL                  Log level\n"
+                          "systemd.log_color=0|1                    Highlight important log messages\n"
+@@ -993,7 +993,7 @@ static int help(void) {
+ #ifdef HAVE_SYSV_COMPAT
+                "     --sysv-console[=0|1]        Connect output of SysV scripts to console\n"
+ #endif
+-               "     --log-target=TARGET         Set log target (console, syslog, kmsg, syslog-or-kmsg, null)\n"
++               "     --log-target=TARGET         Set log target (console, journal, syslog, kmsg, journal-or-kmsg, syslog-or-kmsg, null)\n"
+                "     --log-level=LEVEL           Set log level (debug, info, notice, warning, err, crit, alert, emerg)\n"
+                "     --log-color[=0|1]           Highlight important log messages\n"
+                "     --log-location[=0|1]        Include code location in log messages\n"
+@@ -1177,7 +1177,7 @@ int main(int argc, char *argv[]) {
+ 
+         if (getpid() == 1) {
+                 arg_running_as = MANAGER_SYSTEM;
+-                log_set_target(detect_container(NULL) > 0 ? LOG_TARGET_CONSOLE : LOG_TARGET_SYSLOG_OR_KMSG);
++                log_set_target(detect_container(NULL) > 0 ? LOG_TARGET_CONSOLE : LOG_TARGET_JOURNAL_OR_KMSG);
+ 
+                 if (!is_reexec)
+                         if (selinux_setup(&loaded_policy) < 0)
+diff --git a/src/manager.c b/src/manager.c
+index 54df7eb..a549209 100644
+--- a/src/manager.c
++++ b/src/manager.c
+@@ -195,6 +195,7 @@ static int manager_setup_signals(Manager *m) {
+                         SIGRTMIN+21, /* systemd: disable status messages */
+                         SIGRTMIN+22, /* systemd: set log level to LOG_DEBUG */
+                         SIGRTMIN+23, /* systemd: set log level to LOG_INFO */
++                        SIGRTMIN+26, /* systemd: set log target to journal-or-kmsg */
+                         SIGRTMIN+27, /* systemd: set log target to console */
+                         SIGRTMIN+28, /* systemd: set log target to kmsg */
+                         SIGRTMIN+29, /* systemd: set log target to syslog-or-kmsg */
+@@ -2293,6 +2294,11 @@ static int manager_process_signal_fd(Manager *m) {
+                                 log_notice("Setting log level to info.");
+                                 break;
+ 
++                        case 26:
++                                log_set_target(LOG_TARGET_JOURNAL_OR_KMSG);
++                                log_notice("Setting log target to journal-or-kmsg.");
++                                break;
++
+                         case 27:
+                                 log_set_target(LOG_TARGET_CONSOLE);
+                                 log_notice("Setting log target to console.");
+@@ -3121,7 +3127,7 @@ int manager_set_default_controllers(Manager *m, char **controllers) {
+         return 0;
+ }
+ 
+-void manager_recheck_syslog(Manager *m) {
++void manager_recheck_journal(Manager *m) {
+         Unit *u;
+ 
+         assert(m);
+@@ -3131,13 +3137,13 @@ void manager_recheck_syslog(Manager *m) {
+ 
+         u = manager_get_unit(m, SPECIAL_JOURNALD_SOCKET);
+         if (u && SOCKET(u)->state != SOCKET_RUNNING) {
+-                log_close_syslog();
++                log_close_journal();
+                 return;
+         }
+ 
+         u = manager_get_unit(m, SPECIAL_JOURNALD_SERVICE);
+         if (u && SERVICE(u)->state != SERVICE_RUNNING) {
+-                log_close_syslog();
++                log_close_journal();
+                 return;
+         }
+ 
+diff --git a/src/manager.h b/src/manager.h
+index 6e7558e..0ace0c9 100644
+--- a/src/manager.h
++++ b/src/manager.h
+@@ -289,7 +289,7 @@ void manager_check_finished(Manager *m);
+ void manager_run_generators(Manager *m);
+ void manager_undo_generators(Manager *m);
+ 
+-void manager_recheck_syslog(Manager *m);
++void manager_recheck_journal(Manager *m);
+ 
+ void manager_set_show_status(Manager *m, bool b);
+ bool manager_get_show_status(Manager *m);
+diff --git a/src/modules-load.c b/src/modules-load.c
+index 8dd98f7..7384f25 100644
+--- a/src/modules-load.c
++++ b/src/modules-load.c
+@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/quotacheck.c b/src/quotacheck.c
+index 60033a8..b6648b8 100644
+--- a/src/quotacheck.c
++++ b/src/quotacheck.c
+@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/random-seed.c b/src/random-seed.c
+index 0c63794..8b43bac 100644
+--- a/src/random-seed.c
++++ b/src/random-seed.c
+@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/rc-local-generator.c b/src/rc-local-generator.c
+index ac6424a..56785cf 100644
+--- a/src/rc-local-generator.c
++++ b/src/rc-local-generator.c
+@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/readahead/readahead-collect.c b/src/readahead/readahead-collect.c
+index 6bff32f..7e6c243 100644
+--- a/src/readahead/readahead-collect.c
++++ b/src/readahead/readahead-collect.c
+@@ -654,7 +654,7 @@ int main(int argc, char *argv[]) {
+         int r;
+         const char *root;
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/readahead/readahead-replay.c b/src/readahead/readahead-replay.c
+index 88c7a21..00d57c3 100644
+--- a/src/readahead/readahead-replay.c
++++ b/src/readahead/readahead-replay.c
+@@ -338,7 +338,7 @@ int main(int argc, char*argv[]) {
+         int r;
+         const char *root;
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/remount-api-vfs.c b/src/remount-api-vfs.c
+index 7b14655..3e146eb 100644
+--- a/src/remount-api-vfs.c
++++ b/src/remount-api-vfs.c
+@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/reply-password.c b/src/reply-password.c
+index bd55e65..3a96049 100644
+--- a/src/reply-password.c
++++ b/src/reply-password.c
+@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
+         char packet[LINE_MAX];
+         size_t length;
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/shutdownd.c b/src/shutdownd.c
+index 19b16cb..b4052d4 100644
+--- a/src/shutdownd.c
++++ b/src/shutdownd.c
+@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/src/system.conf b/src/system.conf
+index 2d1dd86..33d09bc 100644
+--- a/src/system.conf
++++ b/src/system.conf
+@@ -9,7 +9,7 @@
+ 
+ [Manager]
+ #LogLevel=info
+-#LogTarget=syslog-or-kmsg
++#LogTarget=journal-or-kmsg
+ #LogColor=yes
+ #LogLocation=no
+ #DumpCore=yes
+diff --git a/src/unit.c b/src/unit.c
+index e07d2c1..1fbfb1d 100644
+--- a/src/unit.c
++++ b/src/unit.c
+@@ -1338,7 +1338,7 @@ void unit_notify(Unit *u, UnitActiveState os, UnitActiveState ns, bool reload_su
+                 }
+         }
+ 
+-        manager_recheck_syslog(u->meta.manager);
++        manager_recheck_journal(u->meta.manager);
+ 
+         /* Maybe we finished startup and are now ready for being
+          * stopped because unneeded? */
+diff --git a/src/update-utmp.c b/src/update-utmp.c
+index 073f28e..0d177d6 100644
+--- a/src/update-utmp.c
++++ b/src/update-utmp.c
+@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
+                 return EXIT_FAILURE;
+         }
+ 
+-        log_set_target(LOG_TARGET_SYSLOG_OR_KMSG);
++        log_set_target(LOG_TARGET_AUTO);
+         log_parse_environment();
+         log_open();
+ 
+diff --git a/units/fsck-root.service.in b/units/fsck-root.service.in
+index 7b3529d..4086149 100644
+--- a/units/fsck-root.service.in
++++ b/units/fsck-root.service.in
+@@ -18,6 +18,6 @@ ConditionPathExists=!/run/initramfs/root-fsck
+ Type=oneshot
+ RemainAfterExit=no
+ ExecStart=@rootlibexecdir@/systemd-fsck
+-StandardOutput=syslog+console
++StandardOutput=journal+console
+ FsckPassNo=1
+ TimeoutSec=0
+diff --git a/units/fsck@.service.in b/units/fsck@.service.in
+index e1f7736..c06684b 100644
+--- a/units/fsck@.service.in
++++ b/units/fsck@.service.in
+@@ -16,5 +16,5 @@ Before=shutdown.target
+ Type=oneshot
+ RemainAfterExit=no
+ ExecStart=@rootlibexecdir@/systemd-fsck %f
+-StandardOutput=syslog+console
++StandardOutput=journal+console
+ TimeoutSec=0
+-- 
+1.7.8.1
+
+
+From 7c8bbccd071a9a12efdd8a7770b53d7786eb3a9c Mon Sep 17 00:00:00 2001
+From: Lennart Poettering <lennart@poettering.net>
+Date: Thu, 12 Jan 2012 05:09:24 +0100
+Subject: [PATCH 12/12] journal: if the syslog forwarder socket is full, then
+ don't block
+
+---
+ src/journal/journald.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/src/journal/journald.c b/src/journal/journald.c
+index 56cd313..f924c93 100644
+--- a/src/journal/journald.c
++++ b/src/journal/journald.c
+@@ -752,6 +752,11 @@ static void forward_syslog_iovec(Server *s, const struct iovec *iovec, unsigned
+         if (sendmsg(s->syslog_fd, &msghdr, MSG_NOSIGNAL) >= 0)
+                 return;
+ 
++        /* The socket is full? I guess the syslog implementation is
++         * too slow, and we shouldn't wait for that... */
++        if (errno == EAGAIN)
++                return;
++
+         if (ucred && errno == ESRCH) {
+                 struct ucred u;
+ 
+@@ -765,6 +770,9 @@ static void forward_syslog_iovec(Server *s, const struct iovec *iovec, unsigned
+ 
+                 if (sendmsg(s->syslog_fd, &msghdr, MSG_NOSIGNAL) >= 0)
+                         return;
++
++                if (errno == EAGAIN)
++                        return;
+         }
+ 
+         log_debug("Failed to forward syslog message: %m");
+-- 
+1.7.8.1
+
