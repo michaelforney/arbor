@@ -1,0 +1,22 @@
+Title: udev 177 update
+Author: Wulf C. Krueger <philantrop@exherbo.org>
+Content-Type: text/plain
+Posted: 2012-01-12
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: sys-fs/udev[<177]
+
+For the udev-177 update, you need to enable the DEVTMPFS kernel option
+(-> Device Drivers -> Generic Driver Options) to get the devtmpfs
+filesystem. This is an upstream change. From udev's NEWS file:
+
+"The 'devtmpfs' filesystem is required now, udev will not create or
+delete device nodes anymore, it only adjusts permissions and ownership
+of device nodes and maintains additional symlinks."
+
+If you don't have DEVTMPFS enabled in your kernel when booting with
+udev-177, things will *NOT* work.
+
+Furthermore, if you're using systemd, you should update to systemd >= 38.
+Earlier systemd versions will work but issue a non-fatal error during
+booting.
