@@ -2,6 +2,8 @@
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 SUMMARY="ALSA utilities"
 DESCRIPTION="
 The following utilities are included. None of them are essential apart from (maybe)
@@ -53,7 +55,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( alsaloop )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir /${LIBDIR}/systemd/system" )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}" )
 
 src_install() {
     default
