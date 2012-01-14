@@ -11,7 +11,8 @@ else
     DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] easy-multibuild
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require easy-multibuild systemd-service
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
 
@@ -105,7 +106,7 @@ configure_one_multibuild() {
         --without-selinux \
         $(option_enable glib gudev) \
         $(option_enable gobject-introspection introspection) \
-        $(option_with systemd systemdsystemunitdir "/${LIBDIR}/systemd/system") \
+        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
         $(option_enable acl udev_acl) \
         "${HWDB}"
 }
