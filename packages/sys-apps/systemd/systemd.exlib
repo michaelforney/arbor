@@ -146,8 +146,8 @@ systemd_pkg_pretend() {
 }
 
 systemd_src_prepare() {
-    if [[ ${PV} == 37 ]]; then
-        expatch "${FILES}"/tmpfiles-binfmt-unprefixed.patch
+    if [[ ${PV} == 37 || ${PV} == 38 ]]; then
+        expatch "${FILES}"/${PNV}_tmpfiles-binfmt-unprefixed.patch
     fi
 
     # Set the correct libdir if necessary.
