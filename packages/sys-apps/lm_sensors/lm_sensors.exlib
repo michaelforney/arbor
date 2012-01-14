@@ -85,8 +85,7 @@ lm_sensors_src_install() {
     fi
 
     if option systemd ; then
-        dodir /${LIBDIR}/systemd/system
-        insinto /${LIBDIR}/systemd/system
+        insinto ${SYSTEMDSYSTEMUNITDIR}
         doins prog/init/lm_sensors.service
         insinto /etc/conf.d
         doins "${FILES}"/lm_sensors.conf
