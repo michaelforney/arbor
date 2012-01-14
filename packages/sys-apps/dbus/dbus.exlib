@@ -9,7 +9,7 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic easy-multibuild
+require flag-o-matic easy-multibuild systemd-service
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -80,7 +80,7 @@ configure_one_multibuild() {
         $(option_enable debug verbose-mode)              \
         $(option_enable doc doxygen-docs)                \
         $(option_with X x)                               \
-        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
 }
 
 dbus_src_configure() {
