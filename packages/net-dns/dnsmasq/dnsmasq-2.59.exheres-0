@@ -79,7 +79,7 @@ src_install() {
     fi
 
     # Only install dnsmasq.service, not README
-    insinto "/${LIBDIR}/systemd/system"
+    insinto ${SYSTEMDSYSTEMUNITDIR}
     doins "${WORK}/contrib/systemd/${PN}.service"
 
     if option dbus ; then
