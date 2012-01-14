@@ -1,6 +1,8 @@
 # Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 SUMMARY="An enhanced syslog daemon for Linux (and Unix)"
 DESCRIPTION="
 rsyslog is an enhanced multi-threaded syslogd. Among others, it offers support
@@ -105,7 +107,7 @@ src_configure() {
         $(option_enable postgresql pgsql)
         $(option_enable relp)
 
-        $(option_with systemd systemdsystemunitdir /${LIBDIR}/systemd/system)
+        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
     )
 
     if expecting_tests; then
