@@ -49,10 +49,10 @@ src_prepare() {
 
     # Respect the user's CFLAGS/CXXFLAGS.
     edo sed -i -e "/CFLAGS_COMMON/s:-g -O3$:${CFLAGS}:" \
-               -e "/CXXFLAGS_COMMON/s:-g$:${CXXFLAGS}:" Makefile.common
+               -e "/CXXFLAGS_COMMON/s:-g$:${CXXFLAGS}:" common.mk
 
     # Use the correct libdir.
-    edo sed -i -e "/LIBINST_DIR/s:lib:${LIBDIR}:" Makefile.config.in
+    edo sed -i -e "/LIBINST_DIR/s:lib:${LIBDIR}:" config.mk.in
 
     edo sed -i -e "/libxmlrpc_server_abyss++/d" src/cpp/Makefile
 
