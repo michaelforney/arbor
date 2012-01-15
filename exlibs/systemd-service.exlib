@@ -13,7 +13,7 @@ install_systemd_files() {
     exparam -v systemd_files systemd_files[@]
 
     if option systemd ; then
-        insinto ${SYSTEMDSYSTEMUNITDIR}
+        insinto "${SYSTEMDSYSTEMUNITDIR}"
 
         for object in "${systemd_files[@]}"; do
             if [[ -d ${object} ]]; then
