@@ -24,6 +24,10 @@ DEPENDENCIES="
         net-misc/curl
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/xmlrpc-c_fix_building_with_newer_curl.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
         --disable-wininet-client
         --disable-libwww-client
@@ -58,5 +62,7 @@ src_prepare() {
 
     # We need to filter this. cf. Gentoo bug 214137.
     unset SRCDIR
+
+    default
 }
 
