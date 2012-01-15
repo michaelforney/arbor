@@ -158,6 +158,7 @@ systemd_src_prepare() {
         edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/binfmtdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/sysctldir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
 
