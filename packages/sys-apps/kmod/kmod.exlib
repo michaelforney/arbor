@@ -21,12 +21,17 @@ UPSTREAM_RELEASE_NOTES="http://git.profusion.mobi/cgit.cgi/kmod.git/tree/NEWS"
 
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    doc [[ description = [ Build libkmod's API documentation using gtk-doc ] ]]
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
+    build:
+        doc? ( dev-doc/gtk-doc )
     build+run:
         app-arch/xz[multibuild_c:*(?)?]
-        !sys-apps/module-init-tools[<3.16-r2] [[
+        !sys-apps/module-init-tools[<3.16-r3] [[
             description = [ module-init-tools and kmod provide the same things using alternatives from m-i-t-3.16-r2 on. ]
             resolution = upgrade-blocked-before
         ]]
@@ -35,6 +40,10 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-xz
     --with-zlib
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    "doc gtk-doc"
 )
 
 kmod_src_install() {
@@ -47,14 +56,21 @@ kmod_src_install() {
         dosym ../usr/bin/kmod /sbin/${a}
         alternatives+=(
             /sbin/${a} ${PN}.${a}
+            /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
+
     dosym ../usr/bin/kmod /bin/lsmod
     dosym ../usr/bin/kmod /sbin/lsmod
     alternatives+=(
         /bin/lsmod ${PN}.lsmod
         /sbin/lsmod ${PN}.lsmod
+        /usr/share/man/man8/lsmod.8 ${PN}.lsmod.8
+        /usr/share/man/man5/depmod.d.5 ${PN}.depmod.d.5
+        /usr/share/man/man5/modprobe.d.5 ${PN}.modprobe.d.5
+        /usr/share/man/man5/modules.dep.5 ${PN}.modules.dep.5
     )
+
     alternatives_for "${alternatives[@]}"
 }
 
