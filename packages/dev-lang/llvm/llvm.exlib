@@ -141,8 +141,10 @@ llvm_src_prepare() {
         edo popd
     fi
 
-    if option dragonegg && ! ever is_scm ; then
-        edo mv "${WORKBASE}/dragonegg-${PV}.src" "${WORK}/tools/dragonegg"
+    if option dragonegg ; then
+        if ! ever is_scm ; then
+            edo mv "${WORKBASE}/dragonegg-${PV}.src" "${WORK}/tools/dragonegg"
+        fi
         # When svnversion is present(that means you have subversion installed)
         # the compilation fails because "Unversioned directory" are taken as 2
         # words, http://llvm.org/bugs/show_bug.cgi?id=11593.
