@@ -1,4 +1,5 @@
 # Copyright 2007 Bryan Østergaard
+# Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require alternatives
@@ -60,6 +61,7 @@ src_install() {
     for a in depmod insmod modinfo modprobe rmmod ; do
         alternatives+=(
             /sbin/${a} ${PN}.${a}
+            /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
 
@@ -69,6 +71,13 @@ src_install() {
         /bin/lsmod ${PN}.lsmod
         /sbin/insmod.static ${PN}.insmod.static
         /sbin/lsmod ${PN}.lsmod
+        /usr/share/man/man8/lsmod.8 ${PN}.lsmod.8
+        /usr/share/man/man5/depmod.conf.5 ${PN}.depmod.conf.5
+        /usr/share/man/man5/modprobe.conf.5 ${PN}.modprobe.conf.5
+        /usr/share/man/man5/modules.dep.bin.5 ${PN}.modules.dep.bin.5
+        /usr/share/man/man5/depmod.d.5 ${PN}.depmod.d.5
+        /usr/share/man/man5/modprobe.d.5 ${PN}.modprobe.d.5
+        /usr/share/man/man5/modules.dep.5 ${PN}.modules.dep.5
     )
     alternatives_for "${alternatives[@]}"
 }
