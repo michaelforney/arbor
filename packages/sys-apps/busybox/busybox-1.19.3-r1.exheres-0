@@ -21,6 +21,8 @@ DEPENDENCIES="
         app-arch/zip
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-fix-du-k-works-test-du-may-be-84k-on-some-fs-es.patch )
+
 bb_make() {
     local make_options=(
         AR="${AR}"
@@ -37,6 +39,8 @@ bb_make() {
 }
 
 src_prepare() {
+    default
+
     # nuke tests that require pid 1 to be named 'init'
     edo sed -i -e '/^testing.*init/ d' testsuite/pidof.tests
 
