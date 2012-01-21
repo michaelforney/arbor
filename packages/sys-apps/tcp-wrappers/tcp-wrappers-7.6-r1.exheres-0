@@ -5,7 +5,7 @@
 
 MY_PNV="${PNV//-/_}"
 
-require easy-multibuild [ work=${MY_PNV} ]
+require easy-multibuild [ multiunpack=true work=${MY_PNV} ]
 
 PATCH_VER="1.1"
 SUMMARY="TCP Wrappers"
@@ -22,16 +22,6 @@ MYOPTIONS="
 "
 DEPENDENCIES=""
 
-WORK=${WORKBASE}
-
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-src_unpack() {
-    easy-multibuild_run_phase
-}
-
 prepare_one_multibuild() {
     PATCHDIR="${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${PV}"
 
@@ -39,12 +29,6 @@ prepare_one_multibuild() {
 
     option ipv6 && expatch -p2 "${PATCHDIR}"/${PNV}-ipv6-1.14.diff
 }
-
-src_prepare() {
-    easy-multibuild_run_phase
-}
-
-configure_prepare_one_multibuild() { :; }
 
 compile_one_multibuild() {
     local myconf="-DHAVE_WEAKSYMS"
