@@ -3,6 +3,8 @@
 # Based in part upon 'libaio-0.3.107.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
+require easy-multibuild [ multiunpack=true ]
+
 SUMMARY="Asynchronous input/output library that uses the kernels native interface"
 DESCRIPTION="
 AIO enables even a single application thread to overlap I/O operations with other
@@ -19,7 +21,7 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 # Tests want to mount things, need root, require expect
 RESTRICT="test userpriv"
@@ -32,13 +34,13 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}"/${PNV}-build.patch
 )
 
-src_prepare() {
+prepare_one_multibuild() {
     default
 
     edo sed -i "/^libdir=/s:lib$:${LIBDIR}:" src/Makefile Makefile
 }
 
-src_test() {
+test_one_multibuild() {
     esandbox allow /dev/loop
     edo pushd "${WORK}"/harness >/dev/null
     edo mkdir testdir
@@ -46,7 +48,7 @@ src_test() {
     edo popd >/dev/null
 }
 
-src_install() {
+install_one_multibuild() {
     default
 
     doman man/*
