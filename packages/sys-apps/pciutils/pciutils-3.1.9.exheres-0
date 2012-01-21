@@ -22,8 +22,8 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXCLUDE=( "README.Windows" )
 
 src_prepare() {
-    cp -r "${WORK}" "${WORKBASE}"/static
-    cp -r "${WORK}" "${WORKBASE}"/shared
+    edo cp -r "${WORK}" "${WORKBASE}"/static
+    edo cp -r "${WORK}" "${WORKBASE}"/shared
 }
 
 src_compile() {
@@ -37,15 +37,15 @@ src_compile() {
         ZLIB="no"
     )
 
-    pushd "${WORKBASE}"/static
+    edo pushd "${WORKBASE}"/static
     emake \
         "${params[@]}"
-    popd
-    pushd "${WORKBASE}"/shared
+    edo popd
+    edo pushd "${WORKBASE}"/shared
     emake \
         "${params[@]}" \
         SHARED="yes"
-    popd
+    edo popd
 }
 
 src_install() {
@@ -58,26 +58,26 @@ src_install() {
         STRIP=""
     )
 
-    pushd "${WORKBASE}"/static
+    edo pushd "${WORKBASE}"/static
     emake \
         "${params[@]}" \
         install-lib
-    popd
-    pushd "${WORKBASE}"/shared
+    edo popd
+    edo pushd "${WORKBASE}"/shared
     emake \
         "${params[@]}" \
         SHARED="yes" \
         install \
         install-lib
-    popd
+    edo popd
 
     # provided by pciutils-data
-    edo rm -f "${IMAGE}/usr/share/misc/pci.ids"
-    edo rmdir "${IMAGE}/usr/share/misc"
+    edo rm -f "${IMAGE}"/usr/share/misc/pci.ids
+    edo rmdir "${IMAGE}"/usr/share/misc
 
     # not needed
-    edo rm -f "${IMAGE}/usr/sbin/update-pciids"
-    edo rm -f "${IMAGE}/usr/share/man/man8/update-pciids.8"
+    edo rm -f "${IMAGE}"/usr/sbin/update-pciids
+    edo rm -f "${IMAGE}"/usr/share/man/man8/update-pciids.8
 
     emagicdocs
 }
