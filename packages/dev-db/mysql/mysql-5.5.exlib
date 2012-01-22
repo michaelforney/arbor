@@ -2,7 +2,7 @@
 # Copyright 2011 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cmake systemd-service
+require cmake systemd-service easy-multibuild
 
 export_exlib_phases pkg_pretend src_install src_prepare
 
@@ -28,61 +28,21 @@ LICENCES="GPL-2" # with-exceptions
 SLOT="0"
 MYOPTIONS="baselayout debug tcpd
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
+    multibuild_c: 32 64
 "
 
 DEPENDENCIES="
     build+run:
         group/${PN}
         user/${PN}
-        dev-libs/libaio
-        dev-libs/openssl[>=0.9.7]
-        sys-libs/readline[>=5.2]
-        sys-libs/zlib[>=1.2.3]
-        tcpd? ( sys-apps/tcp-wrappers )
+        dev-libs/libaio[multibuild_c:*(-)?]
+        dev-libs/openssl[>=0.9.7][multibuild_c:*(-)?]
+        sys-libs/readline[>=5.2][multibuild_c:*(-)?]
+        sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
+        tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     suggestion:
         app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
 "
-
-CMAKE_SRC_CONFIGURE_PARAMS=(
-    -DBUILD_CONFIG:STRING=mysql_release
-    -DCMAKE_BUILD_TYPE:STRING=Release
-    -DCMAKE_INSTALL_PREFIX:PATH=/usr
-    -DDEFAULT_CHARSET:STRING=utf8
-    -DDEFAULT_COLLATION:STRING=utf8_general_ci
-    -DFEATURE_SET:STRING=community
-    -DINSTALL_BINDIR:PATH=bin
-    -DINSTALL_DOCDIR:PATH=share/doc/${PNVR}
-    -DINSTALL_DOCREADMEDIR:PATH=share/doc/${PNVR}
-    -DINSTALL_INCLUDEDIR:PATH=include/mysql
-    -DINSTALL_INFODIR:PATH=share/mysql/info
-    -DINSTALL_LIBDIR:PATH=${LIBDIR}/mysql
-    -DINSTALL_MANDIR:PATH=share/man
-    -DINSTALL_MYSQLSHAREDIR:PATH=share/mysql
-    -DINSTALL_PLUGINDIR:PATH=${LIBDIR}/mysql/plugin
-    -DINSTALL_SBINDIR:PATH=sbin
-    -DINSTALL_SCRIPTDIR:PATH=bin
-    -DINSTALL_SUPPORTFILESDIR:PATH=share/doc/${PNVR}/support-files
-    -DMYSQL_DATADIR:PATH=/var/lib/mysql
-    -DMYSQL_UNIX_ADDR:PATH=/run/mysqld/mysqld.sock
-    -DSYSCONFDIR:PATH=/etc/mysql
-    -DWITH_COMMENT:STRING="Exherbo, ${PNVR}"
-    -DWITH_EXTRA_CHARSETS:STRING=all
-    -DWITH_INNOBASE_STORAGE_ENGINE:BOOL=TRUE
-    -DWITH_LIBEDIT:BOOL=FALSE
-    -DWITH_READLINE:BOOL=FALSE
-    -DWITH_SSL:STRING=system
-    -DWITH_VALGRIND:BOOL=FALSE
-    -DWITH_ZLIB:STRING=system
-    # Empty value to not install the sql-bench directory
-    -DINSTALL_SQLBENCHDIR:STRING=
-)
-
-CMAKE_SRC_CONFIGURE_OPTION_HAVES=( 'embedded-server EMBEDDED_PRIVILEGE_CONTROL' )
-CMAKE_SRC_CONFIGURE_OPTION_WITHS=(
-    'debug DEBUG'
-    'embedded-server EMBEDDED_SERVER'
-    'tcpd LIBWRAP'
-)
 
 mysql-5.5_pkg_pretend() {
     # Sanity check when upgrading to a different x.y version of mysql
@@ -113,8 +73,70 @@ mysql-5.5_src_prepare() {
     option debug && edo sed -i -e 's/-Werror//g' "${WORK}"/CMakeLists.txt
 }
 
-mysql-5.5_src_install() {
+configure_one_multibuild() {
+    local ECMAKE_BUILD_DIR="${PWD}"
+
+    local cmakeargs=(
+        -DBUILD_CONFIG:STRING=mysql_release
+        -DCMAKE_BUILD_TYPE:STRING=Release
+        -DCMAKE_INSTALL_PREFIX:PATH=/usr
+        -DDEFAULT_CHARSET:STRING=utf8
+        -DDEFAULT_COLLATION:STRING=utf8_general_ci
+        -DFEATURE_SET:STRING=community
+        -DINSTALL_BINDIR:PATH=bin
+        -DINSTALL_DOCDIR:PATH=share/doc/${PNVR}
+        -DINSTALL_DOCREADMEDIR:PATH=share/doc/${PNVR}
+        -DINSTALL_INCLUDEDIR:PATH=include/mysql
+        -DINSTALL_INFODIR:PATH=share/mysql/info
+        -DINSTALL_LIBDIR:PATH=${LIBDIR}/mysql
+        -DINSTALL_MANDIR:PATH=share/man
+        -DINSTALL_MYSQLSHAREDIR:PATH=share/mysql
+        -DINSTALL_PLUGINDIR:PATH=${LIBDIR}/mysql/plugin
+        -DINSTALL_SBINDIR:PATH=sbin
+        -DINSTALL_SCRIPTDIR:PATH=bin
+        -DINSTALL_SUPPORTFILESDIR:PATH=share/doc/${PNVR}/support-files
+        -DMYSQL_DATADIR:PATH=/var/lib/mysql
+        -DMYSQL_UNIX_ADDR:PATH=/run/mysqld/mysqld.sock
+        -DSYSCONFDIR:PATH=/etc/mysql
+        -DWITH_COMMENT:STRING="Exherbo, ${PNVR}"
+        -DWITH_EXTRA_CHARSETS:STRING=all
+        -DWITH_INNOBASE_STORAGE_ENGINE:BOOL=TRUE
+        -DWITH_LIBEDIT:BOOL=FALSE
+        -DWITH_READLINE:BOOL=FALSE
+        -DWITH_SSL:STRING=system
+        -DWITH_VALGRIND:BOOL=FALSE
+        -DWITH_ZLIB:STRING=system
+        # Empty value to not install the sql-bench directory
+        -DINSTALL_SQLBENCHDIR:STRING=
+    )
+
+    ecmake \
+        "${cmakeargs[@]}" \
+        $(cmake_have 'embedded-server EMBEDDED_PRIVILEGE_CONTROL')\
+        $(cmake_with 'debug DEBUG')\
+        $(cmake_with 'embedded-server EMBEDDED_SERVER')\
+        $(cmake_with 'tcpd LIBWRAP')
+}
+
+compile_one_multibuild() {
+    local ECMAKE_BUILD_DIR="${PWD}"
+    cmake_src_compile
+}
+
+install_one_multibuild() {
+    local ECMAKE_BUILD_DIR="${PWD}"
     cmake_src_install
+
+    ! option debug && edo rmdir "${IMAGE}"/usr/${LIBDIR}/mysql/plugin/debug
+
+    # construct ldpath for all targets
+    ldpath="/usr/${LIBDIR}/${PN}${ldpath:+:${ldpath}}"
+}
+
+mysql-5.5_src_install() {
+    local ldpath
+
+    easy-multibuild_src_install
 
     # Contains lots of cruft & some empty dirs
     edo rm -r "${IMAGE}"/usr/{data,mysql-test}
@@ -128,10 +150,8 @@ mysql-5.5_src_install() {
     edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
     edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
 
-    ! option debug && edo rmdir "${IMAGE}"/usr/${LIBDIR}/mysql/plugin/debug
-
     hereenvd 46mysql <<EOF
-LDPATH=/usr/${LIBDIR}/${PN}
+LDPATH=${ldpath}
 EOF
 
     insinto /etc/logrotate.d
@@ -150,5 +170,10 @@ EOF
 d /run/mysqld 0755 mysql mysql
 EOF
     fi
+}
+
+test_one_multibuild() {
+   local ECMAKE_BUILD_DIR="${PWD}"
+   cmake_src_test
 }
 
