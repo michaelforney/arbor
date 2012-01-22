@@ -28,12 +28,12 @@ cmake_run() {
 
     local ret
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        edo pushd "${ECMAKE_BUILD_DIR}"
-        ret=$?
+        edo pushd "${ECMAKE_BUILD_DIR}" || return 1
     fi
     edo "${@}"
+    ret=$?
     if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        edo popd
+        edo popd || return 1
     fi
     return ${ret}
 }
