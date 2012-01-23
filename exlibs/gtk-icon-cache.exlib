@@ -5,6 +5,8 @@ myexparam -b no_gtk_dependency=false
 
 : ${GTK_UPDATE_ICON_CACHE:=${ROOT}usr/bin/gtk-update-icon-cache}
 
+GTK_ICON_CACHE_ICON_THEME_DIRECTORIES=()
+
 export_exlib_phases pkg_preinst pkg_postinst pkg_postrm
 
 exparam -b no_gtk_dependency ||
@@ -14,16 +16,16 @@ gtk_icon_cache_exlib_save_theme_directories()
 {
     illegal_in_global_scope
 
-    pushd "${IMAGE}" &> /dev/null
-    export GTK_ICON_CACHE_ICON_THEME_DIRECTORIES=$(find 'usr/share/icons' -maxdepth 1 -mindepth 1 -type d 2>/dev/null)
-    popd "${IMAGE}" &> /dev/null
+    for path in "${IMAGE}"usr/share/icons/* ; do
+        [[ -d "${path}" ]] && GTK_ICON_CACHE_ICON_THEME_DIRECTORIES+=( "${path#${IMAGE}}" )
+    done
 }
 
 gtk_icon_cache_exlib_update_theme_cache()
 {
     illegal_in_global_scope
 
-    [[ -n ${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES} ]] || return
+    [[ -n "${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES[@]}" ]] || return
 
     echo "Updating icon cache ..."
 
