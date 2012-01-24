@@ -27,16 +27,16 @@ gtk_icon_cache_exlib_update_theme_cache()
 
     [[ -n "${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES[@]}" ]] || return
 
-    echo "Updating icon cache ..."
+    if [[ -x ${GTK_UPDATE_ICON_CACHE} ]] ; then
+        echo "Updating icon cache ..."
 
-    for dir in "${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES[@]}" ; do
-        [[ -f "${ROOT}${dir}/index.theme" ]] || continue
+        for dir in "${GTK_ICON_CACHE_ICON_THEME_DIRECTORIES[@]}" ; do
+            [[ -f "${ROOT}${dir}/index.theme" ]] || continue
 
-        if [[ -x ${GTK_UPDATE_ICON_CACHE} ]] ; then
             nonfatal edo "${GTK_UPDATE_ICON_CACHE}" -qf "${ROOT}${dir}" ||
                 ewarn "Failed to update icon cache in ${dir}"
-        fi
-    done
+        done
+    fi
 }
 
 gtk-icon-cache_pkg_preinst()
