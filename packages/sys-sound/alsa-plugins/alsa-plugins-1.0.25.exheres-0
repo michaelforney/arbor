@@ -11,7 +11,7 @@ SUMMARY="Plugins for ALSA"
 HOMEPAGE="http://www.alsa-project.org/"
 DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 
-LICENCES="GPL-2"
+LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="ffmpeg pulseaudio jack libsamplerate speex
@@ -20,8 +20,7 @@ MYOPTIONS="ffmpeg pulseaudio jack libsamplerate speex
 
 DEPENDENCIES="
     build+run:
-        sys-sound/alsa-lib[>=1.0.24][multibuild_c:*(?)?]
-
+        sys-sound/alsa-lib[>=1.0.25][multibuild_c:*(?)?]
         ffmpeg?        ( virtual/ffmpeg[multibuild_c:*(?)?] )
         jack?          ( media-sound/jack-audio-connection-kit[>=0.98][multibuild_c:*(?)?] )
         libsamplerate? ( media-libs/libsamplerate[multibuild_c:*(?)?] )
@@ -35,9 +34,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-1.0.22-automagic-speex.patch"
     "${FILES}/${PN}-1.0.22-quote-quote-quote-quote.patch"
     -p0 "${FILES}/${PN}-1.0.22-missing-avutil.patch"
-    -p1 "${FILES}/${PN}-1.0.24-libavcodec-a52-fix1.patch"
-    -p1 "${FILES}/${PN}-1.0.24-libavcodec-a52-fix2.patch"
-    -p1 "${FILES}/${PN}-1.0.24-pulseaudio-fix.patch"
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
