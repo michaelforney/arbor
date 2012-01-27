@@ -27,6 +27,7 @@ MYOPTIONS="
     acl [[ description = [ Enable POSIX ACL support (optional because it causes quite some overhead) ] ]]
     crypto [[ description = [ Enable crypto related code and utilities ] ]]
     debug [[ description = [ Enable debugging code and output ] ]]
+    extras [[ description = [ Additional utilities: ntfs{ck,dump_logfile,mftalloc,move,truncate,wipe} ] ]]
 "
 
 DEPENDENCIES="
@@ -62,9 +63,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    acl
+    'acl posix-acls'
     crypto
     debug
+    extras
 )
 
 src_install() {
