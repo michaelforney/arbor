@@ -48,8 +48,6 @@ DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
 
 src_prepare() {
-    expatch "${FILES}"/fix-compilation-with-newer-gnutls.patch
-
     # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
     edo sed -e '/s_addr =/s:INADDR_ANY:htonl(INADDR_LOOPBACK):' -i tests/server/*.c
 
@@ -71,7 +69,7 @@ EOF
 
     # Default TEST_F is -a -p -r; we add -v (verbose) and remove -r (run time statistics)
     local test_args=( -a -p -v )
-    test_args+=( '!'{600..637} )
+    test_args+=( '!'{600..639} )
     emake test-full TEST_F="${test_args[*]}" # SSH tests hang
 
     esandbox disallow_net --connect "inet:127.0.0.1@9011"
