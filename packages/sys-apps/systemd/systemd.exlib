@@ -4,8 +4,6 @@
 if ever is_scm ; then
     SCM_REPOSITORY="git://git.freedesktop.org/git/systemd/systemd.git"
     require scm-git
-elif [[ ${PV} == 37 ]]; then
-    DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.bz2"
 else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.xz"
 fi
@@ -107,7 +105,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-selinux
     --with-distro=other
     --with-pamlibdir=/${LIBDIR}/security
-    --with-rootdir=
     --with-rootprefix=
     --with-rootlibdir=/${LIBDIR}
     --with-sysvinit-path=""
@@ -146,7 +143,7 @@ systemd_pkg_pretend() {
 }
 
 systemd_src_prepare() {
-    if [[ ${PV} == 37 || ${PV} == 38 ]]; then
+    if ! ever is_scm ; then
         expatch "${FILES}"/${PNV}_tmpfiles-binfmt-unprefixed.patch
     fi
 
@@ -196,11 +193,7 @@ systemd_src_install() {
 
     # Handle bash-completion
     if option bash-completion ; then
-        if [[ ${PV} == 37 ]]; then
-            dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemctl-bash-completion.sh
-        else
-            dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemd-bash-completion.sh
-        fi
+        dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemd-bash-completion.sh
     fi
     edo rm -r "${IMAGE}"/etc/bash_completion.d
 
@@ -273,6 +266,8 @@ LC_MEASUREMENT=C
 LC_IDENTIFICATION=C
 EOF
 
+    nonfatal edo mv "${IMAGE}"/var/${LIBDIR} "${IMAGE}"/var/lib
+
     # keepdir some stuff
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
@@ -285,6 +280,7 @@ EOF
     keepdir /usr/libexec/systemd/user-generators
     keepdir /usr/${LIBDIR}/systemd/system-shutdown
     keepdir /usr/${LIBDIR}/systemd/system/graphical.target.wants
+    keepdir /var/lib/systemd
 
     # Make sure /etc/machine-id exists.
     [[ -f /etc/machine-id ]] || edo touch "${IMAGE}"/etc/machine-id
