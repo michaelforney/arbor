@@ -24,20 +24,20 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MEMORY-LEAK )
 
-src_compile() {
-    easy-multibuild_src_compile
+compile_one_multibuild() {
+    default
 
-    if option doc; then
+    if multibuild_default_target C && option doc; then
         emake doc
         edo find doc/doxygen/html -type f -print0 | xargs -0 sed -i -e "s:${WORK}::g" ||
             die "sed to strip ${WORK} from api docs failed"
     fi
 }
 
-src_install() {
-    easy-multibuild_src_install
+install_one_multibuild() {
+    default
 
-    if option doc; then
+    if multibuild_default_target C && option doc; then
         docinto html
         dodoc doc/doxygen/html/*
     fi
