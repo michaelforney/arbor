@@ -182,7 +182,7 @@ _elibtoolize() {
     lttest="$(autotools_check_macro "AC_PROG_LIBTOOL")$(autotools_check_macro "AM_PROG_LIBTOOL")$(autotools_check_macro "LT_INIT")"
     [[ -n ${lttest} ]] || return 0
 
-    [[ -f Makefile.am || -f GNUmakefile.am ]] && opts="--automake"
+    [[ -n $(autotools_check_macro "AM_INIT_AUTOMAKE") ]] && opts="--automake"
 
     autotools_run_tool libtoolize "$@" ${opts}
 
@@ -241,7 +241,7 @@ eautomake() {
     autotools_select_versions
     local extra_opts
 
-    [[ -f Makefile.am || -f GNUmakefile.am ]] || return 0
+    [[ -n $(autotools_check_macro "AM_INIT_AUTOMAKE") ]] || return 0
 
     if [[ -z ${FROM_EAUTORECONF} && ( -f Makefile.in || -f GNUMakefile.in ) ]]; then
         local used_automake installed_automake
