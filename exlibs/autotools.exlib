@@ -262,6 +262,8 @@ eautomake() {
         || extra_opts+=( --foreign )
 
     # --force-missing seems not to be recognized by some flavours of automake
+    automake --help | grep -q -e '--force-missing' && extra_opts+=( --force-missing )
+
     autotools_run_tool automake --add-missing --copy ${extra_opts[@]} "$@"
 }
 
