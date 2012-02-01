@@ -239,7 +239,7 @@ eautomake() {
     autotools_must_require ${FUNCNAME} automake
 
     autotools_select_versions
-    local extra_opts
+    local -a extra_opts
 
     [[ -n $(autotools_check_macro "AM_INIT_AUTOMAKE") ]] || return 0
 
@@ -259,10 +259,10 @@ eautomake() {
     fi
 
     [[ -f INSTALL && -f AUTHORS && -f ChangeLog && -f NEWS ]] \
-        || extra_opts="${extra_opts} --foreign"
+        || extra_opts+=( --foreign )
 
     # --force-missing seems not to be recognized by some flavours of automake
-    autotools_run_tool automake --add-missing --copy ${extra_opts} "$@"
+    autotools_run_tool automake --add-missing --copy ${extra_opts[@]} "$@"
 }
 
 # Internal function to run an autotools' tool
