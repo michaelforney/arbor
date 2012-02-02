@@ -10,11 +10,7 @@ It provides a robust API for tracing processes.
 Note this is a work in progress and the API is *not* stable.
 "
 HOMEPAGE="http://dev.exherbo.org/~alip/${PN}"
-if [[ ${PV} == scm ]]; then
-    DOWNLOADS=""
-    SCM_REPOSITORY="git://github.com/alip/pinktrace.git"
-    require scm-git
-else
+if ! ever is_scm ; then
     DOWNLOADS="http://dev.exherbo.org/~alip/pinktrace/release/${PNV}.tar.bz2"
 fi
 
