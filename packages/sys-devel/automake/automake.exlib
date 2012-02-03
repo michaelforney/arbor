@@ -3,7 +3,9 @@
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PNV=${PNV/_/-}
-if ever at_least 1.6.1; then
+if ever at_least 1.11.3; then
+    require gnu [ suffix=xz ]
+elif ever at_least 1.6.1; then
     require gnu [ suffix=bz2 ]
 else
     require gnu [ suffix=gz ]
