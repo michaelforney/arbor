@@ -17,6 +17,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     device-mapper [[ description = [ Ability to detect and use device-mapper devices ] ]]
+    efi           [[ description = [ Build for EFI platform ] ]]
     mkfont        [[ description = [ Build grub-mkfont which can create GRUB font files ] ]]
 "
 
@@ -44,25 +45,32 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PNV}-state-devices.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    "CPP=${CC} -E"
-    '--prefix=/'
-
-    # TODO: for now disable emulation utils
-    '--disable-efiemu'
-    '--disable-grub-emu-usb'
-    '--disable-grub-emu-sdl'
-    '--disable-grub-emu-pci'
-    '--disable-mm-debug'
-
-    '--disable-werror'
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'device-mapper' 'mkfont grub-mkfont' )
 
 pkg_setup() {
     # grub2 should be compiled with -Os, other optimizations may result in oversized core images
     replace-flags -O* -Os
+}
+
+src_configure() {
+    myconf=(
+        "CPP=${CC} -E"
+        '--prefix=/'
+
+        # TODO: for now disable emulation utils
+        '--disable-efiemu'
+        '--disable-grub-emu-usb'
+        '--disable-grub-emu-sdl'
+        '--disable-grub-emu-pci'
+        '--disable-mm-debug'
+
+        '--disable-werror'
+    )
+
+    option efi && myconf+=( '--with-platform=efi' )
+
+    econf "${myconf[@]}" \
+        $( option_enable device-mapper ) \
+        $( option_enable mkfont grub-mkfont )
 }
 
 src_install() {
