@@ -5,11 +5,18 @@
 
 myexparam headers_version='[>=2.6.33]'
 
+if ever at_least 3.2.0 ; then
+    SUFFIX=xz
+else
+    SUFFIX=bz2
+fi
+
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux"
 HOMEPAGE="http://www.linuxfoundation.org/en/Net:Iproute2"
 DOWNLOADS="
-    http://dev.exherbo.org/~philantrop/distfiles/${PNV}.tar.bz2
-    http://devresources.linux-foundation.org/dev/${PN}/download/${PNV}.tar.bz2
+    http://dev.exherbo.org/~philantrop/distfiles/${PNV}.tar.${SUFFIX}
+    http://devresources.linux-foundation.org/dev/${PN}/download/${PNV}.tar.${SUFFIX}
+    mirror://kernel/linux/utils/net/${PN}/${PNV}.tar.${SUFFIX}
 "
 DESCRIPTION="A replacement for the inadequately behaving ifconfig/route programs in modern networks"
 LICENCES="GPL-2"

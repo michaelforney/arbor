@@ -1,0 +1,12 @@
+# Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require iproute2 [ headers_version='[>=3.2]' ]
+
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/0001-iplt2p-remove-unused-libnl-headers.patch"
+    "${FILES}/iproute2-3.2.0-temporary_header_fix.patch"
+)
+

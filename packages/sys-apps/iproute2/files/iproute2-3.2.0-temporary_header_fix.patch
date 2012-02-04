@@ -1,0 +1,18 @@
+From: Daniel Mierswa <impulze@impulze.org>
+Upstream: upstream knows about the issue
+Reason: glibc provided headers don't define a necessary macro yet
+
+According to http://lists.openwall.net/netdev/2011/11/16/93 this will
+be brought to glibc upstream.
+
+diff -Naur iproute2-3.2.0.orig/misc/ss.c iproute2-3.2.0/misc/ss.c
+--- iproute2-3.2.0.orig/misc/ss.c	2012-01-05 17:34:31.000000000 +0100
++++ iproute2-3.2.0/misc/ss.c	2012-02-04 14:40:35.419405178 +0100
+@@ -33,6 +33,7 @@
+ #include "libnetlink.h"
+ #include "SNAPSHOT.h"
+
++#define TCPI_OPT_ECN_SEEN       16 /* we received at least one packet with ECT */
+ #include <netinet/tcp.h>
+ #include <linux/inet_diag.h>
+ 
