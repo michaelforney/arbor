@@ -2,7 +2,7 @@
 # Copyright 2009-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require systemd-service
 
 export_exlib_phases src_install
 
@@ -41,8 +41,6 @@ DEPENDENCIES="
 # and leave stale volumes lingering around if they fail
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/no-export-dynamic.patch )
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/
     --libdir=/${LIBDIR}
@@ -50,7 +48,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cmdlib
     --enable-pkgconfig
     --enable-readline
-    --enable-static_link
     --enable-udev_rules
     --enable-udev_sync
     --with-clvmd-pidfile=/run/clvmd.pid
@@ -63,6 +60,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-lvmetad
     --disable-nls
     --disable-selinux
+    --disable-static_link
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
