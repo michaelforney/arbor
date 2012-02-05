@@ -1,9 +1,11 @@
 # Copyright 2009-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases src_test_expensive src_install
+export_exlib_phases src_prepare src_test_expensive src_install
 
 require systemd-service
+
+SUHOSIN_VERSION="5.3.9-0.9.10"
 
 SUMMARY="PHP is a general-purpose scripting language especially suited for web development"
 DESCRIPTION="
@@ -15,7 +17,10 @@ It has excellent support for databases, XML, LDAP, IMAP, Java, various Internet
 protocols, and general data manipulation, and is extensible via its powerful API.
 "
 HOMEPAGE="http://www.${PN}.net"
-DOWNLOADS="${HOMEPAGE}/distributions/${PNV}.tar.bz2"
+DOWNLOADS="
+    ${HOMEPAGE}/distributions/${PNV}.tar.bz2
+    suhosin? ( http://download.suhosin.org/suhosin-patch-${SUHOSIN_VERSION}.patch.gz )
+"
 
 LICENCES="PHP-3"
 SLOT="0"
@@ -25,6 +30,7 @@ MYOPTIONS="
     apache [[ description = [ Build PHP for the Apache webserver. ] ]]
     pear [[ description = [ Support for using the PHP Extension and Application Repository (PEAR). ] requires = [ php_extensions: pcre xml ] ]]
     fpm [[ description = [ Build alternative FastCGI implementation (FastCGI Process Manager) for heavy-loaded sites. ] ]]
+    suhosin [[ description = [ Add the Suhosin security patch (http://www.hardened-php.net/suhosin/) ] ]]
     systemd [[ description = [ Install systemd service file for php-fpm. ] requires = fpm ]]
 
     php_extensions:
@@ -150,7 +156,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-pcntl
     --enable-phar
     --enable-posix
-    --enable-safe-mode
     --enable-session
     --enable-shmop
     --enable-sockets
@@ -162,6 +167,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-zip
     --disable-embed
     --disable-embedded-mysqli
+    --disable-safe-mode
     --hates=docdir
     --with-bz2
     --with-config-file-path=/etc/${PN}
@@ -293,11 +299,19 @@ DEFAULT_SRC_INSTALL_EXCLUDE=(
     README.Zeus
 )
 
+php_src_prepare() {
+    default
+
+    if option suhosin ; then
+        expatch -p1 "${WORKBASE}"/suhosin-patch-${SUHOSIN_VERSION}.patch
+    fi
+}
+
 php_src_test_expensive() {
-    # We enable safe mode by default but for the tests, it must be disabled. Thus,
-    # we make sure the standard php.ini-dist (which disables safe mode) gets used
-    # here.
-    edo cp php.ini-dist tmp-php.ini
+    return
+
+    # Make sure the standard php.ini-dist gets used here.
+    edo cp php.ini-development tmp-php.ini
     edo sed -i -e 's:\(echo >\) \($(top_builddir)/tmp-php.ini;\):\1> \2 :' Makefile
 
     emake -j1 test
