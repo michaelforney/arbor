@@ -41,17 +41,18 @@ vala_src_test() {
 }
 
 vala_src_install() {
+    local src target alternatives=()
+
     default
 
-    edo mv "${IMAGE}"usr/share/aclocal/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
+    if test $(expr "${SLOT} < 0.16") ; then
+        edo mv "${IMAGE}"usr/share/aclocal/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
+    fi
 
-    local src target alternatives=()
     edo pushd "${IMAGE}"
-
     alternatives+=( /usr/bin/vala valac-${SLOT} )
-
     for src in usr/bin/{valac,vala-gen-introspect,vapigen,vapicheck}-${SLOT} \
-               usr/share/man/man1/*-${SLOT}.1; do
+               usr/share/man/man1/*-${SLOT}.1 ; do
         target=${src/-${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done
