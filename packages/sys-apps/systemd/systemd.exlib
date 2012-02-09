@@ -70,7 +70,7 @@ DEPENDENCIES="
         group/lock [[ note = [ Required for var-lock service ] ]]
         simple-net? ( sys-apps/net-tools )
     post:
-        || ( sys-apps/kmod sys-apps/module-init-tools )
+        sys-apps/kmod[>=5]
     suggestion:
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
         sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
@@ -158,15 +158,10 @@ systemd_src_prepare() {
         edo sed -i -e "/sysctldir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
-
-        autotools_src_prepare
-        edo intltoolize
-    elif ever is_scm; then
-        autotools_src_prepare
-        edo intltoolize
-    else
-        default
     fi
+
+    autotools_src_prepare
+    edo intltoolize
 }
 
 systemd_src_install() {
@@ -184,7 +179,7 @@ systemd_src_install() {
             /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
-    dosym ../bin/systemd /sbin/init
+    dosym ../${LIBDIR}/systemd/systemd /sbin/init
     alternatives+=(
         /sbin/init ${PN}.init
         /usr/share/man/man1/init.1 ${PN}.init.1
