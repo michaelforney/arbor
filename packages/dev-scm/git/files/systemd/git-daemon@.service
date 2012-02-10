@@ -7,8 +7,7 @@ Description=git daemon Per-connection server
 [Service]
 User=nobody
 Group=nobody
+StandardInput=socket
+StandardOutput=socket
 EnvironmentFile=/etc/conf.d/git-daemon.conf
-ExecStart=/usr/bin/git daemon --pid-file=/run/git-daemon.pid --inetd $GIT_OPTS
-
-[Install]
-WantedBy=multi-user.target
+ExecStart=/usr/bin/git daemon --inetd $GIT_OPTS
