@@ -64,6 +64,13 @@ if ever at_least 177; then
     "
 fi
 
+if ever at_least 181; then
+    DEPENDENCIES+="
+        build+run:
+            sys-apps/kmod[>=5][multibuild_c:*(?)?]
+    "
+fi
+
 AT_M4DIR=( m4 )
 
 udev_pkg_pretend() {
