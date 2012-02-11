@@ -1,0 +1,35 @@
+Title: systemd 42, kmod 5 and udev 181 updates
+Author: Wulf C. Krueger <philantrop@exherbo.org>
+Content-Type: text/plain
+Posted: 2012-02-11
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: sys-apps/kmod[<5]
+Display-If-Installed: sys-apps/systemd[<42]
+Display-If-Installed: sys-apps/udev[<181]
+
+In systemd[>=41], the systemd executable moves from /bin/systemd to
+/lib/systemd/systemd. Thus, an existing /sbin/init symlink needs to
+be adapted with the update.
+The exheres will do it but you should check carefully it succeeded
+anyway.
+
+Furthermore, systemd[>=41] requires kmod[>=5] now. While this is not an
+issue in itself, kmod[>=5] breaks udev[<181] (potentially making
+systems unbootable!).
+
+In consequence, you need to update all three at once or at least
+refrain from rebooting until you did.
+
+Last but not least, systemd[=42] will most likely be the last version
+to install boot-critical components to / and others to /usr. This split
+is already causing issues with respect to tmpfiles, intrinsic
+dependencies and dependencies on stuff on /usr.
+
+This won't matter to you if you don't have /usr split from / (it should
+*not* be split;
+cf. http://freedesktop.org/wiki/Software/systemd/separate-usr-is-broken
+).
+If you do have /usr separated from /, you'll *have* to use an initramfs
+(preferrably created by dracut) for booting.
+The rest is for another news item.
