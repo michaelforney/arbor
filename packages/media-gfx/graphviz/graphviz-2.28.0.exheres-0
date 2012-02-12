@@ -12,9 +12,9 @@ DOWNLOADS="${HOMEPAGE}/pub/${PN}/ARCHIVE/${PNV}.tar.gz"
 LICENCES="EPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="jpeg png
-           svg [[ description = [ Support node shapes in svg output ] requires = png ]]
-           gtk  [[ description = [ Provides canvas support and cairo renderer ] requires = png ]]
+MYOPTIONS="
+           svg [[ description = [ Support node shapes in svg output ] ]]
+           gtk  [[ description = [ Provides canvas support and cairo renderer ] ]]
 " # perl python ruby"
 
 DEPENDENCIES="
@@ -25,10 +25,10 @@ DEPENDENCIES="
     build+run:
         dev-libs/expat[>=2.0.0]  [[ note = [ Required for HTML-like labels ] ]]
         dev-libs/glib:2[>=2.11]
-        media-libs/gd[>=2.0.34][truetype][jpeg?][png?]
+        media-libs/gd[>=2.0.34][truetype]
         media-libs/fontconfig[>=2.3.95]
         media-libs/freetype:2[>=2.1.10]
-        png? ( media-libs/libpng[>=1.2] )
+        media-libs/libpng[>=1.2]
         svg? ( gnome-desktop/librsvg:2 )
         gtk? (
             x11-libs/cairo[>=1.1.10]
@@ -61,8 +61,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
     --with-fontconfig
     --with-freetype2
+    --with-jpeg
     --with-libgd
     --with-mylibgd=no
+    --with-png
     --without-devil
     # Deprecated crap
     --without-gdk-pixbuf

@@ -11,15 +11,15 @@ DOWNLOADS="http://www.libgd.org/releases/${PNV}.tar.bz2"
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="fontconfig jpeg png truetype xpm
+MYOPTIONS="fontconfig truetype xpm
     fontconfig [[ description = [ Support for managing custom fonts via fontconfig ] ]]
 "
 
 DEPENDENCIES="
     build+run:
         fontconfig? ( media-libs/fontconfig )
-        jpeg? ( media-libs/jpeg )
-        png? ( media-libs/libpng )
+        media-libs/jpeg
+        media-libs/libpng
         truetype? ( media-libs/freetype:2 )
         xpm? (
             x11-libs/libXpm
@@ -31,5 +31,6 @@ src_prepare() {
     edo find . -type f -print0 | xargs -0 touch -r configure || die "touch configure failed"
 }
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( fontconfig jpeg png "truetype freetype" xpm )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-jpeg --with-png )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( fontconfig "truetype freetype" xpm )
 
