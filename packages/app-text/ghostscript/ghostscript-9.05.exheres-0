@@ -23,10 +23,10 @@ DEPENDENCIES="
         dev-libs/expat
         dev-libs/libpaper
         media-libs/fontconfig
-        media-libs/freetype:2
+        media-libs/freetype:2[>=2.4.2]
         media-libs/jbig2dec
         media-libs/jpeg
-        media-libs/lcms:0
+        media-libs/lcms2
         media-libs/libpng
         media-libs/tiff
         sys-libs/zlib
@@ -34,7 +34,6 @@ DEPENDENCIES="
         dbus? ( sys-apps/dbus )
         gtk? ( x11-libs/gtk+:2 )
         idn? ( net-dns/libidn )
-        jpeg2000? ( media-libs/jasper )
         X? (
             x11-libs/libXext
             x11-libs/libXt
@@ -45,7 +44,7 @@ DEPENDENCIES="
 "
 
 src_prepare() {
-    edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms,libpng,tiff,zlib}
+    edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms{,2},libpng,tiff,zlib}
     edo rm -r ./Resource/Font
     edo rm -r ./Resource/CMap
 
@@ -89,14 +88,15 @@ src_configure() {
         --with-jbig2dec \
         --with-libpaper \
         --with-system-libtiff \
+        --without-jasper \
         --without-luratech \
         $(option_enable cups) \
         $(option_enable dbus) \
         $(option_enable gtk) \
+        $(option_enable jpeg2000 openjpeg) \
         $(option_with cups install-cups) \
         $(option_with cups pdftoraster) \
         $(option_with idn libidn) \
-        $(option_with jpeg2000 jasper) \
         $(option_with X x)
 
     edo cd "${WORK}/ijs"
