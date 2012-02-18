@@ -80,13 +80,11 @@ if ever is_scm ; then
     DEPENDENCIES+="
         build:
             dev-lang/vala:0.12
-            dev-libs/libxslt
     "
 fi
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --prefix=
-    --with-rootlibdir=/${LIBDIR}
+    --prefix=/usr
     --libdir=/usr/${LIBDIR}
     --includedir=/usr/include
     --libexecdir=/usr/libexec
@@ -106,8 +104,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-selinux
     --with-distro=other
     --with-pamlibdir=/${LIBDIR}/security
-    --with-rootprefix=
-    --with-rootlibdir=/${LIBDIR}
     --with-sysvinit-path=""
     --with-sysvrcd-path=""
     --with-udevrulesdir=/${LIBDIR}/udev/rules.d
@@ -138,16 +134,12 @@ systemd_pkg_pretend() {
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/legacy.conf ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/legacy.conf has been moved to"
-        ewarn "/${LIBDIR}/tmpfiles.d/legacy.conf and can be safely removed after upgrade"
+        ewarn "/usr/${LIBDIR}/tmpfiles.d/legacy.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 }
 
 systemd_src_prepare() {
-    if ! ever is_scm ; then
-        expatch "${FILES}"/${PNV}_tmpfiles-binfmt-unprefixed.patch
-    fi
-
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
         edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
@@ -168,19 +160,17 @@ systemd_src_prepare() {
 systemd_src_install() {
     default
 
-    dodoc "${FILES}"/README.exherbo
-
     # alternatives
     dodir /sbin
     local a t alternatives=( init ${PN} 10 )
     for a in halt poweroff reboot runlevel shutdown telinit; do
-        dosym ../bin/systemctl /sbin/${a}
+        dosym ../usr/bin/systemctl /sbin/${a}
         alternatives+=(
             /sbin/${a} ${PN}.${a}
             /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
-    dosym ../${LIBDIR}/systemd/systemd /sbin/init
+    dosym ../usr/${LIBDIR}/systemd/systemd /sbin/init
     alternatives+=(
         /sbin/init ${PN}.init
         /usr/share/man/man1/init.1 ${PN}.init.1
@@ -193,12 +183,9 @@ systemd_src_install() {
     fi
     edo rm -r "${IMAGE}"/etc/bash_completion.d
 
-    # Install basic.service
-    insinto /${LIBDIR}/systemd/system
-    doins "${FILES}"/basic.service
-
     # Install simple-net if requested
     if option simple-net; then
+        insinto /usr/${LIBDIR}/systemd/system
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
@@ -206,7 +193,7 @@ systemd_src_install() {
 
     # Install the legacy.conf tmpdirs.d config file.
     # systemd does not install it itself if SysV compatibility is not enabled.
-    insinto /${LIBDIR}/tmpfiles.d
+    insinto /usr/${LIBDIR}/tmpfiles.d
     doins "${WORK}"/tmpfiles.d/legacy.conf
 
     insinto /etc
@@ -270,12 +257,10 @@ EOF
     keepdir /etc/systemd/system/local-fs.target.wants
     keepdir /etc/systemd/system/sysinit.target.wants
     keepdir /etc/systemd/user
-    keepdir /${LIBDIR}/systemd/system/graphical.target.wants
-    keepdir /${LIBDIR}/systemd/system-generators
-    keepdir /${LIBDIR}/systemd/system-shutdown
-    keepdir /usr/libexec/systemd/user-generators
-    keepdir /usr/${LIBDIR}/systemd/system-shutdown
     keepdir /usr/${LIBDIR}/systemd/system/graphical.target.wants
+    keepdir /usr/${LIBDIR}/systemd/system-generators
+    keepdir /usr/${LIBDIR}/systemd/system-shutdown
+    keepdir /usr/libexec/systemd/user-generators
     keepdir /var/lib/systemd
 
     # Make sure /etc/machine-id exists.
@@ -283,37 +268,31 @@ EOF
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
-    keepdir /${LIBDIR}/modules-load.d
+    keepdir /usr/${LIBDIR}/modules-load.d
 
     # Files in /etc/sysctl.d/?*.conf get read and applied via sysctl. Can be used
     # in combination with sysctl.conf (sysctl.conf takes precedence over sysctl.d).
     keepdir /etc/sysctl.d
-    keepdir /${LIBDIR}/sysctl.d
+    keepdir /usr/${LIBDIR}/sysctl.d
 
     # Files in /etc/binfmt.d/?*.conf contain a list of binfmt_misc kernel binary
     # format rules. Those are used to configure additional binary formats to register
     # during boot in the kernel.
     keepdir /etc/binfmt.d
-    keepdir /${LIBDIR}/binfmt.d
+    keepdir /usr/${LIBDIR}/binfmt.d
 
     # Files in /etc/tmpfiles.d/?*.conf contain a list of files and/or directories.
     # Those are automatically (re)created, removed, truncated,... during boot or after a specified time
     # with specified owner, group and access mode.
     keepdir /etc/tmpfiles.d
-    keepdir /${LIBDIR}/tmpfiles.d
-
-    # From here on, we're creating a basic configuration.
-    dodir /etc/systemd/system/basic.target.wants
-
-    # Enable basic.service
-    dosym ../../../../${LIBDIR}/systemd/system/basic.service /etc/systemd/system/basic.target.wants/basic.service
+    keepdir /usr/${LIBDIR}/tmpfiles.d
 }
 
 systemd_pkg_postinst() {
     default
 
     if [[ ${ROOT} == / ]]; then
-        nonfatal edo /bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
+        nonfatal edo /usr/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
     fi
