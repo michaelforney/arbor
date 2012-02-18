@@ -1,4 +1,4 @@
-# Copyright 2009-2011 Wulf C. Krueger
+# Copyright 2009-2012 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'ddclient-3.7.3-r1.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
@@ -32,7 +32,7 @@ DEPENDENCIES="
 ddclient_pkg_pretend() {
     if [[ -f "${ROOT}"/etc/tmpfiles.d/${PN}.conf ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/${PN}.conf has been moved to"
-        ewarn "/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
+        ewarn "/usr/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 }
@@ -55,7 +55,7 @@ EOF
     fi
 
     if option systemd; then
-        insinto /${LIBDIR}/tmpfiles.d
+        insinto /usr/${LIBDIR}/tmpfiles.d
         hereins ${PN}.conf <<EOF
 d /run/ddclient 0755 ddclient ddclient
 EOF
