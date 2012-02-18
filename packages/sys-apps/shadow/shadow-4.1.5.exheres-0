@@ -1,4 +1,4 @@
-# Copyright 2008-2011 Wulf C. Krueger
+# Copyright 2008-2012 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'shadow-4.1.2-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -7,9 +7,9 @@ require pam
 
 SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
-DOWNLOADS="ftp://pkg-${PN}.alioth.debian.org/pub/pkg-${PN}/${PNV}.tar.bz2"
+DOWNLOADS="http://pkg-${PN}.alioth.debian.org/releases/${PNV}.tar.bz2"
 
-UPSTREAM_RELEASE_NOTES="ftp://pkg-shadow.alioth.debian.org/pub/pkg-${PN}/${PNV}.NEWS"
+UPSTREAM_RELEASE_NOTES="http://pkg-${PN}.alioth.debian.org/releases/${PNV}.NEWS"
 
 LICENCES="|| ( BSD-3 GPL-2 )"
 SLOT="0"
@@ -24,7 +24,11 @@ DEPENDENCIES="
         sys-libs/pam[>=1.0.1]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/${PN}-login.defs.patch "${FILES}"/${PN}-groupmod.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0 "${FILES}"/${PN}-login.defs.patch
+    -p1 "${FILES}"/${PNV}-stdarg.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
     --enable-shadowgrp
