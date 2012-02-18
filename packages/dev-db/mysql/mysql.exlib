@@ -85,7 +85,7 @@ mysql_pkg_pretend() {
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/${PN}.conf ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/${PN}.conf has been moved to"
-        ewarn "/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
+        ewarn "/usr/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 
@@ -137,7 +137,7 @@ EOF
     install_systemd_files
 
     if option systemd; then
-        insinto /${LIBDIR}/tmpfiles.d
+        insinto /usr/${LIBDIR}/tmpfiles.d
         hereins ${PN}.conf <<EOF
 d /run/mysqld 0755 mysql mysql
 EOF
