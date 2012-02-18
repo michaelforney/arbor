@@ -71,7 +71,7 @@ glibc_pkg_pretend() {
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/nscd.conf ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/nscd.conf has been moved to"
-        ewarn "/${LIBDIR}/tmpfiles.d/nscd.conf and can be safely removed after upgrade"
+        ewarn "/usr/${LIBDIR}/tmpfiles.d/nscd.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 }
@@ -219,7 +219,7 @@ LANG=en_GB.utf8
 EOF
 
     if option systemd; then
-        insinto /${LIBDIR}/tmpfiles.d
+        insinto /usr/${LIBDIR}/tmpfiles.d
         doins "${FILES}"/systemd/nscd.conf
         install_systemd_files
     fi
