@@ -60,7 +60,7 @@ cyrus-sasl_pkg_pretend()
 {
     if [[ -f "${ROOT}"/etc/tmpfiles.d/saslauthd.conf ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/saslauthd.conf has been moved to"
-        ewarn "/${LIBDIR}/tmpfiles.d/saslauthd.conf and can be safely removed after upgrade"
+        ewarn "/usr/${LIBDIR}/tmpfiles.d/saslauthd.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 }
@@ -110,7 +110,7 @@ cyrus-sasl_src_install()
         install_systemd_files
         insinto /etc/conf.d
         newins "${FILES}"/saslauthd-confd saslauthd.conf
-        insinto /${LIBDIR}/tmpfiles.d
+        insinto /usr/${LIBDIR}/tmpfiles.d
         hereins saslauthd.conf <<EOF
 d /run/saslauthd 0750 root root
 EOF
