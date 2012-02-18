@@ -1,0 +1,124 @@
+Title: systemd 43: Move to /usr
+Author: Wulf C. Krueger <philantrop@exherbo.org>
+Content-Type: text/plain
+Posted: 2012-02-18
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: sys-apps/systemd[<43]
+
+Read ALL of this, it's important to *everyone* using systemd.
+
+Up to systemd[=42] we installed boot-critical components to / and
+others to /usr. This split was causing issues with respect to tmpfiles,
+intrinsic dependencies and dependencies on stuff on /usr.
+
+systemd[=43] finally removes this split and installs everything but
+udev and pam stuff to /usr.
+
+This won't matter much to you if you don't have /usr split from / (it
+should *not* be split;
+cf. http://freedesktop.org/wiki/Software/systemd/separate-usr-is-broken
+).
+
+Even if you don't have /usr != /, you need to update all packages that
+install to /${LIBDIR}/systemd/system because that got moved, too, of
+course. I've rev-bumped all packages, that install their own custom
+systemd units but even after you've updated those, you'll still have
+some in /${LIBDIR}/systemd/system. Find out which package they belong
+to (use cave owner) and re-install them.
+
+Should you forget to do so, you might end up in systemd's emergency
+mode. If that happens, don't panic. Get your network connection up and
+continue updating/re-installing. You'll live, I promise.
+
+There might be orphaned systemd units left behind. Check those on your
+own and decide if you need to move them to /etc/systemd/system. If you
+do, don't forget to systemctl disable and then enable them.
+
+You'll also have some broken symlinks in /etc/systemd/system pointing
+to /${LIBDIR}/systemd/system. To fix those, all you have to do is
+disable and re-enable the respective unit. Here's how to do it quickly
+and easily:
+
+for link in $(find -L /etc/systemd/system -type l); do
+    systemctl disable $(basename ${link});
+    systemctl enable $(basename ${link});
+done
+
+Final sanity checks:
+
+1. Is /${LIBDIR/systemd gone? If so, carry on; if not, you missed a
+step. Go back and find out which one.
+
+2. No broken symlinks in /etc/systemd/system anymore?
+("find -L /etc/systemd/system -type l" doesn't output anything)
+If so, carry on. Otherwise, you missed a step. Go back and find out
+which one.
+
+If you do *NOT* have /usr separated from /, you're done now and it
+should be safe to reboot if you so desire.
+
+
+If you *do* have /usr separated from /, you'll *have* to use an
+initramfs (preferrably created by dracut) for booting from systemd[=43]
+onwards.
+
+The first step to using an initramfs is enabling CONFIG_BLK_DEV_INITRD
+in your kernel, recompiling and installing it.
+If you want to switch from a custom initramfs to dracut, don't forget to
+empty CONFIG_INITRAMFS_SOURCE in your kernel configuration either if you
+have been using it before.
+
+If you want to use dracut (sys-boot/dracut[>=14]), install it and add
+
+add_dracutmodules+="98usrmount"
+
+to /etc/dracut.conf. If you have some weird configuration, you might
+need to add further dracut or kernel modules. In general, though,
+dracut is going to pick up everything you'll need to boot.
+
+Now run dracut to create your shiny new initramfs:
+
+dracut -H <initramfs filename incl. path> <kernel version>
+
+e. g.
+
+dracut -H /boot/init-3.2.5.gz 3.2.5-00001-gf74dd96
+
+-H (or --hostonly) tells dracut to build an initramfs for the machine
+it's running on. Leaving it out *should* create a *HUGE* generic init-
+ramfs that should bascially be able to boot *everything*. In reality,
+leaving -H out usually builds something that doesn't boot *anything*.
+
+Next, update grub's config so that it includes a root= parameter for
+the kernel command line and your new initramfs, e. g.:
+
+(for grub-0.9x's menu.lst)
+title Exherbo Linux
+root (hd0,1)
+kernel /kernel-3.2.5-00001-gf74dd96 root=/dev/primary/uselv
+initrd /init-3.2.5.gz
+
+or
+
+(for grub-1.9x's grub.cfg)
+menuentry "Exherbo Linux" {
+    set root=(hd0,1)
+    linux /kernel-3.2.5-00001-gf74dd96 root=/dev/primary/uselv
+    initrd /init-3.2.5.gz
+}
+
+Do *NOT* forget the root= parameter. It's essential.
+
+(Of course, you need to adjust paths and filenames to your setup but if
+I need to tell you that, you shouldn't be using Exherbo in the first
+place.)
+
+If you're using a custom initramfs, you must make sure that you mount
+/usr as early as possible but definitely before systemd (/sbin/init)
+starts.
+If you're rolling your own initramfs, you should know how to accomplish
+that.
+
+After you've updated your grub configuration, systemd is updated and
+your kernel is ready, too, say a little prayer ;-) and reboot.
