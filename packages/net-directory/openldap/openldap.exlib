@@ -105,7 +105,7 @@ openldap_src_install() {
     if option systemd ; then
         insinto /etc/conf.d
         newins "${FILES}/slapd-confd" slapd.conf
-        insinto "/${LIBDIR}/tmpfiles.d"
+        insinto /usr/${LIBDIR}/tmpfiles.d
         newins "${FILES}/systemd/openldap.conf.tmpfiles" openldap.conf
     fi
 }
