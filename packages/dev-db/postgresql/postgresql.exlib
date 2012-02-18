@@ -86,7 +86,7 @@ postgresql_pkg_pretend() {
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/${PN}.conf ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/${PN}.conf has been moved to"
-        ewarn "/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
+        ewarn "/usr/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 
@@ -102,7 +102,7 @@ postgresql_src_install() {
 
     if option systemd; then
         install_systemd_files
-        insinto /${LIBDIR}/tmpfiles.d
+        insinto /usr/${LIBDIR}/tmpfiles.d
         hereins postgresql.conf <<EOF
 d /var/run/postgresql 0770 postgres postgres
 EOF
