@@ -177,6 +177,10 @@ systemd_src_install() {
     )
     alternatives_for "${alternatives[@]}"
 
+    # Compatibility symlink for some tools that try to use /bin/systemctl.
+    dodir /bin
+    dosym ../usr/bin/systemctl /bin/systemctl
+
     # Handle bash-completion
     if option bash-completion ; then
         dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemd-bash-completion.sh
