@@ -3,7 +3,7 @@
 # Copyright 2010 Adriaan Leijnse <adriaan@leijnse.net>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
+require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 SUMMARY="ALSA library"
 HOMEPAGE="http://www.alsa-project.org/"
@@ -21,6 +21,7 @@ DEPENDENCIES="
         python? ( dev-lang/python:=[multibuild_c:*(?)?] )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-vpath.patch )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MEMORY-LEAK )
 
