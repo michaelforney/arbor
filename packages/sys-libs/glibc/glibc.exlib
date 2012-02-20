@@ -137,9 +137,9 @@ glibc_src_configure() {
             --libdir="/usr/${LIBDIR}" \
             --cache-file=config.cache \
             "--enable-kernel=$MINIMUM_KERNEL_VERSION" \
+            --enable-stackguard-randomization \
             --with-headers=/usr/include \
             --with-add-ons --with-crypt \
-            $(ever at_least 2.12.2 && echo "--enable-stackguard-randomization") \
             --without-gd --without-cvs
         echo "libc_cv_gnu89_inline=yes" >> config.cache
     done
