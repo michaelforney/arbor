@@ -1,6 +1,6 @@
 # Copyright 2008 Stephen Bennett
 # Copyright 2009 Mike Kelly
-# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2011-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require googlecode
@@ -33,14 +33,16 @@ DEPENDENCIES="
         openssl? ( dev-libs/openssl[>=0.9.8] )
 "
 
+# static cryptsetup must be disabled because lvm2 can't be linked statically
+# anymore.
 src_configure() {
     econf --prefix=/ \
         --includedir=/usr/include \
         --enable-dev-random \
         --enable-nls \
-        --enable-static-cryptsetup \
         --enable-udev \
         --disable-selinux \
+        --disable-static-cryptsetup \
         --with-crypto_backend=$(
         if option gcrypt; then
             echo 'gcrypt'
