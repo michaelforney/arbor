@@ -4,8 +4,13 @@
 require easy-multibuild
 
 SUMMARY="Library and utilities for handling TIFF-files"
-HOMEPAGE="http://remotesensing.org/libtiff/"
+HOMEPAGE="http://remotesensing.org/libtiff"
 DOWNLOADS="http://download.osgeo.org/libtiff/${PNV}.tar.gz"
+
+REMOTE_IDS="freshmeat:lib${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/v${PV}.html [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/document.html [[ lang = en ]]"
 
 LICENCES="MIT"
 SLOT="0"
@@ -14,6 +19,8 @@ MYOPTIONS="jpeg opengl multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
+        app-arch/xz[multibuild_c:*(?)?]
+        sys-libs/zlib[multibuild_c:*(?)?]
         jpeg? ( media-libs/jpeg[multibuild_c:*(?)?] )
         opengl? ( x11-dri/freeglut[multibuild_c:*(?)?]
                   x11-dri/mesa[multibuild_c:*(?)?]
@@ -23,17 +30,10 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cxx
-    --with-zlib
+    --enable-lzma
+    --enable-zlib
     --disable-jbig
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( jpeg )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'opengl x' )
-
-src_configure() {
-    easy-multibuild_src_configure
-
-    if option multibuild_c:32 ; then
-        edo sed -e 's,lib64\/ ,lib32\/ ,g' -i "${WORKBASE}/C/32/libtool"
-    fi
-}
 
