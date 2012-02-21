@@ -42,10 +42,22 @@ src_prepare() {
     glibc_src_prepare
 }
 
-# It takes a while.
 src_test_expensive() {
+    local multibuild_c_target
+
     esandbox allow_net "unix:/tmp/tst-cancel4-socket-*-*"
-    TIMEOUTFACTOR=10 emake -j1 check
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+        edo pushd "${WORK}/${multibuild_c_target}"
+
+        local GCONV_PATH="${WORK}/iconvdata LC_ALL=C ${WORK}/elf/ld.so.1 --library-path ${WORK}/:${WORK}/math:${WORK}/elf:${WORK}/dlfcn:${WORK}/nss:${WORK}/nis:${WORK}/rt:${WORK}/resolv:${WORK}/crypt:${WORK}/nptl:${WORK}/dfp"
+
+        TIMEOUTFACTOR=20 emake -j1 check
+
+        edo popd
+    done
+
     esandbox disallow_net "unix:/tmp/tst-cancel4-socket-*-*"
 }
 
