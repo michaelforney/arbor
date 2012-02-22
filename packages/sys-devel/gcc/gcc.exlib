@@ -6,6 +6,15 @@
 
 require multibuild toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
 
+case "$(ever range 3)" in
+    p*) # snapshot
+        MY_PV="$(ever range 1-2).0"
+        ;;
+    *)
+        MY_PV="${PV}"
+        ;;
+esac
+
 SUMMARY="GNU Compiler Collection"
 
 LICENCES="GPL-2"
@@ -151,7 +160,7 @@ src_install() {
     # Precompiled headers, disable for cross-compiling
     local precompiled_headers=( "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch )
     if [[ -f ${precompiled_headers[0]} ]] ; then
-        insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
+        insinto /usr/include/c++/${MY_PV}/${CHOST}/bits
         doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
     fi
 
@@ -164,7 +173,7 @@ src_install() {
     fi
 
     # nuke empty dir if applicable
-    rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
+    rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV}/finclude
 
     edo pushd "${IMAGE}"
 
@@ -283,7 +292,7 @@ src_install() {
         edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir}
     done
 
-    for dir in "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
+    for dir in "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV}/include{-fixed,} ; do
         if [[ -d ${dir} ]] ; then
             edo find "${dir}" -type d -empty -delete
         fi
