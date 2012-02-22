@@ -2,8 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 
 [Unit]
-Description=MySQL server (single instance)
+Description=MySQL database server (single instance)
 After=syslog.target
+After=network.target
 
 # The bl-1 init script contains a mass of possible configurations and options to
 # run several MySQL server instances, define nice-ness and configure everything
@@ -13,8 +14,17 @@ After=syslog.target
 # If you need more, provide a patch.
 
 [Service]
-Type=simple
-ExecStart=/usr/sbin/mysqld --defaults-file=/etc/mysql/my.cnf --basedir=/usr --datadir=/var/lib/mysql --pid-file=/run/mysqld/mysqld.pid --socket=/run/mysqld/mysqld.sock --user=mysql --log-error=/var/log/mysql/mysql.log -W
+PrivateTmp=true
+User=mysql
+Group=mysql
+
+ExecStart=/usr/sbin/mysqld --defaults-file=/etc/mysql/my.cnf --basedir=/usr --datadir=/var/lib/mysql --pid-file=/run/mysqld/mysqld.pid --socket=/run/mysqld/mysqld.sock --log-error=/var/log/mysql/mysql.log -W
+
+# Give a reasonable amount of time for the server to start up/shut down
+TimeoutSec=300
+
+# We rely on systemd, not mysqld_safe, to restart mysqld if it dies
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
