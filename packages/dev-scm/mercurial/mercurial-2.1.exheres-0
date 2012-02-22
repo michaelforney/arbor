@@ -47,10 +47,22 @@ src_compile() {
 src_test_expensive() {
     esandbox disable_net
     edo cd tests
+
+    touch blacklist.txt
+
+    # this test assumes that it's running from a hg checkout
+    echo test-check-code-hg.t >> blacklist.txt
+
+    # seems to be broken by subversion-1.7
+    echo test-convert-svn-sink.t >> blacklist.txt
+
+    # seems to be broken by newer version of git's message changing
+    echo test-subrepo-git.t >> blacklist.txt
+
     # At least in mercurial-1.5.4, the upstream tests break if
     # we run them in more than one job.
     # edo ${PYTHON} ./run-tests.py -j${EXJOBS:-1} --verbose
-    edo ${PYTHON} ./run-tests.py -j1 --verbose --timeout=3600
+    edo ${PYTHON} ./run-tests.py -j1 --verbose --timeout=3600 --blacklist blacklist.txt
     esandbox enable_net
 }
 
