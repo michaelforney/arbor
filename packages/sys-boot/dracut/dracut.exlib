@@ -35,7 +35,7 @@ REMOTE_IDS="sourceforge:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="baselayout"
+MYOPTIONS="baselayout systemd"
 
 DEPENDENCIES="
     build:
@@ -140,6 +140,8 @@ dracut_src_prepare() {
 }
 
 dracut_src_install() {
+    option systemd && export systemdsystemunitdir="/usr/${LIBDIR}/systemd/system"
+
     default
 
     insinto /usr/share/doc/${PNVR}/html/
