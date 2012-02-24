@@ -39,16 +39,16 @@ DEPENDENCIES="
         doc? ( app-doc/doxygen )
         X? ( x11-proto/xproto )
     build+run:
-        dev-libs/expat[>=1.95.8]
+        dev-libs/expat[>=1.95.8][multibuild_c:*(-)?]
         sys-apps/skeleton-filesystem-layout[>=0.5.4]
         group/messagebus
         group/plugdev
         user/messagebus
         systemd? ( sys-apps/systemd[>=32] )
         X? (
-            x11-libs/libICE
-            x11-libs/libSM
-            x11-libs/libX11
+            x11-libs/libICE[multibuild_c:*(-)?]
+            x11-libs/libSM[multibuild_c:*(-)?]
+            x11-libs/libX11[multibuild_c:*(-)?]
         )
     suggestion:
         sys-auth/ConsoleKit [[

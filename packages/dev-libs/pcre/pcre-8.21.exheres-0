@@ -30,7 +30,9 @@ SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="multibuild_c: 32 64"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    sys-libs/readline[multibuild_c:*(-)?]
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-jit
