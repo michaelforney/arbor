@@ -46,7 +46,7 @@ DEPENDENCIES="
         sys-apps/pciutils
         sys-apps/usbutils[>=0.82]
         sys-apps/util-linux[>=2.20]
-        acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(?)?] )
+        acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(-)?] )
         glib? ( dev-libs/glib:2[>=2.22.0] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
     run:
@@ -58,16 +58,16 @@ DEPENDENCIES="
 if ever at_least 177; then
     DEPENDENCIES+="
         build:
-            app-arch/xz[multibuild_c:*(?)?]
+            app-arch/xz[multibuild_c:*(-)?]
         build+run:
-            sys-apps/kmod[>=3][multibuild_c:*(?)?]
+            sys-apps/kmod[>=3][multibuild_c:*(-)?]
     "
 fi
 
 if ever at_least 181; then
     DEPENDENCIES+="
         build+run:
-            sys-apps/kmod[>=5][multibuild_c:*(?)?]
+            sys-apps/kmod[>=5][multibuild_c:*(-)?]
     "
 fi
 

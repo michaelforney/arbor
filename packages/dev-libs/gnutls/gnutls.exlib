@@ -27,7 +27,7 @@ DEPENDENCIES="
     build:
         doc? ( dev-doc/gtk-doc[>=1.1] )
     build+run:
-        sys-libs/zlib[>=1.2.3][multibuild_c:*(?)?]
+        sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
 "
 
 if ever at_least 3.0.8; then
@@ -35,19 +35,19 @@ if ever at_least 3.0.8; then
         build:
             app-arch/xz
         build+run:
-            dev-libs/libtasn1[>=2.10][multibuild_c:*(?)?]
-            dev-libs/nettle[>=2.4][multibuild_c:*(?)?]
+            dev-libs/libtasn1[>=2.10][multibuild_c:*(-)?]
+            dev-libs/nettle[>=2.4][multibuild_c:*(-)?]
     "
 elif ever at_least 2.12.14; then
     DEPENDENCIES+="
         build+run:
-            dev-libs/libtasn1[>=2.10][multibuild_c:*(?)?]
-            dev-libs/nettle[>=2.1][multibuild_c:*(?)?]
+            dev-libs/libtasn1[>=2.10][multibuild_c:*(-)?]
+            dev-libs/nettle[>=2.1][multibuild_c:*(-)?]
     "
 else
     DEPENDENCIES+="
         build+run:
-            dev-libs/libgcrypt[>=1.2.4&<1.5][multibuild_c:*(?)?]
+            dev-libs/libgcrypt[>=1.2.4&<1.5][multibuild_c:*(-)?]
     "
 fi
 
