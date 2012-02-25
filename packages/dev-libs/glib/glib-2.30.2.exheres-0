@@ -55,6 +55,9 @@ src_prepare() {
 
     # TODO: need 0.0.0.0
     edo sed -e '/socket\/ipv6_v4mapped/d' -i gio/tests/socket.c
+
+    # we have no guarantee for ipv6 support, so we disable those tests
+    edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
 }
 
 src_install() {
