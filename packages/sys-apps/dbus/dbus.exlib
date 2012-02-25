@@ -1,5 +1,5 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
-# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -44,9 +44,12 @@ DEPENDENCIES="
         group/messagebus
         group/plugdev
         user/messagebus
-        X? ( x11-libs/libICE
-             x11-libs/libSM
-             x11-libs/libX11 )
+        systemd? ( sys-apps/systemd[>=32] )
+        X? (
+            x11-libs/libICE
+            x11-libs/libSM
+            x11-libs/libX11
+        )
     suggestion:
         sys-auth/ConsoleKit [[
             description = [ required for access to paths controlled via at_console ]
@@ -79,6 +82,7 @@ configure_one_multibuild() {
         $(option_enable debug asserts)                   \
         $(option_enable debug verbose-mode)              \
         $(option_enable doc doxygen-docs)                \
+        $(option_enable systemd)                         \
         $(option_with X x)                               \
         $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
 }
@@ -103,7 +107,7 @@ dbus_src_test() {
 install_one_multibuild() {
     default
     keepdir /usr/${LIBDIR}/dbus-1.0/test
-} 
+}
 
 dbus_src_install() {
     easy-multibuild_src_install
