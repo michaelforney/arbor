@@ -52,9 +52,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-udev_sync
     --with-clvmd-pidfile=/run/clvmd.pid
     --with-cmirrord-pidfile=/run/cmirrord.pid
+    --with-default-name-mangling=auto
     --with-dmeventd-pidfile=/run/dmeventd.pid
     --with-default-locking-dir=/run/lock/lvm
     --with-default-run-dir=/run/lvm
+    --with-tmpfilesdir=/usr/${LIBDIR}/tmpfiles.d
     --with-udevdir=/${LIBDIR}/udev/rules.d
     --with-usrlibdir=/usr/${LIBDIR}
     --disable-lvmetad
@@ -78,7 +80,7 @@ lvm2_src_install() {
     install_systemd_files
     if option systemd ; then
         dodir /etc/systemd/system/basic.target.wants
-        dosym ${SYSTEMDSYSTEMUNITDIR}/lvm2.service /etc/systemd/system/basic.target.wants/lvm2.service
+        dosym "${SYSTEMDSYSTEMUNITDIR}"/lvm2.service /etc/systemd/system/basic.target.wants/lvm2.service
     fi
 
     if option baselayout; then
