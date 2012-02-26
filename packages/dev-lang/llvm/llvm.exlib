@@ -2,9 +2,9 @@
 # Copyright 2011, 2012 Aleksandar Petrinic <petrinic@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-require toolchain-funcs flag-o-matic
+require toolchain-funcs flag-o-matic easy-multibuild
 
-export_exlib_phases pkg_setup src_prepare src_configure src_compile src_test\
+export_exlib_phases pkg_setup src_prepare src_compile\
                     src_install pkg_postinst
 
 myexparam -b snapshot=false
@@ -55,6 +55,7 @@ MYOPTIONS="
     dragonegg? ( ( gcc_version: ${DRAGONEGG_COMPATIBLE_GCC_VERSIONS[@]} ) \
                [[ number-selected = exactly-one ]] )
     gcc_version: ( ${ADMISSIBLE_GCC_VERSIONS[@]} ) [[ number-selected = exactly-one ]]
+    multibuild_c: 32 64
 "
 
 if ! ever is_scm && ! exparam -b snapshot; then
@@ -154,7 +155,7 @@ llvm_src_prepare() {
     default
 }
 
-llvm_src_configure() {
+configure_one_multibuild() {
     local enable_docs=
     ever is_scm || exparam -b snapshot || enable_docs=$(option_enable doc doxygen)
     econf \
@@ -169,29 +170,33 @@ llvm_src_configure() {
 }
 
 llvm_src_compile() {
-    default
+    easy-multibuild_src_compile
     if option dragonegg ; then
         local release_with_asserts
         ever is_scm && release_with_asserts=+Asserts
         local gcc_version=$(get_gcc_version)
         edo pushd ${WORK}/tools/dragonegg
-        emake LLVM_CONFIG=${WORK}/Release${release_with_asserts}/bin/llvm-config \
+        emake LLVM_CONFIG="${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"/Release${release_with_asserts}/bin/llvm-config \
               GCC=/usr/bin/gcc-$( ever range 1-2 ${gcc_version} ) VERBOSE=1
         edo popd
     fi
 }
 
-llvm_src_test() {
+test_one_multilib() {
     local lit_args="-v -j${EXJOBS:-1}"
     emake check LIT_ARGS="${lit_args}"
     option clang && emake test -C tools/clang LIT_ARGS="${lit_args}" TESTARGS=
 }
 
-llvm_src_install() {
+install_one_multibuild() {
     emake install \
         DESTDIR="${IMAGE}" \
         KEEP_SYMBOLS=1 \
         VERBOSE=1
+}
+
+llvm_src_install() {
+    easy-multibuild_src_install
 
     if option gold ; then
         # Make sure nm and ar find the gold plugin
