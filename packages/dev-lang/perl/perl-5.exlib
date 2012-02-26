@@ -25,7 +25,7 @@ UPSTREAM_DOCUMENTATION=
 
 LICENCES="|| ( Artistic GPL-1 GPL-2 GPL-3 )"
 SLOT="$(ever range 1-2)"
-MYOPTIONS="dbm
+MYOPTIONS="dbm ithreads
 ( berkdb gdbm ) [[ requires = dbm ]]
 dbm? ( ( berkdb gdbm ) [[ number-selected = at-least-one ]] )
 "
@@ -92,6 +92,7 @@ perl-5_src_configure() {
         -Dmksymlinks \
         -Duselargefiles \
         -Ui_ndbm \
+        -$(db_define ithreads)usethreads \
         -$(db_define gdbm)i_gdbm \
         -$(db_define berkdb)i_db \
         "${PERL5_CONFIGURE_PARAMS[@]}"
