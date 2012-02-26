@@ -8,7 +8,7 @@ else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.xz"
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] alternatives bash-completion
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] alternatives bash-completion easy-multibuild
 
 export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
@@ -36,6 +36,7 @@ MYOPTIONS="
     plymouth [[ description = [ Enable Plymouth (graphical boot splash) integration ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
+    multibuild_c: 32 64
 "
 
 DEPENDENCIES="
@@ -46,19 +47,19 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
         app-arch/xz
-        dev-libs/glib:2[>=2.26]
+        dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
         dev-util/gperf
-        sys-apps/dbus[>=1.4.0][systemd]
+        sys-apps/dbus[>=1.4.0][systemd][multibuild_c:*(-)?]
         sys-apps/skeleton-filesystem-layout
-        sys-fs/udev[>=172][systemd]
-        sys-libs/libcap
-        sys-libs/pam[>=1.1.2]
-        acl? ( sys-apps/acl )
-        cryptsetup? ( sys-fs/cryptsetup )
+        sys-fs/udev[>=172][systemd][multibuild_c:*(-)?]
+        sys-libs/libcap[multibuild_c:*(-)?]
+        sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
+        acl? ( sys-apps/acl[multibuild_c:*(-)?] )
+        cryptsetup? ( sys-fs/cryptsetup[multibuild_c:*(-)?] )
         gtk? (
-            base/libgee:1.0
-            x11-libs/gtk+:2[>=2.20]
-            x11-libs/libnotify[>=0.7.0]
+            base/libgee:1.0[multibuild_c:*(-)?]
+            x11-libs/gtk+:2[>=2.20][multibuild_c:*(-)?]
+            x11-libs/libnotify[>=0.7.0][multibuild_c:*(-)?]
         )
         plymouth? ( sys-boot/plymouth )
         tcpd? ( sys-apps/tcp-wrappers )
@@ -82,41 +83,6 @@ if ever is_scm ; then
             dev-lang/vala:0.12
     "
 fi
-
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --prefix=/usr
-    --libdir=/usr/${LIBDIR}
-    --includedir=/usr/include
-    --libexecdir=/usr/libexec
-    --localstatedir=/var
-    --enable-binfmt
-    --enable-hostnamed
-    --enable-localed
-    --enable-logind
-    --enable-pam
-    --enable-quotacheck
-    --enable-randomseed
-    --enable-readahead
-    --enable-split-usr
-    --enable-timedated
-    --enable-vconsole
-    --enable-xz
-    --disable-audit
-    --disable-selinux
-    --with-distro=other
-    --with-pamlibdir=/${LIBDIR}/security
-    --with-sysvinit-path=""
-    --with-sysvrcd-path=""
-    --with-udevrulesdir=/${LIBDIR}/udev/rules.d
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    acl
-    "cryptsetup libcryptsetup"
-    gtk
-    plymouth
-    "tcpd tcpwrap"
-)
 
 AT_M4DIR=( m4 )
 
@@ -158,8 +124,41 @@ systemd_src_prepare() {
     edo intltoolize
 }
 
+configure_one_multibuild() {
+    econf \
+        --prefix=/usr \
+        --libdir=/usr/${LIBDIR} \
+        --includedir=/usr/include \
+        --libexecdir=/usr/libexec \
+        --localstatedir=/var \
+        --enable-binfmt \
+        --enable-hostnamed \
+        --enable-localed \
+        --enable-logind \
+        --enable-pam \
+        --enable-quotacheck \
+        --enable-randomseed \
+        --enable-readahead \
+        --enable-split-usr \
+        --enable-timedated \
+        --enable-vconsole \
+        --enable-xz \
+        --disable-audit \
+        --disable-selinux \
+        --with-distro=other \
+        --with-pamlibdir=/${LIBDIR}/security \
+        --with-sysvinit-path="" \
+        --with-sysvrcd-path="" \
+        --with-udevrulesdir=/${LIBDIR}/udev/rules.d \
+        $(option_enable acl) \
+        $(option_enable cryptsetup libcryptsetup) \
+        $(option_enable gtk) \
+        $(option_enable plymouth) \
+        $(option_enable tcpd tcpwrap)
+}
+
 systemd_src_install() {
-    default
+    easy-multibuild_src_install
 
     # alternatives
     dodir /sbin
