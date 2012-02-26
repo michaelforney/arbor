@@ -55,11 +55,7 @@ configure_prepare_one_multibuild() {
 }
 
 compile_one_multibuild() {
-    filter-flags -m32
-    case "${MULTIBUILD_TARGET}" in
-        32) export CC="${CC} -m32";;
-        64) export CC="${CC/ -m32/}";;
-    esac
+    multibuild-m32-cc "${MULTIBUILD_TARGET}"
 
     local myemake=(
         CC="${CC}"
