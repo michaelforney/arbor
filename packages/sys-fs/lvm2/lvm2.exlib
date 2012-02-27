@@ -2,7 +2,7 @@
 # Copyright 2009-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service
+require systemd-service easy-multibuild
 
 export_exlib_phases src_install
 
@@ -26,6 +26,7 @@ MYOPTIONS="
     baselayout
     dmeventd [[ description = [ DM event daemon to monitor active mapped devices ] ]]
     fsadm [[ description = [ Utility to resize or check filesystem on a device ] ]]
+    multibuild_c: 32 64
 "
 
 UPSTREAM_RELEASE_NOTES="ftp://${BASE_URL}/pub/${PN}/WHATS_NEW"
@@ -34,48 +35,45 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        sys-fs/udev[>=165-r1]
+        sys-fs/udev[>=165-r1][multibuild_c:*(-)?]
 "
 
 # The tests are expensive, unreliable, they need write access to /dev and /etc
 # and leave stale volumes lingering around if they fail
 RESTRICT="test"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --exec-prefix=/
-    --libdir=/${LIBDIR}
-    --enable-applib
-    --enable-cmdlib
-    --enable-pkgconfig
-    --enable-readline
-    --enable-udev_rules
-    --enable-udev_sync
-    --with-clvmd-pidfile=/run/clvmd.pid
-    --with-cmirrord-pidfile=/run/cmirrord.pid
-    --with-default-name-mangling=auto
-    --with-dmeventd-pidfile=/run/dmeventd.pid
-    --with-default-locking-dir=/run/lock/lvm
-    --with-default-run-dir=/run/lvm
-    --with-tmpfilesdir=/usr/${LIBDIR}/tmpfiles.d
-    --with-udevdir=/${LIBDIR}/udev/rules.d
-    --with-usrlibdir=/usr/${LIBDIR}
-    --disable-lvmetad
-    --disable-nls
-    --disable-selinux
-    --disable-static_link
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    dmeventd
-    fsadm
-)
+configure_one_multibuild() {
+    econf \
+        --exec-prefix=/ \
+        --libdir=/${LIBDIR} \
+        --enable-applib \
+        --enable-cmdlib \
+        --enable-pkgconfig \
+        --enable-readline \
+        --enable-udev_rules \
+        --enable-udev_sync \
+        --with-clvmd-pidfile=/run/clvmd.pid \
+        --with-cmirrord-pidfile=/run/cmirrord.pid \
+        --with-dmeventd-pidfile=/run/dmeventd.pid \
+        --with-default-locking-dir=/run/lock/lvm \
+        --with-default-run-dir=/run/lvm \
+        --with-tmpfilesdir=/usr/${LIBDIR}/tmpfiles.d \
+        --with-udevdir=/${LIBDIR}/udev/rules.d \
+        --with-usrlibdir=/usr/${LIBDIR} \
+        --disable-lvmetad \
+        --disable-nls \
+        --disable-selinux \
+        --disable-static_link \
+	$(option_enable dmeventd) \
+	$(option_enable fsadm)
+}
 
 DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 WORK=${WORKBASE}/LVM2.${PV}
 
 lvm2_src_install() {
-    default
+    easy-multibuild_src_install
 
     install_systemd_files
     if option systemd ; then
