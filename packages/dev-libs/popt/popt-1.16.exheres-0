@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] easy-multibuild
 
 SUMMARY="Command line parsing library"
 HOMEPAGE="http://www.rpm5.org"
@@ -12,7 +12,7 @@ REMOTE_IDS="freshmeat:${PN}"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -26,8 +26,9 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     -p1 "${FILES}/popt-1.16-pkgconfigdir.patch"
 )
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-nls
-    --with-pkgconfigdir=/usr/${LIBDIR}/pkgconfig
-)
+configure_one_multibuild() {
+    econf \
+        --enable-nls \
+        --with-pkgconfigdir=/usr/${LIBDIR}/pkgconfig
+}
 
