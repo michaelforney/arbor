@@ -3,7 +3,7 @@
 # Copyright 2011-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require googlecode
+require googlecode easy-multibuild
 
 SUMMARY="Userland utilities for dm-crypt"
 
@@ -17,26 +17,27 @@ MYOPTIONS="python
                               crypto interface ] ]]
     nettle [[ description = [ Use nettle library as crypto backend ] ]]
     openssl [[ description = [ Use openssl library as crypto backend ] ]]
-) [[ number-selected = exactly-one ]]"
+) [[ number-selected = exactly-one ]]
+    multibuild_c: 32 64"
 
 # nss backend needs static lib
 DEPENDENCIES="
     build:
         sys-devel/gettext[>=0.15]
     build+run:
-        dev-libs/popt[>=1.7]
+        dev-libs/popt[>=1.7][multibuild_c:*(-)?]
         sys-apps/util-linux [[ note = [ cryptsetup needs libuuid ] ]]
-        sys-fs/lvm2 [[ note = [ cryptsetup needs device-mapper from the LVM2 package ] ]]
-        gcrypt? ( dev-libs/libgcrypt[>=1.1.42]
-                  dev-libs/libgpg-error )
-        nettle? ( dev-libs/nettle[>=2.4] )
-        openssl? ( dev-libs/openssl[>=0.9.8] )
-        python? ( dev-lang/python:=[>=2.4] )
+        sys-fs/lvm2[multibuild_c:*(-)?] [[ note = [ cryptsetup needs device-mapper from the LVM2 package ] ]]
+        gcrypt? ( dev-libs/libgcrypt[>=1.1.42][multibuild_c:*(-)?]
+                  dev-libs/libgpg-error[multibuild_c:*(-)?] )
+        nettle? ( dev-libs/nettle[>=2.4][multibuild_c:*(-)?] )
+        openssl? ( dev-libs/openssl[>=0.9.8][multibuild_c:*(-)?] )
+        python? ( dev-lang/python:=[>=2.4][multibuild_c:*(-)?] )
 "
 
 # static cryptsetup must be disabled because lvm2 can't be linked statically
 # anymore.
-src_configure() {
+configure_one_multibuild() {
     econf --prefix=/ \
         --includedir=/usr/include \
         --enable-dev-random \
@@ -57,7 +58,7 @@ src_configure() {
         fi)
 }
 
-src_install() {
+install_one_multibuild() {
     default
 
     # Move the pkg-config file into the correct dir.
