@@ -61,6 +61,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
 AT_M4DIR=( m4 gl/m4 )
 
+if ever at_least 3.0.14; then
+    AT_M4DIR+=( src/libopts/m4/ )
+fi
+
 gnutls_src_prepare() {
     # Source: Trond A Ekseth <troeks@gmail.com>
     # Upstream: No
