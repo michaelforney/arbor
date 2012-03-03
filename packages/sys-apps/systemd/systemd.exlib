@@ -32,7 +32,6 @@ MYOPTIONS="
     acl
     bash-completion
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
-    gtk [[ description = [ Build systemadm, the GTK+ GUI for systemd's services ] ]]
     plymouth [[ description = [ Enable Plymouth (graphical boot splash) integration ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
@@ -56,11 +55,6 @@ DEPENDENCIES="
         sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
         cryptsetup? ( sys-fs/cryptsetup[multibuild_c:*(-)?] )
-        gtk? (
-            base/libgee:1.0[multibuild_c:*(-)?]
-            x11-libs/gtk+:2[>=2.20][multibuild_c:*(-)?]
-            x11-libs/libnotify[>=0.7.0][multibuild_c:*(-)?]
-        )
         plymouth? ( sys-boot/plymouth )
         tcpd? ( sys-apps/tcp-wrappers )
     run:
@@ -73,16 +67,10 @@ DEPENDENCIES="
     post:
         sys-apps/kmod[>=5]
     suggestion:
+        app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
         sys-apps/rsyslog     [[ description = [ Provides a standard syslog daemon ] ]]
 "
-
-if ever is_scm ; then
-    DEPENDENCIES+="
-        build:
-            dev-lang/vala:*[>=0.12]
-    "
-fi
 
 AT_M4DIR=( m4 )
 
@@ -144,6 +132,7 @@ configure_one_multibuild() {
         --enable-vconsole \
         --enable-xz \
         --disable-audit \
+        --disable-gtk \
         --disable-selinux \
         --with-distro=other \
         --with-pamlibdir=/${LIBDIR}/security \
@@ -152,7 +141,6 @@ configure_one_multibuild() {
         --with-udevrulesdir=/${LIBDIR}/udev/rules.d \
         $(option_enable acl) \
         $(option_enable cryptsetup libcryptsetup) \
-        $(option_enable gtk) \
         $(option_enable plymouth) \
         $(option_enable tcpd tcpwrap)
 }
