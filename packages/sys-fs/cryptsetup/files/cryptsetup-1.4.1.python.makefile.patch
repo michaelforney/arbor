@@ -1,0 +1,43 @@
+Upstream: Yes, http://code.google.com/p/cryptsetup/source/detail?spec=svn83564fbeb9dd0d83d00283b395d6631c130dee4e&r=b30b53e4a7a6099ca68da4e1db31854e5e0ac9c4
+
+From b30b53e4a7a6099ca68da4e1db31854e5e0ac9c4 Mon Sep 17 00:00:00 2001
+From: Milan Broz <mbroz@redhat.com>
+Date: Sat, 3 Mar 2012 18:47:33 +0100
+Subject: Fix Python extension build (thanks to sven.s.jonsson)
+
+---
+ python/Makefile.am          |    2 +-
+ python/pycryptsetup-test.py |    4 ++++
+ 2 files changed, 5 insertions(+), 1 deletions(-)
+
+diff --git a/python/Makefile.am b/python/Makefile.am
+index 2f69be4..3bba8e1 100644
+--- a/python/Makefile.am
++++ b/python/Makefile.am
+@@ -10,7 +10,7 @@ pyexec_LTLIBRARIES = pycryptsetup.la
+ pycryptsetup_la_SOURCES = pycryptsetup.c
+ pycryptsetup_la_CPPFLAGS = $(AM_CPPFLAGS) $(PYTHON_CPPFLAGS) -fno-strict-aliasing
+ pycryptsetup_la_LDFLAGS = -avoid-version -module
+-pycryptsetup_la_LIBADD = $(top_srcdir)/lib/libcryptsetup.la -lpython$(PYTHON_VERSION)
++pycryptsetup_la_LIBADD = $(top_builddir)/lib/libcryptsetup.la -lpython$(PYTHON_VERSION)
+ else
+ all:
+ endif
+diff --git a/python/pycryptsetup-test.py b/python/pycryptsetup-test.py
+index 9923770..cac42be 100755
+--- a/python/pycryptsetup-test.py
++++ b/python/pycryptsetup-test.py
+@@ -52,6 +52,10 @@ def print_status(c):
+        print "ERROR"
+     return
+ 
++if os.geteuid() != 0:
++	print "WARNING: You must be root to run this test, test skipped."
++	sys.exit(0)
++
+ os.system("dd if=/dev/zero of=" + IMG + " bs=1M count=32 >/dev/null 2>&1")
+ 
+ c = pycryptsetup.CryptSetup(
+-- 
+1.7.8.1
+

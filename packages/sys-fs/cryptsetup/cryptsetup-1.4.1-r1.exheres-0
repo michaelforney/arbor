@@ -35,6 +35,8 @@ DEPENDENCIES="
         python? ( dev-lang/python:=[>=2.4][multibuild_c:*(-)?] )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}.python.makefile.patch )
+
 # static cryptsetup must be disabled because lvm2 can't be linked statically
 # anymore.
 configure_one_multibuild() {
@@ -56,6 +58,10 @@ configure_one_multibuild() {
         elif option openssl; then
             echo 'openssl'
         fi)
+}
+
+test_one_multibuild() {
+    multibuild_default_target C && default
 }
 
 install_one_multibuild() {
