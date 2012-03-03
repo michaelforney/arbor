@@ -11,17 +11,18 @@ kmod is a set of tools to handle common tasks with Linux kernel modules like
 insert, remove, list, check properties, resolve dependencies, and aliases.
 It replaces module-init-tools with which it is backwards-compatible.
 "
-HOMEPAGE="http://git.profusion.mobi/cgit.cgi/kmod.git"
-DOWNLOADS="http://packages.profusion.mobi/kmod/${PNV}.tar.xz"
+HOMEPAGE="http://git.kernel.org/?p=utils/kernel/kmod/kmod.git"
+DOWNLOADS="ftp://ftp.kernel.org/pub/linux/utils/kernel/${PN}/${PNV}.tar.xz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
 
-UPSTREAM_RELEASE_NOTES="http://git.profusion.mobi/cgit.cgi/kmod.git/tree/NEWS"
+UPSTREAM_RELEASE_NOTES="http://git.kernel.org/?p=utils/kernel/kmod/kmod.git;a=blob_plain;f=NEWS"
 
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
 MYOPTIONS="
+    debug
     doc [[ description = [ Build libkmod's API documentation using gtk-doc ] ]]
     multibuild_c: 32 64
 "
@@ -38,18 +39,21 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-logging
+    --enable-tools
     --with-xz
     --with-zlib
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    debug
     "doc gtk-doc"
 )
 
 kmod_test_one_multibuild() {
     # For some reason, sydbox prevents the tests from working without stating why.
     # This is especially mysterious to me since the tests only do their stuff in
-    # (and below) ${WORK}.
+    # (and below) ${WORK}. Last tested with kmod-6.
     esandbox disable
 
     emake -j1 check
