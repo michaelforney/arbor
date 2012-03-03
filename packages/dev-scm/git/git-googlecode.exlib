@@ -74,6 +74,9 @@ git-googlecode_src_unpack() {
 # No option: mozsha1/ppcsha1
 # TODO Check whether we want NO_CROSS_DIRECTORY_HARDLINKS wrt pbins
 git-googlecode_src_configure() {
+    if ever at_least 1.7.9 ; then
+        myoptions+=" NO_GETTEXT=YesPlease"
+    fi
     option curl || myoptions+=" NO_CURL=YesPlease"
     option ipv6 || myoptions+=" NO_IPV6=YesPlease"
     option python || myoptions+=" NO_PYTHON=YesPlease"
@@ -138,7 +141,9 @@ git-googlecode_src_install() {
 
     exeinto /usr/libexec/${PN}
     doexe contrib/fast-import/git-p4
-    dodoc contrib/fast-import/git-p4.txt
+    if ! ever at_least 1.7.9 ; then
+        dodoc contrib/fast-import/git-p4.txt
+    fi
     newexe contrib/fast-import/import-tars.perl git-import-tars
 
     docinto /gitweb/
