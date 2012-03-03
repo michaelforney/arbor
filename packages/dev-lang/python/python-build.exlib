@@ -176,7 +176,7 @@ python-build_install_one_multibuild() {
 
     if ever at_least 3.2; then
         edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
-        edo rm "${IMAGE}"/usr/bin/{2to3-3,idle3,pydoc3,python3-config}
+        edo rm "${IMAGE}"/usr/bin/{2to3-3,idle3,pydoc3,python3-config,python${SLOT}m}
     else
         edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
     fi
@@ -198,8 +198,13 @@ python-build_install_one_multibuild() {
             /usr/${CHOST}/bin/python${PYTHON_MAJOR}-config python${SLOT}-config
         )
     fi
-    into "${prefix}"
-    newbin "${WORKBASE}"/"${MULTIBUILD_CLASS}"/"${MULTIBUILD_TARGET}"/"${MY_PNV}"/"${PN}"-config.py "${PN}${PYTHON_MAJOR}"-config
+
+    if ever at_least 3.2; then
+        edo mv "${IMAGE}"/usr/bin/python{${SLOT}m,${PYTHON_MAJOR}}-config
+    else
+        into "${prefix}"
+        newbin "${WORKBASE}"/"${MULTIBUILD_CLASS}"/"${MULTIBUILD_TARGET}"/"${MY_PNV}"/"${PN}"-config.py "${PN}${PYTHON_MAJOR}"-config
+    fi
 }
 
 install_one_multibuild() {
