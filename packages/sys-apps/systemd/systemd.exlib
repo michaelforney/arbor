@@ -278,6 +278,9 @@ EOF
     # with specified owner, group and access mode.
     keepdir /etc/tmpfiles.d
     keepdir /usr/${LIBDIR}/tmpfiles.d
+
+    # Remove man page for systemadm, which is also in app-admin/systemd-ui
+    edo rm "${IMAGE}"/usr/share/man/man1/systemadm.1
 }
 
 systemd_pkg_postinst() {
