@@ -34,7 +34,14 @@ src_prepare() {
 }
 
 src_test_expensive() {
-    emake check
+    local multibuild_c_target
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+        edo pushd "${WORKBASE}/C/${multibuild_c_target}"
+        emake check
+        edo popd
+    done
 }
 
 src_install() {
