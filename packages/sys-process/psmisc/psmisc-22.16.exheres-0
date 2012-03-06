@@ -5,7 +5,7 @@ require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Fuser, killall, pstree and peekfd utilities"
 
-REMOTE_IDS="freshmeat:${PN}"
+REMOTE_IDS+=" freshmeat:${PN}"
 
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/changelog.html"
 
@@ -16,8 +16,12 @@ MYOPTIONS="ipv6"
 
 DEPENDENCIES=""
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --bindir=/bin
+    --enable-nls
+    --disable-harden-flags
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin --enable-nls )
 
 src_install() {
     default
