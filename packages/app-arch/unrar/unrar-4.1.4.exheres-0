@@ -6,8 +6,8 @@
 MY_PN=${PN}src
 
 SUMMARY="Uncompress rar files"
-HOMEPAGE="http://www.rarlab.com/rar_add.htm"
-DOWNLOADS="http://www.rarlab.com/rar/${MY_PN}-${PV}.tar.gz"
+HOMEPAGE="http://www.rarlab.com"
+DOWNLOADS="${HOMEPAGE}/rar/${MY_PN}-${PV}.tar.gz"
 
 REMOTE_IDS="freshmeat:${PN}"
 
@@ -16,13 +16,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="platform: amd64"
 
-DEPENDENCIES="
-    build+run:
-        !app-arch/unrar-gpl [[
-            description = [ Provide binaries with the same name ]
-            resolution = manual
-        ]]
-"
+DEPENDENCIES=""
 
 WORK="${WORKBASE}"/${PN}
 
@@ -40,7 +34,7 @@ src_compile() {
     # The "library" works *interactively* by default...
     edo sed -i -e "s:DEFINES=\(.*\):DEFINES=-DSILENT \1:" makefile.unix
 
-    emake -f makefile.unix lib
+    emake -f makefile.unix CXXFLAGS="${CXXFLAGS}" lib
     edo mv "${TEMP}"/unrar unrar
 }
 
