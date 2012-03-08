@@ -1,4 +1,5 @@
 # Copyright 2009 Mike Kelly <pioto@exherbo.org>
+# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
 # This exlib is useful for packages from luaforge. It'll set the basic
@@ -24,11 +25,10 @@ luaforge_src_prepare() {
 }
 
 luaforge_src_install() {
-    local d
     emake PREFIX="${IMAGE}/usr" install
-    for d in doc/* ; do
-        docinto $(basename "${d}")
-        dodoc "${d}"/*
-    done
+    if pushd doc &>/dev/null; then
+        dodoc -r .
+        popd >/dev/null
+    fi
 }
 
