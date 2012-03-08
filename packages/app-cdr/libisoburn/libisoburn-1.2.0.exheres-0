@@ -9,26 +9,34 @@ Currently it is comprised of libraries named libisofs, libburn, libisoburn,
 a cdrecord emulator named cdrskin, and an integrated multi-session tool named
 xorriso. The software runs on Linux and FreeBSD."
 HOMEPAGE="http://libburnia-project.org"
-DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.pl00.tar.gz"
+DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="acl cdio readline xattr"
+MYOPTIONS="acl cdio xattr"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        app-cdr/libburn[>=1.0.0][cdio(-)?]
-        app-cdr/libisofs[>=1.0.0][acl(+)?][xattr(+)?]
+        app-cdr/libburn[>=1.2.0][cdio(-)?]
+        app-cdr/libisofs[>=1.2.0][acl(+)?][xattr(+)?]
+        sys-libs/readline
+        sys-libs/zlib
         acl? ( sys-apps/acl )
         cdio? ( dev-libs/libcdio[>=0.83] )
-        readline? ( sys-libs/readline )
         xattr? ( sys-apps/attr )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-libjte --enable-external-filters --enable-zlib )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'acl libacl' 'cdio libcdio' readline xattr )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-external-filters
+    --enable-libreadline
+    --enable-pkg-check-modules
+    --enable-zlib
+    --disable-ldconfig-at-install
+    --disable-libjte
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'acl libacl' 'cdio libcdio' xattr )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/comments )
 
