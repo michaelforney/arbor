@@ -20,11 +20,16 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-    acl? ( sys-apps/acl )
-    xattr? ( sys-apps/attr )
+        sys-libs/zlib
+        acl? ( sys-apps/acl )
+        xattr? ( sys-apps/attr )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-libjte --enable-zlib )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-zlib
+    --disable-ldconfig-at-install
+    --disable-libjte
+)
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'acl libacl' xattr )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/Tutorial doc/zisofs_format.txt )
 
