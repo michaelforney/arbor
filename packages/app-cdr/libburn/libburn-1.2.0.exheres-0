@@ -8,7 +8,7 @@ Currently it is comprised of libraries named libisofs, libburn, libisoburn,
 a cdrecord emulator named cdrskin, and an integrated multi-session tool named
 xorriso. The software runs on Linux and FreeBSD."
 HOMEPAGE="http://libburnia-project.org"
-DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.pl00.tar.gz"
+DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.tar.gz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -22,6 +22,7 @@ DEPENDENCIES="
         cdio? ( dev-libs/libcdio[>=0.83] )
 "
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-ldconfig-at-install )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'cdio libcdio' )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/comments )
 
