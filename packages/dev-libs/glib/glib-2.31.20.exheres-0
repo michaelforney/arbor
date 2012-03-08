@@ -33,16 +33,11 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
-# The internal copy of PCRE is old but "patched to use GLib for memory management and Unicode
-# handling". Its usage is recommended by upstream, see also
+# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
+# Its usage is recommended by upstream, see also
 # http://developer.gimp.org/api/2.0/glib/glib-building.html#Dependencies
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    '--enable-static'
-    '--disable-fam'
-    '--disable-selinux'
-    '--disable-xattr'
-    '--with-pcre=internal'
-)
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
+                               '--disable-xattr' '--with-pcre=internal' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk-doc )
 
 src_install() {
