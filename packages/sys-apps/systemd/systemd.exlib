@@ -113,36 +113,44 @@ systemd_src_prepare() {
 }
 
 configure_one_multibuild() {
-    econf \
-        --prefix=/usr \
-        --libdir=/usr/${LIBDIR} \
-        --includedir=/usr/include \
-        --libexecdir=/usr/libexec \
-        --localstatedir=/var \
-        --enable-binfmt \
-        --enable-hostnamed \
-        --enable-localed \
-        --enable-logind \
-        --enable-pam \
-        --enable-quotacheck \
-        --enable-randomseed \
-        --enable-readahead \
-        --enable-split-usr \
-        --enable-timedated \
-        --enable-vconsole \
-        --enable-xz \
-        --disable-audit \
-        --disable-gtk \
-        --disable-selinux \
-        --with-distro=other \
-        --with-pamlibdir=/${LIBDIR}/security \
-        --with-sysvinit-path="" \
-        --with-sysvrcd-path="" \
-        --with-udevrulesdir=/${LIBDIR}/udev/rules.d \
-        $(option_enable acl) \
-        $(option_enable cryptsetup libcryptsetup) \
-        $(option_enable plymouth) \
+    local myconfig=(
+        --prefix=/usr
+        --libdir=/usr/${LIBDIR}
+        --includedir=/usr/include
+        --libexecdir=/usr/libexec
+        --localstatedir=/var
+        --enable-binfmt
+        --enable-hostnamed
+        --enable-localed
+        --enable-logind
+        --enable-pam
+        --enable-quotacheck
+        --enable-randomseed
+        --enable-readahead
+        # This adds /sbin and /bin to PATH for systemd units again.
+        --enable-split-usr
+        --enable-timedated
+        --enable-vconsole
+        --enable-xz
+        --disable-audit
+        # Disable putting core dumps into the journal for now.
+        --disable-coredump
+        # Disable the GTK+ tools - those are part of systemd-ui now.
+        --disable-gtk
+        --disable-selinux
+        --with-distro=other
+        --with-pamlibdir=/${LIBDIR}/security
+        # Disable SysV init compatibility.
+        --with-sysvinit-path=""
+        --with-sysvrcd-path=""
+        --with-udevrulesdir=/${LIBDIR}/udev/rules.d
+        $(option_enable acl)
+        $(option_enable cryptsetup libcryptsetup)
+        $(option_enable plymouth)
         $(option_enable tcpd tcpwrap)
+    )
+
+    econf ${myconfig[@]}
 }
 
 systemd_src_install() {
