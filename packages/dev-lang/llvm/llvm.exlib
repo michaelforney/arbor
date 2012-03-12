@@ -4,8 +4,7 @@
 
 require toolchain-funcs flag-o-matic easy-multibuild
 
-export_exlib_phases pkg_setup src_prepare src_compile\
-                    src_install pkg_postinst
+export_exlib_phases pkg_setup src_prepare src_compile src_install pkg_postinst
 
 myexparam -b snapshot=false
 
@@ -52,9 +51,9 @@ MYOPTIONS="
     dragonegg [[ description = [ Build a plugin that allows gcc to use\
               optimisations from the LLVM project ] ]]
     gold
-    dragonegg? ( ( gcc_version: ${DRAGONEGG_COMPATIBLE_GCC_VERSIONS[@]} ) \
+    dragonegg? ( ( gcc_version: ${DRAGONEGG_COMPATIBLE_GCC_VERSIONS[*]} ) \
                [[ number-selected = exactly-one ]] )
-    gcc_version: ( ${ADMISSIBLE_GCC_VERSIONS[@]} ) [[ number-selected = exactly-one ]]
+    gcc_version: ( ${ADMISSIBLE_GCC_VERSIONS[*]} ) [[ number-selected = exactly-one ]]
     multibuild_c: 32 64
 "
 
