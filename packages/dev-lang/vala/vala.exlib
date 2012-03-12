@@ -47,6 +47,9 @@ vala_src_install() {
 
     if test $(expr "${SLOT} < 0.16") ; then
         edo mv "${IMAGE}"usr/share/aclocal/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
+    else
+        edo mkdir "${IMAGE}"usr/share/aclocal/
+        edo cp "${WORK}"/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
     fi
 
     edo pushd "${IMAGE}"
