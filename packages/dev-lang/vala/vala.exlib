@@ -18,6 +18,7 @@ HOMEPAGE="http://live.gnome.org/Vala"
 LICENCES="LGPL-2.1"
 MYOPTIONS=""
 
+# gobject-introspection - /gir/bug651773
 DEPENDENCIES="
     build:
         dev-libs/libxslt
@@ -28,6 +29,7 @@ DEPENDENCIES="
         dev-libs/glib:2[>=2.25.9]
     test:
         sys-apps/dbus
+        $(ever at_least 0.14.1 && echo 'gnome-desktop/gobject-introspection:*')
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-unversioned' '--enable-vapigen' )
