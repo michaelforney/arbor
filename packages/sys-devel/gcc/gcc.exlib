@@ -7,11 +7,11 @@
 require multibuild toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
 
 case "$(ever range 3)" in
-    p*) # snapshot
+    +([[:digit:]])) # snapshot
         MY_PV="$(ever range 1-2).0"
         ;;
     *)
-        MY_PV="${PV}"
+        MY_PV="$(ever range 1-3)"
         ;;
 esac
 
