@@ -1,7 +1,7 @@
 # Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require alternatives easy-multibuild
+require alternatives easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
 
 export_exlib_phases src_install
 
@@ -50,10 +50,12 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "doc gtk-doc"
 )
 
+AT_M4DIR=( m4 )
+
 kmod_test_one_multibuild() {
     # For some reason, sydbox prevents the tests from working without stating why.
     # This is especially mysterious to me since the tests only do their stuff in
-    # (and below) ${WORK}. Last tested with kmod-6.
+    # (and below) ${WORK}. Last tested with kmod-7.
     esandbox disable
 
     emake -j1 check
