@@ -28,11 +28,19 @@ LICENCES="( GPL-2 LGPL-2 )"
 SLOT="0"
 
 MYOPTIONS="
-    acl [[ requires = [ glib -systemd ] ]]
     baselayout
     glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
     gobject-introspection [[ requires = [ glib ] ]]
     systemd [[ description = [ install systemd service files ] ]]
+"
+
+if ! ever at_least 182 ; then
+    MYOPTIONS+="
+        acl [[ requires = [ glib -systemd ] ]]
+    "
+fi
+
+MYOPTIONS+="
     multibuild_c: 32 64
     platform: ia64
 " # ppc s390
@@ -46,7 +54,6 @@ DEPENDENCIES="
         sys-apps/pciutils
         sys-apps/usbutils[>=0.82]
         sys-apps/util-linux[>=2.20][multibuild_c:*(-)?]
-        acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(-)?] )
         glib? ( dev-libs/glib:2[>=2.22.0][multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
     run:
@@ -68,6 +75,13 @@ if ever at_least 181; then
     DEPENDENCIES+="
         build+run:
             sys-apps/kmod[>=5][multibuild_c:*(-)?]
+    "
+fi
+
+if ! ever at_least 182 ; then
+    DEPENDENCIES+="
+        build+run:
+            acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(-)?] )
     "
 fi
 
@@ -95,28 +109,44 @@ udev_src_prepare() {
 }
 
 configure_one_multibuild() {
-    local HWDB=--enable-hwdb
-    local LIBEXECDIR=/${LIBDIR}/udev
+    local myconf=()
 
     if ever at_least 177; then
-        HWDB=
-        LIBEXECDIR=/${LIBDIR}
+        myconf+=(
+            --libexecdir=/${LIBDIR}
+            --with-rootprefix=
+        )
+    else
+        myconf+=(
+            --libexecdir=/${LIBDIR}/udev
+        )
     fi
 
-    econf \
-        --bindir=/sbin \
-        --libexecdir=${LIBEXECDIR} \
-        --sbindir=/sbin \
-        --enable-edd \
-        --enable-static \
-        --with-rootlibdir=/${LIBDIR} \
-        --with-rootprefix= \
-        --without-selinux \
-        $(option_enable glib gudev) \
-        $(option_enable gobject-introspection introspection) \
-        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
-        $(option_enable acl udev_acl) \
-        "${HWDB}"
+    myconf+=(
+        --bindir=/sbin
+        --sbindir=/sbin
+        --enable-static
+        --with-rootlibdir=/${LIBDIR}
+        --without-selinux
+        $(option_enable glib gudev)
+        $(option_enable gobject-introspection introspection)
+        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
+    )
+
+    if ! ever at_least 182 ; then
+        myconf+=(
+            --enable-edd
+            $(option_enable acl udev_acl)
+        )
+    fi
+
+    if ! ever at_least 177 ; then
+        myconf+=(
+            --enable-hwdb
+        )
+    fi
+
+    econf "${myconf[@]}"
 }
 
 udev_src_configure() {
