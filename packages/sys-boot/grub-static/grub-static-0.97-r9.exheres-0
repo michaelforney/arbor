@@ -20,6 +20,7 @@ GRUB_PNV="grub-0.97-r9"
 
 src_install() {
     cp -a "${WORKBASE}"/* "${IMAGE}"
+    mv "${IMAGE}/lib" "${IMAGE}/${LIBDIR}"
     mv "${IMAGE}"/usr/share/doc/{${GRUB_PNV},${PNVR}}
 }
 
