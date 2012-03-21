@@ -1,0 +1,27 @@
+Upstream: no, https://groups.google.com/group/isl-development/browse_thread/thread/edbf912f2e2f0663
+From 3dbae9c730d379f6d4a1b9666bc4a015e4f1bab3 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <pl.seidler@googlemail.com>
+Date: Mon, 21 May 2012 23:23:18 +0200
+Subject: [PATCH] gdb: install to gdb auto-load directory
+
+---
+ Makefile.am |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 565405c..b072896 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -272,6 +272,6 @@ install-data-local: $(srcdir)/isl.py
+ 	case $$libisl in \
+ 	'') echo Cannot find isl library name. GDB bindings not installed.;; \
+ 	*) echo $(INSTALL_DATA) $(srcdir)/isl.py \
+-		$(DESTDIR)$(libdir)/$$libisl-gdb.py; \
+-	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(libdir)"; \
+-	$(INSTALL_DATA) $(srcdir)/isl.py $(DESTDIR)$(libdir)/$$libisl-gdb.py; esac
++		$(DESTDIR)$(datadir)/gdb/auto-load$(libdir)/$$libisl-gdb.py; \
++	test -z "$(libdir)" || $(MKDIR_P) "$(DESTDIR)$(datadir)/gdb/auto-load$(libdir)"; \
++	$(INSTALL_DATA) $(srcdir)/isl.py $(DESTDIR)$(datadir)/gdb/auto-load$(libdir)/$$libisl-gdb.py; esac
+-- 
+1.7.10.2
+

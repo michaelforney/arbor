@@ -1,0 +1,31 @@
+# Copyright 2012 Paul Seidler
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+
+SUMMARY="Integer Set Library"
+DESCRIPTION="
+isl is a thread-safe C library for manipulating sets and relations of integer points
+bounded by affine constraints. The descriptions of the sets and relations may involve
+both parameters and existentially quantified variables. All computations are performed
+in exact integer arithmetic using GMP.
+"
+HOMEPAGE="http://www.kotnet.org/~skimo/isl/"
+DOWNLOADS="ftp://ftp.linux.student.kuleuven.be/pub/people/skimo/${PN}/${PNV}.tar.lzma"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+# automagic for the docs: perl, pdflatex, pod2html
+DEPENDENCIES="
+    build+run:
+        dev-libs/gmp:=
+"
+
+AT_M4DIR=( 'm4' )
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-gdb.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-gmp=system --without-piplib --without-clang )
+
