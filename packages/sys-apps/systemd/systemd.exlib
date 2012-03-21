@@ -288,7 +288,9 @@ EOF
     keepdir /usr/${LIBDIR}/tmpfiles.d
 
     # Remove man page for systemadm, which is also in app-admin/systemd-ui
-    edo rm "${IMAGE}"/usr/share/man/man1/systemadm.1
+    if ! ever is_scm; then
+        edo rm "${IMAGE}"/usr/share/man/man1/systemadm.1
+    fi
 }
 
 systemd_pkg_postinst() {
