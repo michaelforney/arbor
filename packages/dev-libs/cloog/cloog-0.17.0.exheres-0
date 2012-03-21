@@ -1,0 +1,23 @@
+# Copyright 2012 Paul Seidler
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="isl based loop generator for scanning polyhedra"
+HOMEPAGE="http://www.${PN}.org/"
+DOWNLOADS="http://www.bastoul.net/${PN}/pages/download/${PNV}.tar.gz"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+# automagic doc dependency: texi2dvi
+DEPENDENCIES="
+    build+run:
+        dev-libs/isl
+        dev-libs/gmp:=
+        !dev-libs/cloog-ppl [[ description = [ File collision ] ]]
+"
+
+# with psl the tests fail
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-isl=system --with-gmp=system --with-osl=no )
+
