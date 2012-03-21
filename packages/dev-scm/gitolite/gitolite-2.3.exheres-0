@@ -1,0 +1,59 @@
+# Copyright 2011 Ingmar Vanhassel
+# Copyright 2012 Johannes Nixdorf <mixi@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Gitolite allows you to setup a centralised git server"
+DESCRIPTION="
+Gitolite allows you to setup a centralised git server, with very fine-grained access control and
+many (many!) more powerful features.
+"
+HOMEPAGE="http://github.com/sitaramc/gitolite"
+DOWNLOADS="http://dev.exherbo.org/~mixi/distfiles/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-scm/git[>=1.6.2]
+        user/git
+        group/git
+"
+
+BUGS_TO="mixi@exherbo.org"
+
+src_compile() {
+    :
+}
+
+src_install() {
+    # step 2 of docs/packaging.mkd
+    edo sed \
+        -e "s!/tmp/share/gitolite/conf!/etc/${PN}!" \
+        -i src/gl-setup
+    edo sed \
+        -e "s!#\\s*\$GL_PACKAGE_CONF\\s*=.*!\$GL_PACKAGE_CONF = \"/etc/${PN}\";!" \
+        -e "s!#\\s*\$GL_PACKAGE_HOOKS\\s*=.*!\$GL_PACKAGE_HOOKS = \"/usr/share/${PN}/hooks\";!" \
+        -i conf/example.gitolite.rc
+
+    edo mkdir modules
+    edo mv src/*.pm modules
+
+    # install the perl modules to vendorlib (doc/packaging.mkd says /usr/bin/)
+    eval $(perl -V:vendorlib)
+    insinto ${vendorlib}
+    doins modules/*
+
+    # step 3 of docs/packaging.mkd
+    dobin src/*
+    insinto /etc/${PN}
+    doins conf/example*
+    insinto /usr/share/${PN}/hooks
+    insopts -m0755
+    doins -r hooks/*
+
+    dodoc README.mkd doc/*.mkd
+}
+
