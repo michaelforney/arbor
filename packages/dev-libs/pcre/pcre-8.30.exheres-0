@@ -31,6 +31,7 @@ PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
+    sys-libs/ncurses[multibuild_c:*(-)?]
     sys-libs/readline[multibuild_c:*(-)?]
 "
 
@@ -39,8 +40,9 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-pcregrep-libbz2
     --enable-pcregrep-libz
     --enable-pcretest-libreadline
+    --enable-pcre16
     --enable-shared
-    --enable-utf8
+    --enable-utf
     --enable-unicode-properties
 )
 

@@ -1,0 +1,13 @@
+Title: pcre 8.30 update
+Author: Paul Seidler <sepek@exherbo.org>
+Content-Type: text/plain
+Posted: 2012-02-22
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: dev-libs/pcre[<8.30]
+
+After the update to 8.30 it's neccessary to rebuild grep, I recommend to
+disable the tests for that. Afterwards you need to fix the linkage of your installed
+packages.
+cave resolve sys-apps/grep -zx1
+cave fix-linkage -x
