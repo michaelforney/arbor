@@ -10,7 +10,10 @@ DOWNLOADS="mirror://apache/xerces/c/$(ever major)/sources/${PNV}.tar.gz"
 LICENCES="Apache-2.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="amd64_cpu_features: sse2"
+MYOPTIONS="
+    platform: amd64
+    x86_cpu_features: sse2
+"
 
 DEPENDENCIES="
     build+run:
@@ -19,18 +22,33 @@ DEPENDENCIES="
 
 AT_M4DIR=( m4 )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( amd64_cpu_features:sse2 )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-threads
-    --enable-msgloader-iconv
-    --enable-netaccessor-curl
-    --enable-transcoder-gnuiconv
-)
-
 src_prepare() {
     edo sed -e 's|$(prefix)/msg|$(DESTDIR)/$(prefix)/share/xerces-c/msg|' \
             -i src/xercesc/util/MsgLoaders/MsgCatalog/Makefile.in
     autotools_src_prepare
+}
+
+src_configure() {
+    local myconf=()
+
+    myconf+=(
+        --enable-threads
+        --enable-msgloader-iconv
+        --enable-netaccessor-curl
+        --enable-transcoder-gnuiconv
+    )
+
+    if option platform:amd64 ; then
+        myconf+=(
+            --enable-sse2
+        )
+    else
+        myconf+=(
+            $(option_enable x86_cpu_features:sse2)
+        )
+    fi
+
+    econf "${myconf[@]}"
 }
 
 src_install() {
