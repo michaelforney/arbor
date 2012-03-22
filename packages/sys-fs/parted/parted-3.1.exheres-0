@@ -3,7 +3,7 @@
 
 require gnu [ suffix=xz ]
 
-SUMMARY="Create, destroy, resize, check, copy partitions and file systems"
+SUMMARY="Create, destroy, resize, check, copy partitions"
 
 LICENCES="GPL-3"
 SLOT="0"
@@ -16,13 +16,12 @@ DEPENDENCIES="
     test:
         dev-libs/check[>=0.9.3]
     build+run:
-        sys-fs/e2fsprogs
+        sys-apps/util-linux
         sys-libs/ncurses
         sys-libs/readline[>=5.2]
         device-mapper? ( sys-fs/lvm2 )"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-Werror
     --enable-nls
     --with-readline=/${LIBDIR}
 )
