@@ -1,11 +1,11 @@
-# Copyright 2010-2011 Wulf C. Krueger
+# Copyright 2010-2012 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'mc-4.6.2_pre1.ebuild' from Gentoo, which is:
 #       Copyright 1999-2008 Gentoo Foundation
 
 require flag-o-matic
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_install
 
 SUMMARY="GNU Midnight Commander is a s-lang based file manager."
 DESCRIPTION="
@@ -46,6 +46,9 @@ DEPENDENCIES="
         app-arch/unzip
 "
 
+# Some test have been broken in 4.8.2, thus, restrict tests for now.
+RESTRICT="test"
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-background
     --enable-charset
@@ -70,16 +73,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     samba
 )
 
-WORK="${WORKBASE}/${PNV/_/-}"
-
-mc_src_prepare() {
-    default
-
-    # Upstream's fooloishly using symbolic links into the live fs which would
-    # cause sandbox violations
-    edo rm "${WORK}"/config/{config{.guess,.sub},depcomp,install-sh,missing,mkinstalldirs}
-    edo cp /usr/share/automake-1.10/{config{.guess,.sub},depcomp,install-sh,missing,mkinstalldirs} "${WORK}"/config/
-}
+WORK=${WORKBASE}/${PNV/_/-}
 
 mc_src_install() {
     default
