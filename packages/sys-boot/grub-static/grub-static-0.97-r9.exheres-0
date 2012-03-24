@@ -16,11 +16,10 @@ DEPENDENCIES="
         !sys-boot/grub [[ note = [ /sbin/grub-install collides ] ]]"
 
 WORK=${WORKBASE}
-GRUB_PNV="grub-0.97-r9"
 
 src_install() {
-    cp -a "${WORKBASE}"/* "${IMAGE}"
-    mv "${IMAGE}/lib" "${IMAGE}/${LIBDIR}"
-    mv "${IMAGE}"/usr/share/doc/{${GRUB_PNV},${PNVR}}
+    edo cp -a "${WORKBASE}"/* "${IMAGE}"
+    edo mv "${IMAGE}/lib" "${IMAGE}/${LIBDIR}"
+    edo mv "${IMAGE}"/usr/share/doc/{${PNVR/-static/},${PNVR}}
 }
 
