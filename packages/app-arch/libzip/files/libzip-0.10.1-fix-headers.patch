@@ -1,0 +1,15 @@
+Source: Debian
+Upstream: Unknown
+Reason: zipconf.h in include is needed by e.g. ebook-tools
+
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -2,7 +2,7 @@ libincludedir = ${libdir}/@PACKAGE@/incl
+ 
+ lib_LTLIBRARIES = libzip.la
+ noinst_HEADERS = zipint.h
+-include_HEADERS = zip.h
++include_HEADERS = zip.h zipconf.h
+ libinclude_HEADERS = zipconf.h
+ 
+ # also update CMakeLists.txt when changing version

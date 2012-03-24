@@ -1,0 +1,41 @@
+# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+SUMMARY="C Library for manipulating zip archives"
+DESCRIPTION="
+A C library for reading, creating, and modifying zip archives. Files can be
+added from data buffers, files, or compressed data copied directly from other
+zip archives. Changes made without closing the archive can be reverted.
+"
+HOMEPAGE="http://www.nih.at/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/NEWS.html [[ lang = en ]]"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/zlib[>=1.1.2]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-0.10.1-fix-headers.patch
+    "${FILES}"/${PN}-0.10.1-fix-open-nonarchive-test.patch
+)
+
+src_prepare() {
+    # Distributed broken.zip is (not) really broken in 0.10
+    # and asks for a password during the unzip attempt
+    # Disable for now (Debian #665225, Gentoo #405351)
+    sed -e '/fread.test/d' \
+        -i regress/Makefile.am
+
+    autotools_src_prepare
+}
+
