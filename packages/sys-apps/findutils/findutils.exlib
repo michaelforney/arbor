@@ -6,6 +6,7 @@ if (($(ever range 2) % 2)); then
 else
     require gnu [ suffix=gz ]
 fi
+require alternatives
 
 export_exlib_phases src_install src_test_expensive
 
@@ -39,6 +40,19 @@ findutils_src_test_expensive() {
 
 findutils_src_install() {
     default
+
+    local alternatives=(
+        locate ${PN} 10
+
+        /usr/bin/locate                ${PN}.locate
+        /usr/bin/updatedb              ${PN}.updatedb
+        /usr/share/man/man1/locate.1   /usr/share/man/man1/${PN}.locate.1
+        /usr/share/man/man1/updatedb.1 /usr/share/man/man1/${PN}.updatedb.1
+        /usr/share/man/man5/locatedb.5 /usr/share/man/man5/${PN}.locatedb.5
+    )
+
+    alternatives_for "${alternatives[@]}"
+
     edo rmdir "${IMAGE}"/var{/lib,}
 }
 
