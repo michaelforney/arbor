@@ -261,13 +261,13 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:mcrypt mcrypt"
     "php_extensions:mssql mssql"
     "php_extensions:mysql mysql mysqlnd"
-    "php_extensions:mysql mysql-sock /var/run/mysqld/mysqld.sock"
+    "php_extensions:mysql mysql-sock /run/mysqld/mysqld.sock"
     "php_extensions:mysqli mysqli mysqlnd"
-    "php_extensions:mysqli mysql-sock /var/run/mysqld/mysqld.sock"
+    "php_extensions:mysqli mysql-sock /run/mysqld/mysqld.sock"
     "php_extensions:pcre pcre-dir /usr"
     "php_extensions:pcre pcre-regex /usr"
     "php_extensions:pdo-mysql pdo-mysql mysqlnd"
-    "php_extensions:pdo-mysql mysql-sock /var/run/mysqld/mysqld.sock"
+    "php_extensions:pdo-mysql mysql-sock /run/mysqld/mysqld.sock"
     "php_extensions:pdo-dblib pdo-dblib /usr"
     "php_extensions:pdo-odbc pdo-odbc unixODBC,/usr"
     "php_extensions:pdo-pgsql pdo-pgsql /usr"
@@ -361,7 +361,7 @@ php_src_install() {
     fi
 
     if option php_extensions:mysql ; then
-        edo sed -i -e 's:.*\(mysql.default_socket =\).*:\1 "/var/run/mysqld/mysqld.sock":' "${IMAGE}"/etc/php/php.ini
+        edo sed -i -e 's:.*\(mysql.default_socket =\).*:\1 "/run/mysqld/mysqld.sock":' "${IMAGE}"/etc/php/php.ini
     fi
 
     if option apache; then

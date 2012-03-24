@@ -1,0 +1,33 @@
+From 4ecfa5abf5d5cb47677565808bdd15dfb25e39b5 Mon Sep 17 00:00:00 2001
+From: Rasmus Lerdorf <rasmus@php.net>
+Date: Mon, 6 Feb 2012 18:18:53 +0000
+Subject: [PATCH 2/2] Safer way to call pcre_fullinfo - bug 60986
+
+---
+ ext/pcre/php_pcre.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ext/pcre/php_pcre.c b/ext/pcre/php_pcre.c
+index f7d0404..b1b9e66 100644
+--- a/ext/pcre/php_pcre.c
++++ b/ext/pcre/php_pcre.c
+@@ -241,6 +241,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
+ 	char				*pattern;
+ 	int					 do_study = 0;
+ 	int					 poptions = 0;
++	int				count = 0;
+ 	unsigned const char *tables = NULL;
+ #if HAVE_SETLOCALE
+ 	char				*locale = setlocale(LC_CTYPE, NULL);
+@@ -255,7 +256,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
+ 		 * We use a quick pcre_fullinfo() check to see whether cache is corrupted, and if it
+ 		 * is, we flush it and compile the pattern from scratch.
+ 		 */
+-		if (pcre_fullinfo(pce->re, NULL, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
++		if (pcre_fullinfo(pce->re, NULL, PCRE_INFO_CAPTURECOUNT, &count) == PCRE_ERROR_BADMAGIC) {
+ 			zend_hash_clean(&PCRE_G(pcre_cache));
+ 		} else {
+ #if HAVE_SETLOCALE
+-- 
+1.7.9.4
+
