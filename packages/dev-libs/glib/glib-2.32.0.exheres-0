@@ -37,8 +37,24 @@ DEPENDENCIES="
 # Its usage is recommended by upstream, see also
 # http://developer.gimp.org/api/2.0/glib/glib-building.html#Dependencies
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
-                               '--disable-xattr' '--with-pcre=internal' )
+                               '--disable-xattr' '--with-pcre=internal' '--with-threads=posix' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk-doc )
+
+src_prepare() {
+    glib_src_prepare
+
+    # fail under sydbox
+    edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c
+    edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
+    edo sed -e '/thread\/cond1/d' -i glib/tests/cond.c
+    edo sed -e 's/run-assert-msg-test.sh//' -i tests/Makefile.{am,in}
+
+    # we have no guarantee for ipv6 support, so we disable those tests
+    edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
+
+    # TODO: need 0.0.0.0
+    edo sed -e '/socket\/ipv6_v4mapped/d' -i gio/tests/socket.c
+}
 
 src_install() {
     glib_src_install
