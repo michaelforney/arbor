@@ -20,23 +20,21 @@ DEPENDENCIES="
         net-libs/libssh2[>=1.2.8][multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
         ares? ( net-dns/c-ares[>=1.6.0] )
-       !gnutls? ( dev-libs/openssl[multibuild_c:*(-)?] )
+       !gnutls? ( dev-libs/openssl[>=1.0.1][multibuild_c:*(-)?] )
         gnutls? (
-            dev-libs/gnutls[multibuild_c:*(-)?]
-            dev-libs/libgcrypt[multibuild_c:*(-)?]
+            dev-libs/gnutls[>=2.12.14][multibuild_c:*(-)?]
+            dev-libs/nettle[multibuild_c:*(-)?]
         )
         idn? ( net-dns/libidn )
 "
-# NOTE: curl requires that gnutls was built against libgcrypt. It only checks for presence of
-# libgcrypt, not if it actually used by gnutls, though.
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-{cookies,crypto-auth,largefile,manual,nonblocking,proxy,tls-srp}
+    --enable-{dict,file,ftp,gopher,http,imap,pop3,rtsp,smtp,telnet,tftp}
     --disable-werror
-    --disable-{gssapi,ldap,sspi}
-    --without-{cyassl,nss,krb4,librtmp,polarssl,spnego,axtls}
-    --without-ca-bundle
-    --enable-{http,ftp,gopher,file,dict,manual,telnet,nonblocking,largefile}
-    --with-libssh2
+    --disable-{ldap,ldaps,sspi}
+    --with-{libssh2,zlib}
+    --without-{ca-bundle,cyassl,gssapi,nss,krb4,librtmp,polarssl,spnego,axtls}
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares '!ares threaded-resolver' ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
