@@ -1,0 +1,58 @@
+commit cc4f9d5679278ce41cd5480fab3f5e71dba163ed
+Author: Matthew Booth <mbooth@redhat.com>
+Date:   Fri Mar 16 16:29:00 2012 +0100
+
+    transport_send: Finish in-progress key exchange before sending data
+    
+    _libssh2_channel_write() first reads outstanding packets before writing
+    new data. If it reads a key exchange request, it will immediately start
+    key re-exchange, which will require sending a response. If the output
+    socket is full, this will result in a return from
+    _libssh2_transport_read() of LIBSSH2_ERROR_EAGAIN. In order not to block
+    a write because there is no data to read, this error is explicitly
+    ignored and the code continues marshalling a packet for sending. When it
+    is sent, the remote end immediately drops the connection because it was
+    expecting a continuation of the key exchange, but got a data packet.
+    
+    This change adds the same check for key exchange to
+    _libssh2_transport_send() that is in _libssh2_transport_read(). This
+    ensures that key exchange is completed before any data packet is sent.
+
+diff --git a/src/transport.c b/src/transport.c
+index 057dcf5..95b9a3a 100644
+--- a/src/transport.c
++++ b/src/transport.c
+@@ -296,7 +296,7 @@ int _libssh2_transport_read(LIBSSH2_SESSION * session)
+          * is done!
+          */
+         _libssh2_debug(session, LIBSSH2_TRACE_TRANS, "Redirecting into the"
+-                       " key re-exchange");
++                       " key re-exchange from _libssh2_transport_read");
+         rc = _libssh2_kex_exchange(session, 1, &session->startup_key_state);
+         if (rc)
+             return rc;
+@@ -687,6 +687,24 @@ int _libssh2_transport_send(LIBSSH2_SESSION *session,
+     const unsigned char *orgdata = data;
+     size_t orgdata_len = data_len;
+ 
++    /*
++     * If the last read operation was interrupted in the middle of a key
++     * exchange, we must complete that key exchange before continuing to write
++     * further data.
++     *
++     * See the similar block in _libssh2_transport_read for more details.
++     */
++    if (session->state & LIBSSH2_STATE_EXCHANGING_KEYS &&
++        !(session->state & LIBSSH2_STATE_KEX_ACTIVE)) {
++        /* Don't write any new packets if we're still in the middle of a key
++         * exchange. */
++        _libssh2_debug(session, LIBSSH2_TRACE_TRANS, "Redirecting into the"
++                       " key re-exchange from _libssh2_transport_send");
++        rc = _libssh2_kex_exchange(session, 1, &session->startup_key_state);
++        if (rc)
++            return rc;
++    }
++
+     debugdump(session, "libssh2_transport_write plain", data, data_len);
+     if(data2)
+         debugdump(session, "libssh2_transport_write plain2", data2, data2_len);

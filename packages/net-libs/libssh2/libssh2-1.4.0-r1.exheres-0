@@ -30,7 +30,16 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( '!gcrypt openssl' 'gcrypt libgcrypt' )
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-c4a0e0.patch
+    "${FILES}"/${PNV}-cc4f9d.patch
+    "${FILES}"/${PNV}-f4f229.patch
+    "${FILES}"/${PNV}-fed075.patch
+)
+
 src_prepare() {
+    default
+
     # keyboard-interactive tests fail: Failed requesting pty
     edo sed -e "s:ssh2.sh::" \
         -i tests/Makefile.{am,in}
