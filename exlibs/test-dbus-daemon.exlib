@@ -1,0 +1,31 @@
+# Copyright 2012 Paul Seidler <sepek@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+export_exlib_phases src_test
+
+test-dbus-daemon_start() {
+    esandbox allow_net 'unix-abstract:/tmp/dbus-*'
+
+    echo "Launching DBus session bus..."
+    eval "$(dbus-launch --sh-syntax)"
+    [[ -z ${DBUS_SESSION_BUS_PID} ]] && die "Launching DBus session bus failed"
+}
+
+test-dbus-daemon_stop() {
+    esandbox disallow_net 'unix-abstract:/tmp/dbus-*'
+
+    edo kill ${DBUS_SESSION_BUS_PID}
+}
+
+test-dbus-daemon_src_test() {
+    local DBUS_SESSION_BUS_PID
+    local DBUS_SESSION_BUS_ADDRESS
+
+    test-dbus-daemon_start
+    default
+    test-dbus-daemon_stop
+
+    unset DBUS_SESSION_BUS_PID
+    unset DBUS_SESSION_BUS_ADDRESS
+}
+
