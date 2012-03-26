@@ -4,12 +4,12 @@
 require easy-multibuild
 
 SUMMARY="International Components for Unicode"
-HOMEPAGE="http://www.${PN}-project.org"
+HOMEPAGE="http://site.${PN}-project.org"
 DOWNLOADS="http://download.${PN}-project.org/files/${PN}4c/${PV}/${PN}4c-${PV//./_}-src.tgz"
 
 REMOTE_IDS="freshmeat:internationalcomponentsforunicodecc"
 
-UPSTREAM_CHANGELOG="${HOMEPAGE}/download/$(ever range 1-2).html [[ lang = en ]]"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/download/$(ever major) [[ lang = en ]]"
 
 LICENCES="icu"
 SLOT="0"
@@ -19,8 +19,6 @@ MYOPTIONS="multibuild_c: 32 64"
 DEPENDENCIES=""
 
 WORK="${WORKBASE}/${PN}/source"
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--with-iostream=std' )
 
 install_one_multibuild() {
     default
