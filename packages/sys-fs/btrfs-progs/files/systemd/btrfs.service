@@ -1,0 +1,17 @@
+# Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+[Unit]
+Description=BtrFS device scan
+DefaultDependencies=no
+Before=basic.target shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+ExecStart=/usr/bin/btrfs device scan
+Type=oneshot
+TimeoutSec=0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=basic.target

@@ -1,15 +1,27 @@
 # Copyright 2009 Bryan Østergaard
+# Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-SUMMARY="Support utilities for handling btrfs filesystems"
-HOMEPAGE="http://btrfs.wiki.kernel.org/index.php/Main_Page"
-DOWNLOADS="mirror://kernel/linux/kernel/people/mason/btrfs/${PNV}.tar.bz2"
+if ever is_scm ; then
+    SCM_REPOSITORY="git://git.kernel.org/pub/scm/linux/kernel/git/mason/btrfs-progs.git"
+    DOWNLOADS=""
+    require scm-git
+else
+    DOWNLOADS="mirror://kernel/linux/kernel/people/mason/btrfs/${PNV}.tar.bz2"
+fi
 
-UPSTREAM_CHANGELOG="http://btrfs.wiki.kernel.org/index.php/Changelog"
-UPSTREAM_DOCUMENTATION="
-http://btrfs.wiki.kernel.org/index.php/Getting_started#Basic_Filesystem_Commands    [[ description = [ Basic usage, mount options ] ]]
-http://btrfs.wiki.kernel.org/index.php/Getting_started#Compiling_the_Kernel_Module  [[ description = [ More on the required kernel config ] ]]
-"
+require systemd-service
+
+export_exlib_phases src_prepare src_install
+
+SUMMARY="Support utilities for handling btrfs filesystems"
+HOMEPAGE="http://btrfs.ipv5.de"
+#    http://btrfs.wiki.kernel.org/index.php/Main_Page is unmaintained.
+
+BUGS_TO="philantrop@exherbo.org"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/index.php?title=Changelog"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/index.php?title=Main_Page#Documentation"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -20,28 +32,61 @@ DEPENDENCIES="
         sys-apps/acl
         sys-apps/util-linux
         sys-fs/e2fsprogs
+    suggestion:
+        dev-python/matplotlib [[ description = [ for btrfs-show-blocks & other debugging tools ] ]]
 "
 
-DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS="${CFLAGS}" \
-    all \
-    btrfs-debug-tree \
-    btrfs-zero-log \
-    btrfstune \
-    btrfs-image \
+DEFAULT_SRC_COMPILE_PARAMS=(
+    CC="${CC}"
+    CFLAGS="${CFLAGS}"
+    LDFLAGS="${LDFLAGS}"
+    all
+    btrfs-debug-tree
+    btrfs-image
+    btrfs-select-super
+    btrfs-zero-log
+    btrfstune
     convert
 )
 
-src_prepare() {
+DEFAULT_SRC_INSTALL_PARAMS=(
+    prefix=/usr
+    mandir=/usr/share/man
+)
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    INSTALL
+    show-blocks
+)
+
+btrfs-progs_src_prepare() {
     default
-    # btrfs binaries to "/" rather than to "/usr/"
-    sed -i -e '/^bindir/s:\$(prefix)/:/s:' Makefile
+
+    # Respect CFLAGS.
+    edo sed -i -e 's:gcc $(CFLAGS):$(CC) $(CFLAGS):' Makefile
 }
 
-src_install() {
+btrfs-progs_src_install() {
     default
-    dosbin btrfstune
+
+    install_systemd_files
+    # For potentially critical filesystem services (e. g. btrfs, lvm2) we auto-
+    # activate the respective service.
+    if option systemd ; then
+        dodir /etc/systemd/system/basic.target.wants
+        dosym "${SYSTEMDSYSTEMUNITDIR}"/btrfs.service /etc/systemd/system/basic.target.wants/btrfs.service
+    fi
+
+    insinto /usr
     dosbin btrfs-debug-tree
-    dosbin btrfs-zero-log
     dosbin btrfs-image
+    dosbin btrfs-select-super
+    dosbin btrfs-zero-log
+    dosbin btrfstune
+
+    # Prevent collisions with other tools.
+    for filename in calc-size find-root restore ; do
+        edo mv "${IMAGE}"/usr/bin/${filename} "${IMAGE}"/usr/bin/btrfs-${filename}
+    done
 }
 
