@@ -17,7 +17,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/announcements/${PNV}.html [[ lang = en ]]"
 LICENCES="IPL-1.0"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="baselayout cyrus ldap ssl"
+MYOPTIONS="baselayout cyrus ldap ssl mysql"
 
 DEPENDENCIES="
     dev-libs/pcre
@@ -28,6 +28,10 @@ DEPENDENCIES="
     user/postfix
     cyrus? ( net-libs/cyrus-sasl )
     ldap? ( net-directory/openldap )
+    mysql? (
+        dev-db/mysql
+        sys-libs/zlib
+    )
     ssl? ( dev-libs/openssl )
 "
 
@@ -49,6 +53,10 @@ src_compile() {
     if option ldap ; then
         ccargs+=" -DHAS_LDAP"
         auxlibs+=" -lldap -llber"
+    fi
+    if option mysql ; then
+        ccargs+=" -DHAS_MYSQL -I/usr/include/mysql"
+        auxlibs+=" -L/usr/${LIBDIR}/mysql/ -lmysqlclient -lz -lm"
     fi
     ccargs+=' -DDEF_DAEMON_DIR=\"/usr/'${LIBDIR}'/postfix\"'
     ccargs+=' -DDEF_MANPAGE_DIR=\"/usr/share/man\"'
