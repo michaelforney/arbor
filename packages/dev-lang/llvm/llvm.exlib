@@ -123,10 +123,14 @@ llvm_pkg_setup() {
 
 llvm_src_prepare() {
     expatch "${FILES}"/${PNV}-respect-libdir-etc.patch
+    # Fix the use of dot
+    edo sed -i "${WORK}"/docs/doxygen.cfg.in -e 's/@DOT@//g'
     if option clang; then
         if ! ever is_scm && ! exparam -b snapshot; then
             edo mv "${WORKBASE}/${CLANG_PV:-clang-${PV}}" "${WORK}/tools/clang"
         fi
+        # Fix the use of dot
+        edo sed -i "${WORK}"/tools/clang/docs/doxygen.cfg.in -e 's/@DOT@//g'
         edo pushd tools/clang
         expatch "${FILES}"/0001-Replace-PROJ_prefix-lib-with-PROJ_libdir.patch
         if ever at_least 3.0_rc3; then
