@@ -305,6 +305,9 @@ php_src_prepare() {
     if option suhosin ; then
         expatch -p1 "${WORKBASE}"/suhosin-patch-${SUHOSIN_VERSION}.patch
     fi
+
+    # Workaround for PHP bug #48795
+    export EXTRA_LIBS="${EXTRA_LIBS} -lstdc++"
 }
 
 php_src_test_expensive() {
