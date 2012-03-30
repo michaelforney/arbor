@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require googlecode [ project=googletest ]
+require easy-multibuild [ multiunpack=true ] googlecode [ project=googletest ]
 
 SUMMARY="Google's framework for writing C++ tests on a variety of platforms, based on the xUnit architecture"
 DESCRIPTION="
@@ -12,7 +12,8 @@ fatal and non-fatal failures, various options for running the tests, and XML tes
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="examples"
+MYOPTIONS="examples
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
