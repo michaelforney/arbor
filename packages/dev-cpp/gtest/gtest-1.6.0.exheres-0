@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild [ multiunpack=true ] googlecode [ project=googletest ]
+require easy-multibuild [ multiunpack=true ] googlecode [ project=googletest suffix=zip ]
 
 SUMMARY="Google's framework for writing C++ tests on a variety of platforms, based on the xUnit architecture"
 DESCRIPTION="
@@ -12,18 +12,31 @@ fatal and non-fatal failures, various options for running the tests, and XML tes
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="examples
-    multibuild_c: 32 64"
+MYOPTIONS="
+    examples
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
-        dev-lang/python:*
+        dev-lang/python:*[multibuild_c:*(-)?]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-pthreads )
 
-src_install() {
+prepare_one_multibuild() {
+    # Workaround "'make install' is dangerous and not supported" error
+    edo sed -i -r \
+        -e '/^install-(data|exec)-local:/s|^.*$|&\ndisabled-&|' \
+        Makefile.in
+
     default
+}
+
+install_one_multibuild() {
+    default
+
+    dobin scripts/gtest-config
 
     if option examples; then
         insinto /usr/share/doc/${PNVR}/examples
