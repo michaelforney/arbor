@@ -10,5 +10,9 @@ DEPENDENCIES="
         sys-apps/sydbox[>=0.6.8] [[ note = [ tests fail with sydbox older than 0.6.8 ] ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Disable-tests-that-fail-with-sydbox.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/0001-Disable-tests-that-fail-with-sydbox.patch
+    "${FILES}"/0001-Disable-two-broken-gnulib-tests-unrelated-to-coreuti.patch
+    "${FILES}"/0001-Disable-test-bind-and-test-connect-which-both-want-t.patch
+)
 

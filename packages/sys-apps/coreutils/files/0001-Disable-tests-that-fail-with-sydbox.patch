@@ -27,7 +27,7 @@ index 688e6be..914491c 100755
  # Perform this test only if "." is on a local file system.
  # Otherwise, it would fail e.g., on an NFS-mounted file system.
 +
-+skip_test_ "Test fails under sydbox, see bug #204. -alip"
++skip_ "Test fails under sydbox, see bug #204. -alip"
  if is_local_dir_ .; then
    mkdir -p sub1/d || fail=1
    (cd sub1/d && chmod a-r . && chmod a-rx .. &&
@@ -39,7 +39,7 @@ index 0adfbea..2a963a3 100755
  # whose parent is inaccessible.  coreutils 5.97 fails this test.
  # Perform this test only if "." is on a local file system.
  # Otherwise, it would fail e.g., on an NFS-mounted file system.
-+skip_test_ "Test fails under sydbox, see bug #204. -alip"
++skip_ "Test fails under sydbox, see bug #204. -alip"
 +
  if is_local_dir_ .; then
    (cd no-acce3s/d && chmod a-r . && chmod a-rx .. &&
@@ -52,7 +52,7 @@ index 7e23100..ce8767c 100755
  . "${srcdir=.}/init.sh"; path_prepend_ ../src
  print_ver_ tail
  
-+skip_test_ 'This test (using gdb) hangs under sydbox'
++skip_ 'This test (using gdb) hangs under sydbox'
 +
  # Don't run this test by default because sometimes it's skipped as noted below.
  # Also gdb has a bug in Debian's gdb-6.8-3 at least that causes it to not

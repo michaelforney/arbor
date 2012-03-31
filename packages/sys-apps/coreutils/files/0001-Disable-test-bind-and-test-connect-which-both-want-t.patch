@@ -1,0 +1,31 @@
+From 3563551b5f9d1d0be2feb461a4892159f4e9d888 Mon Sep 17 00:00:00 2001
+From: "Wulf C. Krueger" <philantrop@exherbo.org>
+Date: Fri, 30 Mar 2012 23:07:42 +0200
+Subject: [PATCH] Disable test-bind and test-connect which both want to
+ bind/connect to 127.0.0.1:80.
+
+---
+ gnulib-tests/Makefile.in |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gnulib-tests/Makefile.in b/gnulib-tests/Makefile.in
+index c0e9b0c..9d1418c 100644
+--- a/gnulib-tests/Makefile.in
++++ b/gnulib-tests/Makefile.in
+@@ -87,11 +87,11 @@ TESTS = test-accept$(EXEEXT) test-file-has-acl.sh \
+ 	test-areadlink-with-size$(EXEEXT) test-areadlinkat$(EXEEXT) \
+ 	test-argmatch$(EXEEXT) test-argv-iter$(EXEEXT) \
+ 	test-arpa_inet$(EXEEXT) test-base64$(EXEEXT) test-binary-io.sh \
+-	test-bind$(EXEEXT) test-bitrotate$(EXEEXT) test-btowc1.sh \
++	test-bitrotate$(EXEEXT) test-btowc1.sh \
+ 	test-btowc2.sh test-c-ctype$(EXEEXT) test-c-strcase.sh \
+ 	test-calloc-gnu$(EXEEXT) test-canonicalize$(EXEEXT) \
+ 	test-chdir$(EXEEXT) test-chown$(EXEEXT) test-cloexec$(EXEEXT) \
+-	test-close$(EXEEXT) test-closein.sh test-connect$(EXEEXT) \
++	test-close$(EXEEXT) test-closein.sh \
+ 	test-md5$(EXEEXT) test-sha1$(EXEEXT) test-ctype$(EXEEXT) \
+ 	test-di-set$(EXEEXT) test-dirent-safer$(EXEEXT) \
+ 	test-dirent$(EXEEXT) test-dirname$(EXEEXT) test-dup$(EXEEXT) \
+-- 
+1.7.9.4
+

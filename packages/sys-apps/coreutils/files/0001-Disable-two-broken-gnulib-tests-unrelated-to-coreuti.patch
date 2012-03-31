@@ -1,0 +1,40 @@
+From 229e6886e73e5f71066eecf45486d4ab9dfea3d0 Mon Sep 17 00:00:00 2001
+From: "Wulf C. Krueger" <philantrop@exherbo.org>
+Date: Fri, 30 Mar 2012 22:03:27 +0200
+Subject: [PATCH] Disable two broken gnulib tests unrelated to coreutils
+ itself.
+
+test-select suffers from a kernel bug:
+http://osdir.com/ml/bug-gnulib-gnu/2011-09/msg00220.html
+
+test-getlogin expects specific mount options for /dev/pts:
+http://article.gmane.org/gmane.comp.gnu.coreutils.general/2518
+---
+ gnulib-tests/Makefile.in |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gnulib-tests/Makefile.in b/gnulib-tests/Makefile.in
+index 366e60d..c0e9b0c 100644
+--- a/gnulib-tests/Makefile.in
++++ b/gnulib-tests/Makefile.in
+@@ -125,7 +125,7 @@ TESTS = test-accept$(EXEEXT) test-file-has-acl.sh \
+ 	test-getdelim$(EXEEXT) test-getdtablesize$(EXEEXT) \
+ 	test-getgroups$(EXEEXT) test-gethostname$(EXEEXT) \
+ 	test-getline$(EXEEXT) test-getloadavg$(EXEEXT) \
+-	test-getlogin$(EXEEXT) test-getndelim2$(EXEEXT) \
++	test-getndelim2$(EXEEXT) \
+ 	test-getopt$(EXEEXT) test-gettimeofday$(EXEEXT) \
+ 	test-hash$(EXEEXT) test-i-ring$(EXEEXT) test-iconv-h$(EXEEXT) \
+ 	test-iconv$(EXEEXT) test-ignore-value$(EXEEXT) \
+@@ -168,7 +168,7 @@ TESTS = test-accept$(EXEEXT) test-file-has-acl.sh \
+ 	test-readlink$(EXEEXT) test-readlinkat$(EXEEXT) \
+ 	test-readtokens.sh test-realloc-gnu$(EXEEXT) \
+ 	test-remove$(EXEEXT) test-rename$(EXEEXT) test-rmdir$(EXEEXT) \
+-	test-sched$(EXEEXT) test-select$(EXEEXT) test-select-in.sh \
++	test-sched$(EXEEXT) test-select-in.sh \
+ 	test-select-out.sh test-setenv$(EXEEXT) test-setlocale1.sh \
+ 	test-setlocale2.sh test-setsockopt$(EXEEXT) \
+ 	test-sigaction$(EXEEXT) test-signal-h$(EXEEXT) \
+-- 
+1.7.9.4
+
