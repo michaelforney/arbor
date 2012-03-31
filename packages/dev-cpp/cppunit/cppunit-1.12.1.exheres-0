@@ -1,13 +1,15 @@
 # Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge [ suffix=tar.gz ]
+require sourceforge [ suffix=tar.gz ] easy-multibuild
+
 SUMMARY="C++ port of the famous JUnit framework for unit testing"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="doc"
+MYOPTIONS="doc
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
