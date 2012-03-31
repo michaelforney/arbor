@@ -1,0 +1,30 @@
+From 314566a3e58916024a89998dc03275f0acfa9bcf Mon Sep 17 00:00:00 2001
+From: "Wulf C. Krueger" <philantrop@exherbo.org>
+Date: Sat, 31 Mar 2012 22:52:10 +0200
+Subject: [PATCH] Fix libelf includes.
+Upstream: No, other distros install the headers to /usr/include directly.
+
+Our libelf installs its headers to /usr/include/libelf (as per upstreams's
+default). Thus, glib needs to include <libelf/libelf.h>, etc.
+---
+ gio/gresource-tool.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gio/gresource-tool.c b/gio/gresource-tool.c
+index db607fc..d66d969 100644
+--- a/gio/gresource-tool.c
++++ b/gio/gresource-tool.c
+@@ -31,8 +31,8 @@
+ #include <locale.h>
+ 
+ #ifdef HAVE_LIBELF
+-#include <libelf.h>
+-#include <gelf.h>
++#include <libelf/libelf.h>
++#include <libelf/gelf.h>
+ #include <sys/mman.h>
+ #endif
+ 
+-- 
+1.7.9.5
+
