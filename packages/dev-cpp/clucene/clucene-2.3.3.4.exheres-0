@@ -4,7 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 MY_PNV=${PN}-core-${PV}
-require cmake sourceforge [ suffix=tar.gz ]
+require sourceforge [ suffix=tar.gz ] cmake [ api=2 ]
 
 SUMMARY="High-performance, full-featured text search engine based off of lucene in C++"
 
@@ -23,5 +23,5 @@ DEPENDENCIES="
 # CMake conversion not complete
 RESTRICT="test"
 
-WORK="${WORKBASE}/${MY_PNV}"
+CMAKE_SOURCE="${WORKBASE}/${MY_PNV}"
 
