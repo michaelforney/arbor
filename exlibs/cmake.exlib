@@ -1,4 +1,4 @@
-# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Copyright 2008-2012 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'cmake-utils.eclass' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -9,6 +9,10 @@
 # builds and an implementation of the well-known option_enable and option_with
 # functions for CMake.
 
+# api=1 is for compatibility with old cmake.exlib code
+# use api=2 as much as possible
+myexparam api=1
+
 myexparam -b out_of_source=true
 myexparam cmake_minimum_version=2.6.4
 
@@ -16,27 +20,63 @@ DEPENDENCIES="
     build:
         sys-devel/cmake[>=$(exparam cmake_minimum_version)]"
 
-export_exlib_phases src_configure src_compile src_test src_install
-
-ECMAKE_BUILD_DIR="${WORKBASE}"/build
 DEFAULT_SRC_TEST_PARAMS+=( ARGS="--verbose" )
 
-# Used to enter the correct build dir and run a command in
-# cmake_src_{compile,test,install}.
-cmake_run() {
-    illegal_in_global_scope
+export_exlib_phases src_configure src_install
 
-    local ret
-    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        edo pushd "${ECMAKE_BUILD_DIR}" || return 1
-    fi
-    edo "${@}"
-    ret=$?
-    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        edo popd || return 1
-    fi
-    return ${ret}
-}
+case $(exparam api) in
+    1)
+        ECMAKE_BUILD_DIR="${WORKBASE}"/build
+
+        export_exlib_phases src_compile src_test
+
+        # Used to enter the correct build dir and run a command in
+        # cmake_src_{compile,test,install}.
+        cmake_run() {
+            illegal_in_global_scope
+
+            local ret
+            if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+                edo pushd "${ECMAKE_BUILD_DIR}" || return 1
+            fi
+            edo "${@}"
+            ret=$?
+            if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+                edo popd || return 1
+            fi
+            return ${ret}
+        }
+
+        # Function for building the package. Automatically detects the correct build
+        # dir.  All arguments including CMAKE_SRC_COMPILE_PARAMS are passed to emake.
+        cmake_src_compile() {
+            cmake_run emake "${CMAKE_SRC_COMPILE_PARAMS[@]}" "$@"
+        }
+
+        # Function for testing the package. Automatically detects the build dir. Uses
+        # default_src_test.
+        cmake_src_test() {
+            cmake_run default_src_test
+        }
+        ;;
+    2)
+        CMAKE_SOURCE=${CMAKE_SOURCE:-${WORK}}
+
+        if exparam -b out_of_source; then
+            WORK=${WORKBASE}/build
+
+            export_exlib_phases src_unpack
+
+            cmake_src_unpack() {
+                default
+                edo mkdir -p "${WORK}"
+            }
+        fi
+        ;;
+    *)
+        die "cmake api $(exparam api) is unsupported"
+        ;;
+esac
 
 # Similar to option_enable for cmake. A few examples:
 #   `cmake_enable Foo`     -> foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
@@ -96,11 +136,6 @@ cmake_with() {
 ecmake() {
     illegal_in_global_scope
 
-    if exparam -b out_of_source; then
-        edo mkdir -p "${ECMAKE_BUILD_DIR}" || return 1
-        edo pushd "${ECMAKE_BUILD_DIR}" || return 1
-    fi
-
     local cmakeargs
 
     # All default CMAKE_BUILD_TYPEs come with default CFLAGS, CXXFLAGS, which are *appended* to
@@ -117,14 +152,28 @@ ecmake() {
         -DCMAKE_CXX_COMPILER:PATH="${CXX}"
         -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX:=/usr}"
         -DLIB_INSTALL_DIR:PATH="${PREFIX}/${LIBDIR}"
-        -DLIB_SUFFIX:STRING=${LIBDIR/lib}
+        -DLIB_SUFFIX:STRING=${LIBDIR#lib}
     )
 
-    edo cmake "${cmakeargs[@]}" "$@" "${WORK}" || return 1
+    local cmake_api
+    exparam -v cmake_api api
+    case ${cmake_api} in
+        1)
+            if exparam -b out_of_source; then
+                edo mkdir -p "${ECMAKE_BUILD_DIR}" || return 1
+                edo pushd "${ECMAKE_BUILD_DIR}" || return 1
+            fi
 
-    if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
-        edo popd
-    fi
+            edo cmake "${cmakeargs[@]}" "$@" "${WORK}" || return 1
+
+            if [[ -d ${ECMAKE_BUILD_DIR} ]]; then
+                edo popd
+            fi
+            ;;
+        2)
+            edo cmake "${cmakeargs[@]}" "$@" "${CMAKE_SOURCE:-${WORK}}" || return 1
+            ;;
+    esac
 }
 
 # Function for configuring a package. Disable the out_of_source exparam to make this
@@ -154,24 +203,26 @@ cmake_src_configure() {
         done )
 }
 
-# Function for building the package. Automatically detects the correct build
-# dir.  All arguments including CMAKE_SRC_COMPILE_PARAMS are passed to emake.
-cmake_src_compile() {
-    cmake_run emake "${CMAKE_SRC_COMPILE_PARAMS[@]}" "$@"
-}
-
-# Function for testing the package. Automatically detects the build dir. Uses
-# default_src_test.
-cmake_src_test() {
-    cmake_run default_src_test
-}
-
 # Function for installing the package. Automatically detects the build dir.
 # Uses default_src_install.
 cmake_src_install() {
-    cmake_run default_src_install
-    # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
-    [[ -d ${ECMAKE_BUILD_DIR} ]] && emagicdocs
+    local cmake_api
+    exparam -v cmake_api api
+    case ${cmake_api} in
+        1)
+            cmake_run default_src_install
+            # We run default_src_install from ${ECMAKE_BUILD_DIR}, so it doesn't look for docs in ${WORK}.
+            [[ -d ${ECMAKE_BUILD_DIR} ]] && emagicdocs
+            ;;
+        2)
+            default
+            if [[ -d ${CMAKE_SOURCE} && ${WORK} != ${CMAKE_SOURCE} ]]; then
+                edo pushd "${CMAKE_SOURCE}"
+                emagicdocs
+                edo popd
+            fi
+            ;;
+    esac
 }
 
 ### Functions below this are for internal use only.
