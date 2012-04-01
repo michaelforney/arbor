@@ -1,7 +1,7 @@
 # Copyright 2009-2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cmake sourceforge [ suffix=tar.gz ]
+require sourceforge [ suffix=tar.gz ] cmake [ api=2 ]
 
 export_exlib_phases src_prepare src_test
 
@@ -59,6 +59,8 @@ CMAKE_SRC_CONFIGURE_OPTION_WANTS=(
 )
 
 podofo_src_prepare() {
+    edo cd "${CMAKE_SOURCE}"
+
     default
 
     # For the tests to succeed a path must be changed.
@@ -69,7 +71,7 @@ podofo_src_test() {
     # The commented tests fail due to bogus assumptions (e. g. specific fonts
     # being installed, all fonts being supported, etc.) or problems with the tests
     # themselves, not podofo. (E. g. some tests are actually *interactive*.)
-    edo pushd "${WORKBASE}"/build/test
+    edo cd test
     edo ./ContentParser/ContentParser CreationTest/resources/Illust.pdf
     edo ./CreationTest/CreationTest ./lala.pdf
     edo ./DeviceTest/DeviceTest
@@ -83,6 +85,5 @@ podofo_src_test() {
     edo ./VariantTest/VariantTest
     edo ./WatermarkTest/WatermarkTest ./CreationTest/resources/Illust.pdf lala.pdf
 #    edo ./unit/podofo-test
-    edo popd
 }
 
