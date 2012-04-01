@@ -46,7 +46,6 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     btrfs-select-super
     btrfs-zero-log
     btrfstune
-    convert
 )
 
 DEFAULT_SRC_INSTALL_PARAMS=(
@@ -83,10 +82,5 @@ btrfs-progs_src_install() {
     dosbin btrfs-select-super
     dosbin btrfs-zero-log
     dosbin btrfstune
-
-    # Prevent collisions with other tools.
-    for filename in calc-size find-root restore ; do
-        edo mv "${IMAGE}"/usr/bin/${filename} "${IMAGE}"/usr/bin/btrfs-${filename}
-    done
 }
 
