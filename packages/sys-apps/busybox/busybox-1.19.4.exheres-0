@@ -21,7 +21,10 @@ DEPENDENCIES="
         app-arch/zip
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-fix-du-k-works-test-du-may-be-84k-on-some-fs-es.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/0001-fix-du-k-works-test-du-may-be-84k-on-some-fs-es.patch
+    "${FILES}"/linux-headers-fix.patch
+)
 
 bb_make() {
     local make_options=(
