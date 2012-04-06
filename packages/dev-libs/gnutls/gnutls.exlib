@@ -30,6 +30,13 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
 "
 
+if ever at_least 3.0.18; then
+    DEPENDENCIES+="
+        build:
+            sys-devel/automake:1.11[>=1.11.4]
+    "
+fi
+
 if ever at_least 3.0.8; then
     DEPENDENCIES+="
         build:
@@ -83,6 +90,9 @@ gnutls_src_prepare() {
         edo sed -e '/TESTS =/s:testdsa::' -i tests/dsa/Makefile.am
         edo sed -e '/TESTS =/s:testcerts::' -i tests/openpgp-certs/Makefile.am
     fi
+
+    # Disable a test that fails to return
+    edo sed -i -e s/mini-loss-time// tests/Makefile.am
 
     # FIXME: don't run eautoreconf since it breaks 2.12.14
     if ever at_least 3.0.0; then
