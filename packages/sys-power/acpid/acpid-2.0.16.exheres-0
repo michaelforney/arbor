@@ -1,4 +1,5 @@
 # Copyright 2008, 2009 Mike Kelly <pioto@exherbo.org>
+# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
 # Distributed under the terms of the GPL v2
 # Based in part upon 'acpid-1.0.6-r1.ebuild', which is:
 #     Copyright 1999-2008 Gentoo Foundation
@@ -13,7 +14,7 @@ netlink. When an ACPI event is received from one of these sources, acpid
 will examine a list of rules, and execute the rules that match the event.
 "
 HOMEPAGE="http://tedfelix.com/linux/${PN}-netlink.html"
-DOWNLOADS="http://tedfelix.com/linux/${PNV}.tar.gz"
+DOWNLOADS="http://tedfelix.com/linux/${PNV}.tar.xz"
 
 REMOTE_IDS="freshmeat:{PN}"
 
@@ -26,18 +27,22 @@ DEPENDENCIES=""
 BUGS_TO="pioto@exherbo.org"
 
 DEFAULT_SRC_INSTALL_PARAMS=( DOCDIR="/usr/share/doc/${PNVR}" )
-DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( kacpimon )
 
-src_compile() {
-    default
-
-    emake -C kacpimon
+src_prepare() {
+    # /var/run -> /run
+    # /var/lock -> /run/lock
+    edo sed -i -e "s:var/run:run:g" \
+               -e "s:var/lock:run/lock:g" \
+               acpid.8 acpid.h acpi_listen.8 \
+               samples/battery/battery.sh \
+               samples/powerbtn/powerbtn.sh \
+               samples/powerbtn/powerbtn.sh.old
 }
 
 src_install() {
     default
 
-    dobin kacpimon/kacpimon
+    dodoc -r samples
 
     if option baselayout ; then
         newinitd "${FILES}"/acpid.init.d-0 acpid
