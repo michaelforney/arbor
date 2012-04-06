@@ -51,9 +51,11 @@ DEPENDENCIES="
             x11-libs/libX11[multibuild_c:*(-)?]
         )
     suggestion:
-        sys-auth/ConsoleKit [[
-            description = [ required for access to paths controlled via at_console ]
-        ]]
+        !systemd? (
+            sys-auth/ConsoleKit [[
+                description = [ required for access to paths controlled via at_console ]
+            ]]
+        )
 "
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
