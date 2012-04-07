@@ -31,14 +31,12 @@ MYOPTIONS="
 DEPENDENCIES="
     build+run:
         sys-libs/pam
-        group/cron
-        user/cron
-    run:
-        sys-apps/debianutils
+        sys-process/cronbase
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     SPOOL_DIR="/var/spool/cron/crontabs"
+    ANACRON_SPOOL_DIR="/var/spool/anacron"
     --with-daemon_username=cron
     --with-daemon_groupname=cron
     --with-inotify
@@ -51,20 +49,22 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( anacron )
 cronie_src_install() {
     default
 
-    do_cron_dirs
     do_cron_exes
 
     if option anacron ; then
-        insinto /etc/cron.d
+        insinto /etc/cron.hourly
         insopts -m0755
-        doins contrib/dailyjobs
+        doins contrib/0anacron
+
+        insinto /etc
+        insopts -m0644
+        doins contrib/anacrontab
+
+        diropts -m 0750 -o root -g cron
+        keepdir /var/spool/anacron
+
         dodoc -r contrib
     fi
-
-    # /etc stuff
-    insopts -m0644
-    insinto /etc
-    newins "${FILES}"/crontab-4.1 crontab
 
     # Install the pam file
     newpamd "${FILES}"/pamd.compatible crond
@@ -85,7 +85,5 @@ cronie_src_install() {
 
 cronie_pkg_postinst() {
     alternatives_pkg_postinst
-
-    nonfatal edo chmod 0644 /etc/crontab || eerror "chmod 0644 /etc/crontab failed"
 }
 

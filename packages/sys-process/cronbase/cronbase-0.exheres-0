@@ -1,0 +1,47 @@
+# Copyright 2012 Steven Siloti <ssiloti@gmail.com> 
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Base directories and common configuration for cron daemons"
+HOMEPAGE=""
+DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/vixie-cron-4.1-exherbo-1.0.tar.bz2"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        group/cron
+        user/cron
+    run:
+        sys-apps/debianutils
+"
+
+BUGS_TO="ssiloti@gmail.com"
+
+WORK=${WORKBASE}
+
+src_install() {
+    newsbin "${WORKBASE}"/vixie-cron-4.1-run-crons run-crons
+
+    keepdir /etc/cron.d
+
+    diropts -m 0750
+    keepdir /etc/cron.{hourly,daily,weekly,monthly}
+    diropts -m 0750 -o root -g cron
+    keepdir /var/spool/cron
+    diropts -m 0750
+    keepdir /var/spool/cron/lastrun
+    diropts -m 1730 -o root -g cron
+    keepdir /var/spool/cron/crontabs
+
+    insopts -m0644
+    insinto /etc
+    newins "${FILES}"/crontab crontab
+}
+
+pkg_postinst() {
+    nonfatal edo chmod 0644 /etc/crontab || eerror "chmod 0644 /etc/crontab failed"
+}
+
