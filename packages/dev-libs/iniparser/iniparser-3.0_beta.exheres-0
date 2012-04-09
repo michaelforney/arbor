@@ -31,7 +31,7 @@ src_prepare() {
             -e "s:^\(CFLAGS .*=\) -O2:\1 ${CFLAGS}:" \
             -e "s:^\(AR\t .*=\) .*:\1 ${AR}:" \
             -e "s:^\(LDFLAGS = .*\):\1 ${LDFLAGS}:" \
-            -e "s:/usr/lib:/usr/${LIBDIR}:g" \
+            -e "s:/usr/lib\b:/usr/${LIBDIR}:g" \
             -i Makefile test/Makefile
 }
 
