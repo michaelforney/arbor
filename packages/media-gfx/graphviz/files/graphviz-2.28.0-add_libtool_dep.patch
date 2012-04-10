@@ -1,0 +1,24 @@
+Source: upstream (backported)
+Reason: missing libtool dependencies
+Upstream: yes
+
+changeset:   8806:5aa2be2fe17a
+user:        John Ellson <ellson@research.att.com>
+date:        Tue Mar 13 06:18:12 2012 -0400
+files:       configure.ac
+description:
+add AC_PROG_LIBTOOL to configure.ac to see if it helps Debian Lenny problem
+
+
+diff -r 1126cecf6b01 -r 5aa2be2fe17a configure.ac
+--- a/configure.ac	Mon Mar 12 10:36:43 2012 -0400
++++ b/configure.ac	Tue Mar 13 06:18:12 2012 -0400
+@@ -261,6 +261,7 @@
+ AC_PROG_AWK
+ AC_PROG_INSTALL
+ AC_PROG_LN_S
++AC_PROG_LIBTOOL
+ AC_CHECK_PROG(SED,sed,sed,false)
+ AC_CHECK_PROG(GREP,grep,grep,false)
+ AC_CHECK_PROG(SORT,sort,sort,false)
+ AC_CHECK_PROG(GROFF,groff,groff,false)

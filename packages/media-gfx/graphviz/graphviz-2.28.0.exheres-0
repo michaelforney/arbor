@@ -79,33 +79,23 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     # Requires extra packages (gts, smyrna, etc.), and doesn't seem to work yet (cgraph)
     --without-{smyrna,glade,gtkglext,cgraph,gts}
 )
+
 TODO_DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     perl python ruby
 )
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/graphviz-2.28.0-add_libtool_dep.patch
+    "${FILES}"/graphviz-2.28.0-automake_incompatibility.patch
+    "${FILES}"/graphviz-2.28.0-fix_gnu_extensions_warning.patch
+)
+
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'svg rsvg'
     'gtk x'
     'gtk pangocairo'
     'gtk'
 )
-
-src_prepare() {
-    default
-
-    edo rm -rf libltdl
-    edo sed -e '/LT_CONFIG_LTDL_DIR(\[libltdl\])/d' -i configure.ac
-
-    # Update bundled copy of libtool with the system one:
-    for atrocious_posix_shellscript in /usr/share/libtool/{config/,}install-sh; do
-        if [[ -f ${atrocious_posix_shellscript} ]]; then
-            echo "Updating ${WORK}/config/install-sh with ${atrocious_posix_shellscript}"
-            edo cp ${atrocious_posix_shellscript} config
-            continue
-        fi
-    done
-
-    eautoreconf
-}
 
 src_install() {
     default

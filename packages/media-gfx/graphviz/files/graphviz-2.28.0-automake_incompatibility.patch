@@ -1,0 +1,46 @@
+Source: upstream
+Reason: auomake 1.11.2 incompatibility
+Upstream: yes
+
+changeset:   8545:cb4b487423c4
+user:        John Ellson <ellson@research.att.com>
+date:        Mon Jan 02 09:56:13 2012 -0500
+files:       plugin/ming/Makefile.am tclpkg/gv/Makefile.am
+description:
+fix for 0002179 - automake 1.11.2 incompatibility
+
+
+diff -r b000ec4de336 -r cb4b487423c4 plugin/ming/Makefile.am
+--- a/plugin/ming/Makefile.am	Wed Dec 28 14:46:46 2011 -0500
++++ b/plugin/ming/Makefile.am	Mon Jan 02 09:56:13 2012 -0500
+@@ -1,6 +1,8 @@
+ # $Id$ $Revision$
+ ## Process this file with automake to produce Makefile.in
+ 
++pkgfontdir = ${pkgdatadir}/font
++
+ AM_CPPFLAGS = \
+ 	-I$(top_srcdir) \
+ 	-I$(top_srcdir)/lib/common \
+@@ -17,7 +19,7 @@
+ else
+ pkglib_LTLIBRARIES = libgvplugin_ming.la
+ endif
+-pkglib_DATA = Bitstream_Vera_Sans.fdb  Bitstream_Vera_Serif.fdb
++pkgfont_DATA = Bitstream_Vera_Sans.fdb  Bitstream_Vera_Serif.fdb
+ endif
+ 
+ libgvplugin_ming_C_la_SOURCES = \
+diff -r b000ec4de336 -r cb4b487423c4 tclpkg/gv/Makefile.am
+--- a/tclpkg/gv/Makefile.am	Wed Dec 28 14:46:46 2011 -0500
++++ b/tclpkg/gv/Makefile.am	Mon Jan 02 09:56:13 2012 -0500
+@@ -258,7 +258,7 @@
+ gv_tcl.cpp: gv.i
+ 	$(SWIG) -c++ -tcl -namespace -o gv_tcl.cpp $(srcdir)/gv.i
+ 
+-pkginclude_DATA = gv.i gv.cpp
++pkginclude_HEADERS = gv.i gv.cpp
+ pkglib_LTLIBRARIES = 
+ man_MANS =
+ pdf_DATA = 
+

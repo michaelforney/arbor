@@ -1,0 +1,29 @@
+Source: upstream
+Reason: fix warnings about gnu extensions
+Upstream: yes
+
+changeset:   7448:07f59b4cdcf8
+user:        ellson
+date:        Fri May 20 21:08:04 2011 +0000
+files:       tclpkg/gv/Makefile.am
+description:
+use backtick syntax to avoid complaints about GNU extensions
+
+
+diff -r 2f94560f415f -r 07f59b4cdcf8 tclpkg/gv/Makefile.am
+--- a/tclpkg/gv/Makefile.am	Fri May 20 15:06:43 2011 +0000
++++ b/tclpkg/gv/Makefile.am	Fri May 20 21:08:04 2011 +0000
+@@ -133,9 +133,9 @@
+ 
+ pkgperldir = $(pkglibdir)/perl
+ PERL        ?= perl
+-PERL_CC      = $(shell $(PERL) -MExtUtils::Embed -e ccopts)
+-PERL_LD      = $(shell $(PERL) -MExtUtils::Embed -e ldopts)
+-VENDOR_ARCH  = $(shell $(PERL) -MConfig -e 'print $$Config{installvendorarch};')
++PERL_CC      = `$(PERL) -MExtUtils::Embed -e ccopts`
++PERL_LD      = `$(PERL) -MExtUtils::Embed -e ldopts`
++VENDOR_ARCH  = `$(PERL) -MConfig -e 'print $$Config{installvendorarch};'`
+ PERL_data = gv.pm
+ nodist_libgv_perl_la_SOURCES = gv_perl.cpp $(PERL_data)
+ libgv_perl_la_SOURCES = $(BASESOURCES) gv_dummy_init.c
+
