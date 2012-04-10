@@ -6,7 +6,9 @@ Description=Network Time Service
 After=syslog.target
 
 [Service]
-ExecStart=/usr/sbin/ntpd -n -g -p /var/run/ntpd.pid
+Type=forking
+ExecStart=/usr/sbin/ntpd -u ntp:ntp -g -p /run/ntpd.pid
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
