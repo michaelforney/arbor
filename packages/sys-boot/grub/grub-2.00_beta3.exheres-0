@@ -1,0 +1,105 @@
+# Copyright (c) 2007 Bryan Østergaard <bryan.ostergaard@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require bash-completion
+require gnu [ alpha=true pv=${PV/_/\~} suffix=xz ]
+require flag-o-matic
+
+SUMMARY="GRUB (Grand Unified Boot) bootloader"
+
+UPSTREAM_DOCUMENTATION="
+    http://grub.enbug.org/             [[ description = [ GNU Grub Wiki ] ]]
+    http://grub.enbug.org/TestingOnX86 [[ description = [ Installing Grub 2 on x86 ] ]]
+"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    device-mapper [[ description = [ Ability to detect and use device-mapper devices ] ]]
+    efi           [[ description = [ Build for EFI platform ] ]]
+    grub-mount    [[ description = [ FUSE driver for filesystems that GRUB understands ] ]]
+    mkfont        [[ description = [ Build grub-mkfont which can create GRUB font files ] ]]
+"
+
+# TODO: needs qemu-system-i386
+RESTRICT="test"
+
+DEPENDENCIES="
+    build:
+        sys-apps/help2man [[ note = [ man pages won't get created otherwise resulting in empty man dirs ] ]]
+        sys-devel/bison
+        sys-devel/flex[>=2.5.35]
+        sys-devel/make
+        device-mapper? ( sys-fs/lvm2 )
+        grub-mount? ( sys-fs/fuse )
+        mkfont? (
+            fonts/unifont
+            media-libs/freetype:2
+        )
+    build+run:
+        app-arch/xz
+        sys-devel/gettext [[ note = [ required for grub-mkconfig, grep gettext in /etc/grub.d ] ]]
+        sys-fs/udev
+        !sys-boot/grub-static [[ description = [ /sbin/grub-install collides ] resolution = manual ]]
+    suggestion:
+        sys-boot/os-prober [[
+            description = [ Ability to add other OSs automatically to grub.cfg via grub-mkconf ]
+        ]]
+"
+
+pkg_setup() {
+    # grub2 should be compiled with -Os, other optimizations may result in oversized core images
+    replace-flags -O* -Os
+}
+
+src_configure() {
+    myconf=(
+        "CPP=${CC} -E"
+        --prefix=/
+        --with-bootdir=/boot
+        --with-grubdir=grub
+        --enable-cache-stats
+
+        # TODO: for now disable emulation utils
+        --disable-efiemu
+        --disable-grub-emu-usb
+        --disable-grub-emu-sdl
+        --disable-grub-emu-pci
+        --disable-mm-debug
+
+        --disable-libzfs
+
+        --disable-werror
+    )
+
+    option efi && myconf+=( '--with-platform=efi' )
+
+    econf "${myconf[@]}" \
+        $( option_enable device-mapper ) \
+        $( option_enable grub-mount ) \
+        $( option_enable mkfont grub-mkfont )
+}
+
+src_install() {
+    default
+
+    dodoc "${FILES}"/grub.cfg.example
+
+    if ! option mkfont ; then
+        edo rmdir "${IMAGE}"/usr/share/grub/themes/{starfield,}
+    fi
+
+    edo rm "${IMAGE%/}"/etc/bash_completion.d/${PN}
+    edo rmdir "${IMAGE%/}"/etc/bash_completion.d/
+    dobashcompletion "${WORK%/}"/util/bash-completion.d/${PN}
+}
+
+pkg_postinst() {
+    elog "Use grub-install /dev/your-device e.g. sda to install grub onto the"
+    elog "device you wish to boot from."
+    elog "A sample grub.cfg has been installed into /usr/share/doc/${PNVR}."
+    elog "Copy this to /boot/grub and edit it to fit your configuration."
+    elog "Alternatively, you can use the provided grub-mkconfig utility."
+}
+
