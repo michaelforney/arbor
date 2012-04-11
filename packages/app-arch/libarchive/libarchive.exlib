@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require googlecode [ suffix=tar.gz ]
+require github [ suffix=tar.gz ]
 
 SUMMARY="C library for reading and writing tar, cpio, zip, ISO, and other archive formats"
 DESCRIPTION="
@@ -19,6 +19,7 @@ mtree (read and write)
 shar (write only)
 ar (read and write, including BSD and GNU/SysV variants)
 "
+HOMEPAGE="http://${PN}.github.com"
 
 LICENCES="BSD-3"
 SLOT="0"
@@ -30,9 +31,9 @@ MYOPTIONS="acl nettle openssl xattr
 
 DEPENDENCIES="
     build+run:
-        app-arch/xz
-        app-arch/gzip
         app-arch/bzip2
+        app-arch/gzip
+        app-arch/xz
         dev-libs/libxml2:=
         acl? ( sys-apps/acl )
         nettle? ( dev-libs/nettle )
