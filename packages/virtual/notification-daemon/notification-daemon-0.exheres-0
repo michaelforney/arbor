@@ -10,15 +10,16 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
+# keep those sorted by "obesity", so it doesn't pull too much cruft on new installs
 DEPENDENCIES="
     || (
-        gnome-desktop/gnome-shell
-        kde/kde-runtime [[ description = [ with knotify ] ]]
-        kde/kdebase-runtime [[ description = [ with knotify ] ]]
         x11-apps/notification-daemon
         x11-apps/notify-osd
         x11-wm/awesome[>=3.1] [[ description = [ with the naughty library ] ]]
         xfce-extra/notification-daemon-xfce
+        gnome-desktop/gnome-shell
+        kde/kde-runtime [[ description = [ with knotify ] ]]
+        kde/kdebase-runtime [[ description = [ with knotify ] ]]
     )
 "
 
