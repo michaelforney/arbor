@@ -80,7 +80,9 @@ ntp_src_install() {
 
     install_systemd_files
     # As of ntp-4.2.4_p7-RC1 ntp will only drop privileges if linuxcaps is enabled
-    option caps || edo sed -i -e 's/ -u ntp:ntp//' "${IMAGE}"/"${SYSTEMDSYSTEMUNITDIR}"/ntpd.service
+    if option systemd && option !caps ; then
+        edo sed -i -e 's/ -u ntp:ntp//' "${IMAGE}"/"${SYSTEMDSYSTEMUNITDIR}"/ntpd.service
+    fi
 
     if option baselayout ; then
         newinitd "${FILES}"/ntpd.initd ntpd
