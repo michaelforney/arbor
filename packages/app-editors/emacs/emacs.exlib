@@ -118,6 +118,7 @@ emacs_src_prepare() {
     edo sed -i -e 's/@GZIP_PROG@//' {.,leim}/Makefile.in
     default
 
+    # Create a copy of the clean source (it will be installed in src_install)
     edo tar cf source.tar src/
 }
 
@@ -139,6 +140,8 @@ EOF
 
     elisp-install-site-file
 
+    # Install a copy of the clean source to `source-directory`. The builtin help system of emacs
+    # requires it in order to fully function.
     local emacs_source_root=/usr/src/emacs
     dodir ${emacs_source_root}
     edo tar xf source.tar -C "${IMAGE}"${emacs_source_root}
