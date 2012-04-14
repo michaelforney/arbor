@@ -51,6 +51,8 @@ DEPENDENCIES+="
                 app-arch/zip )
     build+run:
         dev-libs/gmp[>=4.1]
+        dev-libs/libelf [[ note = [ Enable link-time optimisation ] ]]
+        dev-libs/mpc[>=0.8.1]
         dev-libs/mpfr[>=2.3]"
 
 # Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
@@ -67,16 +69,6 @@ if ever at_least 4.6.0; then
     DEPENDENCIES+="
         build+run:
             graphite? ( dev-libs/ppl:=[>=0.11] )"
-fi
-
-if ever at_least 4.5.0 ; then
-    DEPENDENCIES+="
-        build+run:
-            dev-libs/libelf         [[ note = [ Enable link-time optimisation ] ]]
-            dev-libs/mpc[>=0.8.1]"
-fi
-
-if ever at_least 4.6; then
     MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
 fi
 
@@ -121,18 +113,18 @@ src_configure() {
     econf \
         ${multilib} \
         --libdir=/usr/${LIBDIR} \
-        $(ever at_least 4.5.0 || echo --hates=docdir) \
+        --hates=docdir \
         --enable-clocale=gnu \
         --enable-languages="${LANGS}" \
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \
         --program-suffix=-${SLOT} \
+        --with-libelf \
         --with-pkgversion="Exherbo ${PNVR}" \
         --with-system-zlib \
         $(option_with graphite cloog) \
         $(option_with graphite ppl) \
         $(ever at_least 4.6 && option_enable graphite cloog-backend ppl-legacy) \
-        $(ever at_least 4.5.0 && echo --with-libelf) \
         $(option_enable openmp libgomp) \
         $(option_enable propolice libssp)
 }
