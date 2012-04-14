@@ -1,6 +1,8 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
+require easy-multibuild
+
 SUMMARY="ELF object file access library"
 DESCRIPTION="
 libelf lets you read, modify or create ELF files in an architecture-independent
@@ -17,11 +19,11 @@ DOWNLOADS="http://www.mr511.de/software/${PNV}.tar.gz"
 LICENCES="|| ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        sys-devel/gettext[multibuild_c:*(-)?]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
