@@ -26,7 +26,12 @@ do we support it.
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
 BUGS_TO="philantrop@exherbo.org"
 
-LICENCES="GPL-2"
+if ever is_scm ; then
+    LICENCES="LGPL-2.1"
+else
+    LICENCES="GPL-2"
+fi
+
 SLOT="0"
 MYOPTIONS="
     acl
