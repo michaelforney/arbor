@@ -1,0 +1,51 @@
+# Copyright 2007-2008 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require glibc [ source_uri="mirror://gnu/${PN}/${PNV}.tar.xz" \
+                ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.xz" \
+                minimum_kernel_version="2.6.34" ]
+
+# FIXME: ~ia64 have not been tested
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+
+DEPENDENCIES="
+    build:
+        app-arch/xz
+"
+
+src_prepare() {
+    edo cd "${ECONF_SOURCE}"
+    expatch -p0 "${FILES}"/${PN}-2.11.2-i686.patch
+
+    # fail with sydbox
+    edo sed \
+        -e 's:tst-exec3 ::' \
+        -e 's:tst-exec4 ::' -i "${WORKBASE}"/${PNV}/nptl/Makefile
+    # timing problems
+    edo sed \
+        -e '77s:tst-dir ::' \
+        -e 's:tst-waitid ::' -i "${WORKBASE}"/${PNV}/posix/Makefile
+
+    glibc_src_prepare
+}
+
+src_test_expensive() {
+    local multibuild_c_target
+
+    esandbox allow_net "unix:/tmp/tst-cancel4-socket-*-*"
+
+    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
+        multibuild_switch_build_target C ${multibuild_c_target}
+        edo pushd "${WORK}/${multibuild_c_target}"
+
+        local GCONV_PATH="${WORK}/iconvdata LC_ALL=C ${WORK}/elf/ld.so.1 --library-path
+${WORK}/:${WORK}/math:${WORK}/elf:${WORK}/dlfcn:${WORK}/nss:${WORK}/nis:${WORK}/rt:${WORK}/resolv:${WORK}/crypt:${WORK}/nptl:${WORK}/dfp"
+
+        TIMEOUTFACTOR=20 emake -j1 check
+
+        edo popd
+    done
+
+    esandbox disallow_net "unix:/tmp/tst-cancel4-socket-*-*"
+}
+
