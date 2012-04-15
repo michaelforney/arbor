@@ -71,7 +71,6 @@ DEPENDENCIES="
         eap-fast? (
             openssl? ( dev-libs/openssl[>=0.9.9] )
         )
-        gnutls?  ( dev-libs/gnutls[<3.0.0] )
         nl80211? ( net-libs/libnl:1 )
         pcap?    (
             dev-libs/libdnet
@@ -89,6 +88,16 @@ DEPENDENCIES="
             !openssl? ( dev-libs/libtommath )
         )
 "
+
+if ever at_least 1.0_rc2; then
+    DEPENDENCIES+="
+        gnutls?  ( dev-libs/gnutls )
+    "
+else
+    DEPENDENCIES+="
+        gnutls?  ( dev-libs/gnutls[<3.0.0] )
+    "
+fi
 
 if ${CHECKOUT}; then
 DEPENDENCIES+="
