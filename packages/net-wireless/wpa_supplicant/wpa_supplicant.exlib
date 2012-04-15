@@ -2,6 +2,9 @@
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+myexparam -b checkout=false
+exparam -v CHECKOUT checkout
+
 require qmake4 [ no_qt_dependency=true ] systemd-service
 
 SUMMARY="Linux WPA/WPA2/IEEE 802.1X Supplicant"
@@ -20,7 +23,7 @@ wpa_supplicant supports separate frontend programs and a text-based frontend
 "
 HOMEPAGE="http://hostap.epitest.fi/${PN}/"
 
-if ! ever is_scm ; then
+if ! ${CHECKOUT}; then
     DOWNLOADS="http://hostap.epitest.fi/releases/${PNV}.tar.gz"
 fi
 
@@ -87,7 +90,7 @@ DEPENDENCIES="
         )
 "
 
-if ever is_scm ; then
+if ${CHECKOUT}; then
 DEPENDENCIES+="
     build:
         app-text/docbook-sgml-dtd:4.1
@@ -137,7 +140,7 @@ src_prepare() {
     edo sed -i -e 's:/usr/local/sbin/:/usr/bin/:g' Makefile
 
     # FILES is a reserved exheres-0 variable
-    ever is_scm && edo sed -i -e 's:FILES:DOC_FILES:g' doc/docbook/Makefile
+    ${CHECKOUT} && edo sed -i -e 's:FILES:DOC_FILES:g' doc/docbook/Makefile
 }
 
 src_configure() {
@@ -290,7 +293,7 @@ src_configure() {
 src_compile() {
     default
     option qt4 && emake -C wpa_gui-qt4
-    ever is_scm && emake -C doc/docbook man
+    ${CHECKOUT} && emake -C doc/docbook man
 }
 
 #src_test() {
