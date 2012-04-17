@@ -231,6 +231,26 @@ scm_do_set_actual_vars() {
     scm_set_var ACTUAL_REVISION "${rev}"
 }
 
+scm_multiunpack() {
+    local $(scm_var_name UNPACK_TO)=${1}
+
+    local dir=${1}
+    if [[ -d ${dir} ]]; then
+        rmdir "${dir}" || die "rmdir failed"
+    else
+        mkdir -p "${dir%/*}" || die mkdir "failed"
+    fi
+
+    scm_call unpack
+    rm -f "${dir}/.scm.exlib.timestamp"{,.*}
+}
+
+if [[ -z $(declare -F scm_multiunpack_hook) ]]; then
+    scm_multiunpack_hook() {
+        scm_multiunpack "${1}"
+    }
+fi
+
 scm_unpack_one() {
     scm_call resolve_externals
 
@@ -242,15 +262,8 @@ scm_unpack_one() {
         die "$(scm_get_var CHECKOUT_TO) does not exist"
     fi
 
-    local dir=$(scm_get_var UNPACK_TO)
-    if [[ -d ${dir} ]]; then
-        rmdir "${dir}" || die "rmdir failed"
-    else
-        mkdir -p "${dir%/*}" || die mkdir "failed"
-    fi
+    scm_multiunpack_hook "$(scm_get_var UNPACK_TO)"
 
-    scm_call unpack
-    rm -f "${dir}/.scm.exlib.timestamp"{,.*}
     scm_call set_actual_vars
     scm_scmrevision_one
 }
