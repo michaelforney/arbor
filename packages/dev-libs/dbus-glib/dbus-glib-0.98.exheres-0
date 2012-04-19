@@ -47,10 +47,7 @@ src_install() {
     if option bash-completion ; then
         edo dobashcompletion "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh dbus
         edo rm "${IMAGE}"/etc/bash_completion.d/dbus-bash-completion.sh
-    else
-        edo rmdir "${IMAGE}"/usr/libexec
+        edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
     fi
-
-    edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
 }
 
