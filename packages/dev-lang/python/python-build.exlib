@@ -185,6 +185,7 @@ python-build_install_one_multibuild() {
     local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
     edo rm "${IMAGE}/usr/bin/python${SLOT}"
     edo rm "${IMAGE}/usr/bin/python${SLOT}-config"
+    edo rm "${IMAGE}/usr/${LIBDIR}/pkgconfig/python${PYTHON_MAJOR}.pc"
 
     # pyconfig.h contains PLATFORMS specific bits
     local prefix='/usr'
@@ -205,6 +206,8 @@ python-build_install_one_multibuild() {
         into "${prefix}"
         newbin "${WORKBASE}"/"${MULTIBUILD_CLASS}"/"${MULTIBUILD_TARGET}"/"${MY_PNV}"/"${PN}"-config.py "${PN}${PYTHON_MAJOR}"-config
     fi
+
+    alternatives+=( /usr/${LIBDIR}/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc )
 }
 
 install_one_multibuild() {
