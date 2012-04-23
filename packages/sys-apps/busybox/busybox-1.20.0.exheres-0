@@ -1,0 +1,90 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2009 Daniel Mierswa
+# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="BusyBox provides tiny replacements for many common UNIX utilities"
+HOMEPAGE="http://busybox.net"
+DOWNLOADS="${HOMEPAGE}/downloads/${PNV}.tar.bz2"
+
+REMOTE_IDS="freshmeat:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-kernel/linux-headers[<3.0|>=3.0-r1]
+    test:
+        app-arch/zip
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/0001-fix-du-k-works-test-du-may-be-84k-on-some-fs-es.patch
+)
+
+bb_make() {
+    local make_options=(
+        AR="${AR}"
+        NM="${NM}"
+
+        CPP="${CC} -E"
+        CC="${CC}" CFLAGS="${CFLAGS}" HOSTCC="${CC}" HOSTCFLAGS="${CFLAGS}"
+        CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" HOSTCXX="${CXX}" HOSTCXXFLAGS="${CXXFLAGS}"
+        LD="${CC} -nostdlib" LDFLAGS="${LDFLAGS}" HOSTLD="${CC}" HOSTLDFLAGS="${LDFLAGS}"
+
+        V=1
+    )
+    emake "${make_options[@]}" "$@"
+}
+
+src_prepare() {
+    default
+
+    # Make mdev send 'not found' to kernel: https://bugs.busybox.net/show_bug.cgi?id=5048
+    edo sed -i -e 's/firmware_fd = xopen/firmware_fd = open_or_warn/' util-linux/mdev.c
+
+    # nuke tests that require pid 1 to be named 'init'
+    edo sed -i -e '/^testing.*init/ d' testsuite/pidof.tests
+}
+
+src_configure() {
+    bb_make defconfig
+}
+
+src_compile() {
+    # Build dynamically linked executable and preserve it
+    bb_make busybox_unstripped
+    edo mv busybox_unstripped{,.dynamic}
+
+    # Build statically linked executable and preserve it
+    bb_make busybox_unstripped CONFIG_STATIC=y
+    edo mv busybox_unstripped{,.static}
+}
+
+src_test() {
+    local test_options=(
+        SKIP_KNOWN_BUGS=y
+        SKIP_INTERNET_TESTS=y
+    )
+
+    # test dynamic version
+    edo cp busybox_unstripped.dynamic busybox
+    bb_make check "${test_options[@]}"
+
+    # test static version
+    edo cp busybox_unstripped.static busybox
+    bb_make check "${test_options[@]}"
+}
+
+src_install() {
+    into /
+    newbin busybox_unstripped.dynamic busybox
+    newbin busybox_unstripped.static busybox-static
+
+    emagicdocs
+    dodoc -r examples
+}
+
