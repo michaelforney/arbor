@@ -9,15 +9,20 @@ MY_PNV="gc-${PV/_/}"
 WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="The Boehm-Demers-Weiser conservative garbage collector"
-HOMEPAGE="http://www.hpl.hp.com/personal/Hans_Boehm/gc/"
-DOWNLOADS="http://www.hpl.hp.com/personal/Hans_Boehm/gc/gc_source/${MY_PNV}.tar.gz"
+HOMEPAGE="http://www.hpl.hp.com/personal/Hans_Boehm/gc"
+DOWNLOADS="${HOMEPAGE}/gc_source/${MY_PNV}.tar.gz"
 
 LICENCES="as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS="cxx threads"
+MYOPTIONS=""
 
 DEPENDENCIES=""
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-cplusplus
+    --enable-threads=posix
+)
 
 src_prepare() {
     # These headers are added to pkginclude_HEADERS twice; once unconditionally and once with
@@ -28,11 +33,5 @@ src_prepare() {
         -e '/^pkginclude_HEADERS +=/,/^$/bC; b; :C /include\/gc_\(allocator\|cpp\)/d;' \
         -i include/include.am
     autotools_src_prepare
-}
-
-src_configure() {
-    econf \
-        $(option threads || echo --disable-threads) \
-        $(option_enable cxx cplusplus)
 }
 
