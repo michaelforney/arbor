@@ -6,11 +6,11 @@ Before=network.target
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/conf.d/network.conf
-ExecStartPre=/sbin/ifconfig lo up
-ExecStartPre=/sbin/ifconfig ${IFACE} ${IPV4} netmask ${MASK} broadcast ${BCAST} up
-ExecStart=/sbin/route add default gw ${GATEWAY}
-ExecStop=/sbin/ifconfig ${IFACE} down
-ExecStopPost=/sbin/ifconfig lo down
+ExecStartPre=/bin/ifconfig lo up
+ExecStartPre=/bin/ifconfig ${IFACE} ${IPV4} netmask ${MASK} broadcast ${BCAST} up
+ExecStart=/bin/route add default gw ${GATEWAY}
+ExecStop=/bin/ifconfig ${IFACE} down
+ExecStopPost=/bin/ifconfig lo down
 RemainAfterExit=yes
 
 [Install]
