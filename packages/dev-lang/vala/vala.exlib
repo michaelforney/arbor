@@ -61,6 +61,10 @@ vala_src_install() {
         target=${src/-${SLOT}}
         alternatives+=( /${target} ${src##*/} )
     done
+    if ever at_least 0.16.0; then
+        src=usr/share/pkgconfig/vapigen-${SLOT}.pc
+        alternatives+=( /${src/-${SLOT}} ${src##*/} )
+    fi
     edo popd
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
