@@ -5,16 +5,21 @@ SUMMARY="Tools for controlling the key management system in the Linux kernel"
 HOMEPAGE="http://people.redhat.com/~dhowells/${PN}"
 DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
 
-LICENCES="GPL-2 [[ description = [ applies to the tools ] ]]
-    LGPL-2.1 [[ description = [ applies to the library ] ]]"
+LICENCES="
+    GPL-2    [[ description = [ applies to the tools ] ]]
+    LGPL-2.1 [[ description = [ applies to the library ] ]]
+"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES=""
 
+# Tests need to run as root
+RESTRICT="test"
+
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/keyutils-1.5.3-makefile-fixup.patch
+    "${FILES}"/${PNV}-makefile-fixup.patch
 )
 DEFAULT_SRC_COMPILE_PARAMS=(
     CC="${CC}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
@@ -26,6 +31,8 @@ DEFAULT_SRC_INSTALL_PARAMS=(
 
 src_install() {
     default
+
+    keepdir /etc/request-key.d
 
     edo rmdir "${IMAGE}"/usr/${LIBDIR}
 }

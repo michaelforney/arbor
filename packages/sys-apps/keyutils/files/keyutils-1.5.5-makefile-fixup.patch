@@ -3,8 +3,6 @@ From: Mike Frysinger <vapier@gentoo.org>
 Date: Fri, 2 Sep 2011 13:30:30 -0400
 Subject: [PATCH] depend on $(DEVELLIB) not -lkeyutils
 
-also fix the libkeyutils.so symlink
-
 Upstream: no
 
 ---
@@ -15,23 +13,6 @@ diff --git a/Makefile b/Makefile
 index 9e3fa9b..46695d1 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -125,13 +125,13 @@ keyutils.os: keyutils.c keyutils.h Makefile
- %.o: %.c keyutils.h Makefile
- 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ -c $<
- 
--keyctl: keyctl.o -lkeyutils
-+keyctl: keyctl.o $(DEVELLIB)
- 	$(CC) -L. $(CFLAGS) $(LDFLAGS) $(RPATH) -o $@ $< -lkeyutils
- 
--request-key: request-key.o -lkeyutils
-+request-key: request-key.o $(DEVELLIB)
- 	$(CC) -L. $(CFLAGS) $(LDFLAGS) $(RPATH) -o $@ $< -lkeyutils
- 
--key.dns_resolver: key.dns_resolver.o -lkeyutils
-+key.dns_resolver: key.dns_resolver.o $(DEVELLIB)
- 	$(CC) -L. $(CFLAGS) $(LDFLAGS) $(RPATH) -o $@ $< -lkeyutils -lresolv
- 
- ###############################################################################
 @@ -91,7 +91,7 @@
  	$(INSTALL) -D $(LIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBNAME)
  	$(LNS) $(LIBNAME) $(DESTDIR)$(LIBDIR)/$(SONAME)
