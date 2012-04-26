@@ -8,23 +8,40 @@ SUMMARY="GNU localization utilties"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="emacs multibuild_c: 32 64"
+MYOPTIONS="
+    acl
+    emacs
+    examples
+    openmp
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
+    build:
+        sys-devel/gcc:*[openmp?]
     build+run:
-        dev-libs/libxml2
+        dev-libs/libxml2[multibuild_c:*(-)?]
+        acl? ( sys-apps/acl[multibuild_c:*(-)?] )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-acl
+    --htmldir=/usr/share/doc/${PNVR}/html
+    --enable-nls
     --disable-csharp
     --disable-java
-    --disable-openmp
+    --disable-native-java
+    --disable-rpath
     --with-included-glib
     --with-included-libcroco
     --with-included-libunistring
+    --without-cvs
+    --without-included-gettext
 )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( emacs )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    acl
+    openmp
+)
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-0.18-sydbox.patch
     "${FILES}"/${PNV}-fix-readlink-test.patch
@@ -33,5 +50,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 src_install() {
     easy-multibuild_src_install
     option emacs && elisp-install-site-file
+    option examples || edo rm -r "${IMAGE}"/usr/share/doc/${PNVR}/examples
+    edo rm -r "${IMAGE}"/usr/share/doc/${PNVR}/html/{csharpdoc,javadoc2}
 }
 
