@@ -97,7 +97,6 @@ gnutls_src_prepare() {
 
     # FIXME: don't run eautoreconf since it breaks 2.12.14
     if ever at_least 3.0.0; then
-        ever at_least 3.0.8 && expatch "${FILES}"/0001-make-crywrap-optional.patch
         autotools_src_prepare
     else
         default
