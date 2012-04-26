@@ -1,0 +1,16 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require automake
+
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+src_install() {
+    automake_src_install
+
+    for man in "${IMAGE}"/usr/share/man/man?/*-${SLOT}-${SLOT}.? ; do
+        edo mv "${man}" "${man/${SLOT}-${SLOT}/${SLOT}}"
+    done
+    keepdir /usr/share/aclocal
+}
+
