@@ -7,7 +7,7 @@
 # Automake wrapper v0.4 -- http://www.exherbo.org
 
 # Keep versions sorted highest to lowest.
-AUTOMAKE_VERSIONS="1.11 1.10 1.9 1.8 1.7 1.6 1.5 1.4"
+AUTOMAKE_VERSIONS="1.12 1.11 1.10 1.9 1.8 1.7 1.6 1.5 1.4"
 AUTOMAKE_PROGRAM="$(basename $0)"
 
 # Default to latest available if WANT_AUTOMAKE isn't set
