@@ -1,0 +1,70 @@
+# Copyright 2009 Bryan Østergaard
+# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+
+SUMMARY="Numerical abstraction library"
+DESCRIPTION="
+The Parma Polyhedra Library (PPL) provides numerical abstractions especially targeted at
+applications in the field of analysis and verification of complex systems. These abstractions
+include convex polyhedra, defined as the intersection of a finite number of (open or closed)
+halfspaces, each described by a linear inequality (strict or non-strict) with rational coefficients;
+some special classes of polyhedra shapes that offer interesting complexity/precision tradeoffs; and
+grids which represent regularly spaced points that satisfy a set of linear congruence relations. The
+library also supports finite powersets and products of (any kind of) polyhedra and grids, a mixed
+integer linear programming problem solver using an exact-arithmetic version of the simplex
+algorithm, a parametric integer programming solver, and primitives for termination analysis via the
+automatic synthesis of linear ranking functions.
+"
+HOMEPAGE="http://bugseng.com/products/${PN}"
+DOWNLOADS="ftp://ftp.cs.unipr.it/pub/${PN}/releases/${PV}/${PNV}.tar.xz"
+
+LICENCES="GPL-3"
+SLOT="0.11"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="doc"
+RESTRICT="test"
+
+DEPENDENCIES="
+    build:
+        doc? ( app-doc/doxygen )
+    build+run:
+        dev-libs/gmp:=[>=4.1.3]
+"
+
+AT_M4DIR=( "m4" )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    # Don't support Java, ML and Fortran interfaces for now
+    --enable-interfaces="c cxx"
+    --enable-ppl_lcdd
+    --enable-ppl_lpsol
+    --enable-ppl_pips
+    --disable-valgrind-tests
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc documentation' )
+
+pkg_pretend() {
+    default
+
+    has_version --root "dev-libs/ppl:0.11[<0.12]" && \
+        if has_version --root "sys-devel/gcc:$(eclectic gcc show)[graphite]"; then
+eerror "Your currently selected gcc version is compiled with graphite support."
+eerror "You have to choose a different version or rebuild this version without it,"
+eerror "else your GCC will break."
+    fi
+}
+
+src_prepare() {
+    # Do not build documentation if not needed, saves a ton of X dependencies
+    if option !doc ; then
+        edo sed -i -e '/SUBDIRS =/s/doc//' Makefile.am
+    fi
+
+    autotools_src_prepare
+}
+
+src_test_expensive() {
+    emake check
+}
+
