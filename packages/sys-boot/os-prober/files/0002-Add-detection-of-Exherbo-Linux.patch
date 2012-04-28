@@ -1,0 +1,26 @@
+From a0f78dfaa268861ac71ede686626f48e2d580722 Mon Sep 17 00:00:00 2001
+From: "Wulf C. Krueger" <philantrop@exherbo.org>
+Date: Sat, 28 Apr 2012 23:58:23 +0200
+Subject: [PATCH 2/2] Add detection of Exherbo Linux.
+
+---
+ os-probes/mounted/common/90linux-distro |    3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/os-probes/mounted/common/90linux-distro b/os-probes/mounted/common/90linux-distro
+index f237a38..ee62e97 100755
+--- a/os-probes/mounted/common/90linux-distro
++++ b/os-probes/mounted/common/90linux-distro
+@@ -121,6 +121,9 @@ if ls "$dir"/lib*/ld*.so* >/dev/null 2>/dev/null; then
+ 	elif [ -e "$dir/etc/meego-release" ]; then
+ 		short="MeeGo"
+ 		long="$(head -1 "$dir/etc/meego-release")"
++	elif [ -e "$dir/etc/exherbo-release" ]; then
++		short="Exherbo"
++		long="Exherbo Linux"
+ 	else
+ 		short="Linux"
+ 		long="unknown Linux distribution"
+-- 
+1.7.9.6
+

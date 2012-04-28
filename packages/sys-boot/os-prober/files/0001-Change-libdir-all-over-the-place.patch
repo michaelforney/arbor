@@ -1,0 +1,117 @@
+From 27d05a7aa56c02d17654e1bcc1bbc0b3c4edf94c Mon Sep 17 00:00:00 2001
+From: "Wulf C. Krueger" <philantrop@exherbo.org>
+Date: Sat, 28 Apr 2012 23:51:55 +0200
+Subject: [PATCH 1/2] Change libdir all over the place.
+
+---
+ common.sh                                |    6 +++---
+ linux-boot-prober                        |    4 ++--
+ linux-boot-probes/common/50mounted-tests |    2 +-
+ os-prober                                |    6 +++---
+ os-probes/common/50mounted-tests         |    2 +-
+ 5 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/common.sh b/common.sh
+index 30e245e..692c807 100644
+--- a/common.sh
++++ b/common.sh
+@@ -1,5 +1,5 @@
+ newns () {
+-  [ "$OS_PROBER_NEWNS" ] || exec /usr/lib/os-prober/newns "$0" "$@"
++  [ "$OS_PROBER_NEWNS" ] || exec /usr/WK_LIBDIR/os-prober/newns "$0" "$@"
+ }
+ 
+ cleanup_tmpdir=false
+@@ -107,8 +107,8 @@ item_in_dir () {
+ # information then we should use it. Note that we can't use block-attr here
+ # as it's only available in udebs.
+ fs_type () {
+-	if (export PATH="/lib/udev:$PATH"; type vol_id) >/dev/null 2>&1; then
+-		PATH="/lib/udev:$PATH" vol_id --type "$1" 2>/dev/null
++	if (export PATH="/WK_LIBDIR/udev:$PATH"; type vol_id) >/dev/null 2>&1; then
++		PATH="/WK_LIBDIR/udev:$PATH" vol_id --type "$1" 2>/dev/null
+ 	elif type blkid >/dev/null 2>&1; then
+ 		blkid -o value -s TYPE "$1" 2>/dev/null
+ 	else
+diff --git a/linux-boot-prober b/linux-boot-prober
+index e32dc84..153f88d 100755
+--- a/linux-boot-prober
++++ b/linux-boot-prober
+@@ -21,7 +21,7 @@ if ! mapped="$(mapdevfs "$partition")"; then
+ fi
+ 
+ if ! grep -q "^$mapped " "$OS_PROBER_TMP/mounted-map"; then
+-	for test in /usr/lib/linux-boot-probes/*; do
++	for test in /usr/WK_LIBDIR/linux-boot-probes/*; do
+ 		debug "running $test"
+ 		if [ -x $test ] && [ -f $test ]; then
+ 			if $test "$partition"; then
+@@ -43,7 +43,7 @@ else
+ 			bootpart="$partition"
+ 			bootmounted=0
+ 		fi
+-		for test in /usr/lib/linux-boot-probes/mounted/*; do
++		for test in /usr/WK_LIBDIR/linux-boot-probes/mounted/*; do
+ 			if [ -f $test ] && [ -x $test ]; then
+ 				debug "running $test on mounted $partition"
+ 				if $test "$partition" "$bootpart" "$mpoint" "$type"; then
+diff --git a/linux-boot-probes/common/50mounted-tests b/linux-boot-probes/common/50mounted-tests
+index 41e26e6..832d568 100755
+--- a/linux-boot-probes/common/50mounted-tests
++++ b/linux-boot-probes/common/50mounted-tests
+@@ -55,7 +55,7 @@ if [ "$mounted" ]; then
+ 	bootpart="${mountboot%% *}"
+ 	mounted="${mountboot#* }"
+ 
+-	for test in /usr/lib/linux-boot-probes/mounted/*; do
++	for test in /usr/WK_LIBDIR/linux-boot-probes/mounted/*; do
+ 		if [ -f "$test" ] && [ -x "$test" ]; then
+ 			debug "running $test $partition $bootpart $tmpmnt $type"
+ 			if $test "$partition" "$bootpart" "$tmpmnt" "$type"; then
+diff --git a/os-prober b/os-prober
+index fc4de2c..12f39d8 100755
+--- a/os-prober
++++ b/os-prober
+@@ -101,7 +101,7 @@ parse_proc_mdstat () {
+ # Needed for idempotency
+ rm -f /var/lib/os-prober/labels
+ 
+-for prog in /usr/lib/os-probes/init/*; do
++for prog in /usr/WK_LIBDIR/os-probes/init/*; do
+ 	if [ -x "$prog" ] && [ -f "$prog" ]; then
+ 		"$prog" || true
+ 	fi
+@@ -135,7 +135,7 @@ for partition in $(partitions); do
+ 	fi
+ 
+ 	if ! grep -q "^$mapped " "$OS_PROBER_TMP/mounted-map" ; then
+-		for test in /usr/lib/os-probes/*; do
++		for test in /usr/WK_LIBDIR/os-probes/*; do
+ 			if [ -f "$test" ] && [ -x "$test" ]; then
+ 				debug "running $test on $partition"
+ 				if "$test" "$partition"; then
+@@ -149,7 +149,7 @@ for partition in $(partitions); do
+ 		mpoint="$(unescape_mount "$mpoint")"
+ 		if [ "$mpoint" != "/target/boot" ] && [ "$mpoint" != "/target" ] && [ "$mpoint" != "/" ]; then
+ 			type=$(grep "^$mapped " "$OS_PROBER_TMP/mounted-map" | head -n1 | cut -d " " -f 3)
+-			for test in /usr/lib/os-probes/mounted/*; do
++			for test in /usr/WK_LIBDIR/os-probes/mounted/*; do
+ 				if [ -f "$test" ] && [ -x "$test" ]; then
+ 					debug "running $test on mounted $partition"
+ 					if "$test" "$partition" "$mpoint" "$type"; then
+diff --git a/os-probes/common/50mounted-tests b/os-probes/common/50mounted-tests
+index 45b4b53..b7b7585 100755
+--- a/os-probes/common/50mounted-tests
++++ b/os-probes/common/50mounted-tests
+@@ -69,7 +69,7 @@ else
+ fi
+ 
+ if [ "$mounted" ]; then
+-	for test in /usr/lib/os-probes/mounted/*; do
++	for test in /usr/WK_LIBDIR/os-probes/mounted/*; do
+ 		debug "running subtest $test"
+ 		if [ -f "$test" ] && [ -x "$test" ]; then
+ 			if "$test" "$partition" "$tmpmnt" "$type"; then
+-- 
+1.7.9.6
+
