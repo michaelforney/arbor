@@ -47,7 +47,7 @@ LICENCES="UoI-NCSA"
 SLOT="0"
 MYOPTIONS="
     clang [[ description = [ Build clang, a front-end for C, C++, Objective C\
-          and Objective C++ ] ]]
+          and Objective C++ and install the clang static-analyser ] ]]
     dragonegg [[ description = [ Build a plugin that allows gcc to use\
               optimisations from the LLVM project ] ]]
     gold
@@ -217,6 +217,19 @@ llvm_src_install() {
         docinto html/dragonegg
         dodoc www/*
 
+        edo popd
+    fi
+
+    if option clang ; then
+        edo pushd "${WORK}"/tools/clang/tools
+        insinto /usr/share/clang-analyzer
+        for f in scan-{build,view} ; do
+            doins -r ${f}
+            dosym /usr/share/clang-analyzer/${f}/${f} /usr/bin/${f}
+        done
+        edo popd
+        edo pushd "${IMAGE}"/usr/share/clang-analyzer
+        edo chmod a+x scan-build/{ccc-analyzer,scan-build,set-xcode-analyzer} scan-view/scan-view
         edo popd
     fi
 }
