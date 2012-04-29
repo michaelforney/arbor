@@ -1,0 +1,23 @@
+# Copyright 2009, 2010 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require python-build
+
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+prepare_one_multibuild() {
+    python-build_prepare_one_multibuild
+
+    edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
+        Lib/distutils/tests/test_install.py
+}
+
+test_one_multibuild() {
+    local DISABLE_TESTS
+    # test_install_lib (test_distuils) has problems with path resolution
+    # the rest want to bind to 0.0.0.0/::, test_uuid: socket.gethostname() name->resolution
+    DISABLE_TESTS="test_distutils test_ftplib test_ssl test_uuid"
+
+    python-build_test_one_multibuild
+}
+
