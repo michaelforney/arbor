@@ -19,20 +19,9 @@ test_one_multibuild() {
     # test_build_ext (test_distutils) fails for fresh installs
     # I've not tested if any python version is compatible so depend on :2.6
     has_version --root "dev-lang/python:2.6" || DISABLE_TESTS+="test_distutils"
-    # wants to bind 0.0.0.0/::
-    DISABLE_TESTS+=" test_ftplib test_socket test_urllib2"
-
-    # needed for test_socket
-    esandbox allow_net "unix-abstract:python-test-hello"
-    esandbox allow_net "unix-abstract:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+    # wants to bind 0.0.0.0/::, test_uuid: socket.gethostname() name->resolution
+    DISABLE_TESTS+=" test_ftplib test_socket test_urllib2 test_uuid"
 
     python-build_test_one_multibuild
-}
-
-install_one_multibuild() {
-    python-build_install_one_multibuild
-
-    # Installs empty directory.
-    edo rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}${SLOT}/lib-old
 }
 

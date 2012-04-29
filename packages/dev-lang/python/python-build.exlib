@@ -67,7 +67,7 @@ python-build_src_unpack() {
 
 python-build_prepare_one_multibuild() {
     # linux-3 support, applied upstream
-    edo cp -r "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Lib/plat-linux2" "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Lib/plat-linux3"
+    ever at_least 2.7 && edo cp -r "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Lib/plat-linux2" "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Lib/plat-linux3"
 
     [[ -d ${FILES}/${PV} ]] && expatch "${FILES}/${PV}/"
 
@@ -194,9 +194,14 @@ python-build_install_one_multibuild() {
         dodir "${prefix}"/{bin,include/"${PN}${SLOT}"}
         edo mv "${IMAGE}"/usr/bin/"${PN}"{${PYTHON_MAJOR}-config,${PYTHON_MAJOR}} "${IMAGE}${prefix}"/bin
         edo mv "${IMAGE}"/usr/include/"${PN}${SLOT}"/*.h "${IMAGE}${prefix}"/include/"${PN}${SLOT}"
+        [ "$(ever major)" == 2 ] && \
+            alternatives+=(
+                /usr/${CHOST}/bin/python python$(ever major)
+                /usr/${CHOST}/bin/python-config python$(ever major)-config
+            )
         alternatives+=(
-            /usr/${CHOST}/bin/python${PYTHON_MAJOR} python${SLOT}
-            /usr/${CHOST}/bin/python${PYTHON_MAJOR}-config python${SLOT}-config
+            /usr/${CHOST}/bin/python$(ever major) python${SLOT}
+            /usr/${CHOST}/bin/python$(ever major)-config python${SLOT}-config
         )
     fi
 
@@ -221,12 +226,18 @@ python-build_src_install() {
 
     easy-multibuild_src_install
 
+    [ "$(ever major)" == 2 ] && \
+        alternatives+=(
+            /usr/bin/python python$(ever major)
+            /usr/bin/python-config python$(ever major)-config
+        )
+
     alternatives+=(
         /usr/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3${SLOT}
         /usr/bin/idle${PYTHON_MAJOR} idle${SLOT}
         /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
-        /usr/bin/python${PYTHON_MAJOR} python${SLOT}
-        /usr/bin/python${PYTHON_MAJOR}-config python${SLOT}-config
+        /usr/bin/python$(ever major) python${SLOT}
+        /usr/bin/python$(ever major)-config python${SLOT}-config
     )
 
     alternatives_for "${alternatives[@]}"
