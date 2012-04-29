@@ -26,22 +26,14 @@ prepare_one_multibuild() {
 test_one_multibuild() {
     local DISABLE_TESTS
     # test_install_lib (test_distuils) has problems with path resolution
-    # the rest wants to bind to 0.0.0.0/::
-    DISABLE_TESTS="test_distutils test_ftplib test_socket"
+    # the rest wants to bind to 0.0.0.0/::, test_uuid: socket.gethostname() name->resolution
+    DISABLE_TESTS="test_distutils test_ftplib test_socket test_uuid"
 
     # for test_ssl
     esandbox allow_net --connect "inet:127.0.0.1@0"
 
-    # needed for test_socket
-    esandbox allow_net --connect "inet:127.0.0.1@80"
-    esandbox allow_net --connect "inet6:::1@80"
-    esandbox allow_net "unix-abstract:python-test-hello"
-    esandbox allow_net "unix-abstract:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
-
     python-build_test_one_multibuild
 
     esandbox disallow_net --connect "inet:127.0.0.1@0"
-    esandbox disallow_net --connect "inet:127.0.0.1@80"
-    esandbox disallow_net --connect "inet6:::1@80"
 }
 
