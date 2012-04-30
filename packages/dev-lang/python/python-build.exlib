@@ -207,6 +207,13 @@ python-build_install_one_multibuild() {
             /usr/${CHOST}/bin/python$(ever major) python${SLOT}
             /usr/${CHOST}/bin/python$(ever major)-config python${SLOT}-config
         )
+
+        if ever at_least 3.2; then
+            edo pushd "${IMAGE}"/usr/${CHOST}/bin
+            edo ln -s python3.2 python3.2m
+            edo ln -s python3.2-config python3.2m-config
+            edo popd
+        fi
     fi
 
     if ever at_least 3.2; then
@@ -245,6 +252,13 @@ python-build_src_install() {
     )
 
     alternatives_for "${alternatives[@]}"
+
+    if ever at_least 3.2; then
+        edo pushd "${IMAGE}"/usr/bin
+        edo ln -s python3.2 python3.2m
+        edo ln -s python3.2-config python3.2m-config
+        edo popd
+    fi
 }
 
 # replace symlinks with directories
