@@ -1,0 +1,50 @@
+# Copyright 2012 Elias Pipping <pipping@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SCM_REPOSITORY="http://llvm.org/git/clang.git"
+
+require scm-git cmake [ api=2 ]
+
+SUMMARY="C language family frontend for LLVM"
+HOMEPAGE="http://clang.llvm.org/"
+DOWNLOADS=""
+
+LICENCES="UoI-NCSA"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*
+        sys-devel/flex
+    build+run:
+        experimental/llvm
+    run:
+       !dev-lang/llvm
+       !dev-lang/clang
+"
+
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    -DCLANG_PATH_TO_LLVM_BUILD:STRING=/usr
+    -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
+)
+
+src_unpack() {
+    cmake_src_unpack
+    scm_src_unpack
+}
+
+src_prepare() {
+    # Fix the use of dot
+    edo sed -e 's/@DOT@//g' -i "${CMAKE_SOURCE}"/docs/doxygen.cfg.in
+}
+
+# FIXME: tests
+
+src_install() {
+    cmake_src_install
+    # the sole file here, config.h, is explicitly not installed
+    edo rmdir "${IMAGE}"/usr/include/clang/Config
+}
+
