@@ -14,8 +14,17 @@ DEPENDENCIES="
     build:
         app-arch/xz
     build+run:
-        dev-libs/gmp[>=4.1]
+        dev-libs/gmp:=[>=4.1]
+    run:
+        dev-libs/mpfr:3
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-shared )
+
+src_install() {
+    default
+
+    edo rm -r "${IMAGE}"/usr/{include/,share/info/}
+    edo rm "${IMAGE}"/usr/${LIBDIR}/libmpfr.{a,la,so}
+}
 
