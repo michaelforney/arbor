@@ -172,11 +172,11 @@ python-build_install_one_multibuild() {
 
     ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
 
-    ever at_least 3 && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
+    [ "${SLOT}" == "3.1" ] && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
 
     if ever at_least 3.2; then
         edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
-        edo rm "${IMAGE}"/usr/bin/{2to3-3,idle3,pydoc3,python3-config,python${SLOT}m}
+        edo rm "${IMAGE}"/usr/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
     else
         edo mv "${IMAGE}"/usr/${LIBDIR}/{${PN}${SLOT}/config,}/libpython${SLOT}.a
     fi
@@ -244,7 +244,7 @@ python-build_src_install() {
         )
 
     alternatives+=(
-        /usr/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3${SLOT}
+        /usr/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3-${SLOT}
         /usr/bin/idle${PYTHON_MAJOR} idle${SLOT}
         /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
         /usr/bin/python$(ever major) python${SLOT}
