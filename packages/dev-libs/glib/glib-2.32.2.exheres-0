@@ -3,6 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require bash-completion glib
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -34,7 +35,8 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Fix-libelf-includes.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Fix-libelf-includes.patch
+                              "${FILES}"/9ab02c1428385c30b13e24872960474d44b6866b.patch )
 
 # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
 # Its usage is recommended by upstream, see also
@@ -45,6 +47,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk-doc )
 
 src_prepare() {
     glib_src_prepare
+    eautoreconf
 
     # fail under sydbox
     edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c
