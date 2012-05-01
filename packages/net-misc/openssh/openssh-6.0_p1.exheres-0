@@ -1,4 +1,4 @@
-# Copyright 2008-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2008-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Copyright 2011 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
@@ -8,7 +8,7 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] pam
 
 MY_PNV=${PNV/_/}
 
-X509_VERSION="7.0"
+X509_VERSION="7.1"
 X509_PATCH="${MY_PNV}+x509-${X509_VERSION}.diff.gz"
 
 SUMMARY="OpenSSH is a free version of the SSH connectivity tools"
@@ -23,8 +23,14 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/txt/release-${PV%_p*}"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="baselayout kerberos pam tcpd X
+MYOPTIONS="
+    baselayout
     gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
+    kerberos
+    ldns [[ description = [ Use ldns for DNSSEC support ] ]]
+    pam
+    tcpd
+    X
     X509 [[ description = [ Adds support for X.509 certificate authentication ] ]]
 "
 
@@ -42,6 +48,7 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3]
         gtk? ( x11-libs/gtk+:2 )
         kerberos? ( app-crypt/heimdal )
+        ldns? ( net-libs/ldns )
         pam? ( sys-libs/pam[>=0.78] )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
         X? ( x11-apps/xauth )
@@ -57,8 +64,7 @@ src_prepare() {
     default
 
     if [[ -n ${X509_PATCH} ]] && option X509 ; then
-        expatch \
-            -p1 "${WORKBASE}/${X509_PATCH%.gz}"
+        expatch -p1 "${WORKBASE}/${X509_PATCH%.gz}"
     fi
 
     edo sed -i -e '/_PATH_XAUTH/s:/usr/X11R6/bin/xauth:/usr/bin/xauth:' pathnames.h
@@ -83,6 +89,7 @@ src_configure() {
         --without-libedit \
         --without-selinux \
         $(option_with kerberos kerberos5) \
+        $(option_with ldns) \
         $(option_with pam) \
         $(option_with tcpd tcp-wrappers)
 }
