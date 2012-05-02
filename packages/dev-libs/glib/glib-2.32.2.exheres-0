@@ -49,6 +49,9 @@ src_prepare() {
     glib_src_prepare
     eautoreconf
 
+    # race condition worsened by sydbox
+    edo sed -e '/mainloop\/invoke/d' -i glib/tests/mainloop.c
+
     # fail under sydbox
     edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c
     edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
