@@ -13,7 +13,10 @@ MYOPTIONS="multibuild_c: 32 64
 
 DEPENDENCIES="
     build:
-        sys-devel/m4"
+        sys-devel/m4
+    run:
+        dev-libs/gmp:5
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-cxx --hates=docdir )
 
@@ -26,5 +29,18 @@ configure_one_multibuild() {
     done
 
     default
+}
+
+install_one_multibuild() {
+    default
+
+    edo rm "${IMAGE}"/usr/${LIBDIR}/libgmp.{a,la,so}
+    edo rm "${IMAGE}"/usr/${LIBDIR}/libgmpxx.{a,la,so{.4,}}
+}
+
+src_install() {
+    easy-multibuild_src_install
+
+    edo rm -r "${IMAGE}"/usr/{include,share/info/}
 }
 
