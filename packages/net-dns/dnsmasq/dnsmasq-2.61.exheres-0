@@ -16,22 +16,25 @@ TFTP/PXE for network booting of diskless machines.
 "
 BASEURI="http://www.thekelleys.org.uk/${PN}"
 HOMEPAGE="${BASEURI}/doc.html"
-DOWNLOADS="${BASEURI}/${PNV}.tar.lzma"
+DOWNLOADS="${BASEURI}/${PNV}.tar.gz"
 
 UPSTREAM_CHANGELOG="${BASEURI}/CHANGELOG [[ lang = en ]]"
 
 LICENCES="|| ( GPL-2 GPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS="baselayout dbus doc nls
+MYOPTIONS="
+    baselayout
     conntrack [[ description = [ Enables connection tracking via NetFilter ] ]]
+    dbus
+    doc
     idn [[ description = [ Support international domain names ] ]]
+    nls
     systemd [[ requires = [ dbus ] ]]
 "
 
 DEPENDENCIES="
     build:
-        app-arch/xz
         dev-util/pkg-config
         nls? ( sys-devel/gettext )
     build+run:
