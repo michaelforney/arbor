@@ -79,7 +79,7 @@ scm-hg_do_appraise() {
 
     local origin=$(scm-hg_hg -q showconfig paths.default)
     [[ -n ${origin} ]] || die "could not determine origin URL for ${dir}"
-    if [[ ${origin} != $(scm_get_var REPOSITORY) ]]; then
+    if [[ $(scm_trim_slashes -scheme -trailing "${origin}") != $(scm_get_var REPOSITORY) ]]; then
         echo "${dir} is a clone of ${origin}, but wanted $(scm_get_var REPOSITORY)"
         return 3 # XXX
     fi
