@@ -15,6 +15,17 @@ scm-hg_do_dependencies() {
     fi
 }
 
+scm-hg_trim_slashes() {
+    [[ ${#} -eq 1 ]] || die "scm-hg_trim_slashes needs exactly one argument"
+    if [[ ${1} == ssh://* ]]; then
+        local path=${1#ssh://*/}
+        local pathless=${1%"${path}"}
+        echo "${pathless}$(scm_trim_slashes -scheme -trailing "${path}")"
+    else
+        scm_trim_slashes -scheme -trailing "${1}"
+    fi
+}
+
 scm-hg_do_check_vars() {
     [[ -n $(scm_get_var TAG) && -n $(scm_get_var REVISION) ]] \
         && die "for hg, $(scm_var_name TAG) must not be set at the same time as $(scm_var_name REVISION)"
@@ -31,14 +42,7 @@ scm-hg_do_check_vars() {
     [[ -n $(scm_get_var SUBPATH) ]] && die "for hg, $(scm_var_name SUBPATH) must not be set"
     [[ -n $(scm_get_var EXTERNAL_REFS) ]] && die "for hg, $(scm_var_name EXTERNAL_REFS) must not be set"
 
-    if [[ $(scm_get_var REPOSITORY) == ssh://* ]]; then
-        local repo=$(scm_get_var REPOSITORY)
-        local path=${repo#ssh://*/}
-        local pathless=${repo%"${path}"}
-        scm_set_var REPOSITORY "${pathless}$(scm_trim_slashes -scheme -trailing "${path}")"
-    else
-        scm_modify_var REPOSITORY scm_trim_slashes -scheme -trailing
-    fi
+    scm_modify_var REPOSITORY scm-hg_trim_slashes
 }
 
 scm-hg_hg() {
@@ -79,7 +83,7 @@ scm-hg_do_appraise() {
 
     local origin=$(scm-hg_hg -q showconfig paths.default)
     [[ -n ${origin} ]] || die "could not determine origin URL for ${dir}"
-    if [[ $(scm_trim_slashes -scheme -trailing "${origin}") != $(scm_get_var REPOSITORY) ]]; then
+    if [[ $(scm-hg_trim_slashes "${origin}") != $(scm_get_var REPOSITORY) ]]; then
         echo "${dir} is a clone of ${origin}, but wanted $(scm_get_var REPOSITORY)"
         return 3 # XXX
     fi
