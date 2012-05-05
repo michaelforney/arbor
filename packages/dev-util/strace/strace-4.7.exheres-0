@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2008 Richard Brown
 # Copyright 2009 Bo Ørsted Andresen
-# Copyright 2010-2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge [ suffix=tar.xz ]
@@ -19,11 +19,13 @@ SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    test:
+        sys-apps/busybox
+"
 
-# sydbox makes the tests fail - silently. :-/
-# esandbox is undocumented (which sucks badly) and my attempts to make it work
-# failed.
+# sydbox makes the tests fail even with all the disabled stuff below and
+# RESTRICT="userpriv".
 RESTRICT="test"
 
 src_prepare() {
@@ -36,6 +38,10 @@ src_prepare() {
 
 
 src_test() {
+    esandbox disable
+    esandbox disable_exec
     emake -j1 check
+    esandbox enable
+    esandbox enable_exec
 }
 
