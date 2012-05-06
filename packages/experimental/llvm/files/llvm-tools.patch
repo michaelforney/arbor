@@ -1,0 +1,14 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Remove traces of the build directory
+--- a/cmake/modules/LLVMConfig.cmake.in
++++ b/cmake/modules/LLVMConfig.cmake.in
+@@ -18,7 +18,7 @@ set(LLVM_TARGETS_WITH_JIT @LLVM_TARGETS_WITH_JIT@)
+ 
+ set(TARGET_TRIPLE "@TARGET_TRIPLE@")
+ 
+-set(LLVM_TOOLS_BINARY_DIR @LLVM_TOOLS_BINARY_DIR@)
++set(LLVM_TOOLS_BINARY_DIR "/usr/bin")
+ 
+ set(LLVM_ENABLE_THREADS @LLVM_ENABLE_THREADS@)
+ 
