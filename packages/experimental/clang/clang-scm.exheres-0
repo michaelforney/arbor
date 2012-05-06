@@ -30,11 +30,6 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
     -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
 )
 
-src_unpack() {
-    cmake_src_unpack
-    scm_src_unpack
-}
-
 src_prepare() {
     # Fix the use of dot
     edo sed -e 's/@DOT@//g' -i "${CMAKE_SOURCE}"/docs/doxygen.cfg.in
