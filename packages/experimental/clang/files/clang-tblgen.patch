@@ -1,0 +1,14 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Build in a temporary directory rather than where llvm was built
+--- a/utils/TableGen/CMakeLists.txt
++++ b/utils/TableGen/CMakeLists.txt
+@@ -2,6 +2,8 @@ set(LLVM_REQUIRES_EH 1)
+ set(LLVM_REQUIRES_RTTI 1)
+ set(LLVM_LINK_COMPONENTS Support)
+ 
++# add_tablegen from llvm uses LLVM_TOOLS_BINARY_DIR; rebind it here
++set(LLVM_TOOLS_BINARY_DIR "clang_tblgen_build_subdir")
+ add_tablegen(clang-tblgen CLANG
+   ClangASTNodesEmitter.cpp
+   ClangAttrEmitter.cpp
