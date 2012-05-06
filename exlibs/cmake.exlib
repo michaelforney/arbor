@@ -69,6 +69,9 @@ case $(exparam api) in
 
             cmake_src_unpack() {
                 default
+                if [[ $(type -t scm_src_unpack) == function ]]; then
+                    scm_src_unpack
+                fi
                 edo mkdir -p "${WORK}"
             }
         fi
