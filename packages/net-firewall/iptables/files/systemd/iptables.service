@@ -3,6 +3,7 @@
 
 [Unit]
 Description=iptables
+Before=network.target
 
 [Service]
 Type=oneshot
@@ -13,4 +14,4 @@ ExecStop=/sbin/iptables-save -c > /var/lib/iptables/rules-save
 ExecStop=/sbin/ip6tables-save -c > /var/lib/ip6tables/rules-save
 
 [Install]
-WantedBy=sysinit.target
+WantedBy=multi-user.target
