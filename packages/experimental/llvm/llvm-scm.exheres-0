@@ -40,3 +40,11 @@ src_prepare() {
     edo popd
 }
 
+src_install() {
+    cmake_src_install
+
+    # Required by the clang test suite
+    exeinto /usr/libexec/llvm
+    doexe bin/FileCheck bin/not bin/count
+}
+
