@@ -5,7 +5,7 @@
 MY_PV=${PV%_p*}
 PATCH_LEVEL=${PNV##*_p}
 
-require alternatives
+require alternatives easy-multibuild
 
 export_exlib_phases src_prepare src_test_expensive src_install
 
@@ -20,28 +20,20 @@ DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PV}.tar.gz
 LICENCES="as-is"
 SLOT="$(ever range 1-2)"
 MYOPTIONS="doc
-    tcl [[ description = [ Build tcl bindings. Should be enabled if you want to run expensive tests ] ]]"
+    tcl [[ description = [ Build tcl bindings. Should be enabled if you want to run expensive tests ] ]]
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     test-expensive:
-        dev-lang/tcl
+        dev-lang/tcl[multibuild_c:*(-)?]
     build+run:
         !sys-libs/db:0 [[ description = [ Uninstall sys-libs/db:0 before installing slotted versions of Berkely DB ] ]]
-        tcl? ( dev-lang/tcl )
+        tcl? ( dev-lang/tcl[multibuild_c:*(-)?] )
 "
 
-ECONF_SOURCE="${WORKBASE}/${PN}-${MY_PV}/dist"
-WORK="${WORKBASE}/${PN}-${MY_PV}/build_unix"
+WORK="${WORKBASE}/${PN}-${MY_PV}/dist"
 
 AT_M4DIR=( aclocal aclocal_java )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --includedir=/usr/include/${PN}${SLOT}
-    --enable-compat185
-    --enable-cxx
-    --disable-java
-)
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( tcl 'tcl test' )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "tcl tcl /usr/${LIBDIR}" )
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
 db_src_prepare() {
@@ -63,30 +55,69 @@ db_src_prepare() {
             -i ./Makefile.in
 }
 
+configure_one_multibuild() {
+    econf \
+        --includedir=/usr/include/${PN}${SLOT} \
+        --enable-compat185 \
+        --enable-cxx \
+        --disable-java \
+        $(option_enable tcl) \
+        $(option_enable tcl test) \
+        $(option_with tcl tcl "/usr/${LIBDIR}") \
+        LDFLAGS="-L/usr/${LIBDIR} ${LDFLAGS}"
+}
+
 db_src_test_expensive() {
+    easy-multibuild_run_phase
+}
+
+test_expensive_one_multibuild() {
     if option !tcl ; then
         ewarn "${CATEGORY}/${PN} needs the 'tcl' option enabled to run expensive tests"
         return
     fi
 
 cat <<EOF > testrunner.tcl
-source ../test/test.tcl
+source "${WORK}/../test/test.tcl"
 run_std
 EOF
     tclsh testrunner.tcl
     grep -qs '^FAIL' ALL.OUT && die "Some tests failed, see ${WORK}/ALL.OUT"
 }
 
-db_src_install() {
+install_one_multibuild() {
     default
-
-    if option !doc ; then
-        edo rm -r "${IMAGE}"/usr/share
-    fi
 
     edo rm "${IMAGE}"/usr/${LIBDIR}/libdb{,_cxx}{.so,.a,-$(ever major).so}
 
     option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.so
+
+    local alternatives=() replace_me
+    edo pushd "${IMAGE}"
+    # Libraries,    /usr/lib/lib*.*                 -> /usr/lib/lib*-${SLOT}.*
+    replace_me=-${SLOT}
+    for src in usr/${LIBDIR}/lib*${replace_me}.* ; do
+        target=${src/${replace_me}}
+        alternatives+=( /${target} ${src##*/} )
+    done
+
+    # Libraries,    /usr/lib/lib*-$(ever major).so   -> /usr/lib/lib*-${SLOT}.so
+    replace_me=-$(ever major)
+    for src in usr/${LIBDIR}/libdb{,_cxx}${replace_me}.so ; do
+        target=${src/${replace_me}/-${SLOT}}
+        alternatives+=( /${target} ${src##*/} )
+    done
+    edo popd
+
+    alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
+}
+
+db_src_install() {
+    easy-multibuild_src_install
+
+    if option !doc ; then
+        edo rm -r "${IMAGE}"/usr/share
+    fi
 
     local alternatives=() replace_me
     edo pushd "${IMAGE}"
@@ -102,20 +133,6 @@ db_src_install() {
     for src in usr/include/${replace_me}/*.h ; do
         target=${src/${replace_me}}
         alternatives+=( /${target} ${src##usr/include/} )
-    done
-
-    # Libraries,    /usr/lib/lib*.*                 -> /usr/lib/lib*-${SLOT}.*
-    replace_me=-${SLOT}
-    for src in usr/${LIBDIR}/lib*${replace_me}.* ; do
-        target=${src/${replace_me}}
-        alternatives+=( /${target} ${src##*/} )
-    done
-
-    # Libraries,    /usr/lib/lib*-$(ever major).so   -> /usr/lib/lib*-${SLOT}.so
-    replace_me=-$(ever major)
-    for src in usr/${LIBDIR}/libdb{,_cxx}${replace_me}.so ; do
-        target=${src/${replace_me}/-${SLOT}}
-        alternatives+=( /${target} ${src##*/} )
     done
     edo popd
 
