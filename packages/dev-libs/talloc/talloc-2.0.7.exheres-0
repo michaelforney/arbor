@@ -8,7 +8,7 @@ DESCRIPTION="
 Talloc is a hierarchical pool based memory allocator with destructors. It is the core memory
 allocator used in Samba, and has made a huge difference in many aspects of Samba4 development.
 "
-HOMEPAGE="http://talloc.samba.org/"
+HOMEPAGE="http://${PN}.samba.org"
 DOWNLOADS="http://samba.org/ftp/${PN}/${PNV}.tar.gz"
 
 LICENCES="LGPL-3"
@@ -27,13 +27,11 @@ DEPENDENCIES="
 WORK="${WORKBASE}"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    '--bundled-libraries=NONE'
-    '--hates=disable-silent-rules'
-    '--hates=enable-fast-install'
+    --bundled-libraries=NONE
+    --hates=disable-silent-rules
+    --hates=enable-fast-install
 )
 DEFAULT_SRC_INSTALL_EXCLUDE=( release-script.sh )
-
-# FIXME The install target in talloc.mk installs swig files (talloc.i) if swig is found
 
 unpack_prepare_one_multibuild() {
     edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
