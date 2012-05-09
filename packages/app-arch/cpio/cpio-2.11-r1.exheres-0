@@ -13,12 +13,15 @@ MYOPTIONS=""
 DEPENDENCIES="
     build:
         sys-devel/gettext
+    build+run:
+        app-arch/tar[>=1.26-r1]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --bindir=/bin
     --enable-mt
     --enable-nls
+    --with-rmt=/usr/libexec/rmt
 )
 
 src_configure() {
@@ -26,5 +29,10 @@ src_configure() {
     esandbox hack_toolong
     default
     esandbox nohack_toolong
+}
+
+src_install() {
+    default
+    edo rmdir "${IMAGE}"/usr/libexec
 }
 
