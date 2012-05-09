@@ -3,9 +3,9 @@
 # Based in part upon 'cyrus-sasl-2.1.22-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic pam systemd-service
+require flag-o-matic pam systemd-service easy-multibuild
 
-export_exlib_phases pkg_pretend src_prepare src_configure src_compile src_install
+export_exlib_phases pkg_pretend src_prepare src_install
 
 SUMMARY="Library implementing the Simple Authentication and Security Layer"
 DESCRIPTION="
@@ -21,37 +21,24 @@ DOWNLOADS="http://ftp.andrew.cmu.edu/pub/cyrus-mail/${PNV/-rc/rc}.tar.gz"
 
 LICENCES="cyrus-sasl"
 SLOT="0"
-MYOPTIONS="ssl"
+
+if ever at_least 2.1.24-rc1 ; then
+    MYOPTIONS="ldap "
+fi
+
+MYOPTIONS+="ssl
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
 build+run:
     sys-libs/gdbm
     sys-libs/pam
-    ssl? ( dev-libs/openssl )
+    ssl? ( dev-libs/openssl[multibuild_c:*(-)?] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    "--disable-static"
-    "--enable-login"
-    "--enable-auth-sasldb"
-    "--with-dblib=gdbm"
-    "--disable-krb4"
-    "--disable-otp"
-    "--disable-ntlm"
-    "--disable-srp"
-    "--disable-java"
-    "--disable-sql"
-    "--with-saslauthd=/var/lib/sasl2"
-    "--with-pwcheck=/var/lib/sasl2"
-    "--with-configdir=/etc/sasl2"
-    "--with-plugindir=/usr/${LIBDIR}/sasl2"
-    "--with-dbpath=/etc/sasl2/sasldb2"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    "ssl openssl"
-    "ssl des"
-)
+if ever at_least 2.1.24-rc1 ; then
+    DEPENDENCIES+="ldap? ( net-directory/openldap[multibuild_c:*(-)?] )"
+fi
 
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( saslauthd )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LDAP_SASLAUTHD )
@@ -77,15 +64,42 @@ cyrus-sasl_src_prepare()
     edo popd
 }
 
-cyrus-sasl_src_configure()
+configure_one_multibuild()
 {
-    default
+    local myconf=(
+        "--disable-static"
+        "--enable-login"
+        "--enable-auth-sasldb"
+        "--with-dblib=gdbm"
+        "--disable-krb4"
+        "--disable-otp"
+        "--disable-ntlm"
+        "--disable-srp"
+        "--disable-java"
+        "--disable-sql"
+        "--with-saslauthd=/var/lib/sasl2"
+        "--with-pwcheck=/var/lib/sasl2"
+        "--with-configdir=/etc/sasl2"
+        "--with-plugindir=/usr/${LIBDIR}/sasl2"
+        "--with-dbpath=/etc/sasl2/sasldb2"
+        "$(option_with ssl openssl)"
+        "$(option_with ssl des)"
+    )
+
+    if ever at_least 2.1.24-rc1 ; then
+        myconf+=(
+            "$(option_enable ldap ldapdb)"
+            "$(option_with ldap ldap "/usr/${LIBDIR}")"
+        )
+    fi
+
+    econf "${myconf[@]}"
     edo pushd saslauthd
-    default
+    econf "${myconf[@]}"
     edo popd
 }
 
-cyrus-sasl_src_compile()
+compile_one_multibuild()
 {
     append-flags -fPIC
     emake -j1
@@ -93,7 +107,7 @@ cyrus-sasl_src_compile()
 
 cyrus-sasl_src_install()
 {
-    default
+    easy-multibuild_src_install
 
     dodir /var/lib/sasl2 /etc/sasl2
     keepdir /var/lib/sasl2 /etc/sasl2
