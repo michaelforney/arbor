@@ -27,7 +27,7 @@ HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
 BUGS_TO="philantrop@exherbo.org"
 
 if ever is_scm ; then
-    LICENCES="LGPL-2.1"
+    LICENCES="( GPL-2 LGPL-2 LGPL-2.1 )"
 else
     LICENCES="GPL-2"
 fi
@@ -40,7 +40,18 @@ MYOPTIONS="
     plymouth [[ description = [ Enable Plymouth (graphical boot splash) integration ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
+"
+
+if ever is_scm ; then
+    MYOPTIONS+="
+        gobject-introspection
+        gtk-doc
+    "
+fi
+
+MYOPTIONS+="
     multibuild_c: 32 64
+    platform: ia64
 "
 
 DEPENDENCIES="
@@ -48,14 +59,16 @@ DEPENDENCIES="
         dev-libs/libxslt
         dev-util/intltool[>=0.40.0]
         dev-util/pkg-config[>=0.20]
+        sys-devel/automake[>=1.11.3]
         sys-devel/gettext
     build+run:
-        app-arch/xz
+        app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
-        dev-util/gperf
+        dev-util/gperf[>=3.0.4]
         sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
+        sys-apps/kmod[>=5][multibuild_c:*(-)?]
         sys-apps/skeleton-filesystem-layout
-        sys-fs/udev[>=172][systemd][multibuild_c:*(-)?]
+        sys-apps/util-linux[>=2.21.1-r1][multibuild_c:*(-)?]
         sys-libs/libcap[multibuild_c:*(-)?]
         sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
@@ -66,15 +79,36 @@ DEPENDENCIES="
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
         || ( sys-apps/sysvinit-tools sys-apps/sysvinit )
-        sys-apps/util-linux[>=2.18_p20101120]
         group/lock [[ note = [ Required for var-lock service ] ]]
         simple-net? ( sys-apps/net-tools[>=1.60_p20120127084908] )
-    post:
-        sys-apps/kmod[>=5]
     suggestion:
         app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
 "
+
+if ever is_scm ; then
+    DEPENDENCIES+="
+        build:
+            gtk-doc? ( app-doc/gtk-doc-autotools[>=1.15-r1] )
+        build+run:
+            sys-apps/pciutils
+            sys-apps/usbutils[>=0.82]
+            !sys-fs/udev [[
+                description = [ udev is now part of systemd. ]
+                resolution = uninstall-blocked-after
+            ]]
+            gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
+        run:
+            group/dialout
+    "
+fi
+
+if ! ever is_scm ; then
+    DEPENDENCIES+="
+        build+run:
+            sys-fs/udev[>=172][systemd][multibuild_c:*(-)?]
+    "
+fi
 
 AT_M4DIR=( m4 )
 
@@ -103,6 +137,7 @@ systemd_src_prepare() {
     if [[ ${LIBDIR} != lib ]]; then
         edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/rootlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/udevlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
         edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
@@ -112,6 +147,13 @@ systemd_src_prepare() {
         edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
     fi
 
+    if ever is_scm ; then
+        if option gtk-doc ; then
+            edo gtkdocize --copy
+        else
+            edo echo 'EXTRA_DIST =' > docs/gtk-doc.make
+        fi
+    fi
     autotools_src_prepare
     edo intltoolize
 }
@@ -127,6 +169,7 @@ configure_one_multibuild() {
         --enable-hostnamed
         --enable-localed
         --enable-logind
+        --enable-manpages
         --enable-pam
         --enable-quotacheck
         --enable-randomseed
@@ -139,22 +182,40 @@ configure_one_multibuild() {
         --disable-audit
         # Disable putting core dumps into the journal for now.
         --disable-coredump
-        # Disable the GTK+ tools - those are part of systemd-ui now.
-        --disable-gtk
         --disable-selinux
         --with-distro=other
         --with-pamlibdir=/${LIBDIR}/security
         # Disable SysV init compatibility.
         --with-sysvinit-path=""
         --with-sysvrcd-path=""
-        --with-udevrulesdir=/${LIBDIR}/udev/rules.d
         $(option_enable acl)
         $(option_enable cryptsetup libcryptsetup)
         $(option_enable plymouth)
         $(option_enable tcpd tcpwrap)
     )
 
-    econf ${myconfig[@]}
+    if ever is_scm ; then
+        edo mkdir -p src/gudev
+
+        myconfig+=(
+            --enable-gudev
+            --enable-keymap
+            --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
+            --with-pci-ids-path=/usr/share/misc/pci.ids
+            --with-usb-ids-path=/usr/share/misc/usb.ids
+            --disable-ima
+            $(option_enable gobject-introspection introspection)
+            $(option_enable gtk-doc)
+        )
+    else
+        myconfig+=(
+            --with-udevrulesdir=/${LIBDIR}/udev/rules.d
+            # Disable the GTK+ tools - those are part of systemd-ui now.
+            --disable-gtk
+        )
+    fi
+
+    econf "${myconfig[@]}"
 }
 
 systemd_src_install() {
@@ -291,6 +352,39 @@ EOF
     keepdir /etc/tmpfiles.d
     keepdir /usr/${LIBDIR}/tmpfiles.d
 
+    keepdir /usr/${LIBDIR}/systemd/system-sleep
+
+    if ever is_scm; then
+        keepdir /etc/udev/rules.d
+        keepdir /usr/${LIBDIR}/udev/rules.d
+        keepdir /usr/libexec/udev/devices
+
+        # platform rules
+        insinto /usr/${LIBDIR}/udev/rules.d
+        option platform:ia64 && doins "rules/arch/40-ia64.rules"
+
+        # module loading configuration
+        insinto /etc/modprobe.d
+        doins "${FILES}"/blacklist.conf
+        doins "${FILES}"/pnp-aliases.conf
+
+        # config protection
+        hereenvd 20udev <<EOT
+CONFIG_PROTECT_MASK="/usr/${LIBDIR}/udev/rules.d"
+EOT
+
+        # fix lib paths
+        if [[ ${LIBDIR} != lib ]] ; then
+            if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
+                edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
+            fi
+            [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
+        fi
+
+        # Create a compatibility symlink from /${LIBDIR}/udev/udevd to /sbin/udevd.
+        dosym /usr/${LIBDIR}/udev/udevd /sbin/udevd
+    fi
+
     # Remove man page for systemadm, which is also in app-admin/systemd-ui
     if ! ever is_scm; then
         edo rm "${IMAGE}"/usr/share/man/man1/systemadm.1
@@ -304,6 +398,26 @@ systemd_pkg_postinst() {
         nonfatal edo /usr/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
+
+        if ever is_scm; then
+            # if the root of init does not match our root, we are in a chroot and should not perform the
+            # restart of the udev process
+            [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]] || return
+
+            # No need to ewarn or something because udevd might not be running.
+            nonfatal edo pkill -TERM udevd
+            nonfatal edo sleep 1
+            nonfatal edo pkill -KILL udevd
+
+            # Change the wait mode to wait/eldest so
+            # sydbox doesn't wait for udevd to exit.
+            esandbox wait_eldest
+
+            # Allow access to /run/udev/control for udevd
+            esandbox allow_net unix:/run/udev/control
+
+            nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+        fi
     fi
 
     local cruft=( /etc/init.d/sysinit.bash )
