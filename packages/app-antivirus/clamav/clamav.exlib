@@ -46,6 +46,11 @@ DEFAULT_SRC_TEST_PARAMS=( VALGRIND=no )
 clamav_src_install() {
     default
 
+    insinto /usr/${LIBDIR}/tmpfiles.d
+    hereins ${PN}.conf <<EOF
+d /run/clamav 0755 clamav clamav
+EOF
+
     if option baselayout ; then
         # Install /etc/logrotate.d/clamavd ?
         hereconfd clamd <<EOF
@@ -59,15 +64,15 @@ FRESHCLAM_NICELEVEL=19
 EOF
         newinitd "${FILES}"/clamd.rc clamd
     fi
-    dodir /var/{log,run}/${PN}
-    keepdir /var/{log,run}/${PN}
-    edo chown clamav:clamav "${IMAGE}"/var/{log,run}/${PN}
+    dodir /var/log/${PN}
+    keepdir /var/log/${PN}
+    edo chown clamav:clamav "${IMAGE}"/var/log/${PN}
 
     # XXX Use patches
     # Set up some default configs
     sed -e "s:^\(Example\):\# \1:" \
-        -e "s:.*\(PidFile\) .*:\1 /var/run/clamav/clamd.pid:" \
-        -e "s:.*\(LocalSocket\) .*:\1 /var/run/clamav/clamd.sock:" \
+        -e "s:.*\(PidFile\) .*:\1 /run/clamav/clamd.pid:" \
+        -e "s:.*\(LocalSocket\) .*:\1 /run/clamav/clamd.sock:" \
         -e "s:.*\(User\) .*:\1 clamav:" \
         -e "s:^\#\(LogFile\) .*:\1 /var/log/clamav/clamd.log:" \
         -e "s:^\#\(LogTime\).*:\1 yes:" \
@@ -76,7 +81,7 @@ EOF
 
     # Do the same for /etc/freshclam.conf
     sed -e "s:^\(Example\):\# \1:" \
-        -e "s:.*\(PidFile\) .*:\1 /var/run/clamav/freshclam.pid:" \
+        -e "s:.*\(PidFile\) .*:\1 /run/clamav/freshclam.pid:" \
         -e "s:.*\(DatabaseOwner\) .*:\1 clamav:" \
         -e "s:^\#\(UpdateLogFile\) .*:\1 /var/log/clamav/freshclam.log:" \
         -e "s:^\#\(NotifyClamd\).*:\1 /etc/clamd.conf:" \
