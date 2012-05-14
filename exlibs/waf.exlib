@@ -22,22 +22,27 @@ ewaf() {
 }
 
 waf_src_configure() {
-    ewaf configure \
+    ewaf --jobs=1 configure \
         --prefix=/usr/ \
         --bindir=/usr/bin/ \
         --libdir=/usr/${LIBDIR}/ \
         --datadir=/usr/share/ \
         ${WAF_SRC_CONFIGURE_HTMLDIR---htmldir=/usr/share/doc/${PNVR}/html/} \
         "${WAF_SRC_CONFIGURE_PARAMS[@]}" \
-        $(for s in "${WAF_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do option_enable ${s} ; done)
+        $(for s in "${WAF_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do option_enable ${s} ; done) \
+        $(for s in "${WAF_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do option_with ${s} ; done)
 }
 
 waf_src_compile() {
-    ewaf build
+    ewaf --jobs=${EXJOBS:-1} build
+}
+
+wafsamba_src_test() {
+    ewaf --jobs=${EXJOBS:-1} -v test
 }
 
 waf_src_install() {
-    ewaf install \
-        --destdir="${IMAGE}"
+    ewaf --jobs=1 install --destdir="${IMAGE}"
+    emagicdocs
 }
 
