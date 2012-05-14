@@ -156,6 +156,7 @@ ecmake() {
         -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX:=/usr}"
         -DLIB_INSTALL_DIR:PATH="${PREFIX}/${LIBDIR}"
         -DLIB_SUFFIX:STRING=${LIBDIR#lib}
+        -DCMAKE_PREFIX_PATH:PATH=/usr/${LIBDIR}
     )
 
     local cmake_api
