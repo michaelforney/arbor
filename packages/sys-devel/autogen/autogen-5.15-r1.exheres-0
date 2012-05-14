@@ -1,7 +1,7 @@
 # Copyright 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_automake=[ 1.11 ] supported_autoconf=[ 2.5 ] ] gnu [ suffix=xz subdir=rel${PV} ] flag-o-matic
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] gnu [ suffix=xz subdir=rel${PV} ] flag-o-matic
 
 SUMMARY="AutoGen is a tool designed to simplify the creation and maintenance of programs that contain large amounts of repetitious text"
 
@@ -15,6 +15,10 @@ MYOPTIONS=""
 DEPENDENCIES="
     build+run:
         dev-lang/guile:=
+        dev-libs/boehm-gc     [[ note = [ additionally linked ] ]]
+        dev-libs/gmp:=        [[ note = [ additionally linked ] ]]
+        dev-libs/libffi       [[ note = [ additionally linked ] ]]
+        dev-libs/libunistring [[ note = [ additionally linked ] ]]
         dev-libs/libxml2:2.0
 "
 
