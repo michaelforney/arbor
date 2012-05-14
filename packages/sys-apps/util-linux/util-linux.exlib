@@ -26,10 +26,10 @@ DEPENDENCIES="
             description = [ Upstream renamed util-linux-ng to util-linux ] resolution = uninstall-blocked-after
         ]]
         dev-lang/perl:*
-        sys-fs/udev[>=112]
         sys-libs/ncurses[>=5.6][multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
         sys-libs/pam[multibuild_c:*(-)?]
+        || ( sys-fs/udev[>=112] sys-apps/systemd[~scm] )
 "
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
