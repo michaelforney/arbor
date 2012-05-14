@@ -1,20 +1,17 @@
 # Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-MY_PNV="${PN}${PV/_beta/b}"
-
 SUMMARY="${PN} is a free stand-alone ini file parsing library"
 DESCRIPTION="
 The ${PN} library implements the strict necessary to parse Windows-style ini
 files and return the information as a dictionary of (hashed) strings.
 "
 HOMEPAGE="http://ndevilla.free.fr/${PN}/"
-DOWNLOADS="${HOMEPAGE}/${MY_PNV}.tar.gz"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:inifileparser"
 
-UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/html/index.html [[ lang = en ]]"
 
 LICENCES="MIT"
@@ -24,7 +21,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 DEPENDENCIES=""
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK="${WORKBASE}/${PN}"
 
 src_prepare() {
     edo sed -e "s:^\(CC .*=\) .*:\1 ${CC}:" \
