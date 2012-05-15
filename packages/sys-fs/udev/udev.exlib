@@ -2,15 +2,6 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-if ever is_scm ; then
-    SCM_REPOSITORY="git://git.kernel.org/pub/scm/linux/hotplug/udev.git"
-    require scm-git
-elif ever at_least 177; then
-    DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.xz"
-else
-    DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.bz2"
-fi
-
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
 require easy-multibuild systemd-service
 
@@ -22,6 +13,7 @@ udev provides Linux systems with a dynamic /dev directory and features the abili
 to have persistent device names. It uses sysfs and runs entirely in userspace.
 "
 HOMEPAGE="http://git.kernel.org/?p=linux/hotplug/udev.git;a=summary"
+DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.xz"
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freshmeat:${PN}"
 LICENCES="( GPL-2 LGPL-2 )"
@@ -32,28 +24,25 @@ MYOPTIONS="
     glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
     gobject-introspection [[ requires = [ glib ] ]]
     systemd [[ description = [ install systemd service files ] ]]
-"
-
-if ! ever at_least 182 ; then
-    MYOPTIONS+="
-        acl [[ requires = [ glib -systemd ] ]]
-    "
-fi
-
-MYOPTIONS+="
     multibuild_c: 32 64
     platform: ia64
 " # ppc s390
 
 DEPENDENCIES="
     build:
+        app-arch/xz
         dev-libs/libxslt
         app-doc/gtk-doc-autotools[>=1.15-r1]
     build+run:
         dev-util/gperf[>=3.0.4]
+        sys-apps/kmod[>=5][multibuild_c:*(-)?]
         sys-apps/pciutils
         sys-apps/usbutils[>=0.82]
         sys-apps/util-linux[>=2.20][multibuild_c:*(-)?]
+        !sys-apps/systemd[~scm] [[
+            description = [ udev is now part of systemd. ]
+            resolution = uninstall-blocked-after
+        ]]
         glib? ( dev-libs/glib:2[>=2.22.0][multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
     run:
@@ -61,29 +50,6 @@ DEPENDENCIES="
     suggestion:
         glib? ( sys-auth/ConsoleKit[>=0.4.1] )
 "
-
-if ever at_least 177; then
-    DEPENDENCIES+="
-        build:
-            app-arch/xz[multibuild_c:*(-)?]
-        build+run:
-            sys-apps/kmod[>=3][multibuild_c:*(-)?]
-    "
-fi
-
-if ever at_least 181; then
-    DEPENDENCIES+="
-        build+run:
-            sys-apps/kmod[>=5][multibuild_c:*(-)?]
-    "
-fi
-
-if ! ever at_least 182 ; then
-    DEPENDENCIES+="
-        build+run:
-            acl? ( sys-apps/acl[>=2.2.49][multibuild_c:*(-)?] )
-    "
-fi
 
 AT_M4DIR=( m4 )
 
@@ -111,40 +77,18 @@ udev_src_prepare() {
 configure_one_multibuild() {
     local myconf=()
 
-    if ever at_least 177; then
-        myconf+=(
-            --libexecdir=/${LIBDIR}
-            --with-rootprefix=
-        )
-    else
-        myconf+=(
-            --libexecdir=/${LIBDIR}/udev
-        )
-    fi
-
     myconf+=(
+        --libexecdir=/${LIBDIR}
         --bindir=/sbin
         --sbindir=/sbin
         --enable-static
         --with-rootlibdir=/${LIBDIR}
+        --with-rootprefix=
         --without-selinux
         $(option_enable glib gudev)
         $(option_enable gobject-introspection introspection)
         $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
     )
-
-    if ! ever at_least 182 ; then
-        myconf+=(
-            --enable-edd
-            $(option_enable acl udev_acl)
-        )
-    fi
-
-    if ! ever at_least 177 ; then
-        myconf+=(
-            --enable-hwdb
-        )
-    fi
 
     econf "${myconf[@]}"
 }

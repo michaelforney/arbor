@@ -16,7 +16,15 @@ UPSTREAM_RELEASE_NOTES="${MY_UPSTREAM}-ReleaseNotes"
 
 LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    udev [[
+        description = [ Enable udev support ]
+        note = [ Usually, we hard-enable udev. This option is *solely* to break
+                 a dep-cycle between systemd/udev->util-linux->systemd/udev.
+                 Do NOT introduce new udev options.
+        ]
+    ]]
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -26,10 +34,10 @@ DEPENDENCIES="
             description = [ Upstream renamed util-linux-ng to util-linux ] resolution = uninstall-blocked-after
         ]]
         dev-lang/perl:*
-        sys-fs/udev[>=112]
         sys-libs/ncurses[>=5.6][multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
         sys-libs/pam[multibuild_c:*(-)?]
+        udev? ( || ( sys-fs/udev[>=112] sys-apps/systemd[~scm] ) )
 "
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
@@ -44,7 +52,8 @@ configure_one_multibuild() {
         --enable-nls \
         --enable-partx \
         --without-selinux \
-        --without-utempter
+        --without-utempter \
+        $(option_with udev)
 }
 
 src_install() {
