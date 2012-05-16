@@ -1,0 +1,63 @@
+Upstream: no, https://bugzilla.gnome.org/show_bug.cgi?id=673698
+From 0c5c7b004bd4a7a87166faea845e6418e83dd4a7 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <pl.seidler@googlemail.com>
+Date: Wed, 16 May 2012 18:53:45 +0200
+Subject: [PATCH 1/2] tls-tests: respect disabled gnutls
+
+---
+ tls/tests/Makefile.am |    2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tls/tests/Makefile.am b/tls/tests/Makefile.am
+index 4cb84aa..d2f9c92 100644
+--- a/tls/tests/Makefile.am
++++ b/tls/tests/Makefile.am
+@@ -10,10 +10,12 @@ noinst_PROGRAMS = $(TEST_PROGS)
+ LDADD  = \
+ 	$(GLIB_LIBS)
+ 
++if HAVE_GNUTLS
+ TEST_PROGS +=         \
+ 	certificate   \
+ 	connection    \
+ 	$(NULL)
++endif
+ 
+ if HAVE_PKCS11
+ 
+-- 
+1.7.10.2
+
+
+From 4f36c2f01fb2db991509daf12ff3d45c890a2dc1 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <pl.seidler@googlemail.com>
+Date: Wed, 16 May 2012 19:58:50 +0200
+Subject: [PATCH 2/2] test $TEST_PROGS with " " instead -z
+
+---
+ Makefile.decl |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.decl b/Makefile.decl
+index b999c4a..bad3f8d 100644
+--- a/Makefile.decl
++++ b/Makefile.decl
+@@ -33,13 +33,13 @@ test: test-nonrecursive
+ 
+ # test-nonrecursive: run tests only in cwd
+ test-nonrecursive: ${TEST_PROGS}
+-	@test -z "${TEST_PROGS}" || ${TEST_ENVIRONMENT} ${GTESTER} --verbose ${TEST_PROGS}
++	@test -z "${TEST_PROGS}" || test "${TEST_PROGS}" = " " || ${TEST_ENVIRONMENT} ${GTESTER} --verbose ${TEST_PROGS}
+ 
+ # test-report: run tests in subdirs and generate report
+ # perf-report: run tests in subdirs with -m perf and generate report
+ # full-report: like test-report: with -m perf and -m slow
+ test-report perf-report full-report:	${TEST_PROGS}
+-	@test -z "${TEST_PROGS}" || { \
++	@test -z "${TEST_PROGS}" || test "${TEST_PROGS}" = " " || { \
+ 	  case $@ in \
+ 	  test-report) test_options="-k";; \
+ 	  perf-report) test_options="-k -m=perf";; \
+-- 
+1.7.10.2
+
