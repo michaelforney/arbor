@@ -17,6 +17,8 @@ multibuild_c: 32 64
 "
 
 DEPENDENCIES="
+    build:
+        !sys-libs/glibc[<2.14] [[ description = [ Missing header files ] ]]
     build+run:
         gss? ( net-libs/libgssglue )
 "
