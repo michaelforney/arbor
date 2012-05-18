@@ -12,8 +12,9 @@ MYOPTIONS="python multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        sys-devel/gettext[>=0.17]
     build+run:
+        sys-libs/zlib[multibuild_c:*(-)?]
         python? ( dev-lang/python:=[multibuild_c:*(-)?] )"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
