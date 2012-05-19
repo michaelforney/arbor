@@ -26,6 +26,9 @@ MYOPTIONS="
 "
 # FIXME: kerberos
 
+# The test were broken in 1.2.6.
+RESTRICT="test"
+
 DEPENDENCIES="
     build+run:
         net-libs/libtirpc
@@ -35,6 +38,7 @@ DEPENDENCIES="
         caps? ( sys-libs/libcap )
         gss? ( net-libs/libgssglue )
         nfsv4? (
+                dev-db/sqlite:3
                 dev-libs/libevent[>=1.0b]
                 net-libs/libnfsidmap[>=0.16]
                 sys-fs/lvm2
@@ -65,6 +69,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     ipv6
     nfsv4
     "nfsv4 nfsv41"
+    "nfsv4 nfsdcld"
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( KNOWNBUGS NEW )
@@ -79,6 +84,8 @@ nfs-utils_pkg_pretend() {
 }
 
 nfs-utils_src_install() {
+    dodir /sbin
+
     default
 
     install_systemd_files
@@ -99,10 +106,6 @@ EOF
     keepdir /var/lib/nfs/{sm,sm.bak}
     edo mv "${IMAGE}"/var/lib/nfs/* "${IMAGE}"/usr/${LIBDIR}/nfs
     keepdir /var/lib/nfs
-
-    # Install some client-side binaries in /sbin
-    dodir /sbin
-    edo mv "${IMAGE}"/usr/sbin/rpc.statd "${IMAGE}"/sbin/
 
     if option baselayout ; then
         local f list=""

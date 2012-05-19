@@ -5,31 +5,32 @@
 
 [ -e /etc/conf.d/nfs ] && . /etc/conf.d/nfs
 
-rpc_bin=/sbin/rpc.statd
-rpc_pid=/var/run/rpc.statd.pid
+rpc_bin=/usr/sbin/rpc.statd
+rpc_pid=/run/rpc.statd.pid
 
 depend() {
-	use ypbind net
-	need rpcbind
-	after quota
+    use ypbind net
+    need rpcbind
+    after quota
 }
 
 is_running() {
-	# Don't start rpc.statd if already started by someone else ...
-	# Don't try and kill it if it's already dead ...
-	killall -q -0 ${rpc_bin}
+    # Don't start rpc.statd if already started by someone else ...
+    # Don't try and kill it if it's already dead ...
+    killall -q -0 ${rpc_bin}
 }
 
 start() {
-	is_running && return 0
-	ebegin "Starting NFS statd"
-	start-stop-daemon --start --exec ${rpc_bin} -- --no-notify ${OPTS_RPC_STATD}
-	eend $?
+    is_running && return 0
+    mkdir -p ${rpc_pid}
+    ebegin "Starting NFS statd"
+    start-stop-daemon --start --exec ${rpc_bin} -- --no-notify ${OPTS_RPC_STATD}
+    eend $?
 }
 
 stop() {
-	is_running || return 1
-	ebegin "Stopping NFS statd"
-	start-stop-daemon --stop --exec ${rpc_bin} --pidfile /var/run/rpc.statd.pid
-	eend $?
+    is_running || return 1
+    ebegin "Stopping NFS statd"
+    start-stop-daemon --stop --exec ${rpc_bin} --pidfile ${rpc_pid}
+    eend $?
 }
