@@ -1,7 +1,7 @@
 # Copyright 2010 Alex Elsayed <eternaleye@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'courier-0.65.0.ebuild', which is:
-#     Copyright 1999-2010 Gentoo Foundation 
+#     Copyright 1999-2010 Gentoo Foundation
 
 require sourceforge
 
@@ -144,7 +144,7 @@ src_configure() {
         --with-mailgroup=courier \
         --with-mailuser=courier \
         --with-perlfilter \
-        --with-piddir=/var/run/courier \
+        --with-piddir=/run/courier \
         --with-pthreads \
         --with-qdircount=100 \
         --with-random=/dev/urandom \
@@ -170,7 +170,7 @@ src_configure() {
         --localstatedir=/var/lib/courier \
         --sysconfdir=/etc/courier
     # This is the one line from the Gentoo ebuild, fixing Gentoo bug #73468
-    edo sed -e'/^install-perms-local:/a\	sed -e\"s|^|'"${IMAGE}"'|g\" -i permissions.dat' -i Makefile 
+    edo sed -e'/^install-perms-local:/a\    sed -e\"s|^|'"${IMAGE}"'|g\" -i permissions.dat' -i Makefile
 }
 
 src_install() {
@@ -183,7 +183,6 @@ src_install() {
     keepdir \
         /var/spool/courier-calendar/{public,private,localcache} \
         /var/lib/courier/{webmail-logincache,filters,allfilters,tmp,track,msgs,msgq} \
-        /var/run/courier \
         /etc/courier/{webadmin/added,webadmin/removed,filters/active,shared,shared.tmp,aliasdir}
     if option courier_modules:fax; then
         keepdir /var/lib/courier/faxtmp
