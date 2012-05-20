@@ -4,19 +4,19 @@
 # $Header: /var/cvsroot/gentoo-x86/sys-process/vixie-cron/files/vixie-cron.rc6,v 1.2 2005/06/09 01:35:44 ka0ttic Exp $
 
 depend() {
-	use clock logger
-	need localmount
-	provide cron	
+    use clock logger
+    need localmount
+    provide cron
 }
 
 start() {
-	ebegin "Starting vixie-cron"
-	start-stop-daemon --start --quiet --exec /usr/sbin/cron
-	eend $?
+    ebegin "Starting vixie-cron"
+    start-stop-daemon --start --quiet --exec /usr/sbin/cron
+    eend $?
 }
 
 stop() {
-	ebegin "Stopping vixie-cron"
-	start-stop-daemon --stop --quiet --pidfile /var/run/cron.pid
-	eend $?
+    ebegin "Stopping vixie-cron"
+    start-stop-daemon --stop --quiet --pidfile /run/cron.pid
+    eend $?
 }
