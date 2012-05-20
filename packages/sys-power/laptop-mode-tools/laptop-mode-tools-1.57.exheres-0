@@ -43,7 +43,6 @@ src_install() {
 
     edo rm "${IMAGE}"/etc/init.d/laptop-mode
     option baselayout && newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
-    option baselayout && keepdir /var/run/laptop-mode-tools
     option baselayout || edo rmdir "${IMAGE}"/etc/init.d
 }
 

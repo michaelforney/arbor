@@ -6,45 +6,46 @@
 opts="${opts} reload"
 
 depend() {
-	need localmount
-	use acpid hald
-	after bootmisc
+    need localmount
+    use acpid hald
+    after bootmisc
 }
 
 checkconfig() {
-	if [ ! -f /proc/sys/vm/laptop_mode ] ; then
-		eerror "Kernel does not support laptop_mode"
-		return 1
-	fi
+    if [ ! -f /proc/sys/vm/laptop_mode ] ; then
+        eerror "Kernel does not support laptop_mode"
+        return 1
+    fi
 }
 
 start() {
-	checkconfig || return 1
+    checkconfig || return 1
 
-	ebegin "Starting laptop_mode"
-	touch /var/run/laptop-mode-tools/enabled
-	/usr/sbin/laptop_mode auto >/dev/null
-	eend $?
+    ebegin "Starting laptop_mode"
+    mkdir -p /run/laptop-mode-tools
+    touch /run/laptop-mode-tools/enabled
+    /usr/sbin/laptop_mode auto >/dev/null
+    eend $?
 }
 
 stop() {
-	ebegin "Stopping laptop_mode"
-	rm -f /var/run/laptop-mode-tools/enabled
-	/usr/sbin/laptop_mode stop >/dev/null
-	eend $?
+    ebegin "Stopping laptop_mode"
+    rm -f /run/laptop-mode-tools/enabled
+    /usr/sbin/laptop_mode stop >/dev/null
+    eend $?
 }
 
 reload() {
-	if ! service_started "${SVCNAME}" ; then
-		eerror "${SVCNAME} has not yet been started"
-		return 1
-	fi
+    if ! service_started "${SVCNAME}" ; then
+        eerror "${SVCNAME} has not yet been started"
+        return 1
+    fi
 
-	ebegin "Reloading laptop_mode"
-	/usr/sbin/laptop_mode stop >/dev/null
-	rm -f /var/run/laptop-mode-tools/*
-	/usr/sbin/laptop_mode auto force >/dev/null
-	eend $?
+    ebegin "Reloading laptop_mode"
+    /usr/sbin/laptop_mode stop >/dev/null
+    rm -f /run/laptop-mode-tools/*
+    /usr/sbin/laptop_mode auto force >/dev/null
+    eend $?
 }
 
 # vim: set ts=4 :
