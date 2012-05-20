@@ -104,7 +104,7 @@ postgresql_src_install() {
         install_systemd_files
         insinto /usr/${LIBDIR}/tmpfiles.d
         hereins postgresql.conf <<EOF
-d /var/run/postgresql 0770 postgres postgres
+d /run/postgresql 0770 postgres postgres
 EOF
     fi
 }
