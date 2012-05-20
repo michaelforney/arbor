@@ -4,18 +4,18 @@
 # $Header: /var/cvsroot/gentoo-x86/sys-fs/multipath-tools/files/rc-multipathd,v 1.5 2009/03/17 22:48:13 solar Exp $
 
 depend() {
-	need localmount
-	after modules
+    need localmount
+    after modules
 }
 
 start() {
-	ebegin "Starting multipathd"
-	start-stop-daemon --start --quiet --exec /sbin/multipathd
-	eend $?
+    ebegin "Starting multipathd"
+    start-stop-daemon --start --quiet --exec /sbin/multipathd
+    eend $?
 }
 
 stop() {
-	ebegin "Stopping multipathd"
-	start-stop-daemon --stop --quiet --pidfile /var/run/multipathd.pid
-	eend $?
+    ebegin "Stopping multipathd"
+    start-stop-daemon --stop --quiet --pidfile /run/multipathd.pid
+    eend $?
 }
