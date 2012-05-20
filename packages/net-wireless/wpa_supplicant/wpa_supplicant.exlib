@@ -388,15 +388,15 @@ EOF
 
     # members of the wpa_priv group can start wpa_supplicant, therefore they
     # need read access on wpa_priv created sockets
-#    keepdir /var/run/wpa_priv
-#    edo chown :wpa_priv "${IMAGE}"/var/run/wpa_priv
-#    edo chmod 0750 "${IMAGE}"/var/run/wpa_priv
+#    keepdir /run/wpa_priv
+#    edo chown :wpa_priv "${IMAGE}"/run/wpa_priv
+#    edo chmod 0750 "${IMAGE}"/run/wpa_priv
 
     # users starting wpa_supplicant (who are in the wpa_priv group) need to
     # write their pids into a separate directory
-#    keepdir /var/run/wpa_supplicant
-#    edo chown wpa_supplicant "${IMAGE}"/var/run/wpa_supplicant
-#    edo chmod 0750 "${IMAGE}"/var/run/wpa_supplicant
+#    keepdir /run/wpa_supplicant
+#    edo chown wpa_supplicant "${IMAGE}"/run/wpa_supplicant
+#    edo chmod 0750 "${IMAGE}"/run/wpa_supplicant
 
 #    local defaultdriver=wext
 #    option nl80211 && defaultdriver=nl80211
