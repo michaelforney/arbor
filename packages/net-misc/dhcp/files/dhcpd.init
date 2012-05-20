@@ -29,7 +29,7 @@ start() {
     fi
 
     local pidfile="$(get_var pid-file-name)"
-    pidfile="${pidfile:-/var/run/dhcpd.pid}"
+    pidfile="${pidfile:-/run/dhcpd.pid}"
 
     ebegin "Starting ${SVCNAME}"
     start-stop-daemon --start --exec /sbin/dhcpd \
