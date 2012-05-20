@@ -6,30 +6,30 @@
 # Distributed under the terms of the GNU General Public License v2
 
 CONFIG=/etc/conf.d/fancontrol
-PID=/var/run/fancontrol.pid
+PID=/run/fancontrol.pid
 
 depend() {
-	after lm_sensors
+    after lm_sensors
 }
 
 checkconfig() {
-	if [ ! -f ${CONFIG} ]; then
-		eerror "Configuration file ${CONFIG} not found"
-		return 1
-	fi
+    if [ ! -f ${CONFIG} ]; then
+        eerror "Configuration file ${CONFIG} not found"
+        return 1
+    fi
 }
 
 start() {
-	checkconfig || return 1
+    checkconfig || return 1
 
-	ebegin "Starting fancontrol"
-	start-stop-daemon --start --quiet --background --pidfile ${PID} \
-		--exec /usr/sbin/fancontrol -- ${CONFIG}
-	eend ${?}
+    ebegin "Starting fancontrol"
+    start-stop-daemon --start --quiet --background --pidfile ${PID} \
+        --exec /usr/sbin/fancontrol -- ${CONFIG}
+    eend ${?}
 }
 
 stop() {
-	ebegin "Stopping fancontrol"
-	start-stop-daemon --stop --pidfile ${PID}
-	eend ${?}
+    ebegin "Stopping fancontrol"
+    start-stop-daemon --stop --pidfile ${PID}
+    eend ${?}
 }

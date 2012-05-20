@@ -8,28 +8,28 @@
 CONFIG=/etc/conf.d/sensord
 
 depend() {
-	need logger
-	use lm_sensors
+    need logger
+    use lm_sensors
 }
 
 checkconfig() {
-	if [ ! -f ${CONFIG} ]; then
-		eerror "Configuration file ${CONFIG} not found"
-		return 1
-	fi
+    if [ ! -f ${CONFIG} ]; then
+        eerror "Configuration file ${CONFIG} not found"
+        return 1
+    fi
 }
 
 start() {
-	checkconfig || return 1
+    checkconfig || return 1
 
-	ebegin "Starting sensord"
-	start-stop-daemon --start --exec /usr/sbin/sensord \
-		-- --config-file ${CONFIG} ${SENSORD_OPTIONS}
-	eend ${?}
+    ebegin "Starting sensord"
+    start-stop-daemon --start --exec /usr/sbin/sensord \
+        -- --config-file ${CONFIG} ${SENSORD_OPTIONS}
+    eend ${?}
 }
 
 stop() {
-	ebegin "Stopping sensord"
-	start-stop-daemon --stop --pidfile /var/run/sensord.pid
-	eend ${?}
+    ebegin "Stopping sensord"
+    start-stop-daemon --stop --pidfile /run/sensord.pid
+    eend ${?}
 }
