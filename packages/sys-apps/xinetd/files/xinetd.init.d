@@ -6,39 +6,39 @@
 opts="start stop reload restart dump check"
 
 depend() {
-	use net
+    use net
 }
 
 start() {
-	ebegin "Starting xinetd"
-	(
-	# workaround for #25754
-	unset -f `declare -F | sed 's:declare -f::g'`
-	/usr/sbin/xinetd -pidfile /var/run/xinetd.pid ${XINETD_OPTS}
-	)
-	eend $?
+    ebegin "Starting xinetd"
+    (
+    # workaround for #25754
+    unset -f `declare -F | sed 's:declare -f::g'`
+    /usr/sbin/xinetd -pidfile /run/xinetd.pid ${XINETD_OPTS}
+    )
+    eend $?
 }
 
 stop() {
-	ebegin "Stopping xinetd"
-	start-stop-daemon --stop --quiet --pidfile /var/run/xinetd.pid
-	eend $?
+    ebegin "Stopping xinetd"
+    start-stop-daemon --stop --quiet --pidfile /run/xinetd.pid
+    eend $?
 }
 
 reload(){
-	ebegin "Reloading configuration"
-	killall -HUP xinetd &>/dev/null
-	eend $?
+    ebegin "Reloading configuration"
+    killall -HUP xinetd &>/dev/null
+    eend $?
 }
 
 dump(){
-	ebegin "Dumping configuration"
-	killall -USR1 xinetd &>/dev/null
-	eend $?
+    ebegin "Dumping configuration"
+    killall -USR1 xinetd &>/dev/null
+    eend $?
 }
 
 check(){
-	ebegin "Performing Consistency Check"
-	killall -IOT xinetd &>/dev/null
-	eend $?
+    ebegin "Performing Consistency Check"
+    killall -IOT xinetd &>/dev/null
+    eend $?
 }
