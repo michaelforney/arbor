@@ -106,10 +106,6 @@ postgresql_src_install() {
         hereins postgresql.conf <<EOF
 d /var/run/postgresql 0770 postgres postgres
 EOF
-    else
-        keepdir /var/run/postgresql
-        edo chown postgres:postgres "${IMAGE}"/var/run/postgresql
-        edo chmod 0770 "${IMAGE}"/var/run/postgresql
     fi
 }
 
