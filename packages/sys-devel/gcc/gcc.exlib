@@ -6,6 +6,9 @@
 
 require multibuild toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
 
+export_exlib_phases src_unpack src_prepare src_configure src_test_expensive src_install \
+    pkg_postinst pkg_prerm pkg_postrm
+
 SUMMARY="GNU Compiler Collection"
 
 LICENCES="GPL-2"
@@ -77,7 +80,7 @@ ECONF_SOURCE="${WORKBASE}"/${PNV/_p/-}
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
-src_unpack() {
+gcc_src_unpack() {
     if option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
         edo cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar
@@ -87,12 +90,12 @@ src_unpack() {
     edo mkdir "${WORK}"
 }
 
-src_prepare() {
+gcc_src_prepare() {
     edo cd  "${WORKBASE}/${PNV/_p/-}"
     default
 }
 
-src_configure() {
+gcc_src_configure() {
     local i LANGS="c++"
 
     for i in ada fortran java objc obj-c++; do
@@ -129,7 +132,7 @@ src_configure() {
         $(option_enable propolice libssp)
 }
 
-src_test_expensive() {
+gcc_src_test_expensive() {
     if ! ever at_least 4.6.1; then
         # Increase stack size from 8M to 24M to make
         # gcc.c-torture/compile/limits-exprparen.c test pass as per
@@ -139,7 +142,7 @@ src_test_expensive() {
     emake check
 }
 
-src_install() {
+gcc_src_install() {
     default
 
     # Precompiled headers, disable for cross-compiling
@@ -361,7 +364,7 @@ handle_symlinks() {
     cleanup_dangling_libstdcpp_symlinks
 }
 
-pkg_postinst() {
+gcc_pkg_postinst() {
     alternatives_pkg_postinst
 
     handle_symlinks
@@ -372,7 +375,7 @@ pkg_postinst() {
     done
 }
 
-pkg_prerm() {
+gcc_pkg_prerm() {
     alternatives_pkg_prerm
 
     local ignore
@@ -380,7 +383,7 @@ pkg_prerm() {
     handle_symlinks ${ignore}
 }
 
-pkg_postrm() {
+gcc_pkg_postrm() {
     local x
     for x in "${symlinks[@]}"; do
         if [[ -L ${ROOT}${x/-${SLOT}} && ! -e ${ROOT}${x/-${SLOT}} ]]; then
