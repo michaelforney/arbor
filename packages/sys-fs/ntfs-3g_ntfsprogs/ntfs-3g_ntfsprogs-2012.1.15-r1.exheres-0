@@ -54,10 +54,11 @@ REMOTE_IDS="sourceforge:ntfs-3g"
 UPSTREAM_RELEASE_NOTES="${BASE_URL}/community/release-history/"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-ldconfig
+    --exec-prefix=/usr
     --enable-mount-helper
     --enable-ntfsprogs
     --enable-xattr-mappings
+    --disable-ldconfig
     --with-fuse=external
     --with-uuid
 )
@@ -71,6 +72,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 
 src_install() {
     default
+
+    dodir /usr/sbin
+    edo mv "${IMAGE}"/sbin/* "${IMAGE}"/usr/sbin
+    edo rmdir "${IMAGE}"/sbin
 
     insinto /${LIBDIR}/udev/rules.d
     doins "${FILES}"/99-ntfs-3g.rules
