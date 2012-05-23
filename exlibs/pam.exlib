@@ -98,14 +98,19 @@ newpammod() {
     newexe "$1" "$2"
 }
 
-# pamd_mimic_system <pamd file> [auth levels]
+# pamd_mimic_system <pamd file> <pamd base service> [auth levels]
 #
 # This function creates a pamd file which mimics system-auth file
 # for the given levels in the /etc/pam.d directory.
+#
+# <pamd base service> can be either local-login, remote-login or
+# auth. local-login or remote-login should be used when the
+# application in question may start an interactive shell. auth
+# should be used for all other applications.
 pamd_mimic_system() {
     illegal_in_global_scope
 
-    [[ $# -lt 2 ]] && die "pamd_mimic_system requires at least two argments"
+    [[ $# -lt 3 ]] && die "pamd_mimic_system requires at least three argments"
 
     dodir /etc/pam.d
     pamdfile=${IMAGE}/etc/pam.d/${1}
@@ -113,12 +118,15 @@ pamd_mimic_system() {
 
     authlevels="auth account password session"
 
+    hasq "${2}" "auth local-login remote-login" || die "unknown base service"
+
     if has_version --root 'sys-libs/pam[<0.78]'; then
-        mimic="\trequired\t\tpam_stack.so service=system-auth"
+        mimic="\trequired\t\tpam_stack.so service=system-${2}"
     else
-        mimic="\tinclude\t\tsystem-auth"
+        mimic="\tinclude\t\tsystem-${2}"
     fi
 
+    shift
     shift
 
     while [[ -n $1 ]]; do
