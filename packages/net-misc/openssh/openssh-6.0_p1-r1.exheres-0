@@ -140,7 +140,7 @@ src_install() {
         edo sed -e "/^#UsePAM /s:.*:UsePAM yes:" \
                 -e "/^#PasswordAuthentication /s:.*:PasswordAuthentication no:" \
                 -i "${IMAGE}"/etc/ssh/sshd_config
-        newpamd "${FILES}"/sshd.pam_include.1 sshd
+        pamd_mimic_system sshd remote-login auth account password session
     fi
 
     doman contrib/ssh-copy-id.1
