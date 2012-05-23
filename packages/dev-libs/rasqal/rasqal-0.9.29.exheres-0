@@ -25,8 +25,11 @@ DEPENDENCIES="
     test:
         dev-perl/XML-DOM
     build+run:
+        dev-libs/libgcrypt
+        dev-libs/libgpg-error
         dev-libs/libxml2[>=2.6.8]
-        media-libs/raptor[>=2.0.4]
+        media-libs/raptor[>=2.0.7]
+        sys-apps/util-linux [[ note = [ for libuuid ] ]]
         gmp? ( dev-libs/gmp:= )
         !gmp? ( dev-libs/mpfr:= )
         pcre? ( dev-libs/pcre[>=3.9] )
@@ -36,6 +39,7 @@ src_configure() {
     econf \
         --enable-xml2 \
         --with-decimal=$(optionv gmp || echo "mpfr") \
+        --with-digest-library=gcrypt \
         --with-regex-library=$(optionv pcre || echo "posix") \
         $(option_enable pcre)
 }
