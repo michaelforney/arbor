@@ -103,10 +103,12 @@ newpammod() {
 # This function creates a pamd file which mimics system-auth file
 # for the given levels in the /etc/pam.d directory.
 #
-# <pamd base service> can be either local-login, remote-login or
-# auth. local-login or remote-login should be used when the
-# application in question may start an interactive shell. auth
-# should be used for all other applications.
+# <pamd base service> can be either local-login, remote-login or auth.
+# local-login or remote-login should be used when the application in
+# question is usually used to start an interactive shell and is what
+# pam_loginuid(8) refers to as "entry point application" which means it
+# isn't normally started manually by the user in an already opened
+# session. auth should be used for all other cases.
 pamd_mimic_system() {
     illegal_in_global_scope
 
