@@ -54,8 +54,8 @@ glibc_pkg_pretend() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        if ! echo ${CFLAGS} | grep -q -- -march ; then
-            ewarn "-march setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to native"
+        if ! echo ${CFLAGS} | grep -q -- '-m\(arch\|cpu\)' ; then
+            ewarn "-march or -mcpu setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to -march=native"
         fi
     done
     if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
@@ -131,7 +131,7 @@ glibc_src_configure() {
         echo "libc_cv_c_cleanup=yes" >> config.cache
         echo "libc_cv_slibdir=/${LIBDIR}" >> config.cache
 
-        if ! echo ${CFLAGS} | grep -q -- -march ; then
+        if ! echo ${CFLAGS} | grep -q -- '-m\(arch\|cpu\)' ; then
             append-flags -march=native
         fi
         append-flags -O2
