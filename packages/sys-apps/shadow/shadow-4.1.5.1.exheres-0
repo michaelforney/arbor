@@ -26,7 +26,6 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     -p0 "${FILES}"/${PN}-login.defs.patch
-    -p1 "${FILES}"/${PNV}-stdarg.patch
 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -79,8 +78,8 @@ src_install() {
     insopts -m0644
     newins etc/login.defs login.defs
 
-    dopamd "${FILES}/pam.d-include/"{su,passwd,shadow}
-    newpamd "${FILES}/login.pamd.2" login
+    dopamd "${FILES}"/pam.d-include/{su,passwd,shadow}
+    newpamd "${FILES}"/login.pamd.2 login
 
     for x in passwd chpasswd chgpasswd; do
         newpamd "${FILES}"/pam.d-include/passwd ${x}
