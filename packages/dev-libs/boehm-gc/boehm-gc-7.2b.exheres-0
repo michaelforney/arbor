@@ -24,6 +24,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-threads=posix
 )
 
+WORK=${WORKBASE}/${MY_PNV%b} # Can be removed after 7.2b
+
 src_prepare() {
     # These headers are added to pkginclude_HEADERS twice; once unconditionally and once with
     # --enable-cplusplus. If they are added twice, `install` will fail because of duplicate
