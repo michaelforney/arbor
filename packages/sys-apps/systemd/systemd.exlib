@@ -314,11 +314,10 @@ EOF
     keepdir /usr/${LIBDIR}/systemd/system-sleep
 
     keepdir /etc/udev/rules.d
-    keepdir /usr/${LIBDIR}/udev/rules.d
     keepdir /usr/libexec/udev/devices
 
     # platform rules
-    insinto /usr/${LIBDIR}/udev/rules.d
+    insinto /usr/libexec/udev/rules.d
     option platform:ia64 && doins "rules/arch/40-ia64.rules"
 
     # module loading configuration
@@ -327,7 +326,7 @@ EOF
 
     # config protection
     hereenvd 20udev <<EOT
-CONFIG_PROTECT_MASK="/usr/${LIBDIR}/udev/rules.d"
+CONFIG_PROTECT_MASK="/usr/libexec/udev/rules.d"
 EOT
 
     # fix lib paths
