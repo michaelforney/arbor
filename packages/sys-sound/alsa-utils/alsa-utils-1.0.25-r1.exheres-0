@@ -2,7 +2,7 @@
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service
+require systemd-service udev-rules
 
 SUMMARY="ALSA utilities"
 DESCRIPTION="
@@ -51,7 +51,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --sbindir=/usr/sbin
     --disable-xmlto
     --enable-nls
-    --with-udev-rules-dir=/${LIBDIR}/udev/rules.d
+    --with-udev-rules-dir="${UDEVRULESDIR}"
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( alsaloop )
