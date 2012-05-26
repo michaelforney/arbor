@@ -3,6 +3,8 @@
 # Based in part upon 'multipath-tools-0.4.8.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
+require udev-rules
+
 export_exlib_phases src_prepare src_compile src_install pkg_postinst
 
 SUMMARY="Userland tools for the device Mapper multipathing driver"
@@ -40,7 +42,7 @@ multipath-tools_src_prepare() {
     default
 
     edo sed -i -e '/KRNLLIB/s:/lib/:/'${LIBDIR}'/:' Makefile
-    edo sed -i -e '/libudevdir/s:/lib/:/'${LIBDIR}'/:' Makefile.inc
+    edo sed -i -e '/libudevdir/s:/lib/:/usr/libexec/:' Makefile.inc
 }
 
 multipath-tools_src_compile() {
@@ -54,10 +56,10 @@ multipath-tools_src_install() {
     newins "${WORK}"/multipath.conf.annotated multipath.conf
 
     # Move udev rules into the correct place.
-    dodir /${LIBDIR}/udev/rules.d
-    edo mv "${IMAGE}"/etc/udev/rules.d/multipath.rules "${IMAGE}"/${LIBDIR}/udev/rules.d/65-multipath.rules
-    edo mv "${IMAGE}"/etc/udev/rules.d/kpartx.rules "${IMAGE}"/${LIBDIR}/udev/rules.d/66-kpartx.rules
-    edo chmod 644 "${IMAGE}"/${LIBDIR}/udev/rules.d/{65-multipath,66-kpartx}.rules
+    dodir "${UDEVRULESDIR}"
+    edo mv "${IMAGE}"/etc/udev/rules.d/multipath.rules "${IMAGE}"/"${UDEVRULESDIR}"/65-multipath.rules
+    edo mv "${IMAGE}"/etc/udev/rules.d/kpartx.rules "${IMAGE}"/"${UDEVRULESDIR}"/66-kpartx.rules
+    edo chmod 644 "${IMAGE}"/"${UDEVRULESDIR}"/{65-multipath,66-kpartx}.rules
     edo find "${IMAGE}"/etc -type d -empty -delete
 
     if option baselayout ; then
