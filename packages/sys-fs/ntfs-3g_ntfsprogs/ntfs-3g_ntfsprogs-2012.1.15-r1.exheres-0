@@ -1,11 +1,13 @@
 # Copyright 2011 Pierre Lejeune <superheron@gmail.com>
-# Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2011-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'ntfs-3g-2011.1.15.exheres-0', which is:
 #     Copyright 2008, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Based in part upon 'ntfsprogs-2.0.0.exheres-0', which is:
 #     Copyright 2009 Gaute Hope <eg@gaute.vetsj.com>
 #     Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
+
+require udev-rules [ udev_files=[ 99-ntfs-3g.rules ] ]
 
 SUMMARY="Read/write NTFS driver (ntfs-3g) and userspace tools (ntfsprogs)"
 DESCRIPTION="
@@ -77,8 +79,7 @@ src_install() {
     edo mv "${IMAGE}"/sbin/* "${IMAGE}"/usr/sbin
     edo rmdir "${IMAGE}"/sbin
 
-    insinto /${LIBDIR}/udev/rules.d
-    doins "${FILES}"/99-ntfs-3g.rules
+    install_udev_files
 }
 
 pkg_postinst() {
