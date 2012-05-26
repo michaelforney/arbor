@@ -2,7 +2,7 @@
 # Copyright 2009-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service easy-multibuild
+require systemd-service easy-multibuild udev-rules
 
 export_exlib_phases src_install
 
@@ -58,7 +58,7 @@ configure_one_multibuild() {
         --with-default-locking-dir=/run/lock/lvm \
         --with-default-run-dir=/run/lvm \
         --with-tmpfilesdir=/usr/${LIBDIR}/tmpfiles.d \
-        --with-udevdir=/${LIBDIR}/udev/rules.d \
+        --with-udevdir="${UDEVRULESDIR}" \
         --with-usrlibdir=/usr/${LIBDIR} \
         --disable-lvmetad \
         --disable-nls \
