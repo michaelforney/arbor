@@ -1,6 +1,8 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require udev-rules
+
 SUMMARY="Central Regulatory Domain Agent"
 DESCRIPTION="
 CRDA acts as the udev helper for communication between the kernel and userspace
@@ -76,7 +78,7 @@ src_install() {
     option ssl && mymake+=( USE_OPENSSL=1 )
 
     emake DESTDIR="${IMAGE}" \
-          UDEV_RULE_DIR=/${LIBDIR}/udev/rules.d \
+          UDEV_RULE_DIR="${UDEVRULESDIR}" \
           SBINDIR=/usr/sbin \
           ${mymake[@]} \
           install
