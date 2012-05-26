@@ -14,14 +14,14 @@ start()
 {
     local file dest type
 
-    [[ -d /dev/.udev ]] || return 0
+    [[ -d /run/udev ]] || return 0
 
     # rerun any failed events
     udevadm trigger '--type=failed'
 
     [[ -w /etc/udev/rules.d ]] || return 0
 
-    for file in /dev/.udev/tmp-rules--* ; do
+    for file in /run/udev/tmp-rules--* ; do
         dest=${file##*tmp-rules--}
 
         [[ "${dest}" == "*" ]] && break

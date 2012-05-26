@@ -1,55 +1,65 @@
-# Copyright 2010-2012 Wulf C. Krueger <philanthrop@exherbo.org>
-# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
-require easy-multibuild systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] alternatives bash-completion easy-multibuild
 
-export_exlib_phases pkg_pretend src_prepare src_configure src_install pkg_postinst
+export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
-SUMMARY="Dynamic userspace /dev manager for Linux"
+SUMMARY="Dynamic userspace /dev manager, part of systemd now. Use that."
 DESCRIPTION="
 udev provides Linux systems with a dynamic /dev directory and features the ability
 to have persistent device names. It uses sysfs and runs entirely in userspace.
+udev is now a part of systemd so you should be using that. This udev exheres is
+only intended for those who don't use systemd.
+This entire package will be replaced with systemd soon. This means you'll be able
+to only use udev but will have systemd *installed*, too.
 "
-HOMEPAGE="http://git.kernel.org/?p=linux/hotplug/udev.git;a=summary"
-DOWNLOADS="mirror://kernel/linux/utils/kernel/hotplug/${PNV}.tar.xz"
+HOMEPAGE="http://www.freedesktop.org/wiki/Software/systemd"
+DOWNLOADS="http://www.freedesktop.org/software/systemd/systemd-${PV}.tar.xz"
 BUGS_TO="philantrop@exherbo.org"
-REMOTE_IDS="freshmeat:${PN}"
-LICENCES="( GPL-2 LGPL-2 )"
+LICENCES="( GPL-2 LGPL-2 LGPL-2.1 MIT )"
 SLOT="0"
 
 MYOPTIONS="
     baselayout
-    glib [[ description = [ build gudev to integrate with glib main-loop ] ]]
-    gobject-introspection [[ requires = [ glib ] ]]
-    systemd [[ description = [ install systemd service files ] ]]
+    gobject-introspection
+    gtk-doc
     multibuild_c: 32 64
     platform: ia64
-" # ppc s390
+"
 
 DEPENDENCIES="
     build:
-        app-arch/xz
         dev-libs/libxslt
-        app-doc/gtk-doc-autotools[>=1.15-r1]
+        dev-util/intltool[>=0.40.0]
+        dev-util/pkg-config[>=0.20]
+        sys-devel/automake[>=1.11.3]
+        sys-devel/gettext
+        gtk-doc? ( app-doc/gtk-doc-autotools[>=1.18] )
     build+run:
+        app-arch/xz[multibuild_c:*(-)?]
+        dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
         dev-util/gperf[>=3.0.4]
+        sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
         sys-apps/kmod[>=5][multibuild_c:*(-)?]
         sys-apps/pciutils
+        sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
-        sys-apps/util-linux[>=2.20][multibuild_c:*(-)?]
-        !sys-apps/systemd[~scm] [[
+        sys-apps/util-linux[>=2.21.1-r1][multibuild_c:*(-)?]
+        sys-libs/libcap[multibuild_c:*(-)?]
+        sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
+        !sys-apps/systemd [[
             description = [ udev is now part of systemd. ]
             resolution = uninstall-blocked-after
         ]]
-        glib? ( dev-libs/glib:2[>=2.22.0][multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=0.6.2] )
     run:
         group/dialout
     suggestion:
-        glib? ( sys-auth/ConsoleKit[>=0.4.1] )
+        sys-auth/ConsoleKit[>=0.4.1]
 "
+
+WORK=${WORKBASE}/systemd-${PV}
 
 AT_M4DIR=( m4 )
 
@@ -69,112 +79,150 @@ udev_pkg_pretend() {
     fi
 }
 
+
 udev_src_prepare() {
-    edo gtkdocize --copy
+    # Set the correct libdir if necessary.
+    if [[ ${LIBDIR} != lib ]]; then
+        edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/rootlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/udevlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
+        edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/binfmtdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/sysctldir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
+    fi
+
+    if option gtk-doc ; then
+        edo gtkdocize --copy
+    else
+        edo echo 'EXTRA_DIST =' > docs/gtk-doc.make
+    fi
+
     autotools_src_prepare
+    edo intltoolize
 }
 
 configure_one_multibuild() {
-    local myconf=()
-
-    myconf+=(
-        --libexecdir=/${LIBDIR}
-        --bindir=/sbin
-        --sbindir=/sbin
-        --enable-static
-        --with-rootlibdir=/${LIBDIR}
-        --with-rootprefix=
-        --without-selinux
-        $(option_enable glib gudev)
+    local myconfig=(
+        --prefix=/usr
+        --libdir=/usr/${LIBDIR}
+        --includedir=/usr/include
+        --libexecdir=/usr/libexec
+        --localstatedir=/var
+        --enable-binfmt
+        --enable-gudev
+        --enable-hostnamed
+        --enable-keymap
+        --enable-localed
+        --enable-logind
+        --enable-manpages
+        --enable-pam
+        --enable-quotacheck
+        --enable-randomseed
+        --enable-readahead
+        # This adds /sbin and /bin to PATH for systemd units again.
+        --enable-split-usr
+        --enable-timedated
+        --enable-vconsole
+        --enable-xz
+        --disable-acl
+        --disable-audit
+        # Disable putting core dumps into the journal for now.
+        --disable-coredump
+        --disable-ima
+        --disable-libcryptsetup
+        --disable-plymouth
+        --disable-selinux
+        --disable-tcpwrap
+        --with-distro=other
+        --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
+        --with-pamlibdir=/${LIBDIR}/security
+        --with-pci-ids-path=/usr/share/misc/pci.ids
+        # Disable SysV init compatibility.
+        --with-sysvinit-path=""
+        --with-sysvrcd-path=""
+        --with-usb-ids-path=/usr/share/misc/usb.ids
         $(option_enable gobject-introspection introspection)
-        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
+        $(option_enable gtk-doc)
     )
 
-    econf "${myconf[@]}"
-}
+    edo mkdir -p src/gudev
 
-udev_src_configure() {
-    easy-multibuild_src_configure
-}
-
-install_one_multibuild() {
-    default
-    keepdir /${LIBDIR}/udev/{devices,state}
+    econf "${myconfig[@]}"
 }
 
 udev_src_install() {
     easy-multibuild_src_install
 
+    dodir /sbin
     keepdir /etc/udev/rules.d
+    keepdir /usr/${LIBDIR}/udev/rules.d
+    keepdir /usr/libexec/udev/devices
 
-    # platform rules {{{
-    insinto /${LIBDIR}/udev/rules.d
-
+    # platform rules
+    insinto /usr/${LIBDIR}/udev/rules.d
     option platform:ia64 && doins "rules/arch/40-ia64.rules"
-    # }}}
 
-    # module loading configuration {{{
+    # module loading configuration
     insinto /etc/modprobe.d
-
     doins "${FILES}"/blacklist.conf
-    doins "${FILES}"/pnp-aliases.conf
-    # }}}
 
-    # config protect {{{
+    # config protection
     hereenvd 20udev <<EOT
-CONFIG_PROTECT_MASK="/${LIBDIR}/udev/rules.d"
+CONFIG_PROTECT_MASK="/usr/${LIBDIR}/udev/rules.d"
 EOT
-    # }}}
 
-    # fix lib paths {{{
+    # fix lib paths
     if [[ ${LIBDIR} != lib ]] ; then
-        if option glib && [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
+        if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
             edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
         fi
         [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
-    # }}}
 
-    # baselayout init scripts {{{
-    if option baselayout; then
-        doinitd "${FILES}"/udev-postmount
+    # Create a compatibility symlink from /usr/${LIBDIR}/systemd/systemd-udevd to /sbin/udevd.
+    dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
 
-        insinto /${LIBDIR}/rcscripts/addons
-
-        doins "${FILES}"/udev-start.sh
-        doins "${FILES}"/udev-stop.sh
-
-        edo sed -e "s,@@libdir@@,${LIBDIR},g"                          \
-                -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-start.sh \
-                -i "${IMAGE}"/${LIBDIR}/rcscripts/addons/udev-stop.sh
-    fi
-    # }}}
-
-    # Create a compatibility symlink from /${LIBDIR}/udev/udevd to /sbin/udevd.
-    dosym /${LIBDIR}/udev/udevd /sbin/udevd
+    # Remove everything not belonging to what-used-to-be-udev.
+    edo rm -r "${IMAGE}"/lib*
+    edo rm -r "${IMAGE}"/etc/{bash_completion.d,binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg}
+    edo rm -r "${IMAGE}"/usr/bin/{journalctl,loginctl,systemctl,systemd*}
+    edo rm -r "${IMAGE}"/usr/{include,share}/systemd
+    edo rm -r "${IMAGE}"/usr/*/{binfmt.d,modules-load.d,sysctl.d,systemd,tmpfiles.d}
+    edo rm -r "${IMAGE}"/usr/*/libsystemd*
+    edo rm -r "${IMAGE}"/usr/*/pkgconfig/libsystemd*
+    edo rm -r "${IMAGE}"/usr/share/{dbus,polkit}-1
+    edo rm -r "${IMAGE}"/usr/share/man/man{1,3,5}
+    edo rm -r "${IMAGE}"/usr/share/man/man7/{daemon.7,sd-*,systemd*}
+    edo rm -r "${IMAGE}"/usr/share/man/man8/{halt,pam_systemd,poweroff,reboot,runlevel,shutdown,systemd*,telinit}.8
+    edo rm -r "${IMAGE}"/usr/share/pkgconfig/systemd.pc
+    edo rm -r "${IMAGE}"/var/{*/{systemd,},}
 }
 
 udev_pkg_postinst() {
-    # If root is not the root of the filesystem, we are not merging to the system image, and we
-    # should not restart the udev process
-    [[ "${ROOT}" == "/" ]] || return
+    default
 
-    # if the root of init does not match our root, we are in a chroot and should not perform the
-    # restart of the udev process
-    [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]] || return
+    if [[ ${ROOT} == / ]]; then
+        # if the root of init does not match our root, we are in a chroot and should not perform the
+        # restart of the udev process
+        [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]] || return
 
-    # No need to ewarn or something because udevd might not be running.
-    nonfatal edo pkill -TERM udevd
-    nonfatal edo sleep 1
-    nonfatal edo pkill -KILL udevd
+        # No need to ewarn or something because udevd might not be running.
+        nonfatal edo pkill -TERM udevd
+        nonfatal edo sleep 1
+        nonfatal edo pkill -KILL udevd
 
-    # Change the wait mode to wait/eldest so
-    # sydbox doesn't wait for udevd to exit.
-    esandbox wait_eldest
+        # Change the wait mode to wait/eldest so
+        # sydbox doesn't wait for udevd to exit.
+        esandbox wait_eldest
 
-    # Allow access to /run/udev/control for udevd
-    esandbox allow_net unix:/run/udev/control
+        # Allow access to /run/udev/control for udevd
+        esandbox allow_net unix:/run/udev/control
 
-    nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+        nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+    fi
 }
 
