@@ -1,6 +1,8 @@
 # Copyright 2008, 2009 Mike Kelly <pioto@exherbo.org>
 # Distributed under the terms of the GPL v2
 
+require udev-rules
+
 MY_PNV="${PN}_${PV}"
 
 SUMMARY="A laptop power saving package for Linux systems"
@@ -40,6 +42,10 @@ src_install() {
         ACPI="force" \
         edo ./install.sh
     keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
+
+    dodir "${UDEVRULESDIR}"
+    edo mv "${IMAGE}"/etc/udev/rules.d/99-laptop-mode.rules "${IMAGE}"/"${UDEVRULESDIR}"
+    edo rmdir "${IMAGE}"/etc/udev/{rules.d,}
 
     edo rm "${IMAGE}"/etc/init.d/laptop-mode
     option baselayout && newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
