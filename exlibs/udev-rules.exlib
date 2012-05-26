@@ -1,0 +1,23 @@
+# Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+myexparam udev_files=[ "${FILES}"/udev ]
+
+export UDEVRULESDIR="/usr/libexec/udev/rules.d"
+
+install_udev_files() {
+    local udev_files object=
+
+    exparam -v udev_files udev_files[@]
+
+    insinto "${UDEVRULESDIR}"
+
+    for object in "${udev_files[@]}"; do
+        if [[ -d ${object} ]]; then
+            doins "${object}"/*
+        else
+            doins "${FILES}"/udev/"${object}"
+        fi
+    done
+}
+
