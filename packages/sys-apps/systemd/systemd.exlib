@@ -8,7 +8,7 @@ else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.xz"
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] alternatives bash-completion easy-multibuild
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] alternatives bash-completion easy-multibuild udev-rules
 
 export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
 
@@ -317,7 +317,7 @@ EOF
     keepdir /usr/libexec/udev/devices
 
     # platform rules
-    insinto /usr/libexec/udev/rules.d
+    insinto "${UDEVRULESDIR}"
     option platform:ia64 && doins "rules/arch/40-ia64.rules"
 
     # module loading configuration
@@ -326,7 +326,7 @@ EOF
 
     # config protection
     hereenvd 20udev <<EOT
-CONFIG_PROTECT_MASK="/usr/libexec/udev/rules.d"
+CONFIG_PROTECT_MASK="${UDEVRULESDIR}"
 EOT
 
     # fix lib paths
