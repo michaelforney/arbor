@@ -40,7 +40,7 @@ DEPENDENCIES="
     build+run:
         app-arch/xz
         sys-devel/gettext [[ note = [ required for grub-mkconfig, grep gettext in /etc/grub.d ] ]]
-        sys-fs/udev
+        || ( sys-apps/systemd sys-fs/udev )
         !sys-boot/grub-static [[ description = [ /sbin/grub-install collides ] resolution = manual ]]
     suggestion:
         sys-boot/os-prober [[
