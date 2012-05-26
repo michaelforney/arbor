@@ -35,7 +35,7 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        sys-fs/udev[>=165-r1][multibuild_c:*(-)?]
+        || ( sys-apps/systemd[multibuild_c:*(-)?] sys-fs/udev[multibuild_c:*(-)?] )
 "
 
 # The tests are expensive, unreliable, they need write access to /dev and /etc
