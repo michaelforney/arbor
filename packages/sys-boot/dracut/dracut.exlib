@@ -136,7 +136,10 @@ dracut_src_prepare() {
     edo sed -i -e '/$(MAKE) -C test check/d' Makefile
 
     # Remove modules that are not compatible with Exherbo.
-    edo rm -r modules.d/{10rpmversion,45ifcfg}
+    if ! ever at_least scm; then
+        edo rm -r modules.d/10rpmversion
+    fi
+    edo rm -r modules.d/45ifcfg
 }
 
 dracut_src_install() {
