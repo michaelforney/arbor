@@ -75,6 +75,9 @@ btrfs-progs_src_install() {
         dosym "${SYSTEMDSYSTEMUNITDIR}"/btrfs.service /etc/systemd/system/basic.target.wants/btrfs.service
     fi
 
+    dodir /sbin
+    dosym /usr/bin/btrfs /sbin/btrfs
+
     insinto /usr
     dosbin btrfs-debug-tree
     dosbin btrfs-image
