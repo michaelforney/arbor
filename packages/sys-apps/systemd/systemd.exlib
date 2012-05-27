@@ -119,7 +119,7 @@ systemd_src_prepare() {
     fi
 
     if option gtk-doc ; then
-        edo gtkdocize --copy
+        edo gtkdocize --copy --docdir docs/
     else
         edo echo 'EXTRA_DIST =' > docs/gtk-doc.make
     fi
