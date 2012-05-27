@@ -81,6 +81,8 @@ DEPENDENCIES="
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0001-Disable-test-id128-which-requires-etc-machine-id-on-.patch )
+
 AT_M4DIR=( m4 )
 
 systemd_pkg_pretend() {
