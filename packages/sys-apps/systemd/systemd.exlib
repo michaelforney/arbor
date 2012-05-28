@@ -339,8 +339,9 @@ EOT
         [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 
-    # Create a compatibility symlink from /usr/${LIBDIR}/systemd/systemd-udevd to /sbin/udevd.
+    # Create compatibility symlinks
     dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
+    dosym /usr/bin/udevadm /sbin/udevadm
 }
 
 systemd_pkg_postinst() {
