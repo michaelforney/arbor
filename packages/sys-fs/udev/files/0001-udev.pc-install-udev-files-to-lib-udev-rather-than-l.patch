@@ -1,0 +1,23 @@
+From 392f9c8404e42f7dd6e5b5adf488d87838515981 Mon Sep 17 00:00:00 2001
+From: Tom Gundersen <teg@jklm.no>
+Date: Sun, 27 May 2012 01:24:16 +0200
+Subject: [PATCH] udev.pc: install udev files to /lib/udev rather than
+ /lib/systemd
+
+---
+ src/udev/udev.pc.in |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/udev/udev.pc.in b/src/udev/udev.pc.in
+index 0b04c02..a0c2e82 100644
+--- a/src/udev/udev.pc.in
++++ b/src/udev/udev.pc.in
+@@ -2,4 +2,4 @@ Name: udev
+ Description: udev
+ Version: @VERSION@
+ 
+-udevdir=@pkglibexecdir@
++udevdir=@udevlibexecdir@
+-- 
+1.7.10.3
+

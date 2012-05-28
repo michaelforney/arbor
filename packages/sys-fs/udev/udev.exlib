@@ -59,6 +59,8 @@ DEPENDENCIES="
         sys-auth/ConsoleKit[>=0.4.1]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0001-Disable-test-id128-which-requires-etc-machine-id-on-.patch )
+
 WORK=${WORKBASE}/systemd-${PV}
 
 AT_M4DIR=( m4 )
@@ -96,7 +98,7 @@ udev_src_prepare() {
     fi
 
     if option gtk-doc ; then
-        edo gtkdocize --copy
+        edo gtkdocize --copy --docdir docs/
     else
         edo echo 'EXTRA_DIST =' > docs/gtk-doc.make
     fi
@@ -183,23 +185,35 @@ EOT
         [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 
-    # Create a compatibility symlink from /usr/${LIBDIR}/systemd/systemd-udevd to /sbin/udevd.
+    # Create compatibility symlinks
     dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
+    dosym /usr/bin/udevadm /sbin/udevadm
+
+    # Keep systemd-udevd safe from the following purge.
+    edo cp "${IMAGE}"/usr/${LIBDIR}/systemd/systemd-udevd "${TEMP}"
 
     # Remove everything not belonging to what-used-to-be-udev.
     edo rm -r "${IMAGE}"/lib*
     edo rm -r "${IMAGE}"/etc/{bash_completion.d,binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg}
     edo rm -r "${IMAGE}"/usr/bin/{journalctl,loginctl,systemctl,systemd*}
     edo rm -r "${IMAGE}"/usr/{include,share}/systemd
-    edo rm -r "${IMAGE}"/usr/*/{binfmt.d,modules-load.d,sysctl.d,systemd,tmpfiles.d}
+    edo rm -r "${IMAGE}"/usr/*/{binfmt.d,modules-load.d,sysctl.d,tmpfiles.d}
+    edo rm -r "${IMAGE}"/usr/*/systemd/system
+    edo rm -r "${IMAGE}"/usr/*/systemd/system-*
+    edo rm -r "${IMAGE}"/usr/*/systemd/systemd-*
+    edo rm -r "${IMAGE}"/usr/*/systemd/user
     edo rm -r "${IMAGE}"/usr/*/libsystemd*
     edo rm -r "${IMAGE}"/usr/*/pkgconfig/libsystemd*
+    edo rm -r "${IMAGE}"/usr/libexec/systemd
     edo rm -r "${IMAGE}"/usr/share/{dbus,polkit}-1
     edo rm -r "${IMAGE}"/usr/share/man/man{1,3,5}
     edo rm -r "${IMAGE}"/usr/share/man/man7/{daemon.7,sd-*,systemd*}
     edo rm -r "${IMAGE}"/usr/share/man/man8/{halt,pam_systemd,poweroff,reboot,runlevel,shutdown,systemd*,telinit}.8
     edo rm -r "${IMAGE}"/usr/share/pkgconfig/systemd.pc
     edo rm -r "${IMAGE}"/var/{*/{systemd,},}
+
+    # Restore systemd-udevd.
+    edo cp "${TEMP}"/systemd-udevd "${IMAGE}"/usr/${LIBDIR}/systemd/
 }
 
 udev_pkg_postinst() {
