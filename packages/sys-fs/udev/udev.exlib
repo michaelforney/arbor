@@ -222,21 +222,21 @@ udev_pkg_postinst() {
     if [[ ${ROOT} == / ]]; then
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
-        [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]] || return
+        if [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]]; then
+            # No need to ewarn or something because udevd might not be running.
+            nonfatal edo pkill -TERM udevd
+            nonfatal edo sleep 1
+            nonfatal edo pkill -KILL udevd
 
-        # No need to ewarn or something because udevd might not be running.
-        nonfatal edo pkill -TERM udevd
-        nonfatal edo sleep 1
-        nonfatal edo pkill -KILL udevd
+            # Change the wait mode to wait/eldest so
+            # sydbox doesn't wait for udevd to exit.
+            esandbox wait_eldest
 
-        # Change the wait mode to wait/eldest so
-        # sydbox doesn't wait for udevd to exit.
-        esandbox wait_eldest
+            # Allow access to /run/udev/control for udevd
+            esandbox allow_net unix:/run/udev/control
 
-        # Allow access to /run/udev/control for udevd
-        esandbox allow_net unix:/run/udev/control
-
-        nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+            nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+        fi
     fi
 }
 
