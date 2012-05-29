@@ -371,15 +371,15 @@ systemd_pkg_postinst() {
         fi
     fi
 
-    local cruft=( /etc/init.d/sysinit.bash /etc/systemd/{systemd-journald.conf,systemd-logind.conf} )
-    for file in ${cruft[@]}; do
+    local cruft=( "${ROOT}"/etc/init.d/sysinit.bash "${ROOT}"/etc/systemd/{systemd-journald.conf,systemd-logind.conf} )
+    for file in "${cruft[@]}"; do
         if [[ -f ${file} || -L ${file} ]]; then
             nonfatal edo rm "${file}" || ewarn "removing ${file} failed"
         fi
     done
 
-    local renamed=( /etc/locale /etc/vconsole )
-    for file in ${renamed[@]}; do
+    local renamed=( "${ROOT}"/etc/locale "${ROOT}"/etc/vconsole )
+    for file in "${renamed[@]}"; do
         if [[ -f ${file} ]] ; then
             nonfatal edo mv "${file}" "${file}".conf || ewarn "moving ${file} failed"
         fi
