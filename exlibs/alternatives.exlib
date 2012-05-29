@@ -133,7 +133,10 @@ EOF
         fi
 
         echo eclectic "${alt}" update "${provider}"
-        eclectic "${alt}" update "${provider}" || exlogfailure
+        eclectic "${alt}" update "${provider}" || {
+            eerror eclectic "${alt}" update "${provider}" returned $?
+            exlogfailure
+        }
 
         cleanup_old_alternatives_module ${alt}
     done
@@ -159,6 +162,7 @@ alternatives_pkg_prerm() {
                     eerror rm "${ROOT}/usr/share/eclectic/modules/auto/${alt}.eclectic" failed
                 ;;
             *)
+                eerror eclectic "${alt}" update "${provider}" returned $?
                 exlogfailure
                 ;;
         esac
