@@ -129,7 +129,8 @@ config_enable() {
         local str="CONFIG_${config}"
         [[ ${str} =~ = ]] || str="${str}=y"
 
-        edo echo "${str}" >> .config
+        echo "echo \"${str}\" >> .config" 1>&2
+        echo "${str}" >> .config || die
     done
 }
 
