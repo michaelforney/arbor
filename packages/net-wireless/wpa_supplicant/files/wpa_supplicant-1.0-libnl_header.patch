@@ -1,0 +1,41 @@
+Upstream: no, http://hostap.epitest.fi/bugz/show_bug.cgi?id=449
+From 526b16d3a7fa1fff73b854a40668d73c9f8dbc6a Mon Sep 17 00:00:00 2001
+From: Paul Seidler <sepek@lavabit.com>
+Date: Sat, 26 May 2012 22:24:25 +0200
+Subject: [PATCH] build: include libnl3 headers
+
+else the build will fail
+---
+ src/drivers/drivers.mak |    2 +-
+ src/drivers/drivers.mk  |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/drivers/drivers.mak b/src/drivers/drivers.mak
+index b1f70e0..e2a3dd7 100644
+--- a/src/drivers/drivers.mak
++++ b/src/drivers/drivers.mak
+@@ -48,7 +48,7 @@ NEED_RFKILL=y
+ ifdef CONFIG_LIBNL32
+   DRV_LIBS += -lnl-3
+   DRV_LIBS += -lnl-genl-3
+-  DRV_CFLAGS += -DCONFIG_LIBNL20
++  DRV_CFLAGS += -DCONFIG_LIBNL20 -I/usr/include/libnl3
+ else
+   ifdef CONFIG_LIBNL_TINY
+     DRV_LIBS += -lnl-tiny
+diff --git a/src/drivers/drivers.mk b/src/drivers/drivers.mk
+index 2d1ad9d..1c7f3df 100644
+--- a/src/drivers/drivers.mk
++++ b/src/drivers/drivers.mk
+@@ -48,7 +48,7 @@ NEED_RFKILL=y
+ ifdef CONFIG_LIBNL32
+   DRV_LIBS += -lnl-3
+   DRV_LIBS += -lnl-genl-3
+-  DRV_CFLAGS += -DCONFIG_LIBNL20
++  DRV_CFLAGS += -DCONFIG_LIBNL20 -I/usr/include/libnl3
+ else
+   ifdef CONFIG_LIBNL_TINY
+     DRV_LIBS += -lnl-tiny
+-- 
+1.7.7.6
+
