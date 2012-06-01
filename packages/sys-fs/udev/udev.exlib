@@ -33,21 +33,15 @@ DEPENDENCIES="
         dev-libs/libxslt
         dev-util/intltool[>=0.40.0]
         dev-util/pkg-config[>=0.20]
-        sys-devel/automake[>=1.11.3]
         sys-devel/gettext
         gtk-doc? ( app-doc/gtk-doc-autotools[>=1.18] )
     build+run:
         app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
-        dev-util/gperf[>=3.0.4]
-        sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
         sys-apps/kmod[>=5][multibuild_c:*(-)?]
         sys-apps/pciutils
-        sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
         sys-apps/util-linux[>=2.21.1-r1][multibuild_c:*(-)?]
-        sys-libs/libcap[multibuild_c:*(-)?]
-        sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
         !sys-apps/systemd [[
             description = [ udev is now part of systemd. ]
             resolution = uninstall-blocked-after
