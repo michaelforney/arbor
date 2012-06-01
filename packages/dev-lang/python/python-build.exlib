@@ -83,7 +83,7 @@ python-build_prepare_one_multibuild() {
     edo cp "${FILES}"/"${PN}"-config.py .
 
     edo sed -i -e "s:@@SLOT@@:${SLOT}:g" \
-               -e "s:@@PKG_CONFIG_PATH@@:${PKG_CONFIG_LIBDIR%%:*}:g" \
+               -e "s:@@PKG_CONFIG_PATH@@:${PKG_CONFIG_PATH%%:*}:g" \
         "${PN}"-config.py
 
     if ever at_least 2.7.0; then
