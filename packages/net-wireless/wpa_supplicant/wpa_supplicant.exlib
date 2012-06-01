@@ -116,9 +116,9 @@ RESTRICT="test"
 WORK=${WORKBASE}/${PNV}/${PN}
 
 [[ ${PV} == "0.7.3" ]] && DEFAULT_SRC_PREPARE_PATCHES=(
-                              -p2 "${FILES}"/${PNV}-new-dbus.patch
-                              "${FILES}"/${PN}-gcc-4.7.patch
-                          )
+                              -p2 "${FILES}"/${PNV}-new-dbus.patch )
+
+DEFAULT_SRC_PREPARE_PATCHES+=( -p2 "${FILES}"/${PN}-gcc-4.7.patch )
 
 DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" BINDIR=/usr/bin LIBDIR=/usr/${LIBDIR} V=1 )
 
