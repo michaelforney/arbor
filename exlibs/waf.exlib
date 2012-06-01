@@ -15,10 +15,24 @@ DEPENDENCIES="
 ewaf() {
     illegal_in_global_scope
 
-    edo ${WAF_EXECUTABLE} \
+    local i j hates= ewaf_args=() args=()
+    for i in "$@" ; do
+        case "${i}" in
+            --hates=*)
+                hates+=" ${i#--hates=} "; continue;;
+        esac
+        ewaf_args+=( "${i}" )
+    done
+
+    for i in \
         --verbose --verbose \
         --nocache \
-        "${@}"
+        "${ewaf_args[@]}" ; do
+        j=${i%%=*}
+        has ${j#--} ${hates} || args+=( "${i}" )
+    done
+
+    edo ${WAF_EXECUTABLE} "${args[@]}"
 }
 
 waf_src_configure() {
