@@ -50,7 +50,6 @@ DEPENDENCIES="
     build+run:
         app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
-        dev-util/gperf[>=3.0.4]
         sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
         sys-apps/kmod[>=5][multibuild_c:*(-)?]
         sys-apps/pciutils
@@ -79,6 +78,13 @@ DEPENDENCIES="
         app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
 "
+
+if ever is_scm ; then
+    DEPENDENCIES+="
+        build:
+            dev-util/gperf[>=3.0.4]
+    "
+fi
 
 DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0001-Disable-test-id128-which-requires-etc-machine-id-on-.patch )
 
