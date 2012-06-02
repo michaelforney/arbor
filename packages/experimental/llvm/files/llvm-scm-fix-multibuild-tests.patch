@@ -1,0 +1,44 @@
+Upstream: pending, http://llvm.org/bugs/show_bug.cgi?id=13014
+
+From 17533dfa0a26a91233cad2311dad829980a59272 Mon Sep 17 00:00:00 2001
+From: Johannes Nixdorf <mixi@exherbo.org>
+Date: Sat, 2 Jun 2012 14:35:31 +0200
+Subject: [PATCH] cmake: allow to set LLVM_DEFAULT_TARGET_TRIPLE from the
+ command line
+
+---
+ cmake/config-ix.cmake |    2 +-
+ docs/CMake.html       |    4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index 51b64ac..75ab3dd 100755
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -294,7 +294,7 @@ get_host_triple(LLVM_HOST_TRIPLE)
+ 
+ # By default, we target the host, but this can be overridden at CMake
+ # invocation time.
+-set(LLVM_DEFAULT_TARGET_TRIPLE "${LLVM_HOST_TRIPLE}")
++set(LLVM_DEFAULT_TARGET_TRIPLE "${LLVM_HOST_TRIPLE}" CACHE STRING "Target triple LLVM will generate code for by default")
+ set(TARGET_TRIPLE "${LLVM_DEFAULT_TARGET_TRIPLE}")
+ 
+ # Determine the native architecture.
+diff --git a/docs/CMake.html b/docs/CMake.html
+index e4ac6a4..910fad3 100644
+--- a/docs/CMake.html
++++ b/docs/CMake.html
+@@ -370,6 +370,10 @@
+     <tt>%VTUNE_AMPLIFIER_XE_2011_DIR%</tt> (Windows)
+     | <tt>/opt/intel/vtune_amplifier_xe_2011</tt> (Linux) </dd>
+ 
++  <dt><b>LLVM_DEFAULT_TARGET_TRIPLE</b>:STRING</dt>
++  <dd> The target triple LLVM will generate code for by default. Defaults
++    to the host LLVM was built on.</dd>
++
+ </dl>
+ 
+ </div>
+-- 
+1.7.10.3
+

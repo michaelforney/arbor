@@ -4,7 +4,7 @@
 SCM_REPOSITORY="http://llvm.org/git/llvm.git"
 
 # Not checked against an older version of python
-require scm-git cmake [ api=2 ] distutils [ has_lib=true has_bin=true python_dep=2.7 ]
+require scm-git cmake [ api=2 ] distutils [ has_lib=true has_bin=true python_dep=2.7 ] easy-multibuild
 
 SUMMARY="The LLVM Compiler Infrastructure"
 HOMEPAGE="http://llvm.org/"
@@ -13,7 +13,7 @@ DOWNLOADS=""
 LICENCES="UoI-NCSA"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -27,10 +27,9 @@ DEPENDENCIES="
        !dev-python/lit
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-tools.patch )
-CMAKE_SRC_CONFIGURE_PARAMS=(
-    -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
-    -DLLVM_ENABLE_ASSERTIONS:BOOL=FALSE
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-tools.patch
+    "${FILES}"/${PNV}-fix-multibuild-tests.patch
 )
 
 src_prepare() {
@@ -43,27 +42,42 @@ src_prepare() {
     edo popd
 }
 
+configure_one_multibuild() {
+    local args=(
+        -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
+        -DLLVM_ENABLE_ASSERTIONS:BOOL=FALSE
+        # the jit tests segfault when a i686 build is built with the
+        # wrong LLVM_DEFAULT_TARGET_TRIPLE which happens on x86_64
+        -DLLVM_DEFAULT_TARGET_TRIPLE:STRING=${CHOST}
+    )
+    ecmake "${args[@]}"
+}
+
 src_compile() {
-    default
+    easy-multibuild_run_phase
 
     edo pushd "${CMAKE_SOURCE}"/utils/lit
     distutils_src_compile
     edo popd
 }
 
-src_install() {
+install_one_multibuild() {
     cmake_src_install
+
+    # Required by the clang test suite
+    exeinto /usr/libexec/llvm
+    doexe bin/FileCheck bin/not bin/count
+}
+
+src_install() {
+    easy-multibuild_run_phase
 
     edo pushd "${CMAKE_SOURCE}"/utils/lit
     distutils_src_install
     edo popd
 
-    # Replace the automatically installed ugly version with the clean version from utils/lit
+    # Replace the automatically installed ugly version with the clean version from
+    # utils/lit
     edo mv "${IMAGE}"/usr/bin/{lit,llvm-lit}
-
-    # Required by the clang test suite
-    exeinto /usr/libexec/llvm
-    doexe bin/FileCheck bin/not bin/count
-
 }
 
