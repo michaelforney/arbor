@@ -155,6 +155,12 @@ src_prepare() {
 
     # FILES is a reserved exheres-0 variable
     ${CHECKOUT} && edo sed -i -e 's:FILES:DOC_FILES:g' doc/docbook/Makefile
+
+    if ever at_least 1.0; then
+        edo pushd "${WORKBASE}/${PNV}"
+            expatch "${FILES}"/${PNV}-libnl_header.patch
+        edo popd
+    fi
 }
 
 src_configure() {
