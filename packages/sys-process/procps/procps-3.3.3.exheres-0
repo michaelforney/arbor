@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require debian-upstream [ suffix=.orig.tar.gz ]
+require debian-upstream [ suffix=.orig.tar.xz ]
 
 SUMMARY="Utilities for process information including ps, top and kill"
 HOMEPAGE="http://gitorious.org/${PN}"
@@ -11,17 +11,16 @@ SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS=""
 
-# Need root
-RESTRICT="test"
-
 DEPENDENCIES="
     build+run:
         sys-libs/ncurses
+    test:
+        dev-util/dejagnu
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
-    --disable-kill
+    --disable-{s,}kill
 )
 
 WORK="${WORKBASE}/${PN}-ng-${PV}"
@@ -34,9 +33,6 @@ src_install() {
     # Provided by sys-apps/coreutils
     edo rm "${IMAGE}"/usr/bin/uptime
     edo rm "${IMAGE}"/usr/share/man/man1/uptime.1
-
-    # Provided by sys-apps/skeleton-filesystem-layout
-    edo rm "${IMAGE}"/etc/sysctl.conf
 
     edo find "${IMAGE}"/ -type d -empty -delete
 }
