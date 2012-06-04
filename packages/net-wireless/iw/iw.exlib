@@ -1,4 +1,5 @@
 # Copyright 2009 Daniel Mierswa <impulze@impulze.org>
+# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A new nl80211 based CLI configuration utility for wireless devices"
@@ -9,8 +10,6 @@ wireless devices from the command line.
 HOMEPAGE="http://wireless.kernel.org/en/users/Documentation/${PN}/"
 DOWNLOADS="http://wireless.kernel.org/download/${PN}/${PNV}.tar.bz2"
 
-UPSTREAM_DOCUMENTATION="${HOMEPAGE}"
-
 LICENCES="ISC"
 SLOT="0"
 MYOPTIONS=""
@@ -19,15 +18,17 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        net-libs/libnl:1
+        net-libs/libnl:3.0
 "
 
-DEFAULT_SRC_COMPILE_PARAMS+=( CC="${CC}" )
-DEFAULT_SRC_INSTALL_PARAMS+=( BINDIR=/usr/sbin )
+DEFAULT_SRC_COMPILE_PARAMS+=( V=1 )
 
 src_prepare() {
     default
 
-    edo sed -i -e /iw.8.gz/s:.gz::g Makefile
+    # don't install a compressed manfile + don't link to libnl:1
+    edo sed -e 's/iw\.8\.gz/iw.8/' \
+            -e 's/\(NL2FOUND :=\).*/\1 N/' \
+            -i Makefile
 }
 
