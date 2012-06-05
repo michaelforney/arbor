@@ -27,7 +27,6 @@ DEPENDENCIES="
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( RELEASE-NOTES )
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PN}-1.41.14-makefile.patch"
     "${FILES}/${PN}-1.41.14-inline.patch"
 )
 DEFAULT_SRC_INSTALL_PARAMS=( install-libs )
@@ -48,6 +47,8 @@ e2fsprogs_src_configure() {
         --sbindir=/sbin \
         --libdir=/${LIBDIR} \
         --enable-elf-shlibs \
+        --enable-nls \
+        --enable-symlink-install \
         --enable-tls \
         --enable-verbose-makecmds \
         --disable-uuidd \
