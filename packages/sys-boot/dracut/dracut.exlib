@@ -44,6 +44,7 @@ DEPENDENCIES="
     run:
         app-shells/bash
         sys-apps/util-linux
+        dev-util/pkg-config
         || ( sys-apps/systemd sys-fs/udev )
         || ( sys-apps/kmod sys-apps/module-init-tools )
     build+test:
@@ -136,9 +137,6 @@ dracut_src_prepare() {
     edo sed -i -e '/$(MAKE) -C test check/d' Makefile
 
     # Remove modules that are not compatible with Exherbo.
-    if ! ever at_least scm; then
-        edo rm -r modules.d/10rpmversion
-    fi
     edo rm -r modules.d/45ifcfg
 }
 
