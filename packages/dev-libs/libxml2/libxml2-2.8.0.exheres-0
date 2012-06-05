@@ -1,7 +1,7 @@
 # Copyright 2007-2008 Bo Ørsted Andresen
 # Distributed under the terms of the GNU General Public License v2
 
-require python easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require python easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
 
 SUMMARY="XML C Parser and Toolkit v2"
 HOMEPAGE="http://www.xmlsoft.org/"
@@ -32,7 +32,6 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/0001-Reactivate-the-shared-library-versionning-script.patch"
     -p0 "${FILES}/${PNV}-fix_python_paths.patch"
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
