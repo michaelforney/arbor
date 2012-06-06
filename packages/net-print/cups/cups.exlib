@@ -6,6 +6,8 @@
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
 require pam easy-multibuild [ work=${PNV} ] systemd-service gtk-icon-cache
 
+export_exlib_phases src_unpack src_prepare src_test
+
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
 DOWNLOADS="ftp://ftp.easysw.com/pub/${PN}/${PV}/${PNV}-source.tar.bz2"
@@ -70,7 +72,7 @@ unpack_prepare_one_multibuild() {
     edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
 }
 
-src_unpack() {
+cups_src_unpack() {
     easy-multibuild_run_phase
 }
 
@@ -101,7 +103,7 @@ prepare_one_multibuild() {
     autotools_src_prepare
 }
 
-src_prepare() {
+cups_src_prepare() {
     easy-multibuild_run_phase
 }
 
@@ -206,7 +208,7 @@ install_one_multibuild() {
     echo "ServerName /run/cups/cups.sock" >> "${IMAGE}"/etc/cups/client.conf
 }
 
-src_test() {
+cups_src_test() {
     if option multibuild_c:"${MULTIBUILD_C_DEFAULT_TARGET}" ; then
         edo cd "${WORKBASE}/C/${MULTIBUILD_C_DEFAULT_TARGET}"
         # 1 = medium testsuite
