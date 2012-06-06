@@ -4,9 +4,9 @@
 #     Copyright 1999-2008 Gentoo Foundation.
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
-require pam easy-multibuild [ work=${PNV} ] systemd-service gtk-icon-cache
+require pam easy-multibuild [ multiunpack=true ] systemd-service gtk-icon-cache
 
-export_exlib_phases src_unpack src_prepare src_test
+export_exlib_phases src_test
 
 SUMMARY="Common UNIX Printing System"
 HOMEPAGE="http://www.${PN}.org"
@@ -66,16 +66,6 @@ REMOTE_IDS="freecode:cups"
 # testsuite has lots of FAILs for now, will check into those next version
 RESTRICT="test"
 
-WORK="${WORKBASE}"
-
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-cups_src_unpack() {
-    easy-multibuild_run_phase
-}
-
 AT_M4DIR=( config-scripts )
 
 prepare_one_multibuild() {
@@ -101,14 +91,6 @@ prepare_one_multibuild() {
     edo sed -i '/^\.SILENT:$/d' Makedefs.in
 
     autotools_src_prepare
-}
-
-cups_src_prepare() {
-    easy-multibuild_run_phase
-}
-
-configure_prepare_one_multibuild() {
-    :
 }
 
 configure_one_multibuild() {
