@@ -15,7 +15,7 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.11]
         doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
-        dev-libs/libelf[multibuild_c:*(-)?]
+        dev-libs/libelf[>=0.8.12][multibuild_c:*(-)?]
         dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
     test:
         dev-python/dbus-python
@@ -38,7 +38,7 @@ DEPENDENCIES="
 # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
 # Its usage is recommended by upstream, see also
 # http://developer.gnome.org/glib/unstable/glib-building.html#dependencies
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--enable-libelf' '--disable-selinux'
                                '--disable-xattr' '--with-pcre=internal' '--with-threads=posix' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
@@ -74,7 +74,6 @@ src_install() {
 
     edo rm "${IMAGE}"/etc/bash_completion.d/{gdbus,gsettings,gresource}-bash-completion.sh
     edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
-    option doc || edo rmdir "${IMAGE}"/usr/share/gtk-doc/{html/{glib,gio,gobject,},}
 
     dobashcompletion "${WORK}"/gio/gdbus-bash-completion.sh gdbus
     dobashcompletion "${WORK}"/gio/gresource-bash-completion.sh gresource
