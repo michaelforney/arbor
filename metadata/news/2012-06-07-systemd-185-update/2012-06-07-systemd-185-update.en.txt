@@ -1,0 +1,33 @@
+Title: systemd 185: udev rules dir change
+Author: Wulf C. Krueger <philantrop@exherbo.org>
+Content-Type: text/plain
+Posted: 2012-06-07
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: sys-apps/systemd[<184-r2]
+Display-If-Installed: sys-fs/udev[<185]
+
+The directory for udev rules had to be changed in systemd/udev 185 once
+more.
+
+Thus, after updating to systemd/udev 185, you need to rebuild those
+packages installing udev rules.
+
+If you don't care about the details, you can use this snippet and skip
+the rest of this news item:
+
+----
+for i in /usr/libexec/{systemd,udev}; do
+    cave print-owners --format '%c/%p:%s\n' "$i";
+done | xargs cave resolve
+----
+
+The reason is that systemd/udev expects --libexecdir=/usr/lib (or in
+our case: /use/${LIBDIR}) without complaining if it isn't.
+
+We used to use /usr/libexec but that's only for executables and systemd/
+udev recently started installing more there. Not following this already
+caused problems with other upstreams (e. g. dracut creating a broken
+initramfs which is potentially "not good" for booting) and, thus, as
+annoying another (and hopefully final) move of the systemd/udev rules
+dir is, it had to be done.
