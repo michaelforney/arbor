@@ -106,7 +106,7 @@ configure_one_multibuild() {
         --prefix=/usr
         --libdir=/usr/${LIBDIR}
         --includedir=/usr/include
-        --libexecdir=/usr/libexec
+        --libexecdir=/usr/${LIBDIR}
         --localstatedir=/var
         --enable-binfmt
         --enable-gudev
@@ -150,13 +150,20 @@ configure_one_multibuild() {
     econf "${myconfig[@]}"
 }
 
+install_one_multibuild() {
+    default
+
+    keepdir /usr/${LIBDIR}/systemd/user-generators
+    keepdir /usr/${LIBDIR}/udev/devices
+}
+
 udev_src_install() {
     easy-multibuild_src_install
 
     dodir /sbin
     keepdir /etc/udev/rules.d
     keepdir "${UDEVRULESDIR}"
-    keepdir /usr/libexec/udev/devices
+    keepdir /usr/${LIBDIR}/udev/devices
 
     # platform rules
     insinto "${UDEVRULESDIR}"
@@ -198,7 +205,7 @@ EOT
     edo rm -r "${IMAGE}"/usr/*/systemd/user
     edo rm -r "${IMAGE}"/usr/*/libsystemd*
     edo rm -r "${IMAGE}"/usr/*/pkgconfig/libsystemd*
-    edo rm -r "${IMAGE}"/usr/libexec/systemd
+    edo rm -r "${IMAGE}"/usr/${LIBDIR}/systemd
     edo rm -r "${IMAGE}"/usr/share/{dbus,polkit}-1
     edo rm -r "${IMAGE}"/usr/share/man/man{1,3,5}
     edo rm -r "${IMAGE}"/usr/share/man/man7/{daemon.7,sd-*,systemd*}
@@ -207,6 +214,7 @@ EOT
     edo rm -r "${IMAGE}"/var/{*/{systemd,},}
 
     # Restore systemd-udevd.
+    dodir /usr/${LIBDIR}/systemd
     edo cp "${TEMP}"/systemd-udevd "${IMAGE}"/usr/${LIBDIR}/systemd/
 }
 
