@@ -108,31 +108,31 @@ configure_one_multibuild() {
         --includedir=/usr/include
         --libexecdir=/usr/${LIBDIR}
         --localstatedir=/var
-        --enable-binfmt
         --enable-gudev
-        --enable-hostnamed
         --enable-keymap
-        --enable-localed
-        --enable-logind
         --enable-manpages
-        --enable-pam
-        --enable-quotacheck
-        --enable-randomseed
-        --enable-readahead
         # This adds /sbin and /bin to PATH for systemd units again.
         --enable-split-usr
-        --enable-timedated
-        --enable-vconsole
         --enable-xz
         --disable-acl
         --disable-audit
+        --disable-binfmt
         # Disable putting core dumps into the journal for now.
         --disable-coredump
+        --disable-hostnamed
         --disable-ima
         --disable-libcryptsetup
+        --disable-localed
+        --disable-logind
+        --disable-pam
         --disable-plymouth
+        --disable-quotacheck
+        --disable-randomseed
+        --disable-readahead
         --disable-selinux
         --disable-tcpwrap
+        --disable-timedated
+        --disable-vconsole
         --with-distro=other
         --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
         --with-pamlibdir=/${LIBDIR}/security
@@ -194,11 +194,10 @@ EOT
     edo cp "${IMAGE}"/usr/${LIBDIR}/systemd/systemd-udevd "${TEMP}"
 
     # Remove everything not belonging to what-used-to-be-udev.
-    edo rm -r "${IMAGE}"/lib*
-    edo rm -r "${IMAGE}"/etc/{bash_completion.d,binfmt.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg}
-    edo rm -r "${IMAGE}"/usr/bin/{journalctl,loginctl,systemctl,systemd*}
-    edo rm -r "${IMAGE}"/usr/{include,share}/systemd
-    edo rm -r "${IMAGE}"/usr/*/{binfmt.d,modules-load.d,sysctl.d,tmpfiles.d}
+    edo rm -r "${IMAGE}"/etc/{bash_completion.d,dbus-1,modules-load.d,sysctl.d,systemd,tmpfiles.d,xdg}
+    edo rm -r "${IMAGE}"/usr/bin/{journalctl,systemctl,systemd*}
+    edo rm -r "${IMAGE}"/usr/include/systemd
+    edo rm -r "${IMAGE}"/usr/*/{modules-load.d,sysctl.d,tmpfiles.d}
     edo rm -r "${IMAGE}"/usr/*/systemd/system
     edo rm -r "${IMAGE}"/usr/*/systemd/system-*
     edo rm -r "${IMAGE}"/usr/*/systemd/systemd-*
@@ -211,7 +210,6 @@ EOT
     edo rm -r "${IMAGE}"/usr/share/man/man7/{daemon.7,sd-*,systemd*}
     edo rm -r "${IMAGE}"/usr/share/man/man8/{halt,pam_systemd,poweroff,reboot,runlevel,shutdown,systemd*,telinit}.8
     edo rm -r "${IMAGE}"/usr/share/pkgconfig/systemd.pc
-    edo rm -r "${IMAGE}"/var/{*/{systemd,},}
 
     # Restore systemd-udevd.
     dodir /usr/${LIBDIR}/systemd
