@@ -43,9 +43,6 @@ bb_make() {
 src_prepare() {
     default
 
-    # Make mdev send 'not found' to kernel: https://bugs.busybox.net/show_bug.cgi?id=5048
-    edo sed -i -e 's/firmware_fd = xopen/firmware_fd = open_or_warn/' util-linux/mdev.c
-
     # nuke tests that require pid 1 to be named 'init'
     edo sed -i -e '/^testing.*init/ d' testsuite/pidof.tests
 }
