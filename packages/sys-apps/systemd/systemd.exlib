@@ -43,6 +43,7 @@ MYOPTIONS="
 DEPENDENCIES="
     build:
         dev-libs/libxslt
+        dev-util/gperf[>=3.0.4]
         dev-util/intltool[>=0.40.0]
         dev-util/pkg-config[>=0.20]
         sys-devel/gettext
@@ -78,13 +79,6 @@ DEPENDENCIES="
         app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
 "
-
-if ever is_scm ; then
-    DEPENDENCIES+="
-        build:
-            dev-util/gperf[>=3.0.4]
-    "
-fi
 
 DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0001-Disable-test-id128-which-requires-etc-machine-id-on-.patch )
 
