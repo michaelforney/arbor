@@ -64,6 +64,9 @@ dhcp_src_install() {
         doins "${FILES}"/systemd/dhcpd.conf
     fi
 
+    # install dhcp client script
+    DESTTREE= newsbin client/scripts/linux dhclient-script
+
     # install docs
     dodoc -r doc/*
 }
