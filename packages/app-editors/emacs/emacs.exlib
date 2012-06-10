@@ -45,6 +45,7 @@ DEPENDENCIES="
         gtk? ( dev-util/pkg-config )
         svg? ( dev-util/pkg-config )
     build+run:
+        dev-libs/libxml2 [[ note = [ used for html rendering; could be made optional ] ]]
         net-libs/liblockfile
         sys-libs/ncurses
         alsa? ( sys-sound/alsa-lib[>=1.0.0] )
@@ -80,14 +81,6 @@ DEPENDENCIES="
         app-spell/aspell [[ description = [ For ispell and flyspell mode ] ]]
 "
 
-# libxml2 could be made optional. it is used e.g. for simple html rendering
-if ever at_least 24; then
-    DEPENDENCIES+="
-        build+run:
-            dev-libs/libxml2
-    "
-fi
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --infodir=/usr/share/info/emacs
     --without-kerberos
@@ -95,10 +88,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-hesiod
     --without-m17n-flt
     --without-xim
-    $(ever at_least 24 && echo --without-compress-info) # applies to manpages as well
-    $(ever at_least 24 && echo --without-gsettings)
-    $(ever at_least 24 && echo --without-imagemagick)
-    $(ever at_least 24 && echo --without-selinux)
+    --without-compress-info # applies to manpages as well
+    --without-gsettings
+    --without-imagemagick
+    --without-selinux
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
