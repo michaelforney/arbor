@@ -37,12 +37,14 @@ DEPENDENCIES="
 
 # static cryptsetup must be disabled because lvm2 can't be linked statically
 # anymore.
+# FIPS is probably not interesting for us, so hard disable it
 configure_one_multibuild() {
     econf --prefix=/ \
         --includedir=/usr/include \
         --enable-dev-random \
         --enable-nls \
         --enable-udev \
+        --disable-fips \
         --disable-selinux \
         --disable-static-cryptsetup \
         $(option_enable python) \
