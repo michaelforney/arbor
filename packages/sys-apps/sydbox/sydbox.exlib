@@ -1,29 +1,36 @@
-# Copyright 2009, 2010, 2011 Ali Polatel <alip@exherbo.org>
+# Copyright 2009, 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases pkg_pretend src_test
 
 SUMMARY="Sydbox the other sandbox"
 DESCRIPTION="
-Sydbox is a ptrace based sandbox implementation which is based in part upon
-catbox and strace. Being ptrace based, it doesn't suffer the well known
-security issues that LD_PRELOAD based sandbox implementations suffer from. It
-tries hard to avoid symlink and other kind of races to be on the secure side. It
-has basic support to disallow network connections.
+Sydbox is a ptrace based sandbox for Linux.
 "
-HOMEPAGE="http://git.exherbo.org/?p=${PN}.git;a=summary"
+if ever at_least 1; then
+    HOMEPAGE="http://git.exherbo.org/?p=${PN}-1.git;a=summary"
+else
+    HOMEPAGE="http://git.exherbo.org/?p=${PN}.git;a=summary"
+fi
 DOWNLOADS="http://dev.exherbo.org/~alip/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="ipv6 [[ description = [ Enable IPV6 support for network sandboxing ] ]]"
 
-DEPENDENCIES="
-    build+run:
-        dev-libs/glib:2[>=2.18]
-"
+if ! ever at_least 1; then
+    # sydbox-1 doesn't depend on glib.
+    DEPENDENCIES="
+        build+run:
+            dev-libs/glib:2[>=2.18]
+    "
+fi
 
-if ever at_least 0.7.4; then
+if ever at_least 0-scm; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/pinktrace[>=0.2.0][ipv6?]"
+elif ever at_least 0.7.4; then
     DEPENDENCIES+="
         build+run:
             dev-libs/pinktrace[>=0.1.2][ipv6?]"
