@@ -341,7 +341,11 @@ EOT
         if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
             edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
         fi
-        [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
+        if ever is_scm; then
+            edo rmdir "${IMAGE}"/usr/lib/{systemd/{user-generators,},}
+        else
+            [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
+        fi
     fi
 
     # Create compatibility symlinks
