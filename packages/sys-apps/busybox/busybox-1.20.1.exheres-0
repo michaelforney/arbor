@@ -36,6 +36,7 @@ bb_make() {
         LD="${CC} -nostdlib" LDFLAGS="${LDFLAGS}" HOSTLD="${CC}" HOSTLDFLAGS="${LDFLAGS}"
 
         V=1
+        SKIP_STRIP=y
     )
     emake "${make_options[@]}" "$@"
 }
@@ -53,12 +54,12 @@ src_configure() {
 
 src_compile() {
     # Build dynamically linked executable and preserve it
-    bb_make busybox_unstripped
-    edo mv busybox_unstripped{,.dynamic}
+    bb_make CONFIG_STATIC=n busybox
+    edo mv busybox{,.dynamic}
 
     # Build statically linked executable and preserve it
-    bb_make busybox_unstripped CONFIG_STATIC=y
-    edo mv busybox_unstripped{,.static}
+    bb_make CONFIG_STATIC=y busybox
+    edo mv busybox{,.static}
 }
 
 src_test() {
@@ -68,18 +69,18 @@ src_test() {
     )
 
     # test dynamic version
-    edo cp busybox_unstripped.dynamic busybox
-    bb_make check "${test_options[@]}"
+    edo cp busybox{.dynamic,}
+    bb_make "${test_options[@]}" CONFIG_STATIC=n check
 
     # test static version
-    edo cp busybox_unstripped.static busybox
-    bb_make check "${test_options[@]}"
+    edo cp busybox{.static,}
+    bb_make "${test_options[@]}" CONFIG_STATIC=y check
 }
 
 src_install() {
     into /
-    newbin busybox_unstripped.dynamic busybox
-    newbin busybox_unstripped.static busybox-static
+    newbin busybox.dynamic busybox
+    newbin busybox.static  busybox-static
 
     emagicdocs
     dodoc -r examples
