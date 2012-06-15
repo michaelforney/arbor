@@ -1,0 +1,25 @@
+# Copyright 2012 Quentin "Sardem FF7" Glidic <sardemff7+exherbo@sardemff7.net>
+# Distributed under the terms of the GNU General Public License v2
+
+myexparam python_dep=
+myexparam -b has_lib=true
+myexparam -b has_bin=false
+
+exparam -v PYTHON_DEP python_dep
+exparam -v PYTHON_HAS_LIB has_lib
+exparam -v PYTHON_HAS_BIN has_bin
+
+require distutils [ python_dep="${PYTHON_DEP}" has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" ]
+
+export_exlib_phases src_test
+
+DEPENDENCIES="
+    build:
+        dev-python/setuptools
+"
+
+setuptools_src_test() {
+    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+    edo ${PYTHON} -B setup.py test "${SETUPTOOLS_SRC_TEST_PARAMS[@]}"
+}
+
