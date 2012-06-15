@@ -60,11 +60,16 @@ DEPENDENCIES+="
 
 # Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
 # >=4.4
-# TODO: for 4.6 different cloog backends (cloog-isl, cloog-parma)
 MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
-DEPENDENCIES+="
-    build+run:
-        graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
+if ever at_least 4.7; then
+    DEPENDENCIES+="
+        build+run:
+            graphite? ( || ( dev-libs/cloog dev-libs/cloog-ppl[>=0.15.5] ) )"
+else
+    DEPENDENCIES+="
+        build+run:
+            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
+fi
 
 # Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
 # >=4.4
@@ -125,9 +130,15 @@ gcc_src_configure() {
         --with-libelf \
         --with-pkgversion="Exherbo ${PNVR}" \
         --with-system-zlib \
+        $(ever at_least 4.6 && option_enable graphite && \
+            if ever at_least 4.7 && has_version --root dev-libs/cloog; then
+                option_enable graphite cloog-backend isl
+                echo '--disable-cloog-version-check'
+            else
+                option_enable graphite cloog-backend ppl-legacy
+            fi) \
         $(option_with graphite cloog) \
         $(option_with graphite ppl) \
-        $(ever at_least 4.6 && option_enable graphite cloog-backend ppl-legacy) \
         $(option_enable openmp libgomp) \
         $(option_enable propolice libssp)
 }
