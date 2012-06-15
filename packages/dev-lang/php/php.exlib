@@ -36,38 +36,41 @@ MYOPTIONS="
 
     (
         php_extensions:
-            curl        [[ description = [ Build the cURL extension (includes curl-wrappers). ] ]]
-            berkdb      [[ description = [ Build the Berkeley DB extension. ] ]]
-            exif        [[ description = [ Support acquiring metadata from images using exif. ] ]]
-            fileinfo    [[ description = [ Build fileinfo support. ] ]]
-            filter      [[ description = [ Build the input filter extension. ] ]]
-            ftp         [[ description = [ Enable FTP support. ] requires = [ php_extensions: ssl ] ]]
-            gd          [[ description = [ Support dynamic image manipulation via the GD graphics library (activates all supported formats) ] ]]
-            gdbm        [[ description = [ Build the GNU DBM extension. ] ]]
-            imap        [[ description = [ Support for the IMAP4 protocol. ] ]]
-            kerberos    [[ description = [ Support for Kerberos authentication. ] ]]
-            ldap        [[ description = [ Support for LDAP authentication (activates SASL, too). ] ]]
-            libedit     [[ description = [ Use libedit, the readline replacement. ] requires = [ php_extensions: -readline ] ]]
-            mcrypt      [[ description = [ Support modern encryption algorithms, e. g. AES. ] ]]
-            mssql       [[ description = [ Support for MS SQL-Server. ] ]]
-            mysql       [[ description = [ Support for the popular MySQL database. ] requires = [ php_extensions: -recode ] ]]
-            mysqli      [[ description = [ Support for the popular MySQL database, improved driver. ] ]]
-            pcre        [[ description = [ Include support for Perl Compatible Regular Expressions. ] ]]
-            pdo-dblib   [[ description = [ PDO: Support for MS SQL-Server. ] ]]
-            pdo-mysql   [[ description = [ PDO: Support for the popular MySQL database. ] ]]
-            pdo-odbc    [[ description = [ PDO: Support for ODBC. ] ]]
-            pdo-pgsql   [[ description = [ PDO: Support for PostgreSQL. ] ]]
-            pdo-sqlite  [[ description = [ PDO: Support for sqlite3. ] ]]
-            pgsql       [[ description = [ Support for the PostgreSQL database. ] ]]
-            pspell      [[ description = [ Support for spell checking via aspell. ] ]]
-            readline    [[ description = [ Include readline support (CLI/CGI only) ] requires = [ php_extensions: -libedit ] ]]
-            recode      [[ description = [ Include support for the recode extension. ] requires = [ php_extensions: -mysql ] ]]
-            ssl         [[ description = [ Include OpenSSL support (can be used for FTP, IMAP, SNMP). ] ]]
-            tidy        [[ description = [ Include TIDY support. ] ]]
-            unixodbc    [[ description = [ Support for using ODBC database connections using unixODBC. ] ]]
-            xml         [[ description = [ Support for XML parsing/reading/writing. ] ]]
-            xmlrpc      [[ description = [ Support for writing XML-RPC servers and clients. ] ]]
-            xsl         [[ description = [ Include XSL support. ] ]]
+            curl          [[ description = [ Build the cURL extension. ] ]]
+            curlwrappers  [[ description = [ Configure PHP to use cURL for URL streams. ] ]]
+            berkdb        [[ description = [ Build the Berkeley DB extension. ] ]]
+            exif          [[ description = [ Support acquiring metadata from images using exif. ] ]]
+            fileinfo      [[ description = [ Build fileinfo support. ] ]]
+            filter        [[ description = [ Build the input filter extension. ] ]]
+            ftp           [[ description = [ Enable FTP support. ] requires = [ php_extensions: ssl ] ]]
+            gd            [[ description = [ Support dynamic image manipulation via the GD graphics library (activates all supported formats) ] ]]
+            gdbm          [[ description = [ Build the GNU DBM extension. ] ]]
+            imap          [[ description = [ Support for the IMAP4 protocol. ] ]]
+            kerberos      [[ description = [ Support for Kerberos authentication. ] ]]
+            ldap          [[ description = [ Support for LDAP authentication (activates SASL, too). ] ]]
+            libedit       [[ description = [ Use libedit, the readline replacement. ] requires = [ php_extensions: -readline ] ]]
+            mcrypt        [[ description = [ Support modern encryption algorithms, e. g. AES. ] ]]
+            mssql         [[ description = [ Support for MS SQL-Server. ] ]]
+            mysql         [[ description = [ Support for the popular MySQL database. ] requires = [ php_extensions: -recode ] ]]
+            mysqli        [[ description = [ Support for the popular MySQL database, improved driver. ] ]]
+            pcre          [[ description = [ Include support for Perl Compatible Regular Expressions. ] ]]
+            pdo-dblib     [[ description = [ PDO: Support for MS SQL-Server. ] ]]
+            pdo-mysql     [[ description = [ PDO: Support for the popular MySQL database. ] ]]
+            pdo-odbc      [[ description = [ PDO: Support for ODBC. ] ]]
+            pdo-pgsql     [[ description = [ PDO: Support for PostgreSQL. ] ]]
+            pdo-sqlite    [[ description = [ PDO: Support for sqlite3. ] ]]
+            pgsql         [[ description = [ Support for the PostgreSQL database. ] ]]
+            pspell        [[ description = [ Support for spell checking via aspell. ] ]]
+            readline      [[ description = [ Include readline support (CLI/CGI only) ] requires = [ php_extensions: -libedit ] ]]
+            recode        [[ description = [ Include support for the recode extension. ] requires = [ php_extensions: -mysql ] ]]
+            ssl           [[ description = [ Include OpenSSL support (can be used for FTP, IMAP, SNMP). ] ]]
+            tidy          [[ description = [ Include TIDY support. ] ]]
+            unixodbc      [[ description = [ Support for using ODBC database connections using unixODBC. ] ]]
+            xml           [[ description = [ Support for XML parsing/reading/writing. ] ]]
+            xmlrpc        [[ description = [ Support for writing XML-RPC servers and clients. ] ]]
+            xsl           [[ description = [ Include XSL support. ] ]]
+
+            curlwrappers  [[ requires = curl ]]
     )
 "
 
@@ -257,7 +260,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "apache apxs2"
     pear
     "php_extensions:curl curl"
-    "php_extensions:curl curlwrappers"
+    "php_extensions:curlwrappers curlwrappers"
     "php_extensions:berkdb db4"
     "php_extensions:gd gd /usr"
     "php_extensions:gd jpeg-dir /usr"
