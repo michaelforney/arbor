@@ -1,4 +1,5 @@
 # Copyright 2008 Daniel Mierswa <impulze@impulze.org>
+# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'iproute2-2.6.26-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -56,8 +57,6 @@ DEFAULT_SRC_INSTALL_PARAMS+=(
     MANDIR=/usr/share/man
 )
 
-WORK="${WORKBASE}/${PNV}"
-
 src_prepare() {
     # apply version-specific patches
     default
@@ -92,18 +91,11 @@ src_install() {
     default
 
     if optionq berkdb ; then
-        if ! ever at_least 2.6.33 ; then
-            dodir /var/lib/arpd
-        fi
-
         keepdir /var/lib/arpd
-
         dodir /usr/sbin
         edo mv "${IMAGE}"/{,usr/}sbin/arpd
     else
-        if ever at_least 2.6.33 ; then
-            edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
-        fi
+        edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
     fi
 
     if ! option atm ; then
