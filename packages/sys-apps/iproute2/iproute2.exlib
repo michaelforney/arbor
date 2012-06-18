@@ -60,9 +60,7 @@ src_prepare() {
     edo rm -r include/{linux,netinet}
 
     # fix hardcoded -O2 and allow user CFLAGS
-    edo sed -e '/^CCOPTS =/s: -O2 : :' \
-            -e 's:^CFLAGS =:CFLAGS += :' \
-            -i Makefile
+    edo sed -e "/^CCOPTS =/s|-O2|${CFLAGS}|" -i Makefile
 
     if ! ever at_least 2.6.35 ; then
         edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' -i netem/Makefile
