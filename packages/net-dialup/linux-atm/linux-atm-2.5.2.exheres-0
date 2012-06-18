@@ -39,5 +39,8 @@ src_prepare() {
 
     # Gentoo bug #159823
     edo sed -i -e '/#define _LINUX_NETDEVICE_H/d' src/arpd/*.c
+
+    # install firmware to /${LIBDIR}/firmware/ to shush paludis
+    edo sed -i -e 's:/lib/:/${LIBDIR}/:' src/extra/Makefile.in
 }
 
