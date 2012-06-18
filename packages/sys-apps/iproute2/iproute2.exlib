@@ -4,7 +4,11 @@
 # Based in part upon 'iproute2-2.6.26-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-myexparam headers_version='[>=2.6.33]'
+if [[ $(ever major) -lt 3 ]]; then
+    myexparam headers_version="[>=$(ever range -3)]"
+else
+    myexparam headers_version="[>=$(ever range -2)]"
+fi
 
 if ever at_least 3.2.0 ; then
     SUFFIX=xz
