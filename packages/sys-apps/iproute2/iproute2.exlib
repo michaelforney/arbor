@@ -60,10 +60,8 @@ src_prepare() {
     edo rm -r include/{linux,netinet}
 
     # fix hardcoded -O2 and allow user CFLAGS
-    # The -DRTPROT_DHCP is an evil hack, but I'm not sure of a better
-    # fix for now.
     edo sed -e '/^CCOPTS =/s: -O2 : :' \
-            -e 's:^CFLAGS =:CFLAGS += -DRTPROT_DHCP=16:' \
+            -e 's:^CFLAGS =:CFLAGS += :' \
             -i Makefile
 
     edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' -i netem/Makefile
