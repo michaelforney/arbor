@@ -6,14 +6,10 @@
 
 if [[ $(ever major) -lt 3 ]]; then
     myexparam headers_version="[>=$(ever range -3)]"
+    SUFFIX=bz2
 else
     myexparam headers_version="[>=$(ever range -2)]"
-fi
-
-if ever at_least 3.2.0 ; then
     SUFFIX=xz
-else
-    SUFFIX=bz2
 fi
 
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux"
@@ -61,7 +57,7 @@ src_prepare() {
     default
 
     # use system headers
-    edo rm -r include/linux include/netinet
+    edo rm -r include/{linux,netinet}
 
     # fix hardcoded -O2 and allow user CFLAGS
     # The -DRTPROT_DHCP is an evil hack, but I'm not sure of a better
