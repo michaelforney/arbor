@@ -8,6 +8,7 @@ myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
 
 require multibuild flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ] kernel
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
@@ -109,6 +110,7 @@ glibc_src_prepare() {
         export GCC="${CC}"
     fi
 
+    ever at_least 2.14.1-r2 && eautoconf
     default
 }
 
@@ -140,6 +142,7 @@ glibc_src_configure() {
             --libdir="/usr/${LIBDIR}" \
             --cache-file=config.cache \
             "--enable-kernel=$MINIMUM_KERNEL_VERSION" \
+            $(ever at_least 2.14.1-r2 && echo '--enable-obsolete-rpc') \
             --enable-stackguard-randomization \
             --with-headers=/usr/include \
             --with-add-ons --with-crypt \

@@ -17,6 +17,7 @@ src_prepare() {
     edo cd "${ECONF_SOURCE}"
     expatch -p0 "${FILES}"/${PN}-2.11.2-i686.patch
     expatch -p1 "${FILES}"/6ee65ed6ddbf04402fad0bec6aa9c73b9d982ae4.patch
+    expatch "${FILES}"/${PNV}-rpc.patch
 
     # fail with sydbox
     edo sed \
