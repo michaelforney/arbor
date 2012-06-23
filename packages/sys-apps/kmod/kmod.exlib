@@ -53,14 +53,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 AT_M4DIR=( m4 )
 
 kmod_test_one_multibuild() {
-    # kmod extracts a tarball containing dangling symlinks twice.
-    # sydbox doesn't like this. http://dev.exherbo.org/~woutershep/tar-problem.c
-    # Last tested with kmod-8.
-    esandbox disable
-
     emake -j1 check
-
-    esandbox enable
 }
 
 test_one_multibuild() {
