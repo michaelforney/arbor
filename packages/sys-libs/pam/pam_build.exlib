@@ -25,6 +25,7 @@ BUGS_TO="philantrop@exherbo.org"
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
 MYOPTIONS="
+    nis [[ description = [ Network Information Service support ] ]]
     multibuild_c: 32 64
 "
 
@@ -34,6 +35,7 @@ DEPENDENCIES="
         sys-devel/gettext
     build+run:
         sys-libs/cracklib[>=2.8.3][multibuild_c:*(-)?]
+        nis? ( net-libs/libtirpc[multibuild_c:*(-)?] )
 "
 
 WORK=${WORKBASE}/${MY_PNV}
@@ -68,9 +70,9 @@ configure_one_multibuild() {
        --enable-cracklib \
        --enable-db=no \
        --enable-isadir=/${LIBDIR}/security \
-       --enable-nis \
        --enable-nls \
-       --enable-securedir=/${LIBDIR}/security
+       --enable-securedir=/${LIBDIR}/security \
+       $(option_enable nis)
 }
 
 pam_build_src_configure() {
