@@ -1,0 +1,79 @@
+# Copyright 2012 Elias Pipping <pipping@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+# Not checked against an older version of python
+require cmake [ api=2 ] distutils [ has_lib=true has_bin=true python_dep=2.7 ] easy-multibuild
+
+SUMMARY="The LLVM Compiler Infrastructure"
+HOMEPAGE="http://llvm.org/"
+
+LICENCES="UoI-NCSA"
+SLOT="0"
+MYOPTIONS="multibuild_c: 32 64"
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*
+        dev-python/setuptools [[ description = [ For lit ] ]]
+        sys-devel/flex
+    test:
+        dev-lang/python:*
+    run:
+       !dev-lang/llvm
+       !dev-python/lit
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-tools.patch
+    "${FILES}"/${PN}-fix-multibuild-tests.patch
+)
+
+src_prepare() {
+    edo pushd "${CMAKE_SOURCE}"
+
+    # Fix the use of dot
+    edo sed -e 's/@DOT@//g' -i docs/doxygen.cfg.in
+
+    default
+    edo popd
+}
+
+configure_one_multibuild() {
+    local args=(
+        -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
+        -DLLVM_ENABLE_ASSERTIONS:BOOL=FALSE
+        # the jit tests segfault when a i686 build is built with the
+        # wrong LLVM_DEFAULT_TARGET_TRIPLE which happens on x86_64
+        -DLLVM_DEFAULT_TARGET_TRIPLE:STRING=${CHOST}
+    )
+    ecmake "${args[@]}"
+}
+
+src_compile() {
+    easy-multibuild_run_phase
+
+    edo pushd "${CMAKE_SOURCE}"/utils/lit
+    distutils_src_compile
+    edo popd
+}
+
+install_one_multibuild() {
+    cmake_src_install
+
+    # Required by the clang test suite
+    exeinto /usr/libexec/llvm
+    doexe bin/FileCheck bin/not bin/count
+}
+
+src_install() {
+    easy-multibuild_run_phase
+
+    edo pushd "${CMAKE_SOURCE}"/utils/lit
+    distutils_src_install
+    edo popd
+
+    # Replace the automatically installed ugly version with the clean version from
+    # utils/lit
+    edo mv "${IMAGE}"/usr/bin/{lit,llvm-lit}
+}
+
