@@ -37,7 +37,7 @@ src_prepare() {
 }
 
 src_test() {
-    PATH=/usr/libexec/llvm:$PATH emake clang-test
+    PATH=/usr/libexec/llvm:$PATH CLANG=${PWD}/bin/clang emake clang-test
 }
 
 src_install() {
