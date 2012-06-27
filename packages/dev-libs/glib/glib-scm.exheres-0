@@ -35,13 +35,6 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
-# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
-# Its usage is recommended by upstream, see also
-# http://developer.gnome.org/glib/unstable/glib-building.html#dependencies
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--enable-libelf' '--disable-selinux'
-                               '--disable-xattr' '--with-pcre=internal' '--with-threads=posix' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
-
 src_unpack() {
     default
     scm_src_unpack
@@ -53,13 +46,10 @@ src_prepare() {
     glib_src_prepare
     eautoreconf
 
-    # race condition worsened by sydbox
-    edo sed -e '/mainloop\/invoke/d' -i glib/tests/mainloop.c
-
     # fail under sydbox
     edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c
     edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
-    edo sed -e '/thread\/cond1/d' -i glib/tests/cond.c
+    edo sed -e '/\/DBUS_COOKIE_SHA1/d' -i gio/tests/gdbus-auth.c
     edo sed -e 's/run-assert-msg-test.sh//' -i tests/Makefile.{am,in}
 
     # we have no guarantee for ipv6 support, so we disable those tests
@@ -69,14 +59,27 @@ src_prepare() {
     edo sed -e '/socket\/ipv6_v4mapped/d' -i gio/tests/socket.c
 }
 
+# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
+# Its usage is recommended by upstream, see also
+# http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
+configure_one_multibuild() {
+    econf \
+        --enable-static \
+        --disable-fam \
+        --disable-selinux \
+        --disable-xattr \
+        --with-pcre=internal \
+        --with-threads=posix \
+        $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests') \
+        $(option_enable doc gtk-doc)
+}
+
 src_install() {
     glib_src_install
 
-    edo rm "${IMAGE}"/etc/bash_completion.d/{gdbus,gsettings,gresource}-bash-completion.sh
-    edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
-
-    dobashcompletion "${WORK}"/gio/gdbus-bash-completion.sh gdbus
-    dobashcompletion "${WORK}"/gio/gresource-bash-completion.sh gresource
-    dobashcompletion "${WORK}"/gio/gsettings-bash-completion.sh gsettings
+    if ! option bash-completion; then
+        edo rm "${IMAGE}"/usr/share/bash-completion/completions/{gdbus,gresource,gsettings}
+        edo rmdir "${IMAGE}"/usr/share/bash-completion/{completions/,}
+    fi
 }
 
