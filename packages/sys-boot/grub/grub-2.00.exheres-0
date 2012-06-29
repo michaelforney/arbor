@@ -86,10 +86,6 @@ src_install() {
 
     dodoc "${FILES}"/grub.cfg.example
 
-    if ! option mkfont ; then
-        edo rmdir "${IMAGE}"/usr/share/grub/themes/{starfield,}
-    fi
-
     edo rm "${IMAGE%/}"/etc/bash_completion.d/${PN}
     edo rmdir "${IMAGE%/}"/etc/bash_completion.d/
     dobashcompletion "${WORK%/}"/util/bash-completion.d/${PN}
