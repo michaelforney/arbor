@@ -1,0 +1,63 @@
+Upstream: yes, in master
+From 139c1ce9884a91be167ab9d48d3c4b0df89dd112 Mon Sep 17 00:00:00 2001
+From: Martin Pitt <martinpitt@gnome.org>
+Date: Wed, 27 Jun 2012 07:25:37 +0000
+Subject: gio/tests/contenttype: Call g_content_type_guess() with valid data len
+
+g_content_type_guess() requires specifying a valid data length. Fixes a
+segfault when running the test.
+
+Also add an explicit check for this and return XDG_MIME_TYPE_UNKNOWN when
+data_size is specified as -1, to avoid crashing.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=674452
+---
+diff --git a/gio/gcontenttype.c b/gio/gcontenttype.c
+index a9bdb4b..dc48411 100644
+--- a/gio/gcontenttype.c
++++ b/gio/gcontenttype.c
+@@ -330,6 +330,10 @@ g_content_type_guess (const gchar  *filename,
+   if (result_uncertain)
+     *result_uncertain = FALSE;
+ 
++  /* our test suite and potentially other code used -1 in the past, which is
++   * not documented and not allowed; guard against that */
++  g_return_val_if_fail (data_size != (gsize) -1, g_strdup (XDG_MIME_TYPE_UNKNOWN));
++
+   if (filename)
+     {
+       basename = g_path_get_basename (filename);
+@@ -906,6 +910,10 @@ g_content_type_guess (const gchar  *filename,
+   if (result_uncertain)
+     *result_uncertain = FALSE;
+ 
++  /* our test suite and potentially other code used -1 in the past, which is
++   * not documented and not allowed; guard against that */
++  g_return_val_if_fail (data_size != (gsize) -1, g_strdup (XDG_MIME_TYPE_UNKNOWN));
++
+   G_LOCK (gio_xdgmime);
+ 
+   if (filename)
+diff --git a/gio/tests/contenttype.c b/gio/tests/contenttype.c
+index 7188894..9e0f9af 100644
+--- a/gio/tests/contenttype.c
++++ b/gio/tests/contenttype.c
+@@ -55,14 +55,14 @@ test_guess (void)
+   g_free (res);
+   g_free (expected);
+ 
+-  res = g_content_type_guess ("test.pot", (guchar *)"ABC abc", -1, &uncertain);
++  res = g_content_type_guess ("test.pot", (guchar *)"ABC abc", 7, &uncertain);
+   expected = g_content_type_from_mime_type ("application/vnd.ms-powerpoint");
+   g_assert (g_content_type_equals (expected, res));
+   g_assert (uncertain);
+   g_free (res);
+   g_free (expected);
+ 
+-  res = g_content_type_guess ("test.otf", (guchar *)"OTTO", -1, &uncertain);
++  res = g_content_type_guess ("test.otf", (guchar *)"OTTO", 4, &uncertain);
+   expected = g_content_type_from_mime_type ("application/x-font-otf");
+   g_assert (g_content_type_equals (expected, res));
+   g_assert (!uncertain);
+--
+cgit v0.9.0.2
