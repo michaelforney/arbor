@@ -1,0 +1,217 @@
+Source: backported from http://sourceware.org/git/?p=glibc.git;a=commit;h=0479b305c5b7c8e3fa8e3002982cf8cac02b842e
+Upstream: yes
+Reason: fix mplayer2 segfault and wesnoth hang (and probably mpd segfault too).
+
+Here is mplayer2's bt:
+(gdb) bt
+#0  do_lookup_x (new_hash=new_hash@entry=4024459950, old_hash=old_hash@entry=0x7fffffffbf40, result=result@entry=0x7fffffffbf50, scope=<optimized out>, i=0, flags=flags@entry=2, skip=skip@entry=0x0, undef_map=undef_map@entry=0x7ffff7fd4000) at dl-lookup.c:98
+#1  0x00007ffff7de6bdb in _dl_lookup_symbol_x (undef_name=0x7fffffffc2c0 "_snd_func_concat_dlsym_config_evaluate_001", undef_map=0x7ffff7fd4000, ref=0x7fffffffc058, symbol_scope=0x7ffff7fd4388, version=0x0, type_class=0, flags=2, skip_map=0x0) at dl-lookup.c:739
+#2  0x00007ffff387c1db in do_sym (handle=0x7ffff7fd4000, name=0x7fffffffc2c0 "_snd_func_concat_dlsym_config_evaluate_001", who=0x7ffff7665704, vers=vers@entry=0x0, flags=flags@entry=2) at dl-sym.c:177
+#3  0x00007ffff387c6dd in _dl_sym (handle=<optimized out>, name=<optimized out>, who=<optimized out>) at dl-sym.c:283
+#4  0x00007ffff4af9104 in dlsym_doit (a=a@entry=0x7fffffffc280) at dlsym.c:51
+#5  0x00007ffff7deaed9 in _dl_catch_error (objname=0x987ee0, errstring=0x987ee8, mallocedp=0x987ed8, operate=0x7ffff4af90f0 <dlsym_doit>, args=0x7fffffffc280) at dl-error.c:178
+#6  0x00007ffff4af95ac in _dlerror_run (operate=operate@entry=0x7ffff4af90f0 <dlsym_doit>, args=args@entry=0x7fffffffc280) at dlerror.c:164
+#7  0x00007ffff4af915a in __dlsym (handle=<optimized out>, name=<optimized out>) at dlsym.c:71
+#8  0x00007ffff7665704 in snd_dlsym_verify (handle=0x7ffff7fd4000, name=0x9eae50 "snd_func_concat", version=0x7ffff77054d9 "_dlsym_config_evaluate_001") at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/dlmisc.c:121
+#9  0x00007ffff7665791 in snd_dlsym (handle=0x7ffff7fd4000, name=0x9eae50 "snd_func_concat", version=0x7ffff77054d9 "_dlsym_config_evaluate_001") at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/dlmisc.c:163
+#10 0x00007ffff765fd47 in _snd_config_evaluate (src=0x9eac10, root=0x98abb0, dst=0x0, pass=SND_CONFIG_WALK_PASS_PRE, private_data=0x986650) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:4222
+#11 0x00007ffff765f252 in snd_config_walk (src=0x9eac10, root=0x98abb0, dst=0x0, callback=0x7ffff765f954 <_snd_config_evaluate>, private_data=0x986650) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3949
+#12 0x00007ffff765f2dc in snd_config_walk (src=0x9d4d50, root=0x98abb0, dst=0x0, callback=0x7ffff765f954 <_snd_config_evaluate>, private_data=0x986650) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3956
+#13 0x00007ffff765ff6a in snd_config_evaluate (config=0x9d4d50, root=0x98abb0, private_data=0x986650, result=0x0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:4276
+#14 0x00007ffff76611c7 in snd_config_expand (config=0x993110, root=0x98abb0, args=0x0, private_data=0x986650, result=0x7fffffffc6d0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:4718
+#15 0x00007ffff765e16d in snd_config_hook_load (root=0x98abb0, config=0x9924d0, dst=0x7fffffffc790, private_data=0x986650) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3449
+#16 0x00007ffff765e8d6 in snd_config_hook_load_for_all_cards (root=0x98abb0, config=0x9924d0, dst=0x7fffffffc7f8, private_data=0x0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3597
+#17 0x00007ffff765dc3d in snd_config_hooks_call (root=0x98abb0, config=0x9924d0, private_data=0x0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3326
+#18 0x00007ffff765de07 in snd_config_hooks (config=0x98abb0, private_data=0x0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3362
+#19 0x00007ffff765d2e9 in snd_config_searcha_hooks (root=0x985df0, config=0x98abb0, key=0x999cf6 "pcm.default", result=0x7fffffffc960) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3127
+#20 0x00007ffff765d5a9 in snd1_config_search_alias_hooks (config=0x985df0, base=0x7ffff770be41 "pcm", key=0x999cf0 "cards.pcm.default", result=0x7fffffffc9c0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:3194
+#21 0x00007ffff7661360 in snd_config_search_definition (config=0x985df0, base=0x7ffff770be41 "pcm", name=0x7fffffffcb10 "default", result=0x7fffffffca30) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/conf.c:4782
+#22 0x00007ffff7685a75 in snd_pcm_open_noupdate (pcmp=0x8acfb8, root=0x985df0, name=0x7fffffffcb10 "default", stream=SND_PCM_STREAM_PLAYBACK, mode=0, hop=0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/pcm/pcm.c:2215
+#23 0x00007ffff7685bca in snd_pcm_open (pcmp=0x8acfb8, name=0x7fffffffcb10 "default", stream=SND_PCM_STREAM_PLAYBACK, mode=0) at /home/paludis/build/sys-sound-alsa-lib-1.0.25/work/alsa-lib-1.0.25/src/pcm/pcm.c:2247
+#24 0x0000000000449124 in try_open_device (device=0x7fffffffcb10 "default", open_mode=0, try_ac3=0) at libao2/ao_alsa.c:328
+#25 0x000000000044967d in init (rate_hz=44100, channels=2, format=9, flags=0) at libao2/ao_alsa.c:493
+#26 0x0000000000444497 in old_ao_init (ao=0x97a310, params=0x0) at libao2/audio_out.c:278
+#27 0x0000000000444001 in ao_init (ao=0x97a310, ao_list=0x913b30) at libao2/audio_out.c:180
+#28 0x0000000000432098 in reinit_audio_chain (mpctx=0x8c9060) at mplayer.c:1803
+#29 0x000000000043bc84 in main (argc=2, argv=0x7fffffffe0d8) at mplayer.c:4827
+
+More info:
+https://www.mageia.org/pipermail/mageia-dev/2011-October/009041.html
+http://svnweb.mageia.org/packages/cauldron/glibc/current/SOURCES/glibc-2.14.1-fix-segfault-at-dl-lookup.patch?revision=156969&view=markup
+http://sourceware.org/ml/libc-hacker/2010-09/msg00009.html
+http://sourceware.org/ml/libc-hacker/2011-02/msg00004.html
+http://sourceware.org/ml/libc-alpha/2011-06/msg00006.html
+http://www.linuxquestions.org/questions/linux-from-scratch-13/segfault-in-ld-2-14-so-running-alsa-utils-893812/
+
+-- this is the original patch's header --
+From 0479b305c5b7c8e3fa8e3002982cf8cac02b842e Mon Sep 17 00:00:00 2001
+From: Andreas Schwab <schwab@redhat.com>
+Date: Fri, 22 Jun 2012 11:10:31 -0700
+Subject: [PATCH] Fix invalid memory access in do_lookup_x.
+
+[BZ #13579] Do not free l_initfini and allow it to be reused
+on subsequent dl_open calls for the same library. This fixes
+the invalid memory access in do_lookup_x when the previously
+free'd l_initfini was accessed through l_searchlist when a
+library had been opened for the second time.
+---
+ ChangeLog      |   11 +++++++++++
+ NEWS           |   25 +++++++++++++------------
+ elf/dl-close.c |   15 +++------------
+ elf/dl-deps.c  |    7 ++++---
+ elf/dl-libc.c  |    9 ++++++---
+ elf/rtld.c     |    2 ++
+ include/link.h |    8 ++++----
+ 7 files changed, 43 insertions(+), 34 deletions(-)
+-- end of original patch's header --
+
+diff --git a/elf/dl-close.c b/elf/dl-close.c
+index 02df0d0..188ebed 100644
+--- a/elf/dl-close.c
++++ b/elf/dl-close.c
+@@ -1,5 +1,5 @@
+ /* Close a shared object opened by `_dl_open'.
+-   Copyright (C) 1996-2007, 2009, 2010, 2011 Free Software Foundation, Inc.
++   Copyright (C) 1996-2012 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -119,17 +119,8 @@ _dl_close_worker (struct link_map *map)
+   if (map->l_direct_opencount > 0 || map->l_type != lt_loaded
+       || dl_close_state != not_pending)
+     {
+-      if (map->l_direct_opencount == 0)
+-	{
+-	  if (map->l_type == lt_loaded)
+-	    dl_close_state = rerun;
+-	  else if (map->l_type == lt_library)
+-	    {
+-	      struct link_map **oldp = map->l_initfini;
+-	      map->l_initfini = map->l_orig_initfini;
+-	      _dl_scope_free (oldp);
+-	    }
+-	}
++      if (map->l_direct_opencount == 0 && map->l_type == lt_loaded)
++	dl_close_state = rerun;
+ 
+       /* There are still references to this object.  Do nothing more.  */
+       if (__builtin_expect (GLRO(dl_debug_mask) & DL_DEBUG_FILES, 0))
+diff --git a/elf/dl-deps.c b/elf/dl-deps.c
+index 7fa4d69..51fbf9e 100644
+--- a/elf/dl-deps.c
++++ b/elf/dl-deps.c
+@@ -1,6 +1,5 @@
+ /* Load the dependencies of a mapped object.
+-   Copyright (C) 1996-2003, 2004, 2005, 2006, 2007, 2010, 2011
+-   Free Software Foundation, Inc.
++   Copyright (C) 1996-2012 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -478,6 +477,7 @@ _dl_map_object_deps (struct link_map *map,
+ 		  nneeded * sizeof needed[0]);
+ 	  atomic_write_barrier ();
+ 	  l->l_initfini = l_initfini;
++	  l->l_free_initfini = 1;
+ 	}
+ 
+       /* If we have no auxiliary objects just go on to the next map.  */
+@@ -678,6 +678,7 @@ Filters not supported with LD_TRACE_PRELINKING"));
+   l_initfini[nlist] = NULL;
+   atomic_write_barrier ();
+   map->l_initfini = l_initfini;
++  map->l_free_initfini = 1;
+   if (l_reldeps != NULL)
+     {
+       atomic_write_barrier ();
+@@ -686,7 +687,7 @@ Filters not supported with LD_TRACE_PRELINKING"));
+       _dl_scope_free (old_l_reldeps);
+     }
+   if (old_l_initfini != NULL)
+-      map->l_orig_initfini = old_l_initfini;
++    _dl_scope_free (old_l_initfini);
+ 
+   if (errno_reason)
+     _dl_signal_error (errno_reason == -1 ? 0 : errno_reason, objname,
+diff --git a/elf/dl-libc.c b/elf/dl-libc.c
+index 7be9483..d401e85 100644
+--- a/elf/dl-libc.c
++++ b/elf/dl-libc.c
+@@ -1,5 +1,5 @@
+ /* Handle loading and unloading shared objects for internal libc purposes.
+-   Copyright (C) 1999-2002,2004-2006,2009,2010 Free Software Foundation, Inc.
++   Copyright (C) 1999-2012 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+    Contributed by Zack Weinberg <zack@rabi.columbia.edu>, 1999.
+ 
+@@ -265,13 +265,13 @@ libc_freeres_fn (free_mem)
+ 
+   for (Lmid_t ns = 0; ns < GL(dl_nns); ++ns)
+     {
+-      /* Remove all additional names added to the objects.  */
+       for (l = GL(dl_ns)[ns]._ns_loaded; l != NULL; l = l->l_next)
+ 	{
+ 	  struct libname_list *lnp = l->l_libname->next;
+ 
+ 	  l->l_libname->next = NULL;
+ 
++	  /* Remove all additional names added to the objects.  */
+ 	  while (lnp != NULL)
+ 	    {
+ 	      struct libname_list *old = lnp;
+@@ -279,6 +279,10 @@ libc_freeres_fn (free_mem)
+ 	      if (! old->dont_free)
+ 		free (old);
+ 	    }
++
++	  /* Free the initfini dependency list.  */
++	  if (l->l_free_initfini)
++	    free (l->l_initfini);
+ 	}
+ 
+       if (__builtin_expect (GL(dl_ns)[ns]._ns_global_scope_alloc, 0) != 0
+diff --git a/elf/rtld.c b/elf/rtld.c
+index 9eb9289..2e9fe3a 100644
+--- a/elf/rtld.c
++++ b/elf/rtld.c
+@@ -2263,6 +2263,8 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
+ 	      lnp->dont_free = 1;
+ 	      lnp = lnp->next;
+ 	    }
++	  /* Also allocated with the fake malloc().  */
++	  l->l_free_initfini = 0;
+ 
+ 	  if (l != &GL(dl_rtld_map))
+ 	    _dl_relocate_object (l, l->l_scope, GLRO(dl_lazy) ? RTLD_LAZY : 0,
+diff --git a/include/link.h b/include/link.h
+index e877104..27686a4 100644
+--- a/include/link.h
++++ b/include/link.h
+@@ -1,6 +1,6 @@
+ /* Data structure for communication from the run-time dynamic linker for
+    loaded ELF shared objects.
+-   Copyright (C) 1995-2006, 2007, 2009, 2010, 2011 Free Software Foundation, Inc.
++   Copyright (C) 1995-2012 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -192,6 +192,9 @@ struct link_map
+ 						 during LD_TRACE_PRELINKING=1
+ 						 contains any DT_SYMBOLIC
+ 						 libraries.  */
++    unsigned int l_free_initfini:1; /* Nonzero if l_initfini can be
++				       freed, ie. not allocated with
++				       the dummy malloc in ld.so.  */
+ 
+     /* Collected information about own RPATH directories.  */
+     struct r_search_path_struct l_rpath_dirs;
+@@ -240,9 +243,6 @@ struct link_map
+ 
+     /* List of object in order of the init and fini calls.  */
+     struct link_map **l_initfini;
+-    /* The init and fini list generated at startup, saved when the
+-       object is also loaded dynamically.  */
+-    struct link_map **l_orig_initfini;
+ 
+     /* List of the dependencies introduced through symbol binding.  */
+     struct link_map_reldeps
