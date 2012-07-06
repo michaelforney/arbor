@@ -1,0 +1,24 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: http://llvm.org/bugs/show_bug.cgi?id=6713
+Reason: Replace $(PROJ_prefix)/lib with $(PROJ_libdir)
+
+---
+ lib/Headers/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/lib/Headers/Makefile b/lib/Headers/Makefile
+index d75b1a2..a4ab185 100644
+--- a/lib/Headers/Makefile
++++ b/lib/Headers/Makefile
+@@ -35,7 +35,7 @@ $(HeaderDir)/arm_neon.h: $(BUILT_SOURCES) $(HeaderDir)/.dir
+ # Hook into the standard Makefile rules.
+ all-local:: $(OBJHEADERS)
+ 
+-PROJ_headers := $(DESTDIR)$(PROJ_prefix)/lib/clang/$(CLANG_VERSION)/include
++PROJ_headers := $(DESTDIR)$(PROJ_libdir)/clang/$(CLANG_VERSION)/include
+ 
+ INSTHEADERS := $(addprefix $(PROJ_headers)/, $(HEADERS))
+ INSTHEADERS += $(PROJ_headers)/arm_neon.h
+-- 
+1.7.6
+
