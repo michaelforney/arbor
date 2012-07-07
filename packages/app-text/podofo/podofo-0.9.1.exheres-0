@@ -5,5 +5,8 @@ require podofo
 
 PLATFORMS="~amd64 ~x86"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}"/${PNV}_optional_lua.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PNV}_optional_lua.patch
+    -p0 "${FILES}"/${PNV}_gcc-4.7.patch
+)
 
