@@ -6,6 +6,8 @@ require ruby
 LICENCES="|| ( Ruby-1.8 GPL-2 )"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/stdout-rouge-fix.patch )
+
 src_test() {
     # These tests are currently broken with ruby uninstalled
     edo rm -rf test/{soap,wdsl} test/webrick/test_{filehandler,cgi}.rb

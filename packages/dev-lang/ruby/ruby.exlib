@@ -41,6 +41,13 @@ if ever at_least "1.9" ; then
             dev-libs/libyaml
             dev-util/pkg-config
     "
+else
+    DEPENDENCIES+="
+        build+run:
+            sys-libs/ncurses
+            sys-libs/readline
+            sys-libs/zlib
+    "
 fi
 
 DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
@@ -62,7 +69,7 @@ ruby_src_configure() {
         )
     fi
 
-    # FIXME configure: WARNING: unrecognized options:
+    # FIXME (for 1.8) configure: WARNING: unrecognized options:
     # --disable-socks, --disable-threads, --without-tk, --disable-debug, --without-dbm,
     # --without-gdbm, --with-openssl, --with-lookup-order-hack=INET, --enable-ipv6
     econf \
