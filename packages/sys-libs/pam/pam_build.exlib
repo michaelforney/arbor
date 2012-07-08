@@ -55,6 +55,7 @@ pam_build_src_prepare() {
     for readme in modules/pam_*/README; do
         edo cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | sed -e 's|^modules/||')
     done
+    default
 }
 
 configure_one_multibuild() {
