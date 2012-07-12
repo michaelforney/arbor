@@ -11,7 +11,7 @@
 # required parameters:
 # supported_autoconf=[ slots ], supported_automake=[ slots ]
 
-require versionator
+require versionator dependencies-helpers
 
 export_exlib_phases src_prepare
 
@@ -19,21 +19,21 @@ myexparam supported_autoconf[]
 myexparam supported_automake[]
 myexparam -b need_libtool=true
 
-exparam -v SUPPORTED_AUTOCONF supported_autoconf[@]
-exparam -v SUPPORTED_AUTOMAKE supported_automake[@]
+SUPPORTED_AUTOCONF=( $(version_sort_highest_first $(exparam supported_autoconf[@])) )
+SUPPORTED_AUTOMAKE=( $(version_sort_highest_first $(exparam supported_automake[@])) )
 
 autotools_dependencies() {
     if [[ ${SUPPORTED_AUTOCONF[@]} == none ]]; then
         WANT_AUTOCONF=none
     else
-        sorted_any_of_slot_dependencies \
+        print_slot_dependencies \
             sys-devel/autoconf "${SUPPORTED_AUTOCONF[@]}"
     fi
 
     if [[ ${SUPPORTED_AUTOMAKE[@]} == none ]]; then
         WANT_AUTOMAKE="none"
     else
-        sorted_any_of_slot_dependencies \
+        print_slot_dependencies \
             sys-devel/automake "${SUPPORTED_AUTOMAKE[@]}"
     fi
 }
@@ -48,22 +48,12 @@ printf -v "$(exparam deps_var)" "%s" "
 autotools_select_versions() {
     local i sorted_slots=()
     if [[ -z ${WANT_AUTOCONF} && ${SUPPORTED_AUTOCONF[@]} != none ]]; then
-        sorted_slots=( $(version_sort_lowest_first ${SUPPORTED_AUTOCONF[@]}) )
-        for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
-            has_version --slash sys-devel/autoconf:${sorted_slots[i]} \
-                && export WANT_AUTOCONF="${sorted_slots[i]}" \
-                && break
-        done
+        export WANT_AUTOCONF=$(get_best_slot_dependency sys-devel/autoconf ${SUPPORTED_AUTOCONF[@]})
         [[ -z ${WANT_AUTOCONF} ]] && die "No autoconf installed"
         echo "Using autoconf:${WANT_AUTOCONF}"
     fi
     if [[ -z ${WANT_AUTOMAKE} && ${SUPPORTED_AUTOMAKE[@]} != none ]]; then
-        sorted_slots=( $(version_sort_lowest_first ${SUPPORTED_AUTOMAKE[@]}) )
-        for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
-            has_version --slash sys-devel/automake:${sorted_slots[i]} \
-                && export WANT_AUTOMAKE="${sorted_slots[i]}" \
-                && break
-        done
+        export WANT_AUTOMAKE=$(get_best_slot_dependency sys-devel/automake ${SUPPORTED_AUTOMAKE[@]})
         [[ -z ${WANT_AUTOMAKE} ]] && die "No automake installed"
         echo "Using automake:${WANT_AUTOMAKE}"
     fi
