@@ -1,0 +1,35 @@
+# Copyright 2012 Quentin "Sardem FF7" Glidic <sardemff7+exherbo@sardemff7.net>
+# Distributed under the terms of the GNU General Public License v2
+
+# This exlib contains helpers for handling dependencies
+
+# Prints an || dependency for a slotted package
+# $1: the category/package
+# $2-: the slots
+# If only one slot is passed, will print " category/package:slot "
+print_slot_dependencies() {
+    [[ ${#} -eq 1 ]] && return
+    local slot cpn=${1}
+    shift
+    if [[ ${#} -eq 1 ]]; then
+        echo -n " ${cpn}:${1} "
+    else
+        echo -n ' || ('
+        for slot in ${@}; do
+            echo -n " ${cpn}:${slot} "
+        done
+        echo -n ') '
+    fi
+}
+
+# Prints the first installed slot for the specified package
+# $1: the category/package
+# $2-: the slots
+get_best_slot_dependency() {
+    local slot cpn=${1}
+    shift
+    for slot in ${@}; do
+        has_version --slash ${cpn}:${slot} && echo ${slot} && return
+    done
+}
+
