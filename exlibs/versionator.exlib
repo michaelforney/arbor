@@ -19,10 +19,20 @@ get_last_version_component_index() {
 }
 
 # Returns its parameters sorted, highest version last.
-version_sort() {
+version_sort_lowest_first() {
     local items=( "${@}" )
     __version_sort
     echo "${items[@]}"
+}
+
+# Returns its parameters sorted, highest version first.
+version_sort_highest_first() {
+    local items=( "${@}" ) i r_items=()
+    __version_sort
+    for((i=${#items[@]}-1; i>=0; --i)); do
+        r_items+=( ${items[i]} )
+    done
+    echo "${r_items[@]}"
 }
 
 __version_sort() {
@@ -50,7 +60,7 @@ sorted_any_of_slot_dependencies() {
     local i sorted_slots cpn=${1}
     shift
     (( ${#} > 1 )) && echo -n " || ( "
-    sorted_slots=( $(version_sort ${@}) )
+    sorted_slots=( $(version_sort_lowest_first ${@}) )
     for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
         echo -n " ${cpn}:${sorted_slots[i]} "
     done

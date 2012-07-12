@@ -48,7 +48,7 @@ printf -v "$(exparam deps_var)" "%s" "
 autotools_select_versions() {
     local i sorted_slots=()
     if [[ -z ${WANT_AUTOCONF} && ${SUPPORTED_AUTOCONF[@]} != none ]]; then
-        sorted_slots=( $(version_sort ${SUPPORTED_AUTOCONF[@]}) )
+        sorted_slots=( $(version_sort_lowest_first ${SUPPORTED_AUTOCONF[@]}) )
         for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
             has_version --slash sys-devel/autoconf:${sorted_slots[i]} \
                 && export WANT_AUTOCONF="${sorted_slots[i]}" \
@@ -58,7 +58,7 @@ autotools_select_versions() {
         echo "Using autoconf:${WANT_AUTOCONF}"
     fi
     if [[ -z ${WANT_AUTOMAKE} && ${SUPPORTED_AUTOMAKE[@]} != none ]]; then
-        sorted_slots=( $(version_sort ${SUPPORTED_AUTOMAKE[@]}) )
+        sorted_slots=( $(version_sort_lowest_first ${SUPPORTED_AUTOMAKE[@]}) )
         for((i=${#sorted_slots[@]}-1; i>=0; --i)); do
             has_version --slash sys-devel/automake:${sorted_slots[i]} \
                 && export WANT_AUTOMAKE="${sorted_slots[i]}" \

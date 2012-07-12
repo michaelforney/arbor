@@ -319,7 +319,7 @@ rewrite_symlink() {
         eerror "Could not rewrite ${1/-${SLOT}}, no other versions available"
         return 127
     fi
-    versions_sorted=( $(version_sort "${versions[@]}") )
+    versions_sorted=( $(version_sort_lowest_first "${versions[@]}") )
     latest_slot=${versions_sorted[${#versions_sorted[@]}-1]}
     myln ${lib}-${latest_slot}.${ext} "${2}"/${lib}.${ext}
 }
@@ -342,7 +342,7 @@ rewrite_so_symlink() {
         eerror "Could not rewrite ${lib}, no other versions available"
         return 127
     fi
-    versions_sorted=( $(version_sort "${versions[@]}") )
+    versions_sorted=( $(version_sort_lowest_first "${versions[@]}") )
     latest=${lib}.${versions_sorted[${#versions_sorted[@]}-1]}
     while [[ ${latest} == ${lib}.* ]]; do
         myln ${latest} "${1}"/${latest%.*} || ((++ret))
