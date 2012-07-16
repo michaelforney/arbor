@@ -14,7 +14,7 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.11]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
-        dev-libs/libelf[multibuild_c:*(-)?]
+        dev-libs/libelf[>=0.8.12][multibuild_c:*(-)?]
         dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
     test:
         dev-python/dbus-python
@@ -65,11 +65,9 @@ src_prepare() {
 src_install() {
     glib_src_install
 
-    edo rm "${IMAGE}"/etc/bash_completion.d/{gdbus,gsettings,gresource}-bash-completion.sh
-    edo rmdir "${IMAGE}"/etc/{bash_completion.d,}
-
-    dobashcompletion "${WORK}"/gio/gdbus-bash-completion.sh gdbus
-    dobashcompletion "${WORK}"/gio/gresource-bash-completion.sh gresource
-    dobashcompletion "${WORK}"/gio/gsettings-bash-completion.sh gsettings
+    if ! option bash-completion; then
+        edo rm "${IMAGE}"/usr/share/bash-completion/completions/{gdbus,gresource,gsettings}
+        edo rmdir "${IMAGE}"/usr/share/bash-completion/{completions/,}
+    fi
 }
 
