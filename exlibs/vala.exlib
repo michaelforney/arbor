@@ -1,0 +1,27 @@
+# Copyright 2012 Quentin "Sardem FF7" Glidic <sardemff7+exherbo@sardemff7.net>
+# Distributed under the terms of the GNU General Public License v2
+
+# This exlib is for Vala-based packages
+# Mainly handle the VALAC export
+
+require dependencies-helpers
+
+myexparam vala_slots[]
+
+exparam -v vala_slots vala_slots[@]
+
+export_exlib_phases pkg_setup
+
+DEPENDENCIES="
+    build:
+        $(print_slot_dependencies dev-lang/vala ${vala_slots[@]})
+"
+
+vala_pkg_setup() {
+    local vala_version=$(get_best_slot_dependency dev-lang/vala ${vala_slots[@]})
+    [[ -z ${vala_version} ]] && die "No vala installed"
+    export VALAC="$(type -P valac-${vala_version})"
+
+    default
+}
+
