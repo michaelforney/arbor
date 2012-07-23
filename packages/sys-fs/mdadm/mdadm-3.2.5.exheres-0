@@ -3,6 +3,8 @@
 # Based in part upon 'mdadm-3.0.ebuild', which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
+require udev-rules
+
 SUMMARY="A useful tool for managing RAID systems - can be used as a replacement for the raidtools"
 HOMEPAGE="http://neil.brown.name/blog/mdadm"
 DOWNLOADS="mirror://kernel/linux/utils/raid/${PN}/${PNV}.tar.gz"
@@ -36,6 +38,8 @@ src_prepare() {
     default
     # don't stop on warnings
     edo sed -i -e 's,-Werror,,' "${WORK}/Makefile"
+    # install udev rules to the correct path
+    edo sed -i -e 's,/lib/udev/rules.d,${UDEVRULESDIR},' "${WORK}/Makefile"
     # use proper libdir
     edo sed -i -e 's,/lib/,/${LIBDIR}/,' "${WORK}/Makefile"
 }
