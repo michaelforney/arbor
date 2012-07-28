@@ -184,6 +184,7 @@ EOT
         if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
             edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
         fi
+        edo rmdir "${IMAGE}"/usr/lib/{systemd/{user-generators,},}
         [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 
