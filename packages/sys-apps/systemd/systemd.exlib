@@ -33,7 +33,6 @@ MYOPTIONS="
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
     gobject-introspection
     gtk-doc
-    plymouth [[ description = [ Enable Plymouth (graphical boot splash) integration ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
     multibuild_c: 32 64
@@ -66,7 +65,6 @@ DEPENDENCIES="
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
         cryptsetup? ( sys-fs/cryptsetup[multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
-        plymouth? ( sys-boot/plymouth )
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     run:
         sys-apps/coreutils
@@ -169,7 +167,6 @@ configure_one_multibuild() {
         $(option_enable cryptsetup libcryptsetup)
         $(option_enable gobject-introspection introspection)
         $(option_enable gtk-doc)
-        $(option_enable plymouth)
         $(option_enable tcpd tcpwrap)
     )
 
@@ -341,11 +338,8 @@ EOT
         if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
             edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
         fi
-        if ever is_scm; then
-            edo rmdir "${IMAGE}"/usr/lib/{systemd/{user-generators,},}
-        else
-            [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
-        fi
+        edo rmdir "${IMAGE}"/usr/lib/{systemd/{user-generators,},}
+        [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
     fi
 
     # Create compatibility symlinks
