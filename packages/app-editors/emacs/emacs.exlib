@@ -3,8 +3,6 @@
 # Based in part upon 'emacs-22.2-r2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-# TODO: handle --with-x-toolkit=gtk3?
-
 require game alternatives elisp-module
 
 if [[ -z $(ever range 3) ]]; then
@@ -18,15 +16,16 @@ if [[ $(ever range 3) == rc* ]]; then
     MY_PNV=${PN}-${MY_PV}
 fi
 
-export_exlib_phases src_prepare src_install pkg_postinst
+export_exlib_phases src_prepare src_configure src_install pkg_postinst
 
 SUMMARY="The extensible, customizable, self-documenting, real-time display editor"
 
 LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS="
-    X alsa dbus freetype gif gpm gtk otf svg tiff tiff xpm
-    ( freetype gif gtk otf svg tiff xpm ) [[ requires = X ]]
+    X alsa dbus freetype gif gpm gtk gtk3 otf svg tiff tiff xpm
+    ( freetype gif gtk gtk3 otf svg tiff xpm ) [[ requires = X ]]
+    ( gtk gtk3 ) [[ number-selected = at-most-one ]]
     gconf [[
         description = [ Allows emacs to determine the system font ]
         requires = X
@@ -43,6 +42,7 @@ DEPENDENCIES="
         alsa? ( dev-util/pkg-config )
         dbus? ( dev-util/pkg-config )
         gtk? ( dev-util/pkg-config )
+        gtk3? ( dev-util/pkg-config )
         svg? ( dev-util/pkg-config )
     build+run:
         dev-libs/libxml2 [[ note = [ used for html rendering; could be made optional ] ]]
@@ -60,6 +60,10 @@ DEPENDENCIES="
             gtk? (
               dev-libs/glib:2[>=2.10]
               x11-libs/gtk+:2[>=2.10]
+            )
+            gtk3? (
+              dev-libs/glib:2[>=2.28]
+              x11-libs/gtk+:3[>=3.0]
             )
             otf? ( dev-libs/libotf )
             svg? ( gnome-desktop/librsvg:2[>=2.11.0] )
@@ -79,29 +83,6 @@ DEPENDENCIES="
         app-spell/aspell [[ description = [ For ispell and flyspell mode ] ]]
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --infodir=/usr/share/info/emacs
-    --without-compress-info # applies to manpages as well
-    --without-gsettings
-    --without-hesiod
-    --without-imagemagick
-    --without-kerberos
-    --without-kerberos5
-    --without-m17n-flt
-    --without-selinux
-    --without-xim
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    'X x' 'X jpeg' 'X png'
-    'alsa sound'
-    'freetype xft'
-    'gtk x-toolkit gtk' 'gtk toolkit-scroll-bars'
-    'otf libotf'
-    'svg rsvg'
-    'dbus' 'gconf' 'gif' 'gpm' 'tiff' 'xpm'
-)
-
 WORK=${WORKBASE}/${MY_PNV-${PNV}}
 
 emacs_src_prepare() {
@@ -111,6 +92,40 @@ emacs_src_prepare() {
 
     # Create a copy of the clean source (it will be installed in src_install)
     edo tar cf source.tar src/
+}
+
+emacs_src_configure() {
+    config_params=(
+        --infodir=/usr/share/info/emacs
+        --without-compress-info # applies to manpages as well
+        --without-gsettings
+        --without-hesiod
+        --without-imagemagick
+        --without-kerberos
+        --without-kerberos5
+        --without-m17n-flt
+        --without-selinux
+        --without-xim
+    )
+
+    config_withs=(
+        'X x' 'X jpeg' 'X png'
+        'alsa sound'
+        'freetype xft'
+        'otf libotf'
+        'svg rsvg'
+        'dbus' 'gconf' 'gif' 'gpm' 'tiff' 'xpm'
+    )
+
+    local toolkit=no
+    option gtk  && toolkit=gtk;
+    option gtk3 && toolkit=gtk3;
+
+    econf \
+        "${config_params[@]}" \
+        $(for s in "${config_withs[@]}" ; do option_with ${s} ; done ) \
+        $(option gtk || option gtk3 || echo --without-toolkit-scroll-bars) \
+        --with-x-toolkit=${toolkit}
 }
 
 emacs_src_install() {
