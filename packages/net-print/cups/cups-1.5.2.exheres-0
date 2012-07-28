@@ -1,9 +1,68 @@
 # Copyright 2008-2009 Daniel Mierswa <impulze@impulze.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cups
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
+require pam easy-multibuild [ multiunpack=true ] systemd-service gtk-icon-cache
 
+SUMMARY="Common UNIX Printing System"
+DESCRIPTION="A portable printing layer for UNIX®-based operating systems."
+HOMEPAGE="http://www.${PN}.org"
+DOWNLOADS="ftp://ftp.easysw.com/pub/${PN}/${PV}/${PNV}-source.tar.bz2"
+
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/documentation.php"
+UPSTREAM_RELEASE_NOTES="${UPSTREAM_DOCUMENTATION}/whatsnew.html"
+
+LICENCES="GPL-2"
+SLOT="0"
 PLATFORMS="~amd64 ~x86"
+LANGS="da de es eu fi fr id it ja ko nl no pl pt pt_BR ru sv zh zh_TW"
+MYOPTIONS="baselayout dbus debug gnutls kerberos pam perl python tiff xinetd
+acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
+avahi [[ description = [ Enable DNS Service Discovery (DNS_SD) support (printer sharing using Avahi) ] ]]
+ldap [[ description = [ Support LDAP Protocol when authenticating with the CUPS daemon ] ]]
+libusb [[ description = [ Use libusb rather than the internal USB implementation ] ]]
+pdf [[ description = [ Support pdf printing via pdftops from poppler ] ]]
+tcpd [[ description = [ Use TCP Wrappers to restrict access to cupsd ] ]]
+linguas: ( ${LANGS} )
+multibuild_c: 32 64"
+
+# TODO:
+# options: java kerberos php slp
+# features: maybe ppds?
+# probably better slotting to avoid rebuilding
+
+# testsuite has lots of FAILs for now, will check into those next version
+RESTRICT="test"
+
+DEPENDENCIES="
+    build:
+        dbus? ( dev-util/pkg-config )
+        gnutls? ( dev-util/pkg-config )
+    build+run:
+        group/lpadmin
+        dev-libs/libpaper
+        media-libs/jpeg[multibuild_c:*(-)?]
+        media-libs/libpng[multibuild_c:*(-)?]
+        sys-libs/zlib[multibuild_c:*(-)?]
+        acl? ( sys-apps/acl[multibuild_c:*(-)?] )
+        avahi? ( net-dns/avahi[dns_sd][multibuild_c:*(-)?] )
+        dbus? ( sys-apps/dbus[multibuild_c:*(-)?] )
+        gnutls? ( dev-libs/gnutls[multibuild_c:*(-)?] )
+        kerberos? ( app-crypt/heimdal[multibuild_c:*(-)?] )
+        ldap? ( net-directory/openldap[multibuild_c:*(-)?] )
+        libusb? ( dev-libs/libusb:0.1[multibuild_c:*(-)?] )
+        pam? ( sys-libs/pam[multibuild_c:*(-)?] )
+        perl? ( dev-lang/perl[multibuild_c:*(-)?] )
+        python? ( dev-lang/python:*[multibuild_c:*(-)?] )
+        tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
+        tiff? ( media-libs/tiff[multibuild_c:*(-)?] )
+    post:
+        app-text/ghostscript[cups] [[ note = [ pstoraster, pdftoraster ] ]]
+        pdf? ( app-text/poppler [[ note = [ pdftops ] ]] )
+        xinetd? ( sys-apps/xinetd )
+"
 
 DEFAULT_SRC_PREPARE_PATCHES+=(
     "${FILES}"/${PN}-1.5.0-avahi-1-config.patch
@@ -13,4 +72,148 @@ DEFAULT_SRC_PREPARE_PATCHES+=(
     "${FILES}"/${PN}-1.5.0-avahi-5-services.patch
     "${FILES}"/${PN}-1.5.0-run-pid.patch
 )
+
+AT_M4DIR=( config-scripts )
+
+prepare_one_multibuild() {
+    # remove default optimizations and do not strip by default
+    edo sed -e 's:OPTIM="-Os -g":OPTIM="":' \
+            -e 's:INSTALL_STRIP="-s":INSTALL_STRIP="":' \
+            -i config-scripts/cups-compiler.m4
+
+    # do not overwrite libdir if lib64 is found on the system and
+    # don't use the library dir as server directory, since that'll
+    # break multilib
+    edo sed -e 's#libdir=".*"#:#' \
+            -e '/CUPS_SERVERBIN="/s:lib/cups:libexec/cups:' \
+            -i config-scripts/cups-directories.m4
+
+    # do not gzip manpages by default
+    edo sed -i -e '/MAN[0-9]EXT=/s:\.gz::g' config-scripts/cups-manpages.m4
+
+    # disable the xinetd service by default
+    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" scheduler/cups-lpd.xinetd.in
+
+    # Disable silent rules
+    edo sed -i '/^\.SILENT:$/d' Makedefs.in
+
+    autotools_src_prepare
+}
+
+configure_one_multibuild() {
+    local myconf=()
+
+    for lang in ${LANGS}; do
+        option "linguas:${lang}" && CUPSLANGS="${lang} ${CUPSLANGS}"
+    done
+
+    [[ -z "${CUPSLANGS}" ]] && CUPSLANGS=none
+
+    if option pdf ; then
+        myconf+=( '--with-pdftops=/usr/bin/pdftops' )
+    else
+        myconf+=( '--with-pdftops=none' )
+    fi
+
+    # XXX Enables: slp
+    # XXX Withs: java php
+    econf \
+        --localstatedir=/var \
+        --enable-jpeg \
+        --enable-libpaper \
+        --enable-png \
+        --enable-raw-printing \
+        --enable-static \
+        --enable-threads \
+        --disable-cdsassl \
+        --with-cups-{group,user}=lp \
+        --with-docdir="/usr/share/doc/${PNVR}/handbook" \
+        --with-languages="${CUPSLANGS}" \
+        --with-system-groups=lpadmin \
+        --without-rcdir \
+        $(option_enable acl) \
+        $(option_enable avahi) \
+        $(option_enable avahi dnssd) \
+        $(option_enable dbus) \
+        $(option_enable debug debug) \
+        $(option_enable debug debug-printfs) \
+        $(option_enable gnutls gnutls) \
+        $(option_enable !gnutls openssl) \
+        $(option_enable kerberos gssapi) \
+        $(option_enable ldap) \
+        $(option_enable libusb) \
+        $(option_enable pam) \
+        $(option_enable tcpd tcp-wrappers) \
+        $(option_enable tiff) \
+        $(option_with avahi dnssd-includes /usr/include/avahi-compat-libdns_sd) \
+        $(option_with perl) \
+        $(option_with python) \
+        $(option_with xinetd xinetd /etc/xinetd.d) \
+        DSOFLAGS="${CFLAGS}" LDFLAGS="${CFLAGS} ${LDFLAGS}" \
+        "${myconf[@]}"
+}
+
+compile_one_multibuild() {
+    if multibuild_default_target C; then
+        emake
+    else
+        emake libs
+    fi
+}
+
+install_one_multibuild() {
+    if ! multibuild_default_target C; then
+        emake -j1 BUILDROOT="${IMAGE}" install-libs
+        return
+    fi
+
+    emake -j1 BUILDROOT="${IMAGE}" install
+    emagicdocs
+
+    keepdir /usr/libexec/cups/driver /usr/share/cups/{model,profiles} \
+            /var/cache/cups/rss /var/log/cups /var/spool/cups/tmp
+
+    keepdir /etc/cups/{interfaces,ppd,ssl}
+
+    # provide our own pam script
+    if option pam ; then
+        edo rm -f "${IMAGE}/etc/pam.d/cups"
+        pamd_mimic_system cups auth auth account
+    fi
+
+    if option baselayout ; then
+        # add init.d dependencies to the cups init script
+        local neededservices=
+        option dbus && neededservices+=" dbus"
+
+        [[ -n "${neededservices}" ]] && neededservices="need${neededservices}"
+
+        newinitd "${FILES}"/cupsd.initd cupsd
+        edo sed "s:\$neededservices:$neededservices:" -i "${IMAGE}"/etc/init.d/cupsd
+    fi
+
+    install_systemd_files
+
+    echo "ServerName /run/cups/cups.sock" >> "${IMAGE}"/etc/cups/client.conf
+}
+
+src_test() {
+    if option multibuild_c:"${MULTIBUILD_C_DEFAULT_TARGET}" ; then
+        edo cd "${WORKBASE}/C/${MULTIBUILD_C_DEFAULT_TARGET}"
+        # 1 = medium testsuite
+        emake unittests
+        edo cd test
+        USER=paludisbuild edo ./run-stp-tests.sh 1 2 n
+    fi
+}
+
+#src_test_expensive() {
+#    if option multibuild_c:"${MULTIBUILD_C_DEFAULT_TARGET}" ; then
+#        edo cd "${WORKBASE}/C/${MULTIBUILD_C_DEFAULT_TARGET}"
+#        # 4 = torture testsuite :P
+#        emake unittests
+#        edo cd test
+#        USER=paludisbuild edo ./run-stp-tests.sh 4 2 n
+#    fi
+#}
 
