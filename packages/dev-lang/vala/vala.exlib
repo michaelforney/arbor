@@ -64,6 +64,14 @@ vala_src_install() {
     if ever at_least 0.16.0; then
         src=usr/share/pkgconfig/vapigen-${SLOT}.pc
         alternatives+=( /${src/-${SLOT}} ${src##*/} )
+        edo mkdir -p "${IMAGE}"/usr/share/aclocal/
+        edo cp "${WORK}"/vapigen/vapigen.m4 "${IMAGE}"/usr/share/aclocal/vapigen-${SLOT}.m4
+        src=usr/share/aclocal/vapigen-${SLOT}.m4
+        alternatives+=( /${src/-${SLOT}} ${src##*/} )
+        edo mkdir -p "${IMAGE}"/usr/share/vala/
+        edo cp "${WORK}"/vapigen/Makefile.vapigen "${IMAGE}"/usr/share/vala/Makefile.vapigen-${SLOT}
+        src=usr/share/vala/Makefile.vapigen-${SLOT}
+        alternatives+=( /${src/-${SLOT}} ${src##*/} )
     fi
     edo popd
 
