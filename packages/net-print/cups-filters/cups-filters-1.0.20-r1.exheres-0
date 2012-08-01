@@ -17,7 +17,7 @@ DOWNLOADS="http://www.openprinting.org/download/${PN}/${PNV}.tar.xz"
 LICENCES="GPL-2 GPL-3 MIT"
 SLOT="0"
 PLATFORMS="~amd64"
-MYOPTIONS="multibuild_c: ( 32 64 )"
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
@@ -32,6 +32,8 @@ DEPENDENCIES="
         media-libs/libpng[multibuild_c:*(-)?]
         media-libs/tiff[multibuild_c:*(-)?]
         net-print/cups[>=1.4][multibuild_c:*(-)?]
+    run:
+        sys-apps/bc                [[ note = [ pstopdf filter ] ]]
     suggestion:
         net-print/foomatic-db      [[ note = [ for non-PostScript printers ] ]]
         net-print/foomatic-filters [[ note = [ for non-PostScript printers ] ]]
