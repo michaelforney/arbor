@@ -12,17 +12,23 @@ DOWNLOADS="ftp://alpha.gnu.org/gnu/${PN}/${PNV}.tar.bz2
 LICENCES="|| ( GPL-2 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="readline"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         sys-devel/flex
     build+run:
-        readline? (
-            sys-libs/ncurses
-            sys-libs/readline
-        )"
+        sys-libs/ncurses
+        sys-libs/readline
+"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir --without-libedit )
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( readline )
+DEFAULT_SRC_PREPARE_PATCHES+=(
+    "${FILES}"/${PN}-1.06.95-void_uninitialized.patch
+)
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --with-readline
+    --without-libedit
+)
 
