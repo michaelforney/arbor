@@ -1,0 +1,18 @@
+Source: http://sourceforge.net/tracker/?func=detail&atid=100976&aid=3551460&group_id=976
+Upstream: Reported
+Reason: Fix running curl-config: line 138: CPPFLAG_CURL_STATICLIB: command not found
+
+--- curl-7.27.0/curl-config.in.orig	2012-07-29 18:20:58.949463688 +0100
++++ curl-7.27.0/curl-config.in	2012-07-29 18:41:41.225317131 +0100
+@@ -135,9 +135,9 @@
+           CPPFLAG_CURL_STATICLIB=""
+         fi
+        	if test "X@includedir@" = "X/usr/include"; then
+-          echo "$(CPPFLAG_CURL_STATICLIB)"
++          echo "${CPPFLAG_CURL_STATICLIB}"
+         else
+-          echo "$(CPPFLAG_CURL_STATICLIB)-I@includedir@"
++          echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
+         fi
+        	;;
+ 
