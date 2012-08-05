@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge easy-multibuild
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
 
 SUMMARY="Tool for generating lexical scanners"
 
@@ -17,12 +16,9 @@ DEPENDENCIES="
         sys-devel/m4[>=1.4]"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-	"${FILES}/${PNV}-gcc-4.4-elif.patch"
-	"${FILES}/${PNV}-sign.patch"
-	"${FILES}/${PNV}-tests-LDFLAGS.patch"
+    "${FILES}/${PN}-2.5.35-gcc-4.4-elif.patch"
+    "${FILES}/${PN}-2.5.36-bison-2.6.1.patch"
 )
-
-AT_M4DIR=( m4 )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --hates=docdir )
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
