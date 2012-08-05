@@ -2,9 +2,13 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="${PN} is a super-server daemon and a safe replacement for inetd"
+DESCRIPTION="${PN} listens on specific ports to launch programs configured for that port."
 HOMEPAGE="http://www.${PN}.org"
 DOWNLOADS="http://www.${PN}.org/${PNV}.tar.gz"
-DESCRIPTION="${PN} listens on specific ports to launch programs configured for that port"
+
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/#changes"
 
 LICENCES="${PN}"
 SLOT="0"
@@ -16,9 +20,6 @@ DEPENDENCIES="
     run:
         perl? ( dev-lang/perl:* )
 "
-
-UPSTREAM_RELEASE_NOTES="http://www.xinetd.org/#changes"
-REMOTE_IDS="freecode:xinetd"
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS+=(
     AUDIT
