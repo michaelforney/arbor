@@ -110,7 +110,7 @@ glibc_src_prepare() {
         export GCC="${CC}"
     fi
 
-    ever at_least 2.14.1-r2 && eautoconf
+    ever at_least 2.14.1-r2 && ! ever at_least 2.16 && eautoconf
     default
 }
 
@@ -207,7 +207,7 @@ glibc_src_install() {
     done
 
     # don't install bundled timezone info
-    edo rm -r "${IMAGE}/usr/share/zoneinfo"
+    ! ever at_least 2.16.0 && edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
     cd "${WORKBASE}/${PNV}"
 
