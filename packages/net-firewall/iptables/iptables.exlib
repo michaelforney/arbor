@@ -15,25 +15,27 @@ to control packet filtering, Network Address Translation (masquerading,
 portforwarding, transparent proxying), and special effects such as packet mangling.
 "
 HOMEPAGE="http://netfilter.org/projects/${PN}"
-DOWNLOADS="http://netfilter.org/projects/${PN}/files/${MY_PNV}.tar.bz2"
+DOWNLOADS="${HOMEPAGE}/files/${MY_PNV}.tar.bz2"
 
 BUGS_TO="philantrop@exherbo.org"
 REMOTE_IDS="freecode:${PN}"
-UPSTREAM_CHANGELOG="http://netfilter.org/projects/${PN}/files/changes-iptables-${PV}.txt [[ lang = en ]]"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/files/changes-iptables-${PV}.txt [[ lang = en ]]"
 UPSTREAM_DOCUMENTATION="http://netfilter.org/documentation/"
 
 LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="baselayout"
+
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    "--sbindir=/sbin"
-    "--libdir=/${LIBDIR}"
-    "--libexecdir=/${LIBDIR}"
-    "--without-kernel"
-    "--enable-devel"
-    "--enable-libipq"
+    --sbindir=/sbin
+    --libdir=/${LIBDIR}
+    --libexecdir=/${LIBDIR}
+    --without-kernel
+    --enable-devel
+    --enable-libipq
 )
 DEFAULT_SRC_COMPILE_PARAMS=( V=1 )
 DEFAULT_SRC_INSTALL_EXCLUDE=( "release.sh" )
