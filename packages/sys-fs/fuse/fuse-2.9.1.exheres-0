@@ -1,7 +1,7 @@
 # Copyright 2009 Maxime Coste <frrrwww@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge [ suffix=tar.gz ] udev-rules
+require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Filesystems in Userspace"
 DESCRIPTION="
@@ -13,7 +13,7 @@ create and mount their own filesystem implementations.
 
 REMOTE_IDS+=" freecode:${PN}"
 
-LICENCES="|| ( GPL-2 LGPL-2 )"
+LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
 MYOPTIONS="baselayout"
@@ -23,11 +23,8 @@ DEPENDENCIES="
         sys-apps/util-linux[>=2.18]
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    UDEV_RULES_PATH="${UDEVRULESDIR}"
-    --disable-example
-)
 DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PN}-2.8.6-gold.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-example )
 
 src_install() {
     default
