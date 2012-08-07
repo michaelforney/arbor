@@ -20,6 +20,8 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
+        dev-libs/pcre
+        sys-apps/util-linux
        !gnutls? ( dev-libs/openssl )
         gnutls? (
             dev-libs/gnutls
@@ -32,7 +34,6 @@ DEPENDENCIES="
         dev-perl/IO-Socket-SSL
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-1.13.1-sni.patch" )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MAILING-LIST doc/sample.wgetrc )
 
 src_configure() {
