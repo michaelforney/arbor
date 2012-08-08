@@ -47,14 +47,20 @@ vala_src_install() {
 
     default
 
+    edo pushd "${IMAGE}"
+
     if ! ever at_least 0.14.2 ; then
-        edo mv "${IMAGE}"usr/share/aclocal/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
+        edo mv usr/share/aclocal/vala.m4 usr/share/aclocal/vala-${SLOT##*.}.m4
     else
-        edo mkdir "${IMAGE}"usr/share/aclocal/
-        edo cp "${WORK}"/vala.m4 "${IMAGE}"usr/share/aclocal/vala-${SLOT##*.}.m4
+        edo mkdir usr/share/aclocal/
+        edo cp "${WORK}"/vala.m4 usr/share/aclocal/vala-${SLOT##*.}.m4
+        if ever at_least 0.16; then
+            edo cp "${WORK}"/vapigen/vapigen.m4 usr/share/aclocal/vapigen-${SLOT}.m4
+            edo mkdir usr/share/vala/
+            edo cp "${WORK}"/vapigen/Makefile.vapigen usr/share/vala/Makefile.vapigen-${SLOT}
+        fi
     fi
 
-    edo pushd "${IMAGE}"
     alternatives+=( /usr/bin/vala valac-${SLOT} )
     for src in usr/bin/{valac,vala-gen-introspect,vapigen,vapicheck}-${SLOT} \
                usr/share/man/man1/*-${SLOT}.1 ; do
@@ -62,16 +68,10 @@ vala_src_install() {
         alternatives+=( /${target} ${src##*/} )
     done
     if ever at_least 0.16.0; then
-        src=usr/share/pkgconfig/vapigen-${SLOT}.pc
-        alternatives+=( /${src/-${SLOT}} ${src##*/} )
-        edo mkdir -p "${IMAGE}"/usr/share/aclocal/
-        edo cp "${WORK}"/vapigen/vapigen.m4 "${IMAGE}"/usr/share/aclocal/vapigen-${SLOT}.m4
-        src=usr/share/aclocal/vapigen-${SLOT}.m4
-        alternatives+=( /${src/-${SLOT}} ${src##*/} )
-        edo mkdir -p "${IMAGE}"/usr/share/vala/
-        edo cp "${WORK}"/vapigen/Makefile.vapigen "${IMAGE}"/usr/share/vala/Makefile.vapigen-${SLOT}
-        src=usr/share/vala/Makefile.vapigen-${SLOT}
-        alternatives+=( /${src/-${SLOT}} ${src##*/} )
+        for src in usr/share/pkgconfig/vapigen-${SLOT}.pc usr/share/aclocal/vapigen-${SLOT}.m4 \
+                   usr/share/vala/Makefile.vapigen-${SLOT} ; do
+            alternatives+=( /${src/-${SLOT}} ${src##*/} )
+        done
     fi
     edo popd
 
