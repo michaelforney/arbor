@@ -6,13 +6,18 @@ require bash-completion glib
 
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="gtk-doc"
+MYOPTIONS="gtk-doc
+    man-pages [[ description = [ Generate and install man pages ] ]]
+"
 
 DEPENDENCIES="
     build:
         app-doc/gtk-doc-autotools
         sys-devel/gettext[>=0.11]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
+        man-pages? ( app-text/docbook-xml-dtd:4.1.2
+                     app-text/docbook-xsl-stylesheets
+                     dev-libs/libxslt )
     build+run:
         dev-libs/libelf[>=0.8.12][multibuild_c:*(-)?]
         dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
@@ -34,15 +39,13 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Fix-libelf-includes.patch
-                              "${FILES}"/139c1ce9884a91be167ab9d48d3c4b0df89dd112.patch
-                              "${FILES}"/d023b81a7a261782f2c88df7751f3476bd802b99.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Fix-libelf-includes.patch )
 
 src_prepare() {
     glib_src_prepare
 
     # fail under sydbox
-    edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c
+    edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c # randomly
     edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
     edo sed -e '/\/DBUS_COOKIE_SHA1/d' -i gio/tests/gdbus-auth.c
     edo sed -e 's/run-assert-msg-test.sh//' -i tests/Makefile.{am,in}
@@ -66,7 +69,8 @@ configure_one_multibuild() {
         --with-pcre=internal \
         --with-threads=posix \
         $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests') \
-        $(option_enable gtk-doc)
+        $(option_enable gtk-doc) \
+        $(option_enable man-pages man)
 }
 
 src_install() {
