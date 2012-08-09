@@ -40,6 +40,7 @@ configure_one_multibuild() {
         # the jit tests segfault when a i686 build is built with the
         # wrong LLVM_DEFAULT_TARGET_TRIPLE which happens on x86_64
         -DLLVM_DEFAULT_TARGET_TRIPLE:STRING=${CHOST}
+        -DLLVM_BINUTILS_INCDIR:STRING=/usr/include
     )
     ecmake "${args[@]}"
 }
