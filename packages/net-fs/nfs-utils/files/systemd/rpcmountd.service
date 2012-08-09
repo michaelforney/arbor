@@ -3,8 +3,8 @@
 
 [Unit]
 Description=NFS mount daemon
-Requires=proc-fs-nfsd.mount proc-fs-nfs.mount rpcbind.service
-After=proc-fs-nfsd.mount proc-fs-nfs.mount rpcbind.service
+Requires=proc-fs-nfsd.mount rpcbind.service
+After=proc-fs-nfsd.mount rpcbind.service
 
 [Service]
 ExecStart=/usr/sbin/rpc.mountd -F
