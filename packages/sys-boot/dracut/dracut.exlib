@@ -60,6 +60,9 @@ DEPENDENCIES="
         app-shells/dash [[
             description = [ Support for dash as the initramfs shell ]
         ]]
+        net-fs/cifs-utils [[
+            description = [ Required by the CIFS module for rootfs on CIFS ]
+        ]]
         net-fs/nfs-utils [[
             description = [ Required by the NFS module for rootfs on NFS ]
             group-name = [ dracut-nfs-module ]
@@ -118,6 +121,9 @@ DEPENDENCIES="
             description = [ Support for logging to a remote server with the syslog module ]
         ]]
 "
+
+# requires root
+RESTRICT="test"
 
 # TODO
 #   - Some modules need additional/unpackaged dependencies and testing.
