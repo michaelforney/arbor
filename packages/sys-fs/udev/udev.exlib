@@ -126,7 +126,6 @@ configure_one_multibuild() {
         --disable-localed
         --disable-logind
         --disable-pam
-        --disable-plymouth
         --disable-quotacheck
         --disable-randomseed
         --disable-readahead
@@ -209,7 +208,7 @@ EOT
     edo rm -r "${IMAGE}"/usr/${LIBDIR}/systemd
     edo rm -r "${IMAGE}"/usr/share/{dbus,polkit}-1
     edo rm -r "${IMAGE}"/usr/share/man/man{1,3,5}
-    edo rm -r "${IMAGE}"/usr/share/man/man7/{daemon.7,sd-*,systemd*}
+    edo rm -r "${IMAGE}"/usr/share/man/man7/{daemon.7,systemd*}
     edo rm -r "${IMAGE}"/usr/share/man/man8/{halt,pam_systemd,poweroff,reboot,runlevel,shutdown,systemd*,telinit}.8
     edo rm -r "${IMAGE}"/usr/share/pkgconfig/systemd.pc
 
