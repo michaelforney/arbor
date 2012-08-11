@@ -1,4 +1,4 @@
-# Copyright 2008, 2009, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2008, 2009, 2011, 2012 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'valgrind-3.3.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -16,16 +16,14 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="multibuild_c: ( 32 64 )"
 
-if ever is_scm; then
+if ever at_least 3.8; then
     DEPENDENCIES="
         build+run:
-            sys-libs/glibc[>=2.2&<2.16]
-    "
+            sys-libs/glibc[>=2.2&<2.17]"
 else
     DEPENDENCIES="
         build+run:
-            sys-libs/glibc[>=2.2&<2.15]
-    "
+            sys-libs/glibc[>=2.2&<2.15]"
 fi
 
 prepare_one_multibuild() {
