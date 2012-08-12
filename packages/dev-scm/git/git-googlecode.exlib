@@ -147,6 +147,8 @@ git-googlecode_src_install() {
     dodoc gitweb/{INSTALL,README}
 
     fixlocalpod
+    edo find "${IMAGE}/usr/${LIBDIR}/perl5" -type f -name .packlist -delete
+    edo find "${IMAGE}/usr/${LIBDIR}/perl5" -type d -empty -delete
 
     if option baselayout ; then
         newinitd "${FILES}"/git-daemon.initd git-daemon
