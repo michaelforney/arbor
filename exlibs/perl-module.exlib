@@ -82,11 +82,12 @@ perl-module_src_install() {
 
     fixlocalpod
 
-    find "${IMAGE}" -type f | grep -v '\.so' | while read file
+    local encoding file
+    edo find "${IMAGE}" -type f -not -name '*.so*' | while read file
     do
-        stat=$(file "${file}" | grep -i " text")
-        if [[ -n "${stat}" ]]; then
-            sed -i -e "s:${IMAGE}:/:g" "${file}"
+        encoding=$(file -b --mime-encoding "${file}");
+        if [[ ${encoding} != binary ]]; then
+            edo sed -i -e "s:${IMAGE}:/:g" "${file}"
         fi
     done
 
