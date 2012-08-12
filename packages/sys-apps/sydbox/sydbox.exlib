@@ -16,7 +16,10 @@ DOWNLOADS="http://dev.exherbo.org/~alip/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="ipv6 [[ description = [ Enable IPV6 support for network sandboxing ] ]]"
+MYOPTIONS="
+    ipv6 [[ description = [ Enable IPV6 support for network sandboxing ] ]]
+    seccomp [[ description = [ Enable seccomp user filter support ] ]]
+"
 
 if ! ever at_least 1; then
     # sydbox-1 doesn't depend on glib.
@@ -26,7 +29,10 @@ if ! ever at_least 1; then
     "
 fi
 
-if ever at_least 0-scm; then
+if ever at_least 1; then
+    # sydbox-1 doesn't depend on pinktrace.
+    :
+elif ever at_least 0-scm; then
     DEPENDENCIES+="
         build+run:
             dev-libs/pinktrace[>=0.2.0][ipv6?]"
@@ -47,7 +53,7 @@ fi
 BUGS_TO="alip@exherbo.org"
 REMOTE_IDS="freecode:${PN}"
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 seccomp )
 
 sydbox_pkg_pretend() {
     local kv=$(uname -r)
