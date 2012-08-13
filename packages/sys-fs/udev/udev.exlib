@@ -3,7 +3,7 @@
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] alternatives bash-completion easy-multibuild udev-rules
 
-export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
 
 SUMMARY="Dynamic userspace /dev manager, part of systemd now. Use that."
 DESCRIPTION="
@@ -76,6 +76,9 @@ udev_pkg_pretend() {
     fi
 }
 
+udev_pkg_setup() {
+    exdirectory --allow /etc/udev/rules.d
+}
 
 udev_src_prepare() {
     # Set the correct libdir if necessary.

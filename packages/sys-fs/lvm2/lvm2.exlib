@@ -4,7 +4,7 @@
 
 require systemd-service easy-multibuild udev-rules
 
-export_exlib_phases src_install
+export_exlib_phases pkg_setup src_install
 
 SUMMARY="Userspace toolset providing logical volume management facilities"
 DESCRIPTION="
@@ -41,6 +41,10 @@ DEPENDENCIES="
 # The tests are expensive, unreliable, they need write access to /dev and /etc
 # and leave stale volumes lingering around if they fail
 RESTRICT="test"
+
+lvm2_pkg_setup() {
+    exdirectory --allow /etc/systemd/system
+}
 
 configure_one_multibuild() {
     econf \

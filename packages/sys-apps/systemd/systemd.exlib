@@ -10,7 +10,7 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] alternatives bash-completion easy-multibuild udev-rules
 
-export_exlib_phases pkg_pretend src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
 
 SUMMARY="${PN} is a(n) (init) system and session manager for Linux"
 DESCRIPTION="
@@ -100,6 +100,15 @@ systemd_pkg_pretend() {
         ewarn "/usr/${LIBDIR}/tmpfiles.d/legacy.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
+}
+
+systemd_pkg_setup() {
+    exdirectory --allow /etc/binfmt.d
+    exdirectory --allow /etc/modules-load.d
+    exdirectory --allow /etc/sysctl.d
+    exdirectory --allow /etc/tmpfiles.d
+    exdirectory --allow /etc/systemd/system
+    exdirectory --allow /etc/udev/rules.d
 }
 
 systemd_src_prepare() {
