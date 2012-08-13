@@ -1,0 +1,19 @@
+--- a/tls/tests/Makefile.am	2012-08-12 21:19:55.276421710 -0700
++++ b/tls/tests/Makefile.am	2012-08-12 21:21:09.803489996 -0700
+@@ -11,10 +11,15 @@
+ 	$(GLIB_LIBS)
+ 
+ TEST_PROGS +=         \
+-	certificate   \
+ 	file-database \
++	$(NULL)
++
++if HAVE_GNUTLS
++TEST_PROGS +=         \
++	certificate   \
+ 	connection    \
+ 	$(NULL)
++endif
+ 
+ if HAVE_PKCS11
+ 
