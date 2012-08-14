@@ -1,7 +1,7 @@
 # Copyright 2009, 2010, 2011, 2012 Ali Polatel <alip@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases pkg_pretend src_test
+export_exlib_phases src_test
 
 SUMMARY="Sydbox the other sandbox"
 DESCRIPTION="
@@ -60,16 +60,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     ipv6
     $(ever at_least 1 && echo seccomp)
 )
-
-sydbox_pkg_pretend() {
-    local kv=$(uname -r)
-    kv=${kv%%-*}
-
-    if [[ $(ever range 1-2 ${kv}) == 2.6 ]] && ! ever at_least 2.6.29 ${kv}; then
-        ewarn "sydbox works slow on kernels <2.6.29 due to a ptrace bug!"
-        ewarn "See http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=53da1d9456fe7f87a920a78fdbdcf1225d197cb7 for the fix!"
-    fi
-}
 
 sydbox_src_test() {
     if ! esandbox check 2>/dev/null; then
