@@ -23,6 +23,9 @@ if ever at_least 1; then
     MYOPTIONS+="
     seccomp [[ description = [ Enable seccomp user filter support ] ]]
 "
+    DEPENDENCIES+="
+    seccomp? ( sys-kernel/linux-headers[>=3.5] )
+"
 fi
 
 if ! ever at_least 1; then
