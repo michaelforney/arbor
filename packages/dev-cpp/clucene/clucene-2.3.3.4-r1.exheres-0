@@ -23,5 +23,16 @@ DEPENDENCIES="
 # CMake conversion not complete
 RESTRICT="test"
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-install_contribs_lib.patch
+    "${FILES}"/${PNV}-pkgconfig.patch
+)
+
+CMAKE_SRC_CONFIGURE_PARAMS=(
+    -DBUILD_CONTRIBS_LIB:BOOL=ON
+    -DLIB_DESTINATION:PATH=/usr/${LIBDIR}
+    -DLUCENE_SYS_INCLUDES:PATH=/usr/${LIBDIR}
+)
+
 CMAKE_SOURCE="${WORKBASE}/${MY_PNV}"
 
