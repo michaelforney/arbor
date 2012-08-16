@@ -3,17 +3,18 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Collection of simple PIN or passphrase entry dialogs which utilize"
-HOMEPAGE="http://gnupg.org/related_software/pinentry/"
-DOWNLOADS="mirror://gnupg/${PN}/${PNV}.tar.gz"
+HOMEPAGE="http://gnupg.org/related_software/${PN}"
+DOWNLOADS="mirror://gnupg/${PN}/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="gtk qt4"
+MYOPTIONS="caps gtk qt4"
 
 DEPENDENCIES="
     build+run:
         sys-libs/ncurses
+        caps? ( sys-libs/libcap )
         gtk? ( x11-libs/gtk+:2 )
         qt4? ( x11-libs/qt:4[X(+)] )
 "
@@ -24,10 +25,14 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-pinentry-curses
     --disable-pinentry-gtk
     --disable-pinentry-qt
+    --without-x
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "gtk pinentry-gtk2"
     "qt4 pinentry-qt4"
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "caps libcap"
 )
 
 src_prepare() {
