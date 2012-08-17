@@ -65,7 +65,7 @@ case $(exparam api) in
         if exparam -b out_of_source; then
             WORK=${WORKBASE}/build
 
-            export_exlib_phases src_unpack
+            export_exlib_phases src_unpack src_prepare
 
             cmake_src_unpack() {
                 default
@@ -73,6 +73,11 @@ case $(exparam api) in
                     scm_src_unpack
                 fi
                 edo mkdir -p "${WORK}"
+            }
+
+            cmake_src_prepare() {
+                edo cd "${CMAKE_SOURCE}"
+                default
             }
         fi
         ;;
