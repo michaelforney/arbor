@@ -1,0 +1,36 @@
+From e0ad0ed9121196eb9c642dfd35fbbe1a8158ba67 Mon Sep 17 00:00:00 2001
+Message-Id: <e0ad0ed9121196eb9c642dfd35fbbe1a8158ba67.1345549748.git.alip@exherbo.org>
+From: Ali Polatel <alip@exherbo.org>
+Date: Tue, 21 Aug 2012 14:48:01 +0300
+Subject: [PATCH] Decrease log severity of EAFNOSUPPORT (wrt. ipv6)
+Organization: Pink Floyd
+
+---
+ src/syd-net.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/syd-net.c b/src/syd-net.c
+index 7bd35c8..2f78b7f 100644
+--- a/src/syd-net.c
++++ b/src/syd-net.c
+@@ -1,7 +1,7 @@
+ /* vim: set sw=4 sts=4 et foldmethod=syntax : */
+ 
+ /*
+- * Copyright (c) 2009, 2010 Ali Polatel <alip@exherbo.org>
++ * Copyright (c) 2009, 2010, 2012 Ali Polatel <alip@exherbo.org>
+  * Based in part upon courier which is:
+  *     Copyright 1998-2009 Double Precision, Inc
+  *
+@@ -392,7 +392,7 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+                     addr, saddr->u.sa6.netmask, saddr->u.sa6.port[0], saddr->u.sa6.port[1]);
+         g_free(addr);
+ #else
+-        g_warning("inet6:// not supported (no IPV6 support)");
++        g_info("inet6:// not supported (no IPV6 support)");
+         g_free(saddr);
+         return NULL;
+ #endif /* SYDBOX_HAVE_IPV6 */
+-- 
+1.7.11.4
+
