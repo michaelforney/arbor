@@ -83,7 +83,13 @@ src_install() {
 
     # Only install dnsmasq.service, not README
     insinto ${SYSTEMDSYSTEMUNITDIR}
-    doins "${WORK}/contrib/systemd/${PN}.service"
+
+    # Enable DBus connection for dnsmasq's service (dependent on the dbus option)
+    if option dbus; then
+        edo sed -i -e "/ExecStart=/s:-k:--enable-dbus -k:" "${WORK}"/contrib/systemd/${PN}.service
+    fi
+
+    doins "${WORK}"/contrib/systemd/${PN}.service
 
     if option dbus ; then
         insinto /etc/dbus-1/system.d
