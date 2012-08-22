@@ -1,0 +1,35 @@
+# Copyright 2012 Timo Gurr <tgurr@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ suffix=tar.gz ] easy-multibuild [ multiunpack=true ]
+
+SUMMARY="C++ library and set of programs that inspect and manipulate the structure of PDF files"
+DESCRIPTION="
+QPDF is a C++ library and set of programs that inspect and manipulate the
+structure of PDF files. It can encrypt and linearize files, expose the
+internals of a PDF file, and do many other operations useful to end users and
+PDF developers.
+"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/files/${PN}-manual.html [[ lang = en ]]"
+
+LICENCES="Artistic-2.0"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    multibuild_c: 32 64
+"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/pcre[multibuild_c:*(-)?]
+    test:
+        app-text/ghostscript
+"
+
+configure_one_multibuild() {
+    econf \
+        --disable-static \
+        $(expecting_tests && echo '--enable-test-compare-images' || echo '--disable-test-compare-images')
+}
+
