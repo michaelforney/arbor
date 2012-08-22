@@ -325,9 +325,14 @@ EOF
     keepdir /etc/tmpfiles.d
     keepdir /usr/${LIBDIR}/tmpfiles.d
 
-    # Ntp units name in /etc/systemd/ntp-units.d/?*.conf get read and the services started.
-    keepdir /etc/systemd/ntp-units.d
-    keepdir /usr/${LIBDIR}/systemd/ntp-units.d
+    # ntp units in ntp-units.d/?*.conf get read and the services started.
+    if ever is_scm; then
+        keepdir /etc/systemd/ntp-units.d
+        keepdir /usr/${LIBDIR}/systemd/ntp-units.d
+    else
+        keepdir /etc/ntp-units.d
+        keepdir /usr/${LIBDIR}/ntp-units.d
+    fi
 
     keepdir /usr/${LIBDIR}/systemd/system-sleep
 
