@@ -3,8 +3,8 @@
 # Based in part upon 'gnome.org.eclass' from Gentoo which is:
 #     Copyright 1999-2004 Gentoo Foundation
 
-myexparam pn=${PN}
-myexparam pnv=${PNV}
+myexparam pn=${MY_PN:-${PN}}
+myexparam pnv=${MY_PNV:-$(exparam pn)-${PV}}
 myexparam suffix=.tar.bz2
 
 HOMEPAGE="http://projects.gnome.org/$(exparam pn)"
