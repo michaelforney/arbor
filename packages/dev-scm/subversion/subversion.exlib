@@ -19,7 +19,7 @@ UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-2.0"
 SLOT="0"
-MYOPTIONS="berkdb perl python ruby
+MYOPTIONS="apache berkdb perl python ruby
     keyring [[ description = [ Adds support for storing passwords in GNOME Keyring ] ]]
     kwallet [[ description = [ Adds support for storing passwords in KWallet ] ]]
 "
@@ -27,6 +27,7 @@ RESTRICT="test" # Expensive tests
 
 DEPENDENCIES="
     build:
+        dev-lang/python:*[>=2.2]
         sys-devel/gettext
         keyring? ( dev-util/pkg-config )
         kwallet? ( dev-util/pkg-config )
@@ -39,6 +40,7 @@ DEPENDENCIES="
         dev-db/sqlite[>=3.4.0]
         dev-libs/apr-util[>=0.9.7][berkdb?]
         net-misc/neon[>=0.25&<0.30]
+        apache? ( www-servers/apache )
         berkdb? ( sys-libs/db:=[>=4.0.14&<4.9] )
         keyring? (
             dev-libs/glib
@@ -69,11 +71,13 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-perl-vendor.patch"
     "${FILES}/${PN}-perl-ccopts.patch"
+    "${FILES}"/${PN}-mod_dontdothat.patch
 )
 
 subversion_src_prepare() {
     default
     eautoconf # Doesn't use automake
+    edo ./gen-make.py
 }
 
 subversion_src_configure() {
@@ -94,6 +98,7 @@ subversion_src_configure() {
         --enable-nls \
         --enable-shared \
         ${myconf} \
+        $(option_with apache apxs) \
         $(option_with berkdb berkeley-db $(option berkdb &&
             echo "db.h:$(berkdb_includedir)::db-$(berkdb_slot)")) \
         $(option_with keyring gnome-keyring) \

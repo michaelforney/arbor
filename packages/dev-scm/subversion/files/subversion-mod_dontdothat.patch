@@ -1,0 +1,19 @@
+Source: Upstream, http://svn.apache.org/viewvc/subversion/trunk/build.conf?r1=1371087&r2=1374198
+Upstream: yes, revision 1374198
+Reason: Avoid the hard-dependencies of mod_dontdothat being installed with tools
+
+--- a/build.conf	2012/08/09 08:27:53	1371087
++++ b/build.conf	2012/08/17 11:01:29	1374198
+@@ -350,7 +350,11 @@
+ path = tools/server-side/mod_dontdothat
+ nonlibs = mod_dav_svn apr aprutil
+ libs = libsvn_subr xml
+-install = tools
++# This will cause mod_dontdothat to be installed with the other apache
++# modules instead of with the tools. While this is not quite right,
++# the build generator currently cannot exclude this module from the
++# build based on its install type
++install = apache-mod
+ msvc-libs = libhttpd.lib
+ 
+ # ----------------------------------------------------------------------------
