@@ -78,13 +78,10 @@ src_configure() {
         --disable-gui
         --disable-impstats
         --disable-imsolaris
-        --disable-imtemplate
         --disable-libdbi
-        --disable-omdbalerting
         --disable-omhdfs
         --disable-ommongodb
         --disable-omstdout
-        --disable-omtemplate
         --disable-omudpspoof
         --disable-oracle
         --disable-pmaixforwardedfrom
@@ -131,6 +128,7 @@ src_install() {
 
     if option systemd ; then
         edo echo '$SystemLogSocketName /run/systemd/journal/syslog' >> "${IMAGE}"/etc/rsyslog.conf
+        edo sed -i -e "/systemd-kmsg-syslogd.service/d" "${IMAGE}"/usr/${LIBDIR}/systemd/system/rsyslog.service
     fi
 
     # html docs
