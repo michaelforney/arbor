@@ -1,0 +1,37 @@
+Source: Upstream git mirror, namely
+https://github.com/DamienCassou/RefTeX/commit/5f341de11651f7ec7eaed11f8faf0b2019a3b089
+https://github.com/DamienCassou/RefTeX/commit/c1468af43fc660511551dc5a5ba5585db68e5cfc
+Upstream: part of RefTeX 4.34
+Reason: Improper handling of custom environments, see also http://tex.stackexchange.com/questions/54850
+
+--- emacs-24.1/lisp/textmodes/reftex-parse.el
++++ emacs-24.1/lisp/textmodes/reftex-parse.el
+@@ -239,7 +239,12 @@ of master file."
+ 
+                 ((match-end 3)
+                  ;; It is a section
+-                 (setq bound (point))
++
++		 ;; Use the beginning as bound and not the end
++		 ;; (i.e. (point)) because the section command might
++		 ;; be the start of the current environment to be
++		 ;; found by `reftex-label-info'.
++                 (setq bound (match-beginning 0))
+ 
+                  ;; Insert in List
+                  (setq toc-entry (reftex-section-info file))
+--- emacs-24.1/lisp/textmodes/reftex-parse.el
++++ emacs-24.1/lisp/textmodes/reftex-parse.el
+@@ -245,7 +245,11 @@ of master file."
+ 		 ;; be the start of the current environment to be
+ 		 ;; found by `reftex-label-info'.
+                  (setq bound (match-beginning 0))
+-
++		 ;; The section regexp matches a character at the end
++		 ;; we are not interested in.  Especially if it is the
++		 ;; backslash of a following macro we want to find in
++		 ;; the next parsing iteration.
++		 (when (eq (char-before) ?\\) (backward-char))
+                  ;; Insert in List
+                  (setq toc-entry (reftex-section-info file))
+                  (when toc-entry
