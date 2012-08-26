@@ -20,16 +20,14 @@ DEPENDENCIES="
         dev-lang/python:*
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-tools.patch
-    "${FILES}"/${PN}-fix-multibuild-tests.patch
-)
-
 src_prepare() {
     edo pushd "${CMAKE_SOURCE}"
 
     # Fix the use of dot
     edo sed -e 's/@DOT@//g' -i docs/doxygen.cfg.in
+
+    expatch "${FILES}"/${PN}-tools.patch
+    ever is_scm || expatch "${FILES}"/${PN}-fix-multibuild-tests.patch
 
     default
     edo popd
