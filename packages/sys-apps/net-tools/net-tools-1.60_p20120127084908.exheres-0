@@ -20,5 +20,7 @@ DEPENDENCIES="
 src_configure() {
     yes "" | edo ./configure.sh config.in
     edo sed -i -e 's:I18N 0:I18N 1:' config.h
+    #Token Ring has been removed from >=linux-3.5
+    edo sed -i -e 's:HAVE_HWTR 1:HAVE_HWTR 0:' config.h
 }
 
