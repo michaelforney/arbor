@@ -30,3 +30,9 @@ src_unpack() {
     cp "${FILES}"/libnet.cfg "${WORK}"
 }
 
+src_test() {
+    # Remove test requiring Internet connection.
+    edo rm t/hostname.t
+    default
+}
+
