@@ -191,15 +191,24 @@ python-build_install_one_multibuild() {
     edo rm "${IMAGE}"/usr/bin/python${SLOT}-config
     edo rm "${IMAGE}"/usr/${LIBDIR}/pkgconfig/python${PYTHON_MAJOR}.pc
 
+    if ever at_least 3.2; then
+        edo mv "${IMAGE}"/usr/bin/python{${SLOT}m,${PYTHON_MAJOR}}-config
+    else
+        newbin "${WORKBASE}"/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${MY_PNV}/python-config.py python${PYTHON_MAJOR}-config
+    fi
+
     # pyconfig.h contains PLATFORMS specific bits
     local prefix='/usr'
     if ! multibuild_default_target C; then
+        local m
+        ever at_least 3.2 && m="m"
+
         prefix="/usr/${CHOST}"
-        dodir ${prefix}/{bin,include/python${SLOT}}
+        dodir ${prefix}/{bin,include/python${SLOT}${m}}
         edo mv "${IMAGE}"/usr/bin/python{${PYTHON_MAJOR}-config,${PYTHON_MAJOR}} \
             "${IMAGE}"/${prefix}/bin
-        edo mv "${IMAGE}"/usr/include/python${SLOT}/*.h \
-            "${IMAGE}"/${prefix}/include/python${SLOT}
+        edo mv "${IMAGE}"/usr/include/python${SLOT}${m}/*.h \
+            "${IMAGE}"/${prefix}/include/python${SLOT}${m}
         [ "$(ever major)" == 2 ] && \
             alternatives+=(
                 /usr/${CHOST}/bin/python python$(ever major)
@@ -216,13 +225,6 @@ python-build_install_one_multibuild() {
             edo ln -s python3.2-config python3.2m-config
             edo popd
         fi
-    fi
-
-    if ever at_least 3.2; then
-        edo mv "${IMAGE}"/usr/bin/python{${SLOT}m,${PYTHON_MAJOR}}-config
-    else
-        into ${prefix}
-        newbin "${WORKBASE}"/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${MY_PNV}/python-config.py python${PYTHON_MAJOR}-config
     fi
 
     alternatives+=( /usr/${LIBDIR}/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc )
