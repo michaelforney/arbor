@@ -3,12 +3,35 @@
 
 require bash-completion gnome.org [ suffix=.tar.xz ] gtk-icon-cache
 
-export_exlib_phases src_install
+export_exlib_phases src_test src_install
 
 SUMMARY="A low-level configuration system"
 HOMEPAGE="http://live.gnome.org/dconf"
 
 DEFAULT_SRC_INSTALL_PARAMS=( completiondir=/ )
+
+dconf_src_test() {
+    unset DISPLAY
+    unset DBUS_SESSION_BUS_ADDRESS
+    unset DBUS_SESSION_BUS_PID
+
+    esandbox allow_net 'unix-abstract:/tmp/dbus-*'
+
+    echo "Launching DBus session bus..."
+    eval "$(dbus-launch --sh-syntax)"
+    [[ -z ${DBUS_SESSION_BUS_PID} ]] && die "Launching DBus session bus failed"
+
+    esandbox allow_net --connect 'unix:/run/dbus/system_bus_socket'
+    if ! nonfatal emake check ; then
+        edo kill ${DBUS_SESSION_BUS_PID}
+        die "emake check failed"
+    fi
+    esandbox disallow_net --connect 'unix:/run/dbus/system_bus_socket'
+
+    esandbox disallow_net 'unix-abstract:/tmp/dbus-*'
+
+    edo kill ${DBUS_SESSION_BUS_PID}
+}
 
 dconf_src_install() {
     default
@@ -17,7 +40,7 @@ dconf_src_install() {
 CONFIG_PROTECT_MASK="/etc/dconf/db"
 EOF
 
-    if ever at_least 0.7.4; then
+    if ever at_least 0.7.4 && ! ever at_least 0.13 ; then
         dobashcompletion "${IMAGE}"/dconf-bash-completion.sh
         edo rm "${IMAGE}"/dconf-bash-completion.sh
     fi
