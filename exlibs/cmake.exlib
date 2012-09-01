@@ -87,43 +87,47 @@ case $(exparam api) in
 esac
 
 # Similar to option_enable for cmake. A few examples:
-#   `cmake_enable Foo`     -> foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
-#   `cmake_enable FOO`     -> foo ? -DENABLE_FOO=ON : -DENABLE_FOO=OFF
-#   `cmake_enable foo Bar` -> foo ? -DENABLE_Bar=ON : -DENABLE_Bar=OFF
-#   `cmake_enable Foo Foo` -> Foo ? -DENABLE_Foo=ON : -DENABLE_Foo=OFF
+#   `cmake_build Foo`        -> foo     ? -DBUILD_Foo:BOOL=TRUE  : -DBUILD_Foo:BOOL=FALSE
+#   `cmake_build FOO`        -> foo     ? -DBUILD_FOO:BOOL=TRUE  : -DBUILD_FOO:BOOL=FALSE
+#   `cmake_build foo Bar`    -> foo     ? -DBUILD_Bar:BOOL=TRUE  : -DBUILD_Bar:BOOL=FALSE
+#   `cmake_build Foo Foo`    -> Foo     ? -DBUILD_Foo:BOOL=TRUE  : -DBUILD_Foo:BOOL=FALSE
+#   `cmake_build foo:bar Bar -> foo:bar ? -DBUILD_Bar:BOOL=TRUE  : -DBUILD_Bar:BOOL=FALSE
 cmake_build() {
     illegal_in_global_scope
 
     _cmake_option BUILD "$@"
 }
 
+#   `cmake_enable Foo        -> foo     ? -DENABLE_Foo:BOOL=TRUE : -DENABLE_Foo:BOOL=FALSE
 cmake_enable() {
     illegal_in_global_scope
 
     _cmake_option ENABLE "$@"
 }
 
-# Similar to cmake_enable but using HAVE instead of ENABLE.
+#   `cmake_have Foo          -> foo     ? -DHAVE_Foo:BOOL=TRUE   : -DHAVE_Foo:BOOL=FALSE
 cmake_have() {
     illegal_in_global_scope
 
     _cmake_option HAVE "$@"
 }
 
+#   `cmake_option Foo        -> foo     ? -DFoo:BOOL=TRUE        : -DFoo:BOOL=FALSE
+#   `cmake_option FOO Bar    -> bar     ? -DFOO_Bar:BOOL=TRUE    : -DFOO_Bar:BOOL=FALSE
 cmake_option() {
     illegal_in_global_scope
 
     _cmake_option '' "$@"
 }
 
-# Similar to cmake_enable but using WANT instead of ENABLE.
+#   `cmake_want Foo          -> foo     ? -DWANT_Foo:BOOL=TRUE   : -DWANT_Foo:BOOL=FALSE
 cmake_want() {
     illegal_in_global_scope
 
     _cmake_option WANT "$@"
 }
 
-# Similar to cmake_enable but using WITH instead of ENABLE.
+#   `cmake_with Foo          -> foo     ? -DWITH_Foo:BOOL=TRUE   : -DWITH_Foo:BOOL=FALSE
 cmake_with() {
     illegal_in_global_scope
 
