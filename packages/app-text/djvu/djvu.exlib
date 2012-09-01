@@ -16,7 +16,12 @@ SLOT="0"
 
 DEPENDENCIES="
     build:
-        media-gfx/ImageMagick [[ note = [ librsvg can also be used ] ]]
+        || (
+            media-gfx/ImageMagick
+            media-gfx/GraphicsMagick
+            gnome-desktop/librsvg
+            media-gfx/inkscape
+        ) [[ note = [ for icon generation in desktopfiles/Makefile.in ] ]]
     build+run:
         media-libs/jpeg[>=6b]
         media-libs/tiff
