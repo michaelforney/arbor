@@ -14,7 +14,7 @@
 myexparam api=1
 
 myexparam -b out_of_source=true
-myexparam cmake_minimum_version=2.8.2
+myexparam cmake_minimum_version=2.8.6
 
 DEPENDENCIES="
     build:
@@ -98,7 +98,7 @@ cmake_build() {
     _cmake_option BUILD "$@"
 }
 
-# Note: since this is for disables the logic is reversed. For this to work you need at least cmake 2.8.2:
+# Note: since this is for disables the logic is reversed. For this to work you need at least cmake 2.8.6:
 #   `cmake_disable_find Foo -> foo     ? -DCMAKE_DISABLE_FIND_PACKAGE_Foo:BOOL=FALSE : -DCMAKE_DISABLE_FIND_PACKAGE_Foo:BOOL=TRUE
 cmake_disable_find() {
     illegal_in_global_scope
