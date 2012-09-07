@@ -15,6 +15,7 @@ LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="bluetooth ipv6
+    canusb [[ description = [ Use libusb to support CAN bus sniffing via CANUSB devices ] ]]
     libnl [[ description = [ Use libnl to support monitor mode on mac80211 devices ] ]]
 "
 
@@ -24,10 +25,11 @@ DEPENDENCIES="
         sys-devel/flex
     build+run:
         bluetooth? ( net-wireless/bluez )
+        canusb? ( dev-libs/libusb:1 )
         libnl? ( net-libs/libnl:1 )
 "
-DEFAULT_SRC_CONFIGURE_PARAMS=( --without-snf )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bluetooth ipv6 )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-can --without-snf )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bluetooth canusb ipv6 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( libnl )
 DEFAULT_SRC_INSTALL_EXCLUDE=( README.{Win32,aix,dag,hpux,macosx,septel,sita,tru64} )
 
