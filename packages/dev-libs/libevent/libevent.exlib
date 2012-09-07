@@ -24,9 +24,8 @@ DEPENDENCIES="
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-openssl )
-
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-2.0.10-test.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-openssl --disable-static )
 
 libevent_src_test() {
     pushd test
