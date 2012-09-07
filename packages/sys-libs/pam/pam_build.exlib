@@ -10,14 +10,12 @@ export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 MY_PN=Linux-PAM
 MY_PNV=${MY_PN}-${PV}
 
-HOMEPAGE="
-    https://fedorahosted.org/linux-pam/
-    http://www.kernel.org/pub/linux/libs/${PN}/
-"
+HOMEPAGE="http://www.linux-pam.org"
 SUMMARY="Linux-PAM provides Pluggable Authentication Modules"
 DOWNLOADS="
-    mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2
+    ${HOMEPAGE}/library/${MY_PNV}.tar.bz2
     https://fedorahosted.org/releases/l/i/linux-pam/${MY_PNV}.tar.bz2
+    mirror://kernel/linux/libs/${PN}/library/${MY_PNV}.tar.bz2
 "
 
 BUGS_TO="philantrop@exherbo.org"
@@ -98,10 +96,8 @@ pam_build_src_install() {
     keepdir /etc/security/limits.d
     keepdir /etc/security/namespace.d
 
-    # Need to be suid
+    # Needs to be suid
     edo chmod u+s "${IMAGE}"/sbin/unix_chkpwd
-
-    edo find "${IMAGE}"/var -type d -empty -delete
 
     # install the base pam configuration
     dopamd "${FILES}"/pam.d/*
