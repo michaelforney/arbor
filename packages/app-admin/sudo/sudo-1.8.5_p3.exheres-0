@@ -1,0 +1,67 @@
+# Copyright 2008 Mike Kelly <pioto@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'sudo-1.6.9_p12.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require pam
+
+MY_PNV="${PNV/_p/p}"
+
+SUMMARY="Allows users to run programs with the security privileges of another user"
+DESCRIPTION="
+Allows a system administrator to delegate authority to give certain users (or
+groups of users) the ability to run some (or all) commands as root or another
+user while providing an audit trail of the commands and their arguments.
+"
+HOMEPAGE="http://www.${PN}.ws/"
+DOWNLOADS="${HOMEPAGE}/${PN}/dist/${MY_PNV}.tar.gz"
+
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/${PN}/changes.html [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/${PN}/stable.html [[ lang = en ]]"
+
+LICENCES="ISC BSD-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="pam ( linguas: da eo es eu fi it ja pl ru sr uk zh_CN )"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+    build+run:
+        pam? ( sys-libs/pam )
+"
+
+WORK="${WORKBASE}/${MY_PNV}"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-nls
+    --with-all-insults
+    --with-env-editor
+    --with-insults
+    --with-plugindir=/usr/${LIBDIR}/sudo
+    --with-secure-path=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin
+    --with-timedir=/var/db/sudo
+    --without-AFS
+    --without-DCE
+    --without-kerb5
+    --without-linux-audit
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( pam )
+
+#OPTIONS is a var in the makefile
+DEFAULT_SRC_COMPILE_PARAMS=( OPTIONS= )
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( TROUBLESHOOTING UPGRADE )
+
+src_install() {
+    default
+
+    keepdir /etc/sudoers.d /var/db/sudo
+
+    if option pam ; then
+        pamd_mimic_system sudo auth auth account password session
+    fi
+}
+
