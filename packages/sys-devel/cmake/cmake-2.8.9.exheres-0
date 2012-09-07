@@ -7,11 +7,12 @@
 require elisp-optional [ source_directory=Docs ]
 
 SUMMARY="Cross platform Make"
-HOMEPAGE="http://www.cmake.org/"
-DOWNLOADS="http://www.cmake.org/files/v$(ever range 1-2)/${PNV}.tar.gz"
+HOMEPAGE="http://www.cmake.org"
+DOWNLOADS="${HOMEPAGE}/files/v$(ever range 1-2)/${PNV}.tar.gz"
 
-UPSTREAM_CHANGELOG="http://www.cmake.org/files/v$(ever range 1-2)/CMakeChangeLog-${PV}"
 REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/files/v$(ever range 1-2)/CMakeChangeLog-${PV}"
 
 LICENCES="CMake"
 SLOT="0"
@@ -30,11 +31,10 @@ DEPENDENCIES="
 
 VIMFILE="${PN}.vim"
 
-DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/remove-test-failure-submits-via-network.patch
     "${FILES}"/remove-test-failure-submits-via-network2.patch
 )
+DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
 
 src_prepare() {
     default
@@ -58,13 +58,6 @@ src_configure() {
 src_compile() {
     default
     elisp-optional_src_compile
-}
-
-src_test() {
-    # Setting DISPLAY breaks qtwrapping test if Qt3 is installed, #188
-    export DISPLAY=
-
-    default
 }
 
 src_install() {
