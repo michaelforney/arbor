@@ -1,0 +1,297 @@
+From 2a4806535442c92bfc60ce37b39446e20cdf4a31 Mon Sep 17 00:00:00 2001
+Message-Id: <2a4806535442c92bfc60ce37b39446e20cdf4a31.1346459080.git.alip@exherbo.org>
+From: Ali Polatel <alip@exherbo.org>
+Date: Mon, 27 Aug 2012 12:39:36 +0300
+Subject: [PATCH] Don't barf for unsupported IPv6 with --disable-ipv6
+Organization: Pink Floyd
+
+---
+ src/syd-config.c  | 28 +++++++++++++++++-----------
+ src/syd-net.c     |  8 ++++++++
+ src/syd-syscall.c | 50 +++++++++++++++++++++++++++++++++++++-------------
+ 3 files changed, 62 insertions(+), 24 deletions(-)
+
+diff --git a/src/syd-config.c b/src/syd-config.c
+index e9dd883..a2af0fc 100644
+--- a/src/syd-config.c
++++ b/src/syd-config.c
+@@ -1,7 +1,7 @@
+ /* vim: set sw=4 sts=4 et foldmethod=syntax : */
+ 
+ /*
+- * Copyright (c) 2009, 2010 Ali Polatel <alip@exherbo.org>
++ * Copyright (c) 2009, 2010, 2012 Ali Polatel <alip@exherbo.org>
+  * Copyright (c) 2009 Saleem Abdulrasool <compnerd@compnerd.org>
+  *
+  * This file is part of the sydbox sandbox tool. sydbox is free software;
+@@ -25,6 +25,7 @@
+ #include <stdbool.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <errno.h>
+ #include <arpa/inet.h>
+ 
+ #include <glib.h>
+@@ -340,14 +341,15 @@ static bool sydbox_config_load_lists(GKeyFile *config_fd)
+             for (unsigned int j = 0; NULL != expaddr[j]; j++) {
+                 struct sydbox_addr *addr;
+                 addr = address_from_string(expaddr[j], false);
+-                if (NULL == addr) {
++                if (NULL != addr)
++                    sydbox_config_addfilter_net(addr);
++                else if (errno != EAFNOSUPPORT) {
+                     g_printerr("error: malformed address `%s' at position %d of filter.network\n",
+                             expaddr[j], i);
+                     g_strfreev(expaddr);
+                     g_strfreev(filterlist);
+                     return false;
+                 }
+-                sydbox_config_addfilter_net(addr);
+                 g_free(addr);
+             }
+             g_strfreev(expaddr);
+@@ -379,14 +381,15 @@ static bool sydbox_config_load_lists(GKeyFile *config_fd)
+             for (unsigned int j = 0; NULL != expaddr[j]; j++) {
+                 struct sydbox_addr *addr;
+                 addr = address_from_string(expaddr[j], false);
+-                if (NULL == addr) {
++                if (NULL != addr)
++                    config->network_whitelist_bind = g_slist_prepend(config->network_whitelist_bind, addr);
++                else if (errno != EAFNOSUPPORT) {
+                     g_printerr("error: malformed address `%s' at position %d of net.whitelist_bind\n",
+                             expaddr[j], i);
+                     g_strfreev(expaddr);
+                     g_strfreev(netwhitelist_bind);
+                     return false;
+                 }
+-                config->network_whitelist_bind = g_slist_prepend(config->network_whitelist_bind, addr);
+             }
+             g_strfreev(expaddr);
+         }
+@@ -401,14 +404,15 @@ static bool sydbox_config_load_lists(GKeyFile *config_fd)
+             for (unsigned int j = 0; NULL != expaddr[j]; j++) {
+                 struct sydbox_addr *addr;
+                 addr = address_from_string(expaddr[j], false);
+-                if (NULL == addr) {
++                if (NULL != addr)
++                    config->network_whitelist_connect = g_slist_prepend(config->network_whitelist_connect, addr);
++                else if (errno != EAFNOSUPPORT) {
+                     g_printerr("error: malformed address `%s' at position %d of net.whitelist_connect\n",
+                             expaddr[j], i);
+                     g_strfreev(expaddr);
+                     g_strfreev(netwhitelist_connect);
+                     return false;
+                 }
+-                config->network_whitelist_connect = g_slist_prepend(config->network_whitelist_connect, addr);
+             }
+             g_strfreev(expaddr);
+         }
+@@ -516,7 +520,9 @@ void sydbox_config_update_from_environment(void)
+             for (unsigned int j = 0; NULL != expaddr[j]; j++) {
+                 struct sydbox_addr *addr;
+                 addr = address_from_string(expaddr[j], true);
+-                if (NULL == addr) {
++                if (NULL != addr)
++                    config->network_whitelist_bind = g_slist_prepend(config->network_whitelist_bind, addr);
++                else if (errno != EAFNOSUPPORT) {
+                     g_critical("error: malformed address `%s' at position %d of "ENV_NET_WHITELIST_BIND"\n",
+                             expaddr[j], i);
+                     g_printerr("error: malformed address `%s' at position %d of "ENV_NET_WHITELIST_BIND"\n",
+@@ -525,7 +531,6 @@ void sydbox_config_update_from_environment(void)
+                     g_strfreev(netwhitelist_bind);
+                     exit(-1);
+                 }
+-                config->network_whitelist_bind = g_slist_prepend(config->network_whitelist_bind, addr);
+             }
+             g_strfreev(expaddr);
+         }
+@@ -540,7 +545,9 @@ void sydbox_config_update_from_environment(void)
+             for (unsigned int j = 0; NULL != expaddr[j]; j++) {
+                 struct sydbox_addr *addr;
+                 addr = address_from_string(expaddr[j], true);
+-                if (NULL == addr) {
++                if (NULL != addr)
++                    config->network_whitelist_connect = g_slist_prepend(config->network_whitelist_connect, addr);
++                else if (errno != EAFNOSUPPORT) {
+                     g_critical("error: malformed address `%s' at position %d of "ENV_NET_WHITELIST_CONNECT"\n",
+                             expaddr[j], i);
+                     g_printerr("error: malformed address `%s' at position %d of "ENV_NET_WHITELIST_CONNECT"\n",
+@@ -549,7 +556,6 @@ void sydbox_config_update_from_environment(void)
+                     g_strfreev(netwhitelist_connect);
+                     exit(-1);
+                 }
+-                config->network_whitelist_connect = g_slist_prepend(config->network_whitelist_connect, addr);
+             }
+             g_strfreev(expaddr);
+         }
+diff --git a/src/syd-net.c b/src/syd-net.c
+index 2f78b7f..c6ac39a 100644
+--- a/src/syd-net.c
++++ b/src/syd-net.c
+@@ -27,6 +27,7 @@
+ #include <stdbool.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <errno.h>
+ #include <fnmatch.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
+@@ -255,6 +256,7 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+     char *addr, *netmask, *p, *port_range, *delim;
+     struct sydbox_addr *saddr;
+ 
++    errno = 0;
+     saddr = g_new0(struct sydbox_addr, 1);
+ 
+     if (0 == strncmp(src, "unix://", 7)) {
+@@ -285,6 +287,7 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+         if (NULL == port_range) {
+             g_free(addr);
+             g_free(saddr);
++            errno = EINVAL;
+             return NULL;
+         }
+         addr[port_range - addr] = '\0';
+@@ -322,6 +325,7 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+         if (0 >= inet_pton(AF_INET, addr, &saddr->u.sa.sin_addr)) {
+             g_free(addr);
+             g_free(saddr);
++            errno = EINVAL;
+             return NULL;
+         }
+         if (canlog)
+@@ -340,6 +344,7 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+         if (NULL == port_range || (port_range + 1) == '\0') {
+             g_free(addr);
+             g_free(saddr);
++            errno = EINVAL;
+             return NULL;
+         }
+         addr[port_range - addr] = '\0';
+@@ -385,6 +390,7 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+         if (0 >= inet_pton(AF_INET6, addr, &saddr->u.sa6.sin6_addr)) {
+             g_free(addr);
+             g_free(saddr);
++            errno = EINVAL;
+             return NULL;
+         }
+         if (canlog)
+@@ -394,11 +400,13 @@ struct sydbox_addr *address_from_string(const gchar *src, bool canlog)
+ #else
+         g_info("inet6:// not supported (no IPV6 support)");
+         g_free(saddr);
++        errno = EAFNOSUPPORT;
+         return NULL;
+ #endif /* SYDBOX_HAVE_IPV6 */
+     }
+     else {
+         g_free(saddr);
++        errno = EINVAL;
+         return NULL;
+     }
+     return saddr;
+diff --git a/src/syd-syscall.c b/src/syd-syscall.c
+index 18743f4..11f7767 100644
+--- a/src/syd-syscall.c
++++ b/src/syd-syscall.c
+@@ -1,7 +1,7 @@
+ /* vim: set sw=4 sts=4 et foldmethod=syntax : */
+ 
+ /*
+- * Copyright (c) 2009, 2010 Ali Polatel <alip@exherbo.org>
++ * Copyright (c) 2009, 2010, 2012 Ali Polatel <alip@exherbo.org>
+  *
+  * This file is part of the sydbox sandbox tool. sydbox is free software;
+  * you can redistribute it and/or modify it under the terms of the GNU General
+@@ -461,8 +461,12 @@ static void syscall_magic_stat(struct tchild *child, struct checkdata *data)
+         rpath = path + sizeof(CMD_ADDFILTER_NET) - 1;
+         expaddr = address_alias_expand(rpath, true);
+         for (unsigned i = 0; expaddr[i]; i++) {
+-            if ((addr = address_from_string(expaddr[i], true)) == NULL)
+-                g_warning("malformed filter address `%s'", expaddr[i]);
++            if ((addr = address_from_string(expaddr[i], true)) == NULL) {
++                if (errno == EAFNOSUPPORT)
++                    g_debug("unsupported filter address `%s'", expaddr[i]);
++                else
++                    g_warning("malformed filter address `%s'", expaddr[i]);
++            }
+             else {
+                 sydbox_config_addfilter_net(addr);
+                 g_free(addr);
+@@ -476,8 +480,12 @@ static void syscall_magic_stat(struct tchild *child, struct checkdata *data)
+         rpath = path + sizeof(CMD_RMFILTER_NET) - 1;
+         expaddr = address_alias_expand(rpath, true);
+         for (unsigned i = 0; expaddr[i]; i++) {
+-            if ((addr = address_from_string(expaddr[i], true)) == NULL)
+-                g_warning("malformed filter address `%s'", expaddr[i]);
++            if ((addr = address_from_string(expaddr[i], true)) == NULL) {
++                if (errno == EAFNOSUPPORT)
++                    g_debug("unsupported filter address `%s'", expaddr[i]);
++                else
++                    g_warning("malformed filter address `%s'", expaddr[i]);
++            }
+             else {
+                 sydbox_config_rmfilter_net(addr);
+                 g_free(addr);
+@@ -491,8 +499,12 @@ static void syscall_magic_stat(struct tchild *child, struct checkdata *data)
+         rpath = path + sizeof(CMD_NET_WHITELIST_BIND) - 1;
+         expaddr = address_alias_expand(rpath, true);
+         for (unsigned i = 0; expaddr[i]; i++) {
+-            if ((addr = address_from_string(expaddr[i], true)) == NULL)
+-                g_warning("malformed whitelist address `%s'", expaddr[i]);
++            if ((addr = address_from_string(expaddr[i], true)) == NULL) {
++                if (errno == EAFNOSUPPORT)
++                    g_debug("unsupported whitelist address `%s'", expaddr[i]);
++                else
++                    g_warning("malformed whitelist address `%s'", expaddr[i]);
++            }
+             else {
+                 whitelist = sydbox_config_get_network_whitelist_bind();
+                 whitelist = g_slist_prepend(whitelist, addr);
+@@ -506,8 +518,12 @@ static void syscall_magic_stat(struct tchild *child, struct checkdata *data)
+         rpath = path + sizeof(CMD_NET_UNWHITELIST_BIND) - 1;
+         expaddr = address_alias_expand(rpath, true);
+         for (unsigned i = 0; expaddr[i]; i++) {
+-            if ((addr = address_from_string(expaddr[i], false)) == NULL)
+-                g_warning("malformed whitelist address `%s'", expaddr[i]);
++            if ((addr = address_from_string(expaddr[i], false)) == NULL) {
++                if (errno == EAFNOSUPPORT)
++                    g_debug("unsupported whitelist address `%s'", expaddr[i]);
++                else
++                    g_warning("malformed whitelist address `%s'", expaddr[i]);
++            }
+             else {
+                 whitelist = sydbox_config_get_network_whitelist_bind();
+                 for (walk = whitelist; walk != NULL; walk = g_slist_next(walk)) {
+@@ -529,8 +545,12 @@ static void syscall_magic_stat(struct tchild *child, struct checkdata *data)
+         rpath = path + sizeof(CMD_NET_WHITELIST_CONNECT) - 1;
+         expaddr = address_alias_expand(rpath, true);
+         for (unsigned i = 0; expaddr[i]; i++) {
+-            if ((addr = address_from_string(expaddr[i], true)) == NULL)
+-                g_warning("malformed whitelist address `%s'", expaddr[i]);
++            if ((addr = address_from_string(expaddr[i], true)) == NULL) {
++                if (errno == EAFNOSUPPORT)
++                    g_debug("unsupported whitelist address `%s'", expaddr[i]);
++                else
++                    g_warning("malformed whitelist address `%s'", expaddr[i]);
++            }
+             else {
+                 whitelist = sydbox_config_get_network_whitelist_connect();
+                 whitelist = g_slist_prepend(whitelist, addr);
+@@ -544,8 +564,12 @@ static void syscall_magic_stat(struct tchild *child, struct checkdata *data)
+         rpath = path + sizeof(CMD_NET_UNWHITELIST_CONNECT) - 1;
+         expaddr = address_alias_expand(rpath, true);
+         for (unsigned i = 0; expaddr[i]; i++) {
+-            if ((addr = address_from_string(expaddr[i], false)) == NULL)
+-                g_warning("malformed whitelist address `%s'", rpath);
++            if ((addr = address_from_string(expaddr[i], false)) == NULL) {
++                if (errno == EAFNOSUPPORT)
++                    g_debug("unsupported whitelist address `%s'", rpath);
++                else
++                    g_warning("malformed whitelist address `%s'", rpath);
++            }
+             else {
+                 whitelist = sydbox_config_get_network_whitelist_connect();
+                 for (walk = whitelist; walk != NULL; walk = g_slist_next(walk)) {
+-- 
+1.7.12
