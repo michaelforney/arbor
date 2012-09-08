@@ -6,11 +6,14 @@
 require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="Simplified Wrapper and Interface Generator"
-HOMEPAGE="http://www.${PN}.org/"
+HOMEPAGE="http://www.${PN}.org"
 
 REMOTE_IDS+=" freecode:${PN}"
 
-LICENCES="as-is"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/Doc$(ever range 1-2)/SWIGDocumentation.html [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/Release/RELEASENOTES [[ lang = en ]]"
+
+LICENCES="GPL-3 as-is"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="doc lua perl python ruby"
