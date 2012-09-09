@@ -16,6 +16,9 @@ DEPENDENCIES="
 src_prepare() {
     edo cd "${ECONF_SOURCE}"
 
+    expatch "${FILES}"/6db8f73723e64a4f486ca679e05dbf15a1437bfd.patch
+    expatch "${FILES}"/da1f431963218999c49cae928309dfec426c575c.patch
+
     # fail with sydbox
     edo sed \
         -e 's:tst-exec3 ::' \
