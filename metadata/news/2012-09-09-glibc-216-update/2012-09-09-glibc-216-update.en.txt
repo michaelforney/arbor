@@ -1,0 +1,30 @@
+Title: glibc 2.16 unmasked
+Author: Wulf C. Krueger <philantrop@exherbo.org>
+Content-Type: text/plain
+Posted: 2012-09-09
+Revision: 1
+News-Item-Format: 1.0
+
+We've just unmasked glibc 2.16 after testing the entire system set on
+amd64 and x86 against it.
+
+Some patches were applied due to changes in gnulib which some projects
+haven't yet adapted to. These are the predominant issues with glibc
+2.16:
+- sys/resource.h must now be included directly
+- glibc dropped gets and gnulib intentionally doesn't have a gets
+  module
+
+It's possible that more packages are affected by these changes so if
+you hit build failures like
+
+./stdio.h:1012:1: error: 'gets' undeclared here (not in a function)
+
+you've found something to work on. Please make a patch, test it, submit
+it upstream and on zebrapig and we'll take care of it.
+
+Should you face any other problems, please let us know on IRC or on the
+mailinglist (exherbo-dev@lists.exherbo.org).
+
+Always remember: Do NOT downgrade glibc!
+This is your last chance to mask glibc 2.16.
