@@ -71,8 +71,8 @@ btrfs-progs_src_install() {
     # For potentially critical filesystem services (e. g. btrfs, lvm2) we auto-
     # activate the respective service.
     if option systemd ; then
-        dodir /etc/systemd/system/basic.target.wants
-        dosym "${SYSTEMDSYSTEMUNITDIR}"/btrfs.service /etc/systemd/system/basic.target.wants/btrfs.service
+        dodir "${SYSTEMDSYSTEMUNITDIR}"/basic.target.wants
+        dosym ../btrfs.service "${SYSTEMDSYSTEMUNITDIR}"/basic.target.wants/btrfs.service
     fi
 
     dodir /sbin
