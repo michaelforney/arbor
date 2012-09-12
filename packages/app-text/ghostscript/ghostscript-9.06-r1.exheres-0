@@ -3,7 +3,7 @@
 # Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://${PN}.com"
@@ -34,6 +34,7 @@ DEPENDENCIES="
         dbus? ( sys-apps/dbus )
         gtk? ( x11-libs/gtk+:3 )
         idn? ( net-dns/libidn )
+        jpeg2000? ( media-libs/OpenJPEG )
         X? (
             x11-libs/libXext
             x11-libs/libXt
@@ -43,10 +44,11 @@ DEPENDENCIES="
         fonts/urw-fonts [[ note = [ PostScript standard fonts ] ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-9.05-cups-filters.patch )
+
 src_prepare() {
-    edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms{,2},libpng,tiff,zlib}
-    edo rm -r ./Resource/Font
-    edo rm -r ./Resource/CMap
+    edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms{,2},libpng,openjpeg,tiff,zlib}
+    edo rm -r ./Resource/{CMap,Font}
 
     if option !gtk; then
         edo sed -e 's:\$(GSSOX)::' \
@@ -89,6 +91,7 @@ src_configure() {
         --with-libpaper \
         --with-system-libtiff \
         --without-jasper \
+        --without-lcms \
         --without-luratech \
         $(option_enable cups) \
         $(option_enable dbus) \
