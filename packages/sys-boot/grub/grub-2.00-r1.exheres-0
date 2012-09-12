@@ -48,6 +48,8 @@ DEPENDENCIES="
         ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/grub-2-gets.patch" )
+
 pkg_setup() {
     # grub2 should be compiled with -Os, other optimizations may result in oversized core images
     replace-flags -O* -Os
