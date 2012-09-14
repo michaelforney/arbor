@@ -36,3 +36,12 @@ CMAKE_SRC_CONFIGURE_PARAMS=(
 
 CMAKE_SOURCE="${WORKBASE}/${MY_PNV}"
 
+src_prepare() {
+    cmake_src_prepare
+
+    # remove bundled boost headers
+    edo sed -e '/ADD_SUBDIRECTORY (src\/ext)/d' \
+            -i CMakeLists.txt
+    edo rm -r src/ext
+}
+
