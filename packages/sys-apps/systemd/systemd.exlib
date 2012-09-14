@@ -56,6 +56,7 @@ DEPENDENCIES="
         sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
         sys-apps/util-linux[>=2.21.1-r1][multibuild_c:*(-)?]
+        sys-kernel/linux-headers[>=2.6.39]
         sys-libs/libcap[multibuild_c:*(-)?]
         sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
         !sys-fs/udev [[
@@ -63,7 +64,7 @@ DEPENDENCIES="
             resolution = uninstall-blocked-after
         ]]
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
-    cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][multibuild_c:*(-)?] )
+        cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     run:
@@ -85,14 +86,14 @@ AT_M4DIR=( m4 )
 systemd_pkg_pretend() {
     local kv=$(uname -r)
 
-    if [[ ${kv} < 2.6.36 ]] ; then
-        ewarn "You MUST install a kernel >= 2.6.36-rc1 to use systemd."
+    if [[ ${kv} < 2.6.39 ]] ; then
+        ewarn "You MUST install a kernel >= 2.6.39 to use systemd."
         ewarn "This check is based upon the kernel currently running, thus, if you already"
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
     fi
 
-    if [[ ${kv} < 2.6.39 ]] ; then
-        ewarn "You SHOULD install a kernel >= 2.6.39 to get the best results."
+    if [[ ${kv} < 3.0 ]] ; then
+        ewarn "You SHOULD install a kernel >= 3.0 to get the best results."
     fi
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/legacy.conf ]] ; then
