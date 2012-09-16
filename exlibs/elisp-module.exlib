@@ -81,6 +81,14 @@ elisp-generate-global-site-file() {
     ${reset_shopts}
 }
 
+elisp-generate-autoload() {
+    illegal_in_global_scope
+
+    edo ${EMACS} "${ELISP_FLAGS[@]}" \
+        --eval "(let ((generated-autoload-file \"${PWD}/${1}\"))
+                  (update-directory-autoloads \".\"))"
+}
+
 elisp-module_pkg_postinst() {
     elisp-generate-global-site-file
 }
