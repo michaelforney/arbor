@@ -14,12 +14,19 @@ UPSTREAM_RELEASE_NOTES="http://pkg-${PN}.alioth.debian.org/releases/${PNV}.NEWS"
 LICENCES="|| ( BSD-3 GPL-2 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+    acl  [[ description = [ Add support for ACL when copying user
+                            directories. ] ]]
+    attr [[ description = [ Add support for extended attributes when copying
+                            user directories. ] ]]
+"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
+        acl? ( sys-apps/acl )
+        attr? ( sys-apps/attr )
         sys-libs/cracklib[>=2.8.3]
         sys-libs/pam[>=1.0.1]
 "
@@ -39,6 +46,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-nscd
     --with-sha-crypt
 )
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( acl attr )
 
 DEFAULT_SRC_INSTALL_PARAMS=( suidperms=4711 )
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
