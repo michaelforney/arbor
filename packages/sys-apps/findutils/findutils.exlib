@@ -25,6 +25,10 @@ DEPENDENCIES="
         dev-util/dejagnu
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-no-gets.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-d_type-optimisation
     --enable-leaf-optimisation

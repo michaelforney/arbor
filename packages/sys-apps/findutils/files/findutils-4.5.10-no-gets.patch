@@ -1,0 +1,16 @@
+Source: Written by Evan Pitstick <epitstick@counterthreatunit.com>
+Upstream: no
+Reason: Removes the check for gets that causes the build to fail
+
+--
+diff -rupN findutils-4.5.10/gnulib/lib/stdio.in.h new/gnulib/lib/stdio.in.h
+--- findutils-4.5.10/gnulib/lib/stdio.in.h	2011-04-02 15:50:24.000000000 +0000
++++ new/gnulib/lib/stdio.in.h	2012-09-16 21:20:00.815559393 +0000
+@@ -179,7 +179,6 @@ _GL_WARN_ON_USE (fflush, "fflush is not
+    so any use of gets warrants an unconditional warning.  Assume it is
+    always declared, since it is required by C89.  */
+ #undef gets
+-_GL_WARN_ON_USE (gets, "gets is a security hole - use fgets instead");
+ 
+ #if @GNULIB_FOPEN@
+ # if @REPLACE_FOPEN@
