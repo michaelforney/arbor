@@ -33,14 +33,20 @@ DEPENDENCIES="
         x11-libs/libXScrnSaver[multibuild_c:*(-)?]
         x11-libs/libXrender[multibuild_c:*(-)?]
         x11-libs/libXt[multibuild_c:*(-)?]
-        truetype? ( x11-libs/libXft[multibuild_c:*(-)?] )
+        truetype? (
+            media-libs/fontconfig[multibuild_c:*(-)?]
+            x11-libs/libXft[multibuild_c:*(-)?]
+        )
 "
 
 WORK="${WORKBASE}/${MY_PNV}/unix"
 
 RESTRICT="test"
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}/${PN}-8.5.7-multilib.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p2 "${FILES}/${PN}-8.5.7-multilib.patch"
+    -p2 "${FILES}/${PNV}-fontconfig-underlinking.patch"
+)
 
 configure_one_multibuild() {
     econf \
