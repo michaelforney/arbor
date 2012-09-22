@@ -112,8 +112,8 @@ systemd_pkg_setup() {
     exdirectory --allow /etc/binfmt.d
     exdirectory --allow /etc/modules-load.d
     exdirectory --allow /etc/sysctl.d
-    exdirectory --allow /etc/tmpfiles.d
     exdirectory --allow /etc/systemd/system
+    exdirectory --allow /etc/tmpfiles.d
     exdirectory --allow /etc/udev/rules.d
 }
 
@@ -337,9 +337,9 @@ EOF
     # ntp units in ntp-units.d/?*.conf get read and the services started.
     keepdir /etc/systemd/ntp-units.d
     keepdir /usr/${LIBDIR}/systemd/ntp-units.d
-
     keepdir /usr/${LIBDIR}/systemd/system-sleep
 
+    # Keep the administrator's udev rules dir.
     keepdir /etc/udev/rules.d
 
     # platform rules
