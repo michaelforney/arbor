@@ -3,7 +3,7 @@
 # Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ] easy-multibuild [ multiunpack=true ]
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://${PN}.com"
@@ -13,31 +13,32 @@ LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="cups dbus gtk idn jpeg2000 X
-    gtk [[ requires = [ X ] ]]"
+    gtk [[ requires = [ X ] ]]
+    multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
         dev-util/pkg-config
         X? ( x11-proto/xextproto )
     build+run:
-        dev-libs/expat
+        dev-libs/expat[multibuild_c:*(-)?]
         dev-libs/libpaper
-        media-libs/fontconfig
-        media-libs/freetype:2[>=2.4.2]
+        media-libs/fontconfig[multibuild_c:*(-)?]
+        media-libs/freetype:2[>=2.4.2][multibuild_c:*(-)?]
         media-libs/jbig2dec
-        media-libs/jpeg
-        media-libs/lcms2
-        media-libs/libpng
-        media-libs/tiff
-        sys-libs/zlib
-        cups? ( net-print/cups )
-        dbus? ( sys-apps/dbus )
-        gtk? ( x11-libs/gtk+:3 )
-        idn? ( net-dns/libidn )
+        media-libs/jpeg[multibuild_c:*(-)?]
+        media-libs/lcms2[multibuild_c:*(-)?]
+        media-libs/libpng[multibuild_c:*(-)?]
+        media-libs/tiff[multibuild_c:*(-)?]
+        sys-libs/zlib[multibuild_c:*(-)?]
+        cups? ( net-print/cups[multibuild_c:*(-)?] )
+        dbus? ( sys-apps/dbus[multibuild_c:*(-)?] )
+        gtk? ( x11-libs/gtk+:3[multibuild_c:*(-)?] )
+        idn? ( net-dns/libidn[multibuild_c:*(-)?] )
         jpeg2000? ( media-libs/OpenJPEG )
         X? (
-            x11-libs/libXext
-            x11-libs/libXt
+            x11-libs/libXext[multibuild_c:*(-)?]
+            x11-libs/libXt[multibuild_c:*(-)?]
         )
     run:
         app-text/poppler-data[>=0.4.4] [[ note = [ CMap encoding data ] ]]
@@ -46,7 +47,7 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-9.05-cups-filters.patch )
 
-src_prepare() {
+prepare_one_multibuild() {
     edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms{,2},libpng,openjpeg,tiff,zlib}
     edo rm -r ./Resource/{CMap,Font}
 
@@ -60,11 +61,11 @@ src_prepare() {
 
     default
     eautoreconf
-    edo cd "${WORK}/ijs"
+    edo cd ./ijs
     eautoreconf
 }
 
-src_configure() {
+configure_one_multibuild() {
     local FONTPATH
     for path in \
         /usr/share/fonts/X11/urw-fonts \
@@ -102,22 +103,22 @@ src_configure() {
         $(option_with idn libidn) \
         $(option_with X x)
 
-    edo cd "${WORK}/ijs"
+    edo cd ./ijs
     econf
 }
 
-src_compile() {
+compile_one_multibuild() {
     # Parallel make is broken
     emake -j1 so all
 
-    edo cd "${WORK}/ijs"
+    edo cd ./ijs
     emake
 }
 
-src_install() {
+install_one_multibuild() {
     emake -j1 DESTDIR="${IMAGE}" install-so install
 
-    edo cd "${WORK}/ijs"
+    edo cd ./ijs
     default
 
     if option !X && option !gtk; then
