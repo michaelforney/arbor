@@ -3,7 +3,7 @@
 # Based in part upon 'libxslt-1.1.23.ebuild', which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] easy-multibuild python
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ] easy-multibuild python
 
 SUMMARY="XSLT libraries and tools"
 HOMEPAGE="http://www.xmlsoft.org/XSLT/"
@@ -18,37 +18,38 @@ MYOPTIONS="crypt debug examples python
 DEPENDENCIES="
     build+run:
         dev-libs/libxml2[>=2.6.27][multibuild_c:*(-)?]
-        crypt?  ( dev-libs/libgcrypt[>=1.1.92][multibuild_c:*(-)?] )
+        crypt? ( dev-libs/libgcrypt[>=1.1.92][multibuild_c:*(-)?] )
         python? ( dev-lang/python:=[multibuild_c:*(-)?] )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p0 "${FILES}/libxslt.m4-${PN}-1.1.8.patch"
-    -p0 "${FILES}/${PNV}-fix_python_paths.patch"
-    -p3 "${FILES}/${PN}-1.1.23-parallel-install.patch"
+    "${FILES}"/${PN}-1.1.26-fix_python_paths.patch
+    "${FILES}"/${PN}-1.1.27-m4.patch
+    "${FILES}"/${PN}-1.1.27-disable_static_modules.patch
+    "${FILES}"/${PN}-1.1.27-python-includes.patch
 )
-
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 
 src_prepare() {
-    default
-
+    # The included headers have crypt enabled. This would break linking for
+    # out-of-source builds where crypt is disabled.
     edo rm "${WORK}"/{libxslt/xsltconfig.h,libexslt/exsltconfig.h}
 
-    # sed Makefile to fix bug Gentoo #99382 so that html gets installed in ${PNVR}
-    edo sed -i -e "s:libxslt-\$(VERSION):${PNVR}:" doc/Makefile.am
-
-    # Be warned: eautoreconf breaks tests
-    eautomake
+    autotools_src_prepare
 }
 
 configure_one_multibuild() {
     local python_prefix='/usr'
     multibuild_default_target C || python_prefix="/usr/${CHOST}"
+
     # Always pass --with-debugger. It is required by third parties (see
     # e.g. Gentoo bug #98345)
-    econf --with-debugger \
-        $(option_with crypt crypto) $(option_with debug) $(option_with debug mem-debug) \
+    econf \
+        --disable-static \
+        --with-debugger \
+        $(option_with crypt crypto) \
+        $(option_with debug) \
+        $(option_with debug mem-debug) \
         $(option_with python python "${python_prefix}")
 }
 
