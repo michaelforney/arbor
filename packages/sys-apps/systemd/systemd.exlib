@@ -390,9 +390,17 @@ systemd_pkg_postinst() {
             nonfatal edo sleep 1
             nonfatal edo pkill -KILL udevd
 
-            # Change the wait mode to wait/eldest so
-            # sydbox doesn't wait for udevd to exit.
-            esandbox wait_eldest
+            case "$(esandbox api)" in
+            1)
+                # Resume udevd when it is executed.
+                esandbox resume /sbin/udevd
+                ;;
+            0)
+                # Change the wait mode to wait/eldest so
+                # sydbox doesn't wait for udevd to exit.
+                esandbox wait_eldest
+                ;;
+            esac
 
             # Allow access to /run/udev/control for udevd
             esandbox allow_net unix:/run/udev/control
