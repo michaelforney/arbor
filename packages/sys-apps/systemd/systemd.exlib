@@ -51,8 +51,8 @@ DEPENDENCIES="
         gtk-doc? ( app-doc/gtk-doc-autotools[>=1.18] )
     build+run:
         app-arch/xz[multibuild_c:*(-)?]
-        dev-libs/libgcrypt[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
+        dev-libs/libgcrypt[multibuild_c:*(-)?]
         sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
         sys-apps/kmod[>=5][multibuild_c:*(-)?]
         sys-apps/pciutils
@@ -232,6 +232,10 @@ systemd_src_install() {
     fi
     edo rm -r "${IMAGE}"/etc/bash_completion.d
 
+    # Don't install funny RPM macros.
+    edo rm "${IMAGE}"/etc/rpm/*
+    edo rmdir "${IMAGE}"/etc/rpm
+
     # Install simple-net if requested
     if option simple-net; then
         insinto /usr/${LIBDIR}/systemd/system
@@ -409,7 +413,11 @@ systemd_pkg_postinst() {
         fi
     fi
 
-    local cruft=( "${ROOT}"/etc/init.d/sysinit.bash "${ROOT}"/etc/systemd/{systemd-journald.conf,systemd-logind.conf} )
+    local cruft=(
+        "${ROOT}"/etc/init.d/sysinit.bash
+        "${ROOT}"/etc/rpm/macros.systemd
+        "${ROOT}"/etc/systemd/{systemd-journald.conf,systemd-logind.conf}
+    )
     for file in "${cruft[@]}"; do
         if [[ -f ${file} || -L ${file} ]]; then
             nonfatal edo rm "${file}" || ewarn "removing ${file} failed"
