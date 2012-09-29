@@ -8,10 +8,14 @@ SUMMARY="Tool used for applying patches such as produced by diff"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="xattr"
 
 DEPENDENCIES="
+    build+run:
+        xattr? ( sys-apps/attr )
     test:
         sys-apps/ed
 "
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( xattr )
 
