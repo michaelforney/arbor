@@ -1,7 +1,7 @@
 # Copyright 2012 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
+require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 SUMMARY="OpenPrinting CUPS Filters"
 DESCRIPTION="
@@ -23,8 +23,8 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
-        app-text/ghostscript
-        app-text/poppler[>=0.20.3-r2][lcms]
+        app-text/ghostscript[multibuild_c:*(-)?]
+        app-text/poppler[>=0.20.3-r2][lcms][multibuild_c:*(-)?]
         app-text/qpdf[>=3.0.2][multibuild_c:*(-)?]
         media-libs/fontconfig[>=2.0.0][multibuild_c:*(-)?]
         media-libs/freetype:2[multibuild_c:*(-)?]
@@ -51,4 +51,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-tiff
     --without-php
 )
+
+src_prepare() {
+    default
+    edo sed -e 's:$(LN_S):ln -sf:' -i Makefile.{am,in}
+    autotools_src_prepare
+}
 
