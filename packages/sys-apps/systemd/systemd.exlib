@@ -43,12 +43,15 @@ MYOPTIONS="
 
 DEPENDENCIES="
     build:
-        dev-libs/libxslt
+        dev-libs/libxslt [[ note = [ for creating the man pages ] ]]
         dev-util/gperf[>=3.0.4]
         dev-util/intltool[>=0.40.0]
         dev-util/pkg-config[>=0.20]
         sys-devel/gettext
-        gtk-doc? ( app-doc/gtk-doc-autotools[>=1.18] )
+        gtk-doc? (
+            app-doc/gtk-doc-autotools[>=1.18]
+            dev-libs/libxslt
+        )
     build+run:
         app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
@@ -83,8 +86,6 @@ DEPENDENCIES="
 "
 # FIXME: Hard-enabled for now since 189 fails to build without it.
 # gcrypt? ( dev-libs/libgcrypt )
-
-DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/0001-Disable-test-id128-which-requires-etc-machine-id-on-.patch )
 
 AT_M4DIR=( m4 )
 
@@ -193,6 +194,20 @@ configure_one_multibuild() {
     edo mkdir -p src/gudev
 
     econf "${myconfig[@]}"
+}
+
+test_one_multibuild() {
+    # Note to self & whoever else reads this: Don't even *think* about
+    # RESTRICT=userpriv in order to enable more expensive udev tests.
+    # Enabling those tests can (and most likely will) mess up your running system
+    # completely and require you to reboot. You've been warned.
+    if [[ -f /etc/machine-id ]]; then
+        default
+    else
+        ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
+        ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
+        ewarn "want to run the tests."
+    fi
 }
 
 install_one_multibuild() {
