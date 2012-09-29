@@ -1,29 +1,40 @@
 # Copyright 2008 Kim Højgaard-Hansen
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 1.10 ] ] easy-multibuild
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ] easy-multibuild
 require sourceforge [ suffix=tar.gz ]
 
 SUMMARY="The Multiple Network Graphics reference library"
-HOMEPAGE="http://www.libmng.com/"
 
-LICENCES="libmng"
+LICENCES="ZLIB"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="lcms multibuild_c: 32 64"
+MYOPTIONS="
+    lcms
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build+run:
         media-libs/jpeg[multibuild_c:*(-)?]
-        lcms? ( media-libs/lcms )"
+        lcms? ( media-libs/lcms )
+"
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-static )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lcms )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.examples doc/{${PN}.txt,doc.readme} )
 
 src_prepare() {
-    #upstream does not handle autotools anymore
-    #moved to unmaintained - we use it anyway
+    default
+
+    # Upstream does not handle autotools anymore.
+    # Moved to unmaintained - we use it anyway.
     edo cp makefiles/configure.in makefiles/Makefile.am .
-    eautoreconf
+
+    # Fix build with automake 1.12.
+    # http://sourceforge.net/p/libmng/bugs/90/
+    edo sed -e '/AM_C_PROTOTYPES/d' -i configure.in
+
+    autotools_src_prepare
 }
 
