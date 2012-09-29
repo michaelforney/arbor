@@ -34,6 +34,7 @@ MYOPTIONS="
     gcrypt [[ description = [ Enable cryptographically secured journal files ] ]]
     gobject-introspection
     gtk-doc
+    journal-gateway [[ description = [ Enable journal gateway daemon to access the journal via HTTP and JSON ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
     multibuild_c: 32 64
@@ -71,6 +72,7 @@ DEPENDENCIES="
         cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][multibuild_c:*(-)?] )
         gcrypt? ( dev-libs/libgcrypt[multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
+        journal-gateway? ( net-libs/libmicrohttpd[multibuild_c:*(-)?] )
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     run:
         sys-apps/coreutils
@@ -187,6 +189,7 @@ configure_one_multibuild() {
         $(option_enable gcrypt)
         $(option_enable gobject-introspection introspection)
         $(option_enable gtk-doc)
+        $(option_enable journal-gateway microhttpd)
         $(option_enable tcpd tcpwrap)
     )
 
