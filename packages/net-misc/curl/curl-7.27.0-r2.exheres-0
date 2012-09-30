@@ -82,10 +82,19 @@ EOF
     esandbox disallow_net --connect "inet:127.0.0.1@60000"
 }
 
+install_one_multibuild() {
+    default
+
+    edo mv "${IMAGE}"/usr/include/curl/curlbuild.h "${IMAGE}"/usr/include/curl/curlbuild-${MULTIBUILD_TARGET}.h
+}
+
 src_install() {
     easy-multibuild_src_install
 
     insinto /usr/share/aclocal
     doins docs/libcurl/libcurl.m4
+
+    insinto /usr/include/curl
+    doins "${FILES}"/curlbuild.h
 }
 
