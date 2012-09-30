@@ -84,9 +84,6 @@ gnutls_src_prepare() {
         -i tests/*.c
 
     if ever at_least 2.12.14; then
-        # Fix this: ./configure: line 12825: test: too many arguments
-        edo sed -e '/test x$GNUTLS_REQUIRES_PRIVATE = x/s|x$GNUTLS_REQUIRES_PRIVATE|"&"|' -i configure.ac
-
         # gnutls-serv will always run on 0.0.0.0 and these tests use it
         edo sed -e '/TESTS =/s:testdsa::' -i tests/dsa/Makefile.am
         edo sed -e '/TESTS =/s:testcerts::' -i tests/openpgp-certs/Makefile.am
