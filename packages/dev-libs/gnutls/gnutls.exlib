@@ -30,17 +30,11 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
 "
 
-if ever at_least 3.0.18; then
-    DEPENDENCIES+="
-        build:
-            sys-devel/automake:1.11[>=1.11.4]
-    "
-fi
-
 if ever at_least 3.0.24; then
     DEPENDENCIES+="
         build:
             app-arch/xz
+            sys-devel/automake:1.11[>=1.11.4]
         build+run:
             dev-libs/libtasn1[>=2.14][multibuild_c:*(-)?]
             dev-libs/nettle[>=2.4][multibuild_c:*(-)?]
