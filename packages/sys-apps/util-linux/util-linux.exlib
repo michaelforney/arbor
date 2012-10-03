@@ -2,7 +2,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
+require easy-multibuild systemd-service
 
 SUMMARY="Common linux utilities"
 HOMEPAGE="http://git.kernel.org/?p=utils/${PN}/${PN}.git"
@@ -17,6 +17,7 @@ UPSTREAM_RELEASE_NOTES="${MY_UPSTREAM}-ReleaseNotes"
 LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
 MYOPTIONS="
+    systemd
     udev [[
         description = [ Enable udev support (*only* ever disable this to break a dependency cycle) ]
         note = [ Usually, we hard-enable udev. This option is *solely* to break
@@ -24,36 +25,43 @@ MYOPTIONS="
                  Do NOT introduce new udev options.
         ]
     ]]
-    multibuild_c: 32 64"
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
         sys-devel/gettext[>=0.14.1]
     build+run:
+        !sys-apps/eject [[
+            description = [ util-linux now provides eject ] resolution = uninstall-blocked-after
+        ]]
         !sys-apps/util-linux-ng [[
             description = [ Upstream renamed util-linux-ng to util-linux ] resolution = uninstall-blocked-after
         ]]
         dev-lang/perl:*
         sys-libs/ncurses[>=5.6][multibuild_c:*(-)?]
-        sys-libs/zlib[multibuild_c:*(-)?]
         sys-libs/pam[multibuild_c:*(-)?]
+        sys-libs/zlib[multibuild_c:*(-)?]
         udev? ( sys-apps/systemd[multibuild_c:*(-)?] )
 "
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
-    # --enable-libmount-mount EXPERIMENTAL See v2.19 Release Notes
     econf \
         --libdir=/${LIBDIR} \
         --enable-cramfs \
+        --enable-eject \
         --enable-fs-paths-extra=/usr/sbin \
         --enable-libblkid \
         --enable-libmount \
         --enable-nls \
         --enable-partx \
+        --disable-static \
         --without-selinux \
         --without-utempter \
+        $(option_enable systemd socket-activation) \
+        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
         $(option_with udev)
 }
 
