@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2008-2009 Ingmar Vanhassel
 # Copyright 2008-2009 Bo Ørsted Andresen
-# Copyright 2009 Saleem Abdulrasool
+# Copyright 2009-2012 Saleem Abdulrasool
 # Distributed under the terms of the GNU General Public License v2
 
 require versionator alternatives gnu [ suffix=bz2 ]
@@ -28,31 +28,62 @@ DEPENDENCIES="
     build:
         sys-devel/make
     build+run:
-        dev-libs/gmp:=[>=4.1]
-        dev-libs/mpfr:=[>=2.3]
+        dev-libs/gmp:=[>=4.3.2]
+        dev-libs/mpfr:=[>=2.4.2]
+        dev-libs/mpc[>=0.8.1]
 "
 
 WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}"/${PNV#bootstrap-}
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    # program name options
     --program-prefix=bootstrap-
+
+    # install location options
     --prefix=/usr/${PN}
     --libdir=/usr/${PN}/${LIBDIR}
-    --enable-languages=c
-    --enable-multilib
-    --with-newlib
-    --with-system-zlib
-    --without-headers
+
+    # documented options
+    --disable-gold
+    --disable-libquadmath
+    --disable-libada
+    --disable-libssp
+    --disable-lto
+    --disable-obj-gc
+
+    --with-mpc=/usr
+    --with-mpfr=/usr
+    --with-gmp=/usr
+
+    --without-ppl
     --without-cloog
-    --disable-shared
+
+    # undocumented options ...
+
+    # ... use zlib from the system
+    --with-system-zlib
+
+    # ... disable system libc, dont install headers
+    --without-headers
+    --with-newlib
+
+    # ... disable localisation support
     --disable-nls
+
+    # ... disable shared libraries
+    --disable-shared
     --disable-decimal-float
     --disable-libgomp
     --disable-libmudflap
-    --disable-libquadmath
-    --disable-libssp
     --disable-threads
+
+    # ... only build support for C
+    --enable-languages=c
+
+    # ... enable multilib support
+    --enable-multilib
+
     --hates=docdir
 )
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
