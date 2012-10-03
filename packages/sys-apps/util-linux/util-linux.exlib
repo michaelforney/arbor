@@ -48,6 +48,7 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
+    # su and login are still part of sys-apps/shadow (for now).
     econf \
         --libdir=/${LIBDIR} \
         --enable-cramfs \
@@ -57,7 +58,9 @@ configure_one_multibuild() {
         --enable-libmount \
         --enable-nls \
         --enable-partx \
+        --disable-login \
         --disable-static \
+        --disable-su \
         --without-selinux \
         --without-utempter \
         $(option_enable systemd socket-activation) \
