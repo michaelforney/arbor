@@ -53,7 +53,6 @@ DEPENDENCIES+="
         java? ( app-arch/unzip
                 app-arch/zip )
     build+run:
-        dev-libs/gmp:=[>=4.1]
         dev-libs/libelf [[ note = [ Enable link-time optimisation ] ]]
         dev-libs/mpc[>=0.8.1]
         dev-libs/mpfr:=[>=2.3]"
@@ -64,10 +63,12 @@ MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop 
 if ever at_least 4.7; then
     DEPENDENCIES+="
         build+run:
+            dev-libs/gmp:=[>=4.2]
             graphite? ( || ( dev-libs/cloog dev-libs/cloog-ppl[>=0.15.5] ) )"
 else
     DEPENDENCIES+="
         build+run:
+            dev-libs/gmp:=[>=4.1]
             graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
 fi
 
