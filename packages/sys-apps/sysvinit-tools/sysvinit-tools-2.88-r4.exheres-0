@@ -10,8 +10,6 @@ These are only the useful tools from old, crufty, obsolete sysvinit:
 - last
 - mesg
 - pidof
-- sulogin
-- utmpdump
 "
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN/-tools}"
 DOWNLOADS="http://download.savannah.gnu.org/releases/${PN/-tools}/${PNV/-tools}dsf.tar.bz2"
@@ -28,8 +26,8 @@ DEPENDENCIES="
             description = [ sys-apps/sysvinit and this package collide. You might want this package if you're using systemd. ]
             resolution = manual
         ]]
-        !sys-apps/util-linux[<2.20] [[
-            description = [ sys-apps/util-linux 2.20 installs /bin/mountpoint previously provided by this package ]
+        !sys-apps/util-linux[<2.22] [[
+            description = [ sys-apps/util-linux 2.22 installs sulogin and utmpdump previously provided by this package ]
             resolution = upgrade-blocked-before
         ]]
 "
@@ -48,18 +46,16 @@ src_compile() {
 }
 
 src_install() {
-    doman man/killall5.8 man/last.1 man/mesg.1 man/sulogin.8 man/utmpdump.1
+    doman man/killall5.8 man/last.1 man/mesg.1
 
     exeinto /sbin
     doexe \
-        src/killall5 \
-        src/sulogin
+        src/killall5
 
     exeinto /usr/bin
     doexe \
         src/last \
-        src/mesg \
-        src/utmpdump
+        src/mesg
 
     dodir /bin
     dosym /sbin/killall5 /bin/pidof
