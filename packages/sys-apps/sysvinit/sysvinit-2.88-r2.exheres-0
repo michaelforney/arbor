@@ -27,8 +27,8 @@ DEPENDENCIES="
             description = [ sys-apps/sysvinit-tools and this package collide. You probably want sys-apps/sysvinit-tools. ]
             resolution = manual
         ]]
-        !sys-apps/util-linux[<2.20] [[
-            description = [ sys-apps/util-linux 2.20 installs /bin/mountpoint previously provided by this package ]
+        !sys-apps/util-linux[<2.22] [[
+            description = [ sys-apps/util-linux 2.22 installs sulogin and utmpdump previously provided by this package ]
             resolution = upgrade-blocked-before
         ]]
 "
@@ -76,11 +76,17 @@ src_install() {
     alternatives+=( /usr/share/man/man5/inittab.5 ${PN}.inittab.5 )
     alternatives_for "${alternatives[@]}"
 
-    # wall is provided by util-linux(-ng).
+    # wall is provided by util-linux
     edo rm "${IMAGE}"/usr/bin/wall "${IMAGE}"/usr/share/man/man1/wall.1
 
     # mountpoint is provided by util-linux
     edo rm "${IMAGE}"/bin/mountpoint "${IMAGE}"/usr/share/man/man1/mountpoint.1
+
+    # sulogin is provided by util-linux
+    edo rm "${IMAGE}"/sbin/sulogin "${IMAGE}"/usr/share/man/man1/sulogin.8
+
+    # utmpdump is provided by util-linux
+    edo rm "${IMAGE}"/usr/bin/utmpdump "${IMAGE}"/usr/share/man/man1/utmpdump.1
 }
 
 pkg_postinst() {
