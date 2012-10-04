@@ -425,20 +425,18 @@ systemd_pkg_postinst() {
 
             case "$(esandbox api)" in
             1)
-                # Resume udevd when it is executed.
-                esandbox resume /sbin/udevd
+                esandbox exec /sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
                 ;;
             0)
                 # Change the wait mode to wait/eldest so
                 # sydbox doesn't wait for udevd to exit.
                 esandbox wait_eldest
+                # Allow access to /run/udev/control for udevd
+                esandbox allow_net unix:/run/udev/control
+                nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
                 ;;
             esac
 
-            # Allow access to /run/udev/control for udevd
-            esandbox allow_net unix:/run/udev/control
-
-            nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
         fi
     fi
 
