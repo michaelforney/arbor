@@ -7,7 +7,7 @@
 
 require systemd-service
 
-export_exlib_phases src_install pkg_postinst
+export_exlib_phases src_configure src_install pkg_postinst
 
 SUMMARY="Popular system logger"
 HOMEPAGE="http://www.balabit.com/network-security/${PN}/"
@@ -41,39 +41,33 @@ DEPENDENCIES="
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --with-pidfile-dir=/run
-    --with-module-dir=/usr/${LIBDIR}/syslog-ng
-    --sysconfdir=/etc/syslog-ng
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/syslog-ng.conf.doc )
+
+syslog-ng_src_configure() {
     # If someone wants to use the new SQL logging option directly, please find me some good docs
     # about it.
-    --disable-sql
-    --disable-env-wrapper
-    --disable-spoof-source
-    --disable-sql
-    --enable-dynamic-linking
-    --enable-ssl
-    --with-ivykis=system
-    --without-libnet
-    --without-compile-date
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    "caps linux-caps"
-    json
-    ipv6
-    mongodb
-    pcre
-    systemd
-    "tcpd tcp-wrapper"
-)
-
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    'json json json-c'
-    "systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}"
-)
-
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/syslog-ng.conf.doc )
+    econf \
+        --with-pidfile-dir=/run \
+        --with-module-dir=/usr/${LIBDIR}/syslog-ng \
+        --sysconfdir=/etc/syslog-ng \
+        --disable-sql \
+        --disable-env-wrapper \
+        --disable-spoof-source \
+        --enable-dynamic-linking \
+        --enable-ssl \
+        --with-ivykis=system \
+        --without-libnet \
+        --without-compile-date \
+        $(option_enable caps linux-caps) \
+        $(option_enable json) \
+        $(option_enable ipv6) \
+        $(option_enable mongodb) \
+        $(option_enable pcre) \
+        $(option_enable systemd) \
+        $(option_enable tcpd tcp-wrapper) \
+        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
+        $(option json && echo -n --with-json=json-c )
+}
 
 syslog-ng_src_install() {
     default
