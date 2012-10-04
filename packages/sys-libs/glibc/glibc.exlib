@@ -129,7 +129,7 @@ glibc_src_configure() {
         edo mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
         edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
-        echo > config.cache <<- EOF
+        cat > config.cache <<- EOF
 libc_cv_forced_unwind=yes
 libc_cv_c_cleanup=yes
 libc_cv_gnu89_inline=yes
