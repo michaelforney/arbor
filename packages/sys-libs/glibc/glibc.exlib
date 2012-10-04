@@ -129,16 +129,22 @@ glibc_src_configure() {
         edo mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
         edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
 
-        echo "libc_cv_forced_unwind=yes" > config.cache
-        echo "libc_cv_c_cleanup=yes" >> config.cache
-        echo "libc_cv_slibdir=/${LIBDIR}" >> config.cache
+        echo > config.cache <<- EOF
+libc_cv_forced_unwind=yes
+libc_cv_c_cleanup=yes
+libc_cv_gnu89_inline=yes
+libc_cv_ssp=no
+libc_cv_slibdir=/${LIBDIR}
+EOF
 
         if ! [[ ${CFLAGS} =~ -march|-mcpu ]]; then
             append-flags -march=native
         fi
+
         append-flags -O2
+
         # --enable-stackguard-randomization could also be enabled for <2.12.2 but needs testing
-        CC="${GCC} -m${multibuild_c_target}" econf \
+        BUILD_CC=${CC} CC="${GCC} -m${multibuild_c_target}" econf \
             --libdir="/usr/${LIBDIR}" \
             --cache-file=config.cache \
             "--enable-kernel=$MINIMUM_KERNEL_VERSION" \
@@ -147,7 +153,6 @@ glibc_src_configure() {
             --with-headers=/usr/include \
             --with-add-ons --with-crypt \
             --without-gd --without-cvs
-        echo "libc_cv_gnu89_inline=yes" >> config.cache
     done
 }
 
