@@ -4,8 +4,8 @@
 #  Copyright 1999-2008 Gentoo Foundation
 
 SUMMARY="DocBook XML catalog auto-updater"
-HOMEPAGE="http://www.gentoo.org/"
-DOWNLOADS="mirror://gentoo/${PNV}.bz2"
+HOMEPAGE="http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-src/${PN}"
+DOWNLOADS="mirror://gentoo/${PNV}.tar.xz"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -17,9 +17,7 @@ DEPENDENCIES="
         sys-apps/util-linux
 "
 
-WORK=${WORKBASE}
-
-src_install() {
-    newbin ${PNV} ${PN}
+pkg_postinst() {
+    build-docbook-catalog
 }
 
