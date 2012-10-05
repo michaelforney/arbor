@@ -1,0 +1,15 @@
+# Copyright 2007 Bryan Østergaard
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require util-linux
+
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+pkg_preinst() {
+    # XXX: In previous revision, this package install /bin/kill
+    #      which may overwrite the one from coreutils.
+    #      To avoid /bin/kill being removed, update timestamp.
+    nonfatal edo touch "${ROOT}"/bin/kill
+}
+
