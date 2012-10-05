@@ -1,9 +1,9 @@
-# Copyright 2008, 2009 Ingmar Vanhassel
+# Copyright 2008, 2009, 2012 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
 SCM_REPOSITORY="git://repo.or.cz/tig.git"
 
-require tig autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ] scm-git
+require tig autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ] scm-git
 
 DOWNLOADS=""
 
@@ -16,4 +16,9 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_INSTALL_PARAMS=( doc-html doc-man )
+
+src_prepare() {
+    # Don't use autoreconf, we only use autoconf and simple GNU Make
+    edo ./autogen.sh
+}
 
