@@ -1,13 +1,8 @@
 # Copyright 2012 Nikolay Orlyuk <virkony@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-require vala autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+require vala
 
 SLOT="0.18"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-
-DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}/${PN}-0.17.3-SimpleType-properties.patch" )
-
-# Note that SimpleType properties patch requires files regeneration by
-# automake/autoconf to include new unit-test
 
