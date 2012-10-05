@@ -2,7 +2,7 @@
 # Copyright 2010 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require alternatives
+require alternatives autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 if ever at_least 0.13 ; then
     require gnome.org [ suffix=.tar.xz ]
@@ -32,7 +32,10 @@ DEPENDENCIES="
         $(ever at_least 0.14.1 && echo 'gnome-desktop/gobject-introspection:*')
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-unversioned' '--enable-vapigen' )
+# NOTE: With this patch and '--disable-build-from-vala', you cannot patch .vala files
+# Which is bad anyway, because of bootstrapping
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}--disable-build-from-vala.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-build-from-vala' '--disable-unversioned' '--enable-vapigen' )
 
 vala_src_test() {
     unset DISPLAY
