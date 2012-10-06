@@ -1,0 +1,13 @@
+Source: Denis Knauf <Denis.Knauf@gmail.com>
+Upstream: not yet
+Reason: struct iv_event was missing. it's defined in iv_event.h, but anywhere
+it was included.
+--- syslog-ng-3.3.6/lib/mainloop.c.orig 2012-10-04 14:04:23.149893710 +0200
++++ syslog-ng-3.3.6/lib/mainloop.c      2012-10-04 13:57:33.056108195 +0200
+@@ -41,6 +41,7 @@
+ #include <arpa/nameser.h>
+ #include <resolv.h>
+ #include <iv.h>
++#include <iv_event.h>
+ #include <iv_signal.h>
+ #include <iv_work.h>
