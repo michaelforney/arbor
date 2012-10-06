@@ -8,7 +8,12 @@ else
     DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.xz"
 fi
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] alternatives bash-completion easy-multibuild udev-rules
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ] \
+        alternatives \
+        bash-completion \
+        easy-multibuild \
+        udev-rules \
+        python [ has_lib=false ]
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
 
@@ -35,6 +40,7 @@ MYOPTIONS="
     gobject-introspection
     gtk-doc
     journal-gateway [[ description = [ Enable journal gateway daemon to access the journal via HTTP and JSON ] ]]
+    python [[ description = [ Build the man page index and systemd-python (bindings) ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
     multibuild_c: 32 64
@@ -52,6 +58,7 @@ DEPENDENCIES="
             app-doc/gtk-doc-autotools[>=1.18]
             dev-libs/libxslt
         )
+        python? ( dev-lang/python:=[>=2.7][multibuild_c:*(-)?] )
     build+run:
         app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
@@ -192,6 +199,7 @@ configure_one_multibuild() {
         $(option_enable gtk-doc)
         $(option_enable journal-gateway microhttpd)
         $(option_enable tcpd tcpwrap)
+        $(option_with python)
     )
 
     edo mkdir -p src/gudev
@@ -393,6 +401,10 @@ EOT
     # Create compatibility symlinks
     dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
     dosym /usr/bin/udevadm /sbin/udevadm
+
+    if option python ; then
+        python_bytecompile
+    fi
 }
 
 systemd_pkg_postinst() {
