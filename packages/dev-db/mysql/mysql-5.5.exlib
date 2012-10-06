@@ -2,7 +2,7 @@
 # Copyright 2011-2012 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cmake systemd-service easy-multibuild
+require cmake [ api=2 ] systemd-service easy-multibuild
 
 export_exlib_phases pkg_pretend src_install src_prepare
 
@@ -70,12 +70,10 @@ mysql-5.5_src_prepare() {
     default
 
     # Don't treat warnings as error, debug compilation fails (MySQL 5.5.8)
-    option debug && edo sed -i -e 's/-Werror//g' "${WORK}"/CMakeLists.txt
+    option debug && edo sed -i -e 's/-Werror//g' "${CMAKE_SOURCE}"/CMakeLists.txt
 }
 
 configure_one_multibuild() {
-    local ECMAKE_BUILD_DIR="${PWD}"
-
     local cmakeargs=(
         -DBUILD_CONFIG:STRING=mysql_release
         -DCMAKE_BUILD_TYPE:STRING=Release
@@ -117,13 +115,7 @@ configure_one_multibuild() {
         $(cmake_with tcpd LIBWRAP)
 }
 
-compile_one_multibuild() {
-    local ECMAKE_BUILD_DIR="${PWD}"
-    cmake_src_compile
-}
-
 install_one_multibuild() {
-    local ECMAKE_BUILD_DIR="${PWD}"
     cmake_src_install
 
     ! option debug && edo rmdir "${IMAGE}"/usr/${LIBDIR}/mysql/plugin/debug
@@ -169,10 +161,5 @@ EOF
 d /run/mysqld 0755 mysql mysql
 EOF
     fi
-}
-
-test_one_multibuild() {
-   local ECMAKE_BUILD_DIR="${PWD}"
-   cmake_src_test
 }
 
