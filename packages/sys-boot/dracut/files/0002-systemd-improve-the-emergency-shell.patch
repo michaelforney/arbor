@@ -1,0 +1,50 @@
+From 8866b69c6764752c280efcf70f12c4d98c2766f8 Mon Sep 17 00:00:00 2001
+From: Harald Hoyer <harald@redhat.com>
+Date: Wed, 3 Oct 2012 16:38:38 -0400
+Subject: [PATCH 2/4] systemd: improve the emergency shell
+
+---
+ modules.d/98systemd/emergency.service | 2 +-
+ modules.d/99base/dracut-lib.sh        | 6 ++----
+ 2 files changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/modules.d/98systemd/emergency.service b/modules.d/98systemd/emergency.service
+index 431e2b0..4ec7861 100644
+--- a/modules.d/98systemd/emergency.service
++++ b/modules.d/98systemd/emergency.service
+@@ -18,7 +18,7 @@ ExecStartPre=-/bin/plymouth quit
+ ExecStartPre=-/bin/echo -e '\n\nEntering emergency mode. Exit the shell to continue.\nType "journalctl" to view system logs.\n'
+ ExecStart=-/bin/sh -i -l
+ ExecStopPost=-/bin/rm -f /.console_lock
+-Type=idle
++Type=oneshot
+ StandardInput=tty-force
+ StandardOutput=inherit
+ StandardError=inherit
+diff --git a/modules.d/99base/dracut-lib.sh b/modules.d/99base/dracut-lib.sh
+index 03b6e87..c044ec8 100755
+--- a/modules.d/99base/dracut-lib.sh
++++ b/modules.d/99base/dracut-lib.sh
+@@ -871,9 +871,7 @@ _emergency_shell()
+         > /.console_lock
+         echo "PS1=\"$_name:\${PWD}# \"" >/etc/profile
+         systemctl start emergency.service
+-        debug_off
+-        while [ -e /.console_lock ]; do sleep 1; done
+-        debug_on
++        rm -f /.console_lock
+     else
+         echo "Dropping to debug shell."
+         echo
+@@ -891,7 +889,7 @@ _emergency_shell()
+         fi
+         [ -c "$_ctty" ] || _ctty=/dev/tty1
+         case "$(/usr/bin/setsid --help 2>&1)" in *--ctty*) CTTY="--ctty";; esac
+-        setsid $CTTY /bin/sh -i -l 0<$_ctty 1>$_ctty 2>&1
++        setsid $CTTY /bin/sh -i -l 0<>$_ctty 1<>$_ctty 2<>$_ctty
+     fi
+ }
+ 
+-- 
+1.7.12.2
+
