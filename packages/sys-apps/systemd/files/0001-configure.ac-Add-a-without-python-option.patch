@@ -1,11 +1,12 @@
-From b985a91b4c42fefee7fe7c527c73af016a1ab88a Mon Sep 17 00:00:00 2001
+From 0e758c4d47428c75b346d51571cb186c65494264 Mon Sep 17 00:00:00 2001
 From: "Wulf C. Krueger" <philantrop@exherbo.org>
 Date: Sat, 6 Oct 2012 11:37:44 +0200
-Subject: [PATCH] configure.ac: Add a --with-python option.
+Subject: [PATCH] configure.ac: Add a --without-python option.
 
-Being explicit about Python support rather than auto-detecting it and
-acting upon the result, specifying it as an option gains us more
-control about both dependencies and the resulting build.
+Being able to be explicit about Python support (in addition to the
+default of auto-detecting it) and acting upon the result, specifying
+it as an option gains us more control about both dependencies and
+the resulting build.
 
 Furthermore, relying purely on auto-detection can lead to problems for
 source-based distros. E. g. systemd being built before *both* 32-bit &
@@ -17,7 +18,7 @@ available and fail if that's not the case.
  1 file changed, 19 insertions(+), 12 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 5d7d0c2..6308270 100644
+index 5d7d0c2..1ba266c 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -90,19 +90,26 @@ fi
@@ -37,9 +38,9 @@ index 5d7d0c2..6308270 100644
 -                AC_SUBST(PYTHON_LIBS)
 +
 +AC_ARG_WITH([python],
-+        [AS_HELP_STRING([--with-python], [Build the man page index and systemd-python (default: disabled)])])
++        [AS_HELP_STRING([--without-python], [Disable building the man page index and systemd-python (default: test)])])
 +
-+AS_IF([test "x$with_python" = "xyes"], [
++AS_IF([test "x$with_python" != "xno"], [
 +        AM_PATH_PYTHON(,, [:])
 +        if test "$PYTHON" != : ; then
 +                have_python=yes
