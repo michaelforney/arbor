@@ -50,7 +50,8 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
-    # su and login are still part of sys-apps/shadow (for now).
+    # login and su are still part of sys-apps/shadow (for now).
+    # kill is still part of sys-apps/coreutils (for now).
     econf \
         --libdir=/${LIBDIR} \
         --enable-cramfs \
@@ -69,10 +70,5 @@ configure_one_multibuild() {
         $(option_enable systemd socket-activation) \
         $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
         $(option_with udev)
-}
-
-src_install() {
-    easy-multibuild_src_install
-    edo rmdir "${IMAGE}"/usr/share/man/ru/{man1/,}
 }
 
