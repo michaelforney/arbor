@@ -2,7 +2,7 @@
 # Copyright 2009 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 require bash-completion easy-multibuild
 
 SUMMARY="D-Bus GLib Bindings"
@@ -28,8 +28,9 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-configure-Fix-abstract-socket-namespace-check.patch
+    "${FILES}"/dbus-glib-0.100-sections.patch
 )
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-tests' )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--disable-tests' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( bash-completion 'doc gtk-doc' "verbose verbose-mode" )
 
 src_configure() {
