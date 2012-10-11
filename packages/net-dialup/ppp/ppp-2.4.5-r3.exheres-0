@@ -83,6 +83,8 @@ src_prepare() {
         edo sed -e "s:/etc/radiusclient:/etc/ppp/radius:g" \
                 -i pppd/plugins/radius/{*.8,*.c,*.h,etc/*}
     fi
+
+    edo rm include/linux/if_pppol2tp.h
 }
 
 src_install() {
