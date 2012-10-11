@@ -36,7 +36,11 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( readline )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threadsafe --enable-dynamic-extensions )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-dynamic-extensions
+    --enable-threadsafe
+    --disable-static
+)
 
 WORK=${WORKBASE}/${PN}-autoconf-${SCHNARF_PV}/
 
