@@ -1,5 +1,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2008 Anders Ossowicki <arkanoid@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'imagemagick-6.4.2.0.ebuild' from Gentoo Linux, which is:
+#    Copyright 1999-2008 Gentoo Foundation
 
 MY_PV="${MY_PV:-$(ever replace 3 -)}"
 
@@ -10,14 +13,151 @@ including DPX, EXR, GIF, JPEG, JPEG-2000, PDF, PhotoCD, PNG, Postscript, SVG,
 and TIFF. Use ImageMagick to translate, flip, mirror, rotate, scale, shear and
 transform images, adjust image colors, apply various special effects, or draw
 text, lines, polygons, ellipses and Bézier curves."
-HOMEPAGE="http://www.imagemagick.org/"
+HOMEPAGE="http://www.imagemagick.org"
 DOWNLOADS="ftp://ftp.imagemagick.org/pub/${PN}/${PN}-${MY_PV}.tar.xz"
 
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/script/api.php"
+
 LICENCES="ImageMagick"
+SLOT="0"
+MYOPTIONS="
+    X
+    djvu [[ description = [ Support for the DjVu file format ] ]]
+    doc
+    fftw [[ description = [ Support for the discrete fourier transformation ] ]]
+    fontconfig [[ description = [ Support for font handling utilizing fontconfig ] ]]
+    fpx [[ description = [ Support for the FlashPix image format ] ]]
+    graphviz
+    jpeg2000
+    lcms
+    lqr [[ description = [ Support for liquid rescaling (aka seam carving) image resize algorithm ] ]]
+    openexr [[ description = [ Support for the OpenEXR image file format ] ]]
+    openmp [[ description = [ Support for Open Multi-Processing ] ]]
+    pango [[ description = [ Support for laying out and rendering utilizing pango ] ]]
+    perl
+    postscript [[ description = [ Support for PostScript utilizing Ghostscript ] ]]
+    svg
+    tiff
+    truetype
+    webp [[ description = [ Support for the Webp image format ] ]]
+    wmf [[ description = [ Support for the Windows Metafile image format ] ]]
+"
 
-REMOTE_IDS="freecode:ImageMagick"
+DEPENDENCIES="
+    build:
+        X? ( x11-proto/xextproto )
+    build+run:
+        dev-libs/libxml2[>=2.4.10]
+        media-libs/jpeg[>=6b]
+        media-libs/libpng[>=1.5.0]
+        X?  (
+            x11-libs/libSM
+            x11-libs/libICE
+            x11-libs/libX11
+            x11-libs/libXext
+        )
+        djvu? ( app-text/djvu )
+        fftw? ( sci-libs/fftw[>=3.0] )
+        fontconfig? ( media-libs/fontconfig[>=2.1.0] )
+        fpx? ( media-libs/libfpx )
+        graphviz? ( media-gfx/graphviz[>=2.9.0] )
+        jpeg2000? ( media-libs/jasper )
+        lcms? ( media-libs/lcms2 )
+        lqr? ( media-libs/liblqr[>=0.1.0] )
+        openexr? ( media-libs/openexr[>=1.0.6] )
+        openmp? ( sys-devel/gcc:*[openmp?] )
+        pango? ( x11-libs/pango[>=1.28.1] )
+        perl? ( dev-lang/perl:=[>=5.8.6] )
+        postscript? ( app-text/ghostscript )
+        svg? (
+            gnome-desktop/librsvg[>=2.9.0]
+            x11-libs/cairo
+        )
+        tiff? ( media-libs/tiff[>=3.5.5] )
+        truetype? (
+            fonts/corefonts
+            fonts/urw-fonts
+            media-libs/freetype:2
+        )
+        webp? ( media-libs/libwebp )
+        wmf? ( media-libs/libwmf )
+"
 
-UPSTREAM_DOCUMENTATION="http://www.imagemagick.org/script/api.php"
+# Multiple failures, possibly caused by sandbox
+RESTRICT="test"
 
-WORK="${WORKBASE}/${PN}-${MY_PV}"
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-hdri
+    --disable-opencl
+    --disable-static
+    --with-bzlib
+    --with-dejavu-font-dir=/usr/share/fonts/X11/dejavu
+    --with-gs-font-dir=/usr/share/fonts/X11/urw-fonts
+    --with-jpeg
+    --with-lzma
+    --with-magick-plus-plus
+    --with-modules
+    --with-png
+    --with-quantum-depth=16
+    --with-threads
+    --with-xml
+    --with-zlib
+    --without-autotrace
+    --without-dps
+    --without-included-ltdl
+    --without-jbig
+    --without-lcms
+    --without-wmf
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'openmp' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'X x'
+    'djvu'
+    'fftw'
+    'fontconfig'
+    'fpx'
+    'graphviz gvc'
+    'jpeg2000 jp2'
+    'lcms lcms2'
+    'lqr'
+    'openexr'
+    'pango'
+    'perl'
+    'postscript gslib'
+    'svg rsvg'
+    'tiff'
+    'truetype freetype'
+    'truetype windows-font-dir /usr/share/fonts/X11/corefonts'
+    'webp'
+    'wmf'
+)
+DEFAULT_SRC_INSTALL_PARAMS=( DOCUMENTATION_PATH=/usr/share/doc/${PNVR}/html )
+
+WORK=${WORKBASE}/${PN}-${MY_PV}
+
+src_configure() {
+    default
+
+    if option perl; then
+        edo cd PerlMagick
+        edo perl Makefile.PL
+    fi
+}
+
+src_install() {
+    default
+
+    if option perl; then
+        local perllocal=( "${IMAGE}"/usr/${LIBDIR}/perl5/*/*/perllocal.pod )
+        edo rm "${perllocal[0]}"
+        edo rmdir "${perllocal[0]%/*}"
+        edo rmdir "${perllocal[0]%/*/*}"
+    fi
+
+    if ! option doc; then
+        edo rm -r "${IMAGE}"/usr/share/doc/${PNVR}/html
+    fi
+}
 
