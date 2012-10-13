@@ -1,0 +1,75 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2011 Elias Pipping <pipping@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require gnu [ suffix=xz ]
+
+require easy-multibuild
+
+export_exlib_phases src_prepare
+
+SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
+
+LICENCES="LGPL-3"
+SLOT="0"
+MYOPTIONS="doc multibuild_c: 32 64"
+
+DEPENDENCIES="
+    build:
+        app-arch/xz
+        sys-devel/automake:1.11[>=1.11.4]
+        doc? ( dev-doc/gtk-doc[>=1.1] )
+    build+run:
+        dev-libs/libtasn1[>=2.14][multibuild_c:*(-)?]
+        dev-libs/nettle[>=2.4][multibuild_c:*(-)?]
+        sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-guile
+    --disable-valgrind-tests
+    --with-zlib
+    --without-p11-kit
+    --disable-crywrap
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
+
+AT_M4DIR=( m4 gl/m4 src/libopts/m4/ )
+
+gnutls-3_src_prepare() {
+    # Source: Trond A Ekseth <troeks@gmail.com>
+    # Upstream: No
+    # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
+
+    # made into a sed invocation
+    edo sed \
+        -e '/sa_serv\.sin_addr\.s_addr/s:INADDR_ANY:htonl(INADDR_LOOPBACK):' \
+        -i tests/*.c
+
+    # gnutls-serv will always run on 0.0.0.0 and these tests use it
+    edo sed -e '/TESTS =/s:testdsa::' -i tests/dsa/Makefile.am
+    edo sed -e '/TESTS =/s:testcerts::' -i tests/openpgp-certs/Makefile.am
+
+    # Disable a test that fails to return
+    edo sed -i -e s/mini-loss-time// tests/Makefile.am
+
+    autotools_src_prepare
+}
+
+test_one_multibuild() {
+    esandbox allow_net "LOOPBACK@80"
+    esandbox allow_net "LOOPBACK@5559"
+    esandbox allow_net --connect "LOOPBACK@5557"
+    esandbox allow_net --connect "LOOPBACK@5559"
+    esandbox allow_net --connect "inet:127.0.0.1@80"
+
+    emake check
+
+    esandbox disallow_net "LOOPBACK@80"
+    esandbox disallow_net "LOOPBACK@5559"
+    esandbox disallow_net --connect "LOOPBACK@5557"
+    esandbox disallow_net --connect "LOOPBACK@5559"
+    esandbox disallow_net --connect "inet:127.0.0.1@80"
+}
+

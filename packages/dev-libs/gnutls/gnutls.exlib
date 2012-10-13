@@ -2,12 +2,7 @@
 # Copyright 2011 Elias Pipping <pipping@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-if ever at_least 3.0.0; then
-    require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-    require gnu [ suffix=xz ]
-else
-    require gnu [ suffix=bz2 ]
-fi
+require gnu [ suffix=bz2 ]
 
 require easy-multibuild
 
@@ -15,11 +10,7 @@ export_exlib_phases src_prepare
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
 
-if ever at_least 3.0.0; then
-    LICENCES="LGPL-3"
-else
-    LICENCES="GPL-3"
-fi
+LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS="doc multibuild_c: 32 64"
 
@@ -30,16 +21,7 @@ DEPENDENCIES="
         sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
 "
 
-if ever at_least 3.0.24; then
-    DEPENDENCIES+="
-        build:
-            app-arch/xz
-            sys-devel/automake:1.11[>=1.11.4]
-        build+run:
-            dev-libs/libtasn1[>=2.14][multibuild_c:*(-)?]
-            dev-libs/nettle[>=2.4][multibuild_c:*(-)?]
-    "
-elif ever at_least 2.12.14; then
+if ever at_least 2.12.14; then
     DEPENDENCIES+="
         build+run:
             dev-libs/libtasn1[>=2.10][multibuild_c:*(-)?]
@@ -57,15 +39,10 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --disable-valgrind-tests
     --with-zlib
     $(ever at_least 2.12.8 && echo --without-p11-kit)
-    $(ever at_least 3.0.8 && echo --disable-crywrap)
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
 AT_M4DIR=( m4 gl/m4 )
-
-if ever at_least 3.0.14; then
-    AT_M4DIR+=( src/libopts/m4/ )
-fi
 
 gnutls_src_prepare() {
     # Source: Trond A Ekseth <troeks@gmail.com>
@@ -87,11 +64,7 @@ gnutls_src_prepare() {
     edo sed -i -e s/mini-loss-time// tests/Makefile.am
 
     # FIXME: don't run eautoreconf since it breaks 2.12.14
-    if ever at_least 3.0.0; then
-        autotools_src_prepare
-    else
-        default
-    fi
+    default
 }
 
 test_one_multibuild() {
