@@ -1,7 +1,7 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require dconf
+require dconf vala [ vala_slots=[ 0.18 ] ]
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -14,7 +14,8 @@ MYOPTIONS="
 DEPENDENCIES="
     build:
         dev-libs/libxslt
-        dev-lang/vala:*[>=0.17.0]
+        app-text/docbook-xml-dtd:4.2
+        app-text/docbook-xsl-stylesheets [[ note = [ required for manapages/docbook.xsl ] ]]
         dev-util/pkg-config[>=0.21]
         dev-util/intltool[>=0.50.0]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
@@ -25,6 +26,5 @@ DEPENDENCIES="
                   dev-libs/libxml2:2.0 )
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( "VALAC=$(type -P valac-0.18)" )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'editor' 'gtk-doc' )
 

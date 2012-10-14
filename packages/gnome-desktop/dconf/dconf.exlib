@@ -44,5 +44,10 @@ EOF
         dobashcompletion "${IMAGE}"/dconf-bash-completion.sh
         edo rm "${IMAGE}"/dconf-bash-completion.sh
     fi
+
+    if ever at_least 0.14 ; then
+        dobashcompletion "${WORK}/bin/completion/dconf"
+        edo rm "${IMAGE}/dconf"
+    fi
 }
 
