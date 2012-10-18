@@ -22,15 +22,17 @@ configure_one_multibuild() {
         --without-ada
         --without-hashed-db
         $(option_with gpm)
+        --libdir=/${LIBDIR}
+        --enable-pc-files
     )
 
     edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
-    econf --libdir=/${LIBDIR} "${myconf[@]}"
+    econf "${myconf[@]}"
 
     edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
-    econf --libdir=/${LIBDIR} --includedir=/usr/include/ncursesw --enable-widec "${myconf[@]}"
+    econf --includedir=/usr/include/ncursesw --enable-widec "${myconf[@]}"
 }
 
 compile_one_multibuild() {
@@ -43,9 +45,9 @@ compile_one_multibuild() {
 
 install_one_multibuild() {
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
-    default
+    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${LIBDIR}/pkgconfig install
 
     edo cd "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/wide"
-    default
+    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${LIBDIR}/pkgconfig install
 }
 
