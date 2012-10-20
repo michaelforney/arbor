@@ -1,0 +1,132 @@
+From 3910cc8df7333ed13bc5871f47c414fa2e6cc842 Mon Sep 17 00:00:00 2001
+From: jason <jason@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Wed, 5 Sep 2012 04:16:58 +0000
+Subject: [PATCH 1/1] 	PR c++/54420
+ 	* cp-tree.h (LAMBDANAME_P): Remove.
+ 	(LAMBDA_TYPE_P): Check CLASSTYPE_LAMBDA_EXPR instead.
+ 	* cp-lang.c (cxx_dwarf_name): Likewise.
+ 	* error.c (dump_aggr_type): Likewise.
+ 	* semantics.c (begin_lambda_type): Set CLASSTYPE_LAMBDA_EXPR sooner.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@190961 138bc75d-0d04-0410-961f-82ee72b054a4
+---
+ gcc/cp/ChangeLog                                   |    7 +++++++
+ gcc/cp/cp-lang.c                                   |    2 +-
+ gcc/cp/cp-tree.h                                   |    6 +-----
+ gcc/cp/error.c                                     |    2 +-
+ gcc/cp/name-lookup.c                               |    7 +++----
+ gcc/cp/semantics.c                                 |    8 ++++----
+ gcc/testsuite/ChangeLog                            |    3 +++
+ gcc/testsuite/g++.dg/cpp0x/lambda/lambda-intname.C |    6 ++++++
+ 8 files changed, 26 insertions(+), 15 deletions(-)
+ create mode 100644 gcc/testsuite/g++.dg/cpp0x/lambda/lambda-intname.C
+
+diff --git a/gcc/cp/cp-lang.c b/gcc/cp/cp-lang.c
+index da7f1e1..0e90ab2 100644
+--- a/gcc/cp/cp-lang.c
++++ b/gcc/cp/cp-lang.c
+@@ -115,7 +115,7 @@ cxx_dwarf_name (tree t, int verbosity)
+   gcc_assert (DECL_P (t));
+ 
+   if (DECL_NAME (t)
+-      && (ANON_AGGRNAME_P (DECL_NAME (t)) || LAMBDANAME_P (DECL_NAME (t))))
++      && (ANON_AGGRNAME_P (DECL_NAME (t)) || LAMBDA_TYPE_P (t)))
+     return NULL;
+   if (verbosity >= 2)
+     return decl_as_dwarf_string (t,
+diff --git a/gcc/cp/cp-tree.h b/gcc/cp/cp-tree.h
+index bd57b92..fa3d7b0 100644
+--- a/gcc/cp/cp-tree.h
++++ b/gcc/cp/cp-tree.h
+@@ -621,7 +621,7 @@ struct GTY (()) tree_trait_expr {
+ 
+ /* Based off of TYPE_ANONYMOUS_P.  */
+ #define LAMBDA_TYPE_P(NODE) \
+-  (CLASS_TYPE_P (NODE) && LAMBDANAME_P (TYPE_LINKAGE_IDENTIFIER (NODE)))
++  (CLASS_TYPE_P (NODE) && CLASSTYPE_LAMBDA_EXPR (NODE))
+ 
+ /* Test if FUNCTION_DECL is a lambda function.  */
+ #define LAMBDA_FUNCTION_P(FNDECL) \
+@@ -4329,10 +4329,6 @@ extern GTY(()) VEC(tree,gc) *local_classes;
+ 
+ #define LAMBDANAME_PREFIX "__lambda"
+ #define LAMBDANAME_FORMAT LAMBDANAME_PREFIX "%d"
+-#define LAMBDANAME_P(ID_NODE) \
+-  (!strncmp (IDENTIFIER_POINTER (ID_NODE), \
+-             LAMBDANAME_PREFIX, \
+-	     sizeof (LAMBDANAME_PREFIX) - 1))
+ 
+ #define UDLIT_OP_ANSI_PREFIX "operator\"\" "
+ #define UDLIT_OP_ANSI_FORMAT UDLIT_OP_ANSI_PREFIX "%s"
+diff --git a/gcc/cp/error.c b/gcc/cp/error.c
+index 7d60fe0..80a145d 100644
+--- a/gcc/cp/error.c
++++ b/gcc/cp/error.c
+@@ -657,7 +657,7 @@ dump_aggr_type (tree t, int flags)
+       else
+ 	pp_printf (pp_base (cxx_pp), M_("<anonymous %s>"), variety);
+     }
+-  else if (LAMBDANAME_P (name))
++  else if (LAMBDA_TYPE_P (name))
+     {
+       /* A lambda's "type" is essentially its signature.  */
+       pp_string (cxx_pp, M_("<lambda"));
+diff --git a/gcc/cp/name-lookup.c b/gcc/cp/name-lookup.c
+index 22bc5e7..0211d4f 100644
+--- a/gcc/cp/name-lookup.c
++++ b/gcc/cp/name-lookup.c
+@@ -1998,10 +1998,9 @@ make_anon_name (void)
+ }
+ 
+ /* This code is practically identical to that for creating
+-   anonymous names, but is just used for lambdas instead.  This is necessary
+-   because anonymous names are recognized and cannot be passed to template
+-   functions.  */
+-/* FIXME is this still necessary? */
++   anonymous names, but is just used for lambdas instead.  This isn't really
++   necessary, but it's convenient to avoid treating lambdas like other
++   anonymous types.  */
+ 
+ static GTY(()) int lambda_cnt = 0;
+ 
+diff --git a/gcc/cp/semantics.c b/gcc/cp/semantics.c
+index 183a78a..f64246d 100644
+--- a/gcc/cp/semantics.c
++++ b/gcc/cp/semantics.c
+@@ -8746,6 +8746,10 @@ begin_lambda_type (tree lambda)
+   /* Designate it as a struct so that we can use aggregate initialization.  */
+   CLASSTYPE_DECLARED_CLASS (type) = false;
+ 
++  /* Cross-reference the expression and the type.  */
++  LAMBDA_EXPR_CLOSURE (lambda) = type;
++  CLASSTYPE_LAMBDA_EXPR (type) = lambda;
++
+   /* Clear base types.  */
+   xref_basetypes (type, /*bases=*/NULL_TREE);
+ 
+@@ -8754,10 +8758,6 @@ begin_lambda_type (tree lambda)
+   if (type == error_mark_node)
+     return error_mark_node;
+ 
+-  /* Cross-reference the expression and the type.  */
+-  LAMBDA_EXPR_CLOSURE (lambda) = type;
+-  CLASSTYPE_LAMBDA_EXPR (type) = lambda;
+-
+   return type;
+ }
+ 
+diff --git a/gcc/testsuite/g++.dg/cpp0x/lambda/lambda-intname.C b/gcc/testsuite/g++.dg/cpp0x/lambda/lambda-intname.C
+new file mode 100644
+index 0000000..4c268c6
+--- /dev/null
++++ b/gcc/testsuite/g++.dg/cpp0x/lambda/lambda-intname.C
+@@ -0,0 +1,6 @@
++// PR c++/54420
++
++class __lambda
++{
++  virtual bool is_sub ();
++};
+-- 
+1.7.3.4
+
