@@ -34,15 +34,6 @@ DEFAULT_SRC_INSTALL_PARAMS=(
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
 
-src_prepare() {
-    default
-
-    # Bug in 2011m. Fixed for the next version.
-    if [[ ${PV} == 2011m ]]; then
-        edo sed -i -e "/Europe\/Chisinau/s:$:\tmost locations:" zone.tab
-    fi
-}
-
 src_test() {
     # Don't validate webpages as that requires dependencies on open{jade,sp}
     edo sed -i -e '/^check:/ s/ check_web//' Makefile
