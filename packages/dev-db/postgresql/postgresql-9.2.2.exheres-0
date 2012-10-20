@@ -1,0 +1,13 @@
+# Copyright 2008, 2009, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require postgresql
+
+PLATFORMS="~amd64 ~x86"
+
+src_prepare() {
+    default
+    # move CREATE TABLESPACE test (which is meant to fail) to ${WORK}
+    edo sed -e "s:/no/such/location:${WORK}&:" -i src/test/regress/{input,output}/tablespace.source
+}
+
