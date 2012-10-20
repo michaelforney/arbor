@@ -1,0 +1,44 @@
+From 544887a5645ccf4d1d8164f4a91c633e0e4ddae7 Mon Sep 17 00:00:00 2001
+From: "Wulf C. Krueger" <philantrop@exherbo.org>
+Date: Sat, 20 Oct 2012 14:15:37 +0200
+Subject: [PATCH] systemd-vconsole-setup is in
+ /usr/${LIBDIR}/systemd/systemd-vconsole-setup
+
+Upstream: No, wants it as-is.
+
+---
+ modules.d/10i18n/console_init.sh | 4 ++--
+ modules.d/10i18n/module-setup.sh | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/modules.d/10i18n/console_init.sh b/modules.d/10i18n/console_init.sh
+index 8817f95..2ed75fb 100755
+--- a/modules.d/10i18n/console_init.sh
++++ b/modules.d/10i18n/console_init.sh
+@@ -4,8 +4,8 @@
+ 
+ [ -n "$DRACUT_SYSTEMD" ] && exit 0
+ 
+-if [ -x /lib/systemd/systemd-vconsole-setup ]; then
+-    /lib/systemd/systemd-vconsole-setup "$@"
++if [ -x /usr/lib/systemd/systemd-vconsole-setup ]; then
++    /usr/lib/systemd/systemd-vconsole-setup "$@"
+ fi
+ 
+ [ -e /etc/vconsole.conf ] && . /etc/vconsole.conf
+diff --git a/modules.d/10i18n/module-setup.sh b/modules.d/10i18n/module-setup.sh
+index 1ed1db6..7b6c1ed 100755
+--- a/modules.d/10i18n/module-setup.sh
++++ b/modules.d/10i18n/module-setup.sh
+@@ -12,7 +12,7 @@ depends() {
+ }
+ 
+ install() {
+-    [ -x /lib/systemd/systemd-vconsole-setup ] && dracut_install /lib/systemd/systemd-vconsole-setup
++    [ -x /usr/lib/systemd/systemd-vconsole-setup ] && dracut_install /usr/lib/systemd/systemd-vconsole-setup
+     KBDSUBDIRS=consolefonts,consoletrans,keymaps,unimaps
+     DEFAULT_FONT=LatArCyrHeb-16
+     I18N_CONF="/etc/locale.conf"
+-- 
+1.7.12.3
+
