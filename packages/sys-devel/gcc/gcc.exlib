@@ -34,7 +34,22 @@ DEPENDENCIES="
     test-expensive:
         dev-util/dejagnu
         sys-devel/autogen
+        dev-libs/mpc[>=0.8.1]
+        dev-libs/mpfr:=[>=2.3]
 "
+
+# LTO (Link-Time Optimization)
+DEPENDENCIES+="
+    build+run:
+        sys-devel/binutils[>=2.20.1] [[ note = [ minimal version of binutils for LTO ] ]]
+"
+# GCC 4.6+ no longer depends on libelf for LTO
+if ! ever at_least 4.6 ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-util/elfutils[>=0.143] [[ note = [ Enable link-time optimisation ] ]]
+    "
+fi
 
 MYOPTIONS+=" java"
 if [[ ${SLOT} == 4.4 ]]; then
@@ -52,10 +67,7 @@ DEPENDENCIES+="
         doc? ( app-doc/doxygen[>=1.5.1] )
         java? ( app-arch/unzip
                 app-arch/zip )
-    build+run:
-        dev-libs/libelf [[ note = [ Enable link-time optimisation ] ]]
-        dev-libs/mpc[>=0.8.1]
-        dev-libs/mpfr:=[>=2.3]"
+"
 
 # Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
 # >=4.4
@@ -128,7 +140,11 @@ gcc_src_configure() {
         --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
         --enable-nls \
         --program-suffix=-${SLOT} \
-        --with-libelf \
+        $(if ever at_least 4.6 ; then
+            echo --enable-lto
+          else
+            echo --enable-lto --with-libelf
+          fi) \
         --with-pkgversion="Exherbo ${PNVR}" \
         --with-system-zlib \
         $(ever at_least 4.6 && option_enable graphite && \
