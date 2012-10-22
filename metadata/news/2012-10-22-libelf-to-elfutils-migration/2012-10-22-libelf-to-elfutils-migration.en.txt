@@ -1,0 +1,26 @@
+Title: libelf to elfutils migration
+Author: Saleem Abdulrasool <compnerd@compnerd.org>
+Content-Type: text/plain
+Posted: 2012-10-22
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: dev-libs/libelf
+
+GCC dependencies have been updated to depend on elfutils instead of libelf for
+GCC 4.5, and to have no dependency on either with GCC 4.6+.  elfutils and libelf
+are mutually incompatible (and thus have blockers on each other), which
+complicates the migration process.
+
+If Link Time Optimization (LTO) is enabled in your installation (-flto present
+in CFLAGS or CXXFLAGS), it should temporarily be disabled to permit the
+migration.  You may re-enable LTO once GCC has been rebuilt after the removal of
+libelf.
+
+Once LTO is disabled, it is safe to remove libelf (cave uninstall -x libelf),
+and then rebuild GCC (which will build elfutils if necessary).  Because other
+applications may be dependent on libelf, it is recommended that you rebuild
+those packages once GCC has been rebuilt (cave fix-linkage -x).
+
+Should you face any other problems, please let us know on IRC or on the mailing
+list (exherbo-dev@lists.exherbo.org).
+
