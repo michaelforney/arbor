@@ -14,7 +14,7 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.11]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
-        dev-libs/libelf[>=0.8.12][multibuild_c:*(-)?]
+        dev-util/elfutils[>=0.142][multibuild_c:*(-)?]
         dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
     test:
         dev-python/dbus-python
@@ -33,8 +33,6 @@ DEPENDENCIES="
 
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Fix-libelf-includes.patch )
 
 # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
 # Its usage is recommended by upstream, see also

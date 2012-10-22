@@ -19,7 +19,7 @@ DEPENDENCIES="
                      app-text/docbook-xsl-stylesheets
                      dev-libs/libxslt )
     build+run:
-        dev-libs/libelf[>=0.8.12][multibuild_c:*(-)?]
+        dev-util/elfutils[>=0.142][multibuild_c:*(-)?]
         dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
     test:
         dev-python/dbus-python
@@ -38,8 +38,6 @@ DEPENDENCIES="
 
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-Fix-libelf-includes.patch )
 
 src_prepare() {
     glib_src_prepare
