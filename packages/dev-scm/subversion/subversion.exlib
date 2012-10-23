@@ -71,13 +71,11 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/${PN}-perl-vendor.patch"
     "${FILES}/${PN}-perl-ccopts.patch"
-    "${FILES}"/${PN}-mod_dontdothat.patch
 )
 
 subversion_src_prepare() {
     default
     eautoconf # Doesn't use automake
-    edo ./gen-make.py
 }
 
 subversion_src_configure() {
