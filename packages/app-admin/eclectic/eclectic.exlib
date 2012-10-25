@@ -26,9 +26,17 @@ DEPENDENCIES="
     build+run:
         sys-apps/sed
         app-shells/bash
+"
+
+if ever at_least scm ; then
+MYOPTIONS+=" vim-syntax"
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( vim-syntax )
+else
+DEPENDENCIES+="
     suggestion:
         app-vim/eselect-syntax
 "
+fi
 
 BUGS_TO="eclectic@exherbo.org"
 
