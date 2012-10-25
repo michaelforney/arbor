@@ -1,6 +1,6 @@
-From e59774517f93352a2a801757a1185a8c9ecc608e Mon Sep 17 00:00:00 2001
-From: Ingmar Vanhassel <ingmar@exherbo.org>
-Date: Thu, 6 Jan 2011 16:25:58 +0000
+From 7f6d52ac7bdf91d9e1d0750ae3afd0d128c8ac94 Mon Sep 17 00:00:00 2001
+From: Timo Gurr <tgurr@exherbo.org>
+Date: Thu, 25 Oct 2012 02:12:29 +0200
 Subject: [PATCH] Disable tests that fail with sydbox
 
 Edit: Daniel Mierswa <impulze@impulze.org>
@@ -13,15 +13,15 @@ All but two tests that originally failed still do (the others are
 skipped automatically if strace does not work). Made the patch apply
 again
 ---
- tests/install/basic-1     |    2 ++
- tests/mkdir/p-3           |    2 ++
- tests/tail-2/inotify-race |    2 ++
- 3 files changed, 6 insertions(+), 0 deletions(-)
+ tests/install/basic-1.sh     | 2 ++
+ tests/mkdir/p-3.sh           | 2 ++
+ tests/tail-2/inotify-race.sh | 2 ++
+ 3 files changed, 6 insertions(+)
 
-diff --git a/tests/install/basic-1 b/tests/install/basic-1
-index 688e6be..914491c 100755
---- a/tests/install/basic-1
-+++ b/tests/install/basic-1
+diff --git a/tests/install/basic-1.sh b/tests/install/basic-1.sh
+index 08055f5..c6f9805 100755
+--- a/tests/install/basic-1.sh
++++ b/tests/install/basic-1.sh
 @@ -92,6 +92,8 @@ test -d xx/rel && fail=1
  # inaccessible parent.  coreutils 5.97 fails this test.
  # Perform this test only if "." is on a local file system.
@@ -31,10 +31,10 @@ index 688e6be..914491c 100755
  if is_local_dir_ .; then
    mkdir -p sub1/d || fail=1
    (cd sub1/d && chmod a-r . && chmod a-rx .. &&
-diff --git a/tests/mkdir/p-3 b/tests/mkdir/p-3
-index 0adfbea..2a963a3 100755
---- a/tests/mkdir/p-3
-+++ b/tests/mkdir/p-3
+diff --git a/tests/mkdir/p-3.sh b/tests/mkdir/p-3.sh
+index a80fa37..a50757b 100755
+--- a/tests/mkdir/p-3.sh
++++ b/tests/mkdir/p-3.sh
 @@ -38,6 +38,8 @@ test -d "$p/b/b" && test -d "$p/z" || fail=1
  # whose parent is inaccessible.  coreutils 5.97 fails this test.
  # Perform this test only if "." is on a local file system.
@@ -44,12 +44,12 @@ index 0adfbea..2a963a3 100755
  if is_local_dir_ .; then
    (cd no-acce3s/d && chmod a-r . && chmod a-rx .. &&
        mkdir -p a/b "$p/b/c" d/e && test -d a/b && test -d d/e) || fail=1
-diff --git a/tests/tail-2/inotify-race b/tests/tail-2/inotify-race
-index 7e23100..ce8767c 100755
---- a/tests/tail-2/inotify-race
-+++ b/tests/tail-2/inotify-race
+diff --git a/tests/tail-2/inotify-race.sh b/tests/tail-2/inotify-race.sh
+index 7476283..3d94358 100755
+--- a/tests/tail-2/inotify-race.sh
++++ b/tests/tail-2/inotify-race.sh
 @@ -23,6 +23,8 @@
- . "${srcdir=.}/init.sh"; path_prepend_ ../src
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
  print_ver_ tail
  
 +skip_ 'This test (using gdb) hangs under sydbox'
@@ -58,5 +58,5 @@ index 7e23100..ce8767c 100755
  # Also gdb has a bug in Debian's gdb-6.8-3 at least that causes it to not
  # cleanup and exit correctly when it receives a SIGTERM, thus hanging the test.
 -- 
-1.7.3.5
+1.7.12.4
 
