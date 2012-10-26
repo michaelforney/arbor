@@ -43,6 +43,7 @@ MYOPTIONS="
     python [[ description = [ Build the man page index and systemd-python (bindings) ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
+    xattr
     multibuild_c: 32 64
     platform: ia64
 "
@@ -79,8 +80,9 @@ DEPENDENCIES="
         cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][multibuild_c:*(-)?] )
         gcrypt? ( dev-libs/libgcrypt[multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
-        journal-gateway? ( net-libs/libmicrohttpd[multibuild_c:*(-)?] )
+        journal-gateway? ( net-libs/libmicrohttpd[>=0.9.5][multibuild_c:*(-)?] )
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
+        xattr? ( sys-apps/attr[multibuild_c:*(-)?] )
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
@@ -151,6 +153,9 @@ systemd_src_prepare() {
         edo sed -i -e "/man page index/ a AC_DEFUN([AM_PATH_LIBGCRYPT],/bin/false)" configure.ac
     fi
 
+    # Paludis really hates the progress bar so let's disable it.
+    edo sed -i -e "/journal_file_verify/s:true:false:" src/journal/test-journal-verify.c
+
     edo intltoolize --force --automake
     autotools_src_prepare
 }
@@ -200,6 +205,7 @@ configure_one_multibuild() {
         $(option_enable gtk-doc)
         $(option_enable journal-gateway microhttpd)
         $(option_enable tcpd tcpwrap)
+        $(option_enable xattr)
         $(option_with python)
     )
 
@@ -214,7 +220,9 @@ test_one_multibuild() {
     # Enabling those tests can (and most likely will) mess up your running system
     # completely and require you to reboot. You've been warned.
     if [[ -f /etc/machine-id ]]; then
+        esandbox allow /var/log/journal
         default
+        esandbox disallow /var/log/journal
     else
         ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
         ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
