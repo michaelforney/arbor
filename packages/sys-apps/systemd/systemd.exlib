@@ -220,9 +220,7 @@ test_one_multibuild() {
     # Enabling those tests can (and most likely will) mess up your running system
     # completely and require you to reboot. You've been warned.
     if [[ -f /etc/machine-id ]]; then
-        esandbox allow /var/log/journal
         default
-        esandbox disallow /var/log/journal
     else
         ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
         ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
