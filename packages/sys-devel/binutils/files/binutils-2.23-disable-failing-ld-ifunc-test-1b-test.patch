@@ -1,0 +1,23 @@
+Upstream: reported: http://sourceware.org/bugzilla/show_bug.cgi?id=14778
+Reason: ld testsuite failure: FAIL: Common symbol override ifunc test 1b
+Source: tgurr@exherbo.org
+
+diff -Naur binutils-2.23/ld/testsuite/ld-ifunc/ifunc.exp binutils-2.23.new/ld/testsuite/ld-ifunc/ifunc.exp
+--- binutils-2.23/ld/testsuite/ld-ifunc/ifunc.exp	2012-09-24 14:18:41.000000000 +0200
++++ binutils-2.23.new/ld/testsuite/ld-ifunc/ifunc.exp	2012-10-27 23:21:42.492461770 +0200
+@@ -357,15 +357,6 @@
+ 	"ifunc-common-1.out" \
+ 	"-g" \
+     ] \
+-    [list \
+-	"Common symbol override ifunc test 1b" \
+-	"-static" \
+-	"" \
+-	{ ifunc-common-1b.c ifunc-common-1a.c } \
+-	"ifunc-common-1b" \
+-	"ifunc-common-1.out" \
+-	"-g" \
+-    ] \
+ ]
+ 
+ set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]

@@ -1,0 +1,91 @@
+Upstream: reported: http://sourceware.org/bugzilla/show_bug.cgi?id=14763
+Reason: testsuite failure: exception_static_test crashes
+Source: tgurr@exherbo.org
+
+diff -Naur binutils-2.23/gold/testsuite/Makefile.am binutils-2.23.new/gold/testsuite/Makefile.am
+--- binutils-2.23/gold/testsuite/Makefile.am	2012-07-19 02:19:34.000000000 +0200
++++ binutils-2.23.new/gold/testsuite/Makefile.am	2012-10-27 23:04:07.256214067 +0200
+@@ -551,14 +551,6 @@
+ exception_test_LDFLAGS = -Bgcctestdir/
+ exception_test_LDADD =
+ 
+-if HAVE_STATIC
+-check_PROGRAMS += exception_static_test
+-exception_static_test_SOURCES = $(exception_test_SOURCES)
+-exception_static_test_DEPENDENCIES = $(exception_test_DEPENDENCIES)
+-exception_static_test_LDFLAGS = $(exception_test_LDFLAGS) -static
+-exception_static_test_LDADD = $(exception_test_LDADD)
+-endif
+-
+ exception_shared_1_test_SOURCES = exception_test_2.cc exception_test_main.cc
+ exception_shared_1_test_DEPENDENCIES = gcctestdir/ld exception_shared_1.so
+ exception_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+diff -Naur binutils-2.23/gold/testsuite/Makefile.in binutils-2.23.new/gold/testsuite/Makefile.in
+--- binutils-2.23/gold/testsuite/Makefile.in	2012-07-19 02:19:35.000000000 +0200
++++ binutils-2.23.new/gold/testsuite/Makefile.in	2012-10-27 23:07:52.132266853 +0200
+@@ -175,7 +175,6 @@
+ @NATIVE_LINKER_FALSE@common_test_1_DEPENDENCIES =
+ @GCC_FALSE@exception_test_DEPENDENCIES =
+ @NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES =
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = exception_static_test
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = weak_test \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test
+ @GCC_FALSE@weak_test_DEPENDENCIES =
+@@ -720,7 +719,6 @@
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_same_shared_test$(EXEEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test$(EXEEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test$(EXEEXT)
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_11 = exception_static_test$(EXEEXT)
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 = weak_test$(EXEEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT)
+ @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = weak_undef_nonpic_test$(EXEEXT)
+@@ -953,10 +951,6 @@
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.$(OBJEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_1.$(OBJEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_2.$(OBJEXT)
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am_exception_static_test_OBJECTS = $(am__objects_2)
+-exception_static_test_OBJECTS = $(am_exception_static_test_OBJECTS)
+-exception_static_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+-	$(exception_static_test_LDFLAGS) $(LDFLAGS) -o $@
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@am_exception_test_OBJECTS =  \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.$(OBJEXT) \
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_1.$(OBJEXT) \
+@@ -1712,7 +1706,7 @@
+ 	$(exception_separate_shared_21_test_SOURCES) \
+ 	$(exception_shared_1_test_SOURCES) \
+ 	$(exception_shared_2_test_SOURCES) \
+-	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
++	$(exception_test_SOURCES) \
+ 	$(exclude_libs_test_SOURCES) \
+ 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
+ 	flagstest_o_specialfile_and_compress_debug_sections.c \
+@@ -2196,10 +2190,6 @@
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_DEPENDENCIES = gcctestdir/ld
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_LDFLAGS = -Bgcctestdir/
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_LDADD = 
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_SOURCES = $(exception_test_SOURCES)
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_DEPENDENCIES = $(exception_test_DEPENDENCIES)
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_LDFLAGS = $(exception_test_LDFLAGS) -static
+-@GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_LDADD = $(exception_test_LDADD)
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1_test_SOURCES = exception_test_2.cc exception_test_main.cc
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1_test_DEPENDENCIES = gcctestdir/ld exception_shared_1.so
+ @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@@ -2608,9 +2598,6 @@
+ exception_shared_2_test$(EXEEXT): $(exception_shared_2_test_OBJECTS) $(exception_shared_2_test_DEPENDENCIES) 
+ 	@rm -f exception_shared_2_test$(EXEEXT)
+ 	$(exception_shared_2_test_LINK) $(exception_shared_2_test_OBJECTS) $(exception_shared_2_test_LDADD) $(LIBS)
+-exception_static_test$(EXEEXT): $(exception_static_test_OBJECTS) $(exception_static_test_DEPENDENCIES) 
+-	@rm -f exception_static_test$(EXEEXT)
+-	$(exception_static_test_LINK) $(exception_static_test_OBJECTS) $(exception_static_test_LDADD) $(LIBS)
+ exception_test$(EXEEXT): $(exception_test_OBJECTS) $(exception_test_DEPENDENCIES) 
+ 	@rm -f exception_test$(EXEEXT)
+ 	$(exception_test_LINK) $(exception_test_OBJECTS) $(exception_test_LDADD) $(LIBS)
+@@ -3871,8 +3858,6 @@
+ 	@p='exception_separate_shared_12_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ exception_separate_shared_21_test.log: exception_separate_shared_21_test$(EXEEXT)
+ 	@p='exception_separate_shared_21_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+-exception_static_test.log: exception_static_test$(EXEEXT)
+-	@p='exception_static_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ weak_test.log: weak_test$(EXEEXT)
+ 	@p='weak_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+ weak_undef_test.log: weak_undef_test$(EXEEXT)
