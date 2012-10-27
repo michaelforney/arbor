@@ -1,0 +1,15 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: http://www.mail-archive.com/dev%40apr.apache.org/msg24436.html
+Reason: Pass --tag=CC to libtool
+
+--- a/test/Makefile.in
++++ b/test/Makefile.in
+@@ -34,7 +34,7 @@
+ 
+ # link programs using -no-install to get real executables not
+ # libtool wrapper scripts which link an executable when first run.
+-LINK_PROG = $(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LT_LDFLAGS) \
++LINK_PROG = $(LIBTOOL) $(LTFLAGS) --tag=CC --mode=link $(COMPILE) $(LT_LDFLAGS) \
+ 	    $(APRUTIL_LDFLAGS) -o $@
+ 
+ # STDTEST_PORTABLE;
