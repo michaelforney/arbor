@@ -24,7 +24,10 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( -p2 "${FILES}"/${PN}-2.8.6-gold.patch )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-example )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-example
+    --disable-static
+)
 
 src_install() {
     default
