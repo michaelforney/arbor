@@ -1,0 +1,29 @@
+From c30f66ff0c908022252f77283b6dc40fc057f512 Mon Sep 17 00:00:00 2001
+From: Saleem Abdulrasool <compnerd@compnerd.org>
+Date: Wed, 31 Oct 2012 10:43:04 -0700
+Subject: [PATCH] build: disable TLS tests unless GNUTLS is enabled
+
+All of the TLS tests hard-depend on GNUTLS.  If glib-networking is built without
+GNUTLS, then simply disable the TLS tests.
+---
+ Makefile.am | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 0a54e1d..4cd21b0 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -21,9 +21,8 @@ endif
+ 
+ if HAVE_GNUTLS
+ SUBDIRS += tls/gnutls
+-endif
+-
+ SUBDIRS += tls/tests
++endif
+ 
+ install-exec-hook:
+ 	if test -n "$(GIO_QUERYMODULES)" -a -z "$(DESTDIR)"; then \
+-- 
+1.7.12.3
+
