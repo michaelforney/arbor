@@ -40,7 +40,6 @@ DEPENDENCIES="
         )
         webdav? ( dev-libs/expat )
     run:
-        dev-perl/Error              [[ description = [ Used in Git.pm ] ]]
         xinetd? ( sys-apps/xinetd ) [[ description = [ Enables support for the xinetd super-server ] ]]
     suggestion:
         app-crypt/gnupg             [[ description = [ Needed for signing and verifying tags ] ]]
@@ -48,6 +47,14 @@ DEPENDENCIES="
         dev-perl/DBI                [[ description = [ Dependency for 'git cvsserver' ] ]]
         dev-lang/python:*           [[ description = [ Dependency for 'git p4' ] ]]
         dev-scm/subversion[perl]    [[ description = [ Dependency for 'git svn' ] group-name = [ git-svn ] ]]
+        dev-perl/Error              [[ description = [ Dependency for 'git send-email' and other perl-based git tools ]
+                                       group-name = [ git-send-email ]
+                                       note = [ Error is barely alive and is not in ::arbor, thus, ineligible for stages ]
+                                    ]]
+        dev-perl/Error              [[ description = [ Dependency for 'git svn' and other perl-based git tools ]
+                                       group-name = [ git-svn ]
+                                       note = [ Error is barely alive and is not in ::arbor, thus, ineligible for stages ]
+                                    ]]
         dev-perl/libwww-perl        [[ description = [ Dependency for 'git svn' ] group-name = [ git-svn ] ]]
         dev-perl/TermReadKey        [[ description = [ Dependency for 'git add --interactive, git svn' ] group-name = [ git-svn ] ]]
         dev-perl/Authen-SASL        [[ description = [ Dependency for 'git send-email' ] group-name = [ git-send-email ] ]]
