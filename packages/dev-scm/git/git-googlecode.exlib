@@ -116,7 +116,7 @@ git-googlecode_src_test() {
     esandbox allow_net "unix:${WORK%/}/t/trash directory.t0301-credential-cache/.git-credential-cache/socket";
     # default_src_test executes the wrong target, "make check", first
     # disable SVN tests because they are not compatible with subversion 1.7 yet
-    NO_SVN_TESTS=1 myemake test
+    ever at_least 1.8 && myemake test || NO_SVN_TESTS=1 myemake test
     esandbox disallow_net "unix:${WORK%/}/t/trash directory.t0301-credential-cache/.git-credential-cache/socket";
 }
 
