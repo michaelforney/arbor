@@ -1,0 +1,39 @@
+# Copyright 2012 Paul Seidler
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=pkgconf ] alternatives
+
+SUMMARY="Provides compiler and linker configuration for development frameworks"
+DESCRIPTION="
+pkgconf is a program which helps to configure compiler and linker flags for development frameworks.
+It is similar to pkg-config, but was written from scratch in the summer of 2011 to replace
+pkg-config.
+"
+DOWNLOADS="http://tortois.es/~nenolod/distfiles/${PNV}.tar.bz2"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        !dev-util/pkg-config[<=0.27.1] [[
+            description = [ aclocal file will collide ]
+            resolution = upgrade-blocked-before
+        ]]
+"
+
+src_install() {
+    local alternatives=( pkg-config ${PN} 0 )
+
+    default
+
+    alternatives+=(
+        /usr/bin/pkg-config pkgconf
+        /usr/share/aclocal/pkg.m4 pkg_${PN}.m4
+    )
+
+    alternatives_for "${alternatives[@]}"
+}
+
