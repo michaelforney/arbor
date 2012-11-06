@@ -3,11 +3,12 @@
 # Based in part upon 'gpm-1.20.5.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require systemd-service easy-multibuild [ work=${PNV} ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+require easy-multibuild [ multiunpack=true ] systemd-service
 
 SUMMARY="Console-based mouse driver"
 HOMEPAGE="http://www.nico.schottelius.org/software/${PN}"
-DOWNLOADS="${HOMEPAGE}/archives/${PNV}.tar.lzma"
+DOWNLOADS="${HOMEPAGE}/archives/${PNV}.tar.bz2"
 
 LICENCES="GPL-2"
 SLOT="0"
@@ -16,38 +17,33 @@ MYOPTIONS="baselayout multibuild_c: 32 64"
 
 DEPENDENCIES="
     build:
-        app-arch/xz
         sys-devel/bison
     build+run:
         sys-libs/ncurses[multibuild_c:*(-)?]
 "
 
-WORK="${WORKBASE}"
-
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-Makefile.patch
-    -p1 "${FILES}"/${PNV}-foreground.patch
+    "${FILES}"/${PN}-1.20.6-Makefile.patch
+    "${FILES}"/01373f6fd5dd274116c8ec693245677dbf5390e6.patch
 )
 DEFAULT_SRC_INSTALL_PARAMS=( EMACS=: ELISP= )
 
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
+prepare_one_multibuild() {
+    # fix ABI values
+    edo sed -e '/^abi_lev=/s:=.*:=1:' \
+            -e '/^abi_age=/s:=.*:=20:' \
+            -i configure.ac.footer
+    edo ./autogen.sh
 
-src_unpack() {
-    easy-multibuild_run_phase
+    autotools_src_prepare
 }
-
-src_prepare() {
-    easy-multibuild_run_phase
-}
-
-configure_prepare_one_multibuild() { :; }
 
 configure_one_multibuild() {
-    econf '--hates=libdir' \
-        "--libdir=/${LIBDIR}" \
-        "--sysconfdir=/etc/${PN}"
+    econf \
+        --disable-static \
+        --hates=libdir \
+        --libdir=/usr/${LIBDIR} \
+        --sysconfdir=/etc/${PN}
 }
 
 compile_one_multibuild() {
@@ -59,7 +55,7 @@ compile_one_multibuild() {
 install_one_multibuild() {
     default
 
-    dosym /${LIBDIR}/libgpm.so.2 /${LIBDIR}/libgpm.so
+    dosym /usr/${LIBDIR}/libgpm.so.1 /usr/${LIBDIR}/libgpm.so
 
     insinto /etc/${PN}
     doins conf/gpm-*.conf
