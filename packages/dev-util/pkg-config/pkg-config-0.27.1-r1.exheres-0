@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
+require alternatives
+
 SUMMARY="Helper tool for compiling applications and libraries"
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
 DOWNLOADS="http://pkgconfig.freedesktop.org/releases/${PNV}.tar.gz"
@@ -26,5 +28,18 @@ src_configure() {
     export GLIB_LIBS="-lglib-2.0"
 
     default
+}
+
+src_install() {
+    local alternatives=( ${PN} ${PN} 10 )
+
+    default
+
+    alternatives+=(
+        /usr/bin/${PN} ${PN}_${PN}
+        /usr/share/aclocal/pkg.m4 pkg_${PN}.m4
+    )
+
+    alternatives_for "${alternatives[@]}"
 }
 
