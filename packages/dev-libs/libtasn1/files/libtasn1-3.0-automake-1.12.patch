@@ -1,0 +1,33 @@
+Source: http://git.savannah.gnu.org/gitweb/?p=libtasn1.git;a=patch;h=3dc5d4be516c7c0a86c2fbe1098debb485e50289
+Upstream: yes
+Reason: Fix bootstrap with automake 1.12
+
+From 3dc5d4be516c7c0a86c2fbe1098debb485e50289 Mon Sep 17 00:00:00 2001
+From: Thierry Reding <thierry.reding@avionic-design.de>
+Date: Thu, 1 Nov 2012 09:13:53 +0100
+Subject: [PATCH] Fix bootstrap with automake 1.12
+
+automake 1.12 and later require explicit checking for the archiver using
+the AM_PROG_AR command when building libraries using libtool.
+
+Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
+Signed-off-by: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+---
+ configure.ac |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index aae27f3..0acd74a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -40,6 +40,7 @@ AC_PROG_YACC
+ dnl Checks for programs.
+ AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
+ AC_LIBTOOL_WIN32_DLL
++AM_PROG_AR
+ AM_PROG_LIBTOOL
+ GTK_DOC_CHECK(1.2)
+ 
+-- 
+1.7.2.5
+
