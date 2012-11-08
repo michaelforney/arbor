@@ -8,13 +8,14 @@ require dependencies-helpers
 
 myexparam -b vala_dep=$(ever is_scm && echo true || echo false)
 myexparam vala_slots[]
+myexparam deps_var=DEPENDENCIES
 
 exparam -v vala_slots vala_slots[@]
 
 export_exlib_phases pkg_setup
 
 if exparam -b vala_dep; then
-    DEPENDENCIES="
+    printf -v "$(exparam deps_var)" "%s" "
         build:
             $(print_slot_dependencies dev-lang/vala ${vala_slots[@]})
     "
