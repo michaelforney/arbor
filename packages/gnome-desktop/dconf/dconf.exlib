@@ -1,14 +1,25 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License
 
+myexparam valac_slot
+exparam -v valac_slot valac_slot
+
 require bash-completion gnome.org [ suffix=.tar.xz ] gtk-icon-cache
 
-export_exlib_phases src_test src_install
+export_exlib_phases src_configure src_test src_install
 
 SUMMARY="A low-level configuration system"
 HOMEPAGE="http://live.gnome.org/dconf"
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( "--cache-file=config.cache" )
 DEFAULT_SRC_INSTALL_PARAMS=( completiondir=/ )
+
+dconf_src_configure() {
+    # NOTE (compnerd) valac is optional, and only required if patching the vala sources
+    # echo "ac_cv_path_VALAC=$(type -p valac-${valac_slot})" >> "${WORK}/config.cache"
+    echo "ac_cv_path_VALAC=" >> "${WORK}/config.cache"
+    default_src_configure
+}
 
 dconf_src_test() {
     unset DISPLAY
