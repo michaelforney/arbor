@@ -384,6 +384,9 @@ EOF
     # Keep the administrator's udev rules dir.
     keepdir /etc/udev/rules.d
 
+    # Keep the administrator's udev hardware database dir.
+    ever at_least scm && keepdir /etc/udev/hwdb.d
+
     # platform rules
     insinto "${UDEVRULESDIR}"
     option platform:ia64 && doins "rules/arch/40-ia64.rules"
