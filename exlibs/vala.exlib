@@ -6,22 +6,28 @@
 
 require dependencies-helpers
 
+myexparam -b vala_dep=$(ever is_scm && echo true || echo false)
 myexparam vala_slots[]
 
 exparam -v vala_slots vala_slots[@]
 
 export_exlib_phases pkg_setup
 
-DEPENDENCIES="
-    build:
-        $(print_slot_dependencies dev-lang/vala ${vala_slots[@]})
-"
+if exparam -b vala_dep; then
+    DEPENDENCIES="
+        build:
+            $(print_slot_dependencies dev-lang/vala ${vala_slots[@]})
+    "
+fi
 
 vala_pkg_setup() {
-    local vala_version=$(get_best_slot_dependency dev-lang/vala ${vala_slots[@]})
-    [[ -z ${vala_version} ]] && die "No vala installed"
-    export VALAC="$(type -P valac-${vala_version})"
-
+    if exparam -b vala_dep; then
+        local vala_version=$(get_best_slot_dependency dev-lang/vala ${vala_slots[@]})
+        [[ -z ${vala_version} ]] && die "No vala installed"
+        export VALAC="$(type -P valac-${vala_version})"
+    else
+        export ac_cv_path_VALAC=
+    fi
     default
 }
 
