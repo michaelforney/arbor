@@ -26,9 +26,8 @@ DEFAULT_SRC_COMPILE_PARAMS+=( V=1 )
 src_prepare() {
     default
 
-    # don't install a compressed manfile + don't link to libnl:1
+    # don't install a compressed manfile
     edo sed -e 's/iw\.8\.gz/iw.8/' \
-            -e 's/\(NL2FOUND :=\).*/\1 N/' \
             -i Makefile
 }
 
