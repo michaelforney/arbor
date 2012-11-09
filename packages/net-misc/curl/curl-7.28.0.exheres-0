@@ -69,8 +69,8 @@ EOF
     esandbox allow_net --connect "inet:127.0.0.1@9011"
     esandbox allow_net --connect "inet:127.0.0.1@60000"
 
-    # Default TEST_F is -a -p -r; we add -v (verbose) and remove -r (run time statistics)
-    local test_args=( -a -p -v )
+    # Default TEST_F is -a -p -r; we add -n (no valgrind) -v (verbose) and remove -r (run time statistics)
+    local test_args=( -a -p -n -v )
     test_args+=( '!'{600..639} )
     emake test-full TEST_F="${test_args[*]}" # SSH tests hang
 
