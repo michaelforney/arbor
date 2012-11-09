@@ -1,0 +1,16 @@
+Source: http://thread.gmane.org/gmane.comp.web.curl.library/37087
+Upstream: Reported on ML
+Reason: Failing test 2032
+
+diff -Naur curl-7.28.0/tests/libtest/libntlmconnect.c curl-7.28.0.new/tests/libtest/libntlmconnect.c
+--- curl-7.28.0/tests/libtest/libntlmconnect.c	2012-09-11 18:57:22.000000000 +0200
++++ curl-7.28.0.new/tests/libtest/libntlmconnect.c	2012-11-09 04:01:23.535110508 +0100
+@@ -234,7 +234,7 @@
+       /* if there's no timeout and we get here on the last handle, we may
+          already have read the last part of the stream so waiting makes no
+          sense */
+-      if(num_handles == MAX_EASY_HANDLES) {
++      if(!running && num_handles == MAX_EASY_HANDLES) {
+         break;
+       }
+     }

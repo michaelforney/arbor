@@ -28,6 +28,7 @@ DEPENDENCIES="
         idn? ( net-dns/libidn[multibuild_c:*(-)?] )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-7.28.0-test-2032-workaround.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-{cookies,crypto-auth,largefile,manual,proxy,tls-srp}
     --enable-{dict,file,ftp,gopher,http,imap,pop3,rtsp,smtp,telnet,tftp}
