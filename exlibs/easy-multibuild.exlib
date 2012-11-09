@@ -18,7 +18,7 @@ else
     export_exlib_phases src_unpack src_prepare
 fi
 
-export_exlib_phases src_configure src_compile src_test src_install
+export_exlib_phases src_configure src_compile src_test src_test_expensive src_install
 
 # TODO: use less evil haxx to do this
 easy-multibuild_check_classes() {
@@ -109,6 +109,10 @@ easy-multibuild_src_compile() {
 }
 
 easy-multibuild_src_test() {
+    easy-multibuild_run_phase
+}
+
+easy-multibuild_src_test_expensive() {
     easy-multibuild_run_phase
 }
 
