@@ -3,7 +3,7 @@
 
 require flag-o-matic systemd-service [ systemd_files=[ "slapd.service" ] ] easy-multibuild
 
-export_exlib_phases src_prepare src_test_expensive src_install
+export_exlib_phases src_prepare src_install
 
 SUMMARY="An open source implementation of the Lightweight Directory Access Protocol"
 DESCRIPTION="
@@ -84,10 +84,6 @@ configure_one_multibuild() {
 compile_one_multibuild() {
     emake depend
     default
-}
-
-openldap_src_test_expensive() {
-    easy-multibuild_run_phase
 }
 
 test_expensive_one_multibuild() {
