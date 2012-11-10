@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require easy-multibuild gnu [ suffix=gz ]
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 SUMMARY="ASN.1 parser for GNUTLS"
 HOMEPAGE="http://www.gnutls.org/"
@@ -20,12 +19,6 @@ DEPENDENCIES="
         doc? ( dev-doc/gtk-doc[>=1.2] )
 "
 
-AT_M4DIR=( m4 gl/m4 lib/glm4 )
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-automake-1.12.patch
-    "${FILES}"/${PNV}-out-of-source.patch
-)
 DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-valgrind-tests )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 
