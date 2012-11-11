@@ -1,0 +1,49 @@
+From 71045cc819cc2a3c7e20bf7aba5cfeb8acfd9dad Mon Sep 17 00:00:00 2001
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Date: Tue, 24 Jul 2012 15:21:26 +0000
+Subject: dhcpd: write lease file on exit
+
+function                                             old     new   delta
+udhcpd_main                                         1431    1403     -28
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+---
+(limited to 'networking/udhcp/dhcpd.c')
+
+diff --git a/networking/udhcp/dhcpd.c b/networking/udhcp/dhcpd.c
+index dd55e70..9ad9595 100644
+--- a/networking/udhcp/dhcpd.c
++++ b/networking/udhcp/dhcpd.c
+@@ -377,6 +377,7 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
+ 	/* Setup the signal pipe */
+ 	udhcp_sp_setup();
+ 
++ continue_with_autotime:
+ 	timeout_end = monotonic_sec() + server_config.auto_time;
+ 	while (1) { /* loop until universe collapses */
+ 		fd_set rfds;
+@@ -406,8 +407,7 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
+ 		}
+ 		if (retval == 0) {
+ 			write_leases();
+-			timeout_end = monotonic_sec() + server_config.auto_time;
+-			continue;
++			goto continue_with_autotime;
+ 		}
+ 		if (retval < 0 && errno != EINTR) {
+ 			log1("Error on select");
+@@ -419,10 +419,10 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
+ 			bb_info_msg("Received SIGUSR1");
+ 			write_leases();
+ 			/* why not just reset the timeout, eh */
+-			timeout_end = monotonic_sec() + server_config.auto_time;
+-			continue;
++			goto continue_with_autotime;
+ 		case SIGTERM:
+ 			bb_info_msg("Received SIGTERM");
++			write_leases();
+ 			goto ret0;
+ 		case 0: /* no signal: read a packet */
+ 			break;
+--
+cgit v0.9.1

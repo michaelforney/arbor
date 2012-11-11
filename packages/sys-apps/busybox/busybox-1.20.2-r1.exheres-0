@@ -24,6 +24,7 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-fix-du-k-works-test-du-may-be-84k-on-some-fs-es.patch
     "${FILES}"/busybox-2.20.1-glibc-2.16.patch
+    "${FILES}"/udhcpd.patch
 )
 
 bb_make() {
@@ -50,6 +51,15 @@ src_prepare() {
 
     # nuke tests that require pid 1 to be named 'init'
     edo sed -i -e '/^testing.*init/ d' testsuite/pidof.tests
+
+    # not all examples are commented out...
+    edo sed -i -e 's:^opt:#opt:' examples/udhcp/udhcpd.conf
+
+    # clever little trick to avoid dependency on net-tools
+    # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=684596
+    edo sed -e 's:ifconfig :/bin/busybox ifconfig :g' \
+            -e 's:route :/bin/busybox route :g' \
+            -i examples/udhcp/simple.script
 }
 
 src_configure() {
@@ -82,10 +92,26 @@ src_test() {
 }
 
 src_install() {
+    # busybox
     into /
     newbin busybox.dynamic busybox
     newbin busybox.static  busybox-static
 
+    # udhcpc
+    exeinto /usr/share/udhcpc
+    newexe examples/udhcp/simple.script default.script
+    dosym /bin/busybox /bin/udhcpc
+
+    # udhcpd
+    insinto /etc
+    doins examples/udhcp/udhcpd.conf
+    dosym /bin/busybox /bin/udhcpd
+
+    # dumpleases
+    keepdir /var/lib/misc/
+    dosym /bin/busybox /bin/dumpleases
+
+    # docs
     emagicdocs
     dodoc -r examples
 }
