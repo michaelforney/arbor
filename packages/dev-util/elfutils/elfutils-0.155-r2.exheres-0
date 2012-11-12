@@ -26,6 +26,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--program-prefix=eu-' '--with-bzl
 configure_one_multibuild() {
     # NOTE (abdulras) tests require that the debug information be present in the tools
     expecting_tests && append-flags -g
+
+    # NOTE (compnerd) explicitly add -fPIC as the build fails on x86_64 with LTO without it
+    # contains RIP-relative relocations which may overflow requiring GOT-relative relocations
+    append-flags -fPIC
+
     default
 }
 
