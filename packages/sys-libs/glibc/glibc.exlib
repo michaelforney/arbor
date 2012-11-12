@@ -84,6 +84,10 @@ glibc_pkg_setup() {
     # glibc doesn't compile with -Os. See bug:
     # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
     replace-flags -Os -O2
+
+    # glibc doesnt build with LTO (bug ???)
+    # need linker with .init_array/.fini_array support
+    filter-flags -flto
 }
 
 glibc_src_unpack() {
