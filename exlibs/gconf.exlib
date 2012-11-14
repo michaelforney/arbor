@@ -113,6 +113,7 @@ gconf_exlib_uninstall_gconf_schemas() {
 
     export GCONF_CONFIG_SOURCE=$("${GCONFTOOL}" --get-default-source | sed "s;:/;:${ROOT};")
 
+    unset DISPLAY
     unset DBUS_SESSION_BUS_ADDRESS
 
     echo "Uninstalling GConf schemas ..."
