@@ -28,6 +28,10 @@ DEPENDENCIES="
 # RESTRICT="userpriv".
 RESTRICT="test"
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-0001-util-fix-building-when-glibc-has-a-stub-process_vm_r.patch
+)
+
 src_prepare() {
     default
 
