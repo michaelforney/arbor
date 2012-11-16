@@ -41,6 +41,8 @@ src_prepare() {
     echo -e "\ninstall:\n" >> Makefile
     # Don't strip on your own.
     edo sed -i -e "s:\(install \)-s:\1:" Makefile
+    # Fix installation prefix
+    edo sed -i -e "s:\(PREFIX = /usr\)/local:\1:" Makefile
 
     default
 }
