@@ -85,8 +85,9 @@ glibc_pkg_setup() {
     # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
     replace-flags -Os -O2
 
-    # glibc doesnt build with LTO (bug ???)
-    # need linker with .init_array/.fini_array support
+    # glibc doesnt build with LTO (bug 52489/51255)
+    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52489
+    # reproducible with BFD ld and gold (.init_array/.fini_array is discarded by linker)
     filter-flags -flto
 }
 
