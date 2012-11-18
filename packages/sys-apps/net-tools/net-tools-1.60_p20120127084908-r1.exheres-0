@@ -26,3 +26,8 @@ src_configure() {
     edo sed -i -e 's:HAVE_HWTR 1:HAVE_HWTR 0:' config.h
 }
 
+src_install() {
+    default
+    dosym ../bin/route /sbin/route
+}
+
