@@ -6,6 +6,11 @@ require coreutils
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 DEPENDENCIES="
+    build+run:
+        !sys-apps/net-tools[<1.60_p20120127084908-r1]  [[
+           description = [ used to install /bin/hostname ]
+           resolution = uninstall-blocked-after
+        ]]
     test:
         sys-apps/sydbox[>=0.6.8] [[ note = [ tests fail with sydbox older than 0.6.8 ] ]]
 "

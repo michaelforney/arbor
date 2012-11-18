@@ -27,7 +27,7 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' xattr )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gmp )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-install-program=arch
+    --enable-install-program=arch,hostname
     --enable-largefile
 )
 
@@ -54,10 +54,9 @@ coreutils_src_test_expensive() {
 coreutils_src_install() {
     default
 
-    # Note: We don't install hostname into /bin, since it'd collide with net-tools.
     local binfiles=(
-        basename cat chgrp chmod chown cp chroot cut date df dir dirname du echo env expr false head
-        kill ln ls mkdir mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort stty sync tail
+        basename cat chgrp chmod chown cp chroot cut date df dir dirname du echo env expr false hostname
+        head kill ln ls mkdir mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort stty sync tail
         touch tr true tty uname vdir wc yes
     )
 
