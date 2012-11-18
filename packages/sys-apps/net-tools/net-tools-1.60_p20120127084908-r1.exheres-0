@@ -29,5 +29,10 @@ src_configure() {
 src_install() {
     default
     dosym ../bin/route /sbin/route
+    edo mv "${IMAGE}"/bin/{hostname,domainname}
+    for i in {dns,yp,nis}domainname; do
+        dosym domainname /bin/${i}
+    done
+    edo rm "${IMAGE}"/usr/share/man/man1/hostname.1
 }
 
