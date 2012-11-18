@@ -3,12 +3,14 @@
 
 [Unit]
 Description=Network Time Service
-After=syslog.target
+After=network.target nss-lookup.target
 
 [Service]
 Type=forking
-ExecStart=/usr/sbin/ntpd -u ntp:ntp -g -p /run/ntpd.pid
+ExecStart=/usr/sbin/ntpd -u ntp:ntp -g
 PrivateTmp=true
+ControlGroup=cpu:/
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
