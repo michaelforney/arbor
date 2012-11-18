@@ -17,6 +17,8 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/70f48182fd0e17258bfd018525c07611bdafd66b.patch )
+
 src_configure() {
     yes "" | edo ./configure.sh config.in
     edo sed -i -e 's:I18N 0:I18N 1:' config.h

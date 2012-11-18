@@ -1,0 +1,32 @@
+Upstream: yes
+From 70f48182fd0e17258bfd018525c07611bdafd66b Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Mon, 1 Oct 2012 01:40:43 -0400
+Subject: [PATCH] disable old features by default
+
+These features have been removed in recent kernels (and no longer provide
+the headers so we can't compile against them), so disable by default.
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+ config.in |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/config.in b/config.in
+index 5bb5b0f..86f1155 100644
+--- a/config.in
++++ b/config.in
+@@ -69,8 +69,8 @@ bool 'ARCnet support' HAVE_HWARC y
+ bool 'SLIP (serial line) support' HAVE_HWSLIP y
+ bool 'PPP (serial line) support' HAVE_HWPPP y
+ bool 'IPIP Tunnel support' HAVE_HWTUNNEL y
+-bool 'STRIP (Metricom radio) support' HAVE_HWSTRIP y
+-bool 'Token ring (generic) support' HAVE_HWTR y
++bool 'STRIP (Metricom radio) support' HAVE_HWSTRIP n
++bool 'Token ring (generic) support' HAVE_HWTR n
+ bool 'AX25 (packet radio) support' HAVE_HWAX25 y
+ bool 'Rose (packet radio) support' HAVE_HWROSE y
+ bool 'NET/ROM (packet radio) support' HAVE_HWNETROM y
+-- 
+1.7.4.1
+
