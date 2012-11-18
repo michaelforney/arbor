@@ -1,23 +1,18 @@
 # Copyright 2008 Bryan Østergaard
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel
+# Copyright 2012 Pierre Lejeune
 # Distributed under the terms of the GNU General Public License v2
-
-MY_PV=${PV%_p*}
-PATCH_LEVEL=${PNV##*_p}
 
 require alternatives easy-multibuild
 
 export_exlib_phases src_prepare src_install
 
 SUMMARY="Berkeley DB embeddable database engine"
-HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
+HOMEPAGE="http://www.oracle.com/us/products/database/berkeley-${PN}/overview/index.html"
 
-DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PV}.tar.gz
-    $(for ((i=1 ; i<=PATCH_LEVEL ; i++ )) ; do
-        echo "http://download.oracle.com/berkeley-${PN}/patches/${PN}/${MY_PV}/patch.${MY_PV}.${i} -> ${PN}-${MY_PV}.${i}.patch"
-      done)"
+DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PNV}.tar.gz"
 
-LICENCES="as-is"
+LICENCES="BSD-3"
 SLOT="$(ever range 1-2)"
 MYOPTIONS="doc
     tcl [[ description = [ Build tcl bindings. Should be enabled if you want to run expensive tests ] ]]
@@ -31,33 +26,20 @@ DEPENDENCIES="
         tcl? ( dev-lang/tcl[multibuild_c:*(-)?] )
 "
 
-WORK="${WORKBASE}/${PN}-${MY_PV}/dist"
+WORK="${WORKBASE}/${PNV}/dist"
 
 AT_M4DIR=( aclocal aclocal_java )
 DEFAULT_SRC_INSTALL_PARAMS=( STRIP=: )
 
 db_src_prepare() {
-    edo cd "${WORKBASE}/${PN}-${MY_PV}/"
-
-    local patches=()
-    for ((i=1; i<=PATCH_LEVEL; i++)); do
-        patches+=( "${FETCHEDDIR}/${PN}-${MY_PV}.${i}.patch" )
-    done
-    expatch -p0 "${patches[@]}"
-
-    edo cd "${WORKBASE}/${PN}-${MY_PV}/dist/"
-
     # Allow --docdir to work
     edo sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in
-    # Hack in something similar --program-transform-name, simplifies slotting
-    edo sed -e '/INSTALLER.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
-            -e '/CHMOD.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
-            -i ./Makefile.in
 }
 
 configure_one_multibuild() {
     econf \
         --includedir=/usr/include/${PN}${SLOT} \
+        --program-transform-name="'s/${PN}/${PN}${SLOT}/'" \
         --enable-compat185 \
         --enable-cxx \
         --disable-java \
@@ -86,7 +68,7 @@ install_one_multibuild() {
 
     edo rm "${IMAGE}"/usr/${LIBDIR}/libdb{,_cxx}{.so,.a,-$(ever major).so}
 
-    option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.so
+    option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.{a,so}
 
     local alternatives=() replace_me
     edo pushd "${IMAGE}"
