@@ -15,7 +15,11 @@ It also contains bugfixes to the config module, and a few other
 unreleased features from eselect's trunk.
 "
 HOMEPAGE="http://www.exherbo.org/"
-DOWNLOADS="http://dev.exherbo.org/~zlin/distfiles/${PNV}.tar.bz2"
+if ever at_least 2.0.11 ; then
+    DOWNLOADS="http://dev.exherbo.org/~zlin/distfiles/${PNV}.tar.xz"
+else
+    DOWNLOADS="http://dev.exherbo.org/~zlin/distfiles/${PNV}.tar.bz2"
+fi
 
 LICENCES="GPL-2"
 MYOPTIONS="doc"
@@ -28,7 +32,7 @@ DEPENDENCIES="
         app-shells/bash
 "
 
-if ever at_least scm ; then
+if ever at_least 2.0.11 ; then
 MYOPTIONS+=" vim-syntax"
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( vim-syntax )
 else
