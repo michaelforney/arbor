@@ -65,23 +65,58 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 configure_one_multibuild() {
-    # login and su are still part of sys-apps/shadow (for now).
-    # kill is still part of sys-apps/coreutils (for now).
+    # Conflict Resolution:
+    # - coreutils
+    #   * arch
+    #   * kill
+    # - ncurses
+    #   * reset
+    # - shadow
+    #   * chfn
+    #   * chsh
+    #   * login
+    #   * newgrp
+    #   * su
+    #   * vipw
+    # - sysvinit-tools:
+    #   * last
+    #   * mesg
+    local conflicts=( arch chfn-chsh kill last login mesg newgrp reset su vipw )
+
+    # Deprecated Tools:
+    # arch is deprecated in favour of arch from coreutils
+    # chkdupexe is deprecated as it is in perl and is unnecessary
+    # deprecated-mount is deprecated in favour of libmount + sys-util/{,u}mount in util-linux
+    # elvtune is deprecated as it is useless for kernels >= 2.6.9
+    # last is deprecated (unused)
+    # line is deprecated in favour of head
+    local deprecated=( arch chkdupexe deprecated-mount elvtune last line )
+
+    local enabled_tools=(
+        agetty cramfs eject fallocate fsck losetup mount mountpoint partx pivot_root raw rename
+        sulogin switch_root unshare uuidd wall wdctl
+    )
+
+    local disabled_tools=( runuser write )
+
     econf \
         --libdir=/${LIBDIR} \
-        --enable-cramfs \
-        --enable-eject \
         --enable-fs-paths-extra=/usr/sbin \
+        --enable-libuuid \
         --enable-libblkid \
         --enable-libmount \
         --enable-nls \
-        --enable-partx \
-        --disable-kill \
-        --disable-login \
         --disable-static \
-        --disable-su \
+        --enable-schedutils \
+        --with-ncurses \
+        --without-slang \
+        --without-audit \
         --without-selinux \
         --without-utempter \
+        $(for tool in "${enabled_tools[@]}" ; do echo --enable-${tool} ; done) \
+        $(for tool in "${disabled_tools[@]}" ; do echo --disable-${tool} ; done) \
+        $(for tool in "${conflicts[@]}" ; do echo --disable-${tool} ; done) \
+        $(for tool in "${deprecated[@]}" ; do echo --disable-${tool} ; done) \
         $(option_enable systemd socket-activation) \
         $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
         $(option_with udev)
