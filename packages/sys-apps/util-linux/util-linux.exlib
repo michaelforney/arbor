@@ -18,12 +18,16 @@ LICENCES="GPL-2 GPL-3 || ( LGPL-3 LGPL-2.1 ) BSD-3"
 SLOT="0"
 MYOPTIONS="
     systemd
+    gtk-doc
     udev [[
         description = [ Enable udev support (*only* ever disable this to break a dependency cycle) ]
         note = [ Usually, we hard-enable udev. This option is *solely* to break
                  a dep-cycle between systemd/udev->util-linux->systemd/udev.
                  Do NOT introduce new udev options.
         ]
+    ]]
+    session-management [[
+        description = [ enable utmp/wtmp record updates via libutempter ]
     ]]
     multibuild_c: 32 64
 "
@@ -33,6 +37,7 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.14.1]
         virtual/pkg-config
         dev-libs/libxslt
+        gtk-doc? ( dev-doc/gtk-doc[>=1.10] )
     build+run:
         !sys-apps/eject [[
             description = [ util-linux now provides eject ]
@@ -57,6 +62,7 @@ DEPENDENCIES="
         ]]
         sys-libs/pam[multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
+        session-management? ( x11-libs/libutempter )
         udev? ( sys-apps/systemd[multibuild_c:*(-)?] )
     test:
         sys-apps/bc
@@ -113,11 +119,13 @@ configure_one_multibuild() {
         --without-slang \
         --without-audit \
         --without-selinux \
-        --without-utempter \
         $(for tool in "${enabled_tools[@]}" ; do echo --enable-${tool} ; done) \
         $(for tool in "${disabled_tools[@]}" ; do echo --disable-${tool} ; done) \
         $(for tool in "${conflicts[@]}" ; do echo --disable-${tool} ; done) \
         $(for tool in "${deprecated[@]}" ; do echo --disable-${tool} ; done) \
+        $(option_enable gtk-doc) \
+        $(option_with session-management utempter) \
+        $(option_enable session-management utmpdump) \
         $(option_enable systemd socket-activation) \
         $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
         $(option_with udev)
