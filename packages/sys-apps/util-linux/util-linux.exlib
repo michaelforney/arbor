@@ -31,6 +31,8 @@ MYOPTIONS="
 DEPENDENCIES="
     build:
         sys-devel/gettext[>=0.14.1]
+        virtual/pkg-config
+        dev-libs/libxslt
     build+run:
         !sys-apps/eject [[
             description = [ util-linux now provides eject ]
@@ -49,6 +51,7 @@ DEPENDENCIES="
             resolution = uninstall-blocked-after
         ]]
         dev-lang/perl:*
+        sys-libs/glibc[>=2.10]
         sys-libs/ncurses[>=5.6][multibuild_c:*(-)?] [[
             note = [ this is required as most of the tools have been converted to use ncurses ]
         ]]
