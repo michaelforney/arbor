@@ -10,7 +10,7 @@ require alternatives easy-multibuild
 export_exlib_phases src_prepare src_install
 
 SUMMARY="Berkeley DB embeddable database engine"
-HOMEPAGE="http://www.oracle.com/database/berkeley-${PN}/${PN}/index.html"
+HOMEPAGE="http://www.oracle.com/us/products/database/berkeley-${PN}/overview/index.html"
 
 DOWNLOADS="http://download.oracle.com/berkeley-${PN}/${PN}-${MY_PV}.tar.gz
     $(for ((i=1 ; i<=PATCH_LEVEL ; i++ )) ; do
@@ -43,19 +43,25 @@ db_src_prepare() {
     for ((i=1; i<=PATCH_LEVEL; i++)); do
         patches+=( "${FETCHEDDIR}/${PN}-${MY_PV}.${i}.patch" )
     done
-    expatch -p0 "${patches[@]}"
+    [[ -z ${patches} ]] || expatch -p0 "${patches[@]}"
 
     edo cd "${WORKBASE}/${PN}-${MY_PV}/dist/"
 
     # Allow --docdir to work
     edo sed -re "/^docdir/s:=\s+.*:= \$(prefix)/share/doc/${PNVR}:" -i ./Makefile.in
-    # Hack in something similar --program-transform-name, simplifies slotting
-    edo sed -e '/INSTALLER.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
-            -e '/CHMOD.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
-            -i ./Makefile.in
+
+    if ! ever at_least 5.3.21; then
+        # Hack in something similar --program-transform-name, simplifies slotting
+        edo sed -e '/INSTALLER.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
+                -e '/CHMOD.*bindir/s:$(bindir)/$$i:$(bindir)/`echo $$i | sed '"'s/${PN}/${PN}${SLOT}/'"'`:' \
+                -i ./Makefile.in
+    fi
 }
 
 configure_one_multibuild() {
+    local myconf=()
+    ever at_least 5.3.21 && myconf+=( --program-transform-name="'s/${PN}/${PN}${SLOT}/'" )
+
     econf \
         --includedir=/usr/include/${PN}${SLOT} \
         --enable-compat185 \
@@ -64,6 +70,7 @@ configure_one_multibuild() {
         $(option_enable tcl) \
         $(option_enable tcl test) \
         $(option_with tcl tcl "/usr/${LIBDIR}") \
+        ${myconf[@]} \
         LDFLAGS="-L/usr/${LIBDIR} ${LDFLAGS}"
 }
 
@@ -87,6 +94,7 @@ install_one_multibuild() {
     edo rm "${IMAGE}"/usr/${LIBDIR}/libdb{,_cxx}{.so,.a,-$(ever major).so}
 
     option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.so
+    ever at_least 5.3.21 && option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.a
 
     local alternatives=() replace_me
     edo pushd "${IMAGE}"
