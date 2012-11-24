@@ -33,10 +33,12 @@ DEPENDENCIES="
         sys-devel/gettext[>=0.14.1]
     build+run:
         !sys-apps/eject [[
-            description = [ util-linux now provides eject ] resolution = uninstall-blocked-after
+            description = [ util-linux now provides eject ]
+            resolution = uninstall-blocked-after
         ]]
         !sys-apps/util-linux-ng [[
-            description = [ Upstream renamed util-linux-ng to util-linux ] resolution = uninstall-blocked-after
+            description = [ Upstream renamed util-linux-ng to util-linux ]
+            resolution = uninstall-blocked-after
         ]]
         !sys-apps/sysvinit[<2.88-r2] [[
             description = [ util-linux now provides sulogin and utmpdump ]
@@ -47,7 +49,9 @@ DEPENDENCIES="
             resolution = uninstall-blocked-after
         ]]
         dev-lang/perl:*
-        sys-libs/ncurses[>=5.6][multibuild_c:*(-)?]
+        sys-libs/ncurses[>=5.6][multibuild_c:*(-)?] [[
+            note = [ this is required as most of the tools have been converted to use ncurses ]
+        ]]
         sys-libs/pam[multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
         udev? ( sys-apps/systemd[multibuild_c:*(-)?] )
