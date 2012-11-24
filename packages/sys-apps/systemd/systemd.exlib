@@ -109,8 +109,8 @@ systemd_pkg_pretend() {
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
     fi
 
-    if [[ ${kv} < 3.0 ]] ; then
-        ewarn "You SHOULD install a kernel >= 3.0 to get the best results."
+    if [[ ${kv} < 3.5 ]] ; then
+        ewarn "You SHOULD install a kernel >= 3.5 to get the best results."
     fi
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/legacy.conf ]] ; then
@@ -140,6 +140,7 @@ systemd_src_prepare() {
         edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/binfmtdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/sysctldir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i -e "/catalogdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
         edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
     fi
@@ -157,6 +158,11 @@ systemd_src_prepare() {
     # Paludis really hates the progress bar so let's disable it.
     edo sed -i -e "/journal_file_verify/s:true:false:" src/journal/test-journal-verify.c
 
+    # Disable a test that needs root privs.
+    edo sed -i -e "/test-sched-prio/d" Makefile.am
+    edo sed -i -e "/test_sched_prio_SOURCES/d" Makefile.am
+    edo sed -i -e "s:\(test-replace-var\) \\\:\1:" Makefile.am
+
     edo intltoolize --force --automake
     autotools_src_prepare
 }
@@ -169,9 +175,12 @@ configure_one_multibuild() {
         --libexecdir=/usr/${LIBDIR}
         --localstatedir=/var
         --enable-binfmt
+        --enable-blkid
+        --enable-coredump
         --enable-gudev
         --enable-hostnamed
         --enable-keymap
+        --enable-kmod
         --enable-localed
         --enable-logind
         --enable-manpages
@@ -185,8 +194,6 @@ configure_one_multibuild() {
         --enable-vconsole
         --enable-xz
         --disable-audit
-        # Disable putting core dumps into the journal for now.
-        --disable-coredump
         --disable-ima
         # For transferring the verification key to a smartphone
         --disable-qrencode
@@ -194,11 +201,9 @@ configure_one_multibuild() {
         --with-distro=other
         --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
         --with-pamlibdir=/${LIBDIR}/security
-        --with-pci-ids-path=/usr/share/misc/pci.ids
         # Disable SysV init compatibility.
         --with-sysvinit-path=""
         --with-sysvrcd-path=""
-        --with-usb-ids-path=/usr/share/misc/usb.ids
         $(option_enable acl)
         $(option_enable cryptsetup libcryptsetup)
         $(option_enable gcrypt)
@@ -346,6 +351,7 @@ EOF
     keepdir /etc/systemd/system/local-fs.target.wants
     keepdir /etc/systemd/system/sysinit.target.wants
     keepdir /etc/systemd/user
+    keepdir /etc/udev/hwdb.d
     keepdir /usr/${LIBDIR}/systemd/system/graphical.target.wants
     keepdir /usr/${LIBDIR}/systemd/system-generators
     keepdir /usr/${LIBDIR}/systemd/system-shutdown
@@ -425,6 +431,12 @@ systemd_pkg_postinst() {
         nonfatal edo /usr/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
+
+        # Update the hwdb index
+        nonfatal edo /sbin/udevadm hwdb --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
+
+        # Update the message catalogue index
+        nonfatal edo /usr/bin/journalctl --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
 
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
