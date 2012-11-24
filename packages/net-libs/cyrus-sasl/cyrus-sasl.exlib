@@ -17,28 +17,24 @@ its use is negotiated, a security layer is inserted between the protocol
 and the connection
 "
 HOMEPAGE="http://asg.web.cmu.edu/sasl/sasl-library.html"
-DOWNLOADS="http://ftp.andrew.cmu.edu/pub/cyrus-mail/${PNV/-rc/rc}.tar.gz"
+DOWNLOADS="ftp://ftp.cyrusimap.org/${PN}/${PNV/-rc/rc}.tar.gz"
 
 LICENCES="cyrus-sasl"
 SLOT="0"
 
-if ever at_least 2.1.24-rc1 ; then
-    MYOPTIONS="ldap "
-fi
-
-MYOPTIONS+="ssl
-    multibuild_c: 32 64"
-
-DEPENDENCIES="
-build+run:
-    sys-libs/gdbm
-    sys-libs/pam
-    ssl? ( dev-libs/openssl[multibuild_c:*(-)?] )
+MYOPTIONS="
+    ldap
+    ssl
+    multibuild_c: 32 64
 "
 
-if ever at_least 2.1.24-rc1 ; then
-    DEPENDENCIES+="ldap? ( net-directory/openldap[multibuild_c:*(-)?] )"
-fi
+DEPENDENCIES="
+    build+run:
+        sys-libs/gdbm
+        sys-libs/pam
+        ldap? ( net-directory/openldap[multibuild_c:*(-)?] )
+        ssl? ( dev-libs/openssl[multibuild_c:*(-)?] )
+"
 
 DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( saslauthd )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LDAP_SASLAUTHD )
@@ -82,16 +78,11 @@ configure_one_multibuild()
         "--with-configdir=/etc/sasl2"
         "--with-plugindir=/usr/${LIBDIR}/sasl2"
         "--with-dbpath=/etc/sasl2/sasldb2"
+        "$(option_enable ldap ldapdb)"
+        "$(option_with ldap ldap "/usr/${LIBDIR}")"
         "$(option_with ssl openssl)"
         "$(option_with ssl des)"
     )
-
-    if ever at_least 2.1.24-rc1 ; then
-        myconf+=(
-            "$(option_enable ldap ldapdb)"
-            "$(option_with ldap ldap "/usr/${LIBDIR}")"
-        )
-    fi
 
     econf "${myconf[@]}"
     edo pushd saslauthd
@@ -130,3 +121,4 @@ d /run/saslauthd 0750 root root
 EOF
     fi
 }
+
