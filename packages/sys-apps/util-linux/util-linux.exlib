@@ -55,6 +55,10 @@ DEPENDENCIES="
             description = [ util-linux now provides sulogin and utmpdump ]
             resolution = uninstall-blocked-after
         ]]
+        !sys-apps/sysvinit-tools[<2.88-r5] [[
+            description = [ util-linux now provides mesg ]
+            resolution = uninstall-blocked-after
+        ]]
         dev-lang/perl:*
         sys-libs/glibc[>=2.10]
         sys-libs/ncurses[>=5.6][multibuild_c:*(-)?] [[
@@ -84,10 +88,7 @@ configure_one_multibuild() {
     #   * newgrp
     #   * su
     #   * vipw
-    # - sysvinit-tools:
-    #   * last
-    #   * mesg
-    local conflicts=( arch chfn-chsh kill last login mesg newgrp reset su vipw )
+    local conflicts=( arch chfn-chsh kill login newgrp reset su vipw )
 
     # Deprecated Tools:
     # arch is deprecated in favour of arch from coreutils
@@ -99,7 +100,7 @@ configure_one_multibuild() {
     local deprecated=( arch chkdupexe deprecated-mount elvtune last line )
 
     local enabled_tools=(
-        agetty cramfs eject fallocate fsck losetup mount mountpoint partx pivot_root raw rename
+        agetty cramfs eject fallocate fsck losetup mesg mount mountpoint partx pivot_root raw rename
         sulogin switch_root unshare uuidd wall wdctl
     )
 

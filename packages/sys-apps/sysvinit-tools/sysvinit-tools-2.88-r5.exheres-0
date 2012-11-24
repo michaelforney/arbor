@@ -7,9 +7,7 @@ SUMMARY="System V init tools"
 DESCRIPTION="
 These are only the useful tools from old, crufty, obsolete sysvinit:
 - killall5
-- last
-- mesg
-- pidof
+- pidof (alias to killall5)
 "
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN/-tools}"
 DOWNLOADS="http://download.savannah.gnu.org/releases/${PN/-tools}/${PNV/-tools}dsf.tar.bz2"
@@ -36,24 +34,14 @@ WORK=${WORKBASE}/${PNV/-tools}dsf
 
 src_compile() {
     option static && append-ldflags -static
-    emake -C src \
-        CC="${CC}" \
-        killall5 \
-        last \
-        mesg
+    emake -C src CC="${CC}" killall5
 }
 
 src_install() {
-    doman man/killall5.8 man/last.1 man/mesg.1
+    doman man/killall5.8
 
     exeinto /sbin
-    doexe \
-        src/killall5
-
-    exeinto /usr/bin
-    doexe \
-        src/last \
-        src/mesg
+    doexe src/killall5
 
     dodir /bin
     dosym /sbin/killall5 /bin/pidof
