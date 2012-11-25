@@ -1,0 +1,19 @@
+# Copyright 2012 Ivan Dives <ivan.dives@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A library call tracer"
+DESCRIPTION="ltrace is a debugging utility in Linux to monitor the library calls used by a program and all the signals it receives. It can also show system calls, used by a program."
+HOMEPAGE="http://www.ltrace.org/"
+
+LICENCES="GPL-2"
+SLOT="0"
+
+DEPENDENCIES="
+    build+run:
+        dev-util/elfutils
+"
+
+# ltrace can't ptrace() tests inside an already sydbox-ptrace()'d environment
+RESTRICT="test"
+# TODO: ltrace test results are a bloody mess even when ran outside sydbox. Maybe look into it later.
+
