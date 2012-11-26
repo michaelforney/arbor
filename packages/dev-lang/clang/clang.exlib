@@ -44,5 +44,16 @@ src_install() {
     cmake_src_install
     # the sole file here, config.h, is explicitly not installed
     edo rmdir "${IMAGE}"/usr/include/clang/Config
+
+    edo pushd "${CMAKE_SOURCE}"/tools
+    insinto /usr/share/clang-analyzer
+    for f in scan-{build,view} ; do
+        doins -r ${f}
+        dosym /usr/share/clang-analyzer/${f}/${f} /usr/bin/${f}
+    done
+    edo popd
+    edo pushd "${IMAGE}"/usr/share/clang-analyzer
+    edo chmod a+x scan-build/{ccc-analyzer,scan-build,set-xcode-analyzer} scan-view/scan-view
+    edo popd
 }
 
