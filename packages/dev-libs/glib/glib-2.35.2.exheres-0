@@ -1,0 +1,93 @@
+# Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require bash-completion glib
+
+SLOT="2"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="gtk-doc
+    man-pages [[ description = [ Generate and install man pages ] ]]
+"
+
+DEPENDENCIES="
+    build:
+        app-doc/gtk-doc-autotools
+        sys-devel/gettext[>=0.11]
+        gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
+        man-pages? ( app-text/docbook-xml-dtd:4.1.2
+                     app-text/docbook-xsl-stylesheets
+                     dev-libs/libxslt )
+    build+run:
+        dev-util/elfutils[>=0.142][multibuild_c:*(-)?]
+        dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
+    test:
+        dev-python/dbus-python
+        dev-util/desktop-file-utils
+        gnome-bindings/pygobject:3
+        sys-apps/dbus[>=1.2.14][multibuild_c:*(-)?] [[
+            note = [ Required for building GDBus tests ]
+        ]]
+        virtual/pkg-config[>=0.16]
+        x11-misc/shared-mime-info
+    recommendation:
+        sys-apps/dbus[>=1.2.14][multibuild_c:*(-)?] [[ note = [ Required for GDBus ] ]]
+        dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
+        gnome-desktop/dconf [[ description = [ default GSettings backend ] ]]
+    suggestion:
+        gnome-desktop/gvfs [[ description = [ Provides utilities and support for GIO ] ]]
+"
+
+# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
+# anything not in ::arbor, that means no recommendations, just suggestions
+
+src_prepare() {
+    glib_src_prepare
+
+    # fail under sydbox
+    edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c # randomly
+    edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
+    edo sed -e '/\/DBUS_COOKIE_SHA1/d' -i gio/tests/gdbus-auth.c
+    edo sed -e 's/run-assert-msg-test.sh//' -i tests/Makefile.{am,in}
+
+    # we have no guarantee for ipv6 support, so we disable those tests
+    edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
+
+    # TODO: need 0.0.0.0
+    edo sed -e '/socket\/ipv6_v4mapped/d' -i gio/tests/socket.c
+
+    # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
+    edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
+}
+
+configure_one_multibuild() {
+    # Disable FAM support as FAM is no longer necessary with GIO's inotify support
+    #
+    # xattr support is also provided by libc.  glib will prefer to use glibc's xattr support over
+    # libattr.  As a result, there is no dependency added for attr support.
+    #
+    # Enable libelf (via elf-utils) to read compressed module data
+    #
+    # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling"
+    # Its usage is recommended by upstream, see also
+    # http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
+
+    local DEFAULT_SRC_CONFIGURE_PARAMS=(
+        '--enable-static' '--disable-fam' '--disable-selinux' '--enable-xattr' '--enable-libelf'
+        '--with-pcre=internal' '--with-threads=posix' '--disable-dtrace' '--disable-systemtap'
+        '--disable-gcov' $(option_enable gtk-doc) $(option_enable man-pages man)
+    )
+
+    econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
+          $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests')
+}
+
+src_install() {
+    glib_src_install
+
+    if ! option bash-completion; then
+        edo rm "${IMAGE}"/usr/share/bash-completion/completions/{gdbus,gresource,gsettings}
+        edo rmdir "${IMAGE}"/usr/share/bash-completion/{completions/,}
+    fi
+}
+
