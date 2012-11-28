@@ -4,7 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation
 
 MY_PNV="${PNV}-stable"
-require sourceforge [ project=levent pnv="${MY_PNV}" suffix=tar.gz ]
+require sourceforge [ project=levent pnv=${MY_PNV} suffix=tar.gz ]
 
 export_exlib_phases src_test
 
@@ -22,9 +22,9 @@ DEPENDENCIES="
         dev-libs/openssl
 "
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-2.0.10-test.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.0.10-test.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-openssl --disable-static )
 
 libevent_src_test() {
