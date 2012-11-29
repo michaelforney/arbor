@@ -162,9 +162,7 @@ systemd_src_prepare() {
     edo sed -i -e "/journal_file_verify/s:true:false:" src/journal/test-journal-verify.c
 
     # Disable a test that needs root privs.
-    edo sed -i -e "/test-sched-prio/d" Makefile.am
-    edo sed -i -e "/test_sched_prio_SOURCES/d" Makefile.am
-    edo sed -i -e "s:\(test-replace-var\) \\\:\1:" Makefile.am
+    edo sed -i -e '/test-sched-prio/s:test-sched-prio:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
