@@ -52,7 +52,9 @@ src_prepare() {
     edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
 
     # TODO: need 0.0.0.0
-    edo sed -e '/socket\/ipv6_v4mapped/d' -i gio/tests/socket.c
+    edo sed -e 's/g_inet_address_new_any/g_inet_address_new_loopback/'  \
+            -e '/socket\/ipv6_v4mapped/d'                               \
+            -i gio/tests/socket.c
 
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
