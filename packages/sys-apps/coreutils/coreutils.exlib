@@ -55,8 +55,8 @@ coreutils_src_install() {
     default
 
     local binfiles=(
-        basename cat chgrp chmod chown cp chroot cut date df dir dirname du echo env expr false hostname
-        head kill ln ls mkdir mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort stty sync tail
+        basename cat chgrp chmod chown cp chroot cut date df dir dirname du echo env expr false head
+        kill ln ls mkdir mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort stty sync tail
         touch tr true tty uname vdir wc yes
     )
 
@@ -65,6 +65,13 @@ coreutils_src_install() {
         edo mv "${IMAGE}"/usr/bin/${binfile} "${IMAGE}"/bin/${binfile}
         edo dosym /bin/${binfile} /usr/bin/${binfile}
     done
+
+    # NOTE(compnerd) do not provide a link for hostname.  /bin is part of ${PATH} by default, and
+    # allows for overloading of hostname from inetutils for a more feature-rich version if users
+    # desire.  Install the manpage as hostname.coreutils to avoid conflicting with inetutils since
+    # this command does not really support any arguments.
+    edo mv "${IMAGE}/usr/bin/hostname" "${IMAGE}/bin/hostname"
+    edo mv "${IMAGE}/usr/share/man/man1/hostname.1" "${IMAGE}/usr/share/man/man1/hostname.coreutils.1"
 
     insinto /etc
     newins src/dircolors.hin DIR_COLORS
