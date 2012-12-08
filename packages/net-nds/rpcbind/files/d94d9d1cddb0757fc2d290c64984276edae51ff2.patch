@@ -1,0 +1,32 @@
+From d94d9d1cddb0757fc2d290c64984276edae51ff2 Mon Sep 17 00:00:00 2001
+From: Steve Dickson <steved@redhat.com>
+Date: Thu, 8 Mar 2012 09:13:36 -0500
+Subject: [PATCH 1/1] rpcbind: drop supplemental groups
+
+Drop out of the 'root' group to ensure the process does
+not have any access to writable or readable files
+to that group.
+
+Signed-off-by: Steve Dickson <steved@redhat.com>
+---
+ src/rpcbind.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/src/rpcbind.c b/src/rpcbind.c
+index 24e069b..9a0504d 100644
+--- a/src/rpcbind.c
++++ b/src/rpcbind.c
+@@ -236,6 +236,10 @@ main(int argc, char *argv[])
+                         syslog(LOG_ERR, "setgid to '%s' (%d) failed: %m", id, p->pw_gid);
+                         exit(1);
+                 }
++		if (setgroups(0, NULL) == -1) {
++			syslog(LOG_ERR, "dropping supplemental groups failed: %m");
++			exit(1);
++		}
+ 		if (setuid(p->pw_uid) == -1) {
+ 			syslog(LOG_ERR, "setuid to '%s' (%d) failed: %m", id, p->pw_uid);
+ 			exit(1);
+-- 
+1.7.7.6
+

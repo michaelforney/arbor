@@ -1,0 +1,63 @@
+From 1d9fba5b631b517094c85a80f45f6f7ba1665e2a Mon Sep 17 00:00:00 2001
+From: Olaf Kirch <okir@suse.de>
+Date: Wed, 16 Mar 2011 14:19:37 -0400
+Subject: [PATCH 1/1] Make is_loopback check more permissive
+
+This patch relaxes the is_loopback() check to its original meaning;
+i.e. verify that the caller is local. We no longer check whether
+the source port is privileged, for a number of reasons.
+
+1) The existing check did not allow *any* non-root program to register
+   a services via UDP or TCP transport. It did however allow
+   *any* registration when using the AF_LOCAL transport.
+
+2) Unregistration of services is only possible if the caller has
+   the same "user name", i.e.
+   	"superuser"
+		for root (when connecting through AF_LOCAL sockets,
+		or when using pmap_set with a privileged port)
+	numeric uid
+		for non-root users when connecting through AF_LOCAL
+		sockets
+	"unknown"
+		for all other users
+
+This seems safe enough to allow the removal of the privileged port
+check in is_localhost.
+
+Signed-off-by: Olaf Kirch <okir@suse.de>
+Signed-off-by: Steve Dickson <steved@redhat.com>
+---
+ src/security.c |    8 +++-----
+ 1 files changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/src/security.c b/src/security.c
+index 07c8933..d272f74 100644
+--- a/src/security.c
++++ b/src/security.c
+@@ -138,8 +138,7 @@ is_loopback(struct netbuf *nbuf)
+ 				  "Checking caller's adress (port = %d)\n",
+ 				  ntohs(sin->sin_port));
+ #endif
+-	       	return ((sin->sin_addr.s_addr == htonl(INADDR_LOOPBACK)) &&
+-		    (ntohs(sin->sin_port) < IPPORT_RESERVED));
++	       	return (sin->sin_addr.s_addr == htonl(INADDR_LOOPBACK));
+ #ifdef INET6
+ 	case AF_INET6:
+ 		if (!oldstyle_local)
+@@ -151,10 +150,9 @@ is_loopback(struct netbuf *nbuf)
+ 				  "Checking caller's adress (port = %d)\n",
+ 				  ntohs(sin6->sin6_port));
+ #endif
+-		return ((IN6_IS_ADDR_LOOPBACK(&sin6->sin6_addr) ||
++		return (IN6_IS_ADDR_LOOPBACK(&sin6->sin6_addr) ||
+ 			 (IN6_IS_ADDR_V4MAPPED(&sin6->sin6_addr) &&
+-			  sin6->sin6_addr.s6_addr32[3] == htonl(INADDR_LOOPBACK))) &&
+-		        (ntohs(sin6->sin6_port) < IPV6PORT_RESERVED));
++			  sin6->sin6_addr.s6_addr32[3] == htonl(INADDR_LOOPBACK)));
+ #endif
+ 	case AF_LOCAL:
+ 		return 1;
+-- 
+1.7.7.6
+
