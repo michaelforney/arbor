@@ -3,6 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
+require alternatives
 
 export_exlib_phases src_configure src_test src_test_expensive src_install
 
@@ -72,6 +73,10 @@ coreutils_src_install() {
     # this command does not really support any arguments.
     edo mv "${IMAGE}/usr/bin/hostname" "${IMAGE}/bin/hostname"
     edo mv "${IMAGE}/usr/share/man/man1/hostname.1" "${IMAGE}/usr/share/man/man1/hostname.coreutils.1"
+
+    alternatives_for hostname coreutils 100 \
+                     /usr/bin/hostname /bin/hostname \
+                     /usr/share/man/man1/hostname.1 /usr/share/man/man1/hostname.coreutils.1
 
     insinto /etc
     newins src/dircolors.hin DIR_COLORS
