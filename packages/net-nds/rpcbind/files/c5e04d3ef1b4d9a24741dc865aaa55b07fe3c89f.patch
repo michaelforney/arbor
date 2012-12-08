@@ -1,0 +1,36 @@
+From c5e04d3ef1b4d9a24741dc865aaa55b07fe3c89f Mon Sep 17 00:00:00 2001
+From: Steve Dickson <steved@redhat.com>
+Date: Thu, 25 Jun 2009 08:41:29 -0400
+Subject: [PATCH] Corrected the usage info to match what the rpcbind man page
+ says.
+
+Signed-off-by: Steve Dickson <steved@redhat.com>
+---
+ src/rpcbind.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/rpcbind.c b/src/rpcbind.c
+index 525ffba..ddf2cfc 100644
+--- a/src/rpcbind.c
++++ b/src/rpcbind.c
+@@ -731,7 +731,7 @@ parseargs(int argc, char *argv[])
+ {
+ 	int c;
+ 	oldstyle_local = 1;
+-	while ((c = getopt(argc, argv, "dwah:ils")) != -1) {
++	while ((c = getopt(argc, argv, "adh:ilsw")) != -1) {
+ 		switch (c) {
+ 		case 'a':
+ 			doabort = 1;	/* when debugging, do an abort on */
+@@ -764,7 +764,7 @@ parseargs(int argc, char *argv[])
+ 			break;
+ #endif
+ 		default:	/* error */
+-			fprintf(stderr,	"usage: rpcbind [-Idwils]\n");
++			fprintf(stderr,	"usage: rpcbind [-adhilsw]\n");
+ 			exit (1);
+ 		}
+ 	}
+-- 
+1.7.7.6
+

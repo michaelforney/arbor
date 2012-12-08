@@ -4,6 +4,8 @@
 #     Copyright 1999-2009 Gentoo Foundation
 
 require sourceforge
+require systemd-service [ systemd_files=[ systemd/rpcbind.service systemd/rpcbind.socket ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 SUMMARY="RPC server replacing portmap"
 DESCRIPTION="
@@ -17,6 +19,8 @@ PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="baselayout"
 
 DEPENDENCIES="
+    build:
+        dev-util/pkg-config[>=0.20]
     build+run:
         net-libs/libtirpc
         !net-nds/portmap [[
@@ -35,11 +39,29 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/d94d9d1cddb0757fc2d290c64984276edae51ff2.patch"
 )
 
+DEFAULT_SRC_PREPARE_PATCHES+=(
+    "${FILES}/c5e04d3ef1b4d9a24741dc865aaa55b07fe3c89f.patch"
+    "${FILES}/eb36cf198795b09c1ba796044fc99fa40c5a2b33.patch"
+    "${FILES}/afd71b8fc0df036a884b3af14ddb875674a49a85.patch"
+    "${FILES}/135d4cfbe25d012b1343b0fb71be947444e33c6a.patch"
+    "${FILES}/8d7a0708f14b22df100d64bcadfb66598052a950.patch"
+    "${FILES}/e81d689a6a8605cfc3b90a62a357705e180f532c.patch"
+    "${FILES}/0001-systemd-add-support-for-system-bus-activation.patch"
+    "${FILES}/0001-socket-activation-don-t-unlink-socket-we-didn-t-create.patch"
+    "${FILES}/0001-socket-activation-fix-rpcbind-service-to-use-separate-socket.patch"
+    "${FILES}/rpcbind-journal.patch"
+    "${FILES}/move-lock-file-to-run-fs.patch"
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     "--bindir=/sbin"
     "--enable-warmstarts"
     "--with-statedir=/run/${PN}"
     "--with-rpcuser=rpc"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}"
 )
 
 src_install() {

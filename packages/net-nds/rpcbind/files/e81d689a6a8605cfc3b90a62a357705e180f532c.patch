@@ -1,0 +1,30 @@
+From e81d689a6a8605cfc3b90a62a357705e180f532c Mon Sep 17 00:00:00 2001
+From: Steve Dickson <steved@redhat.com>
+Date: Sun, 14 Oct 2012 12:20:04 -0400
+Subject: [PATCH 1/1] Fixed typo in Makefile.am which cause rpcbind to run as
+ root
+
+Commit 8d7a0708 introduce a regression that cause rpcbind
+to run as root instead of the user define by RPCBIND_USER
+
+Signed-off-by: Steve Dickson <steved@redhat.com>
+---
+ Makefile.am |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 9fa608e..d10c906 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -5,7 +5,7 @@ AM_CPPFLAGS = \
+ 	-DSEVERITY=LOG_INFO \
+ 	-DINET6 \
+ 	-DRPCBIND_STATEDIR="\"$(statedir)\"" \
+-	-DRPCUSER="\"$(rpcuser)\"" \
++	-DRPCBIND_USER="\"$(rpcuser)\"" \
+ 	-D_GNU_SOURCE \
+ 	$(TIRPC_CFLAGS)
+ 
+-- 
+1.7.7.6
+

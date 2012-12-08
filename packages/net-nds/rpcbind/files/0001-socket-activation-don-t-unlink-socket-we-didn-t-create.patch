@@ -1,0 +1,61 @@
+From: Jeff Mahoney <jeffm@suse.com>
+Subject: socket-activation: don't unlink socket we didn't create
+References: bnc#757667
+
+ On an unpatched system, try this:
+ rpcinfo <works>
+ rcrpcbind restart
+ rpcinfo <fails>
+
+ This is due to rpcbind unlinking the socket file when it exits. It
+ doesn't own the socket file when socket activation is used - systemd
+ does. Systemd still has an open reference to it and when rpcbind is
+ restarted, it passes the open reference back to it and rpcbind is
+ perfectly happy to accept it. Unfortunately, everything that needs to
+ talk to rpcbind no longer can because the socket file each of those
+ users needs to open is no longer on the file system.
+
+ This patch adds a new global that's used to avoid unlinking the
+ rpcbind.sock socket file during shutdown.
+
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+---
+
+ src/rpcbind.c |   12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+--- a/src/rpcbind.c
++++ b/src/rpcbind.c
+@@ -80,6 +81,7 @@
+ int debugging = 0;	/* Tell me what's going on */
+ int doabort = 0;	/* When debugging, do an abort on errors */
+ int dofork = 1;		/* fork? */
++int sock_needs_unlink = 1;	/* we created rpcbind.sock */
+ 
+ rpcblist_ptr list_rbl;	/* A list of version 3/4 rpcbind services */
+ 
+@@ -365,6 +396,14 @@ init_transport(struct netconfig *nconf)
+                                nconf->nc_netid);
+ 			goto error;
+ 		}
++
++		/*
++		 * We were passed the open UNIX socket
++		 * and shouldn't remove it.
++		 */
++		if (sa.sa.sa_family == AF_UNIX &&
++		    strcmp(sa.un.sun_path, _PATH_RPCBINDSOCK))
++			sock_needs_unlink = 0;
+ 	}
+ 
+ 	/* if none of the systemd sockets matched, we set up the socket in
+@@ -784,7 +823,8 @@ static void
+ terminate(int dummy /*__unused*/)
+ {
+ 	close(rpcbindlockfd);
+-	unlink(_PATH_RPCBINDSOCK);
++	if (sock_needs_unlink)
++		unlink(_PATH_RPCBINDSOCK);
+ 	unlink(RPCBINDDLOCK);
+ #ifdef WARMSTART
+ 	syslog(LOG_ERR,
