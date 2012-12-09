@@ -8,10 +8,15 @@ HOMEPAGE="http://www.ltrace.org/"
 LICENCES="GPL-2"
 SLOT="0"
 
+MYOPTIONS="libunwind [[ description = [ get backtraces for traced functions via -w option ] ]]"
+
 DEPENDENCIES="
     build+run:
         dev-util/elfutils
+        libunwind? ( dev-libs/libunwind )
 "
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( libunwind )
 
 # ltrace can't ptrace() tests inside an already sydbox-ptrace()'d environment
 RESTRICT="test"
