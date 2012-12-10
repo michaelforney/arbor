@@ -1,0 +1,28 @@
+Upstream: http://www.freelists.org/post/procps/PATCH-pstest-see-truncated-usergroup-names-as-valid
+Reason: testfailure due to paludisbuild beeing too long to fit
+
+From ee293b91515235484782638cfb5a263543be2b40 Mon Sep 17 00:00:00 2001
+From: Wouter van Kesteren <woutershep@gmail.com>
+Date: Mon, 10 Dec 2012 15:20:46 +0100
+Subject: [PATCH] ps.test: see truncated user/group names as valid
+
+---
+ testsuite/ps.test/ps_output.exp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/testsuite/ps.test/ps_output.exp b/testsuite/ps.test/ps_output.exp
+index abc7bd5..3a6f3d8 100644
+--- a/testsuite/ps.test/ps_output.exp
++++ b/testsuite/ps.test/ps_output.exp
+@@ -28,7 +28,7 @@ set flag_match {
+     "blocked,sig_block,sigmask,caught,sigcatch,sig_catch" "\(BLOCKED\\s+\){3}\(CAUGHT\\s+\){2}CATCHED\\s+\(\[0-9a-f\]+\\s*\){6}$"
+     "bsdstart,start,lstart" "\\s*START\\s+STARTED\\s+STARTED\\s+\(\\s*\(\[A-Z\]\[a-z\]{2} \\d+|\\d+:\\d{2}\)\\s+\(\[A-Z\]\[a-z\]{2} \\d+|\\d+:\\d{2}:\\d{2}\)\\s+\[A-Z\]\[a-z\]{2} \[A-Z\]\[a-z\]{2}\\s+\\d+ \\d{2}:\\d{2}:\\d{2} \\d{4}\\s*\)+$"
+     "bsdtime,cputime,etime,etimes" "\\s*TIME\\s+TIME\\s+ELAPSED\\s+ELAPSED\\s*\(\\s*\\d+:\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s+\(\\d{2}:\)?\\d{2}:\\d{2}\\s+\\d+\\s*\)$"
+-    "user,ruser,group,rgroup,uid,ruid,gid,rgid" "\\s*USER\\s+RUSER\\s+GROUP\\s+RGROUP\\s+UID\\s+RUID\\s+GID\\s+RGID\\s+\(\(\\s*\[A-Za-z0-9_-\]+\\s+\){4}\(\\d+\\s+\){4}\\s*\)+$"
++    "user,ruser,group,rgroup,uid,ruid,gid,rgid" "\\s*USER\\s+RUSER\\s+GROUP\\s+RGROUP\\s+UID\\s+RUID\\s+GID\\s+RGID\\s+\(\(\\s*\[A-Za-z0-9_+-\]+\\s+\){4}\(\\d+\\s+\){4}\\s*\)+$"
+ }
+ 
+ foreach { flag match } $flag_match  {
+-- 
+1.8.0.1
+
