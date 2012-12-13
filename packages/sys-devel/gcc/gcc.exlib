@@ -116,7 +116,7 @@ gcc_src_prepare() {
 gcc_src_configure() {
     local i LANGS="c++"
 
-    for i in ada fortran java objc obj-c++; do
+    for i in ada fortran java objc obj-c++ ; do
         option ${i} && LANGS+=",${i}"
     done
 
@@ -131,33 +131,31 @@ gcc_src_configure() {
         multilib=--disable-multilib
     fi
 
-    econf \
-        ${multilib} \
-        --libdir=/usr/${LIBDIR} \
-        --hates=docdir \
-        --enable-clocale=gnu \
-        --enable-languages="${LANGS}" \
-        --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no) \
-        --enable-nls \
-        --program-suffix=-${SLOT} \
-        $(if ever at_least 4.6 ; then
-            echo --enable-lto
-          else
-            echo --enable-lto --with-libelf
-          fi) \
-        --with-pkgversion="Exherbo ${PNVR}" \
-        --with-system-zlib \
-        $(ever at_least 4.6 && option_enable graphite && \
-            if ever at_least 4.7 && has_version --root dev-libs/cloog; then
+    econf --hates=docdir                                                            \
+          --program-suffix=-${SLOT}                                                 \
+          --with-pkgversion="Exherbo ${PNVR}"                                       \
+          --libdir=/usr/${LIBDIR}                                                   \
+          --with-system-zlib                                                        \
+          --enable-nls                                                              \
+          --enable-clocale=gnu                                                      \
+          --enable-languages="${LANGS}"                                             \
+          --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no)   \
+          ${multilib}                                                               \
+          $(if ever at_least 4.6 ; then
+                echo --enable-lto
+            else
+                echo --enable-lto --with-libelf
+            fi)                                                                     \
+          $(option_with graphite cloog)                                             \
+          $(option_with graphite ppl)                                               \
+          $(if ever at_least 4.7 && option_enable graphite && has_version --root dev-libs/cloog ; then
                 option_enable graphite cloog-backend isl
                 echo '--disable-cloog-version-check'
-            else
+            elif ever at_least 4.6 && option_enable graphite ; then
                 option_enable graphite cloog-backend ppl-legacy
-            fi) \
-        $(option_with graphite cloog) \
-        $(option_with graphite ppl) \
-        $(option_enable openmp libgomp) \
-        $(option_enable propolice libssp)
+            fi)                                                                     \
+          $(option_enable openmp libgomp)                                           \
+          $(option_enable propolice libssp)
 }
 
 gcc_src_test_expensive() {
