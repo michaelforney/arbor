@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
-# Copyright 2009 Saleem Abdulrasool
+# Copyright 2009,2011,2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multibuild toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
@@ -15,9 +15,10 @@ LICENCES="GPL-2"
 SLOT="$(ever range 1-2)"
 
 MYOPTIONS="ada doc fortran propolice
-    objc   [[ description = [ Build support for the Objective C code language ] ]]
-    obj-c++ [[ description = [ Build support for the Objective C++ language ] ]]
-    openmp [[ description = [ build support for OpenMP ] ]]
+    objc            [[ description = [ Build support for the Objective C code language ] ]]
+    obj-c++         [[ description = [ Build support for the Objective C++ language ] ]]
+    objc-runtime    [[ description = [ Build the Objective-C runtime (needed for building Objective C code) ] ]]
+    openmp          [[ description = [ build support for OpenMP ] ]]
 "
 REMOTE_IDS="freecode:${PN}"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
@@ -155,7 +156,8 @@ gcc_src_configure() {
                 option_enable graphite cloog-backend ppl-legacy
             fi)                                                                     \
           $(option_enable openmp libgomp)                                           \
-          $(option_enable propolice libssp)
+          $(option_enable propolice libssp)                                         \
+          $(option_enable objc-runtime libobjc)
 }
 
 gcc_src_test_expensive() {
