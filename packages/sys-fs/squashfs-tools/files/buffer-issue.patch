@@ -1,0 +1,261 @@
+From: Phillip Lougher <phillip@squashfs.org.uk>
+Date: Sat, 24 Nov 2012 02:34:48 +0000 (+0000)
+Subject: unsquashfs: fix CVE-2012-4025
+X-Git-Url: http://squashfs.git.sourceforge.net/git/gitweb.cgi?p=squashfs%2Fsquashfs;a=commitdiff_plain;h=8515b3d420f502c5c0236b86e2d6d7e3b23c190e;hp=19c38fba0be1ce949ab44310d7f49887576cc123
+
+unsquashfs: fix CVE-2012-4025
+
+Fix integer overflow exploit in queue_init() leading to heap overflow.
+
+This was a complex exploit to fix because analysis of the code showed
+there were multiple ways this exploit could be triggered, in addition
+to the exploit vector documented in the CVE.
+
+Exploit:
+
+Data_buffer_size and fragment_buffer_size are added together and
+passed to the queue_init function defined as:
+
+struct queue *queue_init(int size)
+
+Unfortunately, data_buffer_size and fragment_buffer_size are ints, and
+contain values supplied by the user.  The addition of these values can
+overflow, leading to a negative size passed to queue_init()
+
+In queue_init, space is allocated by
+
+queue->data = malloc(sizeof(void *) * (size + 1));
+
+Given a sufficiently large negative size, (size + 1) * sizeof(void *)
+can overflow leading to a small positive number, leading to a small
+amount of buffer space being created.
+
+In queue_get, the read pointer is moved through the buffer space by
+
+queue->readp = (queue->readp + 1) % queue->size;
+
+The negative sign of size is ignored, leading to readp going beyond the
+allocated buffer space.
+
+Analysis of exploit:
+
+The exploit above is subtle, and centres around passing a negative
+number to queue_init() due to integer overflow.  This exploit can be
+fixed by adding a check for negative size passed into queue_init().
+
+However, further analysis of the exploit shows it can be triggered much
+more easily.  Data_buffer_size and fragment_buffer_size added together
+can produce a value less than MAX_INT, which when passed into
+queue_init() is not negative.  However, this less than MAX_INT value can
+overflow in the malloc calculation when multipled by sizeof(void *),
+leading to a small positive integer.  This leads to the situation where
+the buffer allocated is smaller than size, and subsequent heap overflow.
+
+Checking for a negative number in queue_init() is insufficient to
+determine if overflow has or will occur.  In fact any one time
+"spot checks" on size is fraught with the problem it can fail to detect
+previous overflow (i.e. previous overflow which has resulted in a small
+positive number is impossible to distinguish from a valid small positive
+number), and it cannot detect if overflow will occur later.
+
+Due to this the approach to the fix is to check every operation
+performed on data_buffer_size, fragment_buffer_size and any values
+derived from them.  All calculations are checked for potential overflow
+before they are performed.
+
+This has the following advantages:
+
+1. It allows the code to trap exactly where the overflow takes place,
+   leading to more descriptive error messages.
+
+2. It ensures overflow situations do not feed through to later
+   calculations making it more difficult to determine if overflow has
+   occurred.
+
+3. It ensures too large values for data and fragment buffer sizes are
+   correctly rejected even if they don't trigger the exploits.
+
+Signed-off-by: Phillip Lougher <phillip@squashfs.org.uk>
+---
+
+diff --git a/squashfs-tools/squashfs_fs.h b/squashfs-tools/squashfs_fs.h
+index d1dc987..58d31f4 100644
+--- squashfs-tools/squashfs_fs.h
++++ squashfs-tools/squashfs_fs.h
+@@ -39,6 +39,7 @@
+ #define SQUASHFS_FILE_LOG		17
+ 
+ #define SQUASHFS_FILE_MAX_SIZE		1048576
++#define SQUASHFS_FILE_MAX_LOG		20
+ 
+ /* Max number of uids and gids */
+ #define SQUASHFS_IDS			65536
+--- squashfs-tools/unsquashfs.c.buffer	2012-11-25 17:07:52.237809893 -0600
++++ squashfs-tools/unsquashfs.c	2012-11-25 17:15:24.155246275 -0600
+@@ -31,6 +31,7 @@
+ 
+ #include <sys/sysinfo.h>
+ #include <sys/types.h>
++#include <limits.h>
+ 
+ struct cache *fragment_cache, *data_cache;
+ struct queue *to_reader, *to_deflate, *to_writer, *from_writer;
+@@ -136,6 +137,24 @@
+ }
+ 
+ 
++int add_overflow(int a, int b)
++{
++	return (INT_MAX - a) < b;
++}
++
++
++int shift_overflow(int a, int shift)
++{
++	return (INT_MAX >> shift) < a;
++}
++
++ 
++int multiply_overflow(int a, int multiplier)
++{
++	return (INT_MAX / multiplier) < a;
++}
++
++
+ struct queue *queue_init(int size)
+ {
+ 	struct queue *queue = malloc(sizeof(struct queue));
+@@ -143,6 +162,10 @@
+ 	if(queue == NULL)
+ 		EXIT_UNSQUASH("Out of memory in queue_init\n");
+ 
++	if(add_overflow(size, 1) ||
++				multiply_overflow(size + 1, sizeof(void *)))
++		EXIT_UNSQUASH("Size too large in queue_init\n");
++
+ 	queue->data = malloc(sizeof(void *) * (size + 1));
+ 	if(queue->data == NULL)
+ 		EXIT_UNSQUASH("Out of memory in queue_init\n");
+@@ -1805,7 +1828,7 @@
+ {
+ 	int i;
+ 	sigset_t sigmask, old_mask;
+-	int all_buffers_size = fragment_buffer_size + data_buffer_size;
++	int all_buffers_size;
+ 
+ 	sigemptyset(&sigmask);
+ 	sigaddset(&sigmask, SIGINT);
+@@ -1841,6 +1864,15 @@
+ 		EXIT_UNSQUASH("Out of memory allocating thread descriptors\n");
+ 	deflator_thread = &thread[3];
+ 
++        if(add_overflow(fragment_buffer_size, data_buffer_size))
++                  EXIT_UNSQUASH("Data and fragment queues combined are"
++                                                         " too large\n");
++
++        all_buffers_size = fragment_buffer_size + data_buffer_size;
++
++        if(add_overflow(all_buffers_size, all_buffers_size))
++                  EXIT_UNSQUASH("Data and fragment queues combined are"
++                                                         " too large\n");
+ 	to_reader = queue_init(all_buffers_size);
+ 	to_deflate = queue_init(all_buffers_size);
+ 	to_writer = queue_init(1000);
+@@ -1940,6 +1972,31 @@
+ 	fflush(stdout);
+ }
+ 
++int parse_number(char *arg, int *res)
++{
++       char *b;
++       long number = strtol(arg, &b, 10);
++
++       /* check for trailing junk after number */
++       if(*b != '\0')
++               return 0;
++
++       /* check for strtol underflow or overflow in conversion */
++       if(number == LONG_MIN || number == LONG_MAX)
++               return 0;
++
++       /* reject negative numbers as invalid */
++       if(number < 0)
++               return 0;
++
++       /* check if long result will overflow signed int */
++       if(number > INT_MAX)
++               return 0;
++
++       *res = number;
++       return 1;
++}
++
+ 
+ #define VERSION() \
+ 	printf("unsquashfs version 4.2 (2011/02/28)\n");\
+@@ -2022,8 +2079,8 @@
+ 		} else if(strcmp(argv[i], "-data-queue") == 0 ||
+ 					 strcmp(argv[i], "-da") == 0) {
+ 			if((++i == argc) ||
+-					(data_buffer_size = strtol(argv[i], &b,
+-					 10), *b != '\0')) {
++					!parse_number(argv[i],
++						&data_buffer_size)) {
+ 				ERROR("%s: -data-queue missing or invalid "
+ 					"queue size\n", argv[0]);
+ 				exit(1);
+@@ -2036,8 +2093,8 @@
+ 		} else if(strcmp(argv[i], "-frag-queue") == 0 ||
+ 					strcmp(argv[i], "-fr") == 0) {
+ 			if((++i == argc) ||
+-					(fragment_buffer_size = strtol(argv[i],
+-					 &b, 10), *b != '\0')) {
++					!parse_number(argv[i],
++						&fragment_buffer_size)) {
+ 				ERROR("%s: -frag-queue missing or invalid "
+ 					"queue size\n", argv[0]);
+ 				exit(1);
+@@ -2161,8 +2218,41 @@
+ 	block_size = sBlk.s.block_size;
+ 	block_log = sBlk.s.block_log;
+ 
+-	fragment_buffer_size <<= 20 - block_log;
+-	data_buffer_size <<= 20 - block_log;
++       /*
++        * Sanity check block size and block log.
++        *
++        * Check they're within correct limits
++        */
++       if(block_size > SQUASHFS_FILE_MAX_SIZE ||
++                                       block_log > SQUASHFS_FILE_MAX_LOG)
++               EXIT_UNSQUASH("Block size or block_log too large."
++                       "  File system is corrupt.\n");
++
++       /*
++        * Check block_size and block_log match
++        */
++       if(block_size != (1 << block_log))
++               EXIT_UNSQUASH("Block size and block_log do not match."
++                       "  File system is corrupt.\n");
++
++       /*
++        * convert from queue size in Mbytes to queue size in
++        * blocks.
++        *
++        * In doing so, check that the user supplied values do not
++        * overflow a signed int
++        */
++       if(shift_overflow(fragment_buffer_size, 20 - block_log))
++               EXIT_UNSQUASH("Fragment queue size is too large\n");
++       else
++               fragment_buffer_size <<= 20 - block_log;
++
++       if(shift_overflow(data_buffer_size, 20 - block_log))
++               EXIT_UNSQUASH("Data queue size is too large\n");
++       else
++               data_buffer_size <<= 20 - block_log;
++
++
+ 	initialise_threads(fragment_buffer_size, data_buffer_size);
+ 
+ 	fragment_data = malloc(block_size);
