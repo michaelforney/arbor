@@ -1,0 +1,16 @@
+Source: Timo Gurr <tgurr@exherbo.org>
+Upstream: No
+Reason: We have /run on a tmpfs so we can't rely on files surviving a restart
+
+diff -Naur a/systemd/rpcbind.service.in b/systemd/rpcbind.service.in
+--- a/systemd/rpcbind.service.in	2012-12-14 02:55:05.802049996 +0100
++++ b/systemd/rpcbind.service.in	2012-12-14 03:03:23.419048839 +0100
+@@ -2,7 +2,7 @@
+ Description=RPC Bind
+ 
+ [Service]
+-ExecStart=@bindir@/rpcbind -w -f
++ExecStart=@bindir@/rpcbind -f
+ 
+ [Install]
+ WantedBy=multi-user.target
