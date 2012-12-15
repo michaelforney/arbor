@@ -134,6 +134,13 @@ EOF
         newconfd "${FILES}"/named.confd named
     fi
 
+    if option systemd ; then
+        insinto /usr/${LIBDIR}/tmpfiles.d
+        hereins ${PN}.conf <<EOF
+d /run/named 0755 named named -
+EOF
+    fi
+
     install_systemd_files
 
     # Install standard zones and root cache
