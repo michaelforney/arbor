@@ -26,8 +26,10 @@ src_prepare() {
     # Fix the use of dot
     edo sed -e 's/@DOT@//g' -i docs/doxygen.cfg.in
 
-    expatch "${FILES}"/${PN}-tools.patch
-    ever is_scm || expatch "${FILES}"/${PN}-fix-multibuild-tests.patch
+    if ! ever at_least 3.2; then
+        expatch "${FILES}"/${PN}-tools.patch
+        expatch "${FILES}"/${PN}-fix-multibuild-tests.patch
+    fi
 
     default
     edo popd
@@ -71,5 +73,10 @@ src_install() {
     # Replace the automatically installed ugly version with the clean version from
     # utils/lit
     edo mv "${IMAGE}"/usr/bin/{lit,llvm-lit}
+
+    # Make sure e.g. clang will not look for tools in the build directory
+    edo sed \
+        -e 's:^set(LLVM_TOOLS_BINARY_DIR .*)$:set(LLVM_TOOLS_BINARY_DIR /usr/bin):' \
+        -i "${IMAGE}"/usr/share/llvm/cmake/LLVMConfig.cmake
 }
 
