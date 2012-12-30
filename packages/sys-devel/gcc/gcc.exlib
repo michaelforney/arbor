@@ -182,6 +182,117 @@ gcc_src_test_expensive() {
     emake check
 }
 
+__gcc_slot_ada() {
+    local programs=(
+        gnat
+        gnatbind
+        gnatchop
+        gnatclean
+        gnatfind
+        gnatkr
+        gnatlink
+        gnatls
+        gnatmake
+        gnatname
+        gnatprep
+        gnatxref
+    )
+    local program=
+
+    option ada || return
+
+    for program in "${programs[@]}" ; do
+        edo mv "${IMAGE}/usr/bin/${program}"{,-${SLOT}}
+    done
+}
+
+__gcc_slot_java() {
+    local unslotted=(
+        "${IMAGE}"/usr/*/security/classpath.security
+        "${IMAGE}"/usr/share/java/ecj.jar
+    )
+    local extension= item= name=
+
+    option java || return
+
+    for item in "${unslotted[@]}" ; do
+        name=$(basename "${item}")
+        extension=${name#*.}
+
+        edo mv "${item%.${extension}}"{,-${SLOT}}.${extension}
+    done
+}
+
+__gcc_slot_shared_data() {
+    local item= name= page=
+
+    for page in "${IMAGE}"/usr/share/info/*.info ; do
+        name=$(basename "${page}" .info)
+        edo mv "${IMAGE}"/usr/share/info/${name}{,-${SLOT}}.info
+    done
+
+    # NOTE(compnerd) we are currently only moving pages in section 7 as section 1 pages are already
+    # slotted due to the binary naming (c.f. --package-suffix).
+    # TODO(compnerd) consider generalising this so that in the case that new man pages are added,
+    # they will be implicitly slotted.  The logic in __gcc_provide_slot_alternatives is already
+    # agnostic to sections!
+    for page in "${IMAGE}"/usr/share/man/man7/* ; do
+        name=$(basename "${page}" .7)
+        edo mv "${IMAGE}"/usr/share/man/man7/${name}{,-${SLOT}}.7
+    done
+
+    for item in "${IMAGE}"/usr/share/locale/*/*/{cpplib,gcc}.mo ; do
+        name=$(basename "${item}" .mo)
+        edo mv "${item%.mo}"{,-${SLOT}}.mo
+    done
+}
+
+__gcc_provide_slot_alternatives() {
+    local alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
+    local program= item= name= section=
+
+    # binaries
+    for program in "${IMAGE}"/usr/bin/*-${SLOT} ; do
+        name=$(basename "${program}" -${SLOT})
+        alternatives+=( /usr/bin/${name} ${name}-${SLOT} )
+    done
+
+    alternatives+=( /usr/bin/cc ${CHOST}-gcc-${SLOT} )
+    alternatives+=( /usr/bin/c++ ${CHOST}-g++-${SLOT} )
+
+    # java runtime
+    if option java ; then
+        for item in "${IMAGE}"/usr/*/security/classpath.security ; do
+            alternatives+=( ${ROOT:-/}${item##${IMAGE}/} "classpath-${SLOT}.security" )
+        done
+
+        alternatives+=( /usr/share/java/ecj.jar ecj-${SLOT}.jar )
+        alternatives+=( /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
+    fi
+
+    # info pages
+    for item in "${IMAGE}"/usr/share/info/*-${SLOT}.info ; do
+        name=$(basename "${item}" -${SLOT}.info)
+        alternatives+=( /usr/share/info/${name}.info ${name}-${SLOT}.info )
+    done
+
+    # man pages
+    for item in "${IMAGE}"/usr/share/man/man?/*-${SLOT}.? ; do
+        section=${item##*.}
+        name=$(basename "${item}" -${SLOT}.${section})
+        alternatives+=( /usr/share/man/man${section}/${name}.${section} ${name}-${SLOT}.${section} )
+    done
+
+    # locale data
+    for item in "${IMAGE}"/usr/share/locale/*/*/{cpplib,gcc}-${SLOT}.mo ; do
+        name=$(basename "${item}" -${SLOT}.mo)
+        alternatives+=( ${ROOT:-/}${item##${IMAGE}/}.mo ${name}-${SLOT}.mo )
+    done
+
+    # provide alternatives
+    alternatives_for "${alternatives[@]}"
+}
+
 gcc_src_install() {
     default
 
@@ -206,14 +317,7 @@ gcc_src_install() {
     edo pushd "${IMAGE}"
 
     ### slots handling
-    local x bn ext alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
-
-    # binaries - slotted properly by upstream, manage with alternatives
-    for x in usr/bin/*-${SLOT}; do
-        bn=$(basename "${x}" -${SLOT})
-        alternatives+=( /usr/bin/${bn} ${bn}-${SLOT} )
-    done
-    alternatives+=( /usr/bin/cc gcc )
+    local x bn ext
 
     # libraries
     local libdir
@@ -264,56 +368,12 @@ gcc_src_install() {
         done
     done
 
-    # info pages
-    for x in usr/share/info/*.info; do
-        bn=$(basename "${x}" .info)
-        edo mv usr/share/info/${bn}{,-${SLOT}}.info
-        alternatives+=( /usr/share/info/${bn}.info ${bn}-${SLOT}.info )
-    done
-
-    # man pages
-    for x in usr/share/man/man1/*-${SLOT}.1; do
-        bn=$(basename "${x}" -${SLOT}.1)
-        alternatives+=( /usr/share/man/man1/${bn}.1 ${bn}-${SLOT}.1 )
-    done
-    for x in usr/share/man/man7/*; do
-        bn=$(basename "${x}" .7)
-        edo mv "${x%.7}"{,-${SLOT}}.7
-        alternatives+=( /usr/share/man/man7/${bn}.7 ${bn}-${SLOT}.7 )
-    done
-
-    # locales
-    for x in usr/share/locale/*/*/{cpplib,gcc}.mo; do
-        bn=$(basename "${x}" .mo)
-        edo mv "${x%.mo}"{,-${SLOT}}.mo
-        alternatives+=( /${x} ${bn}-${SLOT}.mo )
-    done
-
-    # ada
-    if option ada; then
-        for x in gnat gnatbind gnatchop gnatclean gnatfind gnatkr gnatlink gnatls gnatmake gnatname gnatprep gnatxref; do
-            edo mv usr/bin/${x} usr/bin/${x}-${SLOT}
-            alternatives+=( /usr/bin/${x} ${x}-${SLOT} )
-        done
-    fi
-
-    # java
-    if option java; then
-        local classpaths=()
-        for libdir in ${all_libdirs}; do
-            classpaths+=( usr/${libdir}/security/classpath.security )
-        done
-        for x in "${classpaths[@]}" usr/share/java/ecj.jar; do
-            bn=$(basename "${x}")
-            ext=${bn#*.}
-            edo mv "${x%.${ext}}"{,-${SLOT}}.${ext}
-            alternatives+=( /${x} ${bn%.${ext}}-${SLOT}.${ext} )
-        done
-        alternatives+=( /usr/share/java/tools.jar libgcj-tools-${PV}.jar )
-    fi
-
-    alternatives_for "${alternatives[@]}"
     edo popd
+
+    __gcc_slot_ada
+    __gcc_slot_java
+    __gcc_slot_shared_data
+    __gcc_provide_slot_alternatives
 
     # fix libstdc++.so symlink
     for libdir in ${all_libdirs}; do
