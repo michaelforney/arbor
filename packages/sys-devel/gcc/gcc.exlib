@@ -4,7 +4,7 @@
 # Copyright 2009,2011,2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multibuild toolchain-funcs versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
+require multibuild versionator alternatives gnu [ suffix=bz2 subdir=${PNV} ]
 
 export_exlib_phases src_unpack src_prepare src_configure src_test_expensive src_install \
     pkg_postinst pkg_prerm pkg_postrm
@@ -20,12 +20,6 @@ MYOPTIONS="ada doc fortran propolice
     objc-runtime    [[ description = [ Build the Objective-C runtime (needed for building Objective C code) ] ]]
     openmp          [[ description = [ build support for OpenMP ] ]]
 "
-REMOTE_IDS="freecode:${PN}"
-UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
-UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
-UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
-
-RESTRICT="test" # tests are expensive
 
 DEPENDENCIES="
     build:
@@ -52,7 +46,31 @@ if ! ever at_least 4.6 ; then
     "
 fi
 
-MYOPTIONS+=" java"
+# graphite support
+MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
+# Upstream say it is a build time dependency, but uninstall breaks at least gcc-4.6, probably also
+# gcc[>=4.4]
+if ever at_least 4.6.0; then
+    DEPENDENCIES+="
+        build+run:
+            graphite? ( dev-libs/ppl:=[>=0.11] )
+    "
+fi
+if ever at_least 4.7; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/gmp:=[>=4.2]
+            graphite? ( || ( dev-libs/cloog dev-libs/cloog-ppl[>=0.15.5] ) )
+    "
+else
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/gmp:=[>=4.1]
+            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )
+    "
+fi
+
+# java support
 if [[ ${SLOT} == 4.4 ]]; then
     ECJ_JAR_PV="4.3" # There is no ecj-4.4.jar
 elif [[ ${SLOT} == 4.6 ]]; then
@@ -62,7 +80,9 @@ elif [[ ${SLOT} == 4.7 ]]; then
 else
     ECJ_JAR_PV=${SLOT}
 fi
+
 DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
+MYOPTIONS+=" java"
 DEPENDENCIES+="
     build:
         doc? ( app-doc/doxygen[>=1.5.1] )
@@ -70,29 +90,18 @@ DEPENDENCIES+="
                 app-arch/zip )
 "
 
-# Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
-# >=4.4
-MYOPTIONS+=" graphite [[ description = [ Enable support for Graphite based loop optimizations ] ]]"
-if ever at_least 4.7; then
-    DEPENDENCIES+="
-        build+run:
-            dev-libs/gmp:=[>=4.2]
-            graphite? ( || ( dev-libs/cloog dev-libs/cloog-ppl[>=0.15.5] ) )"
-else
-    DEPENDENCIES+="
-        build+run:
-            dev-libs/gmp:=[>=4.1]
-            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )"
-fi
-
-# Upstream say it is a buildtime dependency, but uninstall breaks at least gcc-4.6 probably also
-# >=4.4
-if ever at_least 4.6.0; then
-    DEPENDENCIES+="
-        build+run:
-            graphite? ( dev-libs/ppl:=[>=0.11] )"
+# go support
+if ever at_least 4.6.0 ; then
     MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
 fi
+
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
+UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
+
+RESTRICT="test" # tests are expensive
 
 WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}"/${PNV/_p/-}
@@ -115,49 +124,52 @@ gcc_src_prepare() {
 }
 
 gcc_src_configure() {
-    local i LANGS="c++"
+    local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )
+    local language= languages=( c++ )
+    local enable_multilib=
+    local cloog_backend=
 
-    for i in ada fortran java objc obj-c++ ; do
-        option ${i} && LANGS+=",${i}"
+    # support for optional languages
+    for language in ada fortran java objc obj-c++ ; do
+        option ${language} && languages+=( ${language} )
     done
 
-    if ever at_least 4.6; then
-        option go && LANGS+=",go"
+    if ever at_least 4.6 ; then
+        option go && languages+=( go )
     fi
 
-    local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )
+    # determine multilib support
     if [[ ${#supported_c_build_targets[@]} -gt 1 ]]; then
-        multilib=--enable-multilib
+        enable_multilib='--enable-multilib'
     else
-        multilib=--disable-multilib
+        enable_multilib='--disable-multilib'
     fi
 
-    econf --hates=docdir                                                            \
-          --program-suffix=-${SLOT}                                                 \
-          --with-pkgversion="Exherbo ${PNVR}"                                       \
-          --libdir=/usr/${LIBDIR}                                                   \
-          --with-system-zlib                                                        \
-          --enable-nls                                                              \
-          --enable-clocale=gnu                                                      \
-          --enable-languages="${LANGS}"                                             \
-          --enable-libstdcxx-pch=$(! tc-is-cross-compiler && echo yes || echo no)   \
-          ${multilib}                                                               \
-          $(if ever at_least 4.6 ; then
-                echo --enable-lto
-            else
-                echo --enable-lto --with-libelf
-            fi)                                                                     \
-          $(option_with graphite cloog)                                             \
-          $(option_with graphite ppl)                                               \
-          $(if ever at_least 4.7 && option_enable graphite && has_version --root dev-libs/cloog ; then
-                option_enable graphite cloog-backend isl
-                echo '--disable-cloog-version-check'
-            elif ever at_least 4.6 && option_enable graphite ; then
-                option_enable graphite cloog-backend ppl-legacy
-            fi)                                                                     \
-          $(option_enable openmp libgomp)                                           \
-          $(option_enable propolice libssp)                                         \
-          $(option_enable objc-runtime libobjc)
+    # select cloog backend
+    cloog_backend=ppl-legacy
+    if ever at_least 4.7 && has_version --root dev-libs/cloog ; then
+        cloog_backend=isl
+    fi
+
+    econf --hates=docdir                                            \
+          --libdir=/usr/${LIBDIR}                                   \
+          --with-pkgversion="exherbo ${PNVR}"                       \
+          --program-suffix=-${SLOT}                                 \
+          --enable-clocale=gnu                                      \
+          --enable-languages="$(IFS=, ; echo "${languages[*]}")"    \
+          --enable-lto $(! ever at_least 4.6 && echo --with-libelf) \
+          ${enable_multilib}                                        \
+          --enable-nls                                              \
+          $(option_with graphite cloog)                             \
+          $(option_with graphite ppl)                               \
+          $(if ever at_least 4.6 && optionq graphite ; then
+                option_enable graphite cloog-backend ${cloog_backend}
+                ever at_least 4.7 && echo '--disable-cloog-version-check'
+            fi)                                                     \
+          $(option_enable openmp libgomp)                           \
+          $(option_enable propolice libssp)                         \
+          $(option_enable objc-runtime libobjc)                     \
+          --with-system-zlib
 }
 
 gcc_src_test_expensive() {
@@ -173,7 +185,7 @@ gcc_src_test_expensive() {
 gcc_src_install() {
     default
 
-    # Precompiled headers, disable for cross-compiling
+    # precompiled headers
     local precompiled_headers=( "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch )
     if [[ -f ${precompiled_headers[0]} ]] ; then
         insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
