@@ -1,0 +1,14 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Symlink to $(DESTDIR)
+--- groff-1.22.1/contrib/mom/Makefile.sub
++++ groff-1.22.1/contrib/mom/Makefile.sub
+@@ -160,7 +160,7 @@
+ 	done
+ 	for f in $(PDFDOCFILE); do \
+ 	  rm -f $(DESTDIR)$(pdfdocdir)/$$f; \
+-	  ln -s $(DESTDIR)$(exampledir)/mom/$$f $(DESTDIR)$(pdfdocdir)/$$f; \
++	  ln -s $(exampledir)/mom/$$f $(DESTDIR)$(pdfdocdir)/$$f; \
+ 	done
+ 
+ stamp-strip: $(STRIPFILES)
