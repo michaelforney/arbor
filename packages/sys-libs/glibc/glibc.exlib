@@ -5,7 +5,11 @@
 export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
-myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
+if ! ever at_least 2.17; then
+    myexparam ports_uri="mirror://gnu/${PN}/${PN}-ports-${PV}.tar.bz2"
+else
+    myexparam ports_uri=""
+fi
 
 require multibuild flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ] kernel
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
