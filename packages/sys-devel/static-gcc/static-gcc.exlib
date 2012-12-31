@@ -1,0 +1,115 @@
+# Copyright 2012 © Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ pn=${PN#static-} suffix=bz2 ]
+
+SUMMARY="stand alone compiler"
+
+LICENCES="GPL-2"
+SLOT="0"
+MYOPTIONS="
+    targets:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
+
+DEPENDENCIES="
+    build+run:
+        sys-devel/binutils[targets:*(-)?]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch" )
+
+static-gcc_src_configure() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local libpath=/${target}/lib:/usr/${target}/lib
+
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo mkdir -p "${WORKBASE}/build/${target}"
+        edo cd "${WORKBASE}/build/${target}"
+
+        # NOTE(compnerd) we cannot pass --with-sysroot here because the build assumes that the
+        # "target" libc exists.  Furthermore, if the host and target are the same, then the build
+        # assumes that the "target" libc exists.  Work around that by passing in --with-newlib in
+        # that case.
+        edo "${WORKBASE}/${PN#static-}-${PV}/configure"     \
+                --host=${CHOST}                             \
+                --target=${target}                          \
+                --prefix=/usr/${CHOST}                      \
+                --datarootdir=/usr/share                    \
+                --localstatedir=/var                        \
+                --sysconfdir=/etc                           \
+                --disable-dependency-tracking               \
+                --enable-fast-install                       \
+                --disable-bootstrap                         \
+                --disable-decimal-float                     \
+                --disable-libffi                            \
+                --disable-libgomp                           \
+                --disable-libmudflap                        \
+                --disable-libquadmath                       \
+                --disable-libssp                            \
+                --disable-lto                               \
+                --disable-nls                               \
+                --disable-shared                            \
+                --disable-threads                           \
+                --enable-languages=c                        \
+                --program-prefix=${target}-static-          \
+                --with-lib-path=${libpath}                  \
+                --without-headers                           \
+                --with-as=/usr/${CHOST}/bin/${target}-as    \
+                --with-ld=/usr/${CHOST}/bin/${target}-ld    \
+                --with-system-zlib                          \
+                $([[ ${target} == ${CHOST} ]] && echo --program-prefix=static- --with-newlib) || die
+    done
+}
+
+static-gcc_src_compile() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local libpath=/${target}/lib:/usr/${target}/lib
+
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo cd "${WORKBASE}/build/${target}"
+
+        default
+    done
+}
+
+static-gcc_src_install() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local libpath=/${target}/lib:/usr/${target}/lib
+
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo cd "${WORKBASE}/build/${target}"
+
+        emake -j1 DESTDIR="${IMAGE}" install
+        edo find "${IMAGE}" -depth -type d -empty -delete
+    done
+}
+
+export_exlib_phases src_configure src_compile src_install
+
