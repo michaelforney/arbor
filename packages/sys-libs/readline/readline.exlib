@@ -11,9 +11,9 @@ else
     PATCH_LEVEL=0
 fi
 
-require flag-o-matic gnu [ suffix=gz ] easy-multibuild
+require flag-o-matic gnu [ suffix=gz ]
 
-export_exlib_phases src_prepare
+export_exlib_phases src_prepare src_configure src_compile
 
 SUMMARY="GNU command line editing and history library"
 DESCRIPTION="
@@ -27,7 +27,7 @@ HOMEPAGE="http://cnswww.cns.cwru.edu/php/chet/${PN}/rltop.html"
 
 if (( PATCH_LEVEL )) ; then
     DOWNLOADS+="
-    $(for ((i=1; i<=PATCH_LEVEL; i++)); do
+    $(for (( i=1; i<=PATCH_LEVEL; i++ )); do
         printf "ftp://ftp.cwru.edu/pub/bash/${MY_PNV}-patches/${PN}$(ever delete_all ${MY_PV})-%03d\n" ${i}
     done)"
 fi
@@ -37,13 +37,17 @@ UPSTREAM_CHANGELOG="http://cnswww.cns.cwru.edu/php/chet/${PN}/CHANGES"
 
 LICENCES="GPL-3"
 SLOT="0"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/ncurses[multibuild_c:*(-)?]"
-
-WORK="${WORKBASE}/${MY_PNV}"
+        sys-libs/ncurses[hosts:*?]
+"
 
 DEFAULT_SRC_INSTALL_PARAMS=(
     htmldir="/usr/share/doc/${PNVR}/html"
@@ -55,9 +59,11 @@ DEFAULT_SRC_INSTALL_PARAMS=(
 readline_src_prepare() {
     if (( PATCH_LEVEL )) ; then
         local i patches=( -p0 )
-        for ((i=1; i<=PATCH_LEVEL; i++)); do
-            patches+=("${FETCHEDDIR}/${PN}$(ever delete_all ${MY_PV})-$(printf "%03d" ${i})")
+
+        for (( i=1; i<=PATCH_LEVEL; i++ )) ; do
+            patches+=( "${FETCHEDDIR}/${PN}$(ever delete_all ${MY_PV})-$(printf "%03d" ${i})" )
         done
+
         expatch "${patches[@]}"
     fi
 
@@ -67,18 +73,61 @@ readline_src_prepare() {
     default
 }
 
-configure_one_multibuild() {
-    filter-flags -m32
-    case "${MULTIBUILD_TARGET}" in
-        32) export CC="${CC} -m32";;
-        64) export CC="${CC/ -m32/}";;
-    esac
+readline_src_configure() {
+    local host=
 
-    econf --hates=libdir --libdir=/${LIBDIR}
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+
+        edo mkdir -p "${WORKBASE}/build/${host}"
+        edo cd "${WORKBASE}/build/${host}"
+
+        edo "${WORKBASE}/${MY_PNV}/configure"   \
+                --build=${CHOST}                \
+                --host=${host}                  \
+                --prefix=/usr/${host}           \
+                --datarootdir=/usr/share        \
+                --localstatedir=/var            \
+                --sysconfdir=/etc               \
+        || die
+    done
 }
 
-install_one_multibuild() {
-    default
-    edo rmdir "${IMAGE}"/usr/bin
+readline_src_compile() {
+    local host=
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+        edo cd "${WORKBASE}/build/${host}"
+
+        default
+    done
+}
+
+readline_src_install() {
+    local host=
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+        edo cd "${WORKBASE}/build/${host}"
+
+        default
+        edo rmdir "${IMAGE}/usr/${host}/bin"
+    done
 }
 
