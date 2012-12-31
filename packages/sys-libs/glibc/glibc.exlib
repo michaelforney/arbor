@@ -1,8 +1,9 @@
 # Copyright 2007-2008 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2010, 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install
+export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install pkg_postinst
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 if ! ever at_least 2.17; then
@@ -32,6 +33,11 @@ MYOPTIONS="
     systemd [[
         description = [ Install systemd service file for name service cache daemon (nscd) ]
     ]]
+
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
@@ -40,47 +46,41 @@ DEPENDENCIES="
         sys-apps/gawk
         sys-apps/sed
         sys-apps/texinfo
-        sys-kernel/linux-headers
-        bootstrap? ( sys-devel/bootstrap-gcc )
+        sys-kernel/linux-headers[hosts:*?]
+        bootstrap? ( sys-devel/static-gcc )
     run:
-        sys-libs/timezone-data"
+        sys-libs/timezone-data
+"
 
 # tests are expensive
 RESTRICT=test
 
-WORK="${WORKBASE}/build"
-ECONF_SOURCE="${WORKBASE}/${PNV}"
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}/glibc-95f5a9a866695da4e038aa4e6ccbbfd5d9cf63b7.patch"
+    "${FILES}/glibc-c57a67e03368687fc0d2ae8354cd1b347a61ea44.patch"
+)
+#    "${FILES}/glibc-e057a1b5930ec538c2b8abbba700a436ef2c81d5.patch"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
 glibc_pkg_pretend() {
-    local multibuild_c_target
-
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        if ! [[ ${CFLAGS} =~ -march|-mcpu ]]; then
-            ewarn "-march or -mcpu setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to -march=native"
-        fi
-    done
-    if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
-        die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
-    fi
-
     kernel_check_version_string
-
     local normalized_kernel_version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}${BASH_REMATCH[3]}${BASH_REMATCH[4]:-}
-
     if ! ever at_least $MINIMUM_KERNEL_VERSION ${normalized_kernel_version} ; then
         ewarn "Your currently booted kernel-version is to old ($(uname -r))."
         ewarn "If you continue you will probably break your system."
         ewarn "Please upgrade your kernel to a version >=$MINIMUM_KERNEL_VERSION"
     fi
 
-    if [[ -f "${ROOT}"/etc/tmpfiles.d/nscd.conf ]] ; then
+    if [[ -f "${ROOT}/etc/tmpfiles.d/nscd.conf" ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/nscd.conf has been moved to"
         ewarn "/usr/${LIBDIR}/tmpfiles.d/nscd.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
+    fi
+
+    # TODO(compnerd) consider using filter-flags rather than dying here
+    if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
+        die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
     fi
 }
 
@@ -98,7 +98,7 @@ glibc_pkg_setup() {
 glibc_src_unpack() {
     default
 
-    if [[ ${PV/_p*} != ${PV} ]] ; then
+    if [[ ${PV} =~ *_p* ]] ; then
         edo mv glibc-${PV/_p*}-2* glibc-${PV}
         edo mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
     fi
@@ -106,151 +106,175 @@ glibc_src_unpack() {
     if [[ -n ${ports_uri} ]] ; then
         edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
     fi
-
-    edo mkdir "${WORK}"
 }
 
 glibc_src_prepare() {
-    if option bootstrap ; then
-        sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig" || die "failed to remove gcc_eh linkage"
-        export PATH="/usr/bootstrap-gcc/bin:$PATH"
-        export GCC="bootstrap-gcc"
-    else
-        export GCC="${CC}"
+    if [[ $(eclectic ld show) == gold ]]; then
+        edo mkdir "${TEMP}/bin"
+        edo ln -sf /usr/${CHOST}/bin/ld.bfd "${TEMP}/bin/ld"
     fi
 
+    # TODO(compnerd) convert to an exparam
     ever at_least 2.14.1-r2 && ! ever at_least 2.16 && eautoconf
+
+    filter-flags -O*
+    append-flags -O2
+
     default
 }
 
 glibc_src_configure() {
-    if [[ $(eclectic ld show) == gold ]]; then
-        edo mkdir "${TEMP}"/bin
-        edo ln -sf /usr/${CHOST}/bin/ld.bfd "${TEMP}"/bin/ld
-        GCC="${GCC} -B${TEMP}/bin/"
-    fi
+    local host=
 
-    local multibuild_c_target
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        local _CC _CXX
 
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        edo mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
-        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
-
-        cat > config.cache <<- EOF
-libc_cv_forced_unwind=yes
-libc_cv_c_cleanup=yes
-libc_cv_gnu89_inline=yes
-libc_cv_ssp=no
-libc_cv_slibdir=/${LIBDIR}
-EOF
-
-        if ! [[ ${CFLAGS} =~ -march|-mcpu ]]; then
-            append-flags -march=native
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
         fi
 
-        append-flags -O2
+        echo "    Cross-Compile Host: ${host}"
 
-        # --enable-stackguard-randomization could also be enabled for <2.12.2 but needs testing
-        BUILD_CC=${CC} CC="${GCC} -m${multibuild_c_target}" econf \
-            --libdir="/usr/${LIBDIR}" \
-            --cache-file=config.cache \
-            "--enable-kernel=$MINIMUM_KERNEL_VERSION" \
-            $(ever at_least 2.14.1-r2 && echo '--enable-obsolete-rpc') \
-            --enable-stackguard-randomization \
-            --with-headers=/usr/include \
-            --with-add-ons --with-crypt \
-            --without-gd --without-cvs
+        edo mkdir -p "${WORKBASE}/build/${host}"
+        edo cd "${WORKBASE}/build/${host}"
+
+        if [[ "${host}" == "powerpc64-exherbo-linux-gnueabi" ]] ; then
+            cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
+    libc_cv_ssp=no
+EOF
+        elif [[ "${host}" == "i686-pc-linux-gnu" ]] ; then
+            cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
+    libc_cv_ssp=no
+EOF
+        fi
+
+        if ! ever at_least 2.17 ; then
+            # NOTE(compnerd) explicitly specify that the toolchain is able to emit debug
+            # information for assembly routines.  This is really important as the stabs
+            # fallback stabs information leaves gas unable to actually resolve symbol sizes
+            # and thus breaks compilation
+            cat >> "${WORKBASE}/build/${host}/config.cache" <<- EOF
+    libc_cv_cpp_asm_debuginfo=yes
+EOF
+        fi
+
+        # TODO(compnerd) append the ld search path
+        if option bootstrap ; then
+            _CC=/usr/${CHOST}/bin/${host}-static-gcc
+            _CXX=/usr/${CHOST}/bin/${host}-static-g++
+        else
+            _CC=/usr/${CHOST}/bin/${host}-gcc
+            _CXX=/usr/${CHOST}/bin/${host}-g++
+        fi
+
+        # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
+        # script does not bother to check for the prefixed tools!
+        READELF=${host}-readelf NM=${host}-nm               \
+        BUILD_CC=cc CC=${_CC} CXX=${_CXX}                   \
+            "${WORKBASE}/${PNV}/configure"                  \
+                --cache-file=config.cache                   \
+                --build=${CHOST}                            \
+                --host=${host}                              \
+                --prefix=/usr/${host}                       \
+                --datarootdir=/usr/share                    \
+                --libdir=/usr/${host}/lib                   \
+                --localedir=/usr/share/locale               \
+                --localstatedir=/var                        \
+                --sysconfdir=/etc                           \
+                --enable-addons                             \
+                --enable-kernel=${MINIMUM_KERNEL_VERSION}   \
+                --enable-obsolete-rpc                       \
+                --enable-stackguard-randomization           \
+                --with-headers=/usr/${host}/include || die
     done
 }
 
 glibc_src_compile() {
-    local multibuild_c_target
+    local host=
 
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
 
-        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        echo "    Cross-Compile Host: ${host}"
 
+        edo cd "${WORKBASE}/build/${host}"
         default
     done
 }
 
 glibc_src_install() {
+    local conf_files=(
+        "${WORKBASE}/${PNV}/nscd/nscd.conf"
+        "${WORKBASE}/${PNV}/nss/nsswitch.conf"
+        "${WORKBASE}/${PNV}/posix/gai.conf"
+    )
+    local noins_files=(
+        "${IMAGE}/etc/ld.so.cache"
+        "${IMAGE}/etc/localtime"
+    )
+    local host=
+
     export LANGUAGE=C
 
-    # Note: the default abi must always be staged last.  We do this as the last
-    # one to get staged will clobber all collisions.  In particular, this will
-    # be all of the executables.  The supporting libraries (libc, nss, etc), are
-    # installed into architecutre specific directories.
-    local multibuild_c_target
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        local loader=
 
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
 
-        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        echo "    Cross-Compile Host: ${host}"
 
+        edo cd "${WORKBASE}/build/${host}"
         default
-    done
 
-    # make ld-linux.so.2 accessible to everything that expects to find things in /lib
-    local supported_c_targets=( ${MULTIBUILD_C_TARGETS} )
-    if [[ ${#supported_c_targets[@]} -gt 1 ]]; then
-        dosym ../lib32/ld-linux.so.2 /lib64/ld-linux.so.2
-    fi
-
-    # link every non default locale dir to the default one which is created below
-    local final_libdir=${LIBDIR}
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-
-        if [[ "${multibuild_c_target}" != "${MULTIBUILD_C_DEFAULT_TARGET}" ]] ; then
-            dosym /usr/{${final_libdir},${LIBDIR}}/locale
-        fi
-    done
-
-    # localedef fails if /usr/lib/locale does not exist
-    keepdir /usr/${LIBDIR}/locale
-
-    # don't install /etc/{ld.so.cache,localtime}
-    for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
-        if [[ -f ${file} ]] ; then
-            edo rm "${file}"
-        fi
+        # NOTE(compnerd) maintain compatibility with pre-existing binaries by symlinking the loaders
+        # into the legacy paths
+        for loader in "${IMAGE}"/usr/${host}/lib/ld* ; do
+            edo mkdir -p "${IMAGE}/${LIBDIR}"
+            edo ln -s "${loader##${IMAGE}}" "${IMAGE}/${LIBDIR}/${loader##*/}"
+        done
     done
 
     # don't install bundled timezone info
     ! ever at_least 2.16.0 && edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
-    cd "${WORKBASE}/${PNV}"
+    # don't install /etc/{ld.so.cache,localtime}
+    edo rm -f "${noins_files[@]}"
 
+    # install additional base configuration files
     insinto /etc
-    doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
+    doins "${conf_files[@]}"
 
-    # Move librt.a to /lib and link it to /usr/lib.
-    edo cp -a "${IMAGE}"/usr/${LIBDIR}/librt.a "${IMAGE}"/${LIBDIR}/
-    edo rm "${IMAGE}"/usr/${LIBDIR}/librt.a
-    dosym /${LIBDIR}/librt.a /usr/${LIBDIR}/
-    dosym /${LIBDIR}/librt.so.1 /${LIBDIR}/librt.so
-
-    hereenvd 02locale <<EOF
-LANG=en_GB.utf8
-EOF
-
-    if option systemd; then
-        insinto /usr/${LIBDIR}/tmpfiles.d
-        doins "${FILES}"/systemd/nscd.conf
+    # systemd units
+    if option systemd ; then
+        insinto "/usr/${LIBDIR}/tmpfiles.d"
+        doins "${FILES}/systemd/nscd.conf"
         install_systemd_files
     fi
+
+    # configure default locale
+    hereenvd 02locale <<-EOF
+LANG=en_GB.utf8
+EOF
 }
 
-pkg_postinst() {
-    mkdir -p "${ROOT}usr/${LIBDIR}/locale" || eerror "failed to create /usr/${LIBDIR}/locale"
+glibc_pkg_postinst() {
+    local locales=( en_US.UTF-8 en_GB.UTF-8 )
+    local localedef="${ROOT}usr/${CHOST}/bin/localedef"
+    local locale=
 
-    for lang in en_US en_GB ; do
-        I18NPATH="${ROOT}usr/share/i18n" \
-            nonfatal edo "${ROOT}usr/bin/localedef" --prefix="${ROOT}" -i ${lang} -f UTF-8 ${lang}.UTF-8
+    # localedef fails if /usr/${CHOST}/lib/locale does not exist
+    edo mkdir -p "${ROOT}usr/${CHOST}/lib/locale"
+
+    for locale in "${locales[@]}" ; do
+        I18NPATH="${ROOT}usr/share/i18n" nonfatal edo \
+            "${localedef}" --prefix="${ROOT}" -i ${locale%.*} -f ${locale#*.} ${locale}
     done
 }
 
