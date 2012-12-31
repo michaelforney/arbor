@@ -1,0 +1,128 @@
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+# Certain packages do not support out-of-tree builds.  Provide a simple mechanism for them to
+# state this via the in_tree_build exlib parameter, which defaults to false.
+myexparam -b in_tree_build=false
+myexparam pnv=${PNV}
+
+__multiarch_execute_phase() {
+    local host= pnv=
+
+    exparam -v pnv pnv
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+        if exparam -b in_tree_build ; then
+            if [[ ${EXHERES_PHASE} == unpack ]] ; then
+                edo mkdir -p "${WORKBASE}/build/${host}"
+                edo cd "${WORKBASE}/build/${host}"
+            else
+                edo cd "${WORKBASE}/build/${host}/${pnv}"
+            fi
+            export WORK=${WORKBASE}/build/${host}/${pnv}
+        else
+            if [[ ${EXHERES_PHASE} == configure ]] ; then
+                edo mkdir -p "${WORKBASE}/build/${host}"
+            fi
+            edo cd "${WORKBASE}/build/${host}"
+        fi
+
+        if [[ $(type -t pre_multiarch_${EXHERES_PHASE}) == function ]] ; then
+            pre_multiarch_${EXHERES_PHASE}
+        fi
+
+        if [[ $(type -t perform_multiarch_${EXHERES_PHASE}) == function ]] ; then
+            perform_multiarch_${EXHERES_PHASE}
+        else
+            if [[ ${EXHERES_PHASE} == configure ]] ; then
+                default_multiarch_src_configure
+            else
+                default
+            fi
+        fi
+
+        if [[ $(type -t post_multiarch_${EXHERES_PHASE}) == function ]] ; then
+            post_multiarch_${EXHERES_PHASE}
+        fi
+    done
+}
+
+if exparam -b in_tree_build ; then
+    multiarch_src_unpack() {
+        assert exparam -b in_tree_build
+        __multiarch_execute_phase
+    }
+
+    multiarch_src_prepare() {
+        assert exparam -b in_tree_build
+        __multiarch_execute_phase
+    }
+
+    export_exlib_phases src_unpack src_prepare
+fi
+
+multiarch_src_configure() {
+    __multiarch_execute_phase
+}
+
+default_multiarch_src_configure() {
+    local option=
+
+    if [[ -x ${WORK}/configure ]] ; then
+        edo "${WORK}/configure"                         \
+                --host=${host}                          \
+                --prefix=/usr/${host}                   \
+                --datarootdir=/usr/share                \
+                --localstatedir=${LOCALSTATEDIR:-/var}  \
+                --sysconfdir=/etc                       \
+                --disable-dependency-tracking           \
+                --enable-fast-install                   \
+                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"    \
+                $(for option in "${DEFAULT_SRC_CONFIGURE_OPTIONS[@]}" ; do
+                    option ${option}
+                  done)                                 \
+                $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do
+                    option_enable ${option}
+                  done)                                 \
+                $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do
+                    option_with ${option}
+                  done)                                 \
+                $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_TESTS[@]}" ; do
+                    expecting_tests ${option}
+                  done)                                 \
+        || die "configure failed"
+    fi
+}
+
+multiarch_src_compile() {
+    __multiarch_execute_phase
+}
+
+multiarch_src_test() {
+    # TODO(compnerd) determine if we can work out the set of hosts that are executable on the
+    # current host (e.g. i686-pc-linux-gnu, x86_64-pc-linux-gnu on a x86_64-pc-linux-gnu host which
+    # has glibc[hosts:i686-pc-linux-gnu][hosts:x86_64-pc-linux-gnu]).
+    edo cd "${WORKBASE}/build/${CHOST}"
+    default
+}
+
+multiarch_src_test_expensive() {
+    # TODO(compnerd) determine if we can work out the set of hosts that are executable on the
+    # current host (e.g. i686-pc-linux-gnu, x86_64-pc-linux-gnu on a x86_64-pc-linux-gnu host which
+    # has glibc[hosts:i686-pc-linux-gnu][hosts:x86_64-pc-linux-gnu]).
+    edo cd "${WORKBASE}/build/${CHOST}"
+    default
+}
+
+multiarch_src_install() {
+    __multiarch_execute_phase
+}
+
+export_exlib_phases src_configure src_compile src_test src_test_expensive src_install
+
