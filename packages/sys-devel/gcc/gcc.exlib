@@ -4,12 +4,10 @@
 # Copyright 2009,2011,2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multibuild
 require gnu [ suffix=bz2 subdir=${PNV} ]
 require alternatives versionator
 
-export_exlib_phases src_unpack src_prepare src_configure src_test_expensive src_install \
-    pkg_postinst pkg_prerm pkg_postrm
+export_exlib_phases src_unpack src_configure src_compile src_test_expensive src_install pkg_postinst pkg_prerm pkg_postrm
 
 SUMMARY="GNU Compiler Collection"
 
@@ -97,9 +95,16 @@ DEPENDENCIES+="
 "
 
 # go support
-if ever at_least 4.6.0 ; then
+if ever at_least 4.6.0; then
     MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
 fi
+
+MYOPTIONS+="
+    targets:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 REMOTE_IDS="freecode:${PN}"
 
@@ -107,12 +112,9 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch" )
+
 RESTRICT="test" # tests are expensive
-
-WORK="${WORKBASE}/build"
-ECONF_SOURCE="${WORKBASE}"/${PNV/_p/-}
-
-DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
 gcc_src_unpack() {
     if option java ; then
@@ -121,18 +123,10 @@ gcc_src_unpack() {
     else
         default
     fi
-    edo mkdir "${WORK}"
-}
-
-gcc_src_prepare() {
-    edo cd  "${WORKBASE}/${PNV/_p/-}"
-    default
 }
 
 gcc_src_configure() {
-    local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )
-    local language= languages=( c++ )
-    local enable_multilib=
+    local language= languages=( c++ ) target=
     local cloog_backend=
 
     # support for optional languages
@@ -144,50 +138,94 @@ gcc_src_configure() {
         option go && languages+=( go )
     fi
 
-    # determine multilib support
-    if [[ ${#supported_c_build_targets[@]} -gt 1 ]]; then
-        enable_multilib='--enable-multilib'
-    else
-        enable_multilib='--disable-multilib'
-    fi
-
     # select cloog backend
     cloog_backend=ppl-legacy
     if ever at_least 4.7 && has_version --root dev-libs/cloog ; then
         cloog_backend=isl
     fi
 
-    econf --hates=docdir                                            \
-          --libdir=/usr/${LIBDIR}                                   \
-          --with-pkgversion="exherbo ${PNVR}"                       \
-          --program-suffix=-${SLOT}                                 \
-          --enable-clocale=gnu                                      \
-          --enable-languages="$(IFS=, ; echo "${languages[*]}")"    \
-          --enable-lto $(! ever at_least 4.6 && echo --with-libelf) \
-          ${enable_multilib}                                        \
-          --enable-nls                                              \
-          $(option_with graphite cloog)                             \
-          $(option_with graphite ppl)                               \
-          $(if ever at_least 4.6 && optionq graphite ; then
-                option_enable graphite cloog-backend ${cloog_backend}
-                ever at_least 4.7 && echo '--disable-cloog-version-check'
-            fi)                                                     \
-          $(option_enable openmp libgomp)                           \
-          $(option_enable objc-runtime libobjc)                     \
-          $(option_enable propolice libssp)                         \
-          --with-as=/usr/bin/${CHOST}-as                            \
-          --with-ld=/usr/bin/${CHOST}-ld                            \
-          --with-system-zlib
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local libpath=/${target}/lib:/usr/${target}/lib
+
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo mkdir -p "${WORKBASE}/build/${target}"
+        edo cd "${WORKBASE}/build/${target}"
+
+        # TODO(compnerd) enable precompiled headers
+        edo "${WORKBASE}/${PNV/_p/-}/configure"                             \
+                --host=${CHOST}                                             \
+                --target=${target}                                          \
+                --prefix=/usr/${CHOST}                                      \
+                --datarootdir=/usr/share                                    \
+                --localstatedir=/var                                        \
+                --sysconfdir=/etc                                           \
+                --disable-dependency-tracking                               \
+                --disable-libstdcxx-pch                                     \
+                --enable-fast-install                                       \
+                --enable-clocale=gnu                                        \
+                --enable-languages="$(IFS=, ; echo "${languages[*]}")"      \
+                --enable-lto $(! ever at_least 4.6 && echo --with-libelf)   \
+                --enable-nls                                                \
+                $(option_with graphite cloog)                               \
+                $(option_with graphite ppl)                                 \
+                $(if ever at_least 4.6 && optionq graphite ; then
+                    option_enable graphite cloog-backend ${cloog_backend}
+                    ever at_least 4.7 && echo '--disable-cloog-version-check'
+                  fi)                                                       \
+                $(option_enable openmp libgomp)                             \
+                $(option_enable objc-runtime libobjc)                       \
+                $(option_enable propolice libssp)                           \
+                --program-suffix=-${SLOT}                                   \
+                --with-as=/usr/${CHOST}/bin/${target}-as                    \
+                --with-ld=/usr/${CHOST}/bin/${target}-ld                    \
+                --with-system-zlib                                          \
+        || die
+    done
+}
+
+gcc_src_compile() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo cd "${WORKBASE}/build/${target}"
+        default
+    done
 }
 
 gcc_src_test_expensive() {
+    local target=
+
     if ! ever at_least 4.6.1; then
         # Increase stack size from 8M to 24M to make
         # gcc.c-torture/compile/limits-exprparen.c test pass as per
         # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
         ulimit -s 24000
     fi
-    emake check
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo cd "${WORKBASE}/build/${target}"
+        emake check
+    done
 }
 
 __gcc_slot_ada() {
@@ -210,13 +248,16 @@ __gcc_slot_ada() {
     option ada || return
 
     for program in "${programs[@]}" ; do
-        edo mv "${IMAGE}"/usr/bin/${program}{,-${SLOT}}
+        edo mv "${IMAGE}"/usr/${CHOST}/bin/${program}{,-${SLOT}}
     done
 }
 
 __gcc_slot_java() {
+    # TODO(compnerd) determine whether ecj.jar is actually installed into the dataroot location.
+    # If not, it *should* be.  Although ecj is the compiler, it is designed to run atop the JVM,
+    # and as such, is host agnostic.  There is no reason to have a version per CHOST.
     local unslotted=(
-        "${IMAGE}"/usr/*/security/classpath.security
+        "${IMAGE}"/usr/${CHOST}/*/security/classpath.security
         "${IMAGE}"/usr/share/java/ecj.jar
     )
     local extension= item= name=
@@ -256,54 +297,51 @@ __gcc_slot_shared_data() {
 }
 
 __gcc_slot_runtime() {
-    local libdirs=$(multibuild_get_all_var C LIBDIR || die "could not get LIBDIRs")
-    local libdir= library=
+    local library=
 
-    for libdir in ${libdirs} ; do
-        # to avoid collisions with links as they will be handled properly in pkg_postinst, remove
-        # any symbolic links first
-        for library in "${IMAGE}"/usr/${libdir}/* ; do
-            if [[ -L ${library} ]] ; then
-                edo rm "${library}"
-                # used to sanity check that the link is handled
-                removed+=( "${library/${IMAGE}/${ROOT:-/}}" )
-            fi
-        done
+    # to avoid collisions with links as they will be handled properly in pkg_postinst, remove any
+    # symbolic links first
+    for library in "${IMAGE}"/usr/${CHOST}/lib/* ; do
+        if [[ -L ${library} ]] ; then
+            edo rm "${library}"
+            # used to sanity check that the link is handled
+            removed+=( "${library/${IMAGE}/${ROOT:-/}}" )
+        fi
+    done
 
-        for library in "${IMAGE}"/usr/${libdir}/* ; do
-            [[ -f ${library} ]] || continue
+    for library in "${IMAGE}"/usr/${CHOST}/lib/* ; do
+        [[ -f ${library} ]] || continue
 
-            library=${library##${IMAGE}}
-            local name=$(basename "${library}") # libffi.so.4.0.1   libstdc++.so.6.0.10 libstdc++.la
-            local extension=${name#*.}          #        so.4.0.1             so.6.0.10           la
+        library=${library##${IMAGE}}
+        local name=$(basename "${library}") # libffi.so.4.0.1   libstdc++.so.6.0.10 libstdc++.la
+        local extension=${name#*.}          #        so.4.0.1             so.6.0.10           la
 
-            case "${name}" in
-            # always use newest available so version and create so symlinks
-            libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
-                # rename /usr/lib/libffi.so.4.0.1 => /usr/lib/libffi-4.3.so.4.0.1
-                edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
+        case "${name}" in
+        # always use newest available so version and create so symlinks
+        libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
+            # rename /usr/${CHOST}/lib/libffi.so.4.0.1 => /usr/${CHOST}/lib/libffi-4.3.so.4.0.1
+            edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
 
-                symlinks+=( "${library%.${extension}}-${SLOT}.${extension}" )
-                so_symlinks+=( "${library}" )
-            ;;
-            libstdc++.so.*-gdb.py)
-                # skip
-            ;;
-            # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
-            libgcj-tools.so*|libgcj.so*|libgij.so*|libstdc++.so*)
-                [[ ${name} == libstdc++.so.* ]] && libstdcpp="${name}"
+            symlinks+=( "${library%.${extension}}-${SLOT}.${extension}" )
+            so_symlinks+=( "${library}" )
+        ;;
+        libstdc++.so.*-gdb.py)
+            # skip
+        ;;
+        # slotted properly by upstream (i.e. no collisions between slots), create so symlinks
+        libgcj-tools.so*|libgcj.so*|libgij.so*|libstdc++.so*)
+            [[ ${name} == libstdc++.so.* ]] && libstdcpp="${name}"
 
-                so_symlinks+=( "${library}" )
-            ;;
-            # always use newest available version
-            *.a|*.la|*.spec|*.security|*.properties)
-                # rename /usr/lib/libstdc++.la => /usr/lib/libstdc++-4.3.la
-                edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
+            so_symlinks+=( "${library}" )
+        ;;
+        # always use newest available version
+        *.a|*.la|*.spec|*.security|*.properties)
+            # rename /usr/${CHOST}/lib/libffi.la => /usr/${CHOST}/lib/libffi-4.3.la
+            edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
 
-                symlinks+=( "${library%.${extension}}-${SLOT}.${extension}" )
-            ;;
-            esac
-        done
+            symlinks+=( "${library%.${extension}}-${SLOT}.${extension}" )
+        ;;
+        esac
     done
 }
 
@@ -314,9 +352,9 @@ __gcc_setup_gdb_extension() {
 
     # GDB extension
     # c.f. http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
-    # NOTE(compnerd) these are formatters which are platform agnostic, so simply grab the version
-    # from the primary ABI
-    for item in "${IMAGE}"/usr/${LIBDIR}/*-gdb.py ; do
+    # NOTE(compnerd) these are formatters which are platform agnostic, so simply grab the
+    # version from the host ABI
+    for item in "${IMAGE}"/usr/${CHOST}/lib/*-gdb.py ; do
         local name=
 
         [[ -f ${item} ]] || continue
@@ -331,20 +369,26 @@ __gcc_provide_slot_alternatives() {
     local program= item= location= name= section=
 
     # binaries
-    for program in "${IMAGE}"/usr/bin/*-${SLOT} ; do
+    for program in "${IMAGE}"/usr/${CHOST}/bin/*-${SLOT} ; do
         name=$(basename "${program}" -${SLOT})
-        alternatives+=( "/usr/bin/${name}" "${name}-${SLOT}" )
+        alternatives+=( "/usr/${CHOST}/bin/${name}" "${name}-${SLOT}" )
     done
 
-    alternatives+=( "/usr/bin/cc" "${CHOST}-gcc-${SLOT}" )
-    alternatives+=( "/usr/bin/c++" "${CHOST}-g++-${SLOT}" )
+    alternatives+=( "/usr/${CHOST}/bin/cc" "${CHOST}-gcc-${SLOT}" )
+    alternatives+=( "/usr/${CHOST}/bin/c++" "${CHOST}-g++-${SLOT}" )
 
     # java runtime
     if option java ; then
-        for item in "${IMAGE}"/usr/*/security/classpath.security ; do
+        for item in "${IMAGE}"/usr/${CHOST}/*/security/classpath.security ; do
             alternatives+=( "${ROOT:-/}${item##${IMAGE}/}" "classpath-${SLOT}.security" )
         done
 
+        # TODO(compnerd) determine whether ecj.jar and libgcj-tools.jar are actually installed into
+        # the dataroot location.
+        # If not, they *should* be.  Although ecj is the compiler, it is designed to run atop the JVM,
+        # and as such, is host agnostic.  There is no reason to have a version per CHOST.
+        # I believe that libgcj-tools contains the classpath support tools, which are also designed
+        # to be run atop the JVM, and as such are CHOST agnostic.
         alternatives+=( "/usr/share/java/ecj.jar" "ecj-${SLOT}.jar" )
         alternatives+=( "/usr/share/java/tools.jar" "libgcj-tools-${PV}.jar" )
     fi
@@ -374,18 +418,25 @@ __gcc_provide_slot_alternatives() {
 }
 
 gcc_src_install() {
-    default
+    local target= dir=
 
-    # precompiled headers
-    local precompiled_headers=( "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch )
-    if [[ -f ${precompiled_headers[0]} ]] ; then
-        insinto /usr/include/c++/${MY_PV:-${PV}}/${CHOST}/bits
-        doins -r "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch
-    fi
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
 
-    if option doc; then
+        echo "    Cross-Compile Target: ${target}"
+
+        edo cd "${WORKBASE}/build/${target}"
+        emake -j1 DESTDIR="${IMAGE}" install
+    done
+
+    # TODO(compnerd) precompiled headers for libstdcxx
+
+    if option doc ; then
         insinto /usr/share/doc/${PNVR}/html
-        edo pushd "${WORK}"/${CHOST}/libstdc++-v3/doc
+        edo pushd "${WORKBASE}/build/${CHOST}/${CHOST}/libstdc++-v3/doc"
         emake doc-html-doxygen
         doins -r doxygen/html/*
         edo popd
@@ -399,17 +450,11 @@ gcc_src_install() {
     __gcc_provide_slot_alternatives
 
     # fix libstdc++.so symlink
-    for libdir in ${all_libdirs}; do
-        edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir}
-    done
+    edo rewrite_so_symlink "${libstdcpp}" "${IMAGE}/usr/${CHOST}/lib" "/usr/${CHOST}/lib"
 
-    # nuke empty dir if applicable
-    rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
-
-    for dir in "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
-        if [[ -d ${dir} ]] ; then
-            edo find "${dir}" -type d -empty -delete
-        fi
+    # cleanup empty directories
+    for dir in "${IMAGE}"/usr/*/lib/${PN}/*/${MY_PV:-${PV}}/include{-fixed,} ; do
+        [[ -d ${dir} ]] && edo find "${dir}" -type d -empty -delete
     done
 }
 
