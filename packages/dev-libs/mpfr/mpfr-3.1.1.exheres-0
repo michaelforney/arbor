@@ -3,6 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
+require multiarch
 
 SUMMARY="Multi-precision floating point library"
 HOMEPAGE="http://www.${PN}.org"
@@ -29,65 +30,5 @@ DEPENDENCIES="
         ]]
 "
 
-src_configure() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-
-        edo mkdir -p "${WORKBASE}/build/${host}"
-        edo cd "${WORKBASE}/build/${host}"
-        edo "${WORKBASE}/${PNV}/configure"      \
-                --build=${CHOST}                \
-                --host=${host}                  \
-                --prefix=/usr/${host}           \
-                --dataroot=/usr/share           \
-                --localstatedir=/var            \
-                --sysconfdir=/etc               \
-                --disable-dependency-tracking   \
-                --enable-fast-install           \
-                --enable-shared                 \
-        || die
-    done
-}
-
-src_compile() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}"
-        default
-    done
-}
-
-src_test() {
-    edo cd "${WORKBASE}/build/${CHOST}"
-    default
-}
-
-src_install() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}"
-        default
-    done
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-shared' )
 
