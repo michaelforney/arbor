@@ -1,8 +1,9 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2009 Mike Kelly
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require flag-o-matic easy-multibuild [ work=${PNV} ]
+require flag-o-matic
 
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net/"
@@ -11,57 +12,102 @@ DOWNLOADS="http://www.zlib.net/${PNV}.tar.bz2"
 LICENCES="ZLIB"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES=""
-
-WORK="${WORKBASE}"
 
 DEFAULT_SRC_INSTALL_PARAMS=( LDCONFIG=: )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
+WORK="${WORKBASE}"
 
 src_unpack() {
-    easy-multibuild_run_phase
+    local host=
+
+    # TODO(compnerd) work out-of-tree builds
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option hosts:${host} ; then
+            edo mkdir -p "${WORKBASE}/build/${host}"
+            edo cd "${WORKBASE}/build/${host}"
+            unpack --if-compressed ${ARCHIVES}
+        fi
+    done
 }
 
 src_prepare() {
-    easy-multibuild_run_phase
-}
+    local host=
 
-set_cc() {
+    # TODO(compnerd) work out-of-tree builds
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option hosts:${host} ; then
+            edo cd "${WORKBASE}/build/${host}/${PNV}"
+            default
+        fi
+    done
+
     append-flags -fPIC
-    filter-flags -m32
-    case "${MULTIBUILD_TARGET}" in
-        32) export CC="${CC} -m32";;
-        64) export CC="${CC/ -m32/}";;
-    esac
 }
 
-prepare_one_multibuild() {
-    # Treat clang as gcc
-    edo sed -e '/gcc=1/s:\*gcc\*:*clang*|&:' -i configure
+src_configure() {
+    local host=
 
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+
+        edo cd "${WORKBASE}/build/${host}/${PNV}"
+            AR=${host}-ar CC=${host}-gcc            \
+            mandir=/usr/share/man                   \
+        edo "${PWD}/configure"                      \
+                --prefix=/usr/${host}               \
+                --libdir=/usr/${host}/lib           \
+                --includedir=/usr/${host}/include   \
+                --shared                            \
+        || die
+    done
+}
+
+src_compile() {
+    local host=
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+        edo cd "${WORKBASE}/build/${host}/${PNV}"
+        default
+    done
+}
+
+src_test() {
+    edo cd "${WORKBASE}/build/${CHOST}/${PNV}"
     default
 }
 
-configure_prepare_one_multibuild() { :; }
+src_install() {
+    local host=
 
-configure_one_multibuild() {
-    set_cc
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
 
-    # Breaks on most ./configure arguments econf passes
-    edo ./configure \
-        --prefix=/usr \
-        --libdir=/usr/${LIBDIR} \
-        --shared
-}
-
-test_one_multibuild() {
-    set_cc
-    default
+        echo "    Cross-Compile Host: ${host}"
+        edo cd "${WORKBASE}/build/${host}/${PNV}"
+        default
+    done
 }
 
