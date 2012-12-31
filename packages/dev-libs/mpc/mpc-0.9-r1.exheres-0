@@ -1,4 +1,5 @@
 # Copyright 2009 Ingmar Vanhassel
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="A library for multiprecision complex arithmetic with exact rounding"
@@ -12,14 +13,80 @@ DOWNLOADS="${HOMEPAGE}/download/${PNV}.tar.gz"
 LICENCES="|| ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build+run:
-        dev-libs/gmp:=[>=4.3.2]
-        dev-libs/mpfr:=[>=2.4.2]
+        dev-libs/gmp:=[hosts:*(-)?][>=4.3.2]
+        dev-libs/mpfr:=[hosts:*(-)?][>=2.4.2]
 "
 
-# fixes not building the shared library, already fixed in trunk
-DEFAULT_SRC_CONFIGURE_PARAMS=( "EGREP=egrep" )
+src_configure() {
+    local host=
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+
+        edo mkdir -p "${WORKBASE}/build/${host}"
+        edo cd "${WORKBASE}/build/${host}"
+
+        # NOTE(tgurr) exporting EGREP fixes not building the shared library, already fixed in trunk
+            EGREP=egrep                         \
+        edo "${WORKBASE}/${PNV}/configure"      \
+                --build=${CHOST}                \
+                --host=${host}                  \
+                --prefix=/usr/${host}           \
+                --dataroot=/usr/share           \
+                --localstatedir=/var            \
+                --sysconfdir=/etc               \
+                --disable-dependency-tracking   \
+                --enable-fast-install           \
+        || die
+    done
+}
+
+src_compile() {
+    local host=
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+        edo cd "${WORKBASE}/build/${host}"
+        default
+    done
+}
+
+src_test() {
+    edo cd "${WORKBASE}/build/${CHOST}"
+    default
+}
+
+src_install() {
+    local host=
+
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+        edo cd "${WORKBASE}/build/${host}"
+        default
+    done
+}
 
