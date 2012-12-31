@@ -5,6 +5,9 @@
 
 require flag-o-matic
 
+# TODO(compnerd) work out-of-tree builds
+require multiarch [ in_tree_build=true ]
+
 SUMMARY="A free compression library unencumbered by patents"
 HOMEPAGE="http://www.zlib.net/"
 DOWNLOADS="http://www.zlib.net/${PNV}.tar.bz2"
@@ -26,88 +29,21 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
 WORK="${WORKBASE}"
 
-src_unpack() {
-    local host=
-
-    # TODO(compnerd) work out-of-tree builds
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option hosts:${host} ; then
-            edo mkdir -p "${WORKBASE}/build/${host}"
-            edo cd "${WORKBASE}/build/${host}"
-            unpack --if-compressed ${ARCHIVES}
-        fi
-    done
-}
-
-src_prepare() {
-    local host=
-
-    # TODO(compnerd) work out-of-tree builds
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option hosts:${host} ; then
-            edo cd "${WORKBASE}/build/${host}/${PNV}"
-            default
-        fi
-    done
-
+perform_multiarch_configure() {
     append-flags -fPIC
-}
 
-src_configure() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-
-        edo cd "${WORKBASE}/build/${host}/${PNV}"
-            AR=${host}-ar CC=${host}-gcc            \
-            mandir=/usr/share/man                   \
-        edo "${PWD}/configure"                      \
-                --prefix=/usr/${host}               \
-                --libdir=/usr/${host}/lib           \
-                --includedir=/usr/${host}/include   \
-                --shared                            \
-        || die
-    done
-}
-
-src_compile() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}/${PNV}"
-        default
-    done
-}
-
-src_test() {
-    edo cd "${WORKBASE}/build/${CHOST}/${PNV}"
-    default
-}
-
-src_install() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}/${PNV}"
-        default
-    done
+    # NOTE(compnerd) zlib does not support the usual configure arguments
+    # TODO(compnerd) figure out how to deal with clang
+        AR=${host}-ar                           \
+        CC=${host}-gcc                          \
+        NM=${host}-nm                           \
+        RANLIB=${host}-ranlib                   \
+        mandir=/usr/share/man                   \
+    edo "${PWD}/configure"                      \
+            --prefix=/usr/${host}               \
+            --libdir=/usr/${host}/lib           \
+            --includedir=/usr/${host}/include   \
+            --shared                            \
+    || die
 }
 
