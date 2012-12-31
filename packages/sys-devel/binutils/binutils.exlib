@@ -1,9 +1,10 @@
 # Copyright 2007 Bryan Østergaard
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=bz2 ] alternatives
 
-export_exlib_phases src_unpack src_prepare src_test_expensive src_install
+export_exlib_phases src_prepare src_configure src_compile src_test_expensive src_install
 
 SUMMARY="Collection of binary tools including ld and as"
 
@@ -11,9 +12,12 @@ REMOTE_IDS="freecode:${PN}"
 
 LICENCES="GPL-3 LGPL-3"
 SLOT="0"
-MYOPTIONS=""
-
-RESTRICT="test"
+MYOPTIONS="
+    targets:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     test-expensive:
@@ -21,67 +25,131 @@ DEPENDENCIES="
         sys-apps/bc
 "
 
-ECONF_SOURCE="${WORKBASE}/${PNV}"
-WORK=${WORKBASE}/build
+RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/76_all_use-new-ld-dtags.patch" )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-werror
-    --enable-plugins
-    --enable-threads
-    # Install gold as ld.gold, ld as ld.bfd
-    --enable-ld
-    --enable-gold
-    --enable-lto
-    --enable-shared
-)
-
-binutils_src_unpack() {
-    default
-    edo mkdir "${WORK}"
-}
 
 binutils_src_prepare() {
-    edo cd "${WORKBASE}/${PNV}"
+    # fixup broken locale install paths
+    edo sed -e '/^localedir = /clocaledir = /usr/share/locale'          \
+            -e '/^gnulocaledir = /cgnulocaledir = /usr/share/locale'    \
+            -i "${WORK}/bfd/po/Make-in"                                 \
+            -i "${WORK}/binutils/po/Make-in"                            \
+            -i "${WORK}/gas/po/Make-in"                                 \
+            -i "${WORK}/gold/po/Make-in"                                \
+            -i "${WORK}/gprof/po/Make-in"                               \
+            -i "${WORK}/ld/po/Make-in"                                  \
+            -i "${WORK}/opcodes/po/Make-in"
+
     default
+}
+
+binutils_src_configure() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local libpath=/${target}/lib:/usr/${target}/lib
+
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+
+        edo mkdir -p "${WORKBASE}/build/${target}"
+        edo cd "${WORKBASE}/build/${target}"
+        edo "${WORKBASE}/${PNV}/configure"                  \
+                --host=${CHOST}                             \
+                --target=${target}                          \
+                --prefix=/usr/${CHOST}                      \
+                --datarootdir=/usr/share                    \
+                --localstatedir=/var                        \
+                --sysconfdir=/etc                           \
+                --disable-dependency-tracking               \
+                --enable-fast-install                       \
+                --enable-gold                               \
+                --enable-ld                                 \
+                --enable-lto                                \
+                --enable-plugins                            \
+                --enable-shared                             \
+                --enable-threads                            \
+                --with-lib-path=${libpath}                  \
+                --with-sysroot                              \
+                $([[ ${target} == ${CHOST} ]] && echo --program-prefix=${CHOST}-) || die
+    done
+}
+
+binutils_src_compile() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+        edo cd "${WORKBASE}/build/${target}"
+        default
+    done
 }
 
 binutils_src_test_expensive() {
-    emake -j1 check
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        if option !targets:${target} ; then
+            option "    Cross-Compile Target; ${target} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Target: ${target}"
+        edo cd "${WORKBASE}/build/${target}"
+        emake "${DEFAULT_SRC_TEST_PARAMS[@]}" check
+    done
 }
 
-# FIXME: Make this the default behavior for dosym
-dosymv() { echo dosym $@; dosym $@; }
-
 binutils_src_install() {
-    local alternatives=() bin e ec=(
-        # Managed by eclectic
-        /usr/${CHOST}/bin/ld
-        /usr/bin/${CHOST}-ld
-        /usr/bin/ld
-    ) f ld priority target name
+    local target=
 
-    emake -j1 DESTDIR="${IMAGE}" install
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local m symbols
+        # eclectic managed files
+        local em=( /usr/bin/${target}-ld /usr/${CHOST}/${target}/bin/ld )
 
-    for f in "${IMAGE}"/usr/${CHOST}/bin/* ; do
-        target=${f#${IMAGE}}
-        name=${f##*/}
+        if option !targets:${target} ; then
+            echo "    Cross-Compile Target: ${target} (disabled)"
+            continue
+        fi
 
-        dosymv ${target} /usr/bin/${CHOST}-${name}
-        dosymv ${target} /usr/bin/${name}
-    done
+        echo "    Cross-Compile Target: ${target}"
 
-    for e in ${ec[@]}; do edo rm -f "${IMAGE}"/${e}; done
+        edo cd "${WORKBASE}/build/${target}"
 
-    for ld in bfd gold; do
-        case ${ld} in
-            bfd)  priority=100;;
-            gold) priority=10;;
-        esac
+        # default installation
+        default
 
-        alternatives=( ld ${ld} ${priority} )
-        for e in ${ec[@]}; do alternatives+=( ${e} /usr/${CHOST}/bin/ld.${ld} ); done
-        alternatives_for "${alternatives[@]}"
+        # alternatives setup
+        for m in "${em[@]}" ; do
+            edo rm -f "${IMAGE}${m}"
+        done
+
+        for provider in bfd gold ; do
+            local priority=
+            local alternatives=()
+
+            case "${provider}" in
+            bfd)  priority=100 ;;
+            gold) priority=10  ;;
+            esac
+
+            alternatives=( ld ${provider} ${priority} )
+            for m in "${em[@]}" ; do
+                alternatives+=( "${m}" "/usr/${CHOST}/${target}/bin/ld.${provider}" )
+            done
+            alternatives_for "${alternatives[@]}"
+        done
     done
 }
 
