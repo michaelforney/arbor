@@ -1,5 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2010 Sterling X. Winter <replica@exherbo.org>
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require kernel
@@ -19,53 +20,83 @@ HOMEPAGE="http://www.kernel.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="platform: amd64 arm ia64 ppc64 x86"
+MYOPTIONS="platform: amd64 arm ia64 ppc64 x86
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
-WORK=${WORKBASE}/linux-${PV}
+RESTRICT="test"
 
-# FIXME: Need to sanitize headers at some point
+WORK="${WORKBASE}/linux-${PV}"
 
 linux-headers_pkg_pretend() {
+    # TODO(?) add mappings for alpha mips sparc
+    local _platform_architectures=(
+        amd64:x86_64
+        arm:arm
+        ia64:ia64
+        ppc64:powerpc
+        x86:i386
+    )
+    local arch= plat=
+
     kernel_check_version_string
-
     local normalized_kernel_version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}${BASH_REMATCH[3]}${BASH_REMATCH[4]:-}
-
     if ! ever at_least ${PV} ${normalized_kernel_version} ; then
         ewarn "Kernel headers version mismatch: Installing kernel headers newer than the"
         ewarn "running kernel can break your system. Do not proceed unless you know what"
         ewarn "you're doing."
     fi
-}
 
-linux-headers_src_compile() {
-    # Fix ARCH to match linux-headers values
-    local x myarch platform_to_arch_map=(
-        #alpha mips sparc
-        amd64:x86_64
-        arm
-        ia64
-        ppc64:powerpc
-        x86:i386
-    )
-    for x in "${platform_to_arch_map[@]}"; do
-        if option platform:${x%:*}; then
-            ARCH=${x#*:}
+    for plat in "${_platform_architectures[@]}" ; do
+        if option platform:${plat%:*} ; then
+            arch=${plat#*:}
             break
         fi
     done
-    [[ -z ${ARCH} ]] && die "Your platform is not supported by linux-headers.exlib"
 
-    emake mrproper
-    emake headers_check
+    [[ -n ${arch} ]] || die "unsupported platform, please update linux-headers.exlib"
 }
 
+linux-headers_src_compile() {
+    :
+}
+
+# TODO(?) need to sanitize headers at some point
 linux-headers_src_install() {
-    emake INSTALL_HDR_PATH="${IMAGE}"/usr headers_install
+    local _host_architectures=(
+        arm-exherbo-linux-gnueabi:arm
+        i686-pc-linux-gnu:i386
+        x86_64-pc-linux-gnu:x86_64
+    )
+    local host=
 
-    # remove installed .install and ..install.cmd files
-    edo rm "${IMAGE}"/**/.install "${IMAGE}"/**/..install.cmd
+    for host in ${CROSS_COMPILE_TARGETS} ; do
+        local arch= entry=
 
-    # scsi.h is installed by sys-libs/glibc
-    ever at_least 2.6.35 || edo rm "${IMAGE}"/usr/include/scsi/scsi.h
+        if option !hosts:${host} ; then
+            echo "    Cross-Compile Host: ${host} (disabled)"
+            continue
+        fi
+
+        echo "    Cross-Compile Host: ${host}"
+
+        for entry in "${_host_architectures[@]}" ; do
+            [[ ${entry} =~ ${host}:* ]] || continue
+            arch=${entry#*:}
+            break
+        done
+
+        [[ -n ${arch} ]] || die "unsupported host '${host}', please update linux-headers.exlib"
+
+        edo mkdir -p "${IMAGE}/usr/${host}"
+        edo emake ARCH=${arch} INSTALL_HDR_PATH="${IMAGE}/usr/${host}" headers_install
+        edo find "${IMAGE}/usr/${host}/include" -name '.install' -delete -or \
+                                                -name '..install.cmd' -delete
+        # scsi.h is now provided by sys-libs/glibc
+        ever at_least 2.6.35 || edo rm "${IMAGE}/usr/${host}/include/scsi/scsi.h"
+    done
 }
 
