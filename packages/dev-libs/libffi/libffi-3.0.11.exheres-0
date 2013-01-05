@@ -1,7 +1,7 @@
 # Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
+require multiarch
 
 SUMMARY="A portable foreign function interface library"
 DESCRIPTION="
@@ -31,7 +31,11 @@ LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="debug
-    multibuild_c: 32 64"
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     test:
@@ -39,15 +43,4 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
-
-test_prepare_one_multibuild() {
-    case "${MULTIBUILD_TARGET}" in
-        32) edo sed -e "s|\"-O|\"-m32 -O|" -i "${WORK}"/testsuite/libffi.call/call.exp
-            edo sed -e "s|set cxx_options \" -shared-libgcc -lstdc++\"|set cxx_options \" -m32 -shared-libgcc -lstdc++\"|" -i "${WORK}"/testsuite/libffi.special/special.exp
-            ;;
-        64) edo sed -e "s|\"-m32 -O|\"-O|" -i "${WORK}"/testsuite/libffi.call/call.exp
-            edo sed -e "s|set cxx_options \" -m32 -shared-libgcc -lstdc++\"|set cxx_options \" -shared-libgcc -lstdc++\"|" -i "${WORK}"/testsuite/libffi.special/special.exp
-            ;;
-    esac
-}
 
