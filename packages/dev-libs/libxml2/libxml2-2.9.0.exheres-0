@@ -1,15 +1,18 @@
 # Copyright 2007-2008 Bo Ørsted Andresen
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] easy-multibuild python
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] python
+require multiarch
 
-SUMMARY="XML C Parser and Toolkit v2"
-HOMEPAGE="http://www.xmlsoft.org"
 BASE_URI="http://www.w3.org/XML"
 SCHEMA_TEST_URI="${BASE_URI}/2004/xml-schema-test-suite/xmlschema"
 TEST_VERSION="20080827"
 TAR1="2002-01-16"
 TAR2="2004-01-14"
+
+SUMMARY="XML C Parser and Toolkit v2"
+HOMEPAGE="http://www.xmlsoft.org"
 DOWNLOADS="ftp://www.xmlsoft.org/${PN}/${PNV}.tar.gz
     ${BASE_URI}/Test/xmlts${TEST_VERSION}.tar.gz
     ${SCHEMA_TEST_URI}${TAR1}/xsts-${TAR1}.tar.gz
@@ -22,69 +25,56 @@ LICENCES="MIT"
 SLOT="2.0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="doc examples python
-    multibuild_c: 32 64"
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build+run:
-        app-arch/xz[multibuild_c:*(-)?]
-        sys-libs/readline[multibuild_c:*(-)?]
-        sys-libs/zlib[>=1.2.5-r1][multibuild_c:*(-)?]
-        python? ( dev-lang/python:=[multibuild_c:*(-)?] )
+        app-arch/xz[hosts:*(-)?]
+        sys-libs/readline[hosts:*(-)?]
+        sys-libs/zlib[>=1.2.5-r1][hosts:*(-)?]
+        python? ( dev-lang/python:=[hosts:*(-)?] )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-2.8.0-fix_python_paths.patch
-)
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-2.8.0-fix_python_paths.patch" )
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--enable-ipv6' '--with-history'
+                               '--with-readline' '--with-threads' '--without-icu' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'python' )
+
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
 
 src_unpack() {
-    unpack ${PNV}.tar.gz
+    unpack "${PNV}.tar.gz"
 
     # test suite
-    unpack xmlts${TEST_VERSION}.tar.gz
+    unpack "xmlts${TEST_VERSION}.tar.gz"
     edo mv "${WORKBASE}/xmlconf" "${WORK}"
 }
 
 src_prepare() {
     # prevent fetching with wget during src_test
     edo ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz xstc/
+
+    # NOTE(?) tests don't support out-of-source builds
+    edo mkdir -p "${WORK}/build/${CHOST}"
+    edo ln -s "${WORK}/result" "${WORK}/build/${CHOST}/result"
+    edo ln -s "${WORK}/test" "${WORK}/build/${CHOST}/test"
+
     autotools_src_prepare
 }
 
-configure_one_multibuild() {
-    local python_prefix='/usr'
-    multibuild_default_target C || python_prefix="/usr/${CHOST}"
-
-    econf \
-        --enable-ipv6 \
-        --disable-static \
-        --with-history \
-        --with-readline \
-        --with-threads \
-        --without-icu \
-        $(option_with python python "${python_prefix}")
-}
-
-test_one_multibuild() {
-    # tests don't support out-of-source builds
-    edo ln -s "${WORK}"/{result,test} .
+perform_multiarch_install() {
     default
-}
 
-install_one_multibuild() {
-    default
     option python && python_bytecompile
 
-    # devhelp doesn't support out-of-source builds
-    edo cp -pPR "${WORK}"/doc/devhelp "${IMAGE}"/usr/share/doc/${PNVR}/html/
-
-    if ! option doc; then
-        edo rm -r "${IMAGE}"/usr/share/gtk-doc
-        edo rm -r "${IMAGE}"/usr/share/doc/${PNVR}/html
-    fi
-
-    if ! option examples; then
-        edo rm -r "${IMAGE}"/usr/share/doc/${PNVR}/examples
-    fi
+    edo cp -pPR "${WORK}/doc/devhelp" "${IMAGE}/usr/share/doc/${PNVR}/html/"
+    option doc || edo rm -r "${IMAGE}/usr/share/gtk-doc"              \
+                            "${IMAGE}/usr/share/doc/${PNVR}/html"
+    option examples || edo rm -r "${IMAGE}/usr/share/doc/${PNVR}/examples"
 }
 
