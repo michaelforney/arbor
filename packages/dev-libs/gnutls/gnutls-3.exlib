@@ -3,22 +3,23 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
-require gnu [ suffix=xz ]
 
 require easy-multibuild
 
 export_exlib_phases src_prepare
 
 SUMMARY="TLS 1.0/1.1 and SSL 3.0 Implementation"
+HOMEPAGE="http://www.gnutls.org"
 
 LICENCES="LGPL-3"
 SLOT="0"
 MYOPTIONS="doc multibuild_c: 32 64"
+DOWNLOADS="ftp://ftp.gnutls.org/gcrypt/gnutls/v$(ever range 1-2)/${PNV}.tar.xz"
 
 DEPENDENCIES="
     build:
         app-arch/xz
-        sys-devel/automake:1.11[>=1.11.4]
+        sys-devel/automake:*[>=1.11.4]
         doc? ( dev-doc/gtk-doc[>=1.1] )
     build+run:
         dev-libs/libtasn1[>=2.14][multibuild_c:*(-)?]

@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 AT_M4DIR=( m4 )
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ]
 
 SUMMARY="Utilities for process information including ps, top and kill"
 HOMEPAGE="http://gitorious.org/${PN}"
@@ -28,8 +28,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 WORK=${WORKBASE}/${PN}-${PN}
-
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-ps.test-see-truncated-user-group-names-as-valid.patch )
 
 src_prepare() {
     default

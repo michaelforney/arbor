@@ -361,6 +361,8 @@ __gcc_setup_gdb_extension() {
 
         name=$(basename "${item}")
         edo mv "${item}" "${IMAGE}/usr/share/gdb/python/auto-load/${name%-gdb.py}"
+
+        nonfatal edo rm "${IMAGE}"/usr/lib*/${name}
     done
 }
 
