@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
+require multiarch
 
 SUMMARY="Compression utility designed to be a replacement for compress"
 HOMEPAGE="http://www.gzip.org/ ${HOMEPAGE}"
@@ -9,9 +10,12 @@ HOMEPAGE="http://www.gzip.org/ ${HOMEPAGE}"
 LICENCES="( GPL-3 ) [[ last-checked = 1.4 ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES=""
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/ )
 
