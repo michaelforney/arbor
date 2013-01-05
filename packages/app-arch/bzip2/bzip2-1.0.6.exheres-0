@@ -2,7 +2,8 @@
 # Copyright 2008, 2009 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require flag-o-matic easy-multibuild
+require flag-o-matic
+require multiarch [ in_tree_build=true ]
 
 SUMMARY="Freely available, patent free, high-quality data compressor"
 HOMEPAGE="http://www.bzip.org"
@@ -11,88 +12,80 @@ DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
 LICENCES="( bzip2-withdocs ) [[ last-checked = 1.0.6 ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES=""
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 
-src_prepare() {
+perform_multiarch_prepare() {
     default
 
-    # Respect variables from the environment
-    edo sed \
-        -e 's|^AR=|AR ?=|' \
-        -e 's|^CC=|CC ?=|' \
-        -e 's|^CFLAGS=|CFLAGS +=|' \
-        -e '/^CFLAGS/s/-O.//' \
-        -e '/^CFLAGS/s/-g//' \
-        -e 's|^LDFLAGS=|LDFLAGS +=|' \
-        -e 's|^RANLIB=|RANLIB ?=|' \
-        -i Makefile Makefile-libbz2_so
+    # respect variables from the environment
+    edo sed -e 's|^AR=|AR ?=|'                                      \
+            -e 's|^CC=|CC ?=|'                                      \
+            -e 's|^RANLIB=|RANLIB ?=|'                              \
+            -e 's|^CFLAGS=|CFLAGS +=|'                              \
+            -e '/^CFLAGS/{ s/-O.//; s/-g// }'                       \
+            -e 's|^LDFLAGS=|LDFLAGS +=|'                            \
+            -e 's|^PREFIX=|PREFIX ?=|'                              \
+            -i Makefile Makefile-libbz2_so
 
-    # Use CFLAGS and LDFLAGS properly
-    edo sed \
-        -e '/^all/a\	$(CC) $(CFLAGS) -c bzip2.c -o bzip2.o' \
-        -e 's/$(CC) -shared/& $(LDFLAGS)/' \
-        -e '/$(CC).*\.so/s:CFLAGS:LDFLAGS:' \
-        -i Makefile-libbz2_so
+    # use CFLAGS and LDFLAGS properly
+    edo sed -e '/^all/a\	$(CC) $(CFLAGS) -c bzip2.c -o bzip2.o'  \
+            -e 's/$(CC) -shared/& $(LDFLAGS)/'                      \
+            -e '/$(CC).*\.so/s:CFLAGS:LDFLAGS:'                     \
+            -i Makefile-libbz2_so
 
-    # Update version
-    edo sed -e "s:1\.0\.4:${PV}:" \
+    # update version
+    edo sed -e "s:1\.0\.4:${PV}:"                                   \
             -i bzip2.1 bzip2.txt Makefile-libbz2_so manual.{html,ps,xml}
 
-    # Fix up paths
-    edo sed -e 's:$(PREFIX)/lib:$(PREFIX)/$(LIBDIR):g' \
-            -e 's:$(PREFIX)/include:$(PREFIX)/usr/include:g' \
-            -e 's:$(PREFIX)/man:$(PREFIX)/usr/share/man:g' \
+    # fix up paths
+    edo sed -e 's:$(PREFIX)/bin:$(DESTDIR)$(PREFIX)/bin:g'          \
+            -e 's:$(PREFIX)/lib:$(DESTDIR)$(PREFIX)/lib:g'          \
+            -e 's:$(PREFIX)/include:$(DESTDIR)$(PREFIX)/include:g'  \
+            -e 's:$(PREFIX)/man:$(DESTDIR)$(DATADIR)/man:g'         \
             -i Makefile
 }
 
-configure_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-    edo cp "${WORK}"/* "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-compile_one_multibuild() {
-    multibuild-m32-cc "${MULTIBUILD_TARGET}"
-
-    local myemake=(
-        CC="${CC}"
-        AR="${AR}"
-        RANLIB="${RANLIB}"
+perform_multiarch_compile() {
+    local tools=(
+        CC=${host}-gcc
+        AR=${host}-ar
+        RANLIB=${host}-ranlib
     )
 
-    emake "${myemake[@]}" -f Makefile-libbz2_so
-    emake "${myemake[@]}" $(multibuild_default_target C || echo libbz2.a)
+    edo emake "${tools[@]}" -f Makefile-libbz2_so
+    edo emake "${tools[@]}" -f Makefile
 }
 
-test_one_multibuild() {
-    multibuild_default_target C && default
-}
+perform_multiarch_install() {
+    local versioned=
 
-install_one_multibuild() {
-    if multibuild_default_target C; then
-        emake PREFIX="${IMAGE}" LIBDIR=${LIBDIR} MANPREFIX="${IMAGE}"/usr/share install
-        emagicdocs
-    else
-        into /
-        dolib.a libbz2.a
-    fi
+    einstall DESTDIR=${IMAGE} PREFIX=/usr/${host} DATADIR=/usr/share
+    emagicdocs
 
-    # Install shared libraries to /${LIBDIR}
-    into /
+    into /usr/${host}
+
+    # static library
+    dolib libbz2.a
+
+    # shared library
     dolib.so libbz2.so.${PV}
-    for v in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
-        dosym libbz2.so.${PV} /${LIBDIR}/${v}
+    for versioned in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
+        dosym libbz2.so.${PV} /usr/${host}/lib/${versioned}
     done
 
-    if multibuild_default_target C; then
-        # Fix symlinks linking to ${IMAGE}
-        dosym bzgrep /bin/bzegrep
-        dosym bzgrep /bin/bzfgrep
-        dosym bzmore /bin/bzless
-        dosym bzdiff /bin/bzcmp
-    fi
+    # binaries
+    dosym bzgrep /usr/${host}/bin/bzegrep
+    dosym bzgrep /usr/${host}/bin/bzfgrep
+    dosym bzmore /usr/${host}/bin/bzless
+    dosym bzdiff /usr/${host}/bin/bzcmp
 }
 
