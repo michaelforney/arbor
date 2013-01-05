@@ -5,6 +5,9 @@ myexparam -b htmldocs=true
 myexparam -b manpages=true
 
 require perl-module python bash-completion elisp-optional [ source_directory=contrib/emacs ] systemd-service
+if ever at_least 1.8.1; then
+    require zsh-completion
+fi
 
 export_exlib_phases src_unpack src_configure src_compile src_test src_install
 
@@ -142,6 +145,7 @@ git-googlecode_src_install() {
     docinto /
 
     dobashcompletion contrib/completion/git-completion.bash
+    ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.zsh _git
     elisp-optional_src_install
 
     if option python ; then
