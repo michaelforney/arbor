@@ -139,14 +139,24 @@ glibc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${host}"
         edo cd "${WORKBASE}/build/${host}"
 
-        if [[ "${host}" == "powerpc64-exherbo-linux-gnueabi" ]] ; then
-            cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
+        # NOTE(compnerd) architectures which do not store the SSP canary on the
+        # stack cannot have SSP enabled when bootstrapping.  The storage of the
+        # canary in a TLS slot seems to require the use of libssp which can not
+        # be built during a build of a standalone compiler.
+        if option bootstrap ; then
+            if [[ "${host}" == "powerpc64-exherbo-linux-gnueabi" ]] ; then
+                cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
     libc_cv_ssp=no
 EOF
-        elif [[ "${host}" == "i686-pc-linux-gnu" ]] ; then
-            cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
+            elif [[ "${host}" == "i686-pc-linux-gnu" ]] ; then
+                cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
     libc_cv_ssp=no
 EOF
+            elif [[ "${host}" == "x86_64-pc-linux-gnu" ]] ; then
+                cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
+    libc_cv_ssp=no
+EOF
+            fi
         fi
 
         if ! ever at_least 2.17 ; then
