@@ -4,8 +4,7 @@
 
 require gnu [ suffix=xz ]
 require alternatives
-
-export_exlib_phases src_configure src_test src_test_expensive src_install
+require multiarch
 
 SUMMARY="Core file, shell and text utilities expected to be on any system."
 
@@ -13,38 +12,42 @@ LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS="acl caps gmp xattr
     gmp [[ description = [ The utilities time, factor and expr support arbitrarily large numbers ] ]]
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[>=0.18.1]
+        sys-devel/gettext[>=0.18.1][hosts:*(-)?]
     build+run:
-        acl? ( sys-apps/acl )
-        caps? ( sys-libs/libcap )
-        gmp? ( dev-libs/gmp:= )
-        xattr? ( sys-apps/attr )
+        acl? ( sys-apps/acl[hosts:*(-)?] )
+        caps? ( sys-libs/libcap[hosts:*(-)?] )
+        gmp? ( dev-libs/gmp:=[hosts:*(-)?] )
+        xattr? ( sys-apps/attr[hosts:*(-)?] )
 "
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl 'caps libcap' xattr )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gmp )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-install-program=arch,hostname
-    --enable-largefile
-)
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-install-program=arch,hostname' '--enable-largefile' )
 
-coreutils_src_configure() {
+perform_multiarch_configure() {
     # Configuration takes a million years without this hack.
     esandbox hack_toolong
-    default
+    default_multiarch_src_configure
     esandbox nohack_toolong
 }
 
-coreutils_src_test() {
+pre_multiarch_test() {
     esandbox allow /dev/full
-    default
 }
 
-coreutils_src_test_expensive() {
+post_multiarch_test() {
+    esandbox disallow /dev/full
+}
+
+perform_multiarch_test_expensive() {
     local -a expensive_tests
     edo cd tests
     expensive_tests=($( find . -type f | xargs grep -E --files-with-matches '^(very_|)expensive_$' | sed -e 's:^\./::g'))
@@ -52,33 +55,25 @@ coreutils_src_test_expensive() {
     emake check RUN_{VERY_,}EXPENSIVE_TESTS=yes TESTS="${expensive_tests[*]}"
 }
 
-coreutils_src_install() {
+perform_multiarch_install() {
     default
-
-    local binfiles=(
-        basename cat chgrp chmod chown cp chroot cut date df dir dirname du echo env expr false head
-        kill ln ls mkdir mkfifo mknod mktemp mv pwd readlink rm rmdir seq sleep sort stty sync tail
-        touch tr true tty uname vdir wc yes
-    )
-
-    dodir /bin
-    for binfile in "${binfiles[@]}" ; do
-        edo mv "${IMAGE}"/usr/bin/${binfile} "${IMAGE}"/bin/${binfile}
-        edo dosym /bin/${binfile} /usr/bin/${binfile}
-    done
 
     # NOTE(compnerd) do not provide a link for hostname.  /bin is part of ${PATH} by default, and
     # allows for overloading of hostname from inetutils for a more feature-rich version if users
     # desire.  Install the manpage as hostname.coreutils to avoid conflicting with inetutils since
     # this command does not really support any arguments.
-    edo mv "${IMAGE}/usr/bin/hostname" "${IMAGE}/bin/hostname"
-    edo mv "${IMAGE}/usr/share/man/man1/hostname.1" "${IMAGE}/usr/share/man/man1/hostname.coreutils.1"
+    edo mv "${IMAGE}/usr/${host}/bin/hostname" "${IMAGE}/usr/${host}/bin/hostname.${PN}"
+    edo mv "${IMAGE}/usr/share/man/man1/hostname.1" "${IMAGE}/usr/share/man/man1/hostname.${PN}.1"
 
-    alternatives_for hostname coreutils 100 \
-                     /usr/bin/hostname /bin/hostname \
-                     /usr/share/man/man1/hostname.1 /usr/share/man/man1/hostname.coreutils.1
+    alternatives_for hostname ${PN} 100 \
+                     /usr/${host}/bin/hostname /usr/${host}/bin/hostname.${PN} \
+                     /usr/share/man/man1/hostname.1 /usr/share/man/man1/hostname.${PN}.1
 
     insinto /etc
-    newins src/dircolors.hin DIR_COLORS
+    newins "${WORK}/src/dircolors.hin" DIR_COLORS
+
+    # NOTE(compnerd) preserve legacy paths for paludis
+    dosym /bin/readlink /usr/${CHOST}/bin/readlink
+    dosym /usr/bin/env /usr/${CHOST}/bin/env
 }
 
