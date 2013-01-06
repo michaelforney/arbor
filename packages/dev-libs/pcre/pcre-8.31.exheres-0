@@ -1,7 +1,8 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge easy-multibuild
+require sourceforge
+require multiarch
 
 SUMMARY="Perl Compatible Regular Expression library"
 DESCRIPTION="
@@ -28,38 +29,22 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news.txt"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
-
-DEPENDENCIES="
-    sys-libs/ncurses[multibuild_c:*(-)?]
-    sys-libs/readline[multibuild_c:*(-)?]
-    sys-libs/zlib[multibuild_c:*(-)?]
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-jit
-    --enable-pcregrep-libbz2
-    --enable-pcregrep-libz
-    --enable-pcretest-libreadline
-    --enable-pcre16
-    --enable-shared
-    --enable-utf
-    --enable-unicode-properties
-    --disable-pcretest-libedit
-)
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses[hosts:*(-)?]
+        sys-libs/readline[hosts:*(-)?]
+        sys-libs/zlib[hosts:*(-)?]
+"
 
-src_install() {
-    easy-multibuild_src_install
-
-    # Move libpcre to /${LIBDIR} to keep grep and thus baselayout working
-    # without requiring /usr to be mounted
-    edo cd "${IMAGE}"/usr/${LIBDIR}
-    dodir /${LIBDIR}
-
-    local f
-    for f in libpcre*; do
-        edo mv $f "${IMAGE}"/${LIBDIR}/
-        dosym /${LIBDIR}/${f} /usr/${LIBDIR}/${f}
-    done
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-jit' '--enable-pcregrep-libbz2' '--enable-pcregrep-libz'
+                               '--enable-pcretest-libreadline' '--enable-pcre16' '--enable-shared'
+                               '--enable-utf' '--enable-unicode-properties'
+                               '--disable-pcretest-libedit' )
 
