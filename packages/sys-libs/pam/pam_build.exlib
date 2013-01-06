@@ -3,9 +3,10 @@
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic pam easy-multibuild
+require flag-o-matic pam
+require multiarch
 
-export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
+export_exlib_phases pkg_pretend src_prepare
 
 MY_PN=Linux-PAM
 MY_PNV=${MY_PN}-${PV}
@@ -24,20 +25,30 @@ LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
 MYOPTIONS="
     nis [[ description = [ Network Information Service support ] ]]
-    multibuild_c: 32 64
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
-        sys-devel/flex[multibuild_c:*(-)?]
-        sys-devel/gettext
+        sys-devel/flex[hosts:*(-)?]
+        sys-devel/gettext[hosts:*(-)?]
     build+run:
-        sys-libs/cracklib[>=2.8.3][multibuild_c:*(-)?]
-        nis? ( net-libs/libtirpc[multibuild_c:*(-)?] )
+        sys-libs/cracklib[>=2.8.3][hosts:*(-)?]
+        nis? ( net-libs/libtirpc[hosts:*(-)?] )
 "
 
 WORK=${WORKBASE}/${MY_PNV}
 AT_M4DIR=( m4 )
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-audit' '--disable-prelude' '--disable-regenerate-docu'
+                               '--disable-selinux' '--enable-cracklib' '--enable-db=no'
+                               '--enable-nls' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nis )
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/txt/* )
 
 pam_build_pkg_pretend() {
     if [[ ! -f /etc/pam.d/other ]]; then
@@ -56,29 +67,18 @@ pam_build_src_prepare() {
     default
 }
 
-configure_one_multibuild() {
+perform_multiarch_configure() {
     # Works around an autoconf 2.62 bug; libintl.h is included before
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
-   append-flags -D_GNU_SOURCE
-   econf \
-       --libdir=/${LIBDIR} \
-       --disable-audit \
-       --disable-prelude \
-       --disable-regenerate-docu \
-       --disable-selinux \
-       --enable-cracklib \
-       --enable-db=no \
-       --enable-isadir=/${LIBDIR}/security \
-       --enable-nls \
-       --enable-securedir=/${LIBDIR}/security \
-       $(option_enable nis)
+    append-flags -D_GNU_SOURCE
+
+    default_multiarch_src_configure                     \
+        "--includedir=/usr/${host}/include/security"    \
+        "--enable-isadir=/usr/${host}/lib/security"     \
+        "--enable-securedir=/usr/${host}/lib/security"
 }
 
-pam_build_src_configure() {
-    easy-multibuild_src_configure
-}
-
-test_one_multibuild() {
+perform_multiarch_test() {
     if [[ ! -f /etc/pam.d/other ]]; then
         ewarn "Skipping tests. You don't have /etc/pam.d/other."
     else
@@ -86,22 +86,16 @@ test_one_multibuild() {
     fi
 }
 
-pam_build_src_test() {
-    easy-multibuild_src_test
-}
-
-pam_build_src_install() {
-    easy-multibuild_src_install
+perform_multiarch_install() {
+    default
 
     keepdir /etc/security/limits.d
     keepdir /etc/security/namespace.d
 
-    # Needs to be suid
-    edo chmod u+s "${IMAGE}"/sbin/unix_chkpwd
+    # NOTE(?) needs to be suid
+    edo chmod u+s "${IMAGE}/usr/${host}/sbin/unix_chkpwd"
 
-    # install the base pam configuration
+    # install base pam configuration files
     dopamd "${FILES}"/pam.d/*
-
-    dodoc doc/txt/*
 }
 
