@@ -266,7 +266,7 @@ glibc_src_install() {
     done
 
     # NOTE(compnerd) preserve legacy paths for paludis
-    edo dosym /sbin/ldconfig /usr/${CHOST}/sbin/ldconfig
+    edo dosym /usr/${CHOST}/sbin/ldconfig /sbin/ldconfig
 
     # don't install bundled timezone info
     ever at_least 2.16.0 || edo rm -r "${IMAGE}/usr/share/zoneinfo"
