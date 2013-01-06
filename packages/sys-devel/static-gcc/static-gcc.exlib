@@ -26,6 +26,10 @@ static-gcc_src_configure() {
 
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local libpath=/${target}/lib:/usr/${target}/lib
+        local target_cflags_var=${target//-/_}_CFLAGS
+        local target_asflags_var=${target//-/_}_ASFLAGS
+        local target_ldflags_var=${target//-/_}_LDFLAGS
+        local target_cxxflags_var=${target//-/_}_CXXFLAGS
 
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
@@ -41,7 +45,16 @@ static-gcc_src_configure() {
         # "target" libc exists.  Furthermore, if the host and target are the same, then the build
         # assumes that the "target" libc exists.  Work around that by passing in --with-newlib in
         # that case.
+        #
+        # We pass gcc_cv_objdump as we are using an out of tree binutils, and the default will not
+        # prefix the target as necessary.
+            gcc_cv_objdump=${target}-objdump                \
+            CFLAGS_FOR_TARGET="${!target_cflags_var}"       \
+            ASFLAGS_FOR_TARGET="${!target_asflags_var}"     \
+            LDFLAGS_FOR_TARGET="${!target_ldflags_var}"     \
+            CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"   \
         edo "${WORKBASE}/${PN#static-}-${PV}/configure"     \
+                --build=${CHOST}                            \
                 --host=${CHOST}                             \
                 --target=${target}                          \
                 --prefix=/usr/${CHOST}                      \

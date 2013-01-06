@@ -127,7 +127,7 @@ glibc_src_configure() {
     local host=
 
     for host in ${CROSS_COMPILE_TARGETS} ; do
-        local _CC _CXX
+        local _CC _CXX _CFLAGS _ASFLAGS _LDFLAGS _CXXFLAGS _VAR
 
         if option !hosts:${host} ; then
             echo "    Cross-Compile Host: ${host} (disabled)"
@@ -168,10 +168,24 @@ EOF
             _CXX=/usr/${CHOST}/bin/${host}-g++
         fi
 
+        _VAR=${host//-/_}_CFLAGS
+        _CFLAGS="${!_VAR}"
+
+        _VAR=${host//-/_}_ASFLAGS
+        _ASFLAGS="${!_VAR}"
+
+        _VAR=${host//-/_}_LDFLAGS
+        _LDFLAGS="${!_VAR}"
+
+        _VAR=${host//-/_}_CXXFLAGS
+        _CXXFLAGS="${!_VAR}"
+
         # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
         # script does not bother to check for the prefixed tools!
         READELF=${host}-readelf NM=${host}-nm               \
         BUILD_CC=cc CC=${_CC} CXX=${_CXX}                   \
+        CFLAGS="${_CFLAGS}" ASFLAGS="${_ASFLAGS}"           \
+        LDFLAGS="${_LDFLAGS}" CXXFLAGS="${_CXXFLAGS}"       \
             "${WORKBASE}/${PNV}/configure"                  \
                 --cache-file=config.cache                   \
                 --build=${CHOST}                            \
@@ -241,8 +255,11 @@ glibc_src_install() {
         done
     done
 
+    # NOTE(compnerd) preserve legacy paths for paludis
+    edo dosym /sbin/ldconfig /usr/${CHOST}/sbin/ldconfig
+
     # don't install bundled timezone info
-    ! ever at_least 2.16.0 && edo rm -r "${IMAGE}/usr/share/zoneinfo"
+    ever at_least 2.16.0 || edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
     # don't install /etc/{ld.so.cache,localtime}
     edo rm -f "${noins_files[@]}"

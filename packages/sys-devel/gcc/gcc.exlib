@@ -146,6 +146,10 @@ gcc_src_configure() {
 
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local libpath=/${target}/lib:/usr/${target}/lib
+        local target_cflags_var=${target//-/_}_CFLAGS
+        local target_asflags_var=${target//-/_}_ASFLAGS
+        local target_ldflags_var=${target//-/_}_LDFLAGS
+        local target_cxxflags_var=${target//-/_}_CXXFLAGS
 
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
@@ -158,6 +162,11 @@ gcc_src_configure() {
         edo cd "${WORKBASE}/build/${target}"
 
         # TODO(compnerd) enable precompiled headers
+            gcc_cv_objdump=${target}-objdump                                \
+            CFLAGS_FOR_TARGET="${!target_cflags_var}"                       \
+            ASFLAGS_FOR_TARGET="${!target_asflags_var}"                     \
+            LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                     \
+            CXXFLAGS_FOR_TARGEt="${!target_cxxflags_var}"                   \
         edo "${WORKBASE}/${PNV/_p/-}/configure"                             \
                 --host=${CHOST}                                             \
                 --target=${target}                                          \

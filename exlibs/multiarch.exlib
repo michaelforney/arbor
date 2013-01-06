@@ -75,8 +75,18 @@ default_multiarch_src_configure() {
     local option=
 
     if [[ -x ${WORK}/configure ]] ; then
+        local host_cflags_var=${host//-/_}_CFLAGS
+        local host_asflags_var=${host//-/_}_ASFLAGS
+        local host_ldflags_var=${host//-/_}_LDFLAGS
+        local host_cxxflags_var=${host//-/_}_CXXFLAGS
+
+            CFLAGS="${!host_cflags_var}"                \
+            ASFLAGS="${!host_asflags_var}"              \
+            CXXFLAGS="${!host_cxxflags_var}"            \
+            LDFLAGS="${!host_ldflags_var}"              \
         edo "${WORK}/configure"                         \
                 --host=${host}                          \
+                --build=${CHOST}                        \
                 --prefix=/usr/${host}                   \
                 --datarootdir=/usr/share                \
                 --localstatedir=${LOCALSTATEDIR:-/var}  \
