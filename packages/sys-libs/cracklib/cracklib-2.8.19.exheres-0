@@ -1,58 +1,50 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require python sourceforge [ suffix=tar.gz ] easy-multibuild
+require python sourceforge [ suffix=tar.gz ]
+require multiarch
 
 SUMMARY="A proactive password sanity library"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="python multibuild_c: 32 64"
+MYOPTIONS="python
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[>=0.17]
+        sys-devel/gettext[>=0.17][hosts:*(-)?]
     build+run:
-        sys-libs/zlib[multibuild_c:*(-)?]
-        python? ( dev-lang/python:=[multibuild_c:*(-)?] )"
+        sys-libs/zlib[hosts:*(-)?]
+        python? ( dev-lang/python:=[hosts:*(-)?] )"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-nls
-    --with-default-dict=/var/cache/cracklib/cracklib_dict
-)
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls'
+                               '--with-default-dict=/var/cache/cracklib/cracklib_dict' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 
-configure_one_multibuild() {
-    if option python; then
-        local prefix='/usr'
-        multibuild_default_target C || prefix="/usr/${CHOST}"
-
-        export PYTHON="${prefix}/bin/python"
-        export CPPFLAGS="-I${prefix}/include $(multibuild_get_var C ${MULTIBUILD_TARGET} CPPFLAGS)"
-    fi
-
-    default
-}
-
-install_one_multibuild() {
+perform_multiarch_install() {
     default
     option python && python_bytecompile
 }
 
 src_install() {
-    easy-multibuild_src_install
+    multiarch_src_install
 
     dodir /var/cache/cracklib
     keepdir /var/cache/cracklib
 
     dodir /usr/share/dict
     insinto /usr/share/dict
-    doins dicts/cracklib-small
+    doins "${WORK}/dicts/cracklib-small"
 }
 
 pkg_postinst() {
-    edo cracklib-format "${ROOT}/usr/share/dict/cracklib-small" \
-        | cracklib-packer "${ROOT}/var/cache/${PN}/cracklib_dict"
+    edo "/usr/${CHOST}/sbin/cracklib-format" "${ROOT:-/}usr/share/dict/cracklib-small" \
+        | "/usr/${CHOST}/sbin/cracklib-packer" "${ROOT:-/}var/cache/${PN}/cracklib_dict"
 }
 
