@@ -10,40 +10,47 @@ else
     require gnu [ suffix=bz2 ]
 fi
 
+require multiarch
+
 SUMMARY="GNU awk implementation"
 
 LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS="
-    baselayout [[ description = [ Build and install filefuncs
-        extension to /rcscripts, required by baselayout ] ]]"
+    baselayout [[
+        description = [ Build and install filefuncs extension to /rcscripts, required by baselayout ]
+    ]]
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        sys-devel/gettext[hosts:*(-)?]
 "
 
 if ever at_least 4.0.0; then
     DEPENDENCIES+="
         build:
-            app-arch/xz
+            app-arch/xz[hosts:*(-)?]
     "
 fi
 
-# Install binaries outside /usr
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --bindir=/bin
-    --enable-nls
-    ac_cv_libsigsegv=no # Do not link against libsigsegv
+    '--enable-nls'
+    ac_cv_libsigsegv=no # do not link against libsigsegv
 )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FUTURES LIMITATIONS POSIX.STD )
 
 src_prepare() {
+    default
     option baselayout && edo cp -R "${FILES}"/filefuncs-$(ever major) "${WORKBASE}"/filefuncs
 }
 
-src_compile() {
+perform_multiarch_compile() {
     default
 
     if option baselayout; then
@@ -52,27 +59,23 @@ src_compile() {
     fi
 }
 
-src_install() {
-    default
+perform_multiarch_install() {
+    local alternatives=(
+        awk ${PN} 5
 
-    dodir /usr/bin
-    local x
-    for x in "${IMAGE}"/bin/{gawk,pgawk}; do
-        # don't install the same binary twice. instead use symlinks
-        # ${x} -> ${x}-${PV} and /usr/bin/${x} -> ../../bin/${x}
-        edo rm "${x}"
-        x=${x##*/}
-        dosym ${x}-${PV} /bin/${x}
-        dosym ../../bin/${x} /usr/bin/${x}
-    done
+        /usr/${host}/bin/awk        /usr/${host}/bin/${PN}
+        /usr/share/man/man1/awk.1   ${PN}.1
+    )
+
+    default
 
     if option baselayout; then
         cd "${WORKBASE}"/filefuncs
         nonfatal emake DESTDIR="${IMAGE}" LIBDIR=${LIBDIR} install || die "filefuncs emake install failed"
     fi
 
-    alternatives_for awk ${PN} 5 \
-        /usr/bin/awk ${PN} \
-        /usr/share/man/man1/awk.1 ${PN}.1
+    # NOTE(compnerd) awk symlink is managed via alternatives
+    edo rm "${IMAGE}/usr/${host}/bin/awk"
+    alternatives_for "${alternatives[@]}"
 }
 
