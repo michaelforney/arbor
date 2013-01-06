@@ -12,8 +12,7 @@ else
 fi
 
 require flag-o-matic gnu [ suffix=gz ]
-
-export_exlib_phases src_prepare src_configure src_compile
+require multiarch
 
 SUMMARY="GNU command line editing and history library"
 DESCRIPTION="
@@ -56,7 +55,7 @@ DEFAULT_SRC_INSTALL_PARAMS=(
     installdir="/usr/share/doc/${PNVR}/examples"
 )
 
-readline_src_prepare() {
+perform_multiarch_prepare() {
     if (( PATCH_LEVEL )) ; then
         local i patches=( -p0 )
 
@@ -73,61 +72,8 @@ readline_src_prepare() {
     default
 }
 
-readline_src_configure() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-
-        edo mkdir -p "${WORKBASE}/build/${host}"
-        edo cd "${WORKBASE}/build/${host}"
-
-        edo "${WORKBASE}/${MY_PNV}/configure"   \
-                --build=${CHOST}                \
-                --host=${host}                  \
-                --prefix=/usr/${host}           \
-                --datarootdir=/usr/share        \
-                --localstatedir=/var            \
-                --sysconfdir=/etc               \
-        || die
-    done
-}
-
-readline_src_compile() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}"
-
-        default
-    done
-}
-
-readline_src_install() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}"
-
-        default
-        edo rmdir "${IMAGE}/usr/${host}/bin"
-    done
+perform_multiarch_install() {
+    default
+    edo rmdir "${IMAGE}/usr/${host}/bin"
 }
 
