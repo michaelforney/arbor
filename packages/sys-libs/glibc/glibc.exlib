@@ -192,10 +192,15 @@ EOF
 
         # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
         # script does not bother to check for the prefixed tools!
-        READELF=${host}-readelf NM=${host}-nm               \
-        BUILD_CC=cc CC=${_CC} CXX=${_CXX}                   \
-        CFLAGS="${_CFLAGS}" ASFLAGS="${_ASFLAGS}"           \
-        LDFLAGS="${_LDFLAGS}" CXXFLAGS="${_CXXFLAGS}"       \
+        READELF=${host}-readelf                             \
+        NM=${host}-nm                                       \
+        BUILD_CC="cc -B/usr/${CHOST}/${host}/bin"           \
+        CC=${_CC}                                           \
+        CXX=${_CXX}                                         \
+        CFLAGS="${_CFLAGS}"                                 \
+        ASFLAGS="${_ASFLAGS}"                               \
+        LDFLAGS="${_LDFLAGS}"                               \
+        CXXFLAGS="${_CXXFLAGS}"                             \
             "${WORKBASE}/${PNV}/configure"                  \
                 --cache-file=config.cache                   \
                 --build=${CHOST}                            \
