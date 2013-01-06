@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
+require multiarch
 
 SUMMARY="Utilities for showing file differences in various ways"
 DOWNLOADS="ftp://alpha.gnu.org/pub/gnu/${PN}/${PNV}.tar.gz
@@ -12,11 +13,16 @@ REMOTE_IDS="freecode:${PN}"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        sys-devel/gettext[hosts:*(-)?]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-no-gets.patch )
@@ -29,6 +35,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 src_prepare() {
     # This tests hangs for 10 minutes using sydbox
     edo sed -i -e 's/10m/0/g' tests/help-version
+
+    # TODO(compnerd) do this properly via autotools
+    edo sed -e '/^AR = /c AR = @host@-ar'   \
+            -i "${WORK}/lib/Makefile.in"    \
+            -i "${WORK}/src/Makefile.in"    \
+            -i "${WORK}/gnulib-tests/Makefile.in"
 
     default
 }
