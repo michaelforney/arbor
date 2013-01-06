@@ -2,43 +2,62 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=gz ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require multiarch
 
 SUMMARY="Groff produces formatted output from plain text"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="X"
+MYOPTIONS="X
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build+run:
-        sys-apps/texinfo
+        sys-apps/texinfo[hosts:*(-)?]
         X? (
-            x11-libs/libICE
-            x11-libs/libSM
-            x11-libs/libX11
-            x11-libs/libXaw
-            x11-libs/libXmu
-            x11-libs/libXt
+            x11-libs/libICE[hosts:*(-)?]
+            x11-libs/libSM[hosts:*(-)?]
+            x11-libs/libX11[hosts:*(-)?]
+            x11-libs/libXaw[hosts:*(-)?]
+            x11-libs/libXmu[hosts:*(-)?]
+            x11-libs/libXt[hosts:*(-)?]
         )"
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-1.20.1-man-unicode-dashes.patch
-    "${FILES}"/${PNV}-destdir.patch
-)
+AT_M4DIR=( m4 )
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-1.20.1-man-unicode-dashes.patch"
+                              "${FILES}/${PNV}-destdir.patch"
+                              "${FILES}/0002-load-site-font-and-site-tmac-from-etc-groff.patch"
+                              "${FILES}/0003-various-security-fixes.patch" )
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--with-appresdir=/etc/X11/app-defaults' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'X x' )
 
-src_install() {
-    dodir /usr/bin
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BUG-REPORT FDL INSTALL* MORE.STUFF PROJECTS REVISION VERSION )
 
-    emake appresdir="/etc/X11/app-defaults" DESTDIR="${IMAGE}" install
+src_prepare() {
+    autotools_src_prepare
 
-    edo rmdir "${IMAGE}"/usr/share/groff/site-font "${IMAGE}"/usr/${LIBDIR}/groff/site-tmac
+    # TODO(compnerd) fix this properly via autotools
+    edo sed -e '/^AR = /c AR = @host@-ar'                   \
+            -i "${WORK}/src/libs/gnulib/lib/Makefile.in"
 
-    dosym tbl /usr/bin/gtbl
-    dosym eqn /usr/bin/geqn
+    edo sed -e '/^AR=ar/c AR = @host@-ar'                   \
+            -i "${WORK}/Makefile.in"
+}
 
-    emagicdocs
-    dodoc BUG-REPORT FDL INSTALL* MORE.STUFF PROJECTS REVISION VERSION
+perform_multiarch_install() {
+    default
+    edo rmdir "${IMAGE}/etc/groff/site-font"
+
+    # TODO(compnerd) determine why these symlinks are needed
+    dosym tbl /usr/${host}/bin/gtbl
+    dosym eqn /usr/${host}/bin/geqn
 }
 
