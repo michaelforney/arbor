@@ -168,6 +168,7 @@ gcc_src_configure() {
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                     \
             CXXFLAGS_FOR_TARGEt="${!target_cxxflags_var}"                   \
         edo "${WORKBASE}/${PNV/_p/-}/configure"                             \
+                --build=${CHOST}                                            \
                 --host=${CHOST}                                             \
                 --target=${target}                                          \
                 --prefix=/usr/${CHOST}                                      \
