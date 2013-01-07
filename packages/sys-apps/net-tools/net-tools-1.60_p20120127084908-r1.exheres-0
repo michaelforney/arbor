@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge
+require multiarch [ in_tree_build=true ]
 
 SUMMARY="Collection of Basic Networking Tools"
 DOWNLOADS="http://dev.exherbo.org/~tgurr/distfiles/${PN}/${PNV}.tar.xz"
@@ -9,29 +10,43 @@ DOWNLOADS="http://dev.exherbo.org/~tgurr/distfiles/${PN}/${PNV}.tar.xz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
-        app-arch/xz
-        sys-devel/gettext
+        app-arch/xz[hosts:*(-)?]
+        sys-devel/gettext[hosts:*(-)?]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/70f48182fd0e17258bfd018525c07611bdafd66b.patch )
 
-src_configure() {
-    yes "" | edo ./configure.sh config.in
-    edo sed -i -e 's:I18N 0:I18N 1:' config.h
-    #Token Ring has been removed from >=linux-3.5
-    edo sed -i -e 's:HAVE_HWTR 1:HAVE_HWTR 0:' config.h
+perform_multiarch_configure() {
+    yes "" | edo "${WORK}/configure.sh" "${WORK}/config.in"
+
+    # always enable NLS
+    # token ring has been removed from >=linux-3.5
+    edo sed -e 's:I18N 0:I18N 1:'           \
+            -e 's:HAVE_HWTR 1:HAVE_HWTR 0:' \
+            -i config.h
 }
 
-src_install() {
-    default
-    dosym ../bin/route /sbin/route
-    edo mv "${IMAGE}"/bin/{hostname,domainname}
-    for i in {dns,yp,nis}domainname; do
-        dosym domainname /bin/${i}
+perform_multiarch_install() {
+    local prefix=
+
+    emake -j1 BASEDIR="${IMAGE}/usr/${host}" installbin
+    emake -j1 BASEDIR="${IMAGE}" installdata
+
+    dodir /usr/${host}/sbin
+    dosym /usr/${host}/bin/route /usr/${host}/sbin/route
+
+    edo mv "${IMAGE}"/usr/${host}/bin/{hostname,domainname}
+    for prefix in {dns,yp,nis}domainname; do
+        dosym domainname /usr/${host}/bin/${prefix}
     done
     edo rm "${IMAGE}"/usr/share/man/man1/hostname.1
 }
