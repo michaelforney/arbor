@@ -2,6 +2,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require multiarch
+
 SUMMARY="Popular pager utility"
 HOMEPAGE="http://www.greenwoodsoftware.com/${PN}"
 DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
@@ -13,7 +15,12 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news.${PV}.html [[ lang = en ]]"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     suggestion:
@@ -21,7 +28,7 @@ DEPENDENCIES="
 "
 
 src_install() {
-    default
+    multiarch_src_install
 
     hereenvd 70less <<EOF
 LESS="-R -M --shift 5"
