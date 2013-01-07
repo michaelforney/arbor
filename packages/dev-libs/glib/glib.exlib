@@ -1,7 +1,8 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Purpose License v2
 
-require easy-multibuild gnome.org [ suffix=.tar.xz ]
+require gnome.org [ suffix=.tar.xz ]
+require multiarch
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
@@ -16,7 +17,12 @@ synchronize their operation.
 HOMEPAGE="http://www.gtk.org"
 DOWNLOADS+=" http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz"
 
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 LICENCES="LGPL-2"
 
@@ -25,7 +31,7 @@ REMOTE_IDS="freecode:glib"
 AT_M4DIR=( "${WORKBASE}" )
 
 if ! ever at_least 2.31.2 ; then
-    DEFAULT_SRC_PREPARE_PATCHES=(  "${FILES}"/glib-clang-test.patch )
+    DEFAULT_SRC_PREPARE_PATCHES=(  "${FILES}/glib-clang-test.patch" )
 fi
 
 glib_src_prepare() {
@@ -33,16 +39,7 @@ glib_src_prepare() {
     default
 }
 
-install_one_multibuild() {
-    default
-    keepdir "/usr/${LIBDIR}/gio/modules"
-}
-
-glib_src_install() {
-    easy-multibuild_src_install
-}
-
-test_one_multibuild() {
+perform_multiarch_test() {
     unset DISPLAY
     unset DBUS_SESSION_BUS_ADDRESS
     unset DBUS_SESSION_BUS_PID
@@ -88,9 +85,14 @@ test_one_multibuild() {
     edo kill ${DBUS_SESSION_BUS_PID}
 }
 
-glib_src_test() {
-    easy-multibuild_src_test
+perform_multiarch_install() {
+    default
+    keepdir "/usr/${host}/lib/gio/modules"
 }
 
-export_exlib_phases src_prepare src_install src_test
+glib_src_install() {
+    multiarch_src_install
+}
+
+export_exlib_phases src_prepare src_install
 

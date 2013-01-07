@@ -10,6 +10,8 @@ MYOPTIONS="gtk-doc
     man-pages [[ description = [ Generate and install man pages ] ]]
 "
 
+# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
+# anything not in ::arbor, that means no recommendations, just suggestions
 DEPENDENCIES="
     build:
         app-doc/gtk-doc-autotools
@@ -19,29 +21,38 @@ DEPENDENCIES="
                      app-text/docbook-xsl-stylesheets
                      dev-libs/libxslt )
     build+run:
-        dev-util/elfutils[>=0.142][multibuild_c:*(-)?]
-        dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
+        dev-util/elfutils[>=0.142][hosts:*(-)?]
+        dev-libs/libffi[>=3.0.0][hosts:*(-)?]
     test:
-        dev-python/dbus-python
-        dev-util/desktop-file-utils
-        gnome-bindings/pygobject:3
-        sys-apps/dbus[>=1.2.14][multibuild_c:*(-)?] [[ note = [ Required for building GDBus tests ] ]]
-        virtual/pkg-config[>=0.16]
+        dev-python/dbus-python[hosts:*(-)?]
+        dev-util/desktop-file-utils[hosts:*(-)?]
+        gnome-bindings/pygobject:3[hosts:*(-)?]
+        sys-apps/dbus[>=1.2.14][hosts:*(-)?] [[
+            note = [ Required for building GDBus tests ]
+        ]]
+        virtual/pkg-config[>=0.16][hosts:*(-)?]
         x11-misc/shared-mime-info
     recommendation:
-        sys-apps/dbus[>=1.2.14][multibuild_c:*(-)?] [[ note = [ Required for GDBus ] ]]
-        dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
-        gnome-desktop/dconf [[ description = [ default GSettings backend ] ]]
+        sys-apps/dbus[>=1.2.14][hosts:*(-)?] [[
+            note = [ Required for GDBus ]
+        ]]
+        dev-libs/glib-networking[hosts:*(-)?] [[
+            description = [ Required for GNet ]
+        ]]
+        gnome-desktop/dconf[hosts:*(-)?] [[
+            description = [ default GSettings backend ]
+        ]]
     suggestion:
-        gnome-desktop/gvfs [[ description = [ Provides utilities and support for GIO ] ]]
+        gnome-desktop/gvfs[hosts:*(-)?] [[
+            description = [ Provides utilities and support for GIO ]
+        ]]
 "
 
-# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
-# anything not in ::arbor, that means no recommendations, just suggestions
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
+                               '--disable-xattr' '--with-pcre=internal' '--with-threads=posix' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'gtk-doc' 'man-pages man' )
 
 src_prepare() {
-    glib_src_prepare
-
     # fail under sydbox
     edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c # randomly
     edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
@@ -58,28 +69,22 @@ src_prepare() {
 
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
+
+    glib_src_prepare
 }
 
 # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
 # Its usage is recommended by upstream, see also
 # http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
-configure_one_multibuild() {
-    econf \
-        --enable-static \
-        --disable-fam \
-        --disable-selinux \
-        --disable-xattr \
-        --with-pcre=internal \
-        --with-threads=posix \
-        $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests') \
-        $(option_enable gtk-doc) \
-        $(option_enable man-pages man)
+perform_multiarch_configure() {
+    default_multiarch_src_configure     \
+        $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests')
 }
 
 src_install() {
     glib_src_install
 
-    if ! option bash-completion; then
+    if option !bash-completion; then
         edo rm "${IMAGE}"/usr/share/bash-completion/completions/{gdbus,gresource,gsettings}
         edo rmdir "${IMAGE}"/usr/share/bash-completion/{completions/,}
     fi
