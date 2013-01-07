@@ -1,6 +1,8 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require multiarch [ in_tree_build=true ]
+
 SUMMARY="Man page reader"
 HOMEPAGE="http://primates.ximian.com/~flucifredi/man/"
 DOWNLOADS="http://primates.ximian.com/~flucifredi/${PN}/${PNV}.tar.gz"
@@ -8,21 +10,26 @@ DOWNLOADS="http://primates.ximian.com/~flucifredi/${PN}/${PNV}.tar.gz"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     run:
-        sys-apps/groff[>=1.19.2]
+        sys-apps/groff[>=1.19.2][hosts:*(-)?]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}/man-1.6f-unicode.patch"
-)
+DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/man-1.6f-unicode.patch" )
 
-src_configure() {
-    edo ./configure \
-        -default \
-        -confdir=/etc \
-        -compatibility_mode_for_colored_groff
+perform_multiarch_configure() {
+    edo "${WORK}/configure"         \
+            -default                \
+            -prefix=/usr/${host}    \
+            -mandir=/usr/share/man  \
+            -confdir=/etc           \
+            -compatibility_mode_for_colored_groff
 }
 
