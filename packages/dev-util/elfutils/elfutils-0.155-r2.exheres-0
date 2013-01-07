@@ -1,7 +1,8 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild flag-o-matic
+require flag-o-matic
+require multiarch
 
 SUMMARY="Libraries/utilities to handle ELF objects"
 HOMEPAGE="https://fedorahosted.org/releases/${PN:0:1}/${PN:1:1}/${PN}"
@@ -10,29 +11,57 @@ DOWNLOADS="${HOMEPAGE}/${PV}/${PNV}.tar.bz2"
 LICENCES="GPL-3 || ( GPL-2 LGPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        sys-devel/gettext[hosts:*(-)?]
     build+run:
-        !dev-libs/libelf
-        app-arch/bzip2[multibuild_c:*(-)?]
-        app-arch/xz[multibuild_c:*(-)?]
+        app-arch/bzip2[hosts:*(-)?]
+        app-arch/xz[hosts:*(-)?]
+        !dev-libs/libelf [[
+            description = [ installs the same headers, but the libraries are ABI incompatible ]
+        ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/elfutils-0.155-binutils-pr-ld-13621.patch )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/elfutils-0.155-binutils-pr-ld-13621.patch" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--program-prefix=eu-' '--with-bzlib' '--with-zlib'
                                '--with-lzma' )
 
-configure_one_multibuild() {
+src_prepare() {
+    default
+
+    # TODO(compnerd) do this properly via autotools
+    edo sed -e '/^AR =/c AR = @host@-ar'        \
+            -i "${WORK}/lib/Makefile.in"        \
+            -i "${WORK}/libelf/Makefile.in"     \
+            -i "${WORK}/libebl/Makefile.in"     \
+            -i "${WORK}/libdwfl/Makefile.in"    \
+            -i "${WORK}/libdw/Makefile.in"      \
+            -i "${WORK}/libcpu/Makefile.in"     \
+            -i "${WORK}/libasm/Makefile.in"     \
+            -i "${WORK}/backends/Makefile.in"   \
+            -i "${WORK}/src/Makefile.in"
+    edo sed -e "s,nm,${CHOST}-nm,"              \
+            -i "${WORK}/tests/run-arsymtest.sh"
+}
+
+pre_multiarch_configure() {
     # NOTE (abdulras) tests require that the debug information be present in the tools
     expecting_tests && append-flags -g
 
     # NOTE (compnerd) explicitly add -fPIC as the build fails on x86_64 with LTO without it
     # contains RIP-relative relocations which may overflow requiring GOT-relative relocations
     append-flags -fPIC
+}
 
-    default
+src_install() {
+    multiarch_src_install
+    edo rmdir "${IMAGE}/usr/share"
 }
 
