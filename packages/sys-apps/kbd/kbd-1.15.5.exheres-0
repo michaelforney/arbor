@@ -20,26 +20,7 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --bindir=/bin
-    --enable-nls
-)
-
-src_prepare() {
-    default
-
-    # Remove spanish NLS support:
-    # es.po:1415: 'msgstr' is not a valid C format string, unlike 'msgid'.
-    # Reason: The string refers to arguments both through absolute argument
-    # numbers and through unnumbered argument specifications.
-    # /usr/bin/msgfmt: found 1 fatal error
-    edo rm po/es.po
-}
-
-src_compile() {
-    # Parallel build issues since 1.15.4
-    emake -j1
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--bindir=/bin' '--enable-nls' )
 
 src_install() {
     default
