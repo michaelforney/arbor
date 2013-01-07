@@ -73,7 +73,8 @@ perform_multiarch_install() {
     newins "${WORK}/src/dircolors.hin" DIR_COLORS
 
     # NOTE(compnerd) preserve legacy paths for paludis
-    dosym /bin/readlink /usr/${CHOST}/bin/readlink
-    dosym /usr/bin/env /usr/${CHOST}/bin/env
+    edo mkdir "${IMAGE}"{,/usr}/bin
+    dosym /usr/${CHOST}/bin/readlink /bin/readlink
+    dosym /usr/${CHOST}/bin/env /usr/bin/env
 }
 
