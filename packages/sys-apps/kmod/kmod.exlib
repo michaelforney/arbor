@@ -1,9 +1,8 @@
 # Copyright 2012 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require alternatives easy-multibuild
-
-export_exlib_phases src_install
+require alternatives
+require multiarch
 
 SUMMARY="kmod - handle kernel modules"
 DESCRIPTION="
@@ -24,69 +23,53 @@ SLOT="0"
 MYOPTIONS="
     debug
     doc [[ description = [ Build libkmod's API documentation using gtk-doc ] ]]
-    multibuild_c: 32 64
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
-        doc? ( dev-doc/gtk-doc )
+        doc? ( dev-doc/gtk-doc[hosts:*(-)?] )
     build+run:
-        app-arch/xz[multibuild_c:*(-)?]
+        app-arch/xz[hosts:*(-)?]
         !sys-apps/module-init-tools[<3.16-r3] [[
             description = [ module-init-tools and kmod provide the same things using alternatives from m-i-t-3.16-r2 on. ]
             resolution = upgrade-blocked-before
         ]]
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-logging
-    --enable-manpages
-    --enable-tools
-    --with-xz
-    --with-zlib
-)
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-logging' '--enable-manpages' '--enable-tools' '--with-xz'
+                               '--with-zlib' )
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
-    debug
-    "doc gtk-doc"
-)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug "doc gtk-doc" )
 
 AT_M4DIR=( m4 )
 
-kmod_test_one_multibuild() {
+src_test() {
+    edo cd "${WORKBASE}/build/${CHOST}"
     edo mkdir testsuite
-    emake -j1 check
+    default
 }
 
-test_one_multibuild() {
-    kmod_test_one_multibuild
-}
-
-kmod_src_install() {
-    easy-multibuild_src_install
-
-    # alternatives
-    dodir /bin /sbin
-    local a t alternatives=( kmod-tools ${PN} 10 )
-    for a in depmod insmod modinfo modprobe rmmod ; do
-        dosym ../usr/bin/kmod /sbin/${a}
-        alternatives+=(
-            /sbin/${a} ${PN}.${a}
-            /usr/share/man/man8/${a}.8 ${PN}.${a}.8
-        )
-    done
-
-    dosym ../usr/bin/kmod /bin/lsmod
-    dosym ../usr/bin/kmod /sbin/lsmod
-    alternatives+=(
-        /bin/lsmod ${PN}.lsmod
-        /sbin/lsmod ${PN}.lsmod
-        /usr/share/man/man8/lsmod.8 ${PN}.lsmod.8
-        /usr/share/man/man5/depmod.d.5 ${PN}.depmod.d.5
-        /usr/share/man/man5/modprobe.d.5 ${PN}.modprobe.d.5
-        /usr/share/man/man5/modules.dep.5 ${PN}.modules.dep.5
-        /usr/share/man/man5/modules.dep.bin.5 ${PN}.modules.dep.bin.5
+perform_multiarch_install() {
+    local alternatives=(
+        kmod-tools ${PN} 10
+        /usr/${host}/bin/lsmod                  ${PN}.lsmod
+        /usr/share/man/man5/depmod.d.5          ${PN}.depmod.d.5
+        /usr/share/man/man5/modprobe.d.5        ${PN}.modprobe.d.5
+        /usr/share/man/man5/modules.dep.5       ${PN}.modules.dep.5
+        /usr/share/man/man5/modules.dep.bin.5   ${PN}.modules.dep.bin.5
+        /usr/share/man/man8/depmod.8            ${PN}.depmod.8
+        /usr/share/man/man8/insmod.8            ${PN}.insmod.8
+        /usr/share/man/man8/lsmod.8             ${PN}.lsmod.8
+        /usr/share/man/man8/modinfo.8           ${PN}.modinfo.8
+        /usr/share/man/man8/modprobe.8          ${PN}.modprobe.8
+        /usr/share/man/man8/rmmod.8             ${PN}.rmmod.8
     )
+
+    default
 
     alternatives_for "${alternatives[@]}"
 }
