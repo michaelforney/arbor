@@ -119,7 +119,7 @@ git-googlecode_src_test() {
     esandbox allow_net "unix:${WORK%/}/t/trash directory.t0301-credential-cache/.git-credential-cache/socket";
     # default_src_test executes the wrong target, "make check", first
     # disable SVN tests because they are not compatible with subversion 1.7 yet
-    ever at_least 1.8 && myemake test || NO_SVN_TESTS=1 myemake test
+    myemake test
     esandbox disallow_net "unix:${WORK%/}/t/trash directory.t0301-credential-cache/.git-credential-cache/socket";
 }
 
@@ -145,7 +145,9 @@ git-googlecode_src_install() {
     docinto /
 
     dobashcompletion contrib/completion/git-completion.bash
+    # zsh completion uses bash completion internally
     ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.zsh _git
+    ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.bash
     elisp-optional_src_install
 
     if option python ; then
