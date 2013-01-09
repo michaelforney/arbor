@@ -1,0 +1,136 @@
+From 559270a8f67c77a7ce51246c23d2b2837bcff0c9 Mon Sep 17 00:00:00 2001
+From: =?utf8?q?Jean-Pierre=20Andr=C3=A9?= <jpandre@users.sourceforge.net>
+Date: Tue, 25 Sep 2012 09:46:54 +0200
+Subject: [PATCH] Prevented partitions with metadata cached in Windows from being mounted
+
+Windows 8 includes a "fast restart" feature for restarting without fully
+remounting the internal volumes. When this mode is selected, metadata
+stored in the cache (probably hiberfil.sys) is used instead of what
+is actually on disk, and this may lead to inconsistencies when changes
+have been made by ntfs-3g in the meantime.
+
+This patch tries to prevent ntfs-3g from mounting in read-write mode
+when a fast restart of Windows 8 is detected. It relies on the restart
+pages in the $LogFile being identified as version 2.0, which is
+apparently related to data being cached for hibernation or fast restarting.
+---
+ libntfs-3g/logfile.c |    7 ++++++-
+ libntfs-3g/volume.c  |   30 +++++++++++++++++++++++++++---
+ src/ntfs-3g.8.in     |   16 ++++++++++++++++
+ 3 files changed, 49 insertions(+), 4 deletions(-)
+
+diff --git a/libntfs-3g/logfile.c b/libntfs-3g/logfile.c
+index 83811fa..336bdd2 100644
+--- a/libntfs-3g/logfile.c
++++ b/libntfs-3g/logfile.c
+@@ -84,7 +84,12 @@ static BOOL ntfs_check_restart_page_header(RESTART_PAGE_HEADER *rp, s64 pos)
+ 				"position in $LogFile.\n");
+ 		return FALSE;
+ 	}
+-	/* We only know how to handle version 1.1 and 2.0. */
++	/*
++	 * We only know how to handle version 1.1 and 2.0, though
++	 * version 2.0 is probably related to cached metadata in
++	 * Windows 8, and we will refuse to mount.
++	 * Nevertheless, do all the relevant checks before rejecting.
++	 */
+ 	if (((rp->major_ver != const_cpu_to_le16(1))
+ 			 || (rp->minor_ver != const_cpu_to_le16(1)))
+ 	   && ((rp->major_ver != const_cpu_to_le16(2))
+diff --git a/libntfs-3g/volume.c b/libntfs-3g/volume.c
+index 8ec4ba8..7ec6d6e 100644
+--- a/libntfs-3g/volume.c
++++ b/libntfs-3g/volume.c
+@@ -89,13 +89,9 @@ static const char *corrupt_volume_msg =
+ "for more details.\n";
+ 
+ static const char *hibernated_volume_msg =
+-"The NTFS partition is hibernated. Please resume and shutdown Windows\n"
+-"properly, or mount the volume read-only with the 'ro' mount option, or\n"
+-"mount the volume read-write with the 'remove_hiberfile' mount option.\n"
+-"For example type on the command line:\n"
+-"\n"
+-"            mount -t ntfs-3g -o remove_hiberfile %s %s\n"
+-"\n";
++"The NTFS partition is in an unsafe state. Please resume and shutdown\n"
++"Windows fully (no hibernation or fast restarting), or mount the volume\n"
++"read-only with the 'ro' mount option.\n";
+ 
+ static const char *unclean_journal_msg =
+ "Write access is denied because the disk wasn't safely powered\n"
+@@ -660,6 +661,24 @@ static int ntfs_volume_check_logfile(ntfs_volume *vol)
+ 	
+ 	if (!ntfs_check_logfile(na, &rp) || !ntfs_is_logfile_clean(na, rp))
+ 		err = EOPNOTSUPP;
++		/*
++		 * If the latest restart page was identified as version
++		 * 2.0, then Windows may have kept a cached copy of
++		 * metadata for fast restarting, and we should not mount.
++		 * Hibernation will be seen the same way on a non
++		 * Windows-system partition, so we have to use the same
++		 * error code (EPERM).
++		 * The restart page may also be identified as version 2.0
++		 * when access to the file system is terminated abruptly
++		 * by unplugging or power cut, so mounting is also rejected
++		 * after such an event.
++		 */
++	if (rp
++	    && (rp->major_ver == const_cpu_to_le16(2))
++	    && (rp->minor_ver == const_cpu_to_le16(0))) {
++		ntfs_log_error("Metadata kept in Windows cache, refused to mount.\n");
++		err = EPERM;
++	}
+ 	free(rp);
+ 	ntfs_attr_close(na);
+ out:	
+@@ -1212,7 +1231,8 @@ ntfs_volume *ntfs_device_mount(struct ntfs_device *dev, unsigned long flags)
+ 		    ntfs_volume_check_hiberfile(vol, 1) < 0)
+ 			goto error_exit;
+ 		if (ntfs_volume_check_logfile(vol) < 0) {
+-			if (!(flags & MS_RECOVER))
++			/* Always reject cached metadata for now */
++			if (!(flags & MS_RECOVER) || (errno == EPERM))
+ 				goto error_exit;
+ 			ntfs_log_info("The file system wasn't safely "
+ 				      "closed on Windows. Fixing.\n");
+@@ -1708,6 +1728,10 @@ int ntfs_volume_error(int err)
+ 			ret = NTFS_VOLUME_CORRUPT;
+ 			break;
+ 		case EPERM:
++			/*
++			 * Hibernation and fast restarting are seen the
++			 * same way on a non Windows-system partition.
++			 */
+ 			ret = NTFS_VOLUME_HIBERNATED;
+ 			break;
+ 		case EOPNOTSUPP:
+diff --git a/src/ntfs-3g.8.in b/src/ntfs-3g.8.in
+index e507b68..42f2e2b 100644
+--- a/src/ntfs-3g.8.in
++++ b/src/ntfs-3g.8.in
+@@ -36,6 +36,22 @@ a few differences mentioned below in relevant options descriptions.
+ .PP
+ The \fIvolume\fR to be mounted can be either a block device or 
+ an image file.
++.SS Windows hibernation and fast restarting
++On computers which can be dual-booted into Windows or Linux, Windows has
++to be fully shut down before booting into Linux, otherwise the NTFS file
++systems on internal disks may be left in an inconsistent state and changes
++made by Linux may be ignored by Windows.
++.P
++So, Windows may not be left in hibernation when starting Linux, in order
++to avoid inconsistencies. Moreover, the fast restart feature available on
++recent Windows systems has to be disabled. This can be achieved by issuing
++as an Administrator the Windows command which disables both
++hibernation and fast restarting :
++.RS
++.sp
++powercfg /h off
++.sp
++.RE
+ .SS Access Handling and Security
+ By default, files and directories are owned by the effective 
+ user and group of the mounting process, and everybody has
+-- 
+1.7.4.1
+
