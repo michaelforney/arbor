@@ -245,6 +245,7 @@ glibc_src_install() {
         "${IMAGE}/etc/ld.so.cache"
         "${IMAGE}/etc/localtime"
     )
+    local system=$(uname -s)
     local host=
 
     export LANGUAGE=C
@@ -263,11 +264,17 @@ glibc_src_install() {
         default
 
         # NOTE(compnerd) maintain compatibility with pre-existing binaries by symlinking the loaders
-        # into the legacy paths
-        for loader in "${IMAGE}"/usr/${host}/lib/ld* ; do
+        # into the legacy paths.  We cannot simply link all loaders as ld-$(evar range 1-2) prefix
+        # is shared across architectures, so explicitly link only the loader for the individual
+        # system loader.
+        for loader in "${IMAGE}"/usr/${host}/lib/ld-${system,,}* ; do
             edo mkdir -p "${IMAGE}/${LIBDIR}"
             edo ln -s "${loader##${IMAGE}}" "${IMAGE}/${LIBDIR}/${loader##*/}"
         done
+
+        # TODO(compnerd) determine why the configuration data binaries are not generated for
+        # non-CHOST values
+        [[ ${host} == ${CHOST} ]] || edo rmdir "${IMAGE}/usr/${host}/libexec/getconf"
     done
 
     # NOTE(compnerd) preserve legacy paths for paludis
