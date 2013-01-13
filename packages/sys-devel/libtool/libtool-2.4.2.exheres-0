@@ -2,14 +2,19 @@
 # Copyright 2008 Richard Brown
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=xz ] easy-multibuild
+require gnu [ suffix=xz ] multiarch [ pnv=${PNV%a} ]
 
 SUMMARY="Generic library support script"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
@@ -34,18 +39,12 @@ src_prepare() {
 }
 
 src_test_expensive() {
-    local multibuild_c_target
-
-    for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-        multibuild_switch_build_target C ${multibuild_c_target}
-        edo pushd "${WORKBASE}/C/${multibuild_c_target}"
-        emake check
-        edo popd
-    done
+    edo cd "${WORKBASE}/build/${CHOST}"
+    emake check
 }
 
 src_install() {
-    easy-multibuild_src_install
+    multiarch_src_install
 
     for f in $(find "${IMAGE}" -type f -name config.guess -o -name config.sub); do
         edo rm ${f}
