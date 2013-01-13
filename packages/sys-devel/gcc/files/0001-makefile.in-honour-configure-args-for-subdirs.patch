@@ -1,0 +1,91 @@
+From 03927316b81837a5d2e76e1a4bbe324d37daded0 Mon Sep 17 00:00:00 2001
+From: Saleem Abdulrasool <compnerd@compnerd.org>
+Date: Sun, 13 Jan 2013 14:36:46 -0800
+Subject: [PATCH] makefile.in: honour configure args for subdirs
+
+The configure parameters for subdirs would be overridden when the
+{build,host,target}_configargs were used to override the global config args.
+Ensure that the configured values are honoured.
+
+Signed-off-by: Saleem Abdulrasool <compnerd@compnerd.org>
+---
+ Makefile.in | 49 ++++++++++++++++++++++++++-----------------------
+ 1 file changed, 26 insertions(+), 23 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 4200d5d..21a5f5b 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -669,28 +669,6 @@ BASE_FLAGS_TO_PASS = \
+ 	"DESTDIR=$(DESTDIR)" \
+ 	"RPATH_ENVVAR=$(RPATH_ENVVAR)" \
+ 	"TARGET_SUBDIR=$(TARGET_SUBDIR)" \
+-	"bindir=$(bindir)" \
+-	"datadir=$(datadir)" \
+-	"exec_prefix=$(exec_prefix)" \
+-	"includedir=$(includedir)" \
+-	"datarootdir=$(datarootdir)" \
+-	"docdir=$(docdir)" \
+-	"infodir=$(infodir)" \
+-	"pdfdir=$(pdfdir)" \
+-	"htmldir=$(htmldir)" \
+-	"libdir=$(libdir)" \
+-	"libexecdir=$(libexecdir)" \
+-	"lispdir=$(lispdir)" \
+-	"localstatedir=$(localstatedir)" \
+-	"mandir=$(mandir)" \
+-	"oldincludedir=$(oldincludedir)" \
+-	"prefix=$(prefix)" \
+-	"sbindir=$(sbindir)" \
+-	"sharedstatedir=$(sharedstatedir)" \
+-	"sysconfdir=$(sysconfdir)" \
+-	"tooldir=$(tooldir)" \
+-	"build_tooldir=$(build_tooldir)" \
+-	"target_alias=$(target_alias)" \
+ 	"AWK=$(AWK)" \
+ 	"BISON=$(BISON)" \
+ 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
+@@ -779,6 +757,31 @@ BASE_FLAGS_TO_PASS = \
+ # We leave this in just in case, but it is not needed anymore.
+ RECURSE_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS)
+ 
++# Flags to pass down to sub-makes for the host environment.
++HOST_FLAGS_TO_PASS = \
++	"bindir=$(bindir)" \
++	"datadir=$(datadir)" \
++	"exec_prefix=$(exec_prefix)" \
++	"includedir=$(includedir)" \
++	"datarootdir=$(datarootdir)" \
++	"docdir=$(docdir)" \
++	"infodir=$(infodir)" \
++	"pdfdir=$(pdfdir)" \
++	"htmldir=$(htmldir)" \
++	"libdir=$(libdir)" \
++	"libexecdir=$(libexecdir)" \
++	"lispdir=$(lispdir)" \
++	"localstatedir=$(localstatedir)" \
++	"mandir=$(mandir)" \
++	"oldincludedir=$(oldincludedir)" \
++	"prefix=$(prefix)" \
++	"sbindir=$(sbindir)" \
++	"sharedstatedir=$(sharedstatedir)" \
++	"sysconfdir=$(sysconfdir)" \
++	"tooldir=$(tooldir)" \
++	"build_tooldir=$(build_tooldir)" \
++	"target_alias=$(target_alias)"
++
+ # Flags to pass down to most sub-makes, in which we're building with
+ # the host environment.
+ EXTRA_HOST_FLAGS = \
+@@ -7850,7 +7853,7 @@ install-fixincludes: installdirs
+ 	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+ 	$(HOST_EXPORTS) \
+ 	(cd $(HOST_SUBDIR)/fixincludes && \
+-	  $(MAKE) $(FLAGS_TO_PASS)  install)
++	  $(MAKE) $(FLAGS_TO_PASS) $(HOST_FLAGS_TO_PASS) install)
+ 
+ @endif fixincludes
+ 
+-- 
+1.8.1
+

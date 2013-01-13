@@ -7,7 +7,7 @@
 require gnu [ suffix=bz2 subdir=${PNV} ]
 require alternatives versionator
 
-export_exlib_phases src_unpack src_configure src_compile src_test_expensive src_install pkg_postinst pkg_prerm pkg_postrm
+export_exlib_phases src_unpack src_prepare src_configure src_compile src_test_expensive src_install pkg_postinst pkg_prerm pkg_postrm
 
 SUMMARY="GNU Compiler Collection"
 
@@ -112,8 +112,13 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
 
+# TODO(compnerd) consider upstreaming the 0001- prefixed patches; they are
+# generic build system fixes which should be mostly palatable for upstream as
+# they simply fix rarely used parameters' behaviour to match the documentation
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch"
-                              "${FILES}/0001-config-fix-definition-for-target-flags.patch" )
+                              "${FILES}/0001-config-fix-definition-for-target-flags.patch"
+                              "${FILES}/0001-allow-build-host-target-_configargs-to-override-the-.patch"
+                              "${FILES}/0001-makefile.in-honour-configure-args-for-subdirs.patch" )
 
 RESTRICT="test" # tests are expensive
 
@@ -124,6 +129,24 @@ gcc_src_unpack() {
     else
         default
     fi
+}
+
+gcc_src_prepare() {
+    # NOTE(compnerd) this ugly hack brought to you courtesy of gcc upstream; they hardcode the path
+    # and make it impossible to change; just hack around it.  The goal is simple: treat the target
+    # libraries as non-cross-compile libraries.
+    # TODO(compnerd) find a more elegant solution to this (potentially addressing one of the
+    # upstream FIXMEs in the process)
+    edo sed -e "s,glibcxx_toolexecdir=no,glibcxx_toolexecdir='\${libdir}/gcc/\${host_alias}',"  \
+            -e "s,glibcxx_toolexeclibdir=no,glibcxx_toolexeclibdir='\${libdir}',"               \
+            -i "${WORK}/libstdc++-v3/configure"                                                 \
+    edo sed -e "s,toolexecdir=\S\+,toolexecdir='\$(libdir)/gcc-lib/\$(target_alias)',"          \
+            -e "s,toolexeclibdir=\S\+,toolexeclibdir='\$(libdir)',"                             \
+            -i "${WORK}/libgcc/configure"                                                       \
+            -i "${WORK}/libitm/configure"                                                       \
+            -i "${WORK}/libmudflap/configure"
+
+    default
 }
 
 gcc_src_configure() {
@@ -194,41 +217,52 @@ EOF
         # sysroot'ed cross-compiler with an empty sysroot prefix, treating the system root as the
         # sysroot.
 
-            gcc_cv_objdump=${target}-objdump                                \
-            CFLAGS_FOR_TARGET="${!target_cflags_var}"                       \
-            LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                     \
-            CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                   \
-        edo "${WORKBASE}/${PNV/_p/-}/configure"                             \
-                --build=${CHOST}                                            \
-                --host=${CHOST}                                             \
-                --target=${target}                                          \
-                --prefix=/usr/${CHOST}                                      \
-                --datarootdir=/usr/share                                    \
-                --localstatedir=/var                                        \
-                --sysconfdir=/etc                                           \
-                --disable-bootstrap                                         \
-                --disable-dependency-tracking                               \
-                --disable-multilib                                          \
-                --disable-libstdcxx-pch                                     \
-                --enable-fast-install                                       \
-                --enable-clocale=gnu                                        \
-                --enable-languages="$(IFS=, ; echo "${languages[*]}")"      \
-                --enable-lto $(! ever at_least 4.6 && echo --with-libelf)   \
-                --enable-nls                                                \
-                $(option_with graphite cloog)                               \
-                $(option_with graphite ppl)                                 \
+        # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${CHOST} results
+        # in a double prefix
+
+            gcc_cv_objdump=${target}-objdump                                                        \
+            CFLAGS_FOR_TARGET="${!target_cflags_var}"                                               \
+            LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                                             \
+            CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                                           \
+            target_configargs="--prefix=/usr/${target} --with-slibdir=/usr/${target}/lib"           \
+        edo "${WORKBASE}/${PNV/_p/-}/configure"                                                     \
+                --build=${CHOST}                                                                    \
+                --host=${CHOST}                                                                     \
+                --target=${target}                                                                  \
+                --prefix=/usr/${CHOST}                                                              \
+                --datarootdir=/usr/share                                                            \
+                --localstatedir=/var                                                                \
+                --sysconfdir=/etc                                                                   \
+                --disable-bootstrap                                                                 \
+                --disable-dependency-tracking                                                       \
+                --disable-multilib                                                                  \
+                --disable-libstdcxx-pch                                                             \
+                --enable-fast-install                                                               \
+                --enable-clocale=gnu                                                                \
+                --enable-languages="$(IFS=, ; echo "${languages[*]}")"                              \
+                --enable-lto $(! ever at_least 4.6 && echo --with-libelf)                           \
+                --enable-nls                                                                        \
+                $(option_enable fortran libquadmath)                                                \
+                $(option_enable fortran libquadmath-support)                                        \
+                $(option_with graphite cloog)                                                       \
+                $(option_with graphite ppl)                                                         \
                 $(if ever at_least 4.6 && optionq graphite ; then
                     option_enable graphite cloog-backend ${cloog_backend}
                     ever at_least 4.7 && echo '--disable-cloog-version-check'
-                  fi)                                                       \
-                $(option_enable openmp libgomp)                             \
-                $(option_enable objc-runtime libobjc)                       \
-                $(option_enable propolice libssp)                           \
-                --program-suffix=-${SLOT}                                   \
-                --with-as=/usr/${CHOST}/bin/${target}-as                    \
-                --with-ld=/usr/${CHOST}/bin/${target}-ld                    \
-                --with-system-zlib                                          \
-                --with-sysroot='""'                                         \
+                  fi)                                                                               \
+                $(option_enable openmp libgomp)                                                     \
+                $(option_enable objc-runtime libobjc)                                               \
+                $(option_enable propolice libssp)                                                   \
+                $(if test x"${target}" = x"${CHOST}" ; then
+                    echo --program-suffix=-${SLOT}
+                  else
+                    echo --program-transform="s,^,${target}-,;s,$,-${SLOT},"
+                  fi)                                                                               \
+                --with-as=/usr/${CHOST}/bin/${target}-as                                            \
+                --with-ld=/usr/${CHOST}/bin/${target}-ld                                            \
+                --with-system-zlib                                                                  \
+                --with-sysroot='""'                                                                 \
+                --with-gxx-include-dir=/usr/${target}/include/c++/${PV}                             \
         || die
     done
 }
@@ -465,6 +499,7 @@ gcc_src_install() {
 
         edo cd "${WORKBASE}/build/${target}"
         emake -j1 DESTDIR="${IMAGE}" install
+        edo rm "${IMAGE}/usr/${CHOST}/bin/${target}-gcc-${PV}"
     done
     edo find "${IMAGE}" -depth -type d -empty -delete
 
@@ -485,8 +520,12 @@ gcc_src_install() {
     __gcc_setup_gdb_extension
     __gcc_provide_slot_alternatives
 
-    # fix libstdc++.so symlink
-    edo rewrite_so_symlink "${libstdcpp}" "${IMAGE}/usr/${CHOST}/lib" "/usr/${CHOST}/lib"
+    # fixup libstdc++.so symlink
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        if option targets:${target} ; then
+            edo rewrite_so_symlink "${libstdcpp}" "${IMAGE}/usr/${target}/lib" "/usr/${target}/lib"
+        fi
+    done
 
     # cleanup empty directories
     for dir in "${IMAGE}"/usr/*/lib/${PN}/*/${MY_PV:-${PV}}/include{-fixed,} ; do
