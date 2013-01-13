@@ -27,9 +27,7 @@ static-gcc_src_configure() {
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local libpath=/${target}/lib:/usr/${target}/lib
         local target_cflags_var=${target//-/_}_CFLAGS
-        local target_asflags_var=${target//-/_}_ASFLAGS
         local target_ldflags_var=${target//-/_}_LDFLAGS
-        local target_cxxflags_var=${target//-/_}_CXXFLAGS
 
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
@@ -41,18 +39,23 @@ static-gcc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
-        # NOTE(compnerd) we cannot pass --with-sysroot here because the build assumes that the
-        # "target" libc exists.  Furthermore, if the host and target are the same, then the build
-        # assumes that the "target" libc exists.  Work around that by passing in --with-newlib in
-        # that case.
-        #
-        # We pass gcc_cv_objdump as we are using an out of tree binutils, and the default will not
-        # prefix the target as necessary.
+        # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
+        # generated target components will be invalid as they will be compiled with CFLAGS for the
+        # host.
+        [[ -n "${!target_cflags_var}" ]] || die "CFLAGS for ${target} are not set"
+
+        # NOTE(compnerd) we pass gcc_cv_objdump as we are using an out of tree binutils, and the
+        # default will not prefix the target as necessary.
+
+        # NOTE(compnerd) unlike the standard compiler, we do not pass CXXFLAGS_FOR_TARGET here.
+        # This is a bare compiler, supporting only C and does not rely on the system.  The only
+        # thing that is really included in this compiler is the compiler, driver, preprocessor,
+        # and a static version of libgcc which is required to build libc from scratch.  The one
+        # thing that this compiler depends on is the host's copy of zlib to minimise the build.
+
             gcc_cv_objdump=${target}-objdump                \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"       \
-            ASFLAGS_FOR_TARGET="${!target_asflags_var}"     \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"     \
-            CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"   \
         edo "${WORKBASE}/${PN#static-}-${PV}/configure"     \
                 --build=${CHOST}                            \
                 --host=${CHOST}                             \
@@ -71,7 +74,9 @@ static-gcc_src_configure() {
                 --disable-libquadmath                       \
                 --disable-libssp                            \
                 --disable-lto                               \
+                --disable-multilib                          \
                 --disable-nls                               \
+                --disable-plugin                            \
                 --disable-shared                            \
                 --disable-threads                           \
                 --enable-languages=c                        \
@@ -81,7 +86,7 @@ static-gcc_src_configure() {
                 --with-as=/usr/${CHOST}/bin/${target}-as    \
                 --with-ld=/usr/${CHOST}/bin/${target}-ld    \
                 --with-system-zlib                          \
-                $([[ ${target} == ${CHOST} ]] && echo --program-prefix=static- --with-newlib) || die
+        || die
     done
 }
 
@@ -89,8 +94,6 @@ static-gcc_src_compile() {
     local target=
 
     for target in ${CROSS_COMPILE_TARGETS} ; do
-        local libpath=/${target}/lib:/usr/${target}/lib
-
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
             continue
@@ -99,7 +102,6 @@ static-gcc_src_compile() {
         echo "    Cross-Compile Target: ${target}"
 
         edo cd "${WORKBASE}/build/${target}"
-
         default
     done
 }
@@ -120,8 +122,10 @@ static-gcc_src_install() {
         edo cd "${WORKBASE}/build/${target}"
 
         emake -j1 DESTDIR="${IMAGE}" install
-        edo find "${IMAGE}" -depth -type d -empty -delete
+        edo rm "${IMAGE}/usr/${CHOST}/bin/${host}-gcc-$(evar range 1-2)"
     done
+
+    edo find "${IMAGE}" -depth -type d -empty -delete
 }
 
 export_exlib_phases src_configure src_compile src_install
