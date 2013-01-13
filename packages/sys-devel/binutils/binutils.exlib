@@ -60,6 +60,7 @@ binutils_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
         edo "${WORKBASE}/${PNV}/configure"                  \
+                --build=${CHOST}                            \
                 --host=${CHOST}                             \
                 --target=${target}                          \
                 --prefix=/usr/${CHOST}                      \
@@ -75,7 +76,10 @@ binutils_src_configure() {
                 --enable-shared                             \
                 --enable-threads                            \
                 --with-lib-path=${libpath}                  \
-                $([[ ${target} == ${CHOST} ]] && echo --program-prefix=${CHOST}-) || die
+                $(if test x"${target}" = x"${CHOST}" ; then
+                    echo --program-prefix=${CHOST}-
+                  fi)                                       \
+        || die
     done
 }
 
