@@ -1,4 +1,4 @@
-# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -35,11 +35,17 @@ SLOT="0"
 MYOPTIONS="
     acl
     bash-completion
+    bootchart [[ description = [ Enable integrated bootchart by Auke Kok ] ]]
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
     gcrypt [[ description = [ Enable cryptographically secured journal files ] ]]
     gobject-introspection
     gtk-doc
     journal-gateway [[ description = [ Enable journal gateway daemon to access the journal via HTTP and JSON ] ]]
+    old-net [[ description =
+                [ Use legacy unpredictable kernel names for network interfaces.
+                  cf. http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
+                ]
+            ]]
     python [[ description = [ Build the man page index and systemd-python (bindings) ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
@@ -68,10 +74,14 @@ DEPENDENCIES="
         sys-apps/pciutils
         sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
-        sys-apps/util-linux[>=2.21.1-r1][multibuild_c:*(-)?]
+        sys-apps/util-linux[>=2.22][multibuild_c:*(-)?]
         sys-kernel/linux-headers[>=2.6.39]
         sys-libs/libcap[multibuild_c:*(-)?]
         sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
+        !net-dns/nss-myhostname [[
+            description = [ Included and enabled in systemd >= 197 ]
+            resolution = uninstall-blocked-after
+        ]]
         !sys-fs/udev [[
             description = [ udev is now part of systemd. ]
             resolution = uninstall-blocked-after
@@ -86,7 +96,6 @@ DEPENDENCIES="
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
-        || ( sys-apps/sysvinit-tools sys-apps/sysvinit )
         group/dialout
         group/lock [[ note = [ Required for var-lock service ] ]]
         simple-net? ( sys-apps/net-tools[>=1.60_p20120127084908] )
@@ -97,8 +106,8 @@ DEPENDENCIES="
             gnome-desktop/gobject-introspection:1
         ) [[ description = [ Required for systemd-analyze - analyze the boot performance of your system ] ]]
         dev-python/pycairo [[ description = [ Get fancy svgs about the boot process through systemd-analyze plot  ] ]]
-        net-dns/nss-myhostname [[ description = [ For use with systemd-hostnamed (don't know it? Ignore this suggestion) ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
+        sys-boot/dracut [[ description = [ Easily create an initramfs (if in doubt, don't take this) ] ]]
 "
 
 AT_M4DIR=( m4 )
@@ -185,6 +194,7 @@ configure_one_multibuild() {
         --enable-localed
         --enable-logind
         --enable-manpages
+        --enable-myhostname
         --enable-pam
         --enable-quotacheck
         --enable-randomseed
@@ -195,17 +205,23 @@ configure_one_multibuild() {
         --enable-vconsole
         --enable-xz
         --disable-audit
+        --disable-chkconfig
         --disable-ima
         # For transferring the verification key to a smartphone
         --disable-qrencode
         --disable-selinux
-        --with-distro=other
         --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
+        --with-kbd-loadkeys=/bin/loadkeys
+        --with-kbd-setfont=/bin/setfont
         --with-pamlibdir=/${LIBDIR}/security
         # Disable SysV init compatibility.
+        --with-rc-local-script-path-start=""
+        --with-rc-local-script-path-stop=""
         --with-sysvinit-path=""
-        --with-sysvrcd-path=""
+        --with-sysvrcnd-path=""
+        --with-tty-gid=5
         $(option_enable acl)
+        $(option_enable bootchart)
         $(option_enable cryptsetup libcryptsetup)
         $(option_enable gcrypt)
         $(option_enable gobject-introspection introspection)
@@ -422,6 +438,10 @@ EOT
 
     if option python ; then
         python_bytecompile
+    fi
+
+    if option old-net ; then
+        dosym /dev/null /etc/udev/rules.d/80-net-name-slot.rules
     fi
 }
 
