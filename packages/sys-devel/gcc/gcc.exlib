@@ -112,7 +112,8 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}${PN}-${SLOT}/"
 UPSTREAM_CHANGELOG="${UPSTREAM_RELEASE_NOTES}changes.html"
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${SLOT}/ [[ description = [ API documentation ] ]]"
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch"
+                              "${FILES}/0001-config-fix-definition-for-target-flags.patch" )
 
 RESTRICT="test" # tests are expensive
 
@@ -126,6 +127,7 @@ gcc_src_unpack() {
 }
 
 gcc_src_configure() {
+    local cxxlibraries=( libstdc++-v3 libitm ) library=
     local language= languages=( c++ ) target=
     local cloog_backend=
 
@@ -147,7 +149,6 @@ gcc_src_configure() {
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local libpath=/${target}/lib:/usr/${target}/lib
         local target_cflags_var=${target//-/_}_CFLAGS
-        local target_asflags_var=${target//-/_}_ASFLAGS
         local target_ldflags_var=${target//-/_}_LDFLAGS
         local target_cxxflags_var=${target//-/_}_CXXFLAGS
 
@@ -161,12 +162,42 @@ gcc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
+        # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
+        # generated target components will be invalid as they will be compiled with CFLAGS for the
+        # host.
+        [[ -n ${!target_cflags_var} ]] || die "CFLAGS for ${target} are not set"
+
+        # NOTE(compnerd) ensure that CXXFLAGS_FOR_TARGET is set, otherwise the compilation of target
+        # components (e.g. libstdc++) will fail due to improper flags being passed to the compiler.
+        # In the case it is not set, assume that they should be the same as CFLAGS.
+        [[ -n ${!target_cxxflags_var} ]] || target_cxxflags_var=${target}_CFLAGS
+
         # TODO(compnerd) enable precompiled headers
+
+        # NOTE(compnerd) nasty workaround for the fact that CPPFLAGS_FOR_TARGET is not being passed
+        # to the subconfigure for the target libstdc++ resulting in the CPP check failing for
+        # multilib enabled platforms as we me may not have the required headers because libc for the
+        # multilib is not present.
+        for library in "${cxxlibraries[@]}" ; do
+            edo mkdir -p "${WORKBASE}/build/${target}/${target}/${library}"
+            cat > "${WORKBASE}/build/${target}/${target}/${library}/config.cache" <<-EOF
+ac_cv_prog_CXXCPP="\$CXX ${!target_cxxflags_var} -E"
+EOF
+        done
+
+        # NOTE(compnerd) we pass gcc_cv_objdump as we are using an out of tree binutils build
+        # (provided by binutils), and the default objdump name will not prefix the target as
+        # necessary.
+
+        # NOTE(compnerd) the --with-sysroot='""' is a brilliant hack designed to allow gcc to
+        # function properly in the multiarch'ed environment.  It configures the compiler to be a
+        # sysroot'ed cross-compiler with an empty sysroot prefix, treating the system root as the
+        # sysroot.
+
             gcc_cv_objdump=${target}-objdump                                \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"                       \
-            ASFLAGS_FOR_TARGET="${!target_asflags_var}"                     \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                     \
-            CXXFLAGS_FOR_TARGEt="${!target_cxxflags_var}"                   \
+            CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                   \
         edo "${WORKBASE}/${PNV/_p/-}/configure"                             \
                 --build=${CHOST}                                            \
                 --host=${CHOST}                                             \
@@ -175,6 +206,7 @@ gcc_src_configure() {
                 --datarootdir=/usr/share                                    \
                 --localstatedir=/var                                        \
                 --sysconfdir=/etc                                           \
+                --disable-bootstrap                                         \
                 --disable-dependency-tracking                               \
                 --disable-multilib                                          \
                 --disable-libstdcxx-pch                                     \
@@ -196,6 +228,7 @@ gcc_src_configure() {
                 --with-as=/usr/${CHOST}/bin/${target}-as                    \
                 --with-ld=/usr/${CHOST}/bin/${target}-ld                    \
                 --with-system-zlib                                          \
+                --with-sysroot='""'                                         \
         || die
     done
 }
@@ -217,8 +250,6 @@ gcc_src_compile() {
 }
 
 gcc_src_test_expensive() {
-    local target=
-
     if ! ever at_least 4.6.1; then
         # Increase stack size from 8M to 24M to make
         # gcc.c-torture/compile/limits-exprparen.c test pass as per
@@ -226,17 +257,8 @@ gcc_src_test_expensive() {
         ulimit -s 24000
     fi
 
-    for target in ${CROSS_COMPILE_TARGETS} ; do
-        if option !targets:${target} ; then
-            echo "    Cross-Compile Target: ${target} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Target: ${target}"
-
-        edo cd "${WORKBASE}/build/${target}"
-        emake check
-    done
+    edo cd "${WORKBASE}/build/${CHOST}"
+    emake check
 }
 
 __gcc_slot_ada() {
@@ -444,6 +466,7 @@ gcc_src_install() {
         edo cd "${WORKBASE}/build/${target}"
         emake -j1 DESTDIR="${IMAGE}" install
     done
+    edo find "${IMAGE}" -depth -type d -empty -delete
 
     # TODO(compnerd) precompiled headers for libstdcxx
 

@@ -1,0 +1,25 @@
+From 61362ae5648dd0ecd43b3610651f1fa2391b9daf Mon Sep 17 00:00:00 2001
+From: Saleem Abdulrasool <compnerd@compnerd.org>
+Date: Sun, 13 Jan 2013 08:38:30 -0800
+Subject: [PATCH] config: fix definition for target flags
+
+CXXFLAGS_FOR_TARGET may not match CXXFLAGS.  Because the resolution is done at
+runtime, the value that results for CXXFLAGS_FOR_TARGET is completely invalid
+(it will use the host's CXXFLAGS rather than the target's).  This results in
+compilation failures for at least libstdc++.
+
+Signed-off-by: Saleem Abdulrasool <compnerd@compnerd.org>
+---
+ config/mt-gnu | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/config/mt-gnu b/config/mt-gnu
+index 15bf417..5c696f5 100644
+--- a/config/mt-gnu
++++ b/config/mt-gnu
+@@ -1 +1 @@
+-CXXFLAGS_FOR_TARGET = $(CXXFLAGS) -D_GNU_SOURCE
++CXXFLAGS_FOR_TARGET += -D_GNU_SOURCE
+-- 
+1.8.1
+
