@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
-# Copyright 2009,2011,2012 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2009,2011,2012,2013 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require multibuild
@@ -54,8 +54,8 @@ fi
 
 # graphite support
 MYOPTIONS+=" graphite [[ description = [ enable support for Graphite based loop optimizations ] ]]"
-# upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6, probably also
-# gcc[>=4.4]
+# NOTE(?) upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6,
+# probably also gcc[>=4.4]
 if ever at_least 4.6.0; then
     DEPENDENCIES+="
         build+run:
@@ -126,12 +126,22 @@ gcc_src_unpack() {
 
 gcc_src_prepare() {
     edo cd  "${WORKBASE}/${PNV/_p/-}"
+
+    # TODO(compnerd) -fuse-ld to override the linker when GCC 4.8 is the oldest GCC supported.
+    # Until then, because we must use the GCC_EXEC_DIR override parameter -B path to override the
+    # selection of ld for certain packages (e.g. glibc), allow setting a prefixed linker without an
+    # absolute path.  Do the same for the assembler to keep the parallel values similar.
+    ever at_least 4.8 ||
+        edo sed -e 's,DEFAULT_LINKER+set,DEFAULT_LINKER+permissive,'        \
+                -e 's,DEFAULT_ASSEMBLER+set,DEFAULT_ASSEMBLER+permissive,'  \
+                -i "gcc/configure"
+
     default
 }
 
 gcc_src_configure() {
     local supported_c_build_targets=( ${MULTIBUILD_C_TARGETS} )
-    local language= languages=( c++ )
+    local language= languages=( c c++ )
     local enable_multilib=
     local cloog_backend=
 
@@ -157,6 +167,11 @@ gcc_src_configure() {
         cloog_backend=isl
     fi
 
+    # NOTE(compnerd) disable bootstrap; the exheres is not meant for GCC development, so there is no
+    # point in rebuilding and rebuilding again just to verify that GCC is able to self-host for most
+    # people.
+    # TODO(compnerd) figure out why installation with --disable-bootstrap fails due to
+    # fixed-includes/limits.h not being accessible
     econf --hates=docdir                                            \
           --libdir=/usr/${LIBDIR}                                   \
           --with-pkgversion="exherbo ${PNVR}"                       \
@@ -166,6 +181,9 @@ gcc_src_configure() {
           --enable-lto $(! ever at_least 4.6 && echo --with-libelf) \
           ${enable_multilib}                                        \
           --enable-nls                                              \
+          $(ever at_least 4.7.2 && echo --enable-serial-configure)  \
+          $(option_enable fortran libquadmath)                      \
+          $(option_enable fortran libquadmath-support)              \
           $(option_with graphite cloog)                             \
           $(option_with graphite ppl)                               \
           $(if ever at_least 4.6 && optionq graphite ; then
@@ -175,18 +193,16 @@ gcc_src_configure() {
           $(option_enable openmp libgomp)                           \
           $(option_enable objc-runtime libobjc)                     \
           $(option_enable propolice libssp)                         \
-          --with-as=/usr/bin/${CHOST}-as                            \
-          --with-ld=/usr/bin/${CHOST}-ld                            \
+          --with-as=${CHOST}-as                                     \
+          --with-ld=${CHOST}-ld                                     \
           --with-system-zlib
 }
 
 gcc_src_test_expensive() {
-    if ! ever at_least 4.6.1; then
-        # Increase stack size from 8M to 24M to make
-        # gcc.c-torture/compile/limits-exprparen.c test pass as per
-        # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
-        ulimit -s 24000
-    fi
+    # Increase stack size from 8M to 24M to make
+    # gcc.c-torture/compile/limits-exprparen.c test pass as per
+    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
+    ever at_least 4.6.1 || ulimit -s 24000
     emake check
 }
 
@@ -401,13 +417,15 @@ gcc_src_install() {
     __gcc_provide_slot_alternatives
 
     # fix libstdc++.so symlink
-    for libdir in ${all_libdirs}; do
+    local libdirs=$(multibuild_get_all_var C LIBDIR || die "could not get all LIBDIRs") libdir=
+    for libdir in ${libdirs}; do
         edo rewrite_so_symlink ${libstdcpp} "${IMAGE}"/usr/${libdir} /usr/${libdir}
     done
 
     # nuke empty dir if applicable
-    rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude
+    nonfatal edo rmdir "${IMAGE}/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/finclude"
 
+    local dir=
     for dir in "${IMAGE}"/usr/${LIBDIR}/${PN}/${CHOST}/${MY_PV:-${PV}}/include{-fixed,} ; do
         if [[ -d ${dir} ]] ; then
             edo find "${dir}" -type d -empty -delete
