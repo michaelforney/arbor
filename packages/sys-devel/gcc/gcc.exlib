@@ -137,14 +137,23 @@ gcc_src_prepare() {
     # libraries as non-cross-compile libraries.
     # TODO(compnerd) find a more elegant solution to this (potentially addressing one of the
     # upstream FIXMEs in the process)
-    edo sed -e "s,glibcxx_toolexecdir=no,glibcxx_toolexecdir='\${libdir}/gcc/\${host_alias}',"  \
-            -e "s,glibcxx_toolexeclibdir=no,glibcxx_toolexeclibdir='\${libdir}',"               \
-            -i "${WORK}/libstdc++-v3/configure"                                                 \
-    edo sed -e "s,toolexecdir=\S\+,toolexecdir='\$(libdir)/gcc-lib/\$(target_alias)',"          \
-            -e "s,toolexeclibdir=\S\+,toolexeclibdir='\$(libdir)',"                             \
-            -i "${WORK}/libgcc/configure"                                                       \
-            -i "${WORK}/libitm/configure"                                                       \
+    edo sed -e "s,glibcxx_toolexecdir=no,glibcxx_toolexecdir='\${libdir}',"         \
+            -e "s,glibcxx_toolexeclibdir=no,glibcxx_toolexeclibdir='\${libdir}',"   \
+            -i "${WORK}/libstdc++-v3/configure"
+    edo sed -e "s,toolexecdir=\S\+,toolexecdir='\$(libdir)',"    \
+            -e "s,toolexeclibdir=\S\+,toolexeclibdir='\$(libdir)'," \
+            -e "s,toolexeclibdir=\S\+,toolexeclibdir='\$(libdir)'," \
+            -i "${WORK}/libgcc/configure"                           \
+            -i "${WORK}/libitm/configure"                           \
             -i "${WORK}/libmudflap/configure"
+
+    # TODO(compnerd) convert these into part of exherbo-multiarch-paths patch
+    edo sed -e "/SHLIB_DIR = /c SHLIB_DIR = ." \
+            -i "${WORK}/libgcc/config/t-slibgcc"
+    edo sed -e "/libsubdir = /clibsubdir = /usr/${CHOST}/lib/gcc/\$(host_noncanonical)/\$(version)" \
+            -i "${WORK}/libgcc/Makefile.in"                                                         \
+            -i "${WORK}/libitm/Makefile.in"                                                         \
+            -i "${WORK}/libmudflap/Makefile.in"
 
     default
 }
@@ -279,7 +288,12 @@ gcc_src_compile() {
         echo "    Cross-Compile Target: ${target}"
 
         edo cd "${WORKBASE}/build/${target}"
-        default
+
+        # NOTE(compnerd) we pass gcc_cv_objdump as we are using an out of tree binutils build
+        # (provided by binutils), and the default objdump name will not prefix the target as
+        # necessary.  We need to pass this through the environment here as well due to the
+        # sub-configures that are executed
+        gcc_cv_objdump=${target}-objdump default
     done
 }
 
