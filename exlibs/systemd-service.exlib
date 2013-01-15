@@ -5,7 +5,7 @@ myexparam systemd_files=[ "${FILES}"/systemd ]
 
 MYOPTIONS="systemd"
 
-export SYSTEMDSYSTEMUNITDIR="/usr/${LIBDIR}/systemd/system"
+export SYSTEMDSYSTEMUNITDIR="/usr/${CHOST}/lib/systemd/system"
 
 install_systemd_files() {
     local systemd_files object=
@@ -13,7 +13,7 @@ install_systemd_files() {
     exparam -v systemd_files systemd_files[@]
 
     if option systemd ; then
-        insinto "${SYSTEMDSYSTEMUNITDIR}"
+        insinto "/usr/${host:-${CHOST}}/lib/systemd/system"
 
         for object in "${systemd_files[@]}"; do
             if [[ -d ${object} ]]; then
