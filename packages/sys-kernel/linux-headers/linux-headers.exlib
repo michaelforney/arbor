@@ -92,7 +92,11 @@ linux-headers_src_install() {
         [[ -n ${arch} ]] || die "unsupported host '${host}', please update linux-headers.exlib"
 
         edo mkdir -p "${IMAGE}/usr/${host}"
-        edo emake ARCH=${arch} INSTALL_HDR_PATH="${IMAGE}/usr/${host}" headers_install
+        edo emake \
+            ARCH=${arch} \
+            HOSTCC="${CHOST}-gcc -B/usr/${CHOST}/${CHOST}/bin" \
+            INSTALL_HDR_PATH="${IMAGE}/usr/${host}" \
+            headers_install
         edo find "${IMAGE}/usr/${host}/include" -name '.install' -delete -or \
                                                 -name '..install.cmd' -delete
         # scsi.h is now provided by sys-libs/glibc
