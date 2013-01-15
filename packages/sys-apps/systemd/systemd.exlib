@@ -11,7 +11,7 @@ fi
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
         alternatives \
         bash-completion \
-        easy-multibuild \
+        multiarch \
         udev-rules \
         python [ has_lib=false ]
 
@@ -50,8 +50,10 @@ MYOPTIONS="
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
     xattr
-    multibuild_c: 32 64
-    platform: ia64
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
@@ -65,19 +67,19 @@ DEPENDENCIES="
             app-doc/gtk-doc-autotools[>=1.18]
             dev-libs/libxslt
         )
-        python? ( dev-lang/python:=[>=2.7][multibuild_c:*(-)?] )
+        python? ( dev-lang/python:=[>=2.7][hosts:*(-)?] )
     build+run:
-        app-arch/xz[multibuild_c:*(-)?]
-        dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
-        sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
-        sys-apps/kmod[>=5][multibuild_c:*(-)?]
+        app-arch/xz[hosts:*(-)?]
+        dev-libs/glib:2[>=2.26][hosts:*(-)?]
+        sys-apps/dbus[>=1.4.0][hosts:*(-)?]
+        sys-apps/kmod[>=5][hosts:*(-)?]
         sys-apps/pciutils
         sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
-        sys-apps/util-linux[>=2.22][multibuild_c:*(-)?]
+        sys-apps/util-linux[>=2.22][hosts:*(-)?]
         sys-kernel/linux-headers[>=2.6.39]
-        sys-libs/libcap[multibuild_c:*(-)?]
-        sys-libs/pam[>=1.1.2][multibuild_c:*(-)?]
+        sys-libs/libcap[hosts:*(-)?]
+        sys-libs/pam[>=1.1.2][hosts:*(-)?]
         !net-dns/nss-myhostname [[
             description = [ Included and enabled in systemd >= 197 ]
             resolution = uninstall-blocked-after
@@ -86,13 +88,13 @@ DEPENDENCIES="
             description = [ udev is now part of systemd. ]
             resolution = uninstall-blocked-after
         ]]
-        acl? ( sys-apps/acl[multibuild_c:*(-)?] )
-        cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][multibuild_c:*(-)?] )
-        gcrypt? ( dev-libs/libgcrypt[multibuild_c:*(-)?] )
+        acl? ( sys-apps/acl[hosts:*(-)?] )
+        cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][hosts:*(-)?] )
+        gcrypt? ( dev-libs/libgcrypt[hosts:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
-        journal-gateway? ( net-libs/libmicrohttpd[>=0.9.5][multibuild_c:*(-)?] )
-        tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
-        xattr? ( sys-apps/attr[multibuild_c:*(-)?] )
+        journal-gateway? ( net-libs/libmicrohttpd[>=0.9.5][hosts:*(-)?] )
+        tcpd? ( sys-apps/tcp-wrappers[hosts:*(-)?] )
+        xattr? ( sys-apps/attr[hosts:*(-)?] )
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
@@ -142,21 +144,6 @@ systemd_pkg_setup() {
 }
 
 systemd_src_prepare() {
-    # Set the correct libdir if necessary.
-    if [[ ${LIBDIR} != lib ]]; then
-        edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/rootlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/udevlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
-        edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/binfmtdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/sysctldir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/catalogdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
-    fi
-
     if option gtk-doc ; then
         edo gtkdocize --copy --docdir docs/
     else
@@ -177,12 +164,10 @@ systemd_src_prepare() {
     autotools_src_prepare
 }
 
-configure_one_multibuild() {
+perform_multiarch_configure() {
     local myconfig=(
-        --prefix=/usr
-        --libdir=/usr/${LIBDIR}
-        --includedir=/usr/include
-        --libexecdir=/usr/${LIBDIR}
+        --with-rootprefix=/usr/${host}
+        --libexecdir=/usr/${host}/lib
         --localstatedir=/var
         --enable-binfmt
         --enable-blkid
@@ -199,21 +184,24 @@ configure_one_multibuild() {
         --enable-quotacheck
         --enable-randomseed
         --enable-readahead
-        # This adds /sbin and /bin to PATH for systemd units again.
-        --enable-split-usr
         --enable-timedated
         --enable-vconsole
         --enable-xz
         --disable-audit
         --disable-chkconfig
         --disable-ima
+        # Uses pkg-config directly
+        --with-dbuspolicydir=/etc/dbus-1/system.d
+        --with-dbussessionservicedir=/usr/share/dbus-1/services
+        --with-dbussystemservicedir=/usr/share/dbus-1/system-services
+        --with-dbusinterfacedir=/usr/share/dbus-1/interfaces
         # For transferring the verification key to a smartphone
         --disable-qrencode
         --disable-selinux
-        --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
+        --with-firmware-path=/usr/${host}/lib/firmware/updates:/usr/${host}/lib/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
-        --with-pamlibdir=/${LIBDIR}/security
+        --with-pamlibdir=/usr/${host}/lib/security
         # Disable SysV init compatibility.
         --with-rc-local-script-path-start=""
         --with-rc-local-script-path-stop=""
@@ -230,14 +218,16 @@ configure_one_multibuild() {
         $(option_enable tcpd tcpwrap)
         $(option_enable xattr)
         $(option_with python)
+        ac_cv_func_malloc_0_nonnull=yes
+        ac_cv_func_realloc_0_nonnull=yes
     )
 
     edo mkdir -p src/gudev
 
-    econf "${myconfig[@]}"
+    default_multiarch_src_configure "${myconfig[@]}"
 }
 
-test_one_multibuild() {
+perform_multiarch_test() {
     # Note to self & whoever else reads this: Don't even *think* about
     # RESTRICT=userpriv in order to enable more expensive udev tests.
     # Enabling those tests can (and most likely will) mess up your running system
@@ -251,36 +241,53 @@ test_one_multibuild() {
     fi
 }
 
-install_one_multibuild() {
+perform_multiarch_install() {
     default
 
-    keepdir /usr/${LIBDIR}/systemd/user-generators
-    keepdir /usr/${LIBDIR}/udev/devices
+    # alternatives
+    dodir /usr/${host}/sbin
+    local a
+    for a in halt poweroff reboot runlevel shutdown telinit; do
+        dosym /usr/${host}/bin/systemctl /usr/${host}/sbin/${a}
+        alternatives+=(
+            /usr/${host}/sbin/${a} ${PN}.${a}
+        )
+    done
+    dosym /usr/${host}/lib/systemd/systemd /usr/${host}/sbin/init
+    alternatives+=(
+        /usr/${host}/sbin/init ${PN}.init
+    )
+
+    keepdir /usr/${host}/lib/systemd/user-generators
+    keepdir /usr/${host}/lib/udev/devices
+    keepdir /usr/${host}/lib/systemd/system/graphical.target.wants
+    keepdir /usr/${host}/lib/systemd/system-generators
+    keepdir /usr/${host}/lib/systemd/system-shutdown
+    keepdir /usr/${host}/lib/systemd/user-generators
+    keepdir /usr/${host}/lib/modules-load.d
+    keepdir /usr/${host}/lib/sysctl.d
+    keepdir /usr/${host}/lib/binfmt.d
+    keepdir /usr/${host}/lib/tmpfiles.d
+    keepdir /usr/${host}/lib/systemd/ntp-units.d
+    keepdir /usr/${host}/lib/systemd/system-sleep
 }
 
 systemd_src_install() {
-    easy-multibuild_src_install
+    local alternatives=(
+        init ${PN} 10
+        /usr/share/man/man1/init.1 ${PN}.init.1
+    )
 
-    # alternatives
-    dodir /sbin
-    local a t alternatives=( init ${PN} 10 )
+    local a
     for a in halt poweroff reboot runlevel shutdown telinit; do
-        dosym ../usr/bin/systemctl /sbin/${a}
         alternatives+=(
-            /sbin/${a} ${PN}.${a}
             /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
-    dosym ../usr/${LIBDIR}/systemd/systemd /sbin/init
-    alternatives+=(
-        /sbin/init ${PN}.init
-        /usr/share/man/man1/init.1 ${PN}.init.1
-    )
-    alternatives_for "${alternatives[@]}"
 
-    # Compatibility symlink for some tools that try to use /bin/systemctl.
-    dodir /bin
-    dosym ../usr/bin/systemctl /bin/systemctl
+    multiarch_src_install
+
+    alternatives_for "${alternatives[@]}"
 
     # Handle bash-completion
     if option bash-completion ; then
@@ -294,7 +301,7 @@ systemd_src_install() {
 
     # Install simple-net if requested
     if option simple-net; then
-        insinto /usr/${LIBDIR}/systemd/system
+        insinto /usr/${CHOST}/lib/systemd/system
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
@@ -302,7 +309,7 @@ systemd_src_install() {
 
     # Install the legacy.conf tmpdirs.d config file.
     # systemd does not install it itself if SysV compatibility is not enabled.
-    insinto /usr/${LIBDIR}/tmpfiles.d
+    insinto /usr/${CHOST}/lib/tmpfiles.d
     doins "${WORK}"/tmpfiles.d/legacy.conf
 
     insinto /etc
@@ -360,8 +367,6 @@ LC_MEASUREMENT=C
 LC_IDENTIFICATION=C
 EOF
 
-    nonfatal edo mv "${IMAGE}"/var/${LIBDIR} "${IMAGE}"/var/lib
-
     # keepdir some stuff
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
@@ -369,10 +374,6 @@ EOF
     keepdir /etc/systemd/system/sysinit.target.wants
     keepdir /etc/systemd/user
     keepdir /etc/udev/hwdb.d
-    keepdir /usr/${LIBDIR}/systemd/system/graphical.target.wants
-    keepdir /usr/${LIBDIR}/systemd/system-generators
-    keepdir /usr/${LIBDIR}/systemd/system-shutdown
-    keepdir /usr/${LIBDIR}/systemd/user-generators
     keepdir /var/lib/systemd
 
     # Make sure /etc/machine-id exists.
@@ -380,29 +381,23 @@ EOF
 
     # Module names in /etc/modules-load.d/?*.conf get read and the modules loaded.
     keepdir /etc/modules-load.d
-    keepdir /usr/${LIBDIR}/modules-load.d
 
     # Files in /etc/sysctl.d/?*.conf get read and applied via sysctl. Can be used
     # in combination with sysctl.conf (sysctl.conf takes precedence over sysctl.d).
     keepdir /etc/sysctl.d
-    keepdir /usr/${LIBDIR}/sysctl.d
 
     # Files in /etc/binfmt.d/?*.conf contain a list of binfmt_misc kernel binary
     # format rules. Those are used to configure additional binary formats to register
     # during boot in the kernel.
     keepdir /etc/binfmt.d
-    keepdir /usr/${LIBDIR}/binfmt.d
 
     # Files in /etc/tmpfiles.d/?*.conf contain a list of files and/or directories.
     # Those are automatically (re)created, removed, truncated,... during boot or after a specified time
     # with specified owner, group and access mode.
     keepdir /etc/tmpfiles.d
-    keepdir /usr/${LIBDIR}/tmpfiles.d
 
     # ntp units in ntp-units.d/?*.conf get read and the services started.
     keepdir /etc/systemd/ntp-units.d
-    keepdir /usr/${LIBDIR}/systemd/ntp-units.d
-    keepdir /usr/${LIBDIR}/systemd/system-sleep
 
     # Keep the administrator's udev rules dir.
     keepdir /etc/udev/rules.d
@@ -411,8 +406,8 @@ EOF
     ever at_least scm && keepdir /etc/udev/hwdb.d
 
     # platform rules
-    insinto "${UDEVRULESDIR}"
-    option platform:ia64 && doins "rules/arch/40-ia64.rules"
+    #insinto "${UDEVRULESDIR}"
+    #option platform:ia64 && doins "rules/arch/40-ia64.rules"
 
     # module loading configuration
     insinto /etc/modprobe.d
@@ -423,18 +418,9 @@ EOF
 CONFIG_PROTECT_MASK="${UDEVRULESDIR}"
 EOT
 
-    # fix lib paths
-    if [[ ${LIBDIR} != lib ]] ; then
-        if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
-            edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
-        fi
-        edo rmdir "${IMAGE}"/usr/lib/{systemd/{user-generators,},}
-        [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
-    fi
-
     # Create compatibility symlinks
-    dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
-    dosym /usr/bin/udevadm /sbin/udevadm
+    dosym /usr/${CHOST}/lib/systemd/systemd-udevd /usr/${CHOST}/sbin/udevd
+    dosym /usr/${CHOST}/bin/udevadm /usr/${CHOST}/sbin/udevadm
 
     if option python ; then
         python_bytecompile
@@ -449,15 +435,15 @@ systemd_pkg_postinst() {
     default
 
     if [[ ${ROOT} == / ]]; then
-        nonfatal edo /usr/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
+        nonfatal edo /usr/${CHOST}/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
 
         # Update the hwdb index
-        nonfatal edo /sbin/udevadm hwdb --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
+        nonfatal edo /usr/${CHOST}/sbin/udevadm hwdb --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
 
         # Update the message catalogue index
-        nonfatal edo /usr/bin/journalctl --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
+        nonfatal edo /usr/${CHOST}/bin/journalctl --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
 
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
@@ -469,7 +455,7 @@ systemd_pkg_postinst() {
 
             case "$(esandbox api)" in
             1)
-                esandbox exec /sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
+                esandbox exec /usr/${CHOST}/sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
                 ;;
             0)
                 # Change the wait mode to wait/eldest so
@@ -477,7 +463,7 @@ systemd_pkg_postinst() {
                 esandbox wait_eldest
                 # Allow access to /run/udev/control for udevd
                 esandbox allow_net unix:/run/udev/control
-                nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+                nonfatal edo /usr/${CHOST}/sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
                 ;;
             esac
 
