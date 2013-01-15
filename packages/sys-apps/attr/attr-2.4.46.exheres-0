@@ -4,7 +4,7 @@
 # Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic easy-multibuild [ work=${PNV} ]
+require flag-o-matic multiarch [ in_tree_build=true ]
 
 SUMMARY="Extended attributes tools"
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
@@ -13,7 +13,12 @@ DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 LICENCES="LGPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
@@ -28,47 +33,34 @@ DEFAULT_SRC_INSTALL_PARAMS=( DIST_ROOT="${IMAGE}" install-lib install-dev )
 
 WORK="${WORKBASE}"
 
-set_compiler_flags() {
-    filter-flags -m32
-    case "${MULTIBUILD_TARGET}" in
-        32) export CC="${CC} -m32";;
-        64) export CC="${CC/ -m32/}";;
-    esac
-}
-
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-src_unpack() {
-    easy-multibuild_run_phase
-}
-
-prepare_one_multibuild() {
+perform_multiarch_prepare() {
     default
-
-    set_compiler_flags
 
     edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
             -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
             -i include/builddefs.in
 }
 
-src_prepare() {
-    easy-multibuild_run_phase
-}
-
-configure_prepare_one_multibuild() { :; }
-
-configure_one_multibuild() {
+perform_multiarch_configure() {
     unset PLATFORM # Gentoo #184564
-    set_compiler_flags
+    local host_cflags_var=${host//-/_}_CFLAGS
 
-    DEBUG="-DNDEBUG" OPTIMIZER="${CFLAGS}" \
-        econf --bindir=/bin --libdir=/${LIBDIR} --libexecdir=/${LIBDIR} --enable-gettext --enable-shared
+    DEBUG="-DNDEBUG" OPTIMIZER="${!host_cflags_var}" \
+        default_multiarch_src_configure --libexecdir=/usr/${host}/lib --enable-gettext --enable-shared
 }
 
-install_one_multibuild() {
+perform_multiarch_compile() {
+    local host_cflags_var=${host//-/_}_CFLAGS
+    local host_cxxflags_var=${host//-/_}_CXXFLAGS
+    local host_ldflags_var=${host//-/_}_LDFLAGS
+
+    CFLAGS="${!host_cflags_var}"         \
+    emake                                \
+        CXXFLAGS="${!host_cxxflags_var}" \
+        LDFLAGS="${!host_ldflags_var}"
+}
+
+perform_multiarch_install() {
     default
 
     # Part of sys-apps/man-pages
