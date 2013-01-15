@@ -2,11 +2,11 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
-require flag-o-matic easy-multibuild [ work=${PNV} ]
+require flag-o-matic easy-multibuild [ work=${PNV} ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 SUMMARY="A free compression library unencumbered by patents"
-HOMEPAGE="http://www.zlib.net/"
-DOWNLOADS="http://www.zlib.net/${PNV}.tar.bz2"
+HOMEPAGE="http://www.zlib.net"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
 
 LICENCES="ZLIB"
 SLOT="0"
@@ -46,6 +46,10 @@ prepare_one_multibuild() {
     edo sed -e '/gcc=1/s:\*gcc\*:*clang*|&:' -i configure
 
     default
+
+    edo pushd contrib/minizip
+        eautoreconf
+    edo popd
 }
 
 configure_prepare_one_multibuild() { :; }
@@ -58,6 +62,18 @@ configure_one_multibuild() {
         --prefix=/usr \
         --libdir=/usr/${LIBDIR} \
         --shared
+
+    edo pushd contrib/minizip
+        econf --disable-static
+    edo popd
+}
+
+install_one_multibuild() {
+    default
+
+    edo pushd contrib/minizip
+        emake DESTDIR="${IMAGE}" install
+    edo popd
 }
 
 test_one_multibuild() {
