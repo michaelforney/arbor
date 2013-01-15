@@ -75,6 +75,7 @@ EOF
         # thing that is really included in this compiler is the compiler, driver, preprocessor,
         # and a static version of libgcc which is required to build libc from scratch.  The one
         # thing that this compiler depends on is the host's copy of zlib to minimise the build.
+            CC="${CC} -B/usr/${CHOST}/${target}/bin/"       \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"       \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"     \
         edo "${WORKBASE}/${PN#static-}-${PV}/configure"     \
@@ -110,7 +111,7 @@ EOF
                 --with-as=/usr/${CHOST}/bin/${target}-as    \
                 --with-ld=/usr/${CHOST}/bin/${target}-ld    \
                 --with-system-zlib                          \
-        || die
+        || die "configure failed for ${target} target"
     done
 }
 
