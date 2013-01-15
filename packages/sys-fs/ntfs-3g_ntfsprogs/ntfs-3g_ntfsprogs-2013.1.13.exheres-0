@@ -7,8 +7,6 @@
 #     Copyright 2009 Gaute Hope <eg@gaute.vetsj.com>
 #     Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 
-require udev-rules [ udev_files=[ 99-ntfs-3g.rules ] ]
-
 SUMMARY="Read/write NTFS driver (ntfs-3g) and userspace tools (ntfsprogs)"
 DESCRIPTION="
 NTFS-3G is a stable, full-featured, read-write NTFS driver for Linux, Android, Mac OS X, FreeBSD,
@@ -55,12 +53,6 @@ REMOTE_IDS="sourceforge:ntfs-3g"
 
 UPSTREAM_RELEASE_NOTES="${BASE_URL}/community/release-history/"
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/3e4c43952020fe91f7f7888c7d52213d49148efe.patch
-    "${FILES}"/4d0b9163c9ef1f0cdbbf533317b291220c7fd1c7.patch
-    "${FILES}"/559270a8f67c77a7ce51246c23d2b2837bcff0c9.patch
-)
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --exec-prefix=/usr
     --enable-mount-helper
@@ -86,7 +78,9 @@ src_install() {
     edo mv "${IMAGE}"/sbin/* "${IMAGE}"/usr/sbin
     edo rmdir "${IMAGE}"/sbin
 
-    install_udev_files
+    dosym /usr/sbin/mount.ntfs{-3g,}
+
+    option extras && dosym /usr/bin/{ntfsck,fsck.ntfs}
 }
 
 pkg_postinst() {
