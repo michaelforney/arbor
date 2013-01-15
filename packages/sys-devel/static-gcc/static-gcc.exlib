@@ -102,6 +102,8 @@ EOF
                 --disable-shared                            \
                 --disable-threads                           \
                 --enable-languages=c                        \
+                $([[ ${CHOST} == ${target} ]]               \
+                    && echo --with-newlib)                  \
                 --program-prefix=${target}-static-          \
                 --with-lib-path=${libpath}                  \
                 --without-headers                           \
