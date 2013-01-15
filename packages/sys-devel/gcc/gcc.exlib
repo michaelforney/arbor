@@ -131,7 +131,9 @@ gcc_pkg_setup() {
         # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
         # generated target components will be invalid as they will be compiled with CFLAGS for the
         # host.
-        [[ -n ${!target_cflags_var} ]] || die "CFLAGS for ${target} are not set"
+        if option targets:${target}; then
+            [[ -n ${!target_cflags_var} ]] || die "CFLAGS for ${target} are not set"
+        fi
     done
 }
 
