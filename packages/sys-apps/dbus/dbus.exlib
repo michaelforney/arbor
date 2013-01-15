@@ -9,7 +9,7 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic easy-multibuild systemd-service
+require flag-o-matic multiarch systemd-service
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -28,7 +28,12 @@ MYOPTIONS="multibuild_c: 32 64"
 BUGS_TO="philantrop@exherbo.org"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
-MYOPTIONS="baselayout debug doc systemd X ( multibuild_c: 32 64 )"
+MYOPTIONS="baselayout debug doc systemd X
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
+"
 
 DEPENDENCIES="
     build:
@@ -39,16 +44,16 @@ DEPENDENCIES="
         doc? ( app-doc/doxygen )
         X? ( x11-proto/xproto )
     build+run:
-        dev-libs/expat[>=1.95.8][multibuild_c:*(-)?]
+        dev-libs/expat[>=1.95.8][hosts:*(-)?]
         sys-apps/skeleton-filesystem-layout[>=0.5.4]
         group/messagebus
         group/plugdev
         user/messagebus
-        systemd? ( sys-apps/systemd[>=32][multibuild_c:*(-)?] )
+        systemd? ( sys-apps/systemd[>=32][hosts:*(-)?] )
         X? (
-            x11-libs/libICE[multibuild_c:*(-)?]
-            x11-libs/libSM[multibuild_c:*(-)?]
-            x11-libs/libX11[multibuild_c:*(-)?]
+            x11-libs/libICE[hosts:*(-)?]
+            x11-libs/libSM[hosts:*(-)?]
+            x11-libs/libX11[hosts:*(-)?]
         )
     suggestion:
         !systemd? (
@@ -65,10 +70,10 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
 
-configure_one_multibuild() {
+perform_multiarch_configure() {
     # Testing code (--enable-tests) disabled since building with tests support
     # creates an insecure (sic upstream), non-production use library
-    econf                                                \
+    default_multiarch_src_configure                      \
         --localstatedir=/var                             \
         --enable-inotify                                 \
         --enable-xml-docs                                \
@@ -86,33 +91,33 @@ configure_one_multibuild() {
         $(option_enable doc doxygen-docs)                \
         $(option_enable systemd)                         \
         $(option_with X x)                               \
-        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR})
+        $(option_with systemd systemdsystemunitdir /usr/${host}/lib/systemd/system)
 }
 
 dbus_src_configure() {
     # whitelist bind() to /tmp/dbus-fake-socket-*
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
-    easy-multibuild_src_configure
+    multiarch_src_configure
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
 }
 
 dbus_src_compile() {
     # get backtraces from applications
     append-flags -rdynamic
-    easy-multibuild_src_compile
+    multiarch_src_compile
 }
 
 dbus_src_test() {
-    DBUS_VERBOSE=1 easy-multibuild_src_test
+    DBUS_VERBOSE=1 multiarch_src_test
 }
 
-install_one_multibuild() {
+perform_multiarch_install() {
     default
-    keepdir /usr/${LIBDIR}/dbus-1.0/test
+    keepdir /usr/${host}/lib/dbus-1.0/test
 }
 
 dbus_src_install() {
-    easy-multibuild_src_install
+    multiarch_src_install
 
     if ! option doc ; then
         [[ -d "${IMAGE}"/usr/share/doc/${PNVR}/api ]] && edo rmdir "${IMAGE}"/usr/share/doc/${PNVR}/api
