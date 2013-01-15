@@ -15,11 +15,30 @@ MYOPTIONS="
 "
 
 DEPENDENCIES="
-    build+run:
+    run:
         sys-devel/binutils[targets:*(-)?]
 "
+#   build:
+#       $(for host in ${CROSS_COMPILE_TARGETS} ; do
+#           echo hosts:${host}? ( sys-devel/binutils[targets:${host}] )
+#         done)
+#   buil+run:
+#       sys-libs/glibc[hosts:*(-)?]
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch" )
+
+static-gcc_pkg_setup() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local target_cflags_var=${target//-/_}_CFLAGS
+
+        # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
+        # generated target components will be invalid as they will be compiled with CFLAGS for the
+        # host.
+        [[ -n "${!target_cflags_var}" ]] || die "CFLAGS for ${target} are not set"
+    done
+}
 
 static-gcc_src_configure() {
     local target=
@@ -39,24 +58,25 @@ static-gcc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
-        # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
-        # generated target components will be invalid as they will be compiled with CFLAGS for the
-        # host.
-        [[ -n "${!target_cflags_var}" ]] || die "CFLAGS for ${target} are not set"
-
         # NOTE(compnerd) we pass gcc_cv_objdump as we are using an out of tree binutils, and the
         # default will not prefix the target as necessary.
+        # NOTE(compnerd) GNU libc v2.4+ provide SSP; however, the check for it is based upon a grep
+        # of features.h which is inaccessible to us at this point.  Inform the compiler we will be
+        # running against GNU libc v2.4+
+        cat > config.cache <<- EOF
+gcc_cv_objdump=${target}-objdump
+gcc_cv_libc_provides_ssp=yes
+EOF
 
         # NOTE(compnerd) unlike the standard compiler, we do not pass CXXFLAGS_FOR_TARGET here.
         # This is a bare compiler, supporting only C and does not rely on the system.  The only
         # thing that is really included in this compiler is the compiler, driver, preprocessor,
         # and a static version of libgcc which is required to build libc from scratch.  The one
         # thing that this compiler depends on is the host's copy of zlib to minimise the build.
-
-            gcc_cv_objdump=${target}-objdump                \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"       \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"     \
         edo "${WORKBASE}/${PN#static-}-${PV}/configure"     \
+                --cache-file=config.cache                   \
                 --build=${CHOST}                            \
                 --host=${CHOST}                             \
                 --target=${target}                          \
@@ -102,7 +122,10 @@ static-gcc_src_compile() {
         echo "    Cross-Compile Target: ${target}"
 
         edo cd "${WORKBASE}/build/${target}"
-        default
+
+        # NOTE(compnerd) pass gcc_cv_objdump through the environment to allow the sub-configures to
+        # receive the correct value
+        gcc_cv_objdump=${target}-objdump default
     done
 }
 
@@ -122,11 +145,11 @@ static-gcc_src_install() {
         edo cd "${WORKBASE}/build/${target}"
 
         emake -j1 DESTDIR="${IMAGE}" install
-        edo rm "${IMAGE}/usr/${CHOST}/bin/${host}-gcc-$(evar range 1-2)"
+        edo rm "${IMAGE}/usr/${CHOST}/bin/${target}-gcc-${PV}"
     done
 
     edo find "${IMAGE}" -depth -type d -empty -delete
 }
 
-export_exlib_phases src_configure src_compile src_install
+export_exlib_phases pkg_setup src_configure src_compile src_install
 

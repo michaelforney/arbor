@@ -29,7 +29,6 @@ DOWNLOADS="${source_uri} ${ports_uri}"
 LICENCES="|| ( GPL-3 GPL-2 ) || ( LGPL-3 LGPL-2.1 )"
 SLOT="0"
 MYOPTIONS="
-    bootstrap
     systemd [[
         description = [ Install systemd service file for name service cache daemon (nscd) ]
     ]]
@@ -47,7 +46,9 @@ DEPENDENCIES="
         sys-apps/sed
         sys-apps/texinfo
         sys-kernel/linux-headers[hosts:*?]
-        bootstrap? ( sys-devel/static-gcc )
+        $(for host in arm-exherbo-linux-gnueabi i686-pc-linux-gnu x86_64-pc-linux-gnu ; do
+            echo "hosts:${host}? ( sys-devel/static-gcc[targets:${host}] )"
+          done)
     run:
         sys-libs/timezone-data
 "
@@ -59,7 +60,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}/glibc-95f5a9a866695da4e038aa4e6ccbbfd5d9cf63b7.patch"
     "${FILES}/glibc-c57a67e03368687fc0d2ae8354cd1b347a61ea44.patch"
 )
-#    "${FILES}/glibc-e057a1b5930ec538c2b8abbba700a436ef2c81d5.patch"
 
 DEFAULT_SRC_INSTALL_PARAMS=( install_root="${IMAGE}" )
 
@@ -72,7 +72,7 @@ glibc_pkg_pretend() {
         ewarn "Please upgrade your kernel to a version >=$MINIMUM_KERNEL_VERSION"
     fi
 
-    if [[ -f "${ROOT}/etc/tmpfiles.d/nscd.conf" ]] ; then
+    if [[ -f "${ROOT}etc/tmpfiles.d/nscd.conf" ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/nscd.conf has been moved to"
         ewarn "/usr/${LIBDIR}/tmpfiles.d/nscd.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
@@ -85,49 +85,50 @@ glibc_pkg_pretend() {
 }
 
 glibc_pkg_setup() {
-    # glibc doesn't compile with -Os. See bug:
+    # NOTE(compnerd) glibc doesn't compile with -Os. See bug:
     # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
-    replace-flags -Os -O2
+    filter-flags -O*
+    append-flags -O2
 
-    # glibc doesnt build with LTO (bug 52489/51255)
-    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52489
+    # NOTE(compnerd) glibc doesnt build with LTO (bug 52489/51255)
+    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51255
     # reproducible with BFD ld and gold (.init_array/.fini_array is discarded by linker)
     filter-flags -flto
+
+    # NOTE(compnerd) use -fuse-ld to specify the linker if available
+    if ever at_least 4.8 $(eclectic gcc show) ; then
+        filter-flags -fuse-ld*
+        append-flags '-fuse-ld=bfd'
+    fi
 }
 
 glibc_src_unpack() {
     default
 
+    # TODO(compnerd) remove the ports handling once glibc[>=2.17] is the oldest version supported on
+    # exherbo
     if [[ ${PV} =~ *_p* ]] ; then
         edo mv glibc-${PV/_p*}-2* glibc-${PV}
         edo mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
     fi
 
-    if [[ -n ${ports_uri} ]] ; then
-        edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
-    fi
+    [[ -z ${ports_uri} ]] || edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
 }
 
 glibc_src_prepare() {
-    if [[ $(eclectic ld show) == gold ]]; then
-        edo mkdir "${TEMP}/bin"
-        edo ln -sf /usr/${CHOST}/bin/ld.bfd "${TEMP}/bin/ld"
-    fi
-
     # TODO(compnerd) convert to an exparam
     ever at_least 2.14.1-r2 && ! ever at_least 2.16 && eautoconf
-
-    filter-flags -O*
-    append-flags -O2
-
     default
 }
 
+# TODO(compnerd) convert this to use multiarch.exlib
 glibc_src_configure() {
     local host=
 
     for host in ${CROSS_COMPILE_TARGETS} ; do
-        local _CC _CXX _CFLAGS _ASFLAGS _LDFLAGS _CXXFLAGS _VAR
+        local host_cflags_var=${host//-/_}_CFLAGS
+        local host_ldflags_var=${host//-/_}_LDFLAGS
+        local host_cxxflags_var=${host//-/_}_CXXFLAGS
 
         if option !hosts:${host} ; then
             echo "    Cross-Compile Host: ${host} (disabled)"
@@ -139,24 +140,15 @@ glibc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${host}"
         edo cd "${WORKBASE}/build/${host}"
 
-        # NOTE(compnerd) architectures which do not store the SSP canary on the
-        # stack cannot have SSP enabled when bootstrapping.  The storage of the
-        # canary in a TLS slot seems to require the use of libssp which can not
-        # be built during a build of a standalone compiler.
-        if option bootstrap ; then
-            if [[ "${host}" == "powerpc64-exherbo-linux-gnueabi" ]] ; then
-                cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
-    libc_cv_ssp=no
+        # TODO(compnerd) resolve SSP support for x86_64-pc-linux-gnu
+        # This is disabled on master as well, so this is no worse than the status quo, however, this
+        # should really be enabled.  The cost of a SSP canary check via a TLS slot is pretty cheap,
+        # the gains outweigh it.  Unfortunately, x86_64 seems to be generating relros in gethnaddr.c
+        # on a couple of occasions.
+        if [[ ${host} == "x86_64-pc-linux-gnu" ]] ; then
+            cat >> "${WORKBASE}/build/${host}/config.cache" <<- EOF
+libc_cv_ssp=no
 EOF
-            elif [[ "${host}" == "i686-pc-linux-gnu" ]] ; then
-                cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
-    libc_cv_ssp=no
-EOF
-            elif [[ "${host}" == "x86_64-pc-linux-gnu" ]] ; then
-                cat > "${WORKBASE}/build/${host}/config.cache" <<- EOF
-    libc_cv_ssp=no
-EOF
-            fi
         fi
 
         if ! ever at_least 2.17 ; then
@@ -165,42 +157,30 @@ EOF
             # fallback stabs information leaves gas unable to actually resolve symbol sizes
             # and thus breaks compilation
             cat >> "${WORKBASE}/build/${host}/config.cache" <<- EOF
-    libc_cv_cpp_asm_debuginfo=yes
+libc_cv_cpp_asm_debuginfo=yes
 EOF
         fi
 
-        # TODO(compnerd) append the ld search path
-        if option bootstrap ; then
-            _CC=/usr/${CHOST}/bin/${host}-static-gcc
-            _CXX=/usr/${CHOST}/bin/${host}-static-g++
-        else
-            _CC=/usr/${CHOST}/bin/${host}-gcc
-            _CXX=/usr/${CHOST}/bin/${host}-g++
+        # NOTE(compnerd) explicitly use the BFD linker as suggested by upstream, preferring to use
+        # -fuse-ld if available
+        if ! ever at_least 4.8 $(eclectic gcc show) ; then
+            cat >> "${WORKBASE}/build/${host}/config.cache" <<- EOF
+ac_cv_prog_LD=/usr/${CHOST}/${host}/bin/ld.bfd
+libc_cv_prog_ld_gnu=yes
+EOF
         fi
 
-        _VAR=${host//-/_}_CFLAGS
-        _CFLAGS="${!_VAR}"
-
-        _VAR=${host//-/_}_ASFLAGS
-        _ASFLAGS="${!_VAR}"
-
-        _VAR=${host//-/_}_LDFLAGS
-        _LDFLAGS="${!_VAR}"
-
-        _VAR=${host//-/_}_CXXFLAGS
-        _CXXFLAGS="${!_VAR}"
-
+        # TODO(compnerd) determine how to handle non-gcc compilers
         # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
         # script does not bother to check for the prefixed tools!
         READELF=${host}-readelf                             \
         NM=${host}-nm                                       \
         BUILD_CC="cc -B/usr/${CHOST}/${CHOST}/bin"          \
-        CC=${_CC}                                           \
-        CXX=${_CXX}                                         \
-        CFLAGS="${_CFLAGS}"                                 \
-        ASFLAGS="${_ASFLAGS}"                               \
-        LDFLAGS="${_LDFLAGS}"                               \
-        CXXFLAGS="${_CXXFLAGS}"                             \
+        CC=/usr/${CHOST}/bin/${host}-static-gcc             \
+        CXX=/usr/${CHOST}/bin/${host}-static-g++            \
+        CFLAGS="${!host_cflags_var}"                        \
+        LDFLAGS="${!host_ldflags_var}"                      \
+        CXXFLAGS="${!host_cxxflags_var}"                    \
             "${WORKBASE}/${PNV}/configure"                  \
                 --cache-file=config.cache                   \
                 --build=${CHOST}                            \
@@ -215,7 +195,8 @@ EOF
                 --enable-kernel=${MINIMUM_KERNEL_VERSION}   \
                 --enable-obsolete-rpc                       \
                 --enable-stackguard-randomization           \
-                --with-headers=/usr/${host}/include || die
+                --with-headers=/usr/${host}/include         \
+        || die
     done
 }
 
@@ -245,11 +226,9 @@ glibc_src_install() {
         "${IMAGE}/etc/ld.so.cache"
         "${IMAGE}/etc/localtime"
     )
-    local system=$(uname -s)
     local host=
 
     export LANGUAGE=C
-
     for host in ${CROSS_COMPILE_TARGETS} ; do
         local loader=
 
@@ -264,10 +243,10 @@ glibc_src_install() {
         default
 
         # NOTE(compnerd) maintain compatibility with pre-existing binaries by symlinking the loaders
-        # into the legacy paths.  We cannot simply link all loaders as ld-$(evar range 1-2) prefix
-        # is shared across architectures, so explicitly link only the loader for the individual
-        # system loader.
-        for loader in "${IMAGE}"/usr/${host}/lib/ld-${system,,}* ; do
+        # into the legacy paths
+        # TODO(compnerd) workout the set of multilib directories and symlink those across each other
+        # e.g. i686-pc-linux-gnu, x86_64-pc-linux-gnu under i686-pc-linux-gnu, and x86_64-pc-linux-gnu
+        for loader in "${IMAGE}"/usr/${host}/lib/ld-linux* ; do
             edo mkdir -p "${IMAGE}/${LIBDIR}"
             edo ln -s "${loader##${IMAGE}}" "${IMAGE}/${LIBDIR}/${loader##*/}"
         done
@@ -277,7 +256,7 @@ glibc_src_install() {
         [[ ${host} == ${CHOST} ]] || edo rmdir "${IMAGE}/usr/${host}/libexec/getconf"
     done
 
-    # NOTE(compnerd) preserve legacy paths for paludis
+    # HACK(compnerd) preserve legacy paths for paludis
     edo mkdir "${IMAGE}"/sbin
     edo dosym /usr/${CHOST}/sbin/ldconfig /sbin/ldconfig
 

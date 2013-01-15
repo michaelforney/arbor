@@ -7,7 +7,7 @@
 require gnu [ suffix=bz2 subdir=${PNV} ]
 require alternatives versionator
 
-export_exlib_phases src_unpack src_prepare src_configure src_compile src_test_expensive src_install pkg_postinst pkg_prerm pkg_postrm
+export_exlib_phases pkg_setup src_unpack src_prepare src_configure src_compile src_test_expensive src_install pkg_postinst pkg_prerm pkg_postrm
 
 SUMMARY="GNU Compiler Collection"
 
@@ -122,6 +122,19 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch"
 
 RESTRICT="test" # tests are expensive
 
+gcc_pkg_setup() {
+    local target=
+
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        local target_cflags_var=${target//-/_}_CFLAGS
+
+        # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
+        # generated target components will be invalid as they will be compiled with CFLAGS for the
+        # host.
+        [[ -n ${!target_cflags_var} ]] || die "CFLAGS for ${target} are not set"
+    done
+}
+
 gcc_src_unpack() {
     if option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
@@ -194,11 +207,6 @@ gcc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
-        # NOTE(compnerd) ensure that CFLAGS_FOR_TARGET are specified by the user as otherwise the
-        # generated target components will be invalid as they will be compiled with CFLAGS for the
-        # host.
-        [[ -n ${!target_cflags_var} ]] || die "CFLAGS for ${target} are not set"
-
         # NOTE(compnerd) ensure that CXXFLAGS_FOR_TARGET is set, otherwise the compilation of target
         # components (e.g. libstdc++) will fail due to improper flags being passed to the compiler.
         # In the case it is not set, assume that they should be the same as CFLAGS.
@@ -220,21 +228,22 @@ EOF
         # NOTE(compnerd) we pass gcc_cv_objdump as we are using an out of tree binutils build
         # (provided by binutils), and the default objdump name will not prefix the target as
         # necessary.
+        cat > config.cache <<- EOF
+gcc_cv_objdump=${target}-objdump
+EOF
 
+        # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${CHOST} results
+        # in a double prefix
         # NOTE(compnerd) the --with-sysroot='""' is a brilliant hack designed to allow gcc to
         # function properly in the multiarch'ed environment.  It configures the compiler to be a
         # sysroot'ed cross-compiler with an empty sysroot prefix, treating the system root as the
         # sysroot.
-
-        # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${CHOST} results
-        # in a double prefix
-
-            gcc_cv_objdump=${target}-objdump                                                        \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"                                               \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                                             \
             CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                                           \
             target_configargs="--prefix=/usr/${target} --with-slibdir=/usr/${target}/lib"           \
         edo "${WORKBASE}/${PNV/_p/-}/configure"                                                     \
+                --cache-file=config.cache                                                           \
                 --build=${CHOST}                                                                    \
                 --host=${CHOST}                                                                     \
                 --target=${target}                                                                  \
