@@ -13,7 +13,13 @@ SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 MYOPTIONS="multibuild_c: 32 64"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        !dev-libs/minizip [[
+            description = [ Included and enabled in zlib >= 1.2.7-r1 ]
+            resolution = uninstall-blocked-after
+        ]]
+"
 
 WORK="${WORKBASE}"
 
