@@ -155,6 +155,10 @@ static-gcc_src_install() {
         edo rm "${IMAGE}/usr/${CHOST}/bin/${target}-gcc-${PV}"
     done
 
+    # Remove stuff installed by gcc
+    edo rm "${IMAGE}"/usr/share/man/man7/{gpl,gfdl,fsf-funding}.7
+    edo rm "${IMAGE}"/usr/share/info/{gccint,gccinstall,gcc,cppinternals,cpp}.info
+
     edo find "${IMAGE}" -depth -type d -empty -delete
 }
 
