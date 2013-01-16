@@ -170,6 +170,10 @@ gcc_src_prepare() {
             -i "${WORK}/libitm/Makefile.in"                                                         \
             -i "${WORK}/libmudflap/Makefile.in"
 
+    # TODO(compnerd) do this properly via autotools
+    edo sed -e '/export_sym_check=/c export_sym_check="${target_alias}-objdump -T"'                 \
+            -i "${WORK}/gcc/configure"
+
     default
 }
 
@@ -234,6 +238,17 @@ EOF
 gcc_cv_objdump=${target}-objdump
 EOF
 
+        # NOTE(compnerd) unfortunately, the configure script does not expand the path string when
+        # checking for features.h which results in the SSP support being misdetected, cache the
+        # desired value.
+        # TODO(compnerd) inspect any other usage of headers during configuration and ensure the
+        # proper values are determined
+        edo mkdir -p "${WORKBASE}/build/${target}/gcc"
+        cat > "${WORKBASE}/build/${target}/gcc/config.cache" <<- EOF
+gcc_cv_objdump=${target}-objdump
+gcc_cv_libc_provides_ssp=yes
+EOF
+
         # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${CHOST} results
         # in a double prefix
         # NOTE(compnerd) the --with-sysroot='""' is a brilliant hack designed to allow gcc to
@@ -262,6 +277,7 @@ EOF
                 --enable-languages="$(IFS=, ; echo "${languages[*]}")"                              \
                 --enable-lto $(! ever at_least 4.6 && echo --with-libelf)                           \
                 --enable-nls                                                                        \
+                --enable-serial-configure                                                           \
                 $(option_enable fortran libquadmath)                                                \
                 $(option_enable fortran libquadmath-support)                                        \
                 $(option_with graphite cloog)                                                       \
@@ -299,12 +315,7 @@ gcc_src_compile() {
         echo "    Cross-Compile Target: ${target}"
 
         edo cd "${WORKBASE}/build/${target}"
-
-        # NOTE(compnerd) we pass gcc_cv_objdump as we are using an out of tree binutils build
-        # (provided by binutils), and the default objdump name will not prefix the target as
-        # necessary.  We need to pass this through the environment here as well due to the
-        # sub-configures that are executed
-        gcc_cv_objdump=${target}-objdump default
+        default
     done
 }
 
