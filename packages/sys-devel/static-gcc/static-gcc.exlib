@@ -103,6 +103,7 @@ EOF
                 --disable-shared                            \
                 --disable-threads                           \
                 --enable-languages=c                        \
+                --enable-serial-configure                   \
                 $([[ ${CHOST} == ${target} ]]               \
                     && echo --with-newlib)                  \
                 --program-prefix=${target}-static-          \
@@ -129,8 +130,9 @@ static-gcc_src_compile() {
         edo cd "${WORKBASE}/build/${target}"
 
         # NOTE(compnerd) pass gcc_cv_objdump through the environment to allow the sub-configures to
-        # receive the correct value
-        gcc_cv_objdump=${target}-objdump default
+        # receive the correct value; we also must pass gcc_cv_libc_provides_ssp to ensure that it is
+        # received by the sub-configures.
+        gcc_cv_libc_provides_ssp=yes gcc_cv_objdump=${target}-objdump default
     done
 }
 

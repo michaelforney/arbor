@@ -140,17 +140,6 @@ glibc_src_configure() {
         edo mkdir -p "${WORKBASE}/build/${host}"
         edo cd "${WORKBASE}/build/${host}"
 
-        # TODO(compnerd) resolve SSP support for x86_64-pc-linux-gnu
-        # This is disabled on master as well, so this is no worse than the status quo, however, this
-        # should really be enabled.  The cost of a SSP canary check via a TLS slot is pretty cheap,
-        # the gains outweigh it.  Unfortunately, x86_64 seems to be generating relros in gethnaddr.c
-        # on a couple of occasions.
-        if [[ ${host} == "x86_64-pc-linux-gnu" ]] ; then
-            cat >> "${WORKBASE}/build/${host}/config.cache" <<- EOF
-libc_cv_ssp=no
-EOF
-        fi
-
         if ! ever at_least 2.17 ; then
             # NOTE(compnerd) explicitly specify that the toolchain is able to emit debug
             # information for assembly routines.  This is really important as the stabs
