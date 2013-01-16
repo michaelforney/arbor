@@ -84,6 +84,30 @@ default_multiarch_src_configure() {
 
         [[ -n ${!host_cxxflags_var} ]] || host_cxxflags_var=${host//-/_}_CFLAGS
 
+        local i hates= econf_args=()
+        for i in "$@"; do
+            case "${i}" in
+                --hates=*)
+                    hates+=" ${i#--hates=} "; continue ;;
+            esac
+            econf_args+=( "${i}" )
+        done
+
+        local j default_args=()
+        for i in \
+            --host=${host}                          \
+            --build=${CHOST}                        \
+            --prefix=/usr/${host}                   \
+            --datarootdir=/usr/share                \
+            --localstatedir=${LOCALSTATEDIR:-/var}  \
+            --sysconfdir=/etc                       \
+            --disable-dependency-tracking           \
+            --enable-fast-install;
+        do
+            j=${i%%=*}
+            has ${j#--} ${hates} || default_args+=( "${i}" )
+        done
+
         # TODO(compnerd) work out how to deal with clang
             CC=${host}-gcc                                  \
             CXX=${host}-g++                                 \
@@ -95,14 +119,7 @@ default_multiarch_src_configure() {
             LDFLAGS="${!host_ldflags_var}"                  \
             PKG_CONFIG=${host_pkg_config:-pkg-config}       \
         edo "${ECONF_SOURCE:-.}/configure"                  \
-                --host=${host}                              \
-                --build=${CHOST}                            \
-                --prefix=/usr/${host}                       \
-                --datarootdir=/usr/share                    \
-                --localstatedir=${LOCALSTATEDIR:-/var}      \
-                --sysconfdir=/etc                           \
-                --disable-dependency-tracking               \
-                --enable-fast-install                       \
+                "${default_args[@]}"                        \
                 "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"        \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTIONS[@]}" ; do
                     option ${option}
@@ -116,7 +133,8 @@ default_multiarch_src_configure() {
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_TESTS[@]}" ; do
                     expecting_tests ${option}
                   done)                                     \
-                "${@}"
+                "${econf_args[@]}"                          \
+        || die "configure failed"
     fi
 }
 
