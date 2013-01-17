@@ -80,33 +80,40 @@ default_multiarch_src_configure() {
         local host_ldflags_var=${host//-/_}_LDFLAGS
         local host_cxxflags_var=${host//-/_}_CXXFLAGS
 
-            CFLAGS="${!host_cflags_var}"                \
-            ASFLAGS="${!host_asflags_var}"              \
-            CXXFLAGS="${!host_cxxflags_var}"            \
-            LDFLAGS="${!host_ldflags_var}"              \
-        edo "${WORK}/configure"                         \
-                --host=${host}                          \
-                --build=${CHOST}                        \
-                --prefix=/usr/${host}                   \
-                --datarootdir=/usr/share                \
-                --localstatedir=${LOCALSTATEDIR:-/var}  \
-                --sysconfdir=/etc                       \
-                --disable-dependency-tracking           \
-                --enable-fast-install                   \
-                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"    \
+        [[ -n ${!host_cxxflags_var} ]] || host_cxxflags_var=${host//-/_}_CFLAGS
+
+        # TODO(compnerd) work out how to deal with clang
+            CC=${host}-gcc                                  \
+            CXX=${host}-g++                                 \
+            CPP="${host}-gcc ${!host_cflags_var} -E"        \
+            CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
+            CFLAGS="${!host_cflags_var}"                    \
+            ASFLAGS="${!host_asflags_var}"                  \
+            CXXFLAGS="${!host_cxxflags_var}"                \
+            LDFLAGS="${!host_ldflags_var}"                  \
+        edo "${WORK}/configure"                             \
+                --host=${host}                              \
+                --build=${CHOST}                            \
+                --prefix=/usr/${host}                       \
+                --datarootdir=/usr/share                    \
+                --localstatedir=${LOCALSTATEDIR:-/var}      \
+                --sysconfdir=/etc                           \
+                --disable-dependency-tracking               \
+                --enable-fast-install                       \
+                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"        \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTIONS[@]}" ; do
                     option ${option}
-                  done)                                 \
+                  done)                                     \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do
                     option_enable ${option}
-                  done)                                 \
+                  done)                                     \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do
                     option_with ${option}
-                  done)                                 \
+                  done)                                     \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_TESTS[@]}" ; do
                     expecting_tests ${option}
-                  done)                                 \
-                "${@}"                                  \
+                  done)                                     \
+                "${@}"                                      \
         || die "configure failed"
     fi
 }
