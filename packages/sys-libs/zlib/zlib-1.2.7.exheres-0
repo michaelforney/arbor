@@ -30,6 +30,8 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 WORK="${WORKBASE}"
 
 perform_multiarch_configure() {
+    local host_cflags_var=${host//-/_}_CFLAGS
+
     append-flags -fPIC
 
     # NOTE(compnerd) zlib does not support the usual configure arguments
@@ -38,6 +40,7 @@ perform_multiarch_configure() {
         CC=${host}-gcc                          \
         NM=${host}-nm                           \
         RANLIB=${host}-ranlib                   \
+        CFLAGS=${!host_cflags_var}              \
         mandir=/usr/share/man                   \
     edo "${PWD}/configure"                      \
             --prefix=/usr/${host}               \
