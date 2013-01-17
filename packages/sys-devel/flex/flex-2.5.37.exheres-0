@@ -16,10 +16,14 @@ hosts:
     x86_64-pc-linux-gnu
 "
 
+# TODO(compnerd) this should be:
+#   build:
+#       sys-devel/bison[hosts:${CHOST}]
+#       sys-deve/m4[>=1.4][hosts:${CHOST}]
 DEPENDENCIES="
     build:
-        sys-devel/bison[hosts:*(-)?]
-        sys-devel/m4[>=1.4][hosts:*(-)?]
+        sys-devel/bison
+        sys-devel/m4[>=1.4]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-2.5.35-gcc-4.4-elif.patch"
