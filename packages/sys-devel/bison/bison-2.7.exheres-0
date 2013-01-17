@@ -18,10 +18,15 @@ hosts:
     x86_64-pc-linux-gnu
 "
 
+# TODO(compnerd)
+# this should be:
+#   build:
+#       sys-devel/gettext[>=0.18][hosts:${CHOST}]
+#       sys-devel/flex[hosts:${HOST}]
 DEPENDENCIES="
     build:
-        sys-devel/gettext[>=0.18][hosts:*(-)?]
-        sys-devel/flex[hosts:*(-)?]
+        sys-devel/gettext[>=0.18]
+        sys-devel/flex
     build+run:
         sys-devel/m4[>=1.4.16][hosts:*(-)?]
 "
