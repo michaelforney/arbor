@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=gz ]
+require multiarch
 
 SUMMARY="Free software emulation of curses using terminfo formats"
 
@@ -19,109 +20,110 @@ DEPENDENCIES="
         gpm? ( sys-libs/gpm[hosts:*(-)?] )
 "
 
+perform_multiarch_configure() {
+    local host_cflags_var=${host//-/_}_CFLAGS
+    local host_cxxflags_var=${host//-/_}_CXXFLAGS
+
+    [[ -n ${!host_cxxflags_var} ]] || host_cxxflags_var=${host//-/_}_CFLAGS
+
+    edo mkdir -p "${WORKBASE}/build/${host}/narrow"
+    edo cd "${WORKBASE}/build/${host}/narrow"
+
+    # TODO(compnerd) figure out how to deal with clang
+        CC=${host}-gcc                                  \
+        CFLAGS=${!host_cflags_var}                      \
+        CPP="${host}-gcc ${!host_cflags_var} -E"        \
+        CXX=${host}-g++                                 \
+        CXXFLAGS=${!host_cxxflags_var}                  \
+        CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
+    edo "${WORKBASE}/${PNV}/configure"                  \
+        --build=${CHOST}                                \
+        --host=${host}                                  \
+        --prefix=/usr/${host}                           \
+        --datadir=/usr/share                            \
+        --infodir=/usr/share/info                       \
+        --localstatedir=/var                            \
+        --mandir=/usr/share/man                         \
+        --sysconfdir=/etc                               \
+        --disable-dependency-tracking                   \
+        --disable-widec                                 \
+        --enable-fast-install                           \
+        --enable-overwrite                              \
+        --enable-pc-files                               \
+        --disable-termcap                               \
+        --with-normal                                   \
+        --with-shared                                   \
+        --without-ada                                   \
+        --without-hashed-db                             \
+        $(option_with gpm)                              \
+    || die
+
+    edo mkdir -p "${WORKBASE}/build/${host}/wide"
+    edo cd "${WORKBASE}/build/${host}/wide"
+
+    # TODO(compnerd) figure out how to deal with clang
+        CC=${host}-gcc                                  \
+        CFLAGS=${!host_cflags_var}                      \
+        CPP="${host}-gcc ${!host_cflags_var} -E"        \
+        CXX=${host}-g++                                 \
+        CXXFLAGS=${!host_cxxflags_var}                  \
+        CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
+    edo "${WORKBASE}/${PNV}/configure"                  \
+        --build=${CHOST}                                \
+        --host=${host}                                  \
+        --prefix=/usr/${host}                           \
+        --datadir=/usr/share                            \
+        --infodir=/usr/share/info                       \
+        --includedir=/usr/${host}/include/ncursesw      \
+        --localstatedir=/var                            \
+        --mandir=/usr/share/man                         \
+        --sysconfdir=/etc                               \
+        --disable-dependency-tracking                   \
+        --enable-fast-install                           \
+        --enable-pc-files                               \
+        --enable-widec                                  \
+        --disable-termcap                               \
+        --with-normal                                   \
+        --with-shared                                   \
+        --without-ada                                   \
+        --without-hashed-db                             \
+        $(option_with gpm)                              \
+    || die
+}
+
 ncurses_src_configure() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile host: ${host}"
-
-        edo mkdir -p "${WORKBASE}/build/${host}"
-
-        edo mkdir -p "${WORKBASE}/build/${host}/narrow"
-        edo cd "${WORKBASE}/build/${host}/narrow"
-        edo "${WORKBASE}/${PNV}/configure"          \
-                --build=${CHOST}                    \
-                --host=${host}                      \
-                --prefix=/usr/${host}               \
-                --datadir=/usr/share                \
-                --infodir=/usr/share/info           \
-                --localstatedir=/var                \
-                --mandir=/usr/share/man             \
-                --sysconfdir=/etc                   \
-                --disable-dependency-tracking       \
-                --disable-widec                     \
-                --enable-fast-install               \
-                --enable-pc-files                   \
-                --disable-termcap                   \
-                --with-normal                       \
-                --with-shared                       \
-                --without-ada                       \
-                --without-hashed-db                 \
-                $(option_with gpm)                  \
-        || die
-
-        edo mkdir -p "${WORKBASE}/build/${host}/wide"
-        edo cd "${WORKBASE}/build/${host}/wide"
-        edo "${WORKBASE}/${PNV}/configure"                  \
-                --build=${CHOST}                            \
-                --host=${host}                              \
-                --prefix=/usr/${host}                       \
-                --datadir=/usr/share                        \
-                --infodir=/usr/share/info                   \
-                --includedir=/usr/${host}/include/ncursesw  \
-                --localstatedir=/var                        \
-                --mandir=/usr/share/man                     \
-                --sysconfdir=/etc                           \
-                --disable-dependency-tracking               \
-                --enable-fast-install                       \
-                --enable-pc-files                           \
-                --enable-widec                              \
-                --disable-termcap                           \
-                --with-normal                               \
-                --with-shared                               \
-                --without-ada                               \
-                --without-hashed-db                         \
-                $(option_with gpm)                          \
-        || die
-    done
+    multiarch_src_configure
 }
 
-ncurses_src_compile() {
-    local host=
+perform_multiarch_compile() {
+    edo cd "${WORKBASE}/build/${host}/narrow"
+    default
 
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-
-        edo cd "${WORKBASE}/build/${host}/narrow"
-        default
-
-        edo cd "${WORKBASE}/build/${host}/wide"
-        default
-    done
-}
-
-ncurses_src_test() {
-    edo cd "${WORKBASE}/build/${CHOST}"
+    edo cd "${WORKBASE}/build/${host}/wide"
     default
 }
 
+ncurses_src_compile() {
+    multiarch_src_compile
+}
+
+ncurses_src_test() {
+    multiarch_src_test
+}
+
+perform_multiarch_install() {
+    # NOTE(compnerd) generate the data via the CHOST binaries
+    local target=$(if [[ ${host} == ${CHOST} ]] ; then echo install ; else echo install.libs ; fi)
+
+    edo cd "${WORKBASE}/build/${host}/narrow"
+    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig ${target}
+
+    edo cd "${WORKBASE}/build/${host}/wide"
+    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig ${target}
+}
+
 ncurses_src_install() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-
-        edo cd "${WORKBASE}/build/${host}/narrow"
-        emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig install
-
-        edo cd "${WORKBASE}/build/${host}/wide"
-        emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig install
-    done
+    multiarch_src_install
 }
 
 export_exlib_phases src_configure src_compile src_test src_install
