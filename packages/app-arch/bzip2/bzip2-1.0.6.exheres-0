@@ -26,6 +26,10 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( bzip2.txt )
 perform_multiarch_prepare() {
     default
 
+    # all does not include tests!
+    edo sed -e '/^all:/s/\<test\>//'                                \
+            -i Makefile
+
     # respect variables from the environment
     edo sed -e 's|^AR=|AR ?=|'                                      \
             -e 's|^CC=|CC ?=|'                                      \
@@ -38,8 +42,8 @@ perform_multiarch_prepare() {
 
     # use CFLAGS and LDFLAGS properly
     edo sed -e '/^all/a\	$(CC) $(CFLAGS) -c bzip2.c -o bzip2.o'  \
-            -e 's/$(CC) -shared/& $(LDFLAGS)/'                      \
-            -e '/$(CC).*\.so/s:CFLAGS:LDFLAGS:'                     \
+            -e 's/$(CC) -shared/& $(CFLAGS) $(LDFLAGS)/'            \
+            -e '/$(CC).*\.so/s:$(CFLAGS):$(CFLAGS) $(LDFLAGS):'     \
             -i Makefile-libbz2_so
 
     # update version
@@ -55,10 +59,12 @@ perform_multiarch_prepare() {
 }
 
 perform_multiarch_compile() {
+    local host_cflags_var=${host//-/_}_CFLAGS
     local tools=(
         CC=${host}-gcc
         AR=${host}-ar
         RANLIB=${host}-ranlib
+        CFLAGS=${!host_cflags_var}
     )
 
     edo emake "${tools[@]}" -f Makefile-libbz2_so
