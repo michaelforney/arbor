@@ -46,9 +46,12 @@ hosts:
     x86_64-pc-linux-gnu
 "
 
+# TODO(compnerd)
+# build:
+#   sys-devel/bison[hosts:${CHOST}]
 DEPENDENCIES="
     build:
-        sys-devel/bison[hosts:*(-)?]
+        sys-devel/bison
     build+run:
         sys-libs/ncurses[hosts:*(-)?]
 "
@@ -72,8 +75,8 @@ src_prepare() {
     echo '#define SYS_BASHRC "/etc/bash/bashrc"' >> config-top.h
 }
 
-perform_multiarch_install() {
-    default
+src_install() {
+    multiarch_src_install
 
     dosym bash /usr/${CHOST}/bin/sh
 
