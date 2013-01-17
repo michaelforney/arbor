@@ -36,8 +36,12 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-static
 )
 
+perform_multiarch_configure() {
+    default_multiarch_src_configure --with-gpg-error-prefix=/usr/${host}
+}
+
 perform_multiarch_install() {
     default
-    edo rmdir "${IMAGE}"/usr/${CHOST}/sbin
+    edo rmdir "${IMAGE}"/usr/${host}/sbin
 }
 
