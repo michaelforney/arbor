@@ -64,7 +64,7 @@ perform_multiarch_compile() {
         CC=${host}-gcc
         AR=${host}-ar
         RANLIB=${host}-ranlib
-        CFLAGS=${!host_cflags_var}
+        CFLAGS="${!host_cflags_var} -fPIC"
     )
 
     edo emake "${tools[@]}" -f Makefile-libbz2_so
