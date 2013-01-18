@@ -28,6 +28,7 @@ __multiarch_execute_phase() {
             export WORK=${WORKBASE}/build/${host}/${pnv}
         else
             if [[ ${EXHERES_PHASE} == configure ]] ; then
+                export ECONF_SOURCE="${WORK}"
                 edo mkdir -p "${WORKBASE}/build/${host}"
             fi
             edo cd "${WORKBASE}/build/${host}"
@@ -74,7 +75,7 @@ multiarch_src_configure() {
 default_multiarch_src_configure() {
     local option=
 
-    if [[ -x ${WORK}/configure ]] ; then
+    if [[ -x ${ECONF_SOURCE:-.}/configure ]] ; then
         local host_cflags_var=${host//-/_}_CFLAGS
         local host_asflags_var=${host//-/_}_ASFLAGS
         local host_ldflags_var=${host//-/_}_LDFLAGS
@@ -91,7 +92,7 @@ default_multiarch_src_configure() {
             ASFLAGS="${!host_asflags_var}"                  \
             CXXFLAGS="${!host_cxxflags_var}"                \
             LDFLAGS="${!host_ldflags_var}"                  \
-        edo "${WORK}/configure"                             \
+        edo "${ECONF_SOURCE:-.}/configure"                  \
                 --host=${host}                              \
                 --build=${CHOST}                            \
                 --prefix=/usr/${host}                       \
@@ -113,8 +114,7 @@ default_multiarch_src_configure() {
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_TESTS[@]}" ; do
                     expecting_tests ${option}
                   done)                                     \
-                "${@}"                                      \
-        || die "configure failed"
+                "${@}"
     fi
 }
 
