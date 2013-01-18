@@ -1,8 +1,9 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2013 Bo Ørsted Andresen <zlin@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=bz2 ]
+require gnu [ suffix=bz2 ] multiarch
 
 SUMMARY="GNU Multiple Precision arithmetic library"
 HOMEPAGE="http://${PN}lib.org"
@@ -17,11 +18,11 @@ SLOT="5"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 MYOPTIONS="
-platform: amd64 ppc64 x86
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
+    platform: amd64 ppc64 x86
+    hosts:
+        arm-exherbo-linux-gnueabi
+        i686-pc-linux-gnu
+        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
@@ -34,84 +35,24 @@ DEPENDENCIES="
         ]]
 "
 
-src_configure() {
-    local _platform_abis=(
-        amd64:64
-        ppc64:mode64
-        x86:32
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-cxx
+    --enable-fft
+    --with-readline
+)
+
+pre_multiarch_src_configure() {
+    local abi= hosts_bitness=(
+        "32: arm-exherbo-linux-gnueabi i686-pc-linux-gnu"
+        "64: x86_64-pc-linux-gnu"
     )
-    local host=
 
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        local abi= platform=
-
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
+    for abi in "${hosts_bitness[@]}"; do
+        if has ${host} ${abi#*:} ; then
+            abi=${abi%:*}
+            break
         fi
-
-        for platform in "${_platform_abis[@]}" ; do
-            if option platform:${platform%:*} ; then
-                abi=${platform#*:}
-                break
-            fi
-        done
-
-        echo "    Cross-Compile Host: ${host}"
-
-        edo mkdir -p "${WORKBASE}/build/${host}"
-        edo cd "${WORKBASE}/build/${host}"
-
-            ABI=${abi}                              \
-        edo "${WORKBASE}/${PNV}/configure"          \
-                --build=${CHOST}                    \
-                --host=${host}                      \
-                --prefix=/usr/${host}               \
-                --datarootdir=/usr/share            \
-                --localstatedir=/var                \
-                --sysconfdir=/etc                   \
-                --enable-fast-install               \
-                --enable-cxx                        \
-                --enable-fft                        \
-                --with-readline                     \
-        || die
     done
-}
-
-src_compile() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}"
-
-        default
-    done
-}
-
-src_test() {
-    edo cd "${WORKBASE}/build/${CHOST}"
-    default
-}
-
-src_install() {
-    local host=
-
-    for host in ${CROSS_COMPILE_TARGETS} ; do
-        if option !hosts:${host} ; then
-            echo "    Cross-Compile Host: ${host} (disabled)"
-            continue
-        fi
-
-        echo "    Cross-Compile Host: ${host}"
-        edo cd "${WORKBASE}/build/${host}"
-
-        default
-    done
+    [[ -n ${abi} ]] || die "${host} not currently supported"
 }
 
