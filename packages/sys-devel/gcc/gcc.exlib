@@ -256,6 +256,7 @@ EOF
         # function properly in the multiarch'ed environment.  It configures the compiler to be a
         # sysroot'ed cross-compiler with an empty sysroot prefix, treating the system root as the
         # sysroot.
+            CC="${CHOST}-gcc -B/usr/${CHOST}/${CHOST}/bin"                                          \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"                                               \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                                             \
             CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                                           \
