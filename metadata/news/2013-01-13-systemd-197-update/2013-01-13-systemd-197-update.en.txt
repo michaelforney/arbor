@@ -1,0 +1,31 @@
+Title: systemd 197: udev network interface names
+Author: Wulf C. Krueger <philantrop@exherbo.org>
+Content-Type: text/plain
+Posted: 2013-01-13
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: sys-apps/systemd[<197]
+
+With systemd-udev from systemd[~197], the naming scheme for network
+interfaces changes
+Up to and including systemd[~196], the network interface names were
+applied by the Linux kernel in the order of probing them which is not
+completely predictable. In case of multiple network interfaces, the
+naming was not necessarily static anymore and, thus, in practice, e. g.
+eth0 could become eth1 on the next boot (I've actually had that happen
+with wlan0/1).
+This can be troublesome for static network setups, firewalls, etc.
+
+From systemd[~197] onwards, systemd-udev will automatically assign
+predictable, stable network interface names for all local Ethernet,
+WLAN and WWAN interfaces. This is a departure from the traditional
+interface naming scheme ("eth0", "eth1", "wlan0", ...).
+
+You can find more details about this on
+http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
+
+On Exherbo, I've implemented an opt-out model: If you really insist on
+having non-static network interface names, set the "old-net" option for
+systemd[>=197]. This is option 1 from the above URL.
+Of course, you can implement your own naming scheme if you want to,
+check the above-mentioned URL for more details.

@@ -6,11 +6,11 @@
 require flag-o-matic
 
 # TODO(compnerd) work out-of-tree builds
-require multiarch [ in_tree_build=true ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ] multiarch [ in_tree_build=true ]
 
 SUMMARY="A free compression library unencumbered by patents"
-HOMEPAGE="http://www.zlib.net/"
-DOWNLOADS="http://www.zlib.net/${PNV}.tar.bz2"
+HOMEPAGE="http://www.zlib.net"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
 
 LICENCES="ZLIB"
 SLOT="0"
@@ -22,12 +22,24 @@ hosts:
     x86_64-pc-linux-gnu
 "
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        !dev-libs/minizip [[
+            description = [ Included and enabled in zlib >= 1.2.7-r1 ]
+            resolution = uninstall-blocked-after
+        ]]
+"
 
 DEFAULT_SRC_INSTALL_PARAMS=( LDCONFIG=: )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( algorithm.txt )
 
 WORK="${WORKBASE}"
+
+post_multiarch_prepare() {
+    edo pushd contrib/minizip
+    eautoreconf
+    edo popd
+}
 
 perform_multiarch_configure() {
     local host_cflags_var=${host//-/_}_CFLAGS
@@ -46,7 +58,16 @@ perform_multiarch_configure() {
             --prefix=/usr/${host}               \
             --libdir=/usr/${host}/lib           \
             --includedir=/usr/${host}/include   \
-            --shared                            \
-    || die
+            --shared
+
+    edo pushd contrib/minizip
+    default_multiarch_src_configure --disable-static
+    edo popd
+}
+
+post_multiarch_install() {
+    edo pushd contrib/minizip
+    default
+    edo popd
 }
 
