@@ -80,10 +80,10 @@ perform_multiarch_install() {
     into /usr/${host}
 
     # static library
-    dolib libbz2.a
+    LIBDIR=lib dolib libbz2.a
 
     # shared library
-    dolib.so libbz2.so.${PV}
+    LIBDIR=lib dolib.so libbz2.so.${PV}
     for versioned in libbz2.so{,.{$(ever major 1),$(ever range 1-2)}} ; do
         dosym libbz2.so.${PV} /usr/${host}/lib/${versioned}
     done
