@@ -58,6 +58,13 @@ DEPENDENCIES="
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
 
+if ever at_least 0.8.3 ; then
+    DEPENDENCIES+="
+        run:
+            sys-devel/dwz
+    "
+fi
+
 if ever is_scm; then
     DEPENDENCIES+="
         build:
