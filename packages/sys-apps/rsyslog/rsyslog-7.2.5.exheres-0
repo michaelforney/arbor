@@ -41,6 +41,7 @@ DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
+        dev-libs/json-c
         dev-libs/libee[>=0.3.1]
         dev-libs/libestr[>=0.1.0]
         gnutls? ( dev-libs/gnutls )
@@ -70,27 +71,10 @@ src_configure() {
         --enable-omprog
         --enable-omruleset
         --enable-omuxsock
-        --enable-pthreads
         --enable-regexp
         --enable-rsyslogd
         --enable-rsyslogrt
         --enable-zlib
-        --disable-gui
-        --disable-impstats
-        --disable-imsolaris
-        --disable-libdbi
-        --disable-omhdfs
-        --disable-ommongodb
-        --disable-omstdout
-        --disable-omudpspoof
-        --disable-oracle
-        --disable-pmaixforwardedfrom
-        --disable-pmcisconames
-        --disable-pmlastmsg
-        --disable-pmrfc3164sd
-        --disable-pmsnare
-        --disable-rfc3195
-        --disable-snmp
 
         # This is not a mistake and passing it to configure is correct.
         # Java is not being used at all yet, however the tests depend on it.
@@ -118,6 +102,8 @@ src_configure() {
 
 src_install() {
     default
+
+    option debug || edo rmdir "${IMAGE}"/usr/bin
 
     insinto /etc/logrotate.d
     newins "${FILES}"/rsyslog.logrotate rsyslog
