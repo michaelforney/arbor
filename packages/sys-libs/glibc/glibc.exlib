@@ -3,7 +3,7 @@
 # Copyright 2010, 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install pkg_postinst
+export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install pkg_preinst pkg_postinst
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 if ! ever at_least 2.17; then
@@ -219,8 +219,6 @@ glibc_src_install() {
 
     export LANGUAGE=C
     for host in ${CROSS_COMPILE_TARGETS} ; do
-        local loader=
-
         if option !hosts:${host} ; then
             echo "    Cross-Compile Host: ${host} (disabled)"
             continue
@@ -231,23 +229,10 @@ glibc_src_install() {
         edo cd "${WORKBASE}/build/${host}"
         default
 
-        # NOTE(compnerd) maintain compatibility with pre-existing binaries by symlinking the loaders
-        # into the legacy paths
-        # TODO(compnerd) workout the set of multilib directories and symlink those across each other
-        # e.g. i686-pc-linux-gnu, x86_64-pc-linux-gnu under i686-pc-linux-gnu, and x86_64-pc-linux-gnu
-        for loader in "${IMAGE}"/usr/${host}/lib/ld-linux* ; do
-            edo mkdir -p "${IMAGE}/${LIBDIR}"
-            edo ln -s "${loader##${IMAGE}}" "${IMAGE}/${LIBDIR}/${loader##*/}"
-        done
-
         # TODO(compnerd) determine why the configuration data binaries are not generated for
         # non-CHOST values
         [[ ${host} == ${CHOST} ]] || edo rmdir "${IMAGE}/usr/${host}/libexec/getconf"
     done
-
-    # HACK(compnerd) preserve legacy paths for paludis
-    edo mkdir "${IMAGE}"/sbin
-    edo dosym /usr/${CHOST}/sbin/ldconfig /sbin/ldconfig
 
     # don't install bundled timezone info
     ever at_least 2.16.0 || edo rm -r "${IMAGE}/usr/share/zoneinfo"
@@ -273,6 +258,39 @@ EOF
 
     # remove empty locale dirs
     edo find "${IMAGE}"/usr/share/locale/ -type d -empty -delete
+}
+
+glibc_pkg_preinst() {
+    if [[ $(readlink -f "${ROOT##/}"/lib) == ${ROOT##/}/${LIBDIR} ]] ; then
+        local host=
+        for host in ${CROSS_COMPILE_TARGETS} ; do
+            if option !hosts:${host} ; then
+                echo "    Cross-Compile Host: ${host} (disabled)"
+                continue
+            fi
+
+            echo "    Cross-Compile Host: ${host}"
+
+            # NOTE(compnerd) maintain compatibility with pre-existing binaries by symlinking the loaders
+            # into the legacy paths
+            # TODO(compnerd) workout the set of multilib directories and symlink those across each other
+            # e.g. i686-pc-linux-gnu, x86_64-pc-linux-gnu under i686-pc-linux-gnu, and x86_64-pc-linux-gnu
+            local loader=
+            for loader in "${IMAGE}"/usr/${host}/lib/ld-linux* ; do
+                local loader_bn=$(basename "${loader}")
+                if [[ -e ${ROOT}/${LIBDIR}/${loader_bn} ]] ; then
+                    nonfatal edo rm "${ROOT}/${LIBDIR}/${loader_bn}"
+                fi &&
+                nonfatal edo "${IMAGE}"/usr/${CHOST}/lib/ld-linux*.so* /bin/cp "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" ||
+                    eerror cp "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" failed
+            done
+        done
+
+        # HACK(compnerd) preserve legacy paths for paludis
+        nonfatal edo rm "${ROOT}"/sbin/ldconfig &&
+        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/sbin/ldconfig "${ROOT}"/sbin/ldconfig ||
+            eerror cp "${IMAGE}"/usr/${CHOST}/sbin/ldconfig "${ROOT}"/sbin/ldconfig failed
+    fi
 }
 
 glibc_pkg_postinst() {
