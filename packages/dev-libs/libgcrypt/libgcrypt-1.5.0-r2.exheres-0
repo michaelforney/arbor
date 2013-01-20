@@ -23,17 +23,21 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/9487099071af4478d2882e633a0ade805801d6fa.patch" )
 
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --disable-O-flag-munging
-    # Alpha code, needs kernel patches
-    --without-capabilities
-    # Suggested by upstream, also see Gentoo #201917
-    --disable-padlock-support
-    # crypsetup wants static
-    --enable-static
-    # ensure that libgpg-error is correct
-    --with-gpg-error-prefix=/usr
-)
+configure_one_multibuild() {
+    # --without-capabilities - Alpha code, needs kernel patches
+    # --disable-padlock-support - Suggested by upstream, also see Gentoo #201917
+    # --enable-static - cryptsetup wants static
+    econf \
+        --disable-O-flag-munging \
+        --without-capabilities \
+        --disable-padlock-support \
+        --enable-static \
+        $(if ! multibuild_default_target C; then
+            echo "--with-gpg-error-prefix=/usr/${CHOST}"
+        else
+            echo '--with-gpg-error-prefix=/usr'
+        fi)
+}
 
 install_one_multibuild() {
     default
