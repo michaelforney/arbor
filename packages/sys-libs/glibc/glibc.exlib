@@ -153,12 +153,17 @@ glibc_src_configure() {
         edo cd "${WORK}/${multibuild_c_target}"
 
         cat > config.cache <<- EOF
+libc_cv_slibdir=/${LIBDIR}
+EOF
+
+        if ! ever at_least 2.16 ; then
+            cat >> config.cache <<- EOF
 libc_cv_forced_unwind=yes
 libc_cv_c_cleanup=yes
 libc_cv_gnu89_inline=yes
 libc_cv_ssp=no
-libc_cv_slibdir=/${LIBDIR}
 EOF
+        fi
 
         if ! ever at_least 2.17 ; then
             # NOTE(compnerd) explicitly specify that the toolchain is capable of emitting debug

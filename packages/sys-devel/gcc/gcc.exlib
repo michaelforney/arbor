@@ -8,7 +8,7 @@ require multibuild
 require gnu [ suffix=bz2 subdir=${PNV} ]
 require alternatives versionator
 
-export_exlib_phases src_unpack src_prepare src_configure src_test_expensive src_install \
+export_exlib_phases src_unpack src_prepare src_configure src_compile src_test_expensive src_install \
     pkg_postinst pkg_prerm pkg_postrm
 
 SUMMARY="GNU Compiler Collection"
@@ -167,12 +167,19 @@ gcc_src_configure() {
         cloog_backend=isl
     fi
 
+    # NOTE(compnerd) GNU libc v2.4+ provides SSP; however, libc headers may not be properly parsed,
+    # so explicitly inform the compiler about this
+    cat > config.cache <<- EOF
+gcc_cv_libc_provides_ssp=yes
+EOF
+
     # NOTE(compnerd) disable bootstrap; the exheres is not meant for GCC development, so there is no
     # point in rebuilding and rebuilding again just to verify that GCC is able to self-host for most
     # people.
     # TODO(compnerd) figure out why installation with --disable-bootstrap fails due to
     # fixed-includes/limits.h not being accessible
-    econf --hates=docdir                                            \
+    econf --cache-file=config.cache                                 \
+          --hates=docdir                                            \
           --libdir=/usr/${LIBDIR}                                   \
           --with-pkgversion="exherbo ${PNVR}"                       \
           --program-suffix=-${SLOT}                                 \
@@ -196,6 +203,13 @@ gcc_src_configure() {
           --with-as=${CHOST}-as                                     \
           --with-ld=${CHOST}-ld                                     \
           --with-system-zlib
+}
+
+gcc_src_compile() {
+    # NOTE(compnerd) explicitly pass gcc_cv_libc_provides_ssp through the environment to ensure that
+    # the subconfigures receive the parameter.  Unfortunately, the default configure phases seem to
+    # lose this value
+    gcc_cv_libc_provides_ssp=yes default
 }
 
 gcc_src_test_expensive() {
