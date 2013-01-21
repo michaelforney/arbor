@@ -2,7 +2,7 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases pkg_pretend pkg_setup src_unpack src_prepare src_configure src_compile src_install
+export_exlib_phases pkg_pretend src_unpack src_prepare src_configure src_compile src_install
 
 myexparam source_uri="mirror://gnu/${PN}/${PNV}.tar.bz2"
 if ! ever at_least 2.17; then
@@ -63,6 +63,8 @@ glibc_pkg_pretend() {
             ewarn "-march or -mcpu setting not specified for target MULTIBUILD_C: ${multibuild_c_target}; defaulting to -march=native"
         fi
     done
+
+    # TODO(compnerd) consider using filter-flags rather than dying here
     if [[ $(get-flag -ggdb3) == '-ggdb3' ]]; then
         die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
     fi
@@ -77,66 +79,78 @@ glibc_pkg_pretend() {
         ewarn "Please upgrade your kernel to a version >=$MINIMUM_KERNEL_VERSION"
     fi
 
-    if [[ -f "${ROOT}"/etc/tmpfiles.d/nscd.conf ]] ; then
+    if [[ -f "${ROOT}etc/tmpfiles.d/nscd.conf" ]] ; then
         ewarn "The configuration file /etc/tmpfiles.d/nscd.conf has been moved to"
         ewarn "/usr/${LIBDIR}/tmpfiles.d/nscd.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
 }
 
-glibc_pkg_setup() {
-    # glibc doesn't compile with -Os. See bug:
-    # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
-    replace-flags -Os -O2
-
-    # glibc doesnt build with LTO (bug 52489/51255)
-    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52489
-    # reproducible with BFD ld and gold (.init_array/.fini_array is discarded by linker)
-    filter-flags -flto
-}
-
 glibc_src_unpack() {
     default
 
+    # TODO(compnerd) remove ports handling once glibc[>=2.17] is the oldest version supported
     if [[ ${PV/_p*} != ${PV} ]] ; then
         edo mv glibc-${PV/_p*}-2* glibc-${PV}
         edo mv ${PNV%%_p*}-ports-${PV##*_p} glibc-ports-${PV}
     fi
-
-    if [[ -n ${ports_uri} ]] ; then
-        edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
-    fi
+    [[ -z ${ports_uri} ]] || edo mv ${PN}-ports-${PV} "${WORKBASE}"/${PNV}/ports
 
     edo mkdir "${WORK}"
 }
 
 glibc_src_prepare() {
     if option bootstrap ; then
-        sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig" || die "failed to remove gcc_eh linkage"
-        export PATH="/usr/bootstrap-gcc/bin:$PATH"
+        edo sed -i -e 's:-lgcc_eh::g' "${WORKBASE}/${PNV}/Makeconfig"
+        export PATH="/usr/bootstrap-gcc/bin:${PATH}"
         export GCC="bootstrap-gcc"
     else
         export GCC="${CC}"
     fi
 
+    # TODO(compnerd) make this an exparam
     ever at_least 2.14.1-r2 && ! ever at_least 2.16 && eautoconf
     default
 }
 
 glibc_src_configure() {
-    if [[ $(eclectic ld show) == gold ]]; then
-        edo mkdir "${TEMP}"/bin
-        edo ln -sf /usr/${CHOST}/bin/ld.bfd "${TEMP}"/bin/ld
-        GCC="${GCC} -B${TEMP}/bin/"
-    fi
-
     local multibuild_c_target
+
+    # NOTE(compnerd) explicitly use the BFD linker as suggested by upstream; prefer to use -fuse-ld
+    # if available
+    if ! ever at_least 4.8 $(eclectic gcc show) ; then
+        if [[ $(eclectic ld show) == gold ]]; then
+            edo mkdir -p "${TEMP}/bin"
+            edo ln -sf "/usr/${CHOST}/bin/ld.bfd" "${TEMP}/bin/ld"
+            edo ln -sf "/usr/${CHOST}/bin/ld.bfd" "${TEMP}/bin/${CHOST}-ld"
+            GCC="${GCC} -B${TEMP}/bin/"
+        fi
+    fi
 
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        edo mkdir "${WORK}/${multibuild_c_target}" || die "mkdir ${multibuild_c_target} failed"
-        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
+        # NOTE(compnerd) glibc doesn't compile with -Os. See bug:
+        # http://sourceware.org/bugzilla/show_bug.cgi?id=5203 for details
+        # Upstream recommends (read: requires) always building with -O2
+        filter-flags -O*
+        append-flags -O2
+
+        # NOTE(compnerd) glibc doesnt build with LTO (bug 52489/51255)
+        # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52489
+        # reproducible with BFD ld and gold (.init_array/.fini_array is discarded by linker)
+        filter-flags -flto
+
+        # NOTE(compnerd) use -fuse-ld to specify the linker (available in GCC 4.8+)
+        if ever at_least 4.8 $(eclectic gcc show) ; then
+            filter-flags -fuse-ld*
+            append-flags '-fuse-ld=bfd'
+        fi
+
+        [[ ${CFLAGS} =~ -march|-mcpu ]] || append-flags -march=native
+
+        edo mkdir "${WORK}/${multibuild_c_target}"
+        edo cd "${WORK}/${multibuild_c_target}"
 
         cat > config.cache <<- EOF
 libc_cv_forced_unwind=yes
@@ -146,22 +160,26 @@ libc_cv_ssp=no
 libc_cv_slibdir=/${LIBDIR}
 EOF
 
-        if ! [[ ${CFLAGS} =~ -march|-mcpu ]]; then
-            append-flags -march=native
+        if ! ever at_least 2.17 ; then
+            # NOTE(compnerd) explicitly specify that the toolchain is capable of emitting debug
+            # information for assembly routines.  This is important as the fallback STABS does not
+            # match exactly, and leaves GAS unable to actually resolve symbol sizes
+            cat >> config.cache <<- EOF
+ac_cv_cpp_asm_debuginfo=yes
+EOF
         fi
 
-        append-flags -O2
-
-        # --enable-stackguard-randomization could also be enabled for <2.12.2 but needs testing
-        BUILD_CC=${CC} CC="${GCC} -m${multibuild_c_target}" econf \
-            --libdir="/usr/${LIBDIR}" \
-            --cache-file=config.cache \
-            "--enable-kernel=$MINIMUM_KERNEL_VERSION" \
-            $(ever at_least 2.14.1-r2 && echo '--enable-obsolete-rpc') \
-            --enable-stackguard-randomization \
-            --with-headers=/usr/include \
-            --with-add-ons --with-crypt \
-            --without-gd --without-cvs
+        BUILD_CC=${CC} CC="${GCC} -m${multibuild_c_target}"                 \
+            econf --cache-file=config.cache                                 \
+                  --libdir="/usr/${LIBDIR}"                                 \
+                  --with-add-ons                                            \
+                  --enable-kernel=${MINIMUM_KERNEL_VERSION}                 \
+                  $(ever at_least 2.14.1-r2 && echo --enable-obsolete-rpc)  \
+                  --enable-stackguard-randomization                         \
+                  --with-headers=/usr/include                               \
+                  --with-crypt                                              \
+                  --without-gd                                              \
+                  --without-cvs
     done
 }
 
@@ -171,13 +189,22 @@ glibc_src_compile() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
-
+        edo cd "${WORK}/${multibuild_c_target}"
         default
     done
 }
 
 glibc_src_install() {
+    local conf_files=(
+        "${WORKBASE}/${PNV}/nscd/nscd.conf"
+        "${WORKBASE}/${PNV}/nss/nsswitch.conf"
+        "${WORKBASE}/${PNV}/posix/gai.conf"
+    )
+    local noinst_files=(
+        "${IMAGE}/etc/ld.so.cache"
+        "${IMAGE}/etc/localtime"
+    )
+
     export LANGUAGE=C
 
     # Note: the default abi must always be staged last.  We do this as the last
@@ -189,8 +216,7 @@ glibc_src_install() {
     for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
         multibuild_switch_build_target C ${multibuild_c_target}
 
-        edo cd "${WORK}/${multibuild_c_target}" || die "entering ${multibuild_c_target} failed"
-
+        edo cd "${WORK}/${multibuild_c_target}"
         default
     done
 
@@ -214,25 +240,21 @@ glibc_src_install() {
     keepdir /usr/${LIBDIR}/locale
 
     # don't install /etc/{ld.so.cache,localtime}
-    for file in "${IMAGE}/etc/ld.so.cache" "${IMAGE}/etc/localtime" ; do
-        if [[ -f ${file} ]] ; then
-            edo rm "${file}"
-        fi
-    done
+    nonfatal edo rm "${noinst_files[@]}"
 
     # don't install bundled timezone info
-    ! ever at_least 2.16.0 && edo rm -r "${IMAGE}/usr/share/zoneinfo"
+    ever at_least 2.16.0 || edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
     cd "${WORKBASE}/${PNV}"
 
     insinto /etc
-    doins nscd/nscd.conf nss/nsswitch.conf posix/gai.conf
+    doins "${conf_files[@]}"
 
     # Move librt.a to /lib and link it to /usr/lib.
-    edo cp -a "${IMAGE}"/usr/${LIBDIR}/librt.a "${IMAGE}"/${LIBDIR}/
-    edo rm "${IMAGE}"/usr/${LIBDIR}/librt.a
-    dosym /${LIBDIR}/librt.a /usr/${LIBDIR}/
-    dosym /${LIBDIR}/librt.so.1 /${LIBDIR}/librt.so
+    edo cp -a "${IMAGE}/usr/${LIBDIR}/librt.a" "${IMAGE}/${LIBDIR}/"
+    edo rm "${IMAGE}/usr/${LIBDIR}/librt.a"
+    dosym "/${LIBDIR}/librt.a" "/usr/${LIBDIR}/"
+    dosym "/${LIBDIR}/librt.so.1" "/${LIBDIR}/librt.so"
 
     hereenvd 02locale <<EOF
 LANG=en_GB.utf8
@@ -246,11 +268,16 @@ EOF
 }
 
 pkg_postinst() {
-    mkdir -p "${ROOT}usr/${LIBDIR}/locale" || eerror "failed to create /usr/${LIBDIR}/locale"
+    local locales=( en_US.UTF-8 en_GB.UTF-8 )
+    local localedef="${ROOT}usr/bin/localedef"
+    local locale=
 
-    for lang in en_US en_GB ; do
-        I18NPATH="${ROOT}usr/share/i18n" \
-            nonfatal edo "${ROOT}usr/bin/localedef" --prefix="${ROOT}" -i ${lang} -f UTF-8 ${lang}.UTF-8
+    # NOTE(?) localedef fails if /usr/${LIBDIR}/locale does not exist
+    edo mkdir -p "${ROOT}usr/${LIBDIR}/locale"
+
+    for locale in "${locales[@]}" ; do
+        I18NPATH="${ROOT}usr/share/i18n" nonfatal edo \
+            "${localedef}" --prefix="${ROOT}" -i ${locale%.*} -f ${locale#*.} ${locale}
     done
 }
 
