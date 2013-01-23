@@ -80,11 +80,6 @@ src_install() {
 
     dosym bash /usr/${CHOST}/bin/sh
 
-    # NOTE(compnerd) preserve legacy paths for paludis
-    dodir /bin
-    dosym /usr/${CHOST}/bin/bash /bin/bash
-    dosym /usr/${CHOST}/bin/bash /bin/sh
-
     insinto /etc/bash
     doins "${FILES}/bashrc"
 
@@ -101,5 +96,15 @@ EOF
 EOF
 
     keepdir /etc/bash/bashrc.d
+}
+
+pkg_preinst() {
+    if [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
+        # NOTE(compnerd) preserve legacy paths for paludis
+        nonfatal edo rm "${ROOT}"/bin/{bash,sh} &&
+        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/bash "${ROOT}"/bin/bash &&
+        nonfatal edo ln -s bash "${ROOT}"/bin/sh ||
+            eerror "Symlinking to /bin/bash and /bin/sh failed"
+    fi
 }
 
