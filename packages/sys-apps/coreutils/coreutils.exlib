@@ -71,10 +71,15 @@ perform_multiarch_install() {
 
     insinto /etc
     newins "${WORK}/src/dircolors.hin" DIR_COLORS
+}
 
-    # NOTE(compnerd) preserve legacy paths for paludis
-    edo mkdir "${IMAGE}"{,/usr}/bin
-    dosym /usr/${CHOST}/bin/readlink /bin/readlink
-    dosym /usr/${CHOST}/bin/env /usr/bin/env
+pkg_preinst() {
+    if [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
+        # NOTE(compnerd) preserve legacy paths for paludis
+        nonfatal edo rm "${ROOT}"/{bin/readlink,usr/bin/env} &&
+        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/readlink "${ROOT}"/bin/readlink &&
+        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/env "${ROOT}"/usr/bin/env ||
+            eerror "Copying /bin/readlink and /usr/bin/env failed"
+    fi
 }
 
