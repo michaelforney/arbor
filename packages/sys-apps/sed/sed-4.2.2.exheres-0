@@ -27,11 +27,12 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--without-included-gettext' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl )
 
-src_install() {
-    multiarch_src_install
-
-    # NOTE(compnerd) preserve legacy paths for eclectic
-    dodir /bin
-    dosym /usr/${CHOST}/bin/sed /bin/sed
+pkg_preinst() {
+    if [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
+        # NOTE(compnerd) preserve legacy paths for eclectic
+        nonfatal edo rm "${ROOT}"/bin/sed &&
+        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/sed "${ROOT}"/bin/sed ||
+            eerror "Copying /bin/sed failed"
+    fi
 }
 
