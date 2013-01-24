@@ -275,13 +275,13 @@ glibc_pkg_preinst() {
             # into the legacy paths
             # TODO(compnerd) workout the set of multilib directories and symlink those across each other
             # e.g. i686-pc-linux-gnu, x86_64-pc-linux-gnu under i686-pc-linux-gnu, and x86_64-pc-linux-gnu
-            local loader=
+            local loader= cp=$(type -P cp)
             for loader in "${IMAGE}"/usr/${host}/lib/ld-linux* ; do
                 local loader_bn=$(basename "${loader}")
                 if [[ -e ${ROOT}/${LIBDIR}/${loader_bn} ]] ; then
                     nonfatal edo rm "${ROOT}/${LIBDIR}/${loader_bn}"
                 fi &&
-                nonfatal edo "${IMAGE}"/usr/${CHOST}/lib/ld-linux*.so* /bin/cp "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" ||
+                nonfatal edo "${IMAGE}"/usr/${CHOST}/lib/ld-linux*.so* ${cp} "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" ||
                     eerror cp "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" failed
             done
         done
