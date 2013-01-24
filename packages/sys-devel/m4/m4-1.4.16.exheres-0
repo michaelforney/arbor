@@ -38,3 +38,10 @@ src_prepare() {
             -i "${WORK}/tests/Makefile.in"
 }
 
+pkg_postinst() {
+    if [[ $(readlink -f "${ROOT##/}"/usr/bin) == ${ROOT##/}/usr/bin ]] ; then
+        nonfatal edo ln -sf ../${CHOST}/bin/m4 "${ROOT}"/usr/bin/m4 ||
+            eerror "Copying /usr/bin/m4 failed"
+    fi
+}
+
