@@ -76,10 +76,11 @@ perform_multiarch_install() {
 pkg_preinst() {
     if [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
         # NOTE(compnerd) preserve legacy paths for paludis
-        nonfatal edo rm "${ROOT}"/{bin/readlink,usr/bin/env} &&
-        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/readlink "${ROOT}"/bin/readlink &&
-        nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/env "${ROOT}"/usr/bin/env ||
-            eerror "Copying /bin/readlink and /usr/bin/env failed"
+        for bin in bin/pwd bin/readlink usr/bin/env ; do
+            nonfatal edo rm "${ROOT}"/${bin} &&
+            nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/$(basename ${bin}) "${ROOT}"/${bin} ||
+                eerror "Copying /${bin} failed"
+        done
     fi
 }
 
