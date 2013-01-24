@@ -54,9 +54,20 @@ src_test() {
 }
 
 perform_multiarch_install() {
+    default
+
+    dodir /usr/${host}/sbin
+    dosym kmod /usr/${host}/bin/lsmod
+    dosym kmod /usr/${host}/sbin/lsmod
+
+    alternatives+=(
+        /usr/${host}/bin/lsmod                 ${PN}.lsmod
+    )
+}
+
+src_install() {
     local alternatives=(
         kmod-tools ${PN} 10
-        /usr/${host}/bin/lsmod                  ${PN}.lsmod
         /usr/share/man/man5/depmod.d.5          ${PN}.depmod.d.5
         /usr/share/man/man5/modprobe.d.5        ${PN}.modprobe.d.5
         /usr/share/man/man5/modules.dep.5       ${PN}.modules.dep.5
@@ -69,7 +80,7 @@ perform_multiarch_install() {
         /usr/share/man/man8/rmmod.8             ${PN}.rmmod.8
     )
 
-    default
+    multiarch_src_install
 
     alternatives_for "${alternatives[@]}"
 }
