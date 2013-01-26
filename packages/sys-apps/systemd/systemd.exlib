@@ -144,17 +144,18 @@ systemd_pkg_setup() {
 systemd_src_prepare() {
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
-        edo sed -i -e "/rootlibexecdir=\$(rootdir)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/rootlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/udevlibexecdir=\$(rootprefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/systemunitdir=/s:lib:${LIBDIR}:" Makefile.am
-        edo sed -i -e "/userunitdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/tmpfilesdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/binfmtdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/sysctldir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/catalogdir=\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" Makefile.am
-        edo sed -i -e "/\$(DESTDIR)/s:/lib/:/${LIBDIR}/:" Makefile.am
+        edo sed -i \
+            -e "/^rootlibexecdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^udevlibexecdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^systemunitdir=/s:lib:${LIBDIR}:" \
+            -e "/^userunitdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^tmpfilesdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^sysctldir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^usergeneratordir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^catalogdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" \
+            -e "/\$(INSTALL_DIRS)/s:\$(INSTALL_DIRS):\$(subst /lib/,/${LIBDIR}/,&):" \
+            Makefile.am
     fi
 
     if option gtk-doc ; then
@@ -422,15 +423,6 @@ EOF
     hereenvd 20udev <<EOT
 CONFIG_PROTECT_MASK="${UDEVRULESDIR}"
 EOT
-
-    # fix lib paths
-    if [[ ${LIBDIR} != lib ]] ; then
-        if [[ -d ${IMAGE}/usr/lib/ConsoleKit ]] ; then
-            edo mv "${IMAGE}"/usr/{lib,${LIBDIR}}/ConsoleKit
-        fi
-        edo rmdir "${IMAGE}"/usr/lib/{systemd/{user-generators,},}
-        [[ -d ${IMAGE}/usr/lib ]] && edo rmdir "${IMAGE}"/usr/lib
-    fi
 
     # Create compatibility symlinks
     dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
