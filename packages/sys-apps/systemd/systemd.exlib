@@ -462,25 +462,33 @@ systemd_pkg_postinst() {
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
         if [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]]; then
-            # No need to ewarn or something because udevd might not be running.
-            nonfatal edo pkill -TERM udevd
-            nonfatal edo sleep 1
-            nonfatal edo pkill -KILL udevd
+            if [[ -S /run/systemd/private ]]; then
+                # We are running systemd, use systemctl
+                esandbox allow_net --connect unix:/run/systemd/private
+                nonfatal edo systemctl --system daemon-reexec
+                nonfatal edo systemctl --system restart systemd-udevd.service
+                nonfatal edo systemctl --system restart systemd-journald.service
+                nonfatal edo systemctl --system restart systemd-logind.service
+            else
+                # No need to ewarn or something because udevd might not be running.
+                nonfatal edo pkill -TERM udevd
+                nonfatal edo sleep 1
+                nonfatal edo pkill -KILL udevd
 
-            case "$(esandbox api)" in
-            1)
-                esandbox exec /sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
-                ;;
-            0)
-                # Change the wait mode to wait/eldest so
-                # sydbox doesn't wait for udevd to exit.
-                esandbox wait_eldest
-                # Allow access to /run/udev/control for udevd
-                esandbox allow_net unix:/run/udev/control
-                nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
-                ;;
-            esac
-
+                case "$(esandbox api)" in
+                1)
+                    esandbox exec /sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
+                    ;;
+                0)
+                    # Change the wait mode to wait/eldest so
+                    # sydbox doesn't wait for udevd to exit.
+                    esandbox wait_eldest
+                    # Allow access to /run/udev/control for udevd
+                    esandbox allow_net unix:/run/udev/control
+                    nonfatal edo /sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+                    ;;
+                esac
+            fi
         fi
     fi
 
