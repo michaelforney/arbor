@@ -3,7 +3,7 @@
 
 myexparam suhosin_version=
 
-export_exlib_phases src_prepare src_test_expensive src_install
+export_exlib_phases pkg_pretend src_prepare src_test_expensive src_install
 
 require systemd-service
 
@@ -314,6 +314,12 @@ DEFAULT_SRC_INSTALL_EXCLUDE=(
     README.WIN32-BUILD-SYSTEM
     README.Zeus
 )
+
+php_pkg_pretend() {
+    if [[ -z "${SUHOSIN_VERSION}" ]] && has_version --root ${CATEGORY}/${PN}[suhosin]; then
+        elog "${PNV} doesn't (yet) support the Suhosin patch. If you rely on it, don't install ${PNV}."
+    fi
+}
 
 php_src_prepare() {
     default
