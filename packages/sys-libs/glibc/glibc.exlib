@@ -12,7 +12,7 @@ else
 fi
 
 require multibuild flag-o-matic systemd-service [ systemd_files=[ nscd.service ] ] kernel
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
+# TODO(compnerd) add exparam to run eautoconf
 
 SUMMARY="GNU C library"
 HOMEPAGE="http://www.gnu.org/software/libc"
@@ -108,8 +108,6 @@ glibc_src_prepare() {
         export GCC="${CC}"
     fi
 
-    # TODO(compnerd) make this an exparam
-    ever at_least 2.14.1-r2 && ! ever at_least 2.16 && eautoconf
     default
 }
 
@@ -155,15 +153,6 @@ glibc_src_configure() {
         cat > config.cache <<- EOF
 libc_cv_slibdir=/${LIBDIR}
 EOF
-
-        if ! ever at_least 2.16 ; then
-            cat >> config.cache <<- EOF
-libc_cv_forced_unwind=yes
-libc_cv_c_cleanup=yes
-libc_cv_gnu89_inline=yes
-libc_cv_ssp=no
-EOF
-        fi
 
         if ! ever at_least 2.17 ; then
             # NOTE(compnerd) explicitly specify that the toolchain is capable of emitting debug
@@ -246,9 +235,6 @@ glibc_src_install() {
 
     # don't install /etc/{ld.so.cache,localtime}
     nonfatal edo rm "${noinst_files[@]}"
-
-    # don't install bundled timezone info
-    ever at_least 2.16.0 || edo rm -r "${IMAGE}/usr/share/zoneinfo"
 
     cd "${WORKBASE}/${PNV}"
 
