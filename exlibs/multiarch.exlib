@@ -76,6 +76,7 @@ default_multiarch_src_configure() {
     local option=
 
     if [[ -x ${ECONF_SOURCE:-.}/configure ]] ; then
+        local host_pkg_config=${host}-pkg-config
         local host_cflags_var=${host//-/_}_CFLAGS
         local host_asflags_var=${host//-/_}_ASFLAGS
         local host_ldflags_var=${host//-/_}_LDFLAGS
@@ -92,6 +93,7 @@ default_multiarch_src_configure() {
             ASFLAGS="${!host_asflags_var}"                  \
             CXXFLAGS="${!host_cxxflags_var}"                \
             LDFLAGS="${!host_ldflags_var}"                  \
+            PKG_CONFIG=${host_pkg_config:-pkg-config}       \
         edo "${ECONF_SOURCE:-.}/configure"                  \
                 --host=${host}                              \
                 --build=${CHOST}                            \
