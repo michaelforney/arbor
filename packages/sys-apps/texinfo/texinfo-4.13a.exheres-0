@@ -3,6 +3,7 @@
 
 require gnu [ suffix=lzma ]
 require multiarch
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
 
 SUMMARY="GNU Documentation System"
 
@@ -21,19 +22,23 @@ hosts:
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[hosts:*(-)?]
+        sys-devel/gettext
     build+run:
         sys-libs/ncurses[hosts:*(-)?]
 "
 
+AT_M4DIR=( 'gnulib/m4' )
+
 WORK="${WORKBASE}/${PN}-$(ever range 1-2)"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/texinfo-4.13a-dependency-ordering.patch" )
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( INTRODUCTION )
 
 src_prepare() {
-    default
+    autotools_src_prepare
 
     # TODO(compnerd) do this properly via autotools
     edo sed -e '/^AR =/c AR = @host@-ar'        \

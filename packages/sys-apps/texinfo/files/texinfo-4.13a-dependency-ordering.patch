@@ -1,0 +1,44 @@
+Author: Saleem Abdulrasool <compnerd@compnerd.org>
+Upstream: no, doesnt cleanly apply to master
+Reason: fix build with --disable-dependency-tracking; last hunk needed due to
+older autoconf no longer being available
+--- 
+--- texinfo-4.13/Makefile.am	2013-01-27 00:00:00.000000000 +0000
++++ texinfo-4.13/Makefile.am	2013-01-27 00:00:00.000000000 +0000
+@@ -24,13 +24,13 @@
+ 
+ if TOOLS_ONLY
+   # Build native tools only.
+-  SUBDIRS = lib info install-info makeinfo util
++  SUBDIRS = gnulib/lib lib info install-info makeinfo util
+ else
+   # All subdirectories.
+   # Do libs first since the C programs depend on it.
+   # Do doc last so makeinfo will be built when we get there.
+   # Others are alphabetical.
+-  SUBDIRS = $(native_tools) gnulib/lib lib \
++  SUBDIRS = gnulib/lib $(native_tools) lib \
+             install-info info makeinfo po util doc 
+ endif
+ 
+--- texinfo-4.13/configure.ac	2013-01-27 00:00:00.000000000 +0000
++++ texinfo-4.13/configure.ac	2013-01-27 00:00:00.000000000 +0000
+@@ -29,6 +29,7 @@
+ 
+ # Checks for programs.
+ AC_PROG_CC
++AM_PROG_CC_C_O
+ 
+ # Since we use gnulib: gl_EARLY must be called as soon as possible after
+ # the C compiler is checked.  The others could be later, but we just
+--- texinfo-4.13/configure.ac	2013-01-27 00:00:00.000000000 +0000
++++ texinfo-4.13/configure.ac	2013-01-27 00:00:00.000000000 +0000
+@@ -13,7 +13,7 @@
+ 
+ dnl Must come before AM_INIT_AUTOMAKE.
+ AC_CONFIG_AUX_DIR([build-aux])
+-AM_INIT_AUTOMAKE([1.10.1 readme-alpha dist-lzma])
++AM_INIT_AUTOMAKE([1.10.1 readme-alpha dist-xz])
+ 
+ # Minimum Autoconf version required.
+ AC_PREREQ(2.59)
