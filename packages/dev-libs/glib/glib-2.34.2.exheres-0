@@ -77,7 +77,16 @@ src_prepare() {
 # Its usage is recommended by upstream, see also
 # http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
 perform_multiarch_configure() {
-    default_multiarch_src_configure     \
+    cat > config.cache <<- EOF
+glib_cv_long_long_format=ll
+glib_cv_stack_grows=no
+glib_cv_uscore=no
+ac_cv_func_posix_getpwuid_r=yes
+ac_cv_func_posix_getgrgid_r=yes
+ac_cv_use_pid_surrogate=yes
+EOF
+
+    default_multiarch_src_configure --cache-file=config.cache \
         $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests')
 }
 
