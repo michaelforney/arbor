@@ -56,20 +56,26 @@ findutils_src_test_expensive() {
 }
 
 perform_multiarch_install() {
+    default
+    alternatives+=(
+        /usr/${host}/bin/locate        ${PN}.locate
+        /usr/${host}/bin/updatedb      ${PN}.updatedb
+    )
+}
+
+src_install() {
     local alternatives=(
         locate ${PN} 10
-
-        /usr/${host}/bin/locate         ${PN}.locate
-        /usr/${host}/bin/updatedb       ${PN}.updatedb
 
         /usr/share/man/man1/locate.1    /usr/share/man/man1/${PN}.locate.1
         /usr/share/man/man1/updatedb.1  /usr/share/man/man1/${PN}.updatedb.1
         /usr/share/man/man5/locatedb.5  /usr/share/man/man5/${PN}.locatedb.5
     )
 
-    default
-    edo rmdir "${IMAGE}/var"
+    multiarch_src_install
 
     alternatives_for "${alternatives[@]}"
+
+    edo rmdir "${IMAGE}/var"
 }
 
