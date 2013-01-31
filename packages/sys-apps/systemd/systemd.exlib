@@ -13,7 +13,8 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.
         bash-completion \
         easy-multibuild \
         udev-rules \
-        python [ has_lib=false ]
+        python [ has_lib=false ] \
+        zsh-completion
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
 
@@ -111,6 +112,8 @@ DEPENDENCIES="
 "
 
 AT_M4DIR=( m4 )
+
+ZSH_COMPLETIONS=( 'shell-completion/systemd-zsh-completion.zsh _systemd' )
 
 systemd_pkg_pretend() {
     local kv=$(uname -r)
@@ -288,6 +291,8 @@ systemd_src_install() {
         dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemd-bash-completion.sh
     fi
     edo rm -r "${IMAGE}"/etc/bash_completion.d
+
+    install-zsh-completions
 
     # Don't install funny RPM macros.
     edo rm "${IMAGE}"/etc/rpm/*
