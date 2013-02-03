@@ -1,7 +1,7 @@
 # Copyright 2012 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+require easy-multibuild
 
 SUMMARY="OpenPrinting CUPS Filters"
 DESCRIPTION="
@@ -42,6 +42,7 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-imagefilters
+    --disable-avahi # feel free to make it an option and test it
     --disable-static
     --with-fontdir=fonts/conf.avail
     --with-jpeg
@@ -51,10 +52,4 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-tiff
     --without-php
 )
-
-src_prepare() {
-    default
-    edo sed -e 's:$(LN_S):ln -sf:' -i Makefile.{am,in}
-    autotools_src_prepare
-}
 
