@@ -53,6 +53,22 @@ src_prepare() {
             -i "${WORK}/Makefile.in"
 }
 
+perform_multiarch_compile() {
+    if [[ ${host} == ${CHOST} ]]; then
+        emake
+    else
+        emake \
+            GROFFBIN="${WORKBASE}"/build/${CHOST}/src/roff/groff/groff \
+            TROFFBIN="${WORKBASE}"/build/${CHOST}/src/roff/troff/troff \
+            GROFF_BIN_PATH=""
+    fi
+}
+
+src_compile() {
+    MULTIARCH_SKIP=cross multiarch_src_compile
+    MULTIARCH_SKIP=native multiarch_src_compile
+}
+
 perform_multiarch_install() {
     default
     edo rmdir "${IMAGE}/etc/groff/site-font"
