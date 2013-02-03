@@ -58,6 +58,7 @@ automake_src_install() {
         alternatives+=( /usr/share/info/${info} ${sinfo} )
         edo mv ${info} ${sinfo}
     done
+    ever at_least 1.12 && alternatives+=( /usr/share/info/automake-history.info ${PN}-history-${SLOT}.info  )
     alternatives_for "${alternatives[@]}"
 }
 
