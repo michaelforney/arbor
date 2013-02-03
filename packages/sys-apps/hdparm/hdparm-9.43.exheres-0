@@ -20,8 +20,6 @@ MYOPTIONS="
 
 DEPENDENCIES=""
 
-DEFAULT_SRC_COMPILE_PARAMS=( STRIP=: )
-
 src_prepare() {
     default
 
@@ -31,6 +29,18 @@ src_prepare() {
         s:-s::
     }
 EOF
+}
+
+perform_multiarch_compile() {
+    local host_cflags_var=${host//-/_}_CFLAGS
+    local host_cxxflags_var=${host//-/_}_CXXFLAGS
+    local host_ldflags_var=${host//-/_}_LDFLAGS
+
+    emake CC=${host}-gcc                    \
+          CFLAGS="${!host_cflags_var}"      \
+          CXXFLAGS="${!host_cxxflags_var}"  \
+          LDFLAGS="${!host_ldflags_var}"    \
+          STRIP=:
 }
 
 perform_multiarch_install() {
