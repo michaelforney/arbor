@@ -12,6 +12,13 @@ __multiarch_execute_phase() {
     exparam -v pnv pnv
 
     for host in ${CROSS_COMPILE_TARGETS} ; do
+        case ${MULTIARCH_SKIP} in
+            "") ;;
+            native) [[ ${host} == ${CHOST} ]] && continue ;;
+            cross) [[ ${host} == ${CHOST} ]] || continue ;;
+            *) die "MULTIARCH_SKIP == ${MULTIARCH_SKIP} is currently unsupported" ;;
+        esac
+
         if option !hosts:${host} ; then
             echo "    Cross-Compile Host: ${host} (disabled)"
             continue
