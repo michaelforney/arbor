@@ -52,7 +52,6 @@ DEPENDENCIES="
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     run:
         xinetd? ( sys-apps/xinetd )
-    recommendation:
         net-print/cups-filters [[ description = [ Common filters required by most printer drivers on Linux ] ]]
     suggestion:
         sys-apps/colord [[ description = [ ICC profiles referenced by PPD files are registered utilizing colord ] ]]
@@ -169,6 +168,11 @@ install_one_multibuild() {
     install_systemd_files
 
     echo "ServerName /run/cups/cups.sock" >> "${IMAGE}"/etc/cups/client.conf
+
+    # file collision with cups-filters
+    edo rm "${IMAGE}"/usr/share/cups/banners/{classified,confidential,secret,standard,topsecret,unclassified}
+    edo rm "${IMAGE}"/usr/share/cups/data/testprint
+    edo rmdir "${IMAGE}"/usr/share/cups/{banners,data}
 }
 
 cups_src_test() {
