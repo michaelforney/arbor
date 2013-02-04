@@ -55,6 +55,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 src_prepare() {
     default
+    # required for multilib install - 3e1c32fd
     edo sed -e 's:$(LN_S):ln -sf:' -i Makefile.{am,in}
     autotools_src_prepare
 }
