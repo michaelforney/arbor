@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=bz2 ] easy-multibuild
+require gnu [ suffix=xz ] easy-multibuild
 
 SUMMARY="GNU Multiple Precision arithmetic library"
 HOMEPAGE="http://${PN}lib.org"
@@ -26,6 +26,8 @@ DEPENDENCIES="
             description = [ File collisions which will probably break your system ]
         ]]
 "
+
+WORK=${WORKBASE}/${PNV%a}
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cxx
