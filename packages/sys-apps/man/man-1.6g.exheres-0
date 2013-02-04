@@ -25,11 +25,20 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/man-1.6f-unicode.patch" )
 
 perform_multiarch_configure() {
-    edo "${WORK}/configure"         \
-            -default                \
-            -prefix=/usr/${host}    \
-            -mandir=/usr/share/man  \
-            -confdir=/etc           \
+    CC=${host}-gcc                   \
+    BUILD_CC="${CHOST}-gcc ${CLAGS}" \
+    DEFS="-I/usr/${host}/include"    \
+    edo "${WORK}/configure"          \
+            -default                 \
+            -prefix=/usr/${host}     \
+            -mandir=/usr/share/man   \
+            -confdir=/etc            \
             -compatibility_mode_for_colored_groff
 }
 
+perform_multiarch_compile() {
+    local host_cflags_var=${host//-/_}_CFLAGS
+    local host_ldflags_var=${host//-/_}_LDFLAGS
+
+    emake CFLAGS="${!host_cflags_var}" LDFLAGS="${!host_ldflags_var}"
+}
