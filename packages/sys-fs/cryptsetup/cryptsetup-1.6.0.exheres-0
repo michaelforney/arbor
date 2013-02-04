@@ -24,6 +24,7 @@ MYOPTIONS="python
 DEPENDENCIES="
     build:
         sys-devel/gettext[>=0.15]
+        virtual/pkg-config
     build+run:
         dev-libs/popt[>=1.7][multibuild_c:*(-)?]
         sys-apps/util-linux [[ note = [ cryptsetup needs libuuid ] ]]
@@ -46,6 +47,7 @@ configure_one_multibuild() {
         --enable-nls \
         --enable-udev \
         --disable-fips \
+        --disable-pwquality \
         --disable-selinux \
         --disable-static-cryptsetup \
         $(option_enable python) \
