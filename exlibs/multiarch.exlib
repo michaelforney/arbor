@@ -83,7 +83,10 @@ default_multiarch_src_configure() {
     local option=
 
     if [[ -x ${ECONF_SOURCE:-.}/configure ]] ; then
-        local host_pkg_config=${host}-pkg-config
+        local host_pkg_config
+        for host_pkg_config in {${host}-,${CHOST}-,}pkg-config ; do
+            type -P ${host_pkg_config} && break
+        done
         local host_cflags_var=${host//-/_}_CFLAGS
         local host_asflags_var=${host//-/_}_ASFLAGS
         local host_ldflags_var=${host//-/_}_LDFLAGS
@@ -116,32 +119,34 @@ default_multiarch_src_configure() {
         done
 
         # TODO(compnerd) work out how to deal with clang
-            CC=${host}-gcc                                  \
-            CXX=${host}-g++                                 \
-            CPP="${host}-gcc ${!host_cflags_var} -E"        \
-            CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
-            CFLAGS="${!host_cflags_var}"                    \
-            ASFLAGS="${!host_asflags_var}"                  \
-            CXXFLAGS="${!host_cxxflags_var}"                \
-            LDFLAGS="${!host_ldflags_var}"                  \
-            PKG_CONFIG=${host_pkg_config:-pkg-config}       \
-        edo "${ECONF_SOURCE:-.}/configure"                  \
-                "${default_args[@]}"                        \
-                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"        \
+        edo env                                                                   \
+            CC=${host}-gcc                                                        \
+            CXX=${host}-g++                                                       \
+            CPP="${host}-gcc ${!host_cflags_var} -E"                              \
+            CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"                         \
+            CFLAGS="${!host_cflags_var}"                                          \
+            ASFLAGS="${!host_asflags_var}"                                        \
+            CXXFLAGS="${!host_cxxflags_var}"                                      \
+            LDFLAGS="${!host_ldflags_var}"                                        \
+            PKG_CONFIG=${host_pkg_config:-pkg-config}                             \
+            $([[ ${host_pkg_config} == ${host}-pkg-config ]] ||                   \
+            echo PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig:/usr/lib/pkgconfig) \
+        "${ECONF_SOURCE:-.}/configure"                                            \
+                "${default_args[@]}"                                              \
+                "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}"                              \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTIONS[@]}" ; do
                     option ${option}
-                  done)                                     \
+                  done)                                                           \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do
                     option_enable ${option}
-                  done)                                     \
+                  done)                                                           \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do
                     option_with ${option}
-                  done)                                     \
+                  done)                                                           \
                 $(for option in "${DEFAULT_SRC_CONFIGURE_OPTION_TESTS[@]}" ; do
                     expecting_tests ${option}
-                  done)                                     \
-                "${econf_args[@]}"                          \
-        || die "configure failed"
+                  done)                                                           \
+                "${econf_args[@]}"
     fi
 }
 
