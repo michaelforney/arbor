@@ -41,19 +41,21 @@ src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
-            PKG_CONFIG=${PKG_CONFIG:-${CHOST}-pkg-config}       \
-        edo "${WORKBASE}/${PNV}/configure"                      \
-            --build=${CHOST}                                    \
-            --host=${CHOST}                                     \
-            --prefix=/usr/${CHOST}                              \
-            --datarootdir=/usr/share                            \
-            --localstatedir=/var                                \
-            --disable-dependency-tracking                       \
-            --enable-fast-install                               \
-            --with-pc-path=${pc_path}                           \
-            --with-system-include-path=/usr/${target}/include   \
-            --with-system-library-path=/usr/${target}/lib       \
-            --disable-indirect-deps                             \
+        edo env                                                              \
+            PKG_CONFIG=${PKG_CONFIG:-${CHOST}-pkg-config}                    \
+            PKG_CONFIG_LIBDIR=/usr/${CHOST}/lib/pkgconfig:/usr/lib/pkgconfig \
+        "${WORKBASE}/${PNV}/configure"                                       \
+            --build=${CHOST}                                                 \
+            --host=${CHOST}                                                  \
+            --prefix=/usr/${CHOST}                                           \
+            --datarootdir=/usr/share                                         \
+            --localstatedir=/var                                             \
+            --disable-dependency-tracking                                    \
+            --enable-fast-install                                            \
+            --with-pc-path=${pc_path}                                        \
+            --with-system-include-path=/usr/${target}/include                \
+            --with-system-library-path=/usr/${target}/lib                    \
+            --disable-indirect-deps                                          \
             --program-prefix=${target}-
     done
 }
