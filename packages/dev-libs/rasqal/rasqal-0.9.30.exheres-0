@@ -20,6 +20,7 @@ MYOPTIONS="gmp pcre"
 
 DEPENDENCIES="
     build:
+        sys-devel/bison[>=2.6]
         sys-devel/flex[>=2.5.33]
         virtual/pkg-config[>=0.9.0]
     test:
@@ -31,13 +32,14 @@ DEPENDENCIES="
         media-libs/raptor[>=2.0.7]
         sys-apps/util-linux [[ note = [ for libuuid ] ]]
         gmp? ( dev-libs/gmp:= )
-        !gmp? ( dev-libs/mpfr:= )
+        !gmp? ( dev-libs/mpfr:=[>=2.4.0] )
         pcre? ( dev-libs/pcre[>=3.9] )
 "
 
 src_configure() {
     econf \
         --enable-xml2 \
+        --disable-static \
         --with-decimal=$(optionv gmp || echo "mpfr") \
         --with-digest-library=gcrypt \
         --with-regex-library=$(optionv pcre || echo "posix") \
