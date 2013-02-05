@@ -21,10 +21,13 @@ MYOPTIONS="
 "
 if ever at_least 1; then
     MYOPTIONS+="
+    doc [[ description = [ Build API documentation of included pinktrace library ] ]]
     seccomp [[ description = [ Enable seccomp user filter support ] ]]
 "
     DEPENDENCIES+="
-    seccomp? ( sys-kernel/linux-headers[>=3.5] )
+    build:
+        doc? ( app-doc/doxygen )
+        seccomp? ( sys-kernel/linux-headers[>=3.5] )
 "
 fi
 
@@ -37,7 +40,7 @@ if ! ever at_least 1; then
 fi
 
 if ever at_least 1; then
-    # sydbox-1 doesn't depend on pinktrace.
+    # sydbox-1 includes a rewritten version of pinktrace.
     :
 elif ever at_least 0.7.4; then
     DEPENDENCIES+="
@@ -59,6 +62,7 @@ REMOTE_IDS="freecode:${PN}"
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     ipv6
     $(ever at_least 1 && echo seccomp)
+    "$(ever at_least 1 && echo doc doxygen)"
 )
 
 sydbox_src_test() {
