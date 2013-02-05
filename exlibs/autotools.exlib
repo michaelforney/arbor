@@ -9,9 +9,10 @@
 # need to regenerate their build scripts.
 #
 # required parameters:
-# supported_autoconf=[ slots ], supported_automake=[ slots ]
+#     supported_autoconf=[ slots ], supported_automake=[ slots ]
+# Sort slots in order of preference, preferred first
 
-require versionator dependencies-helpers
+require dependencies-helpers
 
 export_exlib_phases src_prepare
 
@@ -19,8 +20,8 @@ myexparam supported_autoconf[]
 myexparam supported_automake[]
 myexparam -b need_libtool=true
 
-SUPPORTED_AUTOCONF=( $(version_sort_highest_first $(exparam supported_autoconf[@])) )
-SUPPORTED_AUTOMAKE=( $(version_sort_highest_first $(exparam supported_automake[@])) )
+exparam -v SUPPORTED_AUTOCONF supported_autoconf[@]
+exparam -v SUPPORTED_AUTOMAKE supported_automake[@]
 
 autotools_dependencies() {
     if [[ ${SUPPORTED_AUTOCONF[@]} == none ]]; then
