@@ -1,12 +1,10 @@
-# Copyright 2009 Wulf C. Krueger
+# Copyright 2009 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'libevent-1.4.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
 MY_PNV="${PNV}-stable"
-require sourceforge [ project=levent pnv=${MY_PNV} suffix=tar.gz ]
-
-export_exlib_phases src_test
+require sourceforge [ project=levent pnv=${MY_PNV} suffix=tar.gz ] easy-multibuild [ multiunpack=true work=${MY_PNV} ]
 
 SUMMARY="A library to execute a function when a specific event occurs on a file descriptor"
 HOMEPAGE="http://${PN}.org"
@@ -15,19 +13,17 @@ REMOTE_IDS+=" freecode:${PN}"
 
 LICENCES="BSD-3"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        dev-libs/openssl
+        dev-libs/openssl[multibuild_c:*(-)?]
 "
-
-WORK=${WORKBASE}/${MY_PNV}
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.0.10-test.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-openssl --disable-static )
 
-libevent_src_test() {
+test_one_multibuild() {
     pushd test
     edo ./test.sh > "${TEMP}"/tests
     cat "${TEMP}"/tests
