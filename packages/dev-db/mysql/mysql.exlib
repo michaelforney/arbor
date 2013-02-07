@@ -1,9 +1,10 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2011-2013 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service easy-multibuild
+require cmake [ api=2 ] systemd-service easy-multibuild
 
-export_exlib_phases pkg_pretend src_install # src_test pkg_config
+export_exlib_phases pkg_pretend src_install
 
 MYSQL_MAJOR_VERSION=$(ever range 1-2)
 
@@ -16,60 +17,43 @@ http://downloads.mysql.com/archives/${PN}-$(ever range 1-2)/${PNV}.tar.gz
 
 REMOTE_IDS="freecode:${PN}"
 UPSTREAM_CHANGELOG="
-http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/news-$(ever replace_all '-').html
+http://dev.mysql.com/doc/relnotes/mysql/${MYSQL_MAJOR_VERSION}/en/news-$(ever replace_all '-').html [[ lang = [ en ] ]]
 "
 UPSTREAM_DOCUMENTATION="
-http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/index.html               [[ lang = [ en ] ]]
-http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/post-installation.html   [[ lang = [ en ] note = [ Post installation documentation ] ]]
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/index.html                 [[ lang = [ en ] ]]
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/postinstallation.html      [[ lang = [ en ] note = [ Postinstallation documentation ] ]]
+http://dev.mysql.com/doc/refman/${MYSQL_MAJOR_VERSION}/en/upgrading-downgrading.html [[ lang = [ en ] note = [ Upgrading or downgrading documentation ] ]]
+"
+UPSTREAM_RELEASE_NOTES="
+http://dev.mysql.com/doc/relnotes/mysql/${MYSQL_MAJOR_VERSION}/en/ [[ lang = [ en ] ]]
 "
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="baselayout big-tables debug embedded-server ssl
-    big-tables      [[ description = [ Make tables contain up to 1.844E+19 rows ] ]]
+MYOPTIONS="baselayout debug tcpd
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
     multibuild_c: 32 64
 "
 
 DEPENDENCIES="
     build+run:
-        ssl? ( dev-libs/openssl[multibuild_c:*(-)?] )
         group/${PN}
         user/${PN}
+        dev-libs/libaio[multibuild_c:*(-)?]
+        dev-libs/openssl[>=0.9.7][multibuild_c:*(-)?]
+        sys-libs/readline[>=5.2][multibuild_c:*(-)?]
+        sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
+        tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     suggestion:
         app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
-    big-tables
-    debug
-    'embedded-server' 'embedded-server embedded-privilege-control'
-)
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-assembler
-    # Compile the client with threads
-    --enable-thread-safe-client
-    # Where to put mysqld, mysqlmanager
-    --libexecdir="/usr/sbin"
-    # mysqld puts its data directly in this
-    --localstatedir=/var/lib/mysql
-    --with-unix-socket-path=/run/mysqld/mysqld.sock
-    --with-comment="Exherbo, ${PNVR}"
-    --with-mysqld-user=mysql
-    # Use the system readline, libedit. --with-readline builds the internal readling copy.
-    --without-readline --without-libedit
-    # Use system openssl, takes either (no|bundled|DIR) (config/ac-macros/ssl.m4)
-    --with-ssl=/usr
-    --with-extra-charsets=all
-    --with-server
-
-    # Pre-built man-pages
-    --with-man
-    # And info page/ChangeLog
-    --with-docs
-    # Enable the InnoDB plugin as it's the most efficient backend. Akonadi needs this, too.
-    --with-plugins=innobase
-)
+if ever at_least 5.6.10 ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/libevent[>=1.4.12][multibuild_c:*(-)?]
+    "
+fi
 
 mysql_pkg_pretend() {
     # Sanity check when upgrading to a different x.y version of mysql
@@ -88,42 +72,103 @@ mysql_pkg_pretend() {
         ewarn "/usr/${LIBDIR}/tmpfiles.d/${PN}.conf and can be safely removed after upgrade"
         ewarn "if you did not make any changes to it."
     fi
-
-    # Pending genesis integration:
-    # Upgrading to any version requires starting/stopping the MySQL server.
 }
 
-if false; then
-# FIXME Write me
-mysql_pkg_config() {
-    :
-}
-fi
+configure_one_multibuild() {
+    local cmakeargs=(
+        -DBUILD_CONFIG:STRING=mysql_release
+        -DCMAKE_BUILD_TYPE:STRING=Release
+        -DCMAKE_INSTALL_PREFIX:PATH=/usr
+        -DCOMPILATION_COMMENT:STRING="Exherbo"
+        -DDEFAULT_CHARSET:STRING=utf8
+        -DDEFAULT_COLLATION:STRING=utf8_general_ci
+        -DFEATURE_SET:STRING=community
+        -DINSTALL_BINDIR:PATH=bin
+        -DINSTALL_DOCDIR:PATH=share/doc/${PNVR}
+        -DINSTALL_DOCREADMEDIR:PATH=share/doc/${PNVR}
+        -DINSTALL_INCLUDEDIR:PATH=include/mysql
+        -DINSTALL_INFODIR:PATH=share/mysql/info
+        -DINSTALL_LIBDIR:PATH=${LIBDIR}/mysql
+        -DINSTALL_MANDIR:PATH=share/man
+        -DINSTALL_MYSQLSHAREDIR:PATH=share/mysql
+        -DINSTALL_PLUGINDIR:PATH=${LIBDIR}/mysql/plugin
+        -DINSTALL_SBINDIR:PATH=sbin
+        -DINSTALL_SCRIPTDIR:PATH=bin
+        # Empty value to not install the sql-bench directory
+        -DINSTALL_SQLBENCHDIR:STRING=
+        -DINSTALL_SUPPORTFILESDIR:PATH=share/doc/${PNVR}/support-files
+        -DMYSQL_DATADIR:PATH=/var/lib/mysql
+        -DMYSQL_UNIX_ADDR:PATH=/run/mysqld/mysqld.sock
+        -DSYSCONFDIR:PATH=/etc/mysql
+        -DWITH_EXTRA_CHARSETS:STRING=all
+        -DWITH_INNOBASE_STORAGE_ENGINE:BOOL=TRUE
+        -DWITH_SSL:STRING=system
+        -DWITH_VALGRIND:BOOL=FALSE
+        -DWITH_ZLIB:STRING=system
+    )
 
-if false; then
-# FIXME Write me
-# See mysql-test/README
-mysql_src_test() {
-    :
+    if ever at_least 5.6.10 ; then
+        cmakeargs+=(
+            -DBUILD_WITH_WERROR:BOOL=FALSE
+            -DCOMPILE_FLAG_WERROR:BOOL=FALSE
+            -DENABLE_DTRACE:BOOL=FALSE
+            -DENABLE_GCOV:BOOL=FALSE
+            -DENABLE_GPROF:BOOL=FALSE
+            -DENABLED_LOCAL_INFILE:BOOL=TRUE
+            -DENABLED_PROFILING:BOOL=TRUE
+            # 5.6.10 fails to build with system readline, use bundled libedit
+            -DWITH_LIBEDIT:BOOL=TRUE
+            -DWITH_LIBEVENT:STRING=system
+            # 5.6.10 unit tests cannot find -lzlib
+            -DWITH_UNIT_TESTS:BOOL=FALSE
+        )
+    else
+        cmakeargs+=(
+            -DWITH_LIBEDIT:BOOL=FALSE
+            -DWITH_READLINE:BOOL=FALSE
+        )
+    fi
+
+    ecmake \
+        "${cmakeargs[@]}" \
+        $(cmake_with debug DEBUG)\
+        $(cmake_with embedded-server EMBEDDED_SERVER)\
+        $(cmake_with tcpd LIBWRAP)
 }
-fi
+
+install_one_multibuild() {
+    cmake_src_install
+
+    ! option debug && edo rmdir "${IMAGE}"/usr/${LIBDIR}/mysql/plugin/debug
+
+    # construct ldpath for all targets
+    ldpath="/usr/${LIBDIR}/${PN}${ldpath:+:${ldpath}}"
+}
 
 mysql_src_install() {
+    local ldpath
+
     easy-multibuild_src_install
 
     # Contains lots of cruft & some empty dirs
-    edo rm -r "${IMAGE}"/usr/{mysql-test,sql-bench}
+    edo rm -r "${IMAGE}"/usr/{data,mysql-test}
 
     keepdir /etc/mysql
-    edo cp "${IMAGE}"/usr/share/mysql/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf
-    edo sed -i -e "/socket/s:=.*:= /run/mysqld/mysqld.sock:" "${IMAGE}"/etc/mysql/my.cnf
+
+    if ever at_least 5.6.10 ; then
+        edo cp "${IMAGE}"/usr/share/doc/${PNVR}/support-files/my-default.cnf "${IMAGE}"/etc/mysql/my.cnf
+    else
+        edo cp "${IMAGE}"/usr/share/doc/${PNVR}/support-files/my-small.cnf "${IMAGE}"/etc/mysql/my.cnf
+    fi
+    edo mv "${IMAGE}"/usr/bin/mysqlaccess.conf "${IMAGE}"/etc/mysql/mysqlaccess.conf
+    edo chmod 644 "${IMAGE}"/etc/mysql/mysqlaccess.conf
 
     keepdir /var/{lib,log}/mysql
     edo chown mysql:mysql "${IMAGE}"/var/{lib,log}/mysql
     edo chmod 755 "${IMAGE}"/var/{lib,log}/mysql
 
     hereenvd 46mysql <<EOF
-LDPATH=/usr/${LIBDIR}/${PN}
+LDPATH=${ldpath}
 EOF
 
     insinto /etc/logrotate.d
@@ -136,7 +181,7 @@ EOF
 
     install_systemd_files
 
-    if option systemd; then
+    if option systemd ; then
         insinto /usr/${LIBDIR}/tmpfiles.d
         hereins ${PN}.conf <<EOF
 d /run/mysqld 0755 mysql mysql
