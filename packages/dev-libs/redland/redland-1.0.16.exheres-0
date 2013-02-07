@@ -68,11 +68,3 @@ src_test() {
     default
 }
 
-src_install() {
-    default
-
-    if ! option mysql && ! option postgresql && ! option sqlite && ! option virtuoso; then
-        edo rmdir "${IMAGE}"/usr/${LIBDIR}/redland
-    fi
-}
-
