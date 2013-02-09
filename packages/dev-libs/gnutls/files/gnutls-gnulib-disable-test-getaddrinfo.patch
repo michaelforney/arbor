@@ -1,0 +1,18 @@
+Source: Elias Pipping <pipping@exherbo.org>
+Upstream: no
+Reason: Disable test that talks to the DNS server
+--- gnutls-3.1.7/gl/tests/Makefile.am
++++ gnutls-3.1.7/gl/tests/Makefile.am
+@@ -398,10 +398,12 @@
+ 
+ ## begin gnulib module getaddrinfo-tests
+ 
++if FALSE
+ TESTS += test-getaddrinfo
+ check_PROGRAMS += test-getaddrinfo
+ test_getaddrinfo_LDADD = $(LDADD) @GETADDRINFO_LIB@ @LIBINTL@
+ EXTRA_DIST += signature.h test-getaddrinfo.c
++endif
+ 
+ ## end   gnulib module getaddrinfo-tests
+ 
