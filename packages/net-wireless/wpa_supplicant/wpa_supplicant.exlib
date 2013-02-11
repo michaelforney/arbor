@@ -33,7 +33,6 @@ SLOT="0"
 MYOPTIONS="
     baselayout
     dbus     [[ description = [ Enable the DBus control interface                    ] ]]
-    debug    [[ description = [ Support printing out debug message to stdout         ] ]]
     eap-fast [[
         description = [
             Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
@@ -166,6 +165,7 @@ src_configure() {
     config_enable \
         BACKEND=file \
         CTRL_IFACE=unix \
+        DEBUG_FILE \
         ELOOP=eloop \
         IEEE80211R \
         IEEE8021X_EAPOL \
@@ -175,11 +175,7 @@ src_configure() {
         PKCS12 \
         WPS
 
-    option dbus     && config_enable CTRL_IFACE_DBUS
-    option dbus     && config_enable CTRL_IFACE_DBUS_NEW
-    option dbus     && config_enable CTRL_IFACE_DBUS_INTRO
-    option debug    && config_enable DEBUG_FILE ||
-                       config_enable NO_STDOUT_DEBUG
+    option dbus     && config_enable CTRL_IFACE_DBUS{,_NEW,_INTRO}
     option pcap     && config_enable L2_PACKET=pcap ||
                        config_enable L2_PACKET=linux
     option readline && config_enable READLINE
