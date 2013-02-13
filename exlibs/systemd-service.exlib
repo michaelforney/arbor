@@ -18,6 +18,8 @@ install_systemd_files() {
         for object in "${systemd_files[@]}"; do
             if [[ -d ${object} ]]; then
                 doins "${object}"/*
+            elif [[ -f ${object} ]]; then
+                doins "${object}"
             else
                 doins "${FILES}"/systemd/"${object}"
             fi
