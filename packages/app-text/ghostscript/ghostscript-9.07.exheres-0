@@ -9,7 +9,7 @@ SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://${PN}.com"
 DOWNLOADS="http://downloads.${PN}.com/public/${PNV}.tar.bz2"
 
-LICENCES="GPL-3"
+LICENCES="AGPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
 MYOPTIONS="cups dbus gtk idn jpeg2000 X
@@ -27,7 +27,6 @@ DEPENDENCIES="
         media-libs/freetype:2[>=2.4.2][multibuild_c:*(-)?]
         media-libs/jbig2dec
         media-libs/jpeg[multibuild_c:*(-)?]
-        media-libs/lcms2[multibuild_c:*(-)?]
         media-libs/libpng[multibuild_c:*(-)?]
         media-libs/tiff[multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
@@ -44,11 +43,13 @@ DEPENDENCIES="
         app-text/poppler-data[>=0.4.4] [[ note = [ CMap encoding data ] ]]
         fonts/urw-fonts [[ note = [ PostScript standard fonts ] ]]
 "
+# ghostscript 9.07 uses a bundled version of lcms2 that adds the function cmsPluginTHR
+#        media-libs/lcms2[multibuild_c:*(-)?]
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-9.05-cups-filters.patch )
 
 prepare_one_multibuild() {
-    edo rm -r ./{expat,freetype,jasper,jbig2dec,jpeg,lcms{,2},libpng,openjpeg,tiff,zlib}
+    edo rm -r ./{expat,freetype,jbig2dec,jpeg,lcms,libpng,openjpeg,tiff,zlib}
     edo rm -r ./Resource/{CMap,Font}
 
     if option !gtk; then
@@ -91,7 +92,6 @@ configure_one_multibuild() {
         --with-jbig2dec \
         --with-libpaper \
         --with-system-libtiff \
-        --without-jasper \
         --without-lcms \
         --without-luratech \
         $(option_enable cups) \
