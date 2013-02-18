@@ -28,6 +28,7 @@ MYOPTIONS="
     gtk  [[ description = [ Build gnome-ssh-askpass ] ]]
     kerberos
     ldns [[ description = [ Use ldns for DNSSEC support ] ]]
+    readline [[ description = [ Use libedit for tab completion in sftp ] ]]
     pam
     tcpd
     X
@@ -49,6 +50,7 @@ DEPENDENCIES="
         gtk? ( x11-libs/gtk+:2 )
         kerberos? ( app-crypt/heimdal )
         ldns? ( net-libs/ldns )
+        readline? ( dev-libs/libedit )
         pam? ( sys-libs/pam[>=0.78] )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
         X? ( x11-apps/xauth )
@@ -86,10 +88,10 @@ src_configure() {
         --with-privsep-user=sshd \
         --with-md5-passwords \
         --with-ssl-engine \
-        --without-libedit \
         --without-selinux \
         $(option_with kerberos kerberos5) \
         $(option_with ldns) \
+        $(option_with readline libedit) \
         $(option_with pam) \
         $(option_with tcpd tcp-wrappers)
 }
