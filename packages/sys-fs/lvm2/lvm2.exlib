@@ -80,10 +80,6 @@ lvm2_src_install() {
     easy-multibuild_src_install
 
     install_systemd_files
-    if option systemd ; then
-        dodir /etc/systemd/system/basic.target.wants
-        dosym "${SYSTEMDSYSTEMUNITDIR}"/lvm2.service /etc/systemd/system/basic.target.wants/lvm2.service
-    fi
 
     if option baselayout; then
         insinto /${LIBDIR}/rcscripts/addons
