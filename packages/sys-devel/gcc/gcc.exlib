@@ -52,6 +52,13 @@ if ! ever at_least 4.6 ; then
     "
 fi
 
+if ever at_least 4.6 ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/mpfr:=[>=2.3]
+    "
+fi
+
 # graphite support
 MYOPTIONS+=" graphite [[ description = [ enable support for Graphite based loop optimizations ] ]]"
 # NOTE(?) upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6,
