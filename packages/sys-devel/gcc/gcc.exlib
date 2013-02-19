@@ -264,12 +264,13 @@ EOF
         # function properly in the multiarch'ed environment.  It configures the compiler to be a
         # sysroot'ed cross-compiler with an empty sysroot prefix, treating the system root as the
         # sysroot.
+        edo env                                                                                     \
             CC="${CHOST}-gcc -B/usr/${CHOST}/${CHOST}/bin"                                          \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"                                               \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                                             \
             CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                                           \
             target_configargs="--prefix=/usr/${target} --with-slibdir=/usr/${target}/lib"           \
-        edo "${WORKBASE}/${PNV/_p/-}/configure"                                                     \
+        "${WORKBASE}/${PNV/_p/-}/configure"                                                         \
                 --cache-file=config.cache                                                           \
                 --build=${CHOST}                                                                    \
                 --host=${CHOST}                                                                     \
@@ -309,8 +310,7 @@ EOF
                 --with-pkgversion="exherbo ${PNVR}"                                                 \
                 --with-system-zlib                                                                  \
                 --with-sysroot='""'                                                                 \
-                --with-gxx-include-dir=/usr/${target}/include/c++/${PV}                             \
-        || die
+                --with-gxx-include-dir=/usr/${target}/include/c++/${PV}
     done
 }
 

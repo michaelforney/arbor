@@ -25,10 +25,11 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( -p1 "${FILES}/man-1.6f-unicode.patch" )
 
 perform_multiarch_configure() {
+    edo env                          \
     CC=${host}-gcc                   \
     BUILD_CC="${CHOST}-gcc ${CLAGS}" \
     DEFS="-I/usr/${host}/include"    \
-    edo "${WORK}/configure"          \
+    "${WORK}/configure"              \
             -default                 \
             -prefix=/usr/${host}     \
             -mandir=/usr/share/man   \

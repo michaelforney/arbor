@@ -30,13 +30,14 @@ perform_multiarch_configure() {
     edo cd "${WORKBASE}/build/${host}/narrow"
 
     # TODO(compnerd) figure out how to deal with clang
+    edo env                                             \
         CC=${host}-gcc                                  \
         CFLAGS=${!host_cflags_var}                      \
         CPP="${host}-gcc ${!host_cflags_var} -E"        \
         CXX=${host}-g++                                 \
         CXXFLAGS=${!host_cxxflags_var}                  \
         CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
-    edo "${WORKBASE}/${PNV}/configure"                  \
+    "${WORKBASE}/${PNV}/configure"                      \
         --build=${CHOST}                                \
         --host=${host}                                  \
         --prefix=/usr/${host}                           \
@@ -55,20 +56,20 @@ perform_multiarch_configure() {
         --with-shared                                   \
         --without-ada                                   \
         --without-hashed-db                             \
-        $(option_with gpm)                              \
-    || die
+        $(option_with gpm)
 
     edo mkdir -p "${WORKBASE}/build/${host}/wide"
     edo cd "${WORKBASE}/build/${host}/wide"
 
     # TODO(compnerd) figure out how to deal with clang
+    edo env                                             \
         CC=${host}-gcc                                  \
         CFLAGS=${!host_cflags_var}                      \
         CPP="${host}-gcc ${!host_cflags_var} -E"        \
         CXX=${host}-g++                                 \
         CXXFLAGS=${!host_cxxflags_var}                  \
         CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
-    edo "${WORKBASE}/${PNV}/configure"                  \
+    "${WORKBASE}/${PNV}/configure"                      \
         --build=${CHOST}                                \
         --host=${host}                                  \
         --prefix=/usr/${host}                           \
@@ -87,8 +88,7 @@ perform_multiarch_configure() {
         --with-shared                                   \
         --without-ada                                   \
         --without-hashed-db                             \
-        $(option_with gpm)                              \
-    || die
+        $(option_with gpm)
 }
 
 ncurses_src_configure() {

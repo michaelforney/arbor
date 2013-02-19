@@ -48,13 +48,14 @@ perform_multiarch_configure() {
 
     # NOTE(compnerd) zlib does not support the usual configure arguments
     # TODO(compnerd) figure out how to deal with clang
+    edo env                                     \
         AR=${host}-ar                           \
         CC=${host}-gcc                          \
         NM=${host}-nm                           \
         RANLIB=${host}-ranlib                   \
         CFLAGS=${!host_cflags_var}              \
         mandir=/usr/share/man                   \
-    edo "${PWD}/configure"                      \
+    "${PWD}/configure"                          \
             --prefix=/usr/${host}               \
             --libdir=/usr/${host}/lib           \
             --includedir=/usr/${host}/include   \
