@@ -12,11 +12,13 @@ REMOTE_IDS="freecode:${PN}"
 
 LICENCES="GPL-3 LGPL-3"
 SLOT="0"
+CROSS_COMPILE_TARGETS="
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
 MYOPTIONS="
-    targets:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
+    targets: ${CROSS_COMPILE_TARGETS}
 "
 
 DEPENDENCIES="
