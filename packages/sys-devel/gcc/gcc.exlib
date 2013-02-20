@@ -332,15 +332,12 @@ gcc_src_compile() {
         echo "    Cross-Compile Target: ${target}"
 
         edo cd "${WORKBASE}/build/${target}"
-        default
-    done
-}
 
-gcc_src_compile() {
-    # NOTE(compnerd) explicitly pass gcc_cv_libc_provides_ssp through the environment to ensure that
-    # the subconfigures receive the parameter.  Unfortunately, the default configure phases seem to
-    # lose this value
-    gcc_cv_libc_provides_ssp=yes default
+        # NOTE(compnerd) explicitly pass gcc_cv_libc_provides_ssp through the environment to ensure that
+        # the subconfigures receive the parameter.  Unfortunately, the default configure phases seem to
+        # lose this value
+        gcc_cv_libc_provides_ssp=yes default
+    done
 }
 
 gcc_src_test_expensive() {
