@@ -13,7 +13,8 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.
         bash-completion \
         multiarch \
         udev-rules \
-        python [ has_lib=false ]
+        python [ has_lib=false ] \
+        zsh-completion
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
 
@@ -113,6 +114,8 @@ DEPENDENCIES="
 "
 
 AT_M4DIR=( m4 )
+
+ZSH_COMPLETIONS=( 'shell-completion/systemd-zsh-completion.zsh _systemd' )
 
 systemd_pkg_pretend() {
     local kv=$(uname -r)
@@ -295,6 +298,8 @@ systemd_src_install() {
     fi
     edo rm -r "${IMAGE}"/etc/bash_completion.d
 
+    install-zsh-completions
+
     # Don't install funny RPM macros.
     edo rm "${IMAGE}"/etc/rpm/*
     edo rmdir "${IMAGE}"/etc/rpm
@@ -448,25 +453,33 @@ systemd_pkg_postinst() {
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
         if [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]]; then
-            # No need to ewarn or something because udevd might not be running.
-            nonfatal edo pkill -TERM udevd
-            nonfatal edo sleep 1
-            nonfatal edo pkill -KILL udevd
+            if [[ -S /run/systemd/private ]]; then
+                # We are running systemd, use systemctl
+                esandbox allow_net --connect unix:/run/systemd/private
+                nonfatal edo systemctl --system daemon-reexec
+                nonfatal edo systemctl --system restart systemd-udevd.service
+                nonfatal edo systemctl --system restart systemd-journald.service
+                nonfatal edo systemctl --system restart systemd-logind.service
+            else
+                # No need to ewarn or something because udevd might not be running.
+                nonfatal edo pkill -TERM udevd
+                nonfatal edo sleep 1
+                nonfatal edo pkill -KILL udevd
 
-            case "$(esandbox api)" in
-            1)
-                esandbox exec /usr/${CHOST}/sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
-                ;;
-            0)
-                # Change the wait mode to wait/eldest so
-                # sydbox doesn't wait for udevd to exit.
-                esandbox wait_eldest
-                # Allow access to /run/udev/control for udevd
-                esandbox allow_net unix:/run/udev/control
-                nonfatal edo /usr/${CHOST}/sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
-                ;;
-            esac
-
+                case "$(esandbox api)" in
+                1)
+                    esandbox exec /usr/${CHOST}/sbin/udevd --daemon || ewarn "udevd couldn't be restarted"
+                    ;;
+                0)
+                    # Change the wait mode to wait/eldest so
+                    # sydbox doesn't wait for udevd to exit.
+                    esandbox wait_eldest
+                    # Allow access to /run/udev/control for udevd
+                    esandbox allow_net unix:/run/udev/control
+                    nonfatal edo /usr/${CHOST}/sbin/udevd --daemon || ewarn "udevd couldn't be restarted."
+                    ;;
+                esac
+            fi
         fi
     fi
 

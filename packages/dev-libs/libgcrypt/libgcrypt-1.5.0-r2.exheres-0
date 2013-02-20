@@ -1,0 +1,52 @@
+# Copyright 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+require multiarch
+
+SUMMARY="General purpose crypto library based on the code used in GnuPG"
+HOMEPAGE="http://www.gnupg.org/"
+DOWNLOADS="mirror://gnupg/${PN}/${PNV}.tar.bz2"
+
+REMOTE_IDS="freecode:${PN}"
+
+LICENCES="LGPL-2.1 [[ description = [ Applies to the library ] ]]
+      GPL-2 [[ description = [ Applies to the manual & tools ] ]]"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="
+hosts:
+    arm-exherbo-linux-gnueabi
+    i686-pc-linux-gnu
+    x86_64-pc-linux-gnu
+"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libgpg-error[>=1.8][hosts:*(-)?]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-O-flag-munging
+    # Alpha code, needs kernel patches
+    --without-capabilities
+    # Suggested by upstream, also see Gentoo #201917
+    --disable-padlock-support
+    # crypsetup wants static
+    --enable-static
+    # NOTE(compnerd) ELF does not have a global symbol prefix unlike COFF (which is default on *BSD)
+    # this should be safe to unconditionally set until we support non-ELF targets
+    ac_cv_sys_symbol_underscore=no
+)
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/9487099071af4478d2882e633a0ade805801d6fa.patch" )
+
+perform_multiarch_configure() {
+    default_multiarch_src_configure --with-gpg-error-prefix=/usr/${host}
+}
+
+perform_multiarch_install() {
+    default
+    edo rmdir "${IMAGE}"/usr/${host}/sbin
+}
+

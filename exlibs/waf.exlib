@@ -43,8 +43,10 @@ waf_src_configure() {
         --datadir=/usr/share/ \
         ${WAF_SRC_CONFIGURE_HTMLDIR---htmldir=/usr/share/doc/${PNVR}/html/} \
         "${WAF_SRC_CONFIGURE_PARAMS[@]}" \
+        $(for s in "${WAF_SRC_CONFIGURE_OPTIONS[@]}" ; do option ${s} ; done) \
         $(for s in "${WAF_SRC_CONFIGURE_OPTION_ENABLES[@]}" ; do option_enable ${s} ; done) \
-        $(for s in "${WAF_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do option_with ${s} ; done)
+        $(for s in "${WAF_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do option_with ${s} ; done) \
+        $(for s in "${WAF_SRC_CONFIGURE_TESTS[@]}" ; do expecting_tests ${s} ; done)
 }
 
 waf_src_compile() {

@@ -1,0 +1,128 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ] easy-multibuild [ multiunpack=true ]
+
+SUMMARY="An interpreter for the PostScript language and for PDF"
+HOMEPAGE="http://${PN}.com"
+DOWNLOADS="http://downloads.${PN}.com/public/${PNV}.tar.bz2"
+
+LICENCES="AGPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="cups dbus gtk idn jpeg2000 X
+    gtk [[ requires = [ X ] ]]
+    multibuild_c: 32 64"
+
+DEPENDENCIES="
+    build:
+        virtual/pkg-config
+        X? ( x11-proto/xextproto )
+    build+run:
+        dev-libs/expat[multibuild_c:*(-)?]
+        dev-libs/libpaper
+        media-libs/fontconfig[multibuild_c:*(-)?]
+        media-libs/freetype:2[>=2.4.2][multibuild_c:*(-)?]
+        media-libs/jbig2dec
+        media-libs/jpeg[multibuild_c:*(-)?]
+        media-libs/libpng[multibuild_c:*(-)?]
+        media-libs/tiff[multibuild_c:*(-)?]
+        sys-libs/zlib[multibuild_c:*(-)?]
+        cups? ( net-print/cups[multibuild_c:*(-)?] )
+        dbus? ( sys-apps/dbus[multibuild_c:*(-)?] )
+        gtk? ( x11-libs/gtk+:3[multibuild_c:*(-)?] )
+        idn? ( net-dns/libidn[multibuild_c:*(-)?] )
+        jpeg2000? ( media-libs/OpenJPEG )
+        X? (
+            x11-libs/libXext[multibuild_c:*(-)?]
+            x11-libs/libXt[multibuild_c:*(-)?]
+        )
+    run:
+        app-text/poppler-data[>=0.4.4] [[ note = [ CMap encoding data ] ]]
+        fonts/urw-fonts [[ note = [ PostScript standard fonts ] ]]
+"
+# ghostscript 9.07 uses a bundled version of lcms2 that adds the function cmsPluginTHR
+#        media-libs/lcms2[multibuild_c:*(-)?]
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-9.05-cups-filters.patch )
+
+prepare_one_multibuild() {
+    edo rm -r ./{expat,freetype,jbig2dec,jpeg,lcms,libpng,openjpeg,tiff,zlib}
+    edo rm -r ./Resource/{CMap,Font}
+
+    if option !gtk; then
+        edo sed -e 's:\$(GSSOX)::' \
+                -e 's:.*\$(GSSOX_XENAME)$::' \
+                -i base/*.mak
+    fi
+
+    edo sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak
+
+    default
+    eautoreconf
+    edo cd ./ijs
+    eautoreconf
+}
+
+configure_one_multibuild() {
+    local FONTPATH
+    for path in \
+        /usr/share/fonts/X11/urw-fonts \
+        /usr/share/fonts/X11/Type1 \
+        /usr/share/fonts/X11 \
+        /usr/share/poppler/cMap/Adobe-CNS1 \
+        /usr/share/poppler/cMap/Adobe-GB1 \
+        /usr/share/poppler/cMap/Adobe-Japan1 \
+        /usr/share/poppler/cMap/Adobe-Japan2 \
+        /usr/share/poppler/cMap/Adobe-Korea1
+    do
+        FONTPATH="$FONTPATH${FONTPATH:+:}$path"
+    done
+
+    econf \
+        --enable-dynamic \
+        --enable-freetype \
+        --enable-fontconfig \
+        --disable-compile-inits \
+        --with-drivers=ALL \
+        --with-fontpath="$FONTPATH" \
+        --with-ijs \
+        --with-jbig2dec \
+        --with-libpaper \
+        --with-system-libtiff \
+        --without-lcms \
+        --without-luratech \
+        $(option_enable cups) \
+        $(option_enable dbus) \
+        $(option_enable gtk) \
+        $(option_enable jpeg2000 openjpeg) \
+        $(option_with cups install-cups) \
+        $(option_with cups pdftoraster) \
+        $(option_with idn libidn) \
+        $(option_with X x)
+
+    edo cd ./ijs
+    econf
+}
+
+compile_one_multibuild() {
+    # Parallel make is broken
+    emake -j1 so all
+
+    edo cd ./ijs
+    emake
+}
+
+install_one_multibuild() {
+    emake -j1 DESTDIR="${IMAGE}" install-so install
+
+    edo cd ./ijs
+    default
+
+    if option !X && option !gtk; then
+        rmdir "${IMAGE}"/usr/${LIBDIR}/${PN}{/${PV},}
+    fi
+}
+

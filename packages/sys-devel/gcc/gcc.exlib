@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard <kloeri@exherbo.org>
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Copyright 2008-2010 Bo Ørsted Andresen <zlin@exherbo.org>
-# Copyright 2009,2011,2012 Saleem Abdulrasool <compnerd@compnerd.org>
+# Copyright 2009,2011,2012,2013 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=bz2 subdir=${PNV} ]
@@ -50,10 +50,17 @@ if ! ever at_least 4.6 ; then
     "
 fi
 
+if ever at_least 4.6 ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/mpfr:=[>=2.3]
+    "
+fi
+
 # graphite support
 MYOPTIONS+=" graphite [[ description = [ enable support for Graphite based loop optimizations ] ]]"
-# upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6, probably also
-# gcc[>=4.4]
+# NOTE(?) upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6,
+# probably also gcc[>=4.4]
 if ever at_least 4.6.0; then
     DEPENDENCIES+="
         build+run:
@@ -180,7 +187,8 @@ gcc_src_prepare() {
 
 gcc_src_configure() {
     local cxxlibraries=( libstdc++-v3 libitm ) library=
-    local language= languages=( c++ ) target=
+    local language= languages=( c c++ )
+    local target=
     local cloog_backend=
 
     # support for optional languages
@@ -298,6 +306,7 @@ EOF
                   fi)                                                                               \
                 --with-as=/usr/${CHOST}/bin/${target}-as                                            \
                 --with-ld=/usr/${CHOST}/bin/${target}-ld                                            \
+                --with-pkgversion="exherbo ${PNVR}"                                                 \
                 --with-system-zlib                                                                  \
                 --with-sysroot='""'                                                                 \
                 --with-gxx-include-dir=/usr/${target}/include/c++/${PV}                             \
@@ -321,13 +330,18 @@ gcc_src_compile() {
     done
 }
 
+gcc_src_compile() {
+    # NOTE(compnerd) explicitly pass gcc_cv_libc_provides_ssp through the environment to ensure that
+    # the subconfigures receive the parameter.  Unfortunately, the default configure phases seem to
+    # lose this value
+    gcc_cv_libc_provides_ssp=yes default
+}
+
 gcc_src_test_expensive() {
-    if ! ever at_least 4.6.1; then
-        # Increase stack size from 8M to 24M to make
-        # gcc.c-torture/compile/limits-exprparen.c test pass as per
-        # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
-        ulimit -s 24000
-    fi
+    # Increase stack size from 8M to 24M to make
+    # gcc.c-torture/compile/limits-exprparen.c test pass as per
+    # http://gcc.gnu.org/bugzilla/show_bug.cgi?id=31827
+    ever at_least 4.6.1 || ulimit -s 24000
 
     edo cd "${WORKBASE}/build/${CHOST}"
     emake check
