@@ -1,7 +1,7 @@
 # Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-export_exlib_phases pkg_pretend src_test src_install
+export_exlib_phases pkg_pretend src_compile src_test src_install
 
 require systemd-service
 
@@ -37,7 +37,10 @@ DOWNLOADS="mirror://${PN}/source/v${PV}/${PNV}.tar.bz2"
 
 LICENCES="PostgreSQL"
 SLOT="0"
-MYOPTIONS="ldap pam perl python readline ssl tcl xml [[ description = [ Add support for XML data type ] ]]"
+MYOPTIONS="
+    hstore [[ description = [ Adds support for hstore module ] ]]
+    ldap pam perl python readline ssl tcl
+    xml [[ description = [ Add support for XML data type ] ]]"
 
 DEPENDENCIES="
     build:
@@ -94,6 +97,16 @@ postgresql_pkg_pretend() {
     # Upgrading to any version requires starting/stopping the PostgreSQL server.
 }
 
+postgresql_src_compile() {
+    default
+
+    if option hstore; then
+        edo pushd contrib/hstore
+        emake
+        edo popd
+    fi
+}
+
 # XXX: See http://wiki.postgresql.org/wiki/Detailed_installation_guides
 # postgresql_pkg_config()
 
@@ -106,6 +119,12 @@ postgresql_src_install() {
         hereins postgresql.conf <<EOF
 d /run/postgresql 0770 postgres postgres
 EOF
+    fi
+
+    if option hstore; then
+        edo pushd contrib/hstore
+        emake DESTDIR="${IMAGE}" install
+        edo popd
     fi
 }
 
