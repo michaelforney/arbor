@@ -211,7 +211,7 @@ EOF
 }
 
 glibc_pkg_preinst() {
-    if exhost --is-native -q && [[ $(readlink -f "${ROOT##/}"/lib) == ${ROOT##/}/${LIBDIR} ]] ; then
+    if exhost --is-native -q && [[ $(readlink -f "${ROOT##/}"/lib) == ${ROOT##/}/lib*([^/]) ]] ; then
         # NOTE(compnerd) maintain compatibility with pre-existing binaries by symlinking the loaders
         # into the legacy paths
         # TODO(compnerd) workout the set of multilib directories and symlink those across each other
