@@ -141,6 +141,12 @@ libc_cv_prog_ld_gnu=yes
 EOF
     fi
 
+    export CPP
+    for CPP in ${build}-cpp cpp ""; do
+        type -P ${CPP} >/dev/null && break
+    done
+    [[ -n ${CPP} ]] || die "Found no usable cpp"
+
     # TODO(compnerd) determine how to handle non-gcc compilers
     # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
     # script does not bother to check for the prefixed tools!
