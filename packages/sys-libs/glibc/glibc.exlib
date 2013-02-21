@@ -225,11 +225,11 @@ glibc_pkg_preinst() {
         local loader= cp=$(type -P cp)
         for loader in "${IMAGE}"/usr/$(exhost --target)/lib/ld-linux* ; do
             local loader_bn=$(basename "${loader}")
-            if [[ -e ${ROOT}/${LIBDIR}/${loader_bn} ]] ; then
-                nonfatal edo rm "${ROOT}/${LIBDIR}/${loader_bn}"
+            if [[ -e ${ROOT}/lib/${loader_bn} ]] ; then
+                nonfatal edo rm "${ROOT}/lib/${loader_bn}"
             fi &&
-            nonfatal edo "${IMAGE}"/usr/${CHOST}/lib/ld-linux*.so* ${cp} "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" ||
-                eerror cp "${loader}" "${ROOT}/${LIBDIR}/${loader_bn}" failed
+            nonfatal edo "${IMAGE}"/usr/${CHOST}/lib/ld-linux*.so* ${cp} "${loader}" "${ROOT}/lib/${loader_bn}" ||
+                eerror cp "${loader}" "${ROOT}/lib/${loader_bn}" failed
         done
 
         # HACK(compnerd) preserve legacy paths for paludis
