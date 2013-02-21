@@ -32,10 +32,10 @@ perform_multiarch_configure() {
     # TODO(compnerd) figure out how to deal with clang
     edo env                                             \
         CC=${host}-gcc                                  \
-        CFLAGS=${!host_cflags_var}                      \
+        CFLAGS="${!host_cflags_var}"                    \
         CPP="${host}-gcc ${!host_cflags_var} -E"        \
         CXX=${host}-g++                                 \
-        CXXFLAGS=${!host_cxxflags_var}                  \
+        CXXFLAGS="${!host_cxxflags_var}"                \
         CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
     "${WORKBASE}/${PNV}/configure"                      \
         --build=${CHOST}                                \
@@ -64,10 +64,10 @@ perform_multiarch_configure() {
     # TODO(compnerd) figure out how to deal with clang
     edo env                                             \
         CC=${host}-gcc                                  \
-        CFLAGS=${!host_cflags_var}                      \
+        CFLAGS="${!host_cflags_var}"                    \
         CPP="${host}-gcc ${!host_cflags_var} -E"        \
         CXX=${host}-g++                                 \
-        CXXFLAGS=${!host_cxxflags_var}                  \
+        CXXFLAGS="${!host_cxxflags_var}"                \
         CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
     "${WORKBASE}/${PNV}/configure"                      \
         --build=${CHOST}                                \
