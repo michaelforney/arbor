@@ -49,6 +49,12 @@ binutils_src_prepare() {
 binutils_src_configure() {
     local target=
 
+    export CPP
+    for CPP in ${CHOST}-cpp cpp ""; do
+        type -P ${CPP} >/dev/null && break
+    done
+    [[ -n ${CPP} ]] || die "Found no usable cpp"
+
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local libpath=/${target}/lib:/usr/${target}/lib
 
