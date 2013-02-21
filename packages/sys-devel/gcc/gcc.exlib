@@ -554,6 +554,11 @@ gcc_src_install() {
         edo cd "${WORKBASE}/build/${target}"
         emake -j1 DESTDIR="${IMAGE}" install
         edo rm "${IMAGE}/usr/${CHOST}/bin/${target}-gcc-${PV}"
+        if [[ ${target} == ${CHOST} ]] ; then
+            for tool in cpp gcov ; do
+                edo mv "${IMAGE}"/usr/${CHOST}/bin/{,${target}-}${tool}-${SLOT}
+            done
+        fi
     done
     edo find "${IMAGE}" -depth -type d -empty -delete
 
