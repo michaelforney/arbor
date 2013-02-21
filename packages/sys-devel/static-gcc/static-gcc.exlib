@@ -117,7 +117,11 @@ EOF
                 --enable-serial-configure                   \
                 $([[ ${CHOST} == ${target} ]]               \
                     && echo --with-newlib)                  \
-                --program-prefix=${target}-static-          \
+                $(if [[ ${target} == ${CHOST} ]] ; then
+                    echo --program-prefix=static-
+                  else
+                    echo --program-prefix=${target}-static-
+                  fi)                                       \
                 --with-lib-path=${libpath}                  \
                 --without-headers                           \
                 --with-as=/usr/${CHOST}/bin/${target}-as    \
@@ -163,6 +167,11 @@ static-gcc_src_install() {
 
         emake -j1 DESTDIR="${IMAGE}" install
         edo rm "${IMAGE}/usr/${CHOST}/bin/${target}-gcc-${PV}"
+        if [[ ${target} == ${CHOST} ]] ; then
+            for tool in cpp gcov ; do
+                edo mv "${IMAGE}"/usr/${CHOST}/bin/{,${target}-}static-${tool}
+            done
+        fi
     done
 
     # Remove stuff installed by gcc
