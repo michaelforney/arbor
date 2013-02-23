@@ -415,6 +415,11 @@ __gcc_provide_slot_alternatives() {
 gcc_src_install() {
     default
 
+    local tool
+    for tool in cpp gcov ; do
+        edo cp "${IMAGE}"/usr/bin/{,${CHOST}-}${tool}-${SLOT}
+    done
+
     # precompiled headers
     local precompiled_headers=( "${WORK}"/${CHOST}/libstdc++-v3/include/${CHOST}/bits/*.gch )
     if [[ -f ${precompiled_headers[0]} ]] ; then
