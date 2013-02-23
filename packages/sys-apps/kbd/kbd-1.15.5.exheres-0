@@ -4,8 +4,6 @@
 # Based in part upon 'kbd-1.14.1-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require multiarch
-
 SUMMARY="Keyboard and console utilities"
 HOMEPAGE="http://www.${PN}-project.org/"
 DOWNLOADS="ftp://ftp.altlinux.org/pub/people/legion/kbd/${PNV}.tar.gz"
@@ -15,21 +13,16 @@ REMOTE_IDS="freecode:${PN}"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[hosts:*(-)?]
+        sys-devel/gettext
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' )
 
-perform_multiarch_install() {
+src_install() {
     default
 
     insinto /usr/share/doc/${PNVR}/html

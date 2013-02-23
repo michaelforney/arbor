@@ -3,7 +3,7 @@
 # Based in part upon 'libcap-2.08-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require pam multiarch [ in_tree_build=true ]
+require pam
 
 SUMMARY="POSIX 1003.1e capabilities"
 HOMEPAGE="http://sites.google.com/site/fullycapable/"
@@ -11,63 +11,39 @@ DOWNLOADS="mirror://kernel/linux/libs/security/linux-privs/${PN}${PV:0:1}/${PNV}
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         sys-kernel/linux-headers
     build+run:
-        sys-apps/attr[hosts:*(-)?]
-        sys-libs/pam[hosts:*(-)?]
+        sys-apps/attr
+        sys-libs/pam
 "
 
-WORK=${WORKBASE}
-
-perform_multiarch_prepare() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
-
+src_prepare() {
     edo sed -f - -i Make.Rules <<'EOF'
     /^\(AR\|CC\|CFLAGS\|LDFLAGS\|RANLIB\) :=/{
         s|:=|?=|;
     }
 EOF
-    edo sed -e 's/\$(BUILD_CC)/& $('${host_cflags_var}') $('${host_ldflags_var}')/' -i libcap/Makefile
-
-    if [[ ${host} != ${CHOST} ]]; then
-        edo sed '/^cap_names.h:/s/^/dummy_/' -i "${WORK}"/libcap/Makefile
-    fi
-}
-
-perform_multiarch_compile() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_cxxflags_var=${host//-/_}_CXXFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
-
-    if [[ ${host} != ${CHOST} ]]; then
-        edo cp "${WORKBASE}"/build/${CHOST}/${PNV}/libcap/cap_names.h libcap/
-    fi
-
-    emake PAM_CAP=yes lib=lib CC=${host}-gcc \
-        CFLAGS="${!host_cflags_var}"         \
-        CXXFLAGS="${!host_cxxflags_var}"     \
-        LDFLAGS="${!host_ldflags_var}"
 }
 
 src_compile() {
-    MULTIARCH_SKIP="cross" multiarch_src_compile
-    MULTIARCH_SKIP="native" multiarch_src_compile
+    local host_prefix=$(exhost --build)
+    local build_cflags=${host_prefix//-/_}_CFLAGS
+
+    emake                                                           \
+        BUILD_CC="${host_prefix}-gcc"                               \
+        BUILD_CFLAGS="${!build_cflags}"                             \
+        lib=lib                                                     \
+        PAM_CAP=yes
 }
 
-perform_multiarch_install() {
+src_install() {
     emagicdocs
 
-    emake -j1 DESTDIR="${IMAGE}" prefix=/usr/${host} lib=lib RAISE_SETFCAP=no install
+    emake -j1 DESTDIR="${IMAGE}" prefix=/usr/$(exhost --target) lib=lib RAISE_SETFCAP=no install
 
     dopammod pam_cap/pam_cap.so
     dopamsecurity '' pam_cap/capability.conf

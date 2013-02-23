@@ -12,7 +12,6 @@ else
 fi
 
 require flag-o-matic gnu [ suffix=gz ]
-require multiarch
 
 SUMMARY="GNU command line editing and history library"
 DESCRIPTION="
@@ -36,16 +35,11 @@ UPSTREAM_CHANGELOG="http://cnswww.cns.cwru.edu/php/chet/${PN}/CHANGES"
 
 LICENCES="GPL-3"
 SLOT="0"
-MYOPTIONS="
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        sys-libs/ncurses[hosts:*?]
+        sys-libs/ncurses
 "
 
 DEFAULT_SRC_INSTALL_PARAMS=(
@@ -55,7 +49,7 @@ DEFAULT_SRC_INSTALL_PARAMS=(
     installdir="/usr/share/doc/${PNVR}/examples"
 )
 
-perform_multiarch_prepare() {
+src_prepare() {
     if (( PATCH_LEVEL )) ; then
         local i patches=( -p0 )
 
@@ -72,8 +66,8 @@ perform_multiarch_prepare() {
     default
 }
 
-perform_multiarch_install() {
+src_install() {
     default
-    edo rmdir "${IMAGE}/usr/${host}/bin"
+    edo rmdir "${IMAGE}/usr/$(exhost --target)/bin"
 }
 

@@ -11,12 +11,11 @@ fi
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
         alternatives \
         bash-completion \
-        multiarch \
         udev-rules \
         python [ has_lib=false ] \
         zsh-completion
 
-export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
+export_exlib_phases pkg_pretend pkg_setup src_prepare src_configure src_test src_install pkg_postinst
 
 SUMMARY="${PN} is a(n) (init) system and session manager for Linux"
 DESCRIPTION="
@@ -51,10 +50,6 @@ MYOPTIONS="
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
     xattr
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
@@ -68,19 +63,19 @@ DEPENDENCIES="
             app-doc/gtk-doc-autotools[>=1.18]
             dev-libs/libxslt
         )
-        python? ( dev-lang/python:=[>=2.7][hosts:*(-)?] )
+        python? ( dev-lang/python:=[>=2.7] )
     build+run:
-        app-arch/xz[hosts:*(-)?]
-        dev-libs/glib:2[>=2.26][hosts:*(-)?]
-        sys-apps/dbus[>=1.4.0][hosts:*(-)?]
-        sys-apps/kmod[>=5][hosts:*(-)?]
+        app-arch/xz
+        dev-libs/glib:2[>=2.26]
+        sys-apps/dbus[>=1.4.0]
+        sys-apps/kmod[>=5]
         sys-apps/pciutils
         sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
-        sys-apps/util-linux[>=2.22][hosts:*(-)?]
+        sys-apps/util-linux[>=2.22]
         sys-kernel/linux-headers[>=2.6.39]
-        sys-libs/libcap[hosts:*(-)?]
-        sys-libs/pam[>=1.1.2][hosts:*(-)?]
+        sys-libs/libcap
+        sys-libs/pam[>=1.1.2]
         !net-dns/nss-myhostname [[
             description = [ Included and enabled in systemd >= 197 ]
             resolution = uninstall-blocked-after
@@ -89,13 +84,13 @@ DEPENDENCIES="
             description = [ udev is now part of systemd. ]
             resolution = uninstall-blocked-after
         ]]
-        acl? ( sys-apps/acl[hosts:*(-)?] )
-        cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][hosts:*(-)?] )
-        gcrypt? ( dev-libs/libgcrypt[hosts:*(-)?] )
+        acl? ( sys-apps/acl )
+        cryptsetup? ( sys-fs/cryptsetup[>=1.4.2] )
+        gcrypt? ( dev-libs/libgcrypt )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
-        journal-gateway? ( net-libs/libmicrohttpd[>=0.9.5][hosts:*(-)?] )
-        tcpd? ( sys-apps/tcp-wrappers[hosts:*(-)?] )
-        xattr? ( sys-apps/attr[hosts:*(-)?] )
+        journal-gateway? ( net-libs/libmicrohttpd[>=0.9.5] )
+        tcpd? ( sys-apps/tcp-wrappers )
+        xattr? ( sys-apps/attr )
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
@@ -167,10 +162,10 @@ systemd_src_prepare() {
     autotools_src_prepare
 }
 
-perform_multiarch_configure() {
+systemd_src_configure() {
     local myconfig=(
-        --with-rootprefix=/usr/${host}
-        --libexecdir=/usr/${host}/lib
+        --with-rootprefix=/usr/$(exhost --target)
+        --libexecdir=/usr/$(exhost --target)/lib
         --localstatedir=/var
         --enable-binfmt
         --enable-blkid
@@ -201,10 +196,10 @@ perform_multiarch_configure() {
         # For transferring the verification key to a smartphone
         --disable-qrencode
         --disable-selinux
-        --with-firmware-path=/usr/${host}/lib/firmware/updates:/usr/${host}/lib/firmware
+        --with-firmware-path=/usr/$(exhost --target)/lib/firmware/updates:/usr/$(exhost --target)/lib/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
-        --with-pamlibdir=/usr/${host}/lib/security
+        --with-pamlibdir=/usr/$(exhost --target)/lib/security
         # Disable SysV init compatibility.
         --with-rc-local-script-path-start=""
         --with-rc-local-script-path-stop=""
@@ -227,24 +222,40 @@ perform_multiarch_configure() {
 
     edo mkdir -p src/gudev
 
-    default_multiarch_src_configure "${myconfig[@]}"
+    econf "${myconfig[@]}"
 }
 
-perform_multiarch_test() {
-    # Note to self & whoever else reads this: Don't even *think* about
-    # RESTRICT=userpriv in order to enable more expensive udev tests.
-    # Enabling those tests can (and most likely will) mess up your running system
-    # completely and require you to reboot. You've been warned.
-    if [[ -f /etc/machine-id ]]; then
-        default
+systemd_src_test() {
+    if exhost --is-native -q; then
+        # Note to self & whoever else reads this: Don't even *think* about
+        # RESTRICT=userpriv in order to enable more expensive udev tests.
+        # Enabling those tests can (and most likely will) mess up your running system
+        # completely and require you to reboot. You've been warned.
+        if [[ -f /etc/machine-id ]]; then
+            default
+        else
+            ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
+            ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
+            ewarn "want to run the tests."
+        fi
     else
-        ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
-        ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
-        ewarn "want to run the tests."
+        echo "cross compiled host, skipping tests"
     fi
 }
 
-perform_multiarch_install() {
+systemd_src_install() {
+    local host=$(exhost --target) alternatives=(
+        init ${PN} 10
+        /usr/share/man/man1/init.1 ${PN}.init.1
+    )
+
+    local a
+    for a in halt poweroff reboot runlevel shutdown telinit; do
+        alternatives+=(
+            /usr/share/man/man8/${a}.8 ${PN}.${a}.8
+        )
+    done
+
     default
 
     # alternatives
@@ -273,22 +284,6 @@ perform_multiarch_install() {
     keepdir /usr/${host}/lib/tmpfiles.d
     keepdir /usr/${host}/lib/systemd/ntp-units.d
     keepdir /usr/${host}/lib/systemd/system-sleep
-}
-
-systemd_src_install() {
-    local alternatives=(
-        init ${PN} 10
-        /usr/share/man/man1/init.1 ${PN}.init.1
-    )
-
-    local a
-    for a in halt poweroff reboot runlevel shutdown telinit; do
-        alternatives+=(
-            /usr/share/man/man8/${a}.8 ${PN}.${a}.8
-        )
-    done
-
-    multiarch_src_install
 
     alternatives_for "${alternatives[@]}"
 
@@ -300,13 +295,15 @@ systemd_src_install() {
 
     install-zsh-completions
 
-    # Don't install funny RPM macros.
-    edo rm "${IMAGE}"/etc/rpm/*
-    edo rmdir "${IMAGE}"/etc/rpm
+    if exhost --is-native -q ; then
+        # Don't install funny RPM macros.
+        edo rm "${IMAGE}"/etc/rpm/*
+        edo rmdir "${IMAGE}"/etc/rpm
+    fi
 
     # Install simple-net if requested
     if option simple-net; then
-        insinto /usr/${CHOST}/lib/systemd/system
+        insinto /usr/${host}/lib/systemd/system
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
@@ -314,7 +311,7 @@ systemd_src_install() {
 
     # Install the legacy.conf tmpdirs.d config file.
     # systemd does not install it itself if SysV compatibility is not enabled.
-    insinto /usr/${CHOST}/lib/tmpfiles.d
+    insinto /usr/${host}/lib/tmpfiles.d
     doins "${WORK}"/tmpfiles.d/legacy.conf
 
     insinto /etc
@@ -424,8 +421,8 @@ CONFIG_PROTECT_MASK="${UDEVRULESDIR}"
 EOT
 
     # Create compatibility symlinks
-    dosym /usr/${CHOST}/lib/systemd/systemd-udevd /usr/${CHOST}/sbin/udevd
-    dosym /usr/${CHOST}/bin/udevadm /usr/${CHOST}/sbin/udevadm
+    dosym /usr/${host}/lib/systemd/systemd-udevd /usr/${host}/sbin/udevd
+    dosym /usr/${host}/bin/udevadm /usr/${host}/sbin/udevadm
 
     if option python ; then
         python_bytecompile
@@ -439,7 +436,7 @@ EOT
 systemd_pkg_postinst() {
     default
 
-    if [[ ${ROOT} == / ]]; then
+    if exhost --is-native -q && [[ ${ROOT} == / ]]; then
         nonfatal edo /usr/${CHOST}/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"

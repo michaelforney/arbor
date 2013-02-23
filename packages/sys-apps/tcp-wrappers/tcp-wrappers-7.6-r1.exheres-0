@@ -5,8 +5,6 @@
 
 MY_PNV="${PNV//-/_}"
 
-require multiarch [ in_tree_build=true pnv=${MY_PNV} ]
-
 PATCH_VER="1.1"
 SUMMARY="TCP Wrappers"
 HOMEPAGE="ftp://ftp.porcupine.org/pub/security/index.html"
@@ -16,61 +14,49 @@ DOWNLOADS="ftp://ftp.porcupine.org/pub/security/${MY_PNV}.tar.gz
 LICENCES="tcp_wrappers_license"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="
-    ipv6
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS="ipv6"
 DEPENDENCIES=""
 
-perform_multiarch_prepare() {
-    PATCHDIR="${WORKBASE}/build/${host}/${PV}"
+WORK=${WORKBASE}/${MY_PNV}
+
+src_prepare() {
+    PATCHDIR="${WORKBASE}/${PV}"
 
     expatch "${PATCHDIR}/${PNV}-makefile.patch" "${PATCHDIR}/${PNV}-shared.patch" "${PATCHDIR}/generic"
 
     option ipv6 && expatch -p2 "${PATCHDIR}"/${PNV}-ipv6-1.14.diff
 }
 
-perform_multiarch_compile() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_cxxflags_var=${host//-/_}_CXXFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
-
+src_compile() {
     local myconf="-DHAVE_WEAKSYMS"
     option ipv6 && myconf+=" -DINET6=1 -Dss_family=__ss_family -Dss_len=__ss_len"
 
     for target in config-check linux; do
-        CFLAGS="${!host_cflags_var}"              \
-        emake                                     \
-            CC=${host}-gcc                        \
-            CXXFLAGS="${!host_cxxflags_var}"      \
-            LDFLAGS="${!host_ldflags_var}"        \
-            REAL_DAEMON_DIR=/usr/${host}/sbin     \
-            EXHERBO_OPT="${myconf}"               \
-            MAJOR=0 MINOR=${PV:0:1} REL=${PV:2:3} \
+        emake                                             \
+            REAL_DAEMON_DIR=/usr/$(exhost --target)/sbin  \
+            EXHERBO_OPT="${myconf}"                       \
+            MAJOR=0 MINOR=${PV:0:1} REL=${PV:2:3}         \
             ${target}
     done
 }
 
-perform_multiarch_install() {
-    edo mkdir -p "${IMAGE}"/usr/${host}/lib
+src_install() {
+    dodir /usr/$(exhost --target)/lib
 
-    into /usr/${host}
+    into /usr/$(exhost --target)
     dosbin tcpd tcpdchk tcpdmatch safe_finger try-from
 
     doman *.[358]
     dosym hosts_access.5 /usr/share/man/man5/hosts.allow.5
     dosym hosts_access.5 /usr/share/man/man5/hosts.deny.5
 
-    insinto /usr/${host}/include
+    insinto /usr/$(exhost --target)/include
     doins tcpd.h
 
-    into /usr/${host}
-    LIBDIR=lib dolib.a libwrap.a
-    LIBDIR=lib newlib.so libwrap.so libwrap.so.0.${PV}
-    dosym libwrap.so.0.${PV} /usr/${host}/lib/libwrap.so.0
+    into /usr/$(exhost --target)
+    dolib.a libwrap.a
+    newlib.so libwrap.so libwrap.so.0.${PV}
+    dosym libwrap.so.0.${PV} /usr/$(exhost --target)/lib/libwrap.so.0
 
     dodoc BLURB CHANGES DISCLAIMER README* "${FILES}"/hosts.allow.example
 }

@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Purpose License v2
 
 require gnome.org [ suffix=.tar.xz ]
-require multiarch
 
 SUMMARY="General purpose utility library"
 DESCRIPTION="
@@ -17,12 +16,7 @@ synchronize their operation.
 HOMEPAGE="http://www.gtk.org"
 DOWNLOADS+=" http://pkgconfig.freedesktop.org/releases/pkg-config-0.26.tar.gz"
 
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 LICENCES="LGPL-2"
 
@@ -39,7 +33,12 @@ glib_src_prepare() {
     default
 }
 
-perform_multiarch_test() {
+glib_src_test() {
+    if ! exhost --is-native -q; then
+        echo "cross compiled host, skipping tests"
+        return 0
+    fi
+
     unset DISPLAY
     unset DBUS_SESSION_BUS_ADDRESS
     unset DBUS_SESSION_BUS_PID
@@ -85,14 +84,10 @@ perform_multiarch_test() {
     edo kill ${DBUS_SESSION_BUS_PID}
 }
 
-perform_multiarch_install() {
-    default
-    keepdir "/usr/${host}/lib/gio/modules"
-}
-
 glib_src_install() {
-    multiarch_src_install
+    default
+    keepdir "/usr/$(exhost --target)/lib/gio/modules"
 }
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_prepare src_test src_install
 

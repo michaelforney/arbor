@@ -9,7 +9,7 @@ else
     DOWNLOADS="http://dbus.freedesktop.org/releases/${PN}/${PNV}.tar.gz"
 fi
 
-require flag-o-matic multiarch systemd-service
+require flag-o-matic systemd-service
 
 export_exlib_phases src_configure src_compile src_test src_install
 
@@ -24,16 +24,10 @@ or 'printer queue changed') and a per-user-login-session daemon (for general IPC
 needs among user applications).
 "
 HOMEPAGE="http://${PN}.freedesktop.org/"
-MYOPTIONS="multibuild_c: 32 64"
 BUGS_TO="philantrop@exherbo.org"
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
-MYOPTIONS="baselayout debug doc systemd X
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS="baselayout debug doc systemd X"
 
 DEPENDENCIES="
     build:
@@ -44,16 +38,16 @@ DEPENDENCIES="
         doc? ( app-doc/doxygen )
         X? ( x11-proto/xproto )
     build+run:
-        dev-libs/expat[>=1.95.8][hosts:*(-)?]
+        dev-libs/expat[>=1.95.8]
         sys-apps/skeleton-filesystem-layout[>=0.5.4]
         group/messagebus
         group/plugdev
         user/messagebus
-        systemd? ( sys-apps/systemd[>=32][hosts:*(-)?] )
+        systemd? ( sys-apps/systemd[>=32] )
         X? (
-            x11-libs/libICE[hosts:*(-)?]
-            x11-libs/libSM[hosts:*(-)?]
-            x11-libs/libX11[hosts:*(-)?]
+            x11-libs/libICE
+            x11-libs/libSM
+            x11-libs/libX11
         )
     suggestion:
         !systemd? (
@@ -70,10 +64,13 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
 
 DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( doc/ )
 
-perform_multiarch_configure() {
+dbus_src_configure() {
+    # whitelist bind() to /tmp/dbus-fake-socket-*
+    esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
+
     # Testing code (--enable-tests) disabled since building with tests support
     # creates an insecure (sic upstream), non-production use library
-    default_multiarch_src_configure                      \
+    econf                                                \
         --localstatedir=/var                             \
         --enable-inotify                                 \
         --enable-xml-docs                                \
@@ -91,33 +88,23 @@ perform_multiarch_configure() {
         $(option_enable doc doxygen-docs)                \
         $(option_enable systemd)                         \
         $(option_with X x)                               \
-        $(option_with systemd systemdsystemunitdir /usr/${host}/lib/systemd/system)
-}
+        $(option_with systemd systemdsystemunitdir /usr/$(exhost --target)/lib/systemd/system)
 
-dbus_src_configure() {
-    # whitelist bind() to /tmp/dbus-fake-socket-*
-    esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
-    multiarch_src_configure
     esandbox allow_net 'unix-abstract:/tmp/dbus-fake-socket-*'
 }
 
 dbus_src_compile() {
     # get backtraces from applications
     append-flags -rdynamic
-    multiarch_src_compile
+    default
 }
 
 dbus_src_test() {
-    DBUS_VERBOSE=1 multiarch_src_test
-}
-
-perform_multiarch_install() {
-    default
-    keepdir /usr/${host}/lib/dbus-1.0/test
+    DBUS_VERBOSE=1 default
 }
 
 dbus_src_install() {
-    multiarch_src_install
+    default
 
     if ! option doc ; then
         [[ -d "${IMAGE}"/usr/share/doc/${PNVR}/api ]] && edo rmdir "${IMAGE}"/usr/share/doc/${PNVR}/api
@@ -137,7 +124,8 @@ dbus_src_install() {
             /usr/libexec/dbus-1                 \
             /usr/share/dbus-1/services          \
             /usr/share/dbus-1/system-services   \
-            /var/lib/dbus
+            /var/lib/dbus                       \
+            /usr/$(exhost --target)/lib/dbus-1.0/test
 
     if option doc; then
         insinto /usr/share/doc/${PNVR}/html/
@@ -146,3 +134,4 @@ dbus_src_install() {
 
     edo rmdir "${IMAGE}"/var/run/{dbus,}
 }
+

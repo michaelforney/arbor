@@ -4,7 +4,7 @@
 # Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require flag-o-matic multiarch [ in_tree_build=true ]
+require flag-o-matic
 
 SUMMARY="Extended attributes tools"
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
@@ -13,12 +13,7 @@ DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 LICENCES="LGPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
@@ -31,9 +26,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 
 DEFAULT_SRC_INSTALL_PARAMS=( DIST_ROOT="${IMAGE}" install-lib install-dev )
 
-WORK="${WORKBASE}"
-
-perform_multiarch_prepare() {
+src_prepare() {
     default
 
     edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
@@ -41,26 +34,14 @@ perform_multiarch_prepare() {
             -i include/builddefs.in
 }
 
-perform_multiarch_configure() {
+src_configure() {
     unset PLATFORM # Gentoo #184564
-    local host_cflags_var=${host//-/_}_CFLAGS
 
-    DEBUG="-DNDEBUG" OPTIMIZER="${!host_cflags_var}" \
-        default_multiarch_src_configure --libexecdir=/usr/${host}/lib --enable-gettext --enable-shared
+    DEBUG="-DNDEBUG" OPTIMIZER="${CFLAGS}" \
+        econf --libexecdir=/usr/$(exhost --target)/lib --enable-gettext --enable-shared
 }
 
-perform_multiarch_compile() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_cxxflags_var=${host//-/_}_CXXFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
-
-    CFLAGS="${!host_cflags_var}"         \
-    emake                                \
-        CXXFLAGS="${!host_cxxflags_var}" \
-        LDFLAGS="${!host_ldflags_var}"
-}
-
-perform_multiarch_install() {
+src_install() {
     default
 
     # Part of sys-apps/man-pages

@@ -4,7 +4,6 @@
 
 require gnu [ suffix=gz ]
 require elisp-optional
-require multiarch
 
 SUMMARY="GNU localization utilties"
 
@@ -16,18 +15,14 @@ MYOPTIONS="
     emacs
     examples
     openmp
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
         sys-devel/gcc:*[openmp?]
     build+run:
-        dev-libs/libxml2[hosts:*(-)?]
-        acl? ( sys-apps/acl[hosts:*(-)?] )
+        dev-libs/libxml2
+        acl? ( sys-apps/acl )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-0.18-sydbox.patch" )

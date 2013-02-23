@@ -2,7 +2,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multiarch systemd-service
+require systemd-service
 require autotools [ supported_automake=[ 1.13 ] supported_autoconf=[ 2.5 ] ]
 
 SUMMARY="Common linux utilities"
@@ -30,10 +30,6 @@ MYOPTIONS="
     session-management [[
         description = [ enable utmp/wtmp record updates via libutempter ]
     ]]
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
@@ -65,13 +61,13 @@ DEPENDENCIES="
         ]]
         dev-lang/perl:*
         sys-libs/glibc[>=2.10]
-        sys-libs/ncurses[>=5.6][hosts:*(-)?] [[
+        sys-libs/ncurses[>=5.6] [[
             note = [ this is required as most of the tools have been converted to use ncurses ]
         ]]
-        sys-libs/pam[hosts:*(-)?]
-        sys-libs/zlib[hosts:*(-)?]
+        sys-libs/pam
+        sys-libs/zlib
         session-management? ( x11-libs/libutempter )
-        udev? ( sys-apps/systemd[hosts:*(-)?] )
+        udev? ( sys-apps/systemd )
     test:
         sys-apps/bc
 "
@@ -79,11 +75,11 @@ DEPENDENCIES="
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 src_prepare() {
-    edo sed -i "s:CPPFLAGS =:& -I/usr/${host}/include/ncurses:" Makefile.am
+    edo sed -i "s:CPPFLAGS =:& -I/usr/$(exhost --target)/include/ncurses:" Makefile.am
     autotools_src_prepare
 }
 
-perform_multiarch_configure() {
+src_configure() {
     # Conflict Resolution:
     # - coreutils
     #   * arch
@@ -115,8 +111,8 @@ perform_multiarch_configure() {
 
     local disabled_tools=( runuser write )
 
-    default_multiarch_src_configure \
-        --enable-fs-paths-extra=/usr/${host}/sbin \
+    econf \
+        --enable-fs-paths-extra=/usr/$(exhost --target)/sbin \
         --localstatedir=/run \
         --enable-libuuid \
         --enable-libblkid \
@@ -136,7 +132,7 @@ perform_multiarch_configure() {
         $(option_with session-management utempter) \
         $(option_enable session-management utmpdump) \
         $(option_enable systemd socket-activation) \
-        $(option_with systemd systemdsystemunitdir /usr/${host}/systemd/system) \
+        $(option_with systemd systemdsystemunitdir /usr/$(exhost --target)/systemd/system) \
         $(option_with udev)
 }
 

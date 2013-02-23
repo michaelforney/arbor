@@ -2,38 +2,29 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require python sourceforge [ suffix=tar.gz ]
-require multiarch
 
 SUMMARY="A proactive password sanity library"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="python
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS="python"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[>=0.17][hosts:*(-)?]
+        sys-devel/gettext[>=0.17]
     build+run:
-        sys-libs/zlib[hosts:*(-)?]
-        python? ( dev-lang/python:=[hosts:*(-)?] )"
+        sys-libs/zlib
+        python? ( dev-lang/python:= )"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls'
                                '--with-default-dict=/var/cache/cracklib/cracklib_dict' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( python )
 
-perform_multiarch_install() {
-    default
-    option python && python_bytecompile
-}
-
 src_install() {
-    multiarch_src_install
+    default
+
+    option python && python_bytecompile
 
     dodir /var/cache/cracklib
     keepdir /var/cache/cracklib
@@ -44,7 +35,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    edo "/usr/${CHOST}/sbin/cracklib-format" "${ROOT:-/}usr/share/dict/cracklib-small" \
-        | "/usr/${CHOST}/sbin/cracklib-packer" "${ROOT:-/}var/cache/${PN}/cracklib_dict"
+    edo "/usr/$(exhost --build)/sbin/cracklib-format" "${ROOT:-/}usr/share/dict/cracklib-small" \
+        | "/usr/$(exhost --build)/sbin/cracklib-packer" "${ROOT:-/}var/cache/${PN}/cracklib_dict"
 }
 

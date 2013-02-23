@@ -4,9 +4,8 @@
 #     Copyright 1999-2008 Gentoo Foundation
 
 require flag-o-matic pam
-require multiarch
 
-export_exlib_phases pkg_pretend src_prepare
+export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
 MY_PN=Linux-PAM
 MY_PNV=${MY_PN}-${PV}
@@ -25,19 +24,15 @@ LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
 MYOPTIONS="
     nis [[ description = [ Network Information Service support ] ]]
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
-        sys-devel/flex[hosts:*(-)?]
-        sys-devel/gettext[hosts:*(-)?]
+        sys-devel/flex
+        sys-devel/gettext
     build+run:
-        sys-libs/cracklib[>=2.8.3][hosts:*(-)?]
-        nis? ( net-libs/libtirpc[hosts:*(-)?] )
+        sys-libs/cracklib[>=2.8.3]
+        nis? ( net-libs/libtirpc )
 "
 
 WORK=${WORKBASE}/${MY_PNV}
@@ -67,33 +62,37 @@ pam_build_src_prepare() {
     default
 }
 
-perform_multiarch_configure() {
+pam_build_src_configure() {
     # Works around an autoconf 2.62 bug; libintl.h is included before
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
     append-flags -D_GNU_SOURCE
 
-    default_multiarch_src_configure                     \
-        "--includedir=/usr/${host}/include/security"    \
-        "--enable-isadir=/usr/${host}/lib/security"     \
-        "--enable-securedir=/usr/${host}/lib/security"
+    econf                                                           \
+        "--includedir=/usr/$(exhost --target)/include/security"     \
+        "--enable-isadir=/usr/$(exhost --target)/lib/security"      \
+        "--enable-securedir=/usr/$(exhost --target)/lib/security"
 }
 
-perform_multiarch_test() {
-    if [[ ! -f /etc/pam.d/other ]]; then
-        ewarn "Skipping tests. You don't have /etc/pam.d/other."
+pam_build_src_test() {
+    if exhost --is-native -q; then
+        if [[ ! -f /etc/pam.d/other ]]; then
+            ewarn "Skipping tests. You don't have /etc/pam.d/other."
+        else
+            emake -j1 check
+        fi
     else
-        emake -j1 check
+        echo "cross compiled host, skipping tests"
     fi
 }
 
-perform_multiarch_install() {
+pam_build_src_install() {
     default
 
     keepdir /etc/security/limits.d
     keepdir /etc/security/namespace.d
 
     # NOTE(?) needs to be suid
-    edo chmod u+s "${IMAGE}/usr/${host}/sbin/unix_chkpwd"
+    edo chmod u+s "${IMAGE}/usr/$(exhost --target)/sbin/unix_chkpwd"
 
     # install base pam configuration files
     dopamd "${FILES}"/pam.d/*

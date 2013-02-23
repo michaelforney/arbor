@@ -2,129 +2,71 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=gz ]
-require multiarch
 
 SUMMARY="Free software emulation of curses using terminfo formats"
 
 LICENCES="as-is"
-MYOPTIONS="
-gpm
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
-"
+MYOPTIONS="gpm"
 
 DEPENDENCIES="
     build+run:
-        gpm? ( sys-libs/gpm[hosts:*(-)?] )
+        gpm? ( sys-libs/gpm )
 "
 
-perform_multiarch_configure() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_cxxflags_var=${host//-/_}_CXXFLAGS
-
-    [[ -n ${!host_cxxflags_var} ]] || host_cxxflags_var=${host//-/_}_CFLAGS
-
-    edo mkdir -p "${WORKBASE}/build/${host}/narrow"
-    edo cd "${WORKBASE}/build/${host}/narrow"
-
-    # TODO(compnerd) figure out how to deal with clang
-    edo env                                             \
-        CC=${host}-gcc                                  \
-        CFLAGS="${!host_cflags_var}"                    \
-        CPP="${host}-gcc ${!host_cflags_var} -E"        \
-        CXX=${host}-g++                                 \
-        CXXFLAGS="${!host_cxxflags_var}"                \
-        CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
-    "${WORKBASE}/${PNV}/configure"                      \
-        --build=${CHOST}                                \
-        --host=${host}                                  \
-        --prefix=/usr/${host}                           \
-        --datadir=/usr/share                            \
-        --infodir=/usr/share/info                       \
-        --localstatedir=/var                            \
-        --mandir=/usr/share/man                         \
-        --sysconfdir=/etc                               \
-        --disable-dependency-tracking                   \
-        --disable-widec                                 \
-        --enable-fast-install                           \
-        --enable-overwrite                              \
-        --enable-pc-files                               \
-        --disable-termcap                               \
-        --with-normal                                   \
-        --with-shared                                   \
-        --without-ada                                   \
-        --without-hashed-db                             \
-        $(option_with gpm)
-
-    edo mkdir -p "${WORKBASE}/build/${host}/wide"
-    edo cd "${WORKBASE}/build/${host}/wide"
-
-    # TODO(compnerd) figure out how to deal with clang
-    edo env                                             \
-        CC=${host}-gcc                                  \
-        CFLAGS="${!host_cflags_var}"                    \
-        CPP="${host}-gcc ${!host_cflags_var} -E"        \
-        CXX=${host}-g++                                 \
-        CXXFLAGS="${!host_cxxflags_var}"                \
-        CXXCPP="${host}-g++ ${!host_cxxflags_var} -E"   \
-    "${WORKBASE}/${PNV}/configure"                      \
-        --build=${CHOST}                                \
-        --host=${host}                                  \
-        --prefix=/usr/${host}                           \
-        --datadir=/usr/share                            \
-        --infodir=/usr/share/info                       \
-        --includedir=/usr/${host}/include/ncursesw      \
-        --localstatedir=/var                            \
-        --mandir=/usr/share/man                         \
-        --sysconfdir=/etc                               \
-        --disable-dependency-tracking                   \
-        --enable-fast-install                           \
-        --enable-pc-files                               \
-        --enable-widec                                  \
-        --disable-termcap                               \
-        --with-normal                                   \
-        --with-shared                                   \
-        --without-ada                                   \
-        --without-hashed-db                             \
-        $(option_with gpm)
-}
+ECONF_SOURCE=${WORK}
 
 ncurses_src_configure() {
-    multiarch_src_configure
-}
+    local myconf=(
+        --hates=datarootdir
+        --hates=docdir
+        --disable-termcap
+        --enable-overwrite
+        --with-normal
+        --with-shared
+        --without-ada
+        --without-hashed-db
+        $(option_with gpm)
+        --enable-pc-files
+    )
 
-perform_multiarch_compile() {
-    edo cd "${WORKBASE}/build/${host}/narrow"
-    default
+    edo mkdir -p "${WORKBASE}/build/narrow"
+    edo cd "${WORKBASE}/build/narrow"
 
-    edo cd "${WORKBASE}/build/${host}/wide"
-    default
+    # TODO(compnerd) figure out how to deal with clang
+    #    --localstatedir=/var                            \ # <- needed?
+    econf                                               \
+        "${myconf[@]}"                                  \
+        --disable-widec                                 \
+
+    edo mkdir -p "${WORKBASE}/build/wide"
+    edo cd "${WORKBASE}/build/wide"
+
+    # TODO(compnerd) figure out how to deal with clang
+    #    --localstatedir=/var                            \ # <- needed?
+    econf                                               \
+        "${myconf[@]}"                                  \
+        --includedir=/usr/$(exhost --target)/include/ncursesw      \
+        --enable-widec
 }
 
 ncurses_src_compile() {
-    multiarch_src_compile
-}
+    edo cd "${WORKBASE}/build/narrow"
+    default
 
-ncurses_src_test() {
-    multiarch_src_test
-}
-
-perform_multiarch_install() {
-    # NOTE(compnerd) generate the data via the CHOST binaries
-    local target=$(if [[ ${host} == ${CHOST} ]] ; then echo install ; else echo install.libs ; fi)
-
-    edo cd "${WORKBASE}/build/${host}/narrow"
-    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig ${target}
-
-    edo cd "${WORKBASE}/build/${host}/wide"
-    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/${host}/lib/pkgconfig ${target}
+    edo cd "${WORKBASE}/build/wide"
+    default
 }
 
 ncurses_src_install() {
-    multiarch_src_install
+    # NOTE(compnerd) generate the data via the CHOST binaries
+    local target=$(if exhost --is-native -q ; then echo install ; else echo install.libs ; fi)
+
+    edo cd "${WORKBASE}/build/narrow"
+    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig ${target}
+
+    edo cd "${WORKBASE}/build/wide"
+    emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig ${target}
 }
 
-export_exlib_phases src_configure src_compile src_test src_install
+export_exlib_phases src_configure src_compile src_install
 

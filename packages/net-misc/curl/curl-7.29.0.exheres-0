@@ -2,16 +2,12 @@
 # Based in part upon previous work copyrighted to Gentoo Foundation.
 # Distributed under the terms of the GNU General Public License v2
 
-require common-metadata multiarch
+require common-metadata
 
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="idn ipv6
     ares [[ description = [ Enabled c-ares posix-threaded dns support, disables curl's own threaded resolver ] ]]
     gnutls [[ description = [ Use GnuTLS instead of OpenSSL ] ]]
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 DEPENDENCIES="
     build:
@@ -20,15 +16,15 @@ DEPENDENCIES="
         virtual/pkg-config
     build+run:
         app-misc/ca-certificates
-        net-libs/libssh2[>=1.2.8][hosts:*(-)?]
-        sys-libs/zlib[hosts:*(-)?]
-        ares? ( net-dns/c-ares[>=1.6.0][hosts:*(-)?] )
-       !gnutls? ( dev-libs/openssl[>=1.0.1][hosts:*(-)?] )
+        net-libs/libssh2[>=1.2.8]
+        sys-libs/zlib
+        ares? ( net-dns/c-ares[>=1.6.0] )
+       !gnutls? ( dev-libs/openssl[>=1.0.1] )
         gnutls? (
-            dev-libs/gnutls[>=2.12.14][hosts:*(-)?]
-            dev-libs/nettle[hosts:*(-)?]
+            dev-libs/gnutls[>=2.12.14]
+            dev-libs/nettle
         )
-        idn? ( net-dns/libidn[hosts:*(-)?] )
+        idn? ( net-dns/libidn )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
@@ -60,32 +56,33 @@ src_prepare() {
     default
 }
 
-pre_multiarch_test() {
-    esandbox allow_net --connect "inet:127.0.0.1@9011"
-    esandbox allow_net --connect "inet:127.0.0.1@60000"
-}
-
-post_multiarch_test() {
-    esandbox disallow_net --connect "inet:127.0.0.1@9011"
-    esandbox disallow_net --connect "inet:127.0.0.1@60000"
-}
-
-perform_multiarch_test() {
-    cat <<-EOF >> tests/data/DISABLED
+src_test() {
+    if exhost --is-native -q; then
+        cat <<-EOF >> tests/data/DISABLED
 # Work around broken DNS servers, Exherbo #207
 20
 507
 # Fails with too many open files
 537
 EOF
-    # Default TEST_F is -a -p -r; we add -n (no valgrind) -v (verbose) and remove -r (run time statistics)
-    local test_args=( -a -p -n -v )
-    test_args+=( '!'{600..639} )
-    emake test-full TEST_F="${test_args[*]}" # SSH tests hang
+
+        esandbox allow_net --connect "inet:127.0.0.1@9011"
+        esandbox allow_net --connect "inet:127.0.0.1@60000"
+
+        # Default TEST_F is -a -p -r; we add -n (no valgrind) -v (verbose) and remove -r (run time statistics)
+        local test_args=( -a -p -n -v )
+        test_args+=( '!'{600..639} )
+        emake test-full TEST_F="${test_args[*]}" # SSH tests hang
+
+        esandbox disallow_net --connect "inet:127.0.0.1@9011"
+        esandbox disallow_net --connect "inet:127.0.0.1@60000"
+    else
+        echo "cross compiled host, skipping tests"
+    fi
 }
 
 src_install() {
-    multiarch_src_install
+    default
 
     insinto /usr/share/aclocal
     doins "${WORK}"/docs/libcurl/libcurl.m4

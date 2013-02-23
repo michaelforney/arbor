@@ -17,10 +17,15 @@ MYOPTIONS="
         x86_64-pc-linux-gnu
 "
 
+# TODO(zlin):
+#   build+run:
+#       target:$host? ( dev-libs/glib:2[>=2.16][hosts:*(-)?] )
 DEPENDENCIES="
     build+run:
-        dev-libs/glib:2[>=2.16][hosts:*(-)?]
+        dev-libs/glib:2[>=2.16]
 "
+
+ECONF_SOURCE=${WORK}
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--without-internal-glib' )
 
@@ -41,21 +46,14 @@ src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
-        edo env                                                              \
             PKG_CONFIG=${PKG_CONFIG:-${CHOST}-pkg-config}                    \
             PKG_CONFIG_LIBDIR=/usr/${CHOST}/lib/pkgconfig:/usr/lib/pkgconfig \
-        "${WORKBASE}/${PNV}/configure"                                       \
-            --build=${CHOST}                                                 \
-            --host=${CHOST}                                                  \
-            --prefix=/usr/${CHOST}                                           \
-            --datarootdir=/usr/share                                         \
-            --localstatedir=/var                                             \
-            --disable-dependency-tracking                                    \
-            --enable-fast-install                                            \
+        econf                                                                \
             --with-pc-path=${pc_path}                                        \
             --with-system-include-path=/usr/${target}/include                \
             --with-system-library-path=/usr/${target}/lib                    \
             --disable-indirect-deps                                          \
+            --disable-host-tool                                              \
             --program-prefix=${target}-
     done
 }

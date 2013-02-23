@@ -3,7 +3,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
-require multiarch
 
 SUMMARY="Multi-precision floating point library"
 HOMEPAGE="http://www.${PN}.org"
@@ -13,18 +12,13 @@ REMOTE_IDS="freecode:${PN}"
 LICENCES="LGPL-3"
 SLOT="3"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         app-arch/xz
     build+run:
-        dev-libs/gmp:=[hosts:*(-)?][>=4.1]
+        dev-libs/gmp:=[>=4.1]
         !dev-libs/mpfr:*[<2.4.2-r1] [[
             description = [ file collisions which will probably break your system ]
         ]]

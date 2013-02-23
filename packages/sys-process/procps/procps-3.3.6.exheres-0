@@ -3,7 +3,6 @@
 
 AT_M4DIR=( m4 )
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ]
-require multiarch
 
 SUMMARY="Utilities for process information including ps, top and kill"
 HOMEPAGE="http://gitorious.org/${PN}"
@@ -12,18 +11,13 @@ DOWNLOADS="http://gitorious.org/${PN}/${PN}/archive-tarball/v${PV} -> ${PNV}.tar
 LICENCES="GPL-2 LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
-        sys-libs/ncurses[hosts:*(-)?]
+        sys-libs/ncurses
     test:
         dev-util/dejagnu
 "
@@ -52,13 +46,13 @@ src_prepare() {
     eautoreconf
 }
 
-perform_multiarch_install() {
+src_install() {
     default
 
-    edo mv "${IMAGE}"/usr/${host}/usr/bin/* "${IMAGE}"/usr/${host}/bin/
+    edo mv "${IMAGE}"/usr/$(exhost --target)/usr/bin/* "${IMAGE}"/usr/$(exhost --target)/bin/
 
     # Provided by sys-apps/coreutils
-    edo rm "${IMAGE}"/usr/${host}/bin/uptime
+    edo rm "${IMAGE}"/usr/$(exhost --target)/bin/uptime
     edo rm "${IMAGE}"/usr/share/man/man1/uptime.1
 
     edo find "${IMAGE}"/ -type d -empty -delete

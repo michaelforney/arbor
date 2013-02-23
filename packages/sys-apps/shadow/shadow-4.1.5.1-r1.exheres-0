@@ -3,7 +3,7 @@
 # Based in part upon 'shadow-4.1.2-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require pam multiarch
+require pam
 
 SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
@@ -19,20 +19,16 @@ MYOPTIONS="
                             directories. ] ]]
     attr [[ description = [ Add support for extended attributes when copying
                             user directories. ] ]]
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
-        acl? ( sys-apps/acl[hosts:*(-)?] )
-        attr? ( sys-apps/attr[hosts:*(-)?] )
-        sys-libs/cracklib[>=2.8.3][hosts:*(-)?]
-        sys-libs/pam[>=1.0.1][hosts:*(-)?]
+        acl? ( sys-apps/acl )
+        attr? ( sys-apps/attr )
+        sys-libs/cracklib[>=2.8.3]
+        sys-libs/pam[>=1.0.1]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -60,20 +56,20 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 src_prepare() {
     default
 
-    edo sed -i -e "s:@LIBDIR@:${CHOST}/lib:" etc/login.defs
+    edo sed -i -e "s:@LIBDIR@:$(exhost --build)/lib:" etc/login.defs
 }
 
 perform_multiarch_install() {
     default
 
-    dosym useradd /usr/${host}/sbin/adduser
+    dosym useradd /usr/$(exhost --target)/sbin/adduser
 
     # Remove libshadow and libmisc; see Gentoo bug 37725 and the following
     # comment from shadow's README.linux:
     #   Currently, libshadow.a is for internal use only, so if you see
     #   -lshadow in a Makefile of some other package, it is safe to
     #   remove it.
-    edo rm -f "${IMAGE}"/usr/${host}/lib{misc,shadow}.{a,la}
+    edo rm -f "${IMAGE}"/usr/$(exhost --target)/lib{misc,shadow}.{a,la}
 
     insinto /etc
     insopts -m0600

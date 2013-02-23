@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge [ suffix=tar.gz ]
-require multiarch [ in_tree_build=true ]
 
 SUMMARY="Utility to get and set ATA/SATA drive parameters"
 
@@ -11,14 +10,12 @@ REMOTE_IDS+="freecode:${PN}"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES=""
+
+DEFAULT_SRC_COMPILE_PARAMS=( STRIP=: )
+DEFAULT_SRC_INSTALL_PARAMS=( exec_prefix=/usr/$(exhost --target) )
 
 src_prepare() {
     default
@@ -29,22 +26,5 @@ src_prepare() {
         s:-s::
     }
 EOF
-}
-
-perform_multiarch_compile() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_cxxflags_var=${host//-/_}_CXXFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
-
-    emake CC=${host}-gcc                    \
-          CFLAGS="${!host_cflags_var}"      \
-          CXXFLAGS="${!host_cxxflags_var}"  \
-          LDFLAGS="${!host_ldflags_var}"    \
-          STRIP=:
-}
-
-perform_multiarch_install() {
-    emake DESTDIR="${IMAGE}" exec_prefix=/usr/${host}/ install
-    emagicdocs
 }
 

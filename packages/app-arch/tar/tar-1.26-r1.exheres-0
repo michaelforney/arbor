@@ -2,23 +2,17 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=bz2 ]
-require multiarch
 
 SUMMARY="Tar archiver"
 
 LICENCES="( GPL-3 ) [[ last-checked = 1.26 ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[hosts:*(-)?]
+        sys-devel/gettext
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-no-gets.patch" )
@@ -36,19 +30,19 @@ src_prepare() {
             -i "${WORK}/lib/Makefile.in"
 }
 
-perform_multiarch_configure() {
+src_configure() {
     # NOTE(?) configuration takes a million years without this hack.
     esandbox hack_toolong
-    default_multiarch_src_configure
+    default
     esandbox nohack_toolong
 }
 
-perform_multiarch_install() {
+src_install() {
     default
-    edo rmdir "${IMAGE}/usr/${host}/sbin"
+    edo rmdir "${IMAGE}/usr/$(exhost --target)/sbin"
 
     # generate man page
-    cd "${WORK}"
+    edo cd "${WORK}"
     edo perl "${FILES}/tarman" > "${TEMP}/tar.1"
     doman "${TEMP}/tar.1"
 }

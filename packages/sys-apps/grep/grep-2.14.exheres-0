@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
-require multiarch
 
 SUMMARY="Grep searches input files for matches to specified patterns"
 
@@ -11,18 +10,13 @@ REMOTE_IDS="freecode:${PN}"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[>=0.18][hosts:*(-)?]
+        sys-devel/gettext[>=0.18]
     build+run:
-        dev-libs/pcre[hosts:*(-)?]
+        dev-libs/pcre
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--enable-perl-regexp' )

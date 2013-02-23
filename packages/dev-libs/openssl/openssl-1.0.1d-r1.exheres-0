@@ -1,8 +1,6 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require multiarch [ in_tree_build=true ]
-
 SUMMARY="Open source SSL and TLS implementation and cryptographic library"
 HOMEPAGE="http://www.openssl.org"
 DOWNLOADS="${HOMEPAGE}/source/${PNV}.tar.gz"
@@ -16,12 +14,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news/announce.html [[ lang = en ]]"
 LICENCES="${PN}"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES=""
 
@@ -30,11 +23,13 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Fix-IV-check-and-padding-removal.patch
 )
 
+# TODO(compnerd) fix parallel build
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 LIBDIR=lib MANDIR=/usr/share/man )
 # Tests don't run in parallel
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
 _openssl_host_os() {
-    case "${host}" in
+    case "$(exhost --target)" in
     arm-exherbo-linux-gnueabi)
         echo linux-armv4
     ;;
@@ -45,43 +40,21 @@ _openssl_host_os() {
         echo linux-x86_64
     ;;
     *)
-        die "unknown OpenSSL host/os for ${host}"
+        die "unknown OpenSSL host/os for $(exhost --target)"
     ;;
     esac
 }
 
-perform_multiarch_configure() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
+src_configure() {
+    edo "${WORK}"/Configure $(_openssl_host_os) \
+        --test-sanity
 
-    AR=${host}-ar                   \
-    CC=${host}-gcc                  \
-    RANLIB=${host}-ranlib           \
-    CFLAGS=${!host_cflags_var}      \
-    LDFLAGS=${!host_ldflags_var}    \
-        edo ${WORK}/Configure $(_openssl_host_os) \
-            --test-sanity
-
-    AR=${host}-ar                   \
-    CC=${host}-gcc                  \
-    RANLIB=${host}-ranlib           \
-    CFLAGS=${!host_cflags_var}      \
-    LDFLAGS=${!host_ldflags_var}    \
-        edo ${WORK}/Configure $(_openssl_host_os) \
-            --prefix=/usr/${host} --openssldir=/etc/ssl shared threads
-}
-
-perform_multiarch_compile() {
-    # TODO(compnerd) fix parallel build
-    emake -j1 LIBDIR=lib MANDIR=/usr/share/man
-}
-
-perform_multiarch_install() {
-    emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=lib MANDIR=/usr/share/man install
+    edo "${WORK}"/Configure $(_openssl_host_os) \
+        --prefix=/usr/$(exhost --target) --openssldir=/etc/ssl shared threads
 }
 
 src_install() {
-    multiarch_src_install
+    emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=lib MANDIR=/usr/share/man install
     keepdir /etc/ssl/{certs,private}
     emagicdocs
 }

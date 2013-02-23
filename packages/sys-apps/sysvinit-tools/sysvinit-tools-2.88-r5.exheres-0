@@ -1,7 +1,7 @@
 # Copyright 2011 Wulf C. Krueger
 # Distributed under the terms of the GNU General Public License v2
 
-require flag-o-matic multiarch [ in_tree_build=true pnv=${PNV/-tools}dsf ]
+require flag-o-matic
 
 SUMMARY="System V init tools"
 DESCRIPTION="
@@ -14,12 +14,7 @@ DOWNLOADS="http://download.savannah.gnu.org/releases/${PN/-tools}/${PNV/-tools}d
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="static
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS="static"
 
 DEPENDENCIES="
     build:
@@ -35,30 +30,20 @@ DEPENDENCIES="
         ]]
 "
 
-perform_multiarch_compile() {
-    local host_cflags_var=${host//-/_}_CFLAGS
-    local host_cxxflags_var=${host//-/_}_CXXFLAGS
-    local host_ldflags_var=${host//-/_}_LDFLAGS
+WORK=${WORKBASE}/${PNV/-tools}dsf
 
-    # TODO: append-ldflags -static once flag-o-matic supports multiarch
+src_compile() {
+    append-ldflags -static
 
-    emake CC="${host}-gcc"                                                  \
-          CFLAGS="${!host_cflags_var}"                                      \
-          CXXFLAGS="${!host_cxxflags_var}"                                  \
-          LDFLAGS="${!host_ldflags_var} $(option static && echo '-static')" \
-          -C src killall5
-}
-
-perform_multiarch_install() {
-    exeinto /usr/${host}/sbin
-    doexe src/killall5
-
-    dodir /usr/${host}/bin
-    dosym /usr/${host}/sbin/killall5 /usr/${host}/bin/pidof
+    emake -C src killall5
 }
 
 src_install() {
-    multiarch_src_install
+    exeinto /usr/$(exhost --target)/sbin
+    doexe src/killall5
+
+    dodir /usr/$(exhost --target)/bin
+    dosym /usr/$(exhost --target)/sbin/killall5 /usr/$(exhost --target)/bin/pidof
 
     doman man/killall5.8
 }

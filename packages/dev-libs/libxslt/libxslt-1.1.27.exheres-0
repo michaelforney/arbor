@@ -3,7 +3,7 @@
 # Based in part upon 'libxslt-1.1.23.ebuild', which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] multiarch python
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] python
 
 SUMMARY="XSLT libraries and tools"
 HOMEPAGE="http://www.xmlsoft.org/XSLT/"
@@ -12,18 +12,13 @@ DOWNLOADS="ftp://xmlsoft.org/${PN}/${PNV}.tar.gz"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="crypt debug examples python
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
-"
+MYOPTIONS="crypt debug examples python"
 
 DEPENDENCIES="
     build+run:
-        dev-libs/libxml2[>=2.6.27][hosts:*(-)?]
-        crypt? ( dev-libs/libgcrypt[>=1.1.92][hosts:*(-)?] )
-        python? ( dev-lang/python:=[hosts:*(-)?] )
+        dev-libs/libxml2[>=2.6.27]
+        crypt? ( dev-libs/libgcrypt[>=1.1.92] )
+        python? ( dev-lang/python:= )
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -32,7 +27,22 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-1.1.27-disable_static_modules.patch
     "${FILES}"/${PN}-1.1.27-python-includes.patch
 )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-libxml-prefix=/usr/$(exhost --target)
+    --disable-static
+    # Always pass --with-debugger. It is required by third parties (see
+    # e.g. Gentoo bug #98345)
+    --with-debugger
+    ac_cv_path_LIBGCRYPT_CONFIG=/usr/$(exhost --target)/bin/libgcrypt-config
+)
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "crypt crypto"
+    "debug"
+    "debug mem-debug"
+    "python python /usr/$(exhost --target)"
+)
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
+
 src_prepare() {
     # The included headers have crypt enabled. This would break linking for
     # out-of-source builds where crypt is disabled.
@@ -41,29 +51,9 @@ src_prepare() {
     autotools_src_prepare
 }
 
-perform_multiarch_configure() {
-    local python_prefix="/usr/${host}"
-
-    # Always pass --with-debugger. It is required by third parties (see
-    # e.g. Gentoo bug #98345)
-    default_multiarch_src_configure \
-        --with-libxml-prefix=/usr/${host} \
-        --disable-static \
-        --with-debugger \
-        $(option_with crypt crypto) \
-        $(option_with debug) \
-        $(option_with debug mem-debug) \
-        $(option_with python python "${python_prefix}") \
-        ac_cv_path_LIBGCRYPT_CONFIG=/usr/${host}/bin/libgcrypt-config
-}
-
-perform_multiarch_install() {
-    default
-    keepdir /usr/${host}/lib/${PN}-plugins
-}
-
 src_install() {
-    multiarch_src_install
+    default
+    keepdir /usr/$(exhost --target)/lib/${PN}-plugins
 
     if ! option examples; then
         edo rm -rf "${IMAGE}/usr/share/doc/${PN}-python-${PV}/examples"

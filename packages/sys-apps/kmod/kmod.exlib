@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require alternatives
-require multiarch
 
 SUMMARY="kmod - handle kernel modules"
 DESCRIPTION="
@@ -23,22 +22,21 @@ SLOT="0"
 MYOPTIONS="
     debug
     doc [[ description = [ Build libkmod's API documentation using gtk-doc ] ]]
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
-        doc? ( dev-doc/gtk-doc[hosts:*(-)?] )
+        doc? ( dev-doc/gtk-doc )
     build+run:
-        app-arch/xz[hosts:*(-)?]
+        app-arch/xz
         !sys-apps/module-init-tools[<3.16-r3] [[
             description = [ module-init-tools and kmod provide the same things using alternatives from m-i-t-3.16-r2 on. ]
             resolution = upgrade-blocked-before
         ]]
 "
+
+ECONF_SOURCE=${WORK}
+WORK=${WORKBASE}/build
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-logging' '--enable-manpages' '--enable-tools' '--with-xz'
                                '--with-zlib' )
@@ -47,27 +45,24 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug "doc gtk-doc" )
 
 AT_M4DIR=( m4 )
 
-src_test() {
-    edo cd "${WORKBASE}/build/${CHOST}"
-    edo mkdir testsuite
+src_unpack() {
     default
+    edo mkdir "${WORK}"
 }
 
-perform_multiarch_install() {
-    default
-
-    dodir /usr/${host}/sbin
-    dosym kmod /usr/${host}/bin/lsmod
-    dosym kmod /usr/${host}/sbin/lsmod
-
-    alternatives+=(
-        /usr/${host}/bin/lsmod                 ${PN}.lsmod
-    )
+src_test() {
+    if exhost --is-native -q; then
+        edo mkdir testsuite
+        default
+    else
+        echo "cross compiled host, skipping tests"
+    fi
 }
 
 src_install() {
     local alternatives=(
         kmod-tools ${PN} 10
+        /usr/$(exhost --target)/bin/lsmod       ${PN}.lsmod
         /usr/share/man/man5/depmod.d.5          ${PN}.depmod.d.5
         /usr/share/man/man5/modprobe.d.5        ${PN}.modprobe.d.5
         /usr/share/man/man5/modules.dep.5       ${PN}.modules.dep.5
@@ -80,7 +75,11 @@ src_install() {
         /usr/share/man/man8/rmmod.8             ${PN}.rmmod.8
     )
 
-    multiarch_src_install
+    default
+
+    dodir /usr/$(exhost --target)/sbin
+    dosym kmod /usr/$(exhost --target)/bin/lsmod
+    dosym kmod /usr/$(exhost --target)/sbin/lsmod
 
     alternatives_for "${alternatives[@]}"
 }

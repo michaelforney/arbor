@@ -21,29 +21,29 @@ DEPENDENCIES="
                      app-text/docbook-xsl-stylesheets
                      dev-libs/libxslt )
     build+run:
-        dev-util/elfutils[>=0.142][hosts:*(-)?]
-        dev-libs/libffi[>=3.0.0][hosts:*(-)?]
+        dev-util/elfutils[>=0.142]
+        dev-libs/libffi[>=3.0.0]
     test:
-        dev-python/dbus-python[hosts:*(-)?]
-        dev-util/desktop-file-utils[hosts:*(-)?]
-        gnome-bindings/pygobject:3[hosts:*(-)?]
-        sys-apps/dbus[>=1.2.14][hosts:*(-)?] [[
+        dev-python/dbus-python
+        dev-util/desktop-file-utils
+        gnome-bindings/pygobject:3
+        sys-apps/dbus[>=1.2.14] [[
             note = [ Required for building GDBus tests ]
         ]]
-        virtual/pkg-config[>=0.16][hosts:*(-)?]
+        virtual/pkg-config[>=0.16]
         x11-misc/shared-mime-info
     recommendation:
-        sys-apps/dbus[>=1.2.14][hosts:*(-)?] [[
+        sys-apps/dbus[>=1.2.14] [[
             note = [ Required for GDBus ]
         ]]
-        dev-libs/glib-networking[hosts:*(-)?] [[
+        dev-libs/glib-networking [[
             description = [ Required for GNet ]
         ]]
-        gnome-desktop/dconf[hosts:*(-)?] [[
+        gnome-desktop/dconf [[
             description = [ default GSettings backend ]
         ]]
     suggestion:
-        gnome-desktop/gvfs[hosts:*(-)?] [[
+        gnome-desktop/gvfs [[
             description = [ Provides utilities and support for GIO ]
         ]]
 "
@@ -76,7 +76,7 @@ src_prepare() {
 # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
 # Its usage is recommended by upstream, see also
 # http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
-perform_multiarch_configure() {
+src_configure() {
     cat > config.cache <<- EOF
 glib_cv_long_long_format=ll
 glib_cv_stack_grows=no
@@ -86,7 +86,8 @@ ac_cv_func_posix_getgrgid_r=yes
 ac_cv_use_pid_surrogate=yes
 EOF
 
-    default_multiarch_src_configure --cache-file=config.cache \
+    PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig:/usr/lib/pkgconfig \
+    econf --cache-file=config.cache \
         $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests')
 }
 

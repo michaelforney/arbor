@@ -10,8 +10,6 @@ else
     require gnu [ suffix=bz2 ]
 fi
 
-require multiarch
-
 SUMMARY="GNU awk implementation"
 
 LICENCES="GPL-3"
@@ -20,23 +18,22 @@ MYOPTIONS="
     baselayout [[
         description = [ Build and install filefuncs extension to /rcscripts, required by baselayout ]
     ]]
-    hosts:
-        arm-exherbo-linux-gnueabi
-        i686-pc-linux-gnu
-        x86_64-pc-linux-gnu
 "
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext[hosts:*(-)?]
+        sys-devel/gettext
 "
 
 if ever at_least 4.0.0; then
     DEPENDENCIES+="
         build:
-            app-arch/xz[hosts:*(-)?]
+            app-arch/xz
     "
 fi
+
+ECONF_SOURCE=${WORK}
+WORK=${WORKBASE}/build
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     '--enable-nls'
@@ -45,12 +42,17 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FUTURES LIMITATIONS POSIX.STD )
 
+src_unpack() {
+    default
+    edo mkdir "${WORK}"
+}
+
 src_prepare() {
     default
     option baselayout && edo cp -R "${FILES}"/filefuncs-$(ever major) "${WORKBASE}"/filefuncs
 }
 
-perform_multiarch_compile() {
+src_compile() {
     default
 
     if option baselayout; then
@@ -59,11 +61,11 @@ perform_multiarch_compile() {
     fi
 }
 
-perform_multiarch_install() {
+src_install() {
     local alternatives=(
         awk ${PN} 5
 
-        /usr/${host}/bin/awk        /usr/${host}/bin/${PN}
+        /usr/$(exhost --target)/bin/awk        /usr/$(exhost --target)/bin/${PN}
         /usr/share/man/man1/awk.1   ${PN}.1
     )
 
@@ -75,7 +77,7 @@ perform_multiarch_install() {
     fi
 
     # NOTE(compnerd) awk symlink is managed via alternatives
-    edo rm "${IMAGE}/usr/${host}/bin/awk"
+    edo rm "${IMAGE}/usr/$(exhost --target)/bin/awk"
     alternatives_for "${alternatives[@]}"
 }
 
