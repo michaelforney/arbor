@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=xz ]
-require multiarch
 
 SUMMARY="GNU implementation of the M4 macro processor"
 
@@ -11,12 +10,7 @@ REMOTE_IDS="freecode:gnu${PN}"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="
-hosts:
-    arm-exherbo-linux-gnueabi
-    i686-pc-linux-gnu
-    x86_64-pc-linux-gnu
-"
+MYOPTIONS=""
 
 DEPENDENCIES=""
 
@@ -39,7 +33,7 @@ src_prepare() {
 }
 
 pkg_postinst() {
-    if [[ $(readlink -f "${ROOT##/}"/usr/bin) == ${ROOT##/}/usr/bin ]] ; then
+    if exhost --is-native -q && [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
         nonfatal edo ln -sf ../${CHOST}/bin/m4 "${ROOT}"/usr/bin/m4 ||
             eerror "Copying /usr/bin/m4 failed"
     fi
