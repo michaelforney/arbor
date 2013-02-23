@@ -151,11 +151,12 @@ EOF
     # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
     # script does not bother to check for the prefixed tools!
     edo env                                                 \
-    READELF=${target}-readelf                               \
-    NM=${target}-nm                                         \
+    READELF="${target}-readelf"                             \
+    NM="${target}-nm"                                       \
     BUILD_CC="${build}-gcc -B/usr/${build}/${build}/bin"    \
-    CC=/usr/${build}/bin/${target}-static-gcc               \
-    CXX=/usr/${build}/bin/${target}-static-g++              \
+    CC="/usr/${build}/bin/${target}-static-gcc"             \
+    CPP=/usr/${build}/bin/${target}-static-cpp              \
+    CXX="/usr/${build}/bin/${target}-static-g++"            \
         "${WORKBASE}/${PNV}/configure"                      \
             --cache-file=config.cache                       \
             --build=${build}                                \
