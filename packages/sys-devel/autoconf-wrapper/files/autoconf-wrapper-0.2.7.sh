@@ -13,24 +13,20 @@ AUTOCONF_PROGRAM="$(basename $0)"
 # Default to latest available if WANT_AUTOCONF isn't set
 if [[ -z ${WANT_AUTOCONF} || ${WANT_AUTOCONF} == latest ]]; then
     for v in ${AUTOCONF_VERSIONS}; do
-        if [[ -x /usr/bin/${AUTOCONF_PROGRAM}-${v%%:*} ]]; then
-            TARGET="/usr/bin/${AUTOCONF_PROGRAM}-${v%%:*}"
-            break
-        fi
+        TARGET=$(type -P ${AUTOCONF_PROGRAM}-${v%%:*})
+        [[ -x ${TARGET} ]] && break
     done
 else
     for v in ${AUTOCONF_VERSIONS}; do
         [[ ${v#*:} == ${WANT_AUTOCONF} ]] || continue
-        if [[ -x /usr/bin/${AUTOCONF_PROGRAM}-${v%%:*} ]]; then
-            TARGET="/usr/bin/${AUTOCONF_PROGRAM}-${v%%:*}"
-            break
-        fi
+        TARGET=$(type -P ${AUTOCONF_PROGRAM}-${v%%:*})
+        [[ -x ${TARGET} ]] && break
     done
 fi
 unset v
 
 # Exit with error code 1 if TARGET is unset
-if [[ -z ${TARGET} ]]; then
+if [[ ! -x ${TARGET} ]]; then
     echo "autoconf-wrapper: No suitable version of autoconf found" 1>&2
     exit 1
 fi
