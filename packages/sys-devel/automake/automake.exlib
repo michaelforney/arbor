@@ -40,13 +40,17 @@ WORK="${WORKBASE}/${MY_PNV}"
 DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=-${SLOT} )
 
 automake_src_test_expensive() {
-    emake check
+    if exhost --is-native -q ; then
+        emake check
+    else
+        echo "tests disabled for non-native hosts"
+    fi
 }
 
 automake_src_install() {
     default
 
-    local slotslot=( "${IMAGE}"/usr/bin/*-${SLOT}-${SLOT} )
+    local slotslot=( "${IMAGE}"/usr/$(exhost --target)/bin/*-${SLOT}-${SLOT} )
     if [[ -e ${slotslot[0]} ]]; then
         edo rm "${slotslot[@]}"
     fi
