@@ -15,11 +15,12 @@ DEPENDENCIES=""
 WORK=${WORKBASE}
 
 src_install() {
+    dodir /usr/$(exhost --target)/bin
     newbin "${FILES}"/${PNV}.sh ${PN}.sh
     local i
     for i in autoconf autoheader autom4te autoreconf \
         autoscan autoupdate ifnames; do
-        dosym ${PN}.sh /usr/bin/${i}
+        dosym ${PN}.sh /usr/$(exhost --target)/bin/${i}
     done
 }
 
