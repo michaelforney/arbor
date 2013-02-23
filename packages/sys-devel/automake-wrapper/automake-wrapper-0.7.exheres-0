@@ -15,10 +15,11 @@ DEPENDENCIES=""
 WORK=${WORKBASE}
 
 src_install() {
+    dodir /usr/$(exhost --target)
     dobin "${FILES}"/${PV}/${PN}.sh
     local i
     for i in aclocal automake; do
-        dosym /usr/bin/${PN}.sh /usr/bin/${i}
+        dosym ${PN}.sh /usr/$(exhost --target)/bin/${i}
     done
 }
 
