@@ -1,0 +1,46 @@
+Upstream: No.
+
+From ed817c2ff6e81f296cabf3aa33425f7d2a186f60 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bo=20=C3=98rsted=20Andresen?= <zlin@exherbo.org>
+Date: Sun, 24 Feb 2013 02:59:21 +0100
+Subject: [PATCH] Fix CPPFLAGS when cross compiling.
+
+---
+ configure.in          | 9 +++++++++
+ doc/specs/Makefile.am | 1 +
+ 2 files changed, 10 insertions(+)
+
+diff --git a/configure.in b/configure.in
+index 515b301..213c38e 100644
+--- a/configure.in
++++ b/configure.in
+@@ -150,6 +150,15 @@ if test "x${BUILD_CFLAGS+set}" != "xset" ; then
+ fi
+ AC_SUBST(BUILD_CFLAGS)
+ 
++if test "x${BUILD_CPPFLAGS+set}" != "xset" ; then
++  if test "x$cross_compiling" = "xyes" ; then
++    BUILD_CPPFLAGS=
++  else
++    BUILD_CPPFLAGS=${CFLAGS}
++  fi
++fi
++AC_SUBST(BUILD_CPPFLAGS)
++
+ if test "x${BUILD_LDFLAGS+set}" != "xset" ; then
+   if test "x$cross_compiling" = "xyes" ; then
+     BUILD_LDFLAGS=
+diff --git a/doc/specs/Makefile.am b/doc/specs/Makefile.am
+index 2688220..da9d334 100644
+--- a/doc/specs/Makefile.am
++++ b/doc/specs/Makefile.am
+@@ -13,6 +13,7 @@ AM_YFLAGS = -d
+ 
+ CC = @CC_FOR_BUILD@
+ CFLAGS = @BUILD_CFLAGS@
++CPPFLAGS = @BUILD_CPPFLAGS@
+ LDFLAGS = @BUILD_LDFLAGS@
+ 
+ BUILT_SOURCES = parse_y.h
+-- 
+1.8.1.3

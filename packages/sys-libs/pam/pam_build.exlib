@@ -38,6 +38,8 @@ DEPENDENCIES="
 WORK=${WORKBASE}/${MY_PNV}
 AT_M4DIR=( m4 )
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-fix-cppflags.patch )
+
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-audit' '--disable-prelude' '--disable-regenerate-docu'
                                '--disable-selinux' '--enable-cracklib' '--enable-db=no'
                                '--enable-nls' )
@@ -67,6 +69,15 @@ pam_build_src_configure() {
     # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
     append-flags -D_GNU_SOURCE
 
+    local host_prefix=$(exhost --build)
+    local build_cflags=${host_prefix//-/_}_CFLAGS                   \
+        build_cppflags=${host_prefix//-/_}_CPPFLAGS                 \
+        build_ldflags=${host_prefix//-/_}_LDFLAGS
+
+    CC_FOR_BUILD="${host_prefix}-gcc"                               \
+    BUILD_CFLAGS="${!build_cflags}"                                 \
+    BUILD_CPPFLAGS="${!build_cppflags}"                             \
+    BUILD_LDFLAGS="${!build_ldflags}"                               \
     econf                                                           \
         "--includedir=/usr/$(exhost --target)/include/security"     \
         "--enable-isadir=/usr/$(exhost --target)/lib/security"      \
