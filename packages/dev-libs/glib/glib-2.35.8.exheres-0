@@ -85,7 +85,7 @@ configure_one_multibuild() {
 src_install() {
     glib_src_install
 
-    if ! option bash-completion; then
+    if option !bash-completion ; then
         edo rm "${IMAGE}"/usr/share/bash-completion/completions/{gdbus,gresource,gsettings}
         edo rmdir "${IMAGE}"/usr/share/bash-completion/{completions/,}
     fi
