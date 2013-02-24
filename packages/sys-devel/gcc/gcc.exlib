@@ -257,12 +257,6 @@ gcc_cv_objdump=${target}-objdump
 gcc_cv_libc_provides_ssp=yes
 EOF
 
-        export CPP
-        for CPP in ${CHOST}-cpp cpp ""; do
-            type -P ${CPP} >/dev/null && break
-        done
-        [[ -n ${CPP} ]] || die "Found no usable cpp"
-
         # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${CHOST} results
         # in a double prefix
         # NOTE(compnerd) the --with-sysroot='""' is a brilliant hack designed to allow gcc to

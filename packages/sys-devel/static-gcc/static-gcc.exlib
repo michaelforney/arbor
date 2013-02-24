@@ -72,12 +72,6 @@ gcc_cv_objdump=${target}-objdump
 gcc_cv_libc_provides_ssp=yes
 EOF
 
-        export CPP
-        for CPP in ${CHOST}-cpp cpp ""; do
-            type -P ${CPP} >/dev/null && break
-        done
-        [[ -n ${CPP} ]] || die "Found no usable cpp"
-
         # NOTE(compnerd) unlike the standard compiler, we do not pass CXXFLAGS_FOR_TARGET here.
         # This is a bare compiler, supporting only C and does not rely on the system.  The only
         # thing that is really included in this compiler is the compiler, driver, preprocessor,
