@@ -22,6 +22,7 @@ DEPENDENCIES="
     build+run:
         dev-lang/ruby:=
         || (
+            dev-lang/ruby:2.0
             dev-lang/ruby:1.9
             dev-ruby/rubygems[>=1.2.0]
         )
@@ -41,7 +42,7 @@ gem_src_install() {
     site_gem_dir=$(${RUBY} -rubygems -e 'print Gem.dir')
     vendor_gem_dir=${site_gem_dir/gems/vendor_gems}
 
-    export GEM_HOME="${IMAGE}/${vendor_gem_dir}"
+    export GEM_HOME="${IMAGE%/}${vendor_gem_dir}"
     export GEM_PATH="${vendor_gem_dir}:${GEM_HOME}"
 
     local myconf=
@@ -64,6 +65,6 @@ gem_src_install() {
         done
     fi
 
-    keepdir ${vendor_gem_dir}/{doc,gems,cache,specifications}
+    keepdir ${vendor_gem_dir}/{build_info,doc,gems,cache,specifications}
 }
 
