@@ -76,7 +76,7 @@ perform_multiarch_install() {
 pkg_preinst() {
     if [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
         # NOTE(compnerd) preserve legacy paths for paludis
-        for bin in bin/pwd bin/readlink usr/bin/env ; do
+        for bin in bin/pwd bin/rm {,usr/}bin/readlink usr/bin/env ; do
             nonfatal edo rm "${ROOT}"/${bin} &&
             nonfatal edo cp "${IMAGE}"/usr/${CHOST}/bin/$(basename ${bin}) "${ROOT}"/${bin} ||
                 eerror "Copying /${bin} failed"
