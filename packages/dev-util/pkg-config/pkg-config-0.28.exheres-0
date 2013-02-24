@@ -46,6 +46,9 @@ src_configure() {
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
 
+        # PKG_CONFIG_ALLOW_SYSTEM_LIBS=true makes sure -L/usr/lib gets added during
+        # migration to /usr/host/lib
+            PKG_CONFIG_ALLOW_SYSTEM_LIBS=true                                \
             PKG_CONFIG=${PKG_CONFIG:-${CHOST}-pkg-config}                    \
             PKG_CONFIG_LIBDIR=/usr/${CHOST}/lib/pkgconfig:/usr/lib/pkgconfig \
         econf                                                                \
