@@ -1,5 +1,5 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
-# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 if ever is_scm ; then
@@ -31,7 +31,7 @@ MYOPTIONS="baselayout debug doc systemd X"
 
 DEPENDENCIES="
     build:
-        app-text/docbook-xml-dtd:4.1.2
+        app-text/docbook-xml-dtd:4.4
         app-text/xmlto
         sys-devel/gettext
         virtual/pkg-config[>=0.20]
@@ -39,6 +39,7 @@ DEPENDENCIES="
         X? ( x11-proto/xproto )
     build+run:
         dev-libs/expat[>=1.95.8]
+        dev-libs/glib:2[>=2.26]
         sys-apps/skeleton-filesystem-layout[>=0.5.4]
         group/messagebus
         group/plugdev
