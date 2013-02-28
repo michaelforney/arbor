@@ -1,7 +1,7 @@
 # Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
+require easy-multibuild flag-o-matic
 
 SUMMARY="A portable foreign function interface library"
 DESCRIPTION="
@@ -30,15 +30,28 @@ REMOTE_IDS="freecode:${PN}"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="debug
-    multibuild_c: 32 64"
+MYOPTIONS="
+    debug
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     test:
         dev-util/dejagnu
 "
 
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-static )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( debug )
+
+configure_one_multibuild() {
+    filter-flags -m32
+    case "${MULTIBUILD_TARGET}" in
+        32) export CC="${CC} -m32";;
+        64) export CC="${CC/ -m32/}";;
+    esac
+
+    default
+}
 
 test_prepare_one_multibuild() {
     case "${MULTIBUILD_TARGET}" in
@@ -49,5 +62,12 @@ test_prepare_one_multibuild() {
             edo sed -e "s|set cxx_options \" -m32 -shared-libgcc -lstdc++\"|set cxx_options \" -shared-libgcc -lstdc++\"|" -i "${WORK}"/testsuite/libffi.special/special.exp
             ;;
     esac
+}
+
+install_one_multibuild() {
+    default
+
+    # FIXME: our gcc installs it's own copy of libffi instead of using the system one
+    edo rm "${IMAGE}"/usr/share/man/man3/{ffi,ffi_call,ffi_prep_cif}.3
 }
 
