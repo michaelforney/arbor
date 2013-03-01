@@ -1,4 +1,4 @@
-From 6320846302a3f92d6af06b3a3ae23ae47c1b159b Mon Sep 17 00:00:00 2001
+From 322b7f06ed2d8bf0cad88a98e371e50114b61e2a Mon Sep 17 00:00:00 2001
 From: "Wulf C. Krueger" <philantrop@exherbo.org>
 Date: Sat, 23 Feb 2013 12:54:50 +0100
 Subject: [PATCH] Explicitly link to librt
@@ -9,14 +9,14 @@ Upstream: Not yet.
  1 file changed, 3 insertions(+)
 
 diff --git a/tools/Makefile.am b/tools/Makefile.am
-index cfd54b8..63ae39c 100644
+index cfd54b8..503b881 100644
 --- a/tools/Makefile.am
 +++ b/tools/Makefile.am
 @@ -53,15 +53,18 @@ dbus_uuidgen_SOURCES=				\
  
  dbus_send_LDADD = \
  	$(top_builddir)/dbus/libdbus-1.la \
-+	-lrt
++	-lrt \
  	$(NULL)
  
  dbus_monitor_LDADD = \
@@ -27,7 +27,7 @@ index cfd54b8..63ae39c 100644
  
  dbus_uuidgen_LDADD = \
  	$(top_builddir)/dbus/libdbus-1.la \
-+	-lrt
++	-lrt \
  	$(NULL)
  
  dbus_launch_LDADD = \
