@@ -74,11 +74,15 @@ perl-5_src_configure() {
         "${WORKBASE}/${MY_PNV:-${PNV}}/Configure" \
         -des \
         -Dcc="${CC}" \
+        -Dar="${AR}" \
+        -Dnm="${NM}" \
+        -Dranlib="${RANLIB}" \
         -Dcf_by='Exherbo' \
         -Dprefix=/usr \
         -Dvendorprefix=/usr \
         -Dsiteprefix=/usr \
         -Doptimize="${CFLAGS}" \
+        -Dldflags="${LDFLAGS}" \
         -Darchname="${CHOST%%-*}-linux" \
         -Dlibperl="libperl.so.1.${MY_PVM}" \
         -Dprivlib="/usr/${LIBDIR}/perl5/${MY_PVM}" \
