@@ -30,6 +30,7 @@ vala_pkg_setup() {
         local vala_version=$(get_best_slot_dependency dev-lang/vala ${vala_slots[@]})
         [[ -z ${vala_version} ]] && die "No vala installed"
         export VALAC="$(type -P valac-${vala_version})"
+        export VAPIGEN="$(type -P vapigen-${vala_version})"
     else
         export ac_cv_path_VALAC=
     fi
