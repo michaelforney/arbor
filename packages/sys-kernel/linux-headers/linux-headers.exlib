@@ -67,5 +67,8 @@ linux-headers_src_install() {
 
     # scsi.h is installed by sys-libs/glibc
     ever at_least 2.6.35 || edo rm "${IMAGE}"/usr/include/scsi/scsi.h
+
+    # nuke empty directory
+    ever at_least 3.8 && edo rmdir "${IMAGE}"/usr/include/uapi
 }
 
