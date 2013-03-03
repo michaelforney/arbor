@@ -4,8 +4,12 @@
 # Copyright 2009,2011,2012,2013 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require multibuild
 require gnu [ suffix=bz2 subdir=${PNV} ]
+if [[ -n ${PV%%*_pre} ]] ; then
+    DOWNLOADS="ftp://gcc.gnu.org/pub/gcc/snapshots/$(ever range 1-2)-${PV##*_pre}/${PN}-$(ever range 1-2)-${PV##*_pre}.tar.bz2"
+fi
+
+require multibuild
 require alternatives versionator
 
 export_exlib_phases src_unpack src_prepare src_configure src_compile src_test_expensive src_install \
@@ -117,7 +121,7 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}onlinedocs/libstdc++/libstdc++-html-USERS-${S
 RESTRICT="test" # tests are expensive
 
 WORK="${WORKBASE}/build"
-ECONF_SOURCE="${WORKBASE}"/${PNV/_p/-}
+ECONF_SOURCE="${WORKBASE}/${PNV/_p?(re)/-}"
 
 DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
 
@@ -132,16 +136,16 @@ gcc_src_unpack() {
 }
 
 gcc_src_prepare() {
-    edo cd  "${WORKBASE}/${PNV/_p/-}"
+    edo cd  "${WORKBASE}/${PNV/_p?(re)/-}"
 
     # TODO(compnerd) -fuse-ld to override the linker when GCC 4.8 is the oldest GCC supported.
     # Until then, because we must use the GCC_EXEC_DIR override parameter -B path to override the
     # selection of ld for certain packages (e.g. glibc), allow setting a prefixed linker without an
     # absolute path.  Do the same for the assembler to keep the parallel values similar.
-    ever at_least 4.8 ||
-        edo sed -e 's,DEFAULT_LINKER+set,DEFAULT_LINKER+permissive,'        \
-                -e 's,DEFAULT_ASSEMBLER+set,DEFAULT_ASSEMBLER+permissive,'  \
-                -i "gcc/configure"
+    # This check needs to be modified to support prefixed tools to be used.
+    edo sed -e 's,DEFAULT_LINKER+set,DEFAULT_LINKER+permissive,'        \
+            -e 's,DEFAULT_ASSEMBLER+set,DEFAULT_ASSEMBLER+permissive,'  \
+            -i "gcc/configure"
 
     default
 }
@@ -187,6 +191,7 @@ EOF
     # fixed-includes/limits.h not being accessible
     econf --cache-file=config.cache                                 \
           --hates=docdir                                            \
+          --hates=disable-dependency-tracking                       \
           --libdir=/usr/${LIBDIR}                                   \
           --with-pkgversion="exherbo ${PNVR}"                       \
           --program-suffix=-${SLOT}                                 \
@@ -316,7 +321,7 @@ __gcc_slot_runtime() {
 
             case "${name}" in
             # always use newest available so version and create so symlinks
-            libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
+            libatomic.so*|libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
                 # rename /usr/lib/libffi.so.4.0.1 => /usr/lib/libffi-4.3.so.4.0.1
                 edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
 
