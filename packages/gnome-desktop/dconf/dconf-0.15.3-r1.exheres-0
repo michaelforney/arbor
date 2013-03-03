@@ -1,7 +1,7 @@
 # Copyright 2010 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require dconf [ valac_slot='0.16' ]
+require dconf [ valac_slot='0.18' ]
 
 LICENCES="LGPL-2.1"
 SLOT="0"
@@ -13,10 +13,14 @@ MYOPTIONS="
 
 DEPENDENCIES="
     build:
-        dev-util/pkg-config[>=0.21]
+        app-text/docbook-xml-dtd:4.2
+        app-text/docbook-xsl-stylesheets [[ note = [ required for manapages/docbook.xsl ] ]]
+        dev-libs/libxslt
+        dev-util/intltool[>=0.50.0]
+        virtual/pkg-config[>=0.21]
         gtk-doc? ( dev-doc/gtk-doc[>=1.15] )
     build+run:
-        dev-libs/glib[>=2.31.18]
+        dev-libs/glib:2[>=2.35.2]
         sys-apps/dbus
         editor? ( x11-libs/gtk+:3[>=2.90.7]
                   dev-libs/libxml2:2.0 )
