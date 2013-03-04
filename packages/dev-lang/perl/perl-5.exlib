@@ -53,6 +53,11 @@ perl-5_src_unpack() {
 perl-5_src_prepare() {
     edo cd "${WORKBASE}/${MY_PNV:-${PNV}}"
     default
+
+    # https://rt.perl.org/rt3//Public/Bug/Display.html?id=113022
+    test-flag-CC -fno-lto && \
+    edo sed -e '/if(p())/{n; s/$ldflags/& -fno-lto/}' \
+            -i Configure
 }
 
 perl-5_src_configure() {
