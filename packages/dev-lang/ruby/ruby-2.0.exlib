@@ -48,6 +48,7 @@ ruby-2.0_src_configure() {
     unset SOCKS_SERVER
 
     local cfargs=(
+        # Yes, this does always call --enable-ipv6
         --enable-ipv6
         $(option ipv6 || echo --with-lookup-order-hack=INET)
 
