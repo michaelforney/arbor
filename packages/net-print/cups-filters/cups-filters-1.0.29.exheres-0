@@ -40,6 +40,8 @@ DEPENDENCIES="
         net-print/foomatic-filters [[ note = [ for non-PostScript printers ] ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.0.29-poppler_022.patch )
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-imagefilters
     --disable-avahi # feel free to make it an option and test it
@@ -54,7 +56,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 
 src_prepare() {
-    default
     # required for multilib install - 3e1c32fd
     edo sed -e 's:$(LN_S):ln -sf:' -i Makefile.{am,in}
     autotools_src_prepare
