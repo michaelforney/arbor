@@ -2,10 +2,7 @@
 # Copyright 2013 Wouter van Kesteren <woutershep@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 
-require checksums [ sha1=[ ${PNV}.tar.gz=c6d24d9c0f5916c2ca66e2848655555b74ec05b7 ] ]
-
-# using automake 1.13 is broken (maintainer got an email)
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ] systemd-service
+require systemd-service checksums [ sha1=[ ${PNV}.tar.gz=d56d00f064dd62494803655e1df069cc86dddc0f ] ]
 
 SUMMARY="Generates secure entropy using variances in process TSCs"
 DESCRIPTION="
@@ -27,18 +24,12 @@ MYOPTIONS=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/usr/sbin --enable-nistest )
 
-WORK="${WORKBASE}"/${PN}-${PV/[a-z]}
+#WORK="${WORKBASE}"/${PN}-${PV/[a-z]}
 
 src_prepare() {
     # use /run for the pidfile
     edo sed -e 's:/var\(/run/haveged.pid\):\1:' \
             -i src/haveged.c man/haveged.8
-
-    # fix parallel build failure (maintainer got an email)
-    edo sed -e 's:$(top_builddir)/src/::' \
-            -i src/Makefile.am
-
-    autotools_src_prepare
 }
 
 src_install() {
