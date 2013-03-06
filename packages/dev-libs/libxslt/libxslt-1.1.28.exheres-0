@@ -3,7 +3,7 @@
 # Based in part upon 'libxslt-1.1.23.ebuild', which is:
 #   Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] easy-multibuild python
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ] easy-multibuild python
 
 SUMMARY="XSLT libraries and tools"
 HOMEPAGE="http://www.xmlsoft.org/XSLT/"
@@ -13,7 +13,8 @@ LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
 MYOPTIONS="crypt debug examples python
-    multibuild_c: 32 64"
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build+run:
@@ -26,11 +27,10 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-1.1.26-fix_python_paths.patch
     "${FILES}"/${PN}-1.1.27-m4.patch
     "${FILES}"/${PN}-1.1.27-disable_static_modules.patch
-    "${FILES}"/${PN}-1.1.27-python-includes.patch
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( FEATURES )
 
-src_prepare() {
+prepare_one_multibuild() {
     # The included headers have crypt enabled. This would break linking for
     # out-of-source builds where crypt is disabled.
     edo rm "${WORK}"/{libxslt/xsltconfig.h,libexslt/exsltconfig.h}
@@ -60,10 +60,6 @@ install_one_multibuild() {
         dodir "/usr/${CHOST}/bin"
         edo mv "${IMAGE}"/usr/bin/"${PN#lib}"-config "${IMAGE}"/usr/"${CHOST}"/bin
     fi
-}
-
-src_install() {
-    easy-multibuild_src_install
 
     if ! option examples; then
         edo rm -rf "${IMAGE}/usr/share/doc/${PN}-python-${PV}/examples"
