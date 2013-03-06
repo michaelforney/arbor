@@ -123,7 +123,9 @@ RESTRICT="test" # tests are expensive
 WORK="${WORKBASE}/build"
 ECONF_SOURCE="${WORKBASE}/${PNV/_p?(re)/-}"
 
-DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
+if ! ever at_least 4.8_pre20130303 ; then
+    DEFAULT_SRC_COMPILE_PARAMS=( bootstrap )
+fi
 
 gcc_src_unpack() {
     if option java ; then
@@ -187,14 +189,15 @@ EOF
     # NOTE(compnerd) disable bootstrap; the exheres is not meant for GCC development, so there is no
     # point in rebuilding and rebuilding again just to verify that GCC is able to self-host for most
     # people.
-    # TODO(compnerd) figure out why installation with --disable-bootstrap fails due to
-    # fixed-includes/limits.h not being accessible
     econf --cache-file=config.cache                                 \
           --hates=docdir                                            \
           --hates=disable-dependency-tracking                       \
           --libdir=/usr/${LIBDIR}                                   \
           --with-pkgversion="exherbo ${PNVR}"                       \
           --program-suffix=-${SLOT}                                 \
+          $(if ever at_least 4.8_pre20130303 ; then
+                echo --disable-bootstrap
+            fi)                                                     \
           --enable-clocale=gnu                                      \
           --enable-languages="$(IFS=, ; echo "${languages[*]}")"    \
           --enable-lto $(! ever at_least 4.6 && echo --with-libelf) \
