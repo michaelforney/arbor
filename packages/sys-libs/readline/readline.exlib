@@ -41,9 +41,10 @@ MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/ncurses[multibuild_c:*(-)?]"
+        sys-libs/ncurses[multibuild_c:*(-)?]
+"
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 
 DEFAULT_SRC_INSTALL_PARAMS=(
     htmldir="/usr/share/doc/${PNVR}/html"
@@ -74,7 +75,10 @@ configure_one_multibuild() {
         64) export CC="${CC/ -m32/}";;
     esac
 
-    econf --hates=libdir --libdir=/${LIBDIR}
+    econf \
+        --hates=libdir \
+        --libdir=/${LIBDIR} \
+        --disable-static
 }
 
 install_one_multibuild() {
