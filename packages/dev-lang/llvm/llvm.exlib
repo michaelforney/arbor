@@ -58,6 +58,9 @@ src_compile() {
 install_one_multibuild() {
     cmake_src_install
 
+    # remove gtest remains
+    edo rm "${IMAGE}"/usr/${LIBDIR}/libgtest*
+
     # Required by the clang test suite
     exeinto /usr/libexec/llvm
     doexe bin/FileCheck bin/not bin/count
