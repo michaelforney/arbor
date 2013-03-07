@@ -5,7 +5,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require gnu [ suffix=bz2 subdir=${PNV} ]
-if [[ -n ${PV%%*_pre} ]] ; then
+if [[ ${PV} == *_pre* ]] ; then
     DOWNLOADS="ftp://gcc.gnu.org/pub/gcc/snapshots/$(ever range 1-2)-${PV##*_pre}/${PN}-$(ever range 1-2)-${PV##*_pre}.tar.bz2"
 fi
 
