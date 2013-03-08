@@ -5,3 +5,9 @@ require libarchive
 
 PLATFORMS="~amd64 ~arm ~x86"
 
+src_prepare() {
+    # https://github.com/libarchive/libarchive/commit/9caa49246c94921171f45ec5fb6d82081c573b8e
+    edo sed -e 's/test_extract.cpio.lrz/test_extract.cpio.lzo/' \
+            -i cpio/test/test_extract_cpio_lzo.c
+}
+
