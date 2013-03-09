@@ -86,21 +86,29 @@ fi
 
 # NOTE(?) upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6,
 # probably also gcc[>=4.4]
-if ever at_least 4.6; then
+if ever at_least 4.8_pre20130303 ; then
     DEPENDENCIES+="
         build+run:
-            graphite? ( dev-libs/ppl:=[>=0.11] )
+            graphite? (
+                dev-libs/cloog[>=0.17&<0.19]
+                dev-libs/isl[>=0.10&<0.12]
+            )
     "
-fi
-if ever at_least 4.7; then
+elif ever at_least 4.7 ; then
     DEPENDENCIES+="
         build+run:
-            graphite? ( || ( dev-libs/cloog dev-libs/cloog-ppl[>=0.15.5] ) )
+            graphite? (
+                dev-libs/ppl:=[>=0.11]
+                || ( dev-libs/cloog[>=0.16.1] dev-libs/cloog-ppl[>=0.15.5] )
+            )
     "
 else
     DEPENDENCIES+="
         build+run:
-            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )
+            graphite? (
+                dev-libs/ppl:=[>=0.11]
+                dev-libs/cloog-ppl[>=0.15.5]
+            )
     "
 fi
 
@@ -204,10 +212,16 @@ EOF
           $(option_enable fortran libquadmath)                      \
           $(option_enable fortran libquadmath-support)              \
           $(option_with graphite cloog)                             \
-          $(option_with graphite ppl)                               \
+          $(if ! ever at_least 4.8_pre20130303 ; then
+                option_with graphite ppl
+            else
+                option_with graphite isl
+            fi)                                                     \
           $(if ever at_least 4.6 && optionq graphite ; then
-                option_enable graphite cloog-backend ${cloog_backend}
-                ever at_least 4.7 && echo '--disable-cloog-version-check'
+                if ! ever at_least 4.8_pre20130303 ; then
+                    option_enable graphite cloog-backend ${cloog_backend}
+                    ever at_least 4.7 && echo '--disable-cloog-version-check'
+                fi
             fi)                                                     \
           $(option_enable openmp libgomp)                           \
           $(option_enable objc-runtime libobjc)                     \
