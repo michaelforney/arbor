@@ -1,0 +1,74 @@
+Source: written by Johannes Nixdorf
+Upstream: No, see http://llvm.org/bugs/show_bug.cgi?id=9136
+Reason: Without this patch, llvm-config returns a wrong path with multilib
+
+From 149dafe2cfa9b40366b0e7411d8ef1a1e18c0fb5 Mon Sep 17 00:00:00 2001
+From: Johannes Nixdorf <mixi@exherbo.org>
+Date: Sat, 9 Mar 2013 22:39:26 +0100
+Subject: [PATCH] llvm-config: don't use the executable path if not in a
+ development tree
+
+There is no reason to use the current path to guess the library install
+dir if it is not in a development tree.
+
+This behaviour broke LLVM_LIBDIR_SUFFIX when using cmake and --libdir,
+--bindir and --includedir when using autotools.
+
+With this change moving llvm-config to a different location (used by us
+to support 32bit and 64bit libraries on the same file system) is also
+supported as long as the new location doesn't look like a development
+tree.
+---
+ CMakeLists.txt                    | 6 ++++++
+ cmake/config-ix.cmake             | 1 -
+ tools/llvm-config/llvm-config.cpp | 8 ++++----
+ 3 files changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 71a7426..24dd91d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -73,6 +73,12 @@ set(LLVM_TOOLS_BINARY_DIR ${LLVM_BINARY_DIR}/bin)
+ set(LLVM_EXAMPLES_BINARY_DIR ${LLVM_BINARY_DIR}/examples)
+ set(LLVM_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
+ 
++# set LLVM_*DIR for include/llvm/Config/llvm-config.h
++set(LLVM_PREFIX ${CMAKE_INSTALL_PREFIX})
++set(LLVM_LIBDIR ${LLVM_PREFIX}/lib${LLVM_LIBDIR_SUFFIX})
++set(LLVM_INCLUDEDIR ${LLVM_PREFIX}/include)
++set(LLVM_BINDIR ${LLVM_PREFIX}/bin)
++
+ set(LLVM_ALL_TARGETS
+   AArch64
+   ARM
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index 7496622..21f50fa 100755
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -447,4 +447,3 @@ else( LLVM_ENABLE_THREADS )
+   message(STATUS "Threads disabled.")
+ endif()
+ 
+-set(LLVM_PREFIX ${CMAKE_INSTALL_PREFIX})
+diff --git a/tools/llvm-config/llvm-config.cpp b/tools/llvm-config/llvm-config.cpp
+index 7edf5ec..cc2415b 100644
+--- a/tools/llvm-config/llvm-config.cpp
++++ b/tools/llvm-config/llvm-config.cpp
+@@ -247,10 +247,10 @@ int main(int argc, char **argv) {
+     ActiveIncludeOption = ("-I" + ActiveIncludeDir + " " +
+                            "-I" + ActiveObjRoot + "/include");
+   } else {
+-    ActivePrefix = CurrentExecPrefix;
+-    ActiveIncludeDir = ActivePrefix + "/include";
+-    ActiveBinDir = ActivePrefix + "/bin";
+-    ActiveLibDir = ActivePrefix + "/lib";
++    ActivePrefix = LLVM_PREFIX;
++    ActiveIncludeDir = LLVM_INCLUDEDIR;
++    ActiveBinDir = LLVM_BINDIR;
++    ActiveLibDir = LLVM_LIBDIR;
+     ActiveIncludeOption = "-I" + ActiveIncludeDir;
+   }
+ 
+-- 
+1.8.1.5
+

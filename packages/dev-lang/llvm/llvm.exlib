@@ -31,6 +31,8 @@ src_prepare() {
         expatch "${FILES}"/${PN}-fix-multibuild-tests.patch
     fi
 
+    expatch "${FILES}"/llvm-config-path.patch
+
     default
     edo popd
 }
@@ -66,6 +68,14 @@ install_one_multibuild() {
 
     # remove gtest remains
     edo rm "${IMAGE}"/usr/${LIBDIR}/libgtest*
+
+    # Keep one copy of llvm-config and the config include files for each target
+    if ! multibuild_default_target C; then
+        dodir "/usr/${CHOST}"/{bin,include/llvm/Config}
+        edo mv "${IMAGE}"/usr/bin/llvm-config "${IMAGE}"/usr/"${CHOST}"/bin
+        edo mv "${IMAGE}"/usr/include/llvm/Config/*.h \
+            "${IMAGE}"/usr/"${CHOST}"/include/llvm/Config
+    fi
 
     # Required by the clang test suite
     exeinto /usr/libexec/llvm
