@@ -308,11 +308,6 @@ systemd_src_install() {
     dodir /bin
     dosym ../usr/bin/systemctl /bin/systemctl
 
-    # Handle bash-completion
-    if ! option bash-completion ; then
-        edo rm -r "${IMAGE}"/usr/share/bash_completion
-    fi
-
     install-zsh-completions
 
     # Don't install funny RPM macros.
