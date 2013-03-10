@@ -35,6 +35,7 @@ src_prepare() {
 src_compile() {
     emake \
         CC="${CC}" \
+        USE_GNUTLS=no \
         USE_CAP=$(optionv caps || echo no) \
         USE_IDN=$(optionv idn || echo no) \
         $(option ipv6 || echo IPV6_TARGETS=)
