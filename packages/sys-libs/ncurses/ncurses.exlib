@@ -6,7 +6,8 @@ require gnu [ suffix=gz ]
 SUMMARY="Free software emulation of curses using terminfo formats"
 
 LICENCES="as-is"
-MYOPTIONS="gpm"
+MYOPTIONS="gpm
+    parts: binaries data development documentation libraries"
 
 DEPENDENCIES="
     build+run:
@@ -66,6 +67,12 @@ ncurses_src_install() {
 
     edo cd "${WORKBASE}/build/wide"
     emake -j1 DESTDIR="${IMAGE}" PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig ${target}
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart data /usr/share
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/man
+    expart libraries /usr/$(exhost --target)/lib
 }
 
 export_exlib_phases src_configure src_compile src_install
