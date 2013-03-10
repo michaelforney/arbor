@@ -137,6 +137,9 @@ dracut_src_prepare() {
     # This disables them and only runs the syntax check with dash.
     edo sed -i -e '/$(MAKE) -C test check/d' Makefile
 
+    # Fix libdir.
+    edo sed -i -e "s:/lib\(/kernel/install.d\):/${LIBDIR}\1:" Makefile
+
     # Remove modules that are not compatible with Exherbo.
     edo rm -r modules.d/45ifcfg
 }
@@ -159,6 +162,7 @@ EOF
     fi
 
     keepdir /etc/dracut.conf.d
+    keepdir /usr/${LIBDIR}/dracut/dracut.conf.d
 
     insinto /etc/logrotate.d/
     newins dracut.logrotate dracut

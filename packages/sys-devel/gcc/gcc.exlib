@@ -4,8 +4,15 @@
 # Copyright 2009,2011,2012,2013 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=bz2 subdir=${PNV} ]
 require alternatives versionator
+require gnu [ suffix=bz2 subdir=${PNV} ]
+
+if [[ ${PV} == *_pre* ]] ; then
+    DOWNLOADS="ftp://gcc.gnu.org/pub/gcc/snapshots/$(ever range 1-2)-${PV##*_pre}/${PN}-$(ever range 1-2)-${PV##*_pre}.tar.bz2"
+fi
+
+ECJ_JAR_PV=4.5
+DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
 
 export_exlib_phases pkg_setup src_unpack src_prepare src_configure src_compile src_test_expensive src_install pkg_postinst pkg_prerm pkg_postrm
 
@@ -18,6 +25,8 @@ MYOPTIONS="
     ada
     doc
     fortran
+    graphite        [[ description = [ enable support for Graphite based loop optimizations ] ]]
+    java
     propolice
     objc            [[ description = [ build support for the Objective C code language ] ]]
     obj-c++         [[ description = [ build support for the Objective C++ language ] ]]
@@ -30,79 +39,79 @@ DEPENDENCIES="
         sys-devel/gettext
         sys-devel/make
         ada? ( || ( sys-devel/gcc[ada] dev-lang/gnat ) )
+        doc? ( app-doc/doxygen[>=1.5.1] )
+        java? ( app-arch/unzip app-arch/zip )
     test-expensive:
         dev-util/dejagnu
         sys-devel/autogen
         dev-libs/mpc[>=0.8.1]
         dev-libs/mpfr:=[>=2.3]
-"
-
-# LTO (Link-Time Optimization)
-DEPENDENCIES+="
     build+run:
         sys-devel/binutils[>=2.20.1] [[ note = [ minimal version of binutils for LTO ] ]]
 "
+
 # GCC 4.6+ no longer depends on libelf for LTO
 if ! ever at_least 4.6 ; then
     DEPENDENCIES+="
         build+run:
-            dev-util/elfutils[>=0.143] [[ note = [ Enable link-time optimisation ] ]]
+            dev-util/elfutils[>=0.143] [[ note = [ required for link-time optimisation ] ]]
     "
 fi
 
-if ever at_least 4.6 ; then
+if ever at_least 4.8_pre20130303 ; then
+    DEPENDENCIES+="
+        build+run:
+            dev-libs/mpfr:=[>=2.4.0]
+    "
+elif ever at_least 4.6 ; then
     DEPENDENCIES+="
         build+run:
             dev-libs/mpfr:=[>=2.3]
     "
 fi
 
-# graphite support
-MYOPTIONS+=" graphite [[ description = [ enable support for Graphite based loop optimizations ] ]]"
-# NOTE(?) upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6,
-# probably also gcc[>=4.4]
-if ever at_least 4.6.0; then
-    DEPENDENCIES+="
-        build+run:
-            graphite? ( dev-libs/ppl:=[>=0.11] )
-    "
-fi
-if ever at_least 4.7; then
+if ever at_least 4.7 ; then
     DEPENDENCIES+="
         build+run:
             dev-libs/gmp:=[>=4.2]
-            graphite? ( || ( dev-libs/cloog dev-libs/cloog-ppl[>=0.15.5] ) )
     "
 else
     DEPENDENCIES+="
         build+run:
             dev-libs/gmp:=[>=4.1]
-            graphite? ( dev-libs/cloog-ppl[>=0.15.5] )
     "
 fi
 
-# java support
-if [[ ${SLOT} == 4.4 ]]; then
-    ECJ_JAR_PV="4.3" # There is no ecj-4.4.jar
-elif [[ ${SLOT} == 4.6 ]]; then
-    ECJ_JAR_PV="4.5" # There is no ecj-4.6.jar
-elif [[ ${SLOT} == 4.7 ]]; then
-    ECJ_JAR_PV="4.5" # There is no ecj-4.7.jar
+# NOTE(?) upstream says it is a build time dependency, but uninstall breaks at least gcc-4.6,
+# probably also gcc[>=4.4]
+if ever at_least 4.8_pre20130303 ; then
+    DEPENDENCIES+="
+        build+run:
+            graphite? (
+                dev-libs/cloog[>=0.17&<0.19]
+                dev-libs/isl[>=0.10&<0.12]
+            )
+    "
+elif ever at_least 4.7 ; then
+    DEPENDENCIES+="
+        build+run:
+            graphite? (
+                dev-libs/ppl:=[>=0.11]
+                || ( dev-libs/cloog[>=0.16.1] dev-libs/cloog-ppl[>=0.15.5] )
+            )
+    "
 else
-    ECJ_JAR_PV=${SLOT}
+    DEPENDENCIES+="
+        build+run:
+            graphite? (
+                dev-libs/ppl:=[>=0.11]
+                dev-libs/cloog-ppl[>=0.15.5]
+            )
+    "
 fi
 
-DOWNLOADS+=" java? ( mirror://sourceware/java/ecj-${ECJ_JAR_PV}.jar )"
-MYOPTIONS+=" java"
-DEPENDENCIES+="
-    build:
-        doc? ( app-doc/doxygen[>=1.5.1] )
-        java? ( app-arch/unzip
-                app-arch/zip )
-"
-
 # go support
-if ever at_least 4.6.0; then
+if ever at_least 4.6 ; then
     MYOPTIONS+=" go [[ description = [ Build support for the Go programming language ] ]]"
 fi
 
@@ -129,6 +138,8 @@ DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/exherbo-multiarch-paths.patch"
 
 RESTRICT="test" # tests are expensive
 
+WORK="${WORKBASE}/${PNV/_p?(re)/-}"
+
 gcc_pkg_setup() {
     local target=
 
@@ -147,7 +158,7 @@ gcc_pkg_setup() {
 gcc_src_unpack() {
     if option java ; then
         unpack --if-compressed ${ARCHIVES//ecj-${ECJ_JAR_PV}.jar}
-        edo cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${ECONF_SOURCE}"/ecj.jar
+        edo cp "${FETCHEDDIR}"/ecj-${ECJ_JAR_PV}.jar "${WORK}"/ecj.jar
     else
         default
     fi
@@ -278,8 +289,9 @@ EOF
                 --datarootdir=/usr/share                                                            \
                 --localstatedir=/var                                                                \
                 --sysconfdir=/etc                                                                   \
-                --disable-bootstrap                                                                 \
-                --disable-dependency-tracking                                                       \
+                $(if ever at_least 4.8_pre20130303 ; then
+                    echo --disable-bootstrap
+                fi)                                                                                 \
                 --disable-multilib                                                                  \
                 --disable-libstdcxx-pch                                                             \
                 --enable-fast-install                                                               \
@@ -291,10 +303,16 @@ EOF
                 $(option_enable fortran libquadmath)                                                \
                 $(option_enable fortran libquadmath-support)                                        \
                 $(option_with graphite cloog)                                                       \
-                $(option_with graphite ppl)                                                         \
+                $(if ! ever at_least 4.8_pre20130303 ; then
+                    option_with graphite ppl
+                else
+                    option_with graphite isl
+                  fi)                                                                               \
                 $(if ever at_least 4.6 && optionq graphite ; then
-                    option_enable graphite cloog-backend ${cloog_backend}
-                    ever at_least 4.7 && echo '--disable-cloog-version-check'
+                    if ! ever at_least 4.8_pre20130303 ; then
+                        option_enable graphite cloog-backend ${cloog_backend}
+                        ever at_least 4.7 && echo '--disable-cloog-version-check'
+                    fi
                   fi)                                                                               \
                 $(option_enable openmp libgomp)                                                     \
                 $(option_enable objc-runtime libobjc)                                               \
@@ -433,7 +451,7 @@ __gcc_slot_runtime() {
 
         case "${name}" in
         # always use newest available so version and create so symlinks
-        libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
+        libatomic.so*|libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
             # rename /usr/${CHOST}/lib/libffi.so.4.0.1 => /usr/${CHOST}/lib/libffi-4.3.so.4.0.1
             edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
 

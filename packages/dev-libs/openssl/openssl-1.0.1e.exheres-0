@@ -1,0 +1,60 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Open source SSL and TLS implementation and cryptographic library"
+HOMEPAGE="http://www.openssl.org"
+DOWNLOADS="${HOMEPAGE}/source/${PNV}.tar.gz"
+
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/news/changelog.html [[ lang = en ]]"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/docs/ [[ lang = en ]]"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news/announce.html [[ lang = en ]]"
+
+LICENCES="${PN}"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-0.9.8o-CFLAGS.patch
+)
+
+# TODO(compnerd) fix parallel build
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 LIBDIR=lib MANDIR=/usr/share/man )
+# Tests don't run in parallel
+DEFAULT_SRC_TEST_PARAMS=( -j1 )
+
+_openssl_host_os() {
+    case "$(exhost --target)" in
+    arm-exherbo-linux-gnueabi)
+        echo linux-armv4
+    ;;
+    i686-pc-linux-gnu)
+        echo linux-elf
+    ;;
+    x86_64-pc-linux-gnu)
+        echo linux-x86_64
+    ;;
+    *)
+        die "unknown OpenSSL host/os for $(exhost --target)"
+    ;;
+    esac
+}
+
+src_configure() {
+    edo "${WORK}"/Configure $(_openssl_host_os) \
+        --test-sanity
+
+    edo "${WORK}"/Configure $(_openssl_host_os) \
+        --prefix=/usr/$(exhost --target) --openssldir=/etc/ssl shared threads
+}
+
+src_install() {
+    emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=lib MANDIR=/usr/share/man install
+    keepdir /etc/ssl/{certs,private}
+    emagicdocs
+}
+

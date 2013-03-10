@@ -1,0 +1,42 @@
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="A tool to display dialog boxes from a shell"
+HOMEPAGE="http://invisible-island.net/${PN}"
+DOWNLOADS="ftp://invisible-island.net/${PN}/${PNV/_p/-}.tgz"
+
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/CHANGES [[ lang = en ]]"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS="examples"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+    build+run:
+        sys-libs/ncurses
+"
+
+WORK=${WORKBASE}/${PNV/_p/-}
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --enable-nls
+    --enable-widec
+    --disable-rpath-hack
+    --with-ncursesw
+)
+
+src_install() {
+    default
+
+    if option examples; then
+        insinto /usr/share/doc/${PNVR}/examples
+        doins -r samples/*
+    fi
+}
+

@@ -21,6 +21,12 @@ DEPENDENCIES="
         python? ( dev-lang/python:=[multibuild_c:*(-)?] )
 "
 
+# The tests fail during the initial installation:
+# ${WORK}/test/lsb/test.h:5:28: fatal error: alsa/asoundlib.h: No such file or directory
+# Full build log: gist.github.com/5116680
+# Fix it if you care.
+RESTRICT="test"
+
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( python )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( MEMORY-LEAK )
 

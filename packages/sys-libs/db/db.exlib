@@ -93,10 +93,10 @@ install_one_multibuild() {
 
     edo rm "${IMAGE}"/usr/${LIBDIR}/libdb{,_cxx}{.so,.a,-$(ever major).so}
 
-    option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.so
+    option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl{,-$(ever major)}.so
     ever at_least 5.3.21 && option tcl && edo rm "${IMAGE}"/usr/${LIBDIR}/libdb_tcl.a
 
-    local alternatives=() replace_me
+    local alternatives=() replace_me replace_me_by src
     edo pushd "${IMAGE}"
     # Libraries,    /usr/lib/lib*.*                 -> /usr/lib/lib*-${SLOT}.*
     replace_me=-${SLOT}
@@ -106,11 +106,16 @@ install_one_multibuild() {
     done
 
     # Libraries,    /usr/lib/lib*-$(ever major).so   -> /usr/lib/lib*-${SLOT}.so
-    replace_me=-$(ever major)
+    replace_me_by=-$(ever major)
     for src in usr/${LIBDIR}/libdb{,_cxx}${replace_me}.so ; do
-        target=${src/${replace_me}/-${SLOT}}
+        target=${src/${replace_me}/${replace_me_by}}
         alternatives+=( /${target} ${src##*/} )
     done
+    if option tcl; then
+        src=usr/${LIBDIR}/libdb_tcl${replace_me}.so
+        target=${src/${replace_me}/${replace_me_by}}
+        alternatives+=( /${target} ${src##*/} )
+    fi
     edo popd
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"

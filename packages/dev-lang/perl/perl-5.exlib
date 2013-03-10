@@ -53,6 +53,11 @@ perl-5_src_unpack() {
 perl-5_src_prepare() {
     edo cd "${WORKBASE}/${MY_PNV:-${PNV}}"
     default
+
+    # https://rt.perl.org/rt3//Public/Bug/Display.html?id=113022
+    test-flag-CC -fno-lto && \
+    edo sed -e '/if(p())/{n; s/$ldflags/& -fno-lto/}' \
+            -i Configure
 }
 
 perl-5_src_configure() {
@@ -74,11 +79,15 @@ perl-5_src_configure() {
         "${WORKBASE}/${MY_PNV:-${PNV}}/Configure" \
         -des \
         -Dcc="${CC}" \
+        -Dar="${AR}" \
+        -Dnm="${NM}" \
+        -Dranlib="${RANLIB}" \
         -Dcf_by='Exherbo' \
         -Dprefix=/usr \
         -Dvendorprefix=/usr \
         -Dsiteprefix=/usr \
         -Doptimize="${CFLAGS}" \
+        -Dldflags="${LDFLAGS}" \
         -Darchname="${CHOST%%-*}-linux" \
         -Dlibperl="libperl.so.1.${MY_PVM}" \
         -Dprivlib="/usr/${LIBDIR}/perl5/${MY_PVM}" \

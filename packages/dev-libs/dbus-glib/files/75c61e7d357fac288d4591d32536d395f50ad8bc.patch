@@ -1,0 +1,28 @@
+From 75c61e7d357fac288d4591d32536d395f50ad8bc Mon Sep 17 00:00:00 2001
+From: Marko Lindqvist <cazfi74@gmail.com>
+Date: Mon, 25 Feb 2013 12:40:11 +0000
+Subject: use AC_CONFIG_HEADERS, not AM_CONFIG_HEADER
+
+Automake-1.13 removed long obsolete AM_CONFIG_HEADER completely
+<http://lists.gnu.org/archive/html/automake/2012-12/msg00038.html> and
+errors out upon seeing it.
+
+[commit message added -smcv]
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=59003
+Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+---
+diff --git a/configure.ac b/configure.ac
+index 89b097c..808b72d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -8,7 +8,7 @@ AC_CANONICAL_HOST
+ 
+ AM_INIT_AUTOMAKE([1.9])
+ 
+-AM_CONFIG_HEADER(config.h)
++AC_CONFIG_HEADERS(config.h)
+ 
+ # Honor aclocal flags
+ ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS"
+--
+cgit v0.9.0.2-2-gbebe

@@ -37,13 +37,13 @@ DEPENDENCIES="
     test-expensive:
         dev-lang/python:*[>=2.2]
     build+run:
-        dev-db/sqlite[>=3.4.0]
+        dev-db/sqlite:3[>=3.4.0]
         dev-libs/apr-util[>=0.9.7][berkdb?]
         net-misc/neon[>=0.25&<0.30]
         apache? ( www-servers/apache )
         berkdb? ( sys-libs/db:=[>=4.0.14&<4.9] )
         keyring? (
-            dev-libs/glib
+            dev-libs/glib:2
             gnome-desktop/libgnome-keyring:1
             sys-apps/dbus
         )
@@ -90,12 +90,12 @@ subversion_src_configure() {
     # local library preloading makes sure tests do not pick up on a version of svn that is already
     # installed
     econf \
-        --enable-local-library-preloading \
-        --disable-mod-activation \
-        --without-sasl \
-        --enable-nls \
-        --enable-shared \
         ${myconf} \
+        --enable-local-library-preloading \
+        --enable-nls \
+        --disable-mod-activation \
+        --disable-static \
+        --without-sasl \
         $(option_with apache apxs) \
         $(option_with berkdb berkeley-db $(option berkdb &&
             echo "db.h:$(berkdb_includedir)::db-$(berkdb_slot)")) \

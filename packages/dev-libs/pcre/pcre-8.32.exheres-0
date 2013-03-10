@@ -1,0 +1,54 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge
+
+SUMMARY="Perl Compatible Regular Expression library"
+DESCRIPTION="
+The PCRE library is a set of functions that implement regular expression
+pattern matching using the same syntax and semantics as Perl 5. PCRE has its
+own native API, as well as a set of wrapper functions that correspond to the
+POSIX regular expression API. The PCRE library is free, even for building
+commercial software.
+
+PCRE was originally written for the Exim MTA, but is now used by many
+high-profile open source projects, including Apache, PHP, KDE, Postfix, Analog,
+and Nmap. PCRE has also found its way into some well known commercial products,
+like Apple Safari. Some other interesting projects using PCRE include Chicken,
+Ferite, Onyx, Hypermail, Leafnode, Askemos, and Wenlin.
+"
+HOMEPAGE="http://www.${PN}.org"
+
+REMOTE_IDS+=" freecode:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/changelog.txt"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news.txt"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/ncurses
+        sys-libs/readline
+        sys-libs/zlib
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-Fix-forward-search-in-JIT-when-link-size-is-3-or-gre.patch
+    "${FILES}"/${PNV}-Fix-two-buffer-over-read-issues-in-16-and-32-bit-mod.patch
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-cpp
+    --enable-jit
+    --enable-pcregrep-libbz2
+    --enable-pcregrep-libz
+    --enable-pcretest-libreadline
+    --enable-pcre{8,16,32}
+    --enable-utf
+    --enable-unicode-properties
+    --disable-pcretest-libedit
+)
+

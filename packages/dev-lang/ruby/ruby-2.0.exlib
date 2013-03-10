@@ -1,0 +1,123 @@
+# Copyright 2007, 2008 Richard Brown
+# Copyright 2009, 2010 Ingmar Vanhassel
+# Copyright 2013 Elias Pipping <pipping@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'ruby-1.8.6_p111.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+require alternatives
+
+export_exlib_phases src_configure src_test src_install
+
+MY_PNV="${PN}-$(ever replace 3 '-')"
+SLOT=$(ever range 1-2)
+
+SUMMARY="An object-oriented scripting language"
+DESCRIPTION="A dynamic, open source programming language with a focus on
+simplicity and productivity. It has an elegant syntax that is natural to
+read and easy to write."
+HOMEPAGE="http://www.ruby-lang.org/"
+DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
+
+MYOPTIONS="
+    berkdb gdbm ncurses readline ssl tk
+    examples ipv6
+"
+
+tag_number=$(ever replace_all '_' ${PV})
+UPSTREAM_CHANGELOG="http://svn.ruby-lang.org/repos/ruby/tags/v${tag_number/p}/ChangeLog"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}en/documentation/"
+
+DEPENDENCIES="
+    build:
+        virtual/pkg-config
+    build+run:
+        ncurses? ( sys-libs/ncurses )
+        readline? ( sys-libs/readline )
+        ssl? ( dev-libs/openssl )
+        tk? ( dev-lang/tk )
+"
+
+DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
+
+WORK="${WORKBASE}"/${MY_PNV}
+
+ruby-2.0_src_configure() {
+    # picked up by ext/socket/extconf
+    unset SOCKS_SERVER
+
+    local cfargs=(
+        # Yes, this does always call --enable-ipv6
+        --enable-ipv6
+        $(option ipv6 || echo --with-lookup-order-hack=INET)
+
+        --with-ruby-version=minor
+        --with-rubylibprefix=/usr/${LIBDIR}/ruby
+        --with-rubyhdrdir=/usr/include/ruby-${SLOT}
+
+        --program-suffix=${SLOT}
+        --enable-shared
+
+        # Possible dbm providers
+        --with-dbm-type=db,gdbm
+    )
+
+    # Disable modules that were not requested
+    local opt_ext opt ext disabled_opts=() opts=(
+        'gdbm'
+        'ncurses curses'
+        'readline'
+        'ssl openssl'
+        'tk'
+    )
+    for opt_ext in "${opts[@]}"; do
+        opt=${opt_ext% *}
+        ext=${opt_ext#* }
+        option ${opt} || disabled_opts+=( ${ext} )
+    done
+    option berkdb || option gdbm || disabled_opts+=( dbm )
+    if [[ -n ${disabled_opts[@]} ]]; then
+        cfargs+=( $(IFS=,; echo "--with-out-ext=${disabled_opts[*]}") )
+    fi
+
+    econf "${cfargs[@]}"
+}
+
+ruby-2.0_src_test() {
+    emake test TERM="dumb"
+}
+
+ruby-2.0_src_install() {
+    default
+
+    local \
+        rubylibdir=$(PKG_CONFIG_PATH=. pkg-config ruby-2.0 --variable=rubylibdir) \
+        sitearchdir=$(PKG_CONFIG_PATH=. pkg-config ruby-2.0 --variable=sitearchdir) \
+        vendorarchdir=$(PKG_CONFIG_PATH=. pkg-config ruby-2.0 --variable=vendorarchdir)
+    keepdir "${vendorarchdir}" "${sitearchdir}"
+
+    if option examples; then
+        insinto /usr/share/doc/${PNVR}
+        doins -r sample
+    fi
+
+    edo pushd "${IMAGE}"
+    local src target alternatives=()
+    for src in usr/bin/*${SLOT} usr/share/man/man1/*${SLOT}.1; do
+        target=${src/${SLOT}}
+        alternatives+=( /${target} ${src##*/} )
+    done
+
+    # Split gems/ up into vendor_gems/ (shipped with ruby) and gems/
+    edo sed -e "s/default_dir]/default_dir, default_dir.gsub\('gems','vendor_gems'\)]/" -i \
+        "${IMAGE}"/${rubylibdir}/rubygems/defaults.rb
+    edo mv "${IMAGE}"/usr/${LIBDIR}/ruby/{,vendor_}gems
+    keepdir /usr/${LIBDIR}/ruby/{vendor_,}gems/${SLOT}/{build_info,cache,doc,gems,specifications}
+
+    # FIXME: I don't know what this is
+    keepdir /usr/${LIBDIR}/ruby/${SLOT}/racc/rdoc
+
+    alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
+    edo popd
+}
+

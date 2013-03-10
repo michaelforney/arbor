@@ -1,0 +1,135 @@
+# Copyright 2008, 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2010 Cecil Curry <leycec@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'doxygen-1.5.5.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require qmake4 [ no_qt_dependency=true ] freedesktop-mime
+
+SUMMARY="Documentation system for C++, C, Java, Objective-C, Python, IDL, and other languages"
+HOMEPAGE="http://www.doxygen.org/"
+DOWNLOADS="http://ftp.stack.nl/pub/users/dimitri/${PNV}.src.tar.gz
+    doc? ( http://ftp.stack.nl/pub/users/dimitri/${PN}_manual-${PV}.pdf.zip )"
+
+REMOTE_IDS="freecode:${PN}"
+
+DOXYGEN_DOCUMENTATION_HOME="http://www.stack.nl/~dimitri/${PN}"
+UPSTREAM_DOCUMENTATION="
+${DOXYGEN_DOCUMENTATION_HOME}/faq.html    [[ description = [ Doxygen FAQ ] lang = en ]]
+${DOXYGEN_DOCUMENTATION_HOME}/manual.html [[ description = [ Doxygen Manual ] lang = en ]]
+"
+UPSTREAM_RELEASE_NOTES="${DOXYGEN_DOCUMENTATION_HOME}/changelog.html"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="doc
+    dot      [[ description = [ Use the dot tool from graphviz to generate more advanced diagrams
+                                and graphs ] ]]
+    examples [[ description = [ Build doxyapp ] requires = [ qt4 ] ]]
+    qt4      [[ description = [ Build doxywizard ] ]]
+" # latex
+
+DEPENDENCIES="
+    build:
+        doc? (
+            dev-lang/python:*
+            app-arch/unzip
+        )
+    build+run:
+        app-text/ghostscript
+        media-libs/libpng
+        dot? (
+            media-gfx/graphviz[>=1.8.10]
+            media-libs/freetype:2
+        )
+        qt4? ( x11-libs/qt:4[>=4.3.0] )
+"
+
+# Prevent Makefiles from running "qmake"; run "eqmake4" instead in src_configure
+DEFAULT_SRC_COMPILE_PARAMS=( QMAKE=true )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
+DEFAULT_SRC_INSTALL_PARAMS=( MAN1DIR="share/man/man1" )
+
+DOXYGEN_DOC_DIR="/usr/share/doc/${PNVR}"
+
+src_prepare() {
+    default
+
+    # Respect *FLAGS
+    edo sed \
+        -e "/^TMAKE_CC[[:space:]]/s:=.*$:= ${CC}:" \
+        -e "/^TMAKE_CFLAGS[[:space:]]/s:=.*$:= ${CFLAGS}:" \
+        -e "/^TMAKE_CFLAGS_RELEASE[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CFLAGS_DEBUG[[:space:]]/s:=.*$:= :" \
+        -e "/^TMAKE_CXX[[:space:]]/s:=.*$:= ${CXX}:" \
+        -e "/^TMAKE_CXXFLAGS[[:space:]]/s:=.*$:= ${CXXFLAGS}:" \
+        -e "/^TMAKE_LFLAGS[[:space:]]/s:=.*$:= ${LDFLAGS}:" \
+        -e "/^TMAKE_LFLAGS_DEBUG/s:=.*$:= :" \
+        -i tmake/lib/linux*/tmake.conf
+
+    if option qt4; then
+        # Without this, qt:3 is picked up if installed
+        export QTDIR=/usr
+
+        # Fix DESTDIR issues with the doxywizard binary
+        edo sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
+                -i addon/doxywizard/Makefile.in
+
+        if option examples; then
+            # Without this, doxyapp complains about unresolved libpthread symbols
+            edo sed -e '/^LIBS[[:space:]]/s~$~ -lpthread~' \
+                    -i addon/doxyapp/doxyapp.pro.in
+        fi
+    fi
+}
+
+src_configure() {
+    option qt4 && eqmake4 addon/doxywizard/doxywizard.pro -o addon/doxywizard/Makefile.doxywizard
+
+    # Custom configure file hates --without-* and most standard econf options
+    edo ./configure \
+        --docdir "${DOXYGEN_DOC_DIR}" \
+        --prefix /usr \
+        --shared \
+        $(option qt4 && echo "--with-doxywizard") \
+        $(option examples && echo "--with-doxyapp")
+}
+
+src_compile() {
+    default
+
+    if option doc; then
+        dodoc "${WORKBASE}"/${PN}_manual-${PV}.pdf
+
+        # Disable Graphviz support
+        option !dot && edo sed -e '/HAVE_DOT/s:YES:NO:' -i $(find -name Doxyfile)
+
+        # Disable latex support.
+        edo cp doc/Doxyfile{,.orig}
+        edo cp doc/Makefile{,.orig}
+
+        edo sed -e '/GENERATE_LATEX/s:YES:NO:' \
+                -e '/USE_PDFLATEX/s:YES:NO:' \
+                -i doc/Doxyfile
+
+        edo sed -e '/@epstopdf/s:^:#DONOTWANT :' \
+                -e '/@cp Makefile.latex/s:^:#DONOTWANT :' \
+                -e '/@sed/s:^:#DONOTWANT :' \
+                -i doc/Makefile
+
+        emake docs
+    fi
+}
+
+src_install() {
+    default
+
+    if option doc; then
+        insinto "${DOXYGEN_DOC_DIR}"
+        doins -r html/*
+    fi
+
+    option examples && dobin bin/doxyapp
+}
+

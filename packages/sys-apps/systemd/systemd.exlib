@@ -5,7 +5,9 @@ if ever is_scm ; then
     SCM_REPOSITORY="git://git.freedesktop.org/git/systemd/systemd.git"
     require scm-git
 else
-    DOWNLOADS="http://www.freedesktop.org/software/${PN}/${PNV}.tar.xz"
+    DOWNLOADS="
+        http://www.freedesktop.org/software/${PN}/${PNV}.tar.xz
+    "
 fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
@@ -30,7 +32,11 @@ do we support it.
 "
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/${PN}"
 BUGS_TO="philantrop@exherbo.org"
-LICENCES="( GPL-2 LGPL-2 LGPL-2.1 MIT )"
+LICENCES="
+    LGPL-2.1 [[ note = [ Everything but ] ]]
+    GPL-2    [[ note = [ src/udev and ] ]]
+    MIT      [[ note = [ sd-daemon.[ch] and sd-readahead.[ch] ] ]]
+"
 SLOT="0"
 MYOPTIONS="
     acl
@@ -46,7 +52,9 @@ MYOPTIONS="
                   cf. http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames
                 ]
             ]]
+    polkit [[ description = [ Use PolicyKit for privileged operations ] ]]
     python [[ description = [ Build the man page index and systemd-python (bindings) ] ]]
+    qrencode [[ description = [ For transferring the journal verification key to a smartphone ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     tcpd
     xattr
@@ -88,7 +96,13 @@ DEPENDENCIES="
         cryptsetup? ( sys-fs/cryptsetup[>=1.4.2] )
         gcrypt? ( dev-libs/libgcrypt )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
-        journal-gateway? ( net-libs/libmicrohttpd[>=0.9.5] )
+        polkit? ( sys-auth/polkit )
+        qrencode? ( media-libs/qrencode )
+        journal-gateway? (
+            net-libs/libmicrohttpd[>=0.9.5]
+            user/systemd-journal-gateway
+            group/systemd-journal-gateway
+        )
         tcpd? ( sys-apps/tcp-wrappers )
         xattr? ( sys-apps/attr )
     run:
@@ -96,6 +110,7 @@ DEPENDENCIES="
         sys-apps/kbd[>=1.15.2-r1]
         group/dialout
         group/lock [[ note = [ Required for var-lock service ] ]]
+        group/systemd-journal [[ note = [ Required for journal access by non-root users ] ]]
         simple-net? ( sys-apps/net-tools[>=1.60_p20120127084908] )
     suggestion:
         app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
@@ -121,8 +136,9 @@ systemd_pkg_pretend() {
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
     fi
 
-    if [[ ${kv} < 3.5 ]] ; then
-        ewarn "You SHOULD install a kernel >= 3.5 to get the best results."
+    if [[ ${kv} < 3.8 ]] ; then
+        ewarn "You SHOULD install a kernel >= 3.8 to get the best results."
+        ewarn "Read http://cgit.freedesktop.org/systemd/systemd/plain/README for details."
     fi
 
     if [[ -f "${ROOT}"/etc/tmpfiles.d/legacy.conf ]] ; then
@@ -131,6 +147,9 @@ systemd_pkg_pretend() {
         ewarn "if you did not make any changes to it."
     fi
 }
+
+# systemd >= 198 is not parallel safe
+DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 systemd_pkg_setup() {
     exdirectory --allow /etc/binfmt.d
@@ -157,6 +176,9 @@ systemd_src_prepare() {
 
     # Disable a test that needs root privs.
     edo sed -i -e '/test-sched-prio/s:test-sched-prio:$(NULL):' Makefile.am
+
+    # This test needs both a running systemd and dbus. Disabling it.
+    edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
@@ -187,15 +209,16 @@ systemd_src_configure() {
         --enable-xz
         --disable-audit
         --disable-chkconfig
+        # I don't have any EFI system with Linux installed. Feel free to create an option.
+        --disable-efi
         --disable-ima
+        --disable-selinux
+        --with-bashcompletiondir=/usr/share/bash-completion/completions
         # Uses pkg-config directly
         --with-dbuspolicydir=/etc/dbus-1/system.d
         --with-dbussessionservicedir=/usr/share/dbus-1/services
         --with-dbussystemservicedir=/usr/share/dbus-1/system-services
         --with-dbusinterfacedir=/usr/share/dbus-1/interfaces
-        # For transferring the verification key to a smartphone
-        --disable-qrencode
-        --disable-selinux
         --with-firmware-path=/usr/$(exhost --target)/lib/firmware/updates:/usr/$(exhost --target)/lib/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
@@ -213,6 +236,8 @@ systemd_src_configure() {
         $(option_enable gobject-introspection introspection)
         $(option_enable gtk-doc)
         $(option_enable journal-gateway microhttpd)
+        $(option_enable polkit)
+        $(option_enable qrencode)
         $(option_enable tcpd tcpwrap)
         $(option_enable xattr)
         $(option_with python)
@@ -232,7 +257,10 @@ systemd_src_test() {
         # Enabling those tests can (and most likely will) mess up your running system
         # completely and require you to reboot. You've been warned.
         if [[ -f /etc/machine-id ]]; then
-            default
+            # The tests currently fail if run under sydbox.
+            esandbox disable
+            emake check
+            esandbox enable
         else
             ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
             ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
@@ -286,12 +314,6 @@ systemd_src_install() {
     keepdir /usr/${host}/lib/systemd/system-sleep
 
     alternatives_for "${alternatives[@]}"
-
-    # Handle bash-completion
-    if option bash-completion ; then
-        dobashcompletion "${IMAGE}"/etc/bash_completion.d/systemd-bash-completion.sh
-    fi
-    edo rm -r "${IMAGE}"/etc/bash_completion.d
 
     install-zsh-completions
 
@@ -369,6 +391,9 @@ LC_MEASUREMENT=C
 LC_IDENTIFICATION=C
 EOF
 
+    # Don't create /var/log/journal, the user should do that
+    edo rmdir "${IMAGE}"/var/log/{journal,}
+
     # keepdir some stuff
     keepdir /etc/systemd/session
     keepdir /etc/systemd/system/graphical.target.wants
@@ -405,7 +430,7 @@ EOF
     keepdir /etc/udev/rules.d
 
     # Keep the administrator's udev hardware database dir.
-    ever at_least scm && keepdir /etc/udev/hwdb.d
+    keepdir /etc/udev/hwdb.d
 
     # platform rules
     #insinto "${UDEVRULESDIR}"

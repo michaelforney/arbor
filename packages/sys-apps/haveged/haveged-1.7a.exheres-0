@@ -1,0 +1,40 @@
+# Copyright 2011 Nathan McSween <nwmcsween@gmail.com>
+# Copyright 2013 Wouter van Kesteren <woutershep@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require systemd-service checksums [ sha1=[ ${PNV}.tar.gz=d56d00f064dd62494803655e1df069cc86dddc0f ] ]
+
+SUMMARY="Generates secure entropy using variances in process TSCs"
+DESCRIPTION="
+haveged is a daemon that feeds the /dev/random pool on Linux using an adaptation
+of the HArdware Volatile Entropy Gathering and Expansion algorithm invented at
+IRISA. The algorithm is self-tuning on machines with cpuid support, and has been
+tested in both 32-bit and 64-bit environments.
+"
+HOMEPAGE="http://www.issihosts.com/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
+
+BUGS_TO="nwmcsween@gmail.com"
+REMOTE_IDS="freecode:${PN} sourceforge:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/usr/sbin --enable-nistest )
+
+#WORK="${WORKBASE}"/${PN}-${PV/[a-z]}
+
+src_prepare() {
+    # use /run for the pidfile
+    edo sed -e 's:/var\(/run/haveged.pid\):\1:' \
+            -i src/haveged.c man/haveged.8
+}
+
+src_install() {
+    default
+
+    install_systemd_files
+}
+

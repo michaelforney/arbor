@@ -1,0 +1,46 @@
+# Copyright 2013 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+# This exheres can go once git-remote-bzr has ended up in git's contrib.
+
+SUMMARY="Bridge support in git for mercurial and bazaar"
+DESCRIPTION="
+These bridging tools allow for working on Mercurial and Bazaar repositories as
+if they were proper git ones, e. g.
+git clone hg::http://selenic.com/repo/hello
+git clone bzr::lp:gnuhello
+
+Pushing, pulling - everything just works.
+"
+HOMEPAGE="http://felipec.wordpress.com/2012/11/13/git-remote-hg-bzr-2"
+DOWNLOADS="
+    bzr? ( https://raw.github.com/felipec/git/fc/remote/bzr/contrib/remote-helpers/git-remote-bzr )
+    mercurial? ( https://raw.github.com/felipec/git/fc/remote/hg/contrib/remote-helpers/git-remote-hg )
+"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="
+    (
+        bzr [[ description = [ Install the Bazaar bridge ] ]]
+        mercurial [[ description = [ Install the Mercurial bridge ] ]]
+    ) [[ number-selected = at-least-one ]]
+"
+
+DEPENDENCIES="
+    run:
+        dev-lang/python:=
+        bzr? ( dev-scm/bzr )
+        mercurial? ( dev-scm/mercurial )
+"
+
+WORK=${WORKBASE}
+
+src_install() {
+    option bzr && dobin "${FETCHEDDIR}"/git-remote-bzr
+    option mercurial && dobin "${FETCHEDDIR}"/git-remote-hg
+}
+
