@@ -35,7 +35,7 @@ UPSTREAM_CHANGELOG="http://cnswww.cns.cwru.edu/php/chet/${PN}/CHANGES"
 
 LICENCES="GPL-3"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="parts: development documentation libraries"
 
 DEPENDENCIES="
     build+run:
@@ -70,5 +70,9 @@ src_prepare() {
 src_install() {
     default
     edo rmdir "${IMAGE}/usr/$(exhost --target)/bin"
+
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,info,man}
+    expart libraries /usr/$(exhost --target)/lib
 }
 
