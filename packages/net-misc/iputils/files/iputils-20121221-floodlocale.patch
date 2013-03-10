@@ -1,0 +1,25 @@
+Source: Redhat/Fedora
+Upstream: unknown
+Reason: LANG variable breaks ping -i
+
+diff -Naur iputils-s20121221.orig/ping_common.c iputils-s20121221/ping_common.c
+--- iputils-s20121221.orig/ping_common.c	2012-12-21 15:01:07.000000000 +0100
++++ iputils-s20121221/ping_common.c	2013-03-10 01:11:56.490394488 +0100
+@@ -2,6 +2,7 @@
+ #include <ctype.h>
+ #include <sched.h>
+ #include <math.h>
++#include <locale.h>
+ 
+ int options;
+ 
+@@ -269,7 +270,9 @@
+ 		char *ep;
+ 
+ 		errno = 0;
++		setlocale(LC_ALL, "C");
+ 		dbl = strtod(optarg, &ep);
++		setlocale(LC_ALL, "");
+ 
+ 		if (errno || *ep != '\0' ||
+ 		    !finite(dbl) || dbl < 0.0 || dbl >= (double)INT_MAX / 1000 - 1.0) {

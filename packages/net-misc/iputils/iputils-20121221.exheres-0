@@ -2,7 +2,6 @@
 # Distributed under the terms of the GNU General Public License v2
 
 MY_PNV="${PN}-s${PV}"
-WORK="${WORKBASE}/${MY_PNV}"
 
 SUMMARY="Small useful utilities for networking"
 HOMEPAGE="http://www.skbuff.net/${PN}"
@@ -12,22 +11,33 @@ DOWNLOADS="${HOMEPAGE}/${MY_PNV}.tar.bz2
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="ipv6"
+MYOPTIONS="caps idn ipv6"
 
 DEPENDENCIES="
     build+run:
         dev-libs/openssl
         sys-fs/sysfsutils
+        caps? ( sys-libs/libcap )
+        idn? ( net-dns/libidn )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}/${PN}-20071127-kernel-ifaddr.patch" )
-DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
+WORK=${WORKBASE}/${MY_PNV}
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-20121221-floodlocale.patch )
 
 src_prepare() {
     default
 
     edo sed "/^CCOPT=/s|-g|${CFLAGS}|" -i Makefile
     edo sed "/^CCOPT=/s|$| ${CFLAGS}|" -i Modules/Makefile
+}
+
+src_compile() {
+    emake \
+        CC="${CC}" \
+        USE_CAP=$(optionv caps || echo no) \
+        USE_IDN=$(optionv idn || echo no) \
+        $(option ipv6 || echo IPV6_TARGETS=)
 }
 
 src_install() {
@@ -44,9 +54,10 @@ src_install() {
         edo chmod +s "${IMAGE}"/bin/ping6
 
         into /usr
-        dosbin tracepath6 traceroute6
-        edo chmod +s "${IMAGE}"/usr/sbin/traceroute6
+        dosbin tracepath6
     fi
+
+    edo rm doc/traceroute6.8
 
     doman doc/*.?
     dodoc RELNOTES
