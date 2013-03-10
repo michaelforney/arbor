@@ -19,11 +19,10 @@ read and easy to write."
 HOMEPAGE="http://www.ruby-lang.org/"
 DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
-# FIXME: handle berkdb / gdbm
 MYOPTIONS="
-    dbm gdbm ncurses readline ssl tk
+    berkdb gdbm ncurses readline ssl tk
     examples ipv6
-" # berkdb debug doc "
+"
 
 tag_number=$(ever replace_all '_' ${PV})
 UPSTREAM_CHANGELOG="http://svn.ruby-lang.org/repos/ruby/tags/v${tag_number/p}/ChangeLog"
@@ -58,11 +57,13 @@ ruby-2.0_src_configure() {
 
         --program-suffix=${SLOT}
         --enable-shared
+
+        # Possible dbm providers
+        --with-dbm-type=db,gdbm
     )
 
     # Disable modules that were not requested
     local opt_ext opt ext disabled_opts=() opts=(
-        'dbm'
         'gdbm'
         'ncurses curses'
         'readline'
@@ -74,6 +75,7 @@ ruby-2.0_src_configure() {
         ext=${opt_ext#* }
         option ${opt} || disabled_opts+=( ${ext} )
     done
+    option berkdb || option gdbm || disabled_opts+=( dbm )
     if [[ -n ${disabled_opts[@]} ]]; then
         cfargs+=( $(IFS=,; echo "--with-out-ext=${disabled_opts[*]}") )
     fi
