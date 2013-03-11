@@ -20,7 +20,7 @@ HOMEPAGE="http://www.ruby-lang.org/"
 DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
 MYOPTIONS="
-    berkdb gdbm ncurses readline ssl tk
+    berkdb gdbm ncurses readline tk
     examples ipv6
 "
 
@@ -36,8 +36,8 @@ DEPENDENCIES="
         gdbm? ( sys-libs/gdbm )
         ncurses? ( sys-libs/ncurses )
         readline? ( sys-libs/readline )
-        ssl? ( dev-libs/openssl )
         tk? ( dev-lang/tk )
+        dev-libs/openssl
 "
 
 DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
@@ -69,7 +69,6 @@ ruby-2.0_src_configure() {
         'gdbm'
         'ncurses curses'
         'readline'
-        'ssl openssl'
         'tk'
     )
     for opt_ext in "${opts[@]}"; do
