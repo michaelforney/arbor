@@ -152,11 +152,6 @@ EOF
     dodir ${emacs_source_root}
     edo tar xf source.tar -C "${IMAGE}"${emacs_source_root}
 
-    local i
-    for i in "${IMAGE}"/usr/share/info/${PN}/*; do
-        edo mv "${i}" "${i}.info"
-    done
-
     cd "${IMAGE}"
     edo mv usr/share/man/man1/ctags{,-emacs}.1
     edo mv usr/bin/ctags{,-emacs}
