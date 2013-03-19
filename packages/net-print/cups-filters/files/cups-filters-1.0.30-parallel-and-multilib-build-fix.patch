@@ -1,0 +1,26 @@
+Source: Timo Gurr <tgurr@exherbo.org>
+Upstream: Fixed in rev. 7049, bug: https://bugs.linuxfoundation.org/show_bug.cgi?id=1104
+Reason: Multibuild make install fails since 'ln -s' refuses to overwrite.
+
+diff -Naur cups-filters-1.0.30.orig/Makefile.am cups-filters-1.0.30/Makefile.am
+--- cups-filters-1.0.30.orig/Makefile.am	2013-02-20 14:06:20.000000000 +0100
++++ cups-filters-1.0.30/Makefile.am	2013-03-19 15:23:20.136356612 +0100
+@@ -670,14 +670,14 @@
+ if RCLINKS
+ 	for level in $(RCLEVELS); do \
+ 		$(INSTALL) -d -m 755 $(DESTDIR)$(INITDIR)/rc$${level}.d; \
+-		$(LN_S) ../init.d/cups-browsed $(DESTDIR)$(INITDIR)/rc$${level}.d/S$(RCSTART)cups-browsed; \
+-		$(LN_S) ../init.d/cups-browsed $(DESTDIR)$(INITDIR)/rc$${level}.d/K$(RCSTOP)cups-browsed; \
++		$(LN_S) -f ../init.d/cups-browsed $(DESTDIR)$(INITDIR)/rc$${level}.d/S$(RCSTART)cups-browsed; \
++		$(LN_S) -f ../init.d/cups-browsed $(DESTDIR)$(INITDIR)/rc$${level}.d/K$(RCSTOP)cups-browsed; \
+ 	done; \
+ 	$(INSTALL) -d -m 755 $(DESTDIR)$(INITDIR)/rc0.d; \
+-	$(LN_S) ../init.d/cups-browsed $(DESTDIR)$(INITDIR)/rc0.d/K$(RCSTOP)cups-browsed;
++	$(LN_S) -f ../init.d/cups-browsed $(DESTDIR)$(INITDIR)/rc0.d/K$(RCSTOP)cups-browsed;
+ endif
+ endif
+-	$(LN_S) pdf.utf-8.simple \
++	$(LN_S) -f pdf.utf-8.simple \
+ 		$(DESTDIR)$(pkgcharsetdir)/pdf.utf-8
+ 
+ 

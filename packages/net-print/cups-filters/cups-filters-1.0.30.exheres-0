@@ -1,7 +1,8 @@
-# Copyright 2012 Timo Gurr <tgurr@exherbo.org>
+# Copyright 2012-2013 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
+require systemd-service [ systemd_files=[ cups-browsed.service ] ]
 
 SUMMARY="OpenPrinting CUPS Filters"
 DESCRIPTION="
@@ -17,7 +18,10 @@ DOWNLOADS="http://www.openprinting.org/download/${PN}/${PNV}.tar.xz"
 LICENCES="GPL-2 GPL-3 MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    avahi
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
@@ -32,7 +36,11 @@ DEPENDENCIES="
         media-libs/lcms2[multibuild_c:*(-)?]
         media-libs/libpng[multibuild_c:*(-)?]
         media-libs/tiff[multibuild_c:*(-)?]
-        net-print/cups[>=1.4][multibuild_c:*(-)?]
+        net-print/cups[>=1.6][multibuild_c:*(-)?]
+        avahi? (
+            net-dns/avahi[multibuild_c:*(-)?]
+            net-print/cups[>=1.6][avahi][multibuild_c:*(-)?]
+        )
     run:
         sys-apps/bc                [[ note = [ pstopdf filter ] ]]
     suggestion:
@@ -40,11 +48,9 @@ DEPENDENCIES="
         net-print/foomatic-filters [[ note = [ for non-PostScript printers ] ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.0.29-poppler_022.patch )
-
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.0.30-parallel-and-multilib-build-fix.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-imagefilters
-    --disable-avahi # feel free to make it an option and test it
     --disable-static
     --with-fontdir=fonts/conf.avail
     --with-jpeg
@@ -54,10 +60,22 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-tiff
     --without-php
 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( avahi )
 
-src_prepare() {
-    # required for multilib install - 3e1c32fd
-    edo sed -e 's:$(LN_S):ln -sf:' -i Makefile.{am,in}
-    autotools_src_prepare
+configure_one_multibuild() {
+    econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
+        --with-browseremoteprotocols=$(option avahi && echo 'DNSSD,CUPS' || echo 'CUPS')
+}
+
+install_one_multibuild() {
+    default
+
+    edo rm -r "${IMAGE}"/etc/rc.d
+
+    install_systemd_files
+
+    if ! option avahi ; then
+        multibuild_default_target C && edo sed -i -e 's: avahi-daemon.service::g' "${IMAGE}"/usr/${LIBDIR}/systemd/system/cups-browsed.service
+    fi
 }
 
