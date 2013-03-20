@@ -20,6 +20,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     avahi
+    systemd
     multibuild_c: 32 64
 "
 
@@ -48,33 +49,37 @@ DEPENDENCIES="
         net-print/foomatic-filters [[ note = [ for non-PostScript printers ] ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-1.0.30-parallel-and-multilib-build-fix.patch )
-DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --enable-imagefilters
-    --disable-static
-    --with-fontdir=fonts/conf.avail
-    --with-jpeg
-    --with-pdftops=pdftops
-    --with-png
-    --with-test-font-path=/usr/share/fonts/X11/dejavu/DejaVuSans.ttf
-    --with-tiff
-    --without-php
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-1.0.30-parallel-and-multilib-build-fix.patch
+    "${FILES}"/${PN}-1.0.30-noavahi.patch
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( avahi )
 
 configure_one_multibuild() {
-    econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-        --with-browseremoteprotocols=$(option avahi && echo 'DNSSD,CUPS' || echo 'CUPS')
+    local args=(
+        --disable-static
+        --enable-imagefilters
+        --with-browseremoteprotocols=$(option avahi && echo 'DNSSD,')CUPS \
+        --with-fontdir=fonts/conf.avail
+        --with-jpeg
+        --with-pdftops=pdftops
+        --with-png
+        --with-test-font-path=/usr/share/fonts/X11/dejavu/DejaVuSans.ttf
+        --with-tiff
+        --without-php
+        $(option_enable avahi)
+    )
+
+    econf "${args[@]}"
 }
 
 install_one_multibuild() {
     default
 
-    edo rm -r "${IMAGE}"/etc/rc.d
-
     install_systemd_files
 
-    if ! option avahi ; then
+    if option avahi; then
+        edo rm -r "${IMAGE}"/etc/rc.d
+    elif option systemd; then
         multibuild_default_target C && edo sed -i -e 's: avahi-daemon.service::g' "${IMAGE}"/usr/${LIBDIR}/systemd/system/cups-browsed.service
     fi
 }
