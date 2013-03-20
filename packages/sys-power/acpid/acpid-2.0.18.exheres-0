@@ -4,7 +4,7 @@
 # Based in part upon 'acpid-1.0.6-r1.ebuild', which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require systemd-service
+require sourceforge [ project=${PN}2 suffix=tar.xz ] systemd-service
 
 SUMMARY="A configurable ACPI policy daemon for Linux"
 DESCRIPTION="
@@ -13,15 +13,14 @@ will attempt to connect to the Linux kernel via the input layer and
 netlink. When an ACPI event is received from one of these sources, acpid
 will examine a list of rules, and execute the rules that match the event.
 "
-HOMEPAGE="http://tedfelix.com/linux/${PN}-netlink.html"
-DOWNLOADS="http://tedfelix.com/linux/${PNV}.tar.xz"
 
-REMOTE_IDS="freecode:{PN}"
+REMOTE_IDS+=" freecode:{PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="baselayout"
+
 DEPENDENCIES=""
 
 BUGS_TO="pioto@exherbo.org"
