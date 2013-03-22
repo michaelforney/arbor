@@ -12,7 +12,7 @@ fi
 
 require systemd-service
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_install
 
 SUMMARY="Support utilities for handling btrfs filesystems"
 HOMEPAGE="https://btrfs.wiki.kernel.org"
@@ -28,7 +28,7 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        app-arch/lzo
+        app-arch/lzo:2
         sys-apps/acl
         sys-apps/util-linux
         sys-fs/e2fsprogs
@@ -37,9 +37,11 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_COMPILE_PARAMS=(
+    AR="${AR}"
     CC="${CC}"
     CFLAGS="${CFLAGS}"
     LDFLAGS="${LDFLAGS}"
+    V=1
     all
     btrfs-debug-tree
     btrfs-image
@@ -58,13 +60,6 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
     INSTALL
     show-blocks
 )
-
-btrfs-progs_src_prepare() {
-    default
-
-    # Respect CFLAGS.
-    edo sed -i -e 's:gcc $(CFLAGS):$(CC) $(CFLAGS):' Makefile
-}
 
 btrfs-progs_src_install() {
     default
