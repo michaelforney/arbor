@@ -229,6 +229,9 @@ git-googlecode_src_install() {
     if option systemd ; then
         hereconfd ${PN}-daemon.conf <<EOF
 GIT_OPTS="/var/git"
+
+GIT_USER="nobody"
+GIT_GROUP="nobody"
 EOF
     fi
     install_systemd_files
