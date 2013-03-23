@@ -49,6 +49,6 @@ DEFAULT_SRC_COMPILE_PARAMS=( CXX="${CXX}" LIB_OPT="${CXXFLAGS} -finline-function
 DEFAULT_SRC_INSTALL_EXCLUDE=( readme.txt )
 
 src_install() {
-    emake -j1 install # Don't overwrite DESTDIR
+    emake -j1 DESTDIR="${IMAGE}"/usr install
 }
 
