@@ -44,8 +44,9 @@ test_one_multibuild() {
     PATH=/usr/libexec/llvm:$PATH CLANG=${PWD}/bin/clang emake clang-test
 }
 
-install_one_multibuild() {
-    cmake_src_install
+src_install() {
+    easy-multibuild_src_install
+
     # the sole file here, config.h, is explicitly not installed
     edo rmdir "${IMAGE}"/usr/include/clang/Config
 
