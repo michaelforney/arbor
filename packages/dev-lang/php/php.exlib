@@ -316,7 +316,7 @@ DEFAULT_SRC_INSTALL_EXCLUDE=(
 )
 
 php_pkg_pretend() {
-    if [[ -z "${SUHOSIN_VERSION}" ]] && has_version --root ${CATEGORY}/${PN}[suhosin]; then
+    if [[ -z ${SUHOSIN_VERSION} ]] && has_version --root ${CATEGORY}/${PN}[suhosin]; then
         elog "${PNV} doesn't (yet) support the Suhosin patch. If you rely on it, don't install ${PNV}."
     fi
 }
