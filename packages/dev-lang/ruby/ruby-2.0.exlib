@@ -118,6 +118,9 @@ ruby-2.0_src_install() {
     # FIXME: I don't know what this is
     keepdir /usr/${LIBDIR}/ruby/${SLOT}/racc/rdoc
 
+    # if dependencies are met, C API docs are installed
+    edo find "${IMAGE}"/usr/share/doc/${PNVR} -empty -type d -delete
+
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
     edo popd
 }
