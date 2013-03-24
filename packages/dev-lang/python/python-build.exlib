@@ -10,9 +10,9 @@ MY_PNV="Python-${PV}"
 # python: no has_lib as it needs only the pyc part of the exlib
 require flag-o-matic python [ has_lib=false ] alternatives \
         autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 1.10 ] ]
-require easy-multibuild [ work=${MY_PNV} ]
+require easy-multibuild [ multiunpack=true work=${MY_PNV} ]
 
-export_exlib_phases src_unpack src_prepare src_install pkg_preinst
+export_exlib_phases src_prepare src_install pkg_preinst
 
 SUMMARY="Python interpreter"
 HOMEPAGE="http://www.${PN}.org/"
@@ -56,14 +56,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-system-ffi
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
-
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-python-build_src_unpack() {
-    easy-multibuild_run_phase
-}
 
 python-build_prepare_one_multibuild() {
     # linux-3 support, applied upstream
