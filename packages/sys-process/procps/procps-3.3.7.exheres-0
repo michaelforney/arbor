@@ -22,10 +22,6 @@ DEPENDENCIES="
         dev-util/dejagnu
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/0001-Added-support-for-vmflags-in-pmap.patch
-)
-
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-nls
     --disable-{s,}kill
@@ -35,6 +31,10 @@ WORK=${WORKBASE}/${PN}-${PN}
 
 src_prepare() {
     default
+
+    # revert a commit so wrong it's not even funny :(
+    # https://gitorious.org/procps/procps/commit/2840d7f4c66a85676c79eeb2c89db4d450fd3fc4
+    edo sed -i -e 's/[&]9/99999999/' testsuite/config/unix.exp
 
     # misc/git-version-gen only works from a checkout, not a snapshot
     echo ${PV} > .tarball-version
