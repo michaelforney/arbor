@@ -1,0 +1,36 @@
+Upstream: yes, in master
+From 83877eb2f7dde3a9120e7f512058f23aa9c34690 Mon Sep 17 00:00:00 2001
+From: Baptiste Daroussin <bapt@FreeBSD.org>
+Date: Wed, 20 Mar 2013 17:52:17 +0100
+Subject: [PATCH] Do not ignore PKG_CONFIG_PATH if a direct path to a .pc file
+ is supplied
+
+---
+ pkg.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/pkg.c b/pkg.c
+index ed23b47..58eed08 100644
+--- a/pkg.c
++++ b/pkg.c
+@@ -461,6 +461,8 @@
+ 	pkg_node_t *n;
+ 	FILE *f;
+ 
++	pkg_dir_list_build(flags);
++
+ 	/* name might actually be a filename. */
+ 	if (str_has_suffix(name, PKG_CONFIG_EXT))
+ 	{
+@@ -485,8 +487,6 @@
+ 		}
+ 	}
+ 
+-	pkg_dir_list_build(flags);
+-
+ 	PKG_FOREACH_LIST_ENTRY(pkg_dir_list.head, n)
+ 	{
+ 		pkg_path_t *pkg_path = n->data;
+-- 
+1.8.1.5
+
