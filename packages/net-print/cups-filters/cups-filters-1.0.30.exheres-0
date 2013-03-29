@@ -20,7 +20,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     avahi
-    systemd
+    systemd [[ requires = [ avahi ] ]]
     multibuild_c: 32 64
 "
 
@@ -79,8 +79,6 @@ install_one_multibuild() {
 
     if option avahi; then
         edo rm -r "${IMAGE}"/etc/rc.d
-    elif option systemd; then
-        multibuild_default_target C && edo sed -i -e 's: avahi-daemon.service::g' "${IMAGE}"/usr/${LIBDIR}/systemd/system/cups-browsed.service
     fi
 }
 
