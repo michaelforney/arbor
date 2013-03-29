@@ -66,6 +66,7 @@ configure_one_multibuild() {
         --with-test-font-path=/usr/share/fonts/X11/dejavu/DejaVuSans.ttf
         --with-tiff
         --without-php
+        --without-rcdir
         $(option_enable avahi)
     )
 
@@ -76,9 +77,5 @@ install_one_multibuild() {
     default
 
     install_systemd_files
-
-    if option avahi; then
-        edo rm -r "${IMAGE}"/etc/rc.d
-    fi
 }
 
