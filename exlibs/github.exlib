@@ -10,23 +10,7 @@ myexparam user=$(exparam pn)
 # Automatically generated tarballs from git trees (see below) always use tar.gz
 myexparam suffix=tar.bz2
 
-# a full commit hash (required for non-scm versions)
-# it would be nice if we could use tags, but the dir in side the tarball is named
-# <user>-<pn>-<short_hash>, so we need the hash anyway.
-# It has to be the full hash that corresponds to the short hash inside the tarball.
-# defaults to GITHUB_REVISION to make this possible:
-#   foo.exlib
-#          -->     require github [ user=bar ]
-#   foo-scm.exheres-0
-#          -->     require foo
-#   foo-123.exheres-0
-#          -->     GITHUB_REVISION=abc...xyz
-#          -->     require foo
-# If you don't do the above, you should pass the revision using the exparam
-#
-# This exparam is intended for the cases where upstream does a release by simply tagging it in git.
-# If there are proper tarballs that can be downloaded from https://github.com/downloads/<user>/<pn>
-# then those should probably be used instead and this should not be set.
+# the tag or commit hash to get as a tarball
 myexparam rev=${GITHUB_REVISION}
 
 # branch can only be used for scm versions
@@ -40,10 +24,8 @@ if ever is_scm ; then
     require scm-git
 else
     if [[ -n $(exparam rev) ]] ; then
-        DOWNLOADS="https://github.com/$(exparam user)/$(exparam pn)/tarball/$(exparam rev) -> ${PNV}.tar.gz"
-        local revision="$(exparam rev)"
-        WORK="${WORKBASE}/$(exparam user)-$(exparam pn)-${revision::7}"
-        unset revision
+        DOWNLOADS="https://github.com/$(exparam user)/$(exparam pn)/archive/$(exparam rev).tar.gz -> ${PNV}.tgz"
+        WORK="${WORKBASE}/$(exparam pn)-$(exparam rev)"
     else
         DOWNLOADS="https://github.com/downloads/$(exparam user)/$(exparam pn)/$(exparam pnv).$(exparam suffix)"
         WORK="${WORKBASE}"/$(exparam pnv)
