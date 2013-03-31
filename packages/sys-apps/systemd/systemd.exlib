@@ -64,6 +64,10 @@ MYOPTIONS="
     platform: ia64
 "
 
+# With systemd >= 199, sydbox just hangs in some cases. Without sydbox, the tests
+# pass. I've had it. If someone fixes sydbox, please poke me.
+RESTRICT="test"
+
 DEPENDENCIES="
     build:
         dev-libs/libxslt [[ note = [ for creating the man pages ] ]]
@@ -122,6 +126,7 @@ DEPENDENCIES="
             gnome-bindings/pygobject:3
             gnome-desktop/gobject-introspection:1
         ) [[ description = [ Required for systemd-analyze - analyze the boot performance of your system ] ]]
+        dev-python/lxml [[ description = [ For a prettier directive index (man systemd.directives) ] ]]
         dev-python/pycairo [[ description = [ Get fancy svgs about the boot process through systemd-analyze plot  ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
         sys-boot/dracut [[ description = [ Easily create an initramfs (if in doubt, don't take this) ] ]]
@@ -151,9 +156,6 @@ systemd_pkg_pretend() {
         ewarn "if you did not make any changes to it."
     fi
 }
-
-# systemd >= 198 is not parallel safe
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
 
 systemd_pkg_setup() {
     exdirectory --allow /etc/binfmt.d
@@ -198,7 +200,11 @@ systemd_src_prepare() {
     edo sed -i -e '/test-sched-prio/s:test-sched-prio:$(NULL):' Makefile.am
 
     # This test needs both a running systemd and dbus. Disabling it.
+    # Known as broken in >= 199.
     edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
+
+    # This test fails due to sydbox.
+    #edo sed -i -e '/test-bus-marshal/s:test-unit:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
@@ -238,6 +244,7 @@ configure_one_multibuild() {
         --disable-ima
         --disable-selinux
         --with-bashcompletiondir=/usr/share/bash-completion/completions
+        --with-debugshelltty=/dev/tty9
         --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
@@ -430,6 +437,10 @@ EOF
     # with specified owner, group and access mode.
     keepdir /etc/tmpfiles.d
     keepdir /usr/${LIBDIR}/tmpfiles.d
+
+    # Helper dirs for the kernel-install utility.
+    keepdir /etc/kernel/install.d
+    keepdir /usr/${LIBDIR}/kernel/install.d
 
     # ntp units in ntp-units.d/?*.conf get read and the services started.
     keepdir /etc/systemd/ntp-units.d
