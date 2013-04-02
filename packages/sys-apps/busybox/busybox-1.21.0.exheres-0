@@ -26,10 +26,9 @@ bb_make() {
         AR="${AR}"
         NM="${NM}"
 
-        CPP="${CC} -E"
         CC="${CC}" CFLAGS="${CFLAGS}" HOSTCC="${CC}" HOSTCFLAGS="${CFLAGS}"
         CXX="${CXX}" CXXFLAGS="${CXXFLAGS}" HOSTCXX="${CXX}" HOSTCXXFLAGS="${CXXFLAGS}"
-        LD="${CC} -nostdlib" LDFLAGS="${LDFLAGS}" HOSTLD="${CC}" HOSTLDFLAGS="${LDFLAGS}"
+        LDFLAGS="${LDFLAGS}" HOSTLDFLAGS="${LDFLAGS}"
 
         V=1
         SKIP_STRIP=y
@@ -74,18 +73,19 @@ src_compile() {
 }
 
 src_test() {
-    local test_options=(
-        SKIP_KNOWN_BUGS=y
-        SKIP_INTERNET_TESTS=y
-    )
+    export SKIP_KNOWN_BUGS=y SKIP_INTERNET_TESTS=y
+
+    edo pushd testsuite >/dev/null
 
     # test dynamic version
-    edo cp busybox{.dynamic,}
-    bb_make "${test_options[@]}" CONFIG_STATIC=n check
+    edo cp ../busybox{.dynamic,}
+    edo ./runtest -v
 
     # test static version
-    edo cp busybox{.static,}
-    bb_make "${test_options[@]}" CONFIG_STATIC=y check
+    edo cp ../busybox{.static,}
+    edo ./runtest -v
+
+    edo popd >/dev/null
 }
 
 src_install() {
