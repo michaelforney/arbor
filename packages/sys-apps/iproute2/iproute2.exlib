@@ -1,5 +1,5 @@
 # Copyright 2008 Daniel Mierswa <impulze@impulze.org>
-# Copyright 2012 Wouter van Kesteren <woutershep@gmail.com>
+# Copyright 2012, 2013 Wouter van Kesteren <woutershep@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'iproute2-2.6.26-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -15,9 +15,9 @@ fi
 SUMMARY="A collection of utilities for controlling networking and traffic control in Linux"
 HOMEPAGE="http://www.linuxfoundation.org/collaborate/workgroups/networking/${PN}"
 DOWNLOADS="
+    mirror://kernel/linux/utils/net/${PN}/${PNV}.tar.${SUFFIX}
     http://dev.exherbo.org/~philantrop/distfiles/${PNV}.tar.${SUFFIX}
     http://devresources.linux-foundation.org/dev/${PN}/download/${PNV}.tar.${SUFFIX}
-    mirror://kernel/linux/utils/net/${PN}/${PNV}.tar.${SUFFIX}
 "
 DESCRIPTION="A replacement for the inadequately behaving ifconfig/route programs in modern networks"
 LICENCES="GPL-2"
@@ -61,8 +61,9 @@ src_prepare() {
     # use system headers
     edo rm -r include/{linux,netinet}
 
-    # fix hardcoded -O2 and allow user CFLAGS
-    edo sed -e "/^CCOPTS =/s|-O2|${CFLAGS}|" -i Makefile
+    # honor user CFLAGS, nuke -Werror
+    edo sed -e "/^CCOPTS =/s|-O2|${CFLAGS}|" \
+            -e "s/-Werror//" -i Makefile
 
     if ! ever at_least 2.6.35 ; then
         edo sed -e 's:$(DESTDIR)/lib:$(DESTDIR)$(LIBDIR):g' -i netem/Makefile
