@@ -1,8 +1,12 @@
 # Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 myexparam -b htmldocs=true
 myexparam -b manpages=true
+myexparam git_remote_helpers[]
+
+exparam -v GIT_REMOTE_HELPERS git_remote_helpers[@]
 
 require perl-module python bash-completion elisp-optional [ source_directory=contrib/emacs ] systemd-service
 if ever at_least 1.8.1; then
@@ -38,6 +42,13 @@ MYOPTIONS="
     xinetd
 "
 exparam -b htmldocs && MYOPTIONS+=" doc"
+
+# The remote helpers' original home is http://felipec.wordpress.com/2012/11/13/git-remote-hg-bzr-2
+MYOPTIONS+="
+    (
+        git_remote_helpers: ${GIT_REMOTE_HELPERS[*]}
+    ) [[ *requires = [ python ] ]]
+"
 
 DEPENDENCIES="
     build+run:
@@ -76,6 +87,36 @@ DEPENDENCIES="
         net-misc/rsync              [[ description = [ Enables support for rsync:// URIs ] ]]
         curl? ( net-misc/curl[ssl(+)]  [[ description = [ Enables support for https:// URIs ] ]] )
 "
+
+if ever at_least 1.8.2 ; then
+    DEPENDENCIES+="
+        run:
+            git_remote_helpers:bzr? (
+                dev-lang/python:=
+                dev-scm/bzr
+            )
+            git_remote_helpers:mercurial? (
+                dev-lang/python:=
+                dev-scm/mercurial
+            )
+            !dev-scm/git-remote-helpers [[
+                description = [ The remote helpers are included since git-1.8.2 ]
+                resolution = uninstall-blocked-after
+            ]]
+    "
+elif ever at_least 1.8.1.5 ; then
+    DEPENDENCIES+="
+        run:
+            git_remote_helpers:mercurial? (
+                dev-lang/python:=
+                dev-scm/mercurial
+            )
+            !dev-scm/git-remote-helpers[mercurial] [[
+                description = [ The Mercurial remote helper is included since git-1.8.1.5 ]
+                resolution = uninstall-blocked-after
+            ]]
+    "
+fi
 
 WORK=${WORKBASE}/${PNV/_/.}
 
@@ -157,6 +198,9 @@ git-googlecode_src_install() {
     ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.zsh _git
     ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.bash
     elisp-optional_src_install
+
+    option git_remote_helpers:bzr && dobin contrib/remote-helpers/git-remote-bzr
+    option git_remote_helpers:mercurial && dobin contrib/remote-helpers/git-remote-hg
 
     if option python ; then
         python_bytecompile
