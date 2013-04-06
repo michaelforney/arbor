@@ -12,8 +12,10 @@ fi
 export_exlib_phases src_unpack src_configure src_compile src_test src_install
 
 SUMMARY="A distributed VCS focused on speed, effectivity and real-world usability on large projects"
-DESCRIPTION="Git is a fast, scalable, distributed revision control system with an unusually rich command set
-that provides both high-level operations and full access to internals"
+DESCRIPTION="
+Git is a fast, scalable, distributed revision control system with an unusually
+rich command set that provides both high-level operations and full access to internals
+"
 HOMEPAGE="http://git-scm.com/"
 DOWNLOADS="http://git-core.googlecode.com/files/${PNV}.tar.gz"
 exparam -b htmldocs && DOWNLOADS+=" doc? ( http://git-core.googlecode.com/files/git-htmldocs-${PV}.tar.gz )"
@@ -25,10 +27,16 @@ REMOTE_IDS="freecode:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="baselayout curl ipv6 tk xinetd
+MYOPTIONS="
+    baselayout
+    curl
     emacs [[ description = [ Install various Emacs libraries: git.el, git-blame.el and vc-git.el ] ]]
+    ipv6
     python [[ description = [ Install helper scripts for git remote helpers, a compatibility layer with other SCMs ] ]]
-    webdav [[ requires = curl description = [ Adds support for pushing using http:// and https:// transports ] ]]"
+    tk
+    webdav [[ requires = curl description = [ Adds support for pushing using http:// and https:// transports ] ]]
+    xinetd
+"
 exparam -b htmldocs && MYOPTIONS+=" doc"
 
 DEPENDENCIES="
@@ -168,11 +176,13 @@ git-googlecode_src_install() {
         newinitd "${FILES}"/git-daemon.initd git-daemon
         newconfd "${FILES}"/git-daemon.confd git-daemon
     fi
+
     if option xinetd ; then
         dodir /etc/xinetd.d
         insinto /etc/xinetd.d
         newins "${FILES}"/git-daemon.xinetd git-daemon
     fi
+
     if option systemd ; then
         hereconfd ${PN}-daemon.conf <<EOF
 GIT_OPTS="/var/git"
