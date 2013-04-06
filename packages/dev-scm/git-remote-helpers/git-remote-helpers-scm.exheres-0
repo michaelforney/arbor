@@ -1,7 +1,7 @@
 # Copyright 2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-# This exheres can go once git-remote-bzr has ended up in git's contrib.
+# This exheres can go once we only have git[>=1.8.2].
 
 SUMMARY="Bridge support in git for mercurial and bazaar"
 DESCRIPTION="
@@ -35,6 +35,18 @@ DEPENDENCIES="
         dev-lang/python:=
         bzr? ( dev-scm/bzr )
         mercurial? ( dev-scm/mercurial )
+        !dev-scm/git[~1.8.1.5][git_remote_helpers:mercurial] [[
+            description = [ The Mercurial remote helper is included since git-1.8.1.5 ]
+            resolution = manual
+        ]]
+        !dev-scm/git[>=1.8.2][git_remote_helpers:bzr] [[
+            description = [ The remote helpers are included since git-1.8.2 ]
+            resolution = manual
+        ]]
+        !dev-scm/git[>=1.8.2][git_remote_helpers:mercurial] [[
+            description = [ The remote helpers are included since git-1.8.2 ]
+            resolution = manual
+        ]]
 "
 
 WORK=${WORKBASE}
