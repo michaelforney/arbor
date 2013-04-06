@@ -2,6 +2,8 @@
 # Copyright 2010 Brett Witherspoon <spoonb@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require systemd-service
+
 if ever is_scm; then
     SCM_REPOSITORY="git://git.kernel.org/pub/scm/boot/dracut/dracut.git"
     require scm-git
@@ -43,9 +45,9 @@ DEPENDENCIES="
         app-text/docbook-xml-dtd:4.5
         dev-libs/libxslt
     run:
-        app-shells/bash
+        app-shells/bash[>=4.0]
         virtual/pkg-config
-        sys-apps/systemd
+        sys-apps/systemd[>=199]
         sys-apps/util-linux
         || ( sys-apps/kmod sys-apps/module-init-tools )
     build+test:
@@ -127,6 +129,11 @@ RESTRICT="test"
 #   - Some modules need additional/unpackaged dependencies and testing.
 #     See module-info.sh or module-setup.sh in the module directory,
 
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --bashcompletiondir=/usr/share/bash-completion/completions
+    --systemdsystemunitdir="${SYSTEMDSYSTEMUNITDIR}"
+)
+
 DEFAULT_SRC_COMPILE_PARAMS=( WITH_SWITCH_ROOT=0 )
 DEFAULT_SRC_INSTALL_PARAMS=( prefix=/usr libdir=/usr/${LIBDIR} sysconfdir=/etc )
 
@@ -145,7 +152,7 @@ dracut_src_prepare() {
 }
 
 dracut_src_install() {
-    option systemd && export systemdsystemunitdir="/usr/${LIBDIR}/systemd/system"
+    option systemd && export systemdsystemunitdir="${SYSTEMDSYSTEMUNITDIR}"
 
     default
 
