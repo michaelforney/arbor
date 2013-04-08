@@ -7,7 +7,8 @@ DESCRIPTION="
 libburnia is a project for reading, mastering and writing optical discs.
 Currently it is comprised of libraries named libisofs, libburn, libisoburn,
 a cdrecord emulator named cdrskin, and an integrated multi-session tool named
-xorriso. The software runs on Linux and FreeBSD."
+xorriso. The software runs on Linux and FreeBSD.
+"
 HOMEPAGE="http://libburnia-project.org"
 DOWNLOADS="http://files.libburnia-project.org/releases/${PNV}.tar.gz"
 
@@ -18,7 +19,7 @@ MYOPTIONS="acl xattr"
 
 DEPENDENCIES="
     build:
-        dev-util/pkg-config
+        virtual/pkg-config
     build+run:
         sys-libs/zlib
         acl? ( sys-apps/acl )
@@ -29,6 +30,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-zlib
     --disable-ldconfig-at-install
     --disable-libjte
+    --disable-static
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'acl libacl' xattr )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/Tutorial doc/zisofs_format.txt )
