@@ -1,8 +1,7 @@
 # Copyright 2012-2013 Timo Gurr <tgurr@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 ] ]
-require systemd-service [ systemd_files=[ cups-browsed.service ] ]
+require easy-multibuild systemd-service [ systemd_files=[ cups-browsed.service ] ]
 
 SUMMARY="OpenPrinting CUPS Filters"
 DESCRIPTION="
@@ -20,7 +19,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
     avahi
-    systemd [[ requires = [ avahi ] ]]
+    systemd
     multibuild_c: 32 64
 "
 
@@ -31,6 +30,7 @@ DEPENDENCIES="
         app-text/ghostscript[multibuild_c:*(-)?]
         app-text/poppler[>=0.20.3-r2][lcms][multibuild_c:*(-)?]
         app-text/qpdf[>=3.0.2][multibuild_c:*(-)?]
+        dev-libs/glib:2[>=2.30.2][multibuild_c:*(-)?]
         media-libs/fontconfig[>=2.0.0][multibuild_c:*(-)?]
         media-libs/freetype:2[multibuild_c:*(-)?]
         media-libs/jpeg[multibuild_c:*(-)?]
@@ -49,15 +49,10 @@ DEPENDENCIES="
         net-print/foomatic-filters [[ note = [ for non-PostScript printers ] ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-1.0.30-parallel-and-multilib-build-fix.patch
-    "${FILES}"/${PN}-1.0.30-noavahi.patch
-)
-
 configure_one_multibuild() {
     local args=(
-        --disable-static
         --enable-imagefilters
+        --disable-static
         --with-browseremoteprotocols=$(option avahi && echo 'DNSSD,')CUPS \
         --with-fontdir=fonts/conf.avail
         --with-jpeg
@@ -77,5 +72,9 @@ install_one_multibuild() {
     default
 
     install_systemd_files
+
+    if option systemd && ! option avahi ; then
+        multibuild_default_target C && edo sed -i -e 's: avahi-daemon.service::g' "${IMAGE}"/usr/${LIBDIR}/systemd/system/cups-browsed.service
+    fi
 }
 
