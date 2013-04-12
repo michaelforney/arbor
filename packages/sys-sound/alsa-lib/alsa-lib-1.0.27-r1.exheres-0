@@ -47,6 +47,9 @@ compile_one_multibuild() {
 install_one_multibuild() {
     default
 
+    # Fix alsaucm: unable to obtain card list: No such file or directory
+    keepdir /usr/share/alsa/ucm
+
     if multibuild_default_target C && option doc; then
         docinto html
         dodoc -r doc/doxygen/html/*
