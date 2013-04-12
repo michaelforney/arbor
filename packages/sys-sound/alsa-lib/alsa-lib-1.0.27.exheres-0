@@ -3,16 +3,20 @@
 # Copyright 2010 Adriaan Leijnse <adriaan@leijnse.net>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.12 1.11 ] ]
+require easy-multibuild
 
 SUMMARY="ALSA library"
-HOMEPAGE="http://www.alsa-project.org/"
+HOMEPAGE="http://www.alsa-project.org"
 DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="doc python multibuild_c: 32 64"
+MYOPTIONS="
+    doc
+    python
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
