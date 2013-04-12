@@ -5,7 +5,7 @@
 # Based in part upon 'alsa-plugins-1.0.19.ebuild' from Gentoo, which is:
 #     Copyright 1999-2009 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] easy-multibuild
+require easy-multibuild autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 SUMMARY="Plugins for ALSA"
 HOMEPAGE="http://www.alsa-project.org"
@@ -14,27 +14,31 @@ DOWNLOADS="mirror://alsaproject/${PN#alsa-}/${PNV}.tar.bz2"
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="ffmpeg pulseaudio jack libsamplerate speex
+MYOPTIONS="
+    ffmpeg
+    jack
+    libsamplerate
+    pulseaudio
+    speex
     multibuild_c: 32 64
 "
 
 DEPENDENCIES="
     build+run:
         sys-sound/alsa-lib[>=1.0.25][multibuild_c:*(-)?]
-        ffmpeg?        ( || ( media/ffmpeg media/libav ) )
-        jack?          ( media-sound/jack-audio-connection-kit[>=0.98][multibuild_c:*(-)?] )
+        ffmpeg? ( || ( media/ffmpeg media/libav ) )
+        jack? ( media-sound/jack-audio-connection-kit[>=0.98][multibuild_c:*(-)?] )
         libsamplerate? ( media-libs/libsamplerate[multibuild_c:*(-)?] )
-        pulseaudio?    ( media-sound/pulseaudio[>=0.9.11][multibuild_c:*(-)?] )
-        speex?         ( media-libs/speex[>=1.2_rc][multibuild_c:*(-)?] )
+        pulseaudio? ( media-sound/pulseaudio[>=0.9.11][multibuild_c:*(-)?] )
+        speex? ( media-libs/speex[>=1.2_rc][multibuild_c:*(-)?] )
 "
 
 AT_M4DIR=( m4 )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PN}-1.0.22-automagic-speex.patch"
-    "${FILES}/${PN}-1.0.22-quote-quote-quote-quote.patch"
-    -p0 "${FILES}/${PN}-1.0.22-missing-avutil.patch"
-    -p1 "${FILES}/${PN}-1.0.26-ffmpeg-0.11.patch"
+    "${FILES}"/${PN}-1.0.22-automagic-speex.patch
+    "${FILES}"/${PN}-1.0.22-quote-quote-quote-quote.patch
+    -p0 "${FILES}"/${PN}-1.0.22-missing-avutil.patch
 )
 
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
@@ -43,7 +47,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     'libsamplerate samplerate'
     pulseaudio
 )
-
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'speex speex lib'
 )
