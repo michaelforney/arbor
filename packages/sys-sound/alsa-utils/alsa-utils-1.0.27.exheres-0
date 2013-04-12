@@ -1,4 +1,4 @@
-# Copyright (c) 2008 Alexander Færøy <eroyf@exherbo.org>
+# Copyright 2008 Alexander Færøy <eroyf@exherbo.org>
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
@@ -6,11 +6,9 @@ require systemd-service udev-rules
 
 SUMMARY="ALSA utilities"
 DESCRIPTION="
-The following utilities are included. None of them are essential apart from (maybe)
-/sbin/alsaconf and /sbin/alsactl:
+The following utilities are included:
 * aconnect - ALSA sequencer connection manager
-* alsaconf - basic ALSA configuration tool
-* alsactl - advanced controls (store/restore/init hardware settings)
+* alsactl - advanced controls and daemon (store/restore/init/remove hardware settings)
 * alsaloop - create a PCM loopback between a PCM capture device and a PCM playback device
 * alsamixer - ncurses-based mixer
 * alsaucm - something that doesn't work here.
@@ -43,18 +41,18 @@ DEPENDENCIES="
         virtual/pkg-config
     build+run:
         sys-libs/ncurses
-        sys-sound/alsa-lib[>=1.0.25]
+        sys-sound/alsa-lib[>=1.0.27-r1]
         alsaloop? ( media-libs/libsamplerate [[ note = [ Used by alsaloop, which is optional ] ]] )
-    run:
-        sys-apps/dialog [[ note = [ Used by alsaconf ] ]]"
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --sbindir=/usr/sbin
-    --disable-xmlto
     --enable-nls
+    # disable alsaconf like all other distros do
+    --disable-alsaconf
+    --disable-xmlto
     --with-udev-rules-dir="${UDEVRULESDIR}"
 )
-
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( alsaloop )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( "systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}" )
 
@@ -66,6 +64,12 @@ src_install() {
     if option baselayout ; then
         newinitd "${FILES}"/alsasound.initd alsasound
         newconfd "${FILES}"/alsasound.confd alsasound
+    fi
+
+    if option systemd ; then
+        dodir /etc/alsa
+        echo "# Remove this file to disable the alsactl daemon mode" > \
+            "${IMAGE}"/etc/alsa/state-daemon.conf
     fi
 
     edo rmdir "${IMAGE}"/usr/share/man/man7
