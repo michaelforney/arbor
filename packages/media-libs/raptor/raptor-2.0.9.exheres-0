@@ -20,7 +20,7 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
-WORK="${WORKBASE}/${MY_PNV}"
+WORK=${WORKBASE}/${MY_PNV}
 
 DEPENDENCIES="
     build:
@@ -35,12 +35,11 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --disable-static
     --with-icu-config=/usr/bin/icu-config
     --with-www=xml
     --with-yajl
 )
 
-src_test() {
-    emake -j1 check
-}
+DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
