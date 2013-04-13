@@ -70,6 +70,9 @@ src_install() {
         dodir /etc/alsa
         edo echo "# Remove this file to disable the alsactl daemon mode" > \
             "${IMAGE}"/etc/alsa/state-daemon.conf
+
+        edo sed -e 's:oneshop:oneshot:' \
+                -i "${IMAGE}"/usr/${LIBDIR}/systemd/system/alsa-restore.service
     fi
 
     edo rmdir "${IMAGE}"/usr/share/man/man7
