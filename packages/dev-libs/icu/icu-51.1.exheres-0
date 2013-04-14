@@ -18,13 +18,17 @@ MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
-WORK="${WORKBASE}/${PN}/source"
+WORK=${WORKBASE}/${PN}/source
 
 install_one_multibuild() {
     default
     if ! multibuild_default_target C; then
-        dodir "/usr/${CHOST}/bin"
-        edo mv "${IMAGE}"/usr/bin/"${PN}"-config "${IMAGE}"/usr/"${CHOST}"/bin
+        dodir /usr/${CHOST}/bin
+        edo mv "${IMAGE}"/usr/bin/${PN}-config "${IMAGE}"/usr/${CHOST}/bin
     fi
+}
+
+test_one_multibuild() {
+    emake VERBOSE=1 check
 }
 
