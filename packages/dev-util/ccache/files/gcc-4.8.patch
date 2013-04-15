@@ -1,0 +1,243 @@
+Upstream: yes
+
+From b7e65c71cb9f7ead3ac167d423306776bec72678 Mon Sep 17 00:00:00 2001
+From: Joel Rosdahl <joel@rosdahl.net>
+Date: Wed, 20 Mar 2013 22:18:16 +0100
+Subject: [PATCH 1/3] Fix test suite failure on GCC 4.8
+
+GCC 4.8 includes /usr/include/stdc-predef.h implicitly, and this shows up
+in generated .d files.
+---
+ test.sh | 35 +++++++++++++++++++----------------
+ 1 file changed, 19 insertions(+), 16 deletions(-)
+
+diff --git a/test.sh b/test.sh
+index 3ed9069..3e38387 100755
+--- a/test.sh
++++ b/test.sh
+@@ -3,7 +3,7 @@
+ # A simple test suite for ccache.
+ #
+ # Copyright (C) 2002-2007 Andrew Tridgell
+-# Copyright (C) 2009-2012 Joel Rosdahl
++# Copyright (C) 2009-2013 Joel Rosdahl
+ #
+ # This program is free software; you can redistribute it and/or modify it under
+ # the terms of the GNU General Public License as published by the Free Software
+@@ -562,6 +562,9 @@ int test3;
+ EOF
+     backdate test1.h test2.h test3.h
+ 
++    $COMPILER -c -Wp,-MD,expected.d test.c
++    expected_d_content=`cat expected.d`
++
+     ##################################################################
+     # First compilation is a miss.
+     testname="first compilation"
+@@ -677,7 +680,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     rm -f other.d
+ 
+@@ -685,7 +688,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     rm -f other.d
+ 
+@@ -698,7 +701,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     rm -f other.d
+ 
+@@ -706,7 +709,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     rm -f other.d
+ 
+@@ -760,7 +763,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile test.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile test.d "$expected_d_content"
+ 
+     rm -f test.d
+ 
+@@ -768,7 +771,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile test.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile test.d "$expected_d_content"
+ 
+     ##################################################################
+     # Check the scenario of running a ccache with direct mode on a cache
+@@ -780,7 +783,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile test.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile test.d "$expected_d_content"
+ 
+     rm -f test.d
+ 
+@@ -788,7 +791,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 1
+     checkstat 'cache miss' 1
+-    checkfile test.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile test.d "$expected_d_content"
+ 
+     rm -f test.d
+ 
+@@ -796,7 +799,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 2
+     checkstat 'cache miss' 1
+-    checkfile test.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile test.d "$expected_d_content"
+ 
+     rm -f test.d
+ 
+@@ -804,7 +807,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 2
+     checkstat 'cache miss' 1
+-    checkfile test.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile test.d "$expected_d_content"
+ 
+     ##################################################################
+     # Check that -MF works.
+@@ -815,7 +818,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     rm -f other.d
+ 
+@@ -823,7 +826,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     ##################################################################
+     # Check that a missing .d file in the cache is handled correctly.
+@@ -835,13 +838,13 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     $CCACHE $COMPILER -c -MD test.c
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     find $CCACHE_DIR -name '*.d' -exec rm -f '{}' \;
+ 
+@@ -849,7 +852,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 1
+     checkstat 'cache miss' 1
+-    checkfile other.d "test.o: test.c test1.h test3.h test2.h"
++    checkfile other.d "$expected_d_content"
+ 
+     ##################################################################
+     # Check that stderr from both the preprocessor and the compiler is emitted
+-- 
+1.8.2.1
+
+
+From e199b99996d81dd35f747a0069abfa7a73e1875b Mon Sep 17 00:00:00 2001
+From: Joel Rosdahl <joel@rosdahl.net>
+Date: Sun, 31 Mar 2013 20:22:58 +0200
+Subject: [PATCH 2/3] Fix test suite failure on GCC 4.8, take two
+
+---
+ test.sh | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/test.sh b/test.sh
+index 3e38387..18bea94 100755
+--- a/test.sh
++++ b/test.sh
+@@ -565,6 +565,9 @@ EOF
+     $COMPILER -c -Wp,-MD,expected.d test.c
+     expected_d_content=`cat expected.d`
+ 
++    $COMPILER -c -Wp,-MD,expected_mmd.d test.c
++    expected_mmd_d_content=`cat expected_mmd.d`
++
+     ##################################################################
+     # First compilation is a miss.
+     testname="first compilation"
+@@ -701,7 +704,7 @@ EOF
+     checkstat 'cache hit (direct)' 0
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "$expected_d_content"
++    checkfile other.d "$expected_mmd_d_content"
+ 
+     rm -f other.d
+ 
+@@ -709,7 +712,7 @@ EOF
+     checkstat 'cache hit (direct)' 1
+     checkstat 'cache hit (preprocessed)' 0
+     checkstat 'cache miss' 1
+-    checkfile other.d "$expected_d_content"
++    checkfile other.d "$expected_mmd_d_content"
+ 
+     rm -f other.d
+ 
+-- 
+1.8.2.1
+
+
+From 4f4d89c30efb0ebf15caf072e066970509c388fa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ville=20Skytt=C3=A4?= <ville.skytta@iki.fi>
+Date: Sun, 31 Mar 2013 21:34:29 +0300
+Subject: [PATCH 3/3] Fix test suite failure on GCC 4.8, take three
+
+---
+ test.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test.sh b/test.sh
+index 18bea94..71912ce 100755
+--- a/test.sh
++++ b/test.sh
+@@ -565,7 +565,7 @@ EOF
+     $COMPILER -c -Wp,-MD,expected.d test.c
+     expected_d_content=`cat expected.d`
+ 
+-    $COMPILER -c -Wp,-MD,expected_mmd.d test.c
++    $COMPILER -c -Wp,-MMD,expected_mmd.d test.c
+     expected_mmd_d_content=`cat expected_mmd.d`
+ 
+     ##################################################################
+-- 
+1.8.2.1
+
