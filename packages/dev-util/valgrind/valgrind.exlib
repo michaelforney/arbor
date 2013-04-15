@@ -25,6 +25,12 @@ prepare_one_multibuild() {
     edo sed -e 's:^CFLAGS="-Wno-long-long":& $CFLAGS:' -i configure.in
     edo sed -e "s:doc/${PN}:doc/${PNV}:" -i docs/Makefile.am
 
+    # specifying a debuginfo type on the commandline breaks one or
+    # both of these tests, depending on which one is specified.
+    # https://bugs.kde.org/show_bug.cgi?id=262219
+    edo sed -e '/deep_templates/d' -e '/dw4/d' \
+            -i memcheck/tests/Makefile.am
+
     autotools_src_prepare
 }
 
