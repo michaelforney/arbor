@@ -35,7 +35,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--with-ca-certificates=/etc/ssl/certs/ca-certifi
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( libproxy gnome-proxy gnutls pkcs11 )
 
 src_prepare() {
-    # incompatible with gnutls[>3]
+    # incompatible with gnutls[>3], should be fixed in master
     # https://bugzilla.gnome.org/show_bug.cgi?id=695062
     edo sed -e '/\/tls\/connection\/simultaneous-sync-rehandshake/,+1d' -i tls/tests/connection.c
     edo sed -e '/\/tls\/connection\/simultaneous-async-rehandshake/,+1d' -i tls/tests/connection.c
