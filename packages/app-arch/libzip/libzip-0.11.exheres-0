@@ -1,0 +1,42 @@
+# Copyright 2008 Bo Ørsted Andresen <zlin@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ] easy-multibuild [ multiunpack=true ]
+
+SUMMARY="C Library for manipulating zip archives"
+DESCRIPTION="
+A C library for reading, creating, and modifying zip archives. Files can be
+added from data buffers, files, or compressed data copied directly from other
+zip archives. Changes made without closing the archive can be reverted.
+"
+HOMEPAGE="http://www.nih.at/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.xz"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/NEWS.html [[ lang = en ]]"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="multibuild_c: 32 64"
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/zlib[>=1.1.2][multibuild_c:*(-)?]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-0.10.1-fix-headers.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-static )
+
+prepare_one_multibuild() {
+    # http://www.nih.at/listarchive/libzip-discuss/msg00352.html
+    sed -e '/set_compression_deflate_to_deflate.test/d' \
+        -e '/set_compression_store_to_deflate.test/d' \
+        -i regress/Makefile.am
+    if [[ ${MULTIBUILD_TARGET} -eq 64 ]]; then
+        sed -e '/add_from_zip_stored.test/d' \
+            -i regress/Makefile.am
+    fi
+
+    autotools_src_prepare
+}
+
