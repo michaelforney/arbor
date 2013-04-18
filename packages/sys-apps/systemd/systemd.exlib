@@ -487,12 +487,6 @@ systemd_pkg_postinst() {
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
 
-        # Update the hwdb index
-        nonfatal edo /sbin/udevadm hwdb --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
-
-        # Update the message catalogue index
-        nonfatal edo /usr/bin/journalctl --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
-
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
         if [[ -r /proc/1/root && /proc/1/root -ef /proc/self/root/ ]]; then
@@ -525,6 +519,12 @@ systemd_pkg_postinst() {
             fi
         fi
     fi
+
+    # Update the hwdb index
+    nonfatal edo /sbin/udevadm hwdb --root="${ROOT}" --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
+
+    # Update the message catalogue index
+    nonfatal edo /usr/bin/journalctl --root="${ROOT}" --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
 
     local cruft=(
         "${ROOT}"/etc/init.d/sysinit.bash
