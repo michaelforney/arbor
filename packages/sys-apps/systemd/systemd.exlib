@@ -45,6 +45,10 @@ MYOPTIONS="
     bash-completion
     bootchart [[ description = [ Enable integrated bootchart by Auke Kok ] ]]
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
+    efi [[
+        description = [ EFI information in various tools and mounting of efivars during boot ]
+        note = [ Needs (U)EFI compatible hardware and a fairly recent kernel with proper configuration ]
+    ]]
     gcrypt [[ description = [ Enable cryptographically secured journal files ] ]]
     gobject-introspection
     gtk-doc
@@ -113,6 +117,12 @@ DEPENDENCIES="
         qrencode? ( media-libs/qrencode[multibuild_c:*(-)?] )
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
         xattr? ( sys-apps/attr[multibuild_c:*(-)?] )
+    recommendation:
+        efi? ( sys-boot/gummiboot [[
+                note = [ Systemd can receive performance data and other information from supported bootloaders ]
+                url  = [ http://www.freedesktop.org/wiki/Software/systemd/BootLoaderInterface ]
+            ]]
+        )
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
@@ -239,8 +249,6 @@ configure_one_multibuild() {
         --enable-xz
         --disable-audit
         --disable-chkconfig
-        # I don't have any EFI system with Linux installed. Feel free to create an option.
-        --disable-efi
         --disable-ima
         --disable-selinux
         --with-bashcompletiondir=/usr/share/bash-completion/completions
@@ -258,6 +266,7 @@ configure_one_multibuild() {
         $(option_enable acl)
         $(option_enable bootchart)
         $(option_enable cryptsetup libcryptsetup)
+        $(option_enable efi)
         $(option_enable gcrypt)
         $(option_enable gobject-introspection introspection)
         $(option_enable gtk-doc)
