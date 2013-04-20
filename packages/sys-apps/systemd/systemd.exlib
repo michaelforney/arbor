@@ -68,10 +68,6 @@ MYOPTIONS="
     platform: ia64
 "
 
-# With systemd >= 199, sydbox just hangs in some cases. Without sydbox, the tests
-# pass. I've had it. If someone fixes sydbox, please poke me.
-RESTRICT="test"
-
 DEPENDENCIES="
     build:
         dev-libs/libxslt [[ note = [ for creating the man pages ] ]]
@@ -212,9 +208,6 @@ systemd_src_prepare() {
     # This test needs both a running systemd and dbus. Disabling it.
     # Known as broken in >= 199.
     edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
-
-    # This test fails due to sydbox.
-    #edo sed -i -e '/test-bus-marshal/s:test-unit:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
