@@ -13,33 +13,35 @@ HOMEPAGE="http://${PN}.apache.org"
 DOWNLOADS="mirror://apache/subversion/${PNV}.tar.bz2"
 
 REMOTE_IDS="freecode:${PN}"
+
 UPSTREAM_CHANGELOG="http://svn.apache.org/repos/asf/${PN}/tags/${PV}/CHANGES"
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/docs/release-notes/$(ever range 1-2).html"
 UPSTREAM_DOCUMENTATION="http://svnbook.red-bean.com/"
 
 LICENCES="Apache-2.0"
 SLOT="0"
-MYOPTIONS="apache berkdb perl python ruby
+MYOPTIONS="
+    apache berkdb perl python ruby
     keyring [[ description = [ Adds support for storing passwords in GNOME Keyring ] ]]
     kwallet [[ description = [ Adds support for storing passwords in KWallet ] ]]
 "
+
 RESTRICT="test" # Expensive tests
 
 DEPENDENCIES="
     build:
-        dev-lang/python:*[>=2.2]
+        dev-lang/python:*[>=2.4]
         sys-devel/gettext
         keyring? ( virtual/pkg-config )
         kwallet? ( virtual/pkg-config )
         perl? ( dev-lang/swig[perl] )
         python? ( dev-lang/swig[python] )
         ruby? ( dev-lang/swig[ruby] )
-    test-expensive:
-        dev-lang/python:*[>=2.2]
     build+run:
-        dev-db/sqlite:3[>=3.4.0]
-        dev-libs/apr-util[>=0.9.7][berkdb?]
-        net-misc/neon[>=0.25&<0.30]
+        dev-db/sqlite:3[>=3.7.6.3]
+        dev-libs/apr:1[>=1.3.0]
+        dev-libs/apr-util:1[>=0.9.7][berkdb?]
+        net-misc/neon[>=0.29.6&<0.30]
         apache? ( www-servers/apache )
         berkdb? ( sys-libs/db:=[>=4.0.14&<4.9] )
         keyring? (
@@ -57,20 +59,17 @@ DEPENDENCIES="
         ruby? ( dev-lang/ruby:= )
     run:
         keyring? ( gnome-desktop/gnome-keyring:1 )
-        kwallet? (
-            || (
-                kde/kde-runtime:4
-                kde/kdebase-runtime:4
-            )
-        )
+        kwallet? ( kde/kde-runtime:4 )
         perl? ( dev-perl/URI )
     suggestion:
-        net-misc/neon[ssl(+)] [[ description = [ Enables support for https:// URIs ] ]]
-        net-misc/openssh [[ description = [ Enables support for svn+ssh:// URIs ] ]]"
+        net-misc/openssh [[ description = [ Enables support for svn+ssh:// URIs ] ]]
+    test-expensive:
+        dev-lang/python:*[>=2.4]
+"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}/${PN}-perl-vendor.patch"
-    "${FILES}/${PN}-perl-ccopts.patch"
+    "${FILES}"/${PN}-perl-vendor.patch
+    "${FILES}"/${PN}-perl-ccopts.patch
 )
 
 subversion_src_prepare() {
@@ -93,9 +92,14 @@ subversion_src_configure() {
         ${myconf} \
         --enable-local-library-preloading \
         --enable-nls \
+        --disable-javahl \
         --disable-mod-activation \
         --disable-static \
+        --without-gssapi \
+        --without-jikes \
+        --without-junit \
         --without-sasl \
+        --without-serf \
         $(option_with apache apxs) \
         $(option_with berkdb berkeley-db $(option berkdb &&
             echo "db.h:$(berkdb_includedir)::db-$(berkdb_slot)")) \
