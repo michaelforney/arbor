@@ -23,12 +23,20 @@ D-Bus supplies both a system daemon (for events such as 'new hardware device add
 or 'printer queue changed') and a per-user-login-session daemon (for general IPC
 needs among user applications).
 "
-HOMEPAGE="http://${PN}.freedesktop.org/"
-MYOPTIONS="multibuild_c: 32 64"
+HOMEPAGE="http://${PN}.freedesktop.org"
+
 BUGS_TO="philantrop@exherbo.org"
+
 LICENCES="|| ( GPL-2 AFL-2.1 )"
 SLOT="0"
-MYOPTIONS="baselayout debug doc systemd X ( multibuild_c: 32 64 )"
+MYOPTIONS="
+    baselayout
+    debug
+    doc
+    systemd
+    X
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
