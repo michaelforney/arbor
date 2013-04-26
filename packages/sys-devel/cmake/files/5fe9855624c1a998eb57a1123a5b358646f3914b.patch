@@ -1,0 +1,46 @@
+From 5fe9855624c1a998eb57a1123a5b358646f3914b Mon Sep 17 00:00:00 2001
+From: Slava Sysoltsev <SlavaSysoltsev@gmx.de>
+Date: Fri, 1 Mar 2013 08:02:22 -0500
+Subject: [PATCH] FindImageMagick: Search quantum depth suffixes (#13859)
+
+From ImageMagick's 6.8.0-8 changelog:
+
+  http://www.imagemagick.org/script/changelog.php
+  ABI is incompatible if quantum depth change.
+  Add abi indication to library name.
+
+Search for library names with -Q16 and -Q8 suffixes.
+
+Reported-by: Evangelos Foutras <evangelos@foutrelis.com>
+---
+ Modules/FindImageMagick.cmake |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Modules/FindImageMagick.cmake b/Modules/FindImageMagick.cmake
+index bf09616..4aaefb7 100644
+--- a/Modules/FindImageMagick.cmake
++++ b/Modules/FindImageMagick.cmake
+@@ -147,17 +147,17 @@ foreach(component ${ImageMagick_FIND_COMPONENTS}
+     )
+   if(component STREQUAL "Magick++")
+     FIND_IMAGEMAGICK_API(Magick++ Magick++.h
+-      Magick++ CORE_RL_Magick++_
++      Magick++ CORE_RL_Magick++_ Magick++-Q16 Magick++-Q8
+       )
+     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_Magick++_LIBRARY)
+   elseif(component STREQUAL "MagickWand")
+     FIND_IMAGEMAGICK_API(MagickWand wand/MagickWand.h
+-      Wand MagickWand CORE_RL_wand_
++      Wand MagickWand CORE_RL_wand_ MagickWand-Q16 MagickWand-Q8
+       )
+     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickWand_LIBRARY)
+   elseif(component STREQUAL "MagickCore")
+     FIND_IMAGEMAGICK_API(MagickCore magick/MagickCore.h
+-      Magick MagickCore CORE_RL_magick_
++      Magick MagickCore CORE_RL_magick_ MagickCore-Q16 MagickCore-Q8
+       )
+     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickCore_LIBRARY)
+   else()
+-- 
+1.7.0
+
