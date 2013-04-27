@@ -84,6 +84,10 @@ DEPENDENCIES="
         )
         webp? ( media-libs/libwebp )
         wmf? ( media-libs/libwmf )
+        !media-gfx/GraphicsMagick[imagemagick] [[
+            description = [ GraphicsMagick is a fork of ImageMagick ]
+            resolution = uninstall-blocked-after
+        ]]
 "
 
 # Multiple failures, possibly caused by sandbox
@@ -109,7 +113,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-included-ltdl
     --without-jbig
     --without-lcms
-    --without-wmf
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'hdri' 'openmp' )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
