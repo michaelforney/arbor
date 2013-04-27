@@ -208,6 +208,7 @@ systemd_src_prepare() {
     # This test needs both a running systemd and dbus. Disabling it.
     # Known as broken in >= 199.
     edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
+    edo sed -i -e '/test-unit-file/s:test-unit-file:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
