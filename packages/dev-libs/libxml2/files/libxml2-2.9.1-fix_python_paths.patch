@@ -1,0 +1,16 @@
+Source: written by Mark Guptill <compguy284@yahoo.com>, for Exherbo
+Upstream: no
+Reason: fix Python paths for multibuild
+this patch also allows configure to figure out what the value of 
+PYTHON_INCLUDES should be.
+--- libxml2-2.9.1.orig/configure.in	2013-04-19 03:25:20.000000000 -0400
++++ libxml2-2.9.1/configure.in	2013-04-28 15:06:03.000000000 -0400
+@@ -776,7 +776,7 @@
+     if test "$PYTHON" != ""
+     then
+         PYTHON_VERSION=`$PYTHON -c "from distutils import sysconfig; print(sysconfig.get_python_version())"`
+-	PYTHON_INCLUDES=`$PYTHON -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"`
++#	PYTHON_INCLUDES=`$PYTHON -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"`
+ # does not work as it produce a /usr/lib/python path instead of/usr/lib64/python
+ #
+ #	PYTHON_SITE_PACKAGES=`$PYTHON -c "from distutils import sysconfig; print(sysconfig.get_python_lib())"`
