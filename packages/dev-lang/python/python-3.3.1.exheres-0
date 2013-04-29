@@ -1,0 +1,44 @@
+# Copyright 2009, 2010 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require python-build
+
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+DEPENDENCIES+="
+    build+run:
+        dev-libs/expat[multibuild_c:*(-)?]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS+=( '--with-system-expat' )
+
+prepare_one_multibuild() {
+    [[ -d ${FILES}/${PV} ]] && expatch "${FILES}/${PV}/"
+
+    edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
+        Lib/distutils/command/install.py \
+        Lib/distutils/sysconfig.py \
+        Lib/distutils/tests/test_install.py \
+        Lib/site.py \
+        Lib/sysconfig.py \
+        Lib/test/test_site.py \
+        Makefile.pre.in
+
+    eautoreconf
+}
+
+test_one_multibuild() {
+    local DISABLE_TESTS
+    # test_install_lib (test_distuils) has problems with path resolution
+    # test_gdb: never-ending threads running under gdb
+    # the rest want to bind to 0.0.0.0/::, test_{urllib,uuid}: socket.gethostname() name->resolution
+    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_pydoc test_socket test_urllib test_urllib2net test_uuid"
+
+    esandbox allow_net --connect "inet:127.0.0.1@0"
+
+    python-build_test_one_multibuild
+
+    esandbox disallow_net --connect "inet:127.0.0.1@0"
+
+}
+
