@@ -24,7 +24,9 @@ src_prepare() {
     # By default, the library prints the same information as the CLI
     edo sed \
         -e '/^LIBFLAGS=/s:$: -DSILENT:' \
-        -e "/^CXXFLAGS=/s:$: ${CXXFLAGS}:" \
+        -e "/^CXX=/s:g++:${CXX}:" \
+        -e "/^CXXFLAGS=/s:-O2:${CXXFLAGS}:" \
+        -e "/^LDFLAGS=/s:$: ${LDFLAGS}:" \
         -i makefile
 }
 
