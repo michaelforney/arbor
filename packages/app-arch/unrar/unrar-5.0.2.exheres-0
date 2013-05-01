@@ -20,28 +20,22 @@ DEPENDENCIES=""
 
 WORK="${WORKBASE}"/${PN}
 
+src_prepare() {
+    # By default, the library prints the same information as the CLI
+    edo sed \
+        -e '/^LIBFLAGS=/s:$: -DSILENT:' \
+        -e "/^CXXFLAGS=/s:$: ${CXXFLAGS}:" \
+        -i makefile
+}
+
 src_compile() {
-    export CXXFLAGS="${CXXFLAGS}"
-
-    emake -f makefile.unix unrar STRIP="true"
-    edo mv unrar "${TEMP}"
-    emake -f makefile.unix clean
-
-    if option platform:amd64 ; then
-        export CXXFLAGS+=" -fPIC"
-    fi
-
-    # The "library" works *interactively* by default...
-    edo sed -i -e "s:DEFINES=\(.*\):DEFINES=-DSILENT \1:" makefile.unix
-
-    emake -f makefile.unix CXXFLAGS="${CXXFLAGS}" lib
-    edo mv "${TEMP}"/unrar unrar
+    emake -j1 unrar STRIP="true"
+    emake -j1 lib
 }
 
 src_install() {
     dobin unrar
     dolib libunrar.so
-    dodir /usr/include/unrar
     insinto /usr/include/unrar
     doins dll.hpp
     dodoc readme.txt
