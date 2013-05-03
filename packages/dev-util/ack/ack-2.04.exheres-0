@@ -21,6 +21,11 @@ DEPENDENCIES="
 
 DEFAULT_SRC_TEST_PARAMS=( -j1 )
 
+src_test() {
+    export TMPDIR=/tmp
+    default
+}
+
 src_install() {
     perl-module_src_install
 
