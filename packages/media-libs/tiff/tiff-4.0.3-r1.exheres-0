@@ -15,7 +15,10 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}/document.html [[ lang = en ]]"
 LICENCES="MIT"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="opengl multibuild_c: 32 64"
+MYOPTIONS="
+    opengl
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build+run:
@@ -28,11 +31,21 @@ DEPENDENCIES="
                   x11-libs/libICE[multibuild_c:*(-)?] )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-4.0.3-CVE-2012-4447.patch
+    "${FILES}"/${PN}-4.0.3-CVE-2012-4564.patch
+    "${FILES}"/${PN}-4.0.3-printdir-width.patch
+    "${FILES}"/${PN}-4.0.3-jpeg-test.patch
+    "${FILES}"/${PN}-4.0.3-CVE-2013-1960.patch
+    "${FILES}"/${PN}-4.0.3-CVE-2013-1961.patch
+)
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-cxx
     --enable-lzma
     --enable-zlib
     --disable-jbig
+    --disable-static
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'opengl x' )
 
