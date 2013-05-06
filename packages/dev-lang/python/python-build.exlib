@@ -115,9 +115,10 @@ configure_one_multibuild() {
     option tk       || disable+=" _tkinter"
     export PYTHON_DISABLE_MODULES="${disable}"
 
-    export OPT="${CFLAGS}"
+    # -fwrapv: http://bugs.python.org/issue11149
+    export OPT="-fwrapv"
     export CPPFLAGS="$(pkg-config --cflags-only-I libffi) $(multibuild_get_var C ${MULTIBUILD_TARGET} CPPFLAGS)"
-    export LDFLAGS="${CFLAGS} -L/usr/${LIBDIR}"
+    export LDFLAGS="${LDFLAGS} -L/usr/${LIBDIR}"
 
     default
 }
