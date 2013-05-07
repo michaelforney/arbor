@@ -25,9 +25,11 @@ REMOTE_IDS="freecode:${PN}"
 UPSTREAM_RELEASE_NOTES="http://cdrecord.berlios.de/private/AN-$(ever major).0.html [[ lang = en ]]"
 
 # COPYING has detailed licence info for each subpart of the project
-LICENCES="CDDL-1.0
+LICENCES="
+    CDDL-1.0
     GPL-2    [[ note = [ mkisofs ] ]]
-    LGPL-2.1 [[ note = [ libcdrparanoia ] ]]"
+    LGPL-2.1 [[ note = [ libcdrparanoia ] ]]
+"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS="acl"
@@ -38,6 +40,7 @@ DEPENDENCIES="
     build:
         sys-devel/gettext
     build+run:
+        sys-libs/libcap
         acl? ( sys-apps/acl )
         !app-cdr/cdrkit [[ description = [ Various file collisions: /usr/bin/{devdump,isodebug,isodump,isoinfo,isovfy} ] ]]
 "
@@ -51,7 +54,9 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     LDPATH="-L/\$(INS_BASE)/${LIBDIR}"
     RUNPATH="-R/\$(INS_BASE)/${LIBDIR}"
 )
+DEFAULT_SRC_TEST_PARAMS=( GMAKE_NOWARN=true )
 DEFAULT_SRC_INSTALL_PARAMS=(
+    GMAKE_NOWARN=true
     INS_BASE=/usr
 )
 
