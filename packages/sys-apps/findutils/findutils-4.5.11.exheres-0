@@ -7,3 +7,14 @@ PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 DEFAULT_SRC_TEST_PARAMS=( RUNTESTFLAGS='--ignore sv-bug-14535.exp' )
 
+src_prepare() {
+    # disable 2 tests which fail under sydbox
+    # running autoconf is broken...
+    edo sed \
+      -e '/symlinkat/d' \
+      -e '/unlinkat/d' \
+      -i tests/Makefile.{am,in}
+
+    default
+}
+
