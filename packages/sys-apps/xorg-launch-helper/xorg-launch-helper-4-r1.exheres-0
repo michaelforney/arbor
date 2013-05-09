@@ -1,0 +1,32 @@
+# Copyright 2013 Lasse Brun <bruners@gmail.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
+require github [ user=sofar suffix=tar.gz ]
+
+SUMMARY="X.Org launcher for user sessions in systemd"
+DESCRIPTION="
+A small utility that transforms the X server process (X.Org) into a daemon that
+can be used to make applications wait with starting until X.Org is ready for X11
+connections.
+"
+DOWNLOADS="http://foo-projects.org/~sofar/${PN}/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    build:
+        virtual/pkg-config
+    build+run:
+        sys-apps/systemd
+    run:
+        x11-server/xorg-server
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-use-sigtimedwait-instead-of-pthread_cond_timedwait.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-systemduserunitdir="/usr/${LIBDIR}/systemd/user" )
+
