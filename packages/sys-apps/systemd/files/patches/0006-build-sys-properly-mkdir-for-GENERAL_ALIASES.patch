@@ -1,0 +1,30 @@
+From 0b95a21bd70f63fc57f62020ae84e467712d69f2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Zbigniew=20J=C4=99drzejewski-Szmek?= <zbyszek@in.waw.pl>
+Date: Tue, 7 May 2013 14:38:51 -0400
+Subject: [PATCH] build-sys: properly mkdir for GENERAL_ALIASES
+
+Previous commit (20d408766) was broken. The problem is not connected
+to DESTDIR being set or not, but to the fact that targets in
+$GENERAL_ALIASES have directory components, so mkdir -p wasn't
+recursing deep enough.
+---
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 1b8ed92..6200610 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -244,8 +244,8 @@ install-aliases-hook:
+ 		dir= && $(install-aliases)
+ 
+ define install-aliases
+-	$(MKDIR_P) $(DESTDIR)$$dir && \
+ 	while [ -n "$$1" ]; do \
++		$(MKDIR_P) `dirname $(DESTDIR)$$dir/$$2` && \
+ 		rm -f $(DESTDIR)$$dir/$$2 && \
+ 		$(LN_S) $$1 $(DESTDIR)$$dir/$$2 && \
+ 		shift 2 || exit $$?; \
+-- 
+1.8.2.2
+

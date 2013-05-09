@@ -12,7 +12,6 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
         alternatives \
-        bash-completion \
         easy-multibuild \
         test-dbus-daemon \
         udev-rules \
@@ -173,6 +172,8 @@ systemd_pkg_setup() {
 }
 
 systemd_src_prepare() {
+    expatch -p1 "${FILES}"/patches
+
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
         edo sed -i \
@@ -184,6 +185,7 @@ systemd_src_prepare() {
             -e "/^sysctldir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^usergeneratordir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^catalogdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^kernelinstalldir = /s:/lib/:/${LIBDIR}/:" \
             -e "/\$(DESTDIR)\$(prefix)/s:/lib/:/${LIBDIR}/:" \
             -e "/\$(INSTALL_DIRS)/s:\$(INSTALL_DIRS):\$(subst /lib/,/${LIBDIR}/,&):" \
             Makefile.am
@@ -209,6 +211,7 @@ systemd_src_prepare() {
     # Known as broken in >= 199.
     edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
     edo sed -i -e '/test-unit-file/s:test-unit-file:$(NULL):' Makefile.am
+    edo sed -i -e '/test-hashmap/s:test-hashmap:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
@@ -245,8 +248,7 @@ configure_one_multibuild() {
         --disable-chkconfig
         --disable-ima
         --disable-selinux
-        --with-bashcompletiondir=/usr/share/bash-completion/completions
-        --with-debugshelltty=/dev/tty9
+        --with-debug-tty=/dev/tty9
         --with-firmware-path=/${LIBDIR}/firmware/updates:/${LIBDIR}/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
@@ -269,6 +271,7 @@ configure_one_multibuild() {
         $(option_enable qrencode)
         $(option_enable tcpd tcpwrap)
         $(option_enable xattr)
+        $(option_with bash-completion bashcompletiondir /usr/share/bash-completion/completions)
         $(option_with python)
     )
 
@@ -337,6 +340,10 @@ systemd_src_install() {
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
+    fi
+
+    if ! option bash-completion ; then
+        edo rm -r "${IMAGE}"/no
     fi
 
     # Install the legacy.conf tmpdirs.d config file.
