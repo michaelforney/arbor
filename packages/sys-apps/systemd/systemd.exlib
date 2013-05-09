@@ -172,7 +172,9 @@ systemd_pkg_setup() {
 }
 
 systemd_src_prepare() {
-    expatch -p1 "${FILES}"/patches
+    if [[ -d ${FILES}/patches ]]; then
+        expatch -p1 "${FILES}"/patches
+    fi
 
     # Set the correct libdir if necessary.
     if [[ ${LIBDIR} != lib ]]; then
@@ -204,13 +206,12 @@ systemd_src_prepare() {
     # Paludis really hates the progress bar so let's disable it.
     edo sed -i -e "/journal_file_verify/s:true:false:" src/journal/test-journal-verify.c
 
-    # Disable a test that needs root privs.
-    edo sed -i -e '/test-sched-prio/s:test-sched-prio:$(NULL):' Makefile.am
-
-    # This test needs both a running systemd and dbus. Disabling it.
-    # Known as broken in >= 199.
+    # Disable tests that need root privs.
     edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
     edo sed -i -e '/test-unit-file/s:test-unit-file:$(NULL):' Makefile.am
+    edo sed -i -e '/test-sched-prio/s:test-sched-prio:$(NULL):' Makefile.am
+
+    # Broken.
     edo sed -i -e '/test-hashmap/s:test-hashmap:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
@@ -288,8 +289,10 @@ test_one_multibuild() {
     if [[ -f /etc/machine-id ]]; then
         # The tests currently fail if run under sydbox.
         esandbox disable
+        esandbox disable_net
         test-dbus-daemon_src_test
         esandbox enable
+        esandbox enable_net
     else
         ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
         ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
