@@ -1,0 +1,30 @@
+# Copyright 2013 Marc-Antoine Perennou <Marc-Antoine@Perennou.com>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=sofar ]
+
+SUMMARY="A collection of units for the systemd user session"
+DESCRIPTION="
+This package contains several systemd unit files related to the systemd user
+session (systemd --user). The goal of this package is to provide an easy way for
+people to collect, share and deploy systemd user session installations and help
+test the systemd user session core code.
+"
+DOWNLOADS="http://foo-projects.org/~sofar/${PN}/${PNV}.tar.gz"
+
+BUGS_TO="philantrop@exherbo.org"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64"
+
+DEPENDENCIES="
+    build:
+        virtual/pkg-config
+    build+run:
+        sys-apps/systemd
+    run:
+        sys-apps/dbus[>=1.7.0]
+        sys-apps/xorg-launch-helper
+"
+
