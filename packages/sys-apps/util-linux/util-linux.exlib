@@ -83,6 +83,9 @@ src_prepare() {
     edo rm tests/ts/fdisk/{gpt,mbr-{non,}dos-mode,sunlabel}
     edo rm tests/ts/ipcs/limits2
 
+    # only works on btrfs, ext4, ocfs2, and xfs filesystems
+    edo rm tests/ts/misc/fallocate
+
     option !session-management && edo rm -rf tests/ts/utmpdump
 
     default
