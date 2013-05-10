@@ -1,0 +1,17 @@
+[Unit]
+Description=Static networking of %I (IPv6)
+Wants=network.target gateway6.service
+Before=network.target gateway6.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/conf.d/network-%i.conf
+ExecStart=/sbin/ip address add $ADDR6 dev %I
+ExecStart=/sbin/ip link set up dev %I
+ExecStop=/sbin/ip link set down dev %I
+ExecStop=/sbin/ip address delete $ADDR6 dev %I
+RemainAfterExit=yes
+
+[Install]
+Alias=multi-user.target.wants/network6@lo.service
+Alias=multi-user.target.wants/network6@eth0.service

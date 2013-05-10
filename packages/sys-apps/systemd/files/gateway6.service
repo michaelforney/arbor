@@ -1,0 +1,13 @@
+[Unit]
+Description=Static gateway (IPv6)
+Wants=network.target
+Before=network.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/conf.d/network-gateway.conf
+ExecStart=/sbin/ip route add default via ${GATEWAY6}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

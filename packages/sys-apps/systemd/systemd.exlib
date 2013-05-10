@@ -61,6 +61,7 @@ MYOPTIONS="
     python [[ description = [ Build the man page index and systemd-python (bindings) ] ]]
     qrencode [[ description = [ For transferring the journal verification key to a smartphone ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
+    static-net [[ description = [ Include a simple service for static networking ] ]]
     tcpd
     xattr
     multibuild_c: 32 64
@@ -125,6 +126,7 @@ DEPENDENCIES="
         group/lock [[ note = [ Required for var-lock service ] ]]
         group/systemd-journal [[ note = [ Required for journal access by non-root users ] ]]
         simple-net? ( sys-apps/net-tools[>=1.60_p20120127084908] )
+        static-net? ( sys-apps/iproute2 )
     suggestion:
         app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
         (
@@ -343,6 +345,18 @@ systemd_src_install() {
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
+    fi
+
+    if option static-net; then
+        insinto /usr/${LIBDIR}/systemd/system
+        doins "${FILES}"/network4@.service
+        doins "${FILES}"/gateway4.service
+        doins "${FILES}"/network6@.service
+        doins "${FILES}"/gateway6.service
+        insinto /etc/conf.d
+        doins "${FILES}"/network-gateway.conf
+        doins "${FILES}"/network-lo.conf
+        doins "${FILES}"/network-eth0.conf
     fi
 
     if ! option bash-completion ; then

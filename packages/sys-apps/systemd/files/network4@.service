@@ -1,0 +1,17 @@
+[Unit]
+Description=Static networking of %I (IPv4)
+Wants=network.target gateway4.service
+Before=network.target gateway4.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/conf.d/network-%i.conf
+ExecStart=/sbin/ip address add $ADDR4 dev %I
+ExecStart=/sbin/ip link set up dev %I
+ExecStop=/sbin/ip link set down dev %I
+ExecStop=/sbin/ip address delete $ADDR4 dev %I
+RemainAfterExit=yes
+
+[Install]
+Alias=multi-user.target.wants/network4@lo.service
+Alias=multi-user.target.wants/network4@eth0.service
