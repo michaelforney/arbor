@@ -1,0 +1,27 @@
+# Copyright (c) 2008 Alexander Færøy <ahf@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+MY_PN=libpng
+
+require sourceforge [ suffix=tar.xz ] easy-multibuild
+
+SUMMARY="PNG library"
+REMOTE_IDS+="freecode:${PN}"
+
+LICENCES="as-is"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="multibuild_c: 32 64"
+
+DEPENDENCIES="
+    build+run:
+        sys-libs/zlib[multibuild_c:*(-)?]
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --without-libpng-compat )
+
+WORK=${WORKBASE}/${MY_PN}-${PV}
+
+install_one_multibuild() {
+    newlib.so .libs/libpng12.so.0.* libpng12.so.0
+}
