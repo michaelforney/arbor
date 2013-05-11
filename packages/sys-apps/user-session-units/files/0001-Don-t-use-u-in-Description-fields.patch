@@ -1,0 +1,25 @@
+From f88148414307a0fe67dc6e15773081b54bcc3b98 Mon Sep 17 00:00:00 2001
+From: Auke Kok <auke-jan.h.kok@intel.com>
+Date: Thu, 9 May 2013 09:51:17 -0700
+Subject: [PATCH] Don't use %u in Description fields.
+
+---
+ units/system/user-session@.service.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/units/system/user-session@.service.in b/units/system/user-session@.service.in
+index bad037b..82be1e0 100644
+--- a/units/system/user-session@.service.in
++++ b/units/system/user-session@.service.in
+@@ -6,7 +6,7 @@
+ #  (at your option) any later version.
+ 
+ [Unit]
+-Description=User Manager for %u
++Description=User Manager for %I
+ After=systemd-user-sessions.service
+ # This is needed for folks running Xorg on vt/1
+ Conflicts=getty@tty1.service
+-- 
+1.8.2.3
+
