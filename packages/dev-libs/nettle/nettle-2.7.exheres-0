@@ -9,7 +9,10 @@ HOMEPAGE="http://www.lysator.liu.se/~nisse/nettle"
 LICENCES="|| ( LGPL-2.1 LGPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    arm_cpu_features: neon
+    multibuild_c: 32 64
+"
 
 UPSTREAM_DOCUMENTATION="${HOMEPAGE}/nettle.html [[ lang = en description = manual ]]"
 
@@ -22,6 +25,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     --disable-openssl # only used for benchmarking
 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=( 'arm_cpu_features:neon arm-neon' )
 
 # TODO:
 # configure appends -ggdb3 unconditionally and it seems to be explicitly
