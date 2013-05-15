@@ -69,11 +69,7 @@ glibc_pkg_pretend() {
         die "Building glibc with CFLAGS=-ggdb3 is broken. Aborting."
     fi
 
-    kernel_check_version_string
-
-    local normalized_kernel_version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}${BASH_REMATCH[3]}${BASH_REMATCH[4]:-}
-
-    if ! ever at_least $MINIMUM_KERNEL_VERSION ${normalized_kernel_version} ; then
+    if ! kernel_version_at_least $MINIMUM_KERNEL_VERSION ; then
         ewarn "Your currently booted kernel-version is to old ($(uname -r))."
         ewarn "If you continue you will probably break your system."
         ewarn "Please upgrade your kernel to a version >=$MINIMUM_KERNEL_VERSION"
