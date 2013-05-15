@@ -26,11 +26,7 @@ WORK=${WORKBASE}/linux-${PV}
 # FIXME: Need to sanitize headers at some point
 
 linux-headers_pkg_pretend() {
-    kernel_check_version_string
-
-    local normalized_kernel_version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}${BASH_REMATCH[3]}${BASH_REMATCH[4]:-}
-
-    if ! ever at_least ${PV} ${normalized_kernel_version} ; then
+    if ! kernel_version_at_least ${PV} ; then
         ewarn "Kernel headers version mismatch: Installing kernel headers newer than the"
         ewarn "running kernel can break your system. Do not proceed unless you know what"
         ewarn "you're doing."

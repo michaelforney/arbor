@@ -11,3 +11,9 @@ kernel_check_version_string() {
     fi
 }
 
+kernel_version_at_least() {
+    kernel_check_version_string
+
+    local normalized_kernel_version=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}${BASH_REMATCH[3]}${BASH_REMATCH[4]:-}
+    ever at_least "${1}" ${normalized_kernel_version}
+}

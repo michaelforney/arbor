@@ -13,6 +13,7 @@ fi
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
         alternatives \
         easy-multibuild \
+        kernel \
         test-dbus-daemon \
         udev-rules \
         python [ has_lib=false ] \
@@ -144,15 +145,13 @@ AT_M4DIR=( m4 )
 ZSH_COMPLETIONS=( 'shell-completion/systemd-zsh-completion.zsh _systemd' )
 
 systemd_pkg_pretend() {
-    local kv=$(uname -r)
-
-    if [[ ${kv} < 2.6.39 ]] ; then
+    if ! kernel_version_at_least 2.6.39 ; then
         ewarn "You MUST install a kernel >= 2.6.39 to use systemd."
         ewarn "This check is based upon the kernel currently running, thus, if you already"
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
     fi
 
-    if [[ ${kv} < 3.8 ]] ; then
+    if ! kernel_version_at_least 3.8 ; then
         ewarn "You SHOULD install a kernel >= 3.8 to get the best results."
         ewarn "Read http://cgit.freedesktop.org/systemd/systemd/plain/README for details."
     fi
