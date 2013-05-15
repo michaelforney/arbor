@@ -1,0 +1,16 @@
+Source: http://bugs.python.org/issue17547
+Upstream: yes
+Reason: /usr/include/python2.7/modsupport.h:27:1: error: '_PyArg_ParseTuple_SizeT' is an unrecognized format function type [-Werror=format=]
+
+diff --git a/configure.in b/configure.in
+--- a/configure.in
++++ b/configure.in
+@@ -1326,7 +1326,7 @@ if test "$GCC" = "yes"
+ then
+   AC_MSG_CHECKING(whether gcc supports ParseTuple __format__)
+   save_CFLAGS=$CFLAGS
+-  CFLAGS="$CFLAGS -Werror"
++  CFLAGS="$CFLAGS -Werror -Wformat"
+   AC_COMPILE_IFELSE([
+     AC_LANG_PROGRAM([[void f(char*,...)__attribute((format(PyArg_ParseTuple, 1, 2)));]], [[]])
+   ],[
