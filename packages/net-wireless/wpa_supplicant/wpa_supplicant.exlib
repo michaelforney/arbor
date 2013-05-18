@@ -70,6 +70,7 @@ DEPENDENCIES="
         eap-fast? (
             openssl? ( dev-libs/openssl[>=0.9.9] )
         )
+        gnutls?  ( dev-libs/gnutls )
         pcap?    (
             dev-libs/libdnet
             dev-libs/libpcap
@@ -80,24 +81,13 @@ DEPENDENCIES="
             sys-libs/ncurses
             sys-libs/readline
         )
+        nl80211? ( net-libs/libnl:3.0 )
         openssl? ( dev-libs/openssl )
 
         !gnutls? (
             !openssl? ( dev-libs/libtommath )
         )
 "
-
-if ever at_least 1.0_rc2; then
-    DEPENDENCIES+="
-        gnutls?  ( dev-libs/gnutls )
-        nl80211? ( net-libs/libnl:3.0 )
-    "
-else
-    DEPENDENCIES+="
-        gnutls?  ( dev-libs/gnutls[<3.0.0] )
-        nl80211? ( net-libs/libnl:1 )
-    "
-fi
 
 if ${CHECKOUT}; then
 DEPENDENCIES+="
@@ -154,11 +144,9 @@ src_prepare() {
     # FILES is a reserved exheres-0 variable
     ${CHECKOUT} && edo sed -i -e 's:FILES:DOC_FILES:g' doc/docbook/Makefile
 
-    if ever at_least 1.0; then
-        edo pushd "${WORKBASE}/${PNV}"
-            expatch "${FILES}"/${PN}-1.0-libnl_header.patch
-        edo popd
-    fi
+    edo pushd "${WORKBASE}/${PNV}"
+        expatch "${FILES}"/${PN}-1.0-libnl_header.patch
+    edo popd
 }
 
 src_configure() {
@@ -229,11 +217,7 @@ src_configure() {
                 # See wpa_supplicant/README
 
     option nl80211 && config_enable_driver NL80211 && \
-        if ever at_least 1.0; then
-            config_enable LIBNL32
-        else
-            config_enable LIBNL20
-        fi
+        config_enable LIBNL32
 
     # EAP_PEAP, EAP_TLS, and EAP_TTLS require TLS (which is always enabled)
     config_enable_eap \
