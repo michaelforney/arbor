@@ -42,6 +42,12 @@ bash-completion_src_install() {
 
     edo chmod a+r "${IMAGE}"/usr/share/bash-completion/bash_completion
 
-    edo rm "${IMAGE}"/usr/share/bash-completion/completions/{chsh,rtcwake,util-linux}
+    edo rm "${IMAGE}"/usr/share/bash-completion/completions/{chsh,rtcwake}
+
+    if ever at_least scm; then
+        edo rm "${IMAGE}"/usr/share/bash-completion/completions/{cal,dmesg,eject,hexdump,hwclock,ionice,look,newgrp,renice,su}
+    else
+        edo rm "${IMAGE}"/usr/share/bash-completion/completions/util-linux
+    fi
 }
 
