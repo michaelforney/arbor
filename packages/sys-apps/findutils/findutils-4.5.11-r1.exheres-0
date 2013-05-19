@@ -7,6 +7,10 @@ PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 DEFAULT_SRC_TEST_PARAMS=( RUNTESTFLAGS='--ignore sv-bug-14535.exp' )
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/${PN}-4.5.11-locate.patch
+)
+
 src_prepare() {
     # disable 2 tests which fail under sydbox
     # running autoconf is broken...
