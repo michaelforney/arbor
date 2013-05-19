@@ -1,0 +1,24 @@
+Upstream: yes, in master and 2.36 branch
+From a4b54c173b09d563c47bc238e50d13417e0d87c5 Mon Sep 17 00:00:00 2001
+From: Iain Lane <iain.lane@canonical.com>
+Date: Tue, 14 May 2013 11:54:17 +0000
+Subject: proxy/tests/libproxy: Set GIO_EXTRA_MODULES to use the just-built module
+
+https://bugzilla.gnome.org/show_bug.cgi?id=700286
+---
+diff --git a/proxy/tests/libproxy.c b/proxy/tests/libproxy.c
+index b2f6de8..f46c27c 100644
+--- a/proxy/tests/libproxy.c
++++ b/proxy/tests/libproxy.c
+@@ -80,6 +80,9 @@ main (int   argc,
+   g_unsetenv ("DESKTOP_SESSION");
+   g_unsetenv ("KDE_FULL_SESSION");
+ 
++  /* Use the just-built libproxy module */
++  g_setenv ("GIO_EXTRA_MODULES", TOP_BUILDDIR "/proxy/libproxy/.libs", TRUE);
++
+   g_test_add_vtable ("/proxy/libproxy/uri", 0, NULL,
+ 		     reset_proxy_settings, test_proxy_uri, NULL);
+   g_test_add_vtable ("/proxy/libproxy/socks", 0, NULL,
+--
+cgit v0.9.1
