@@ -3,6 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require bash-completion glib
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -43,6 +44,9 @@ DEPENDENCIES="
 
 src_prepare() {
     glib_src_prepare
+
+    # else src_compile will fail, seems to depend on automake-1.13.1
+    autotools_src_prepare
 
     # we have no guarantee for ipv6 support, so we disable those tests
     edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
