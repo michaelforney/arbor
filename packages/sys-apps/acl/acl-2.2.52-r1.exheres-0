@@ -63,5 +63,10 @@ install_one_multibuild() {
     edo rm "${IMAGE}"/{usr/,}${LIBDIR}/libacl.{la,so}
     edo rm "${IMAGE}"/${LIBDIR}/libacl.a
     edo rmdir "${IMAGE}"/usr/${LIBDIR}
+
+    # Fix circular linking
+    # libacl.so symlink required for e.g. udisks2
+    into /
+    dosym /${LIBDIR}/libacl.so.1 /${LIBDIR}/libacl.so
 }
 
