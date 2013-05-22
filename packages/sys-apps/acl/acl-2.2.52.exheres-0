@@ -3,7 +3,7 @@
 # Based in part upon 'acl-2.2.47.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic easy-multibuild [ work=${PNV} ]
+require flag-o-matic easy-multibuild [ multiunpack=true work=${PNV} ]
 
 SUMMARY="Access control list utilities, libraries and headers"
 HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
@@ -12,8 +12,10 @@ DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="nfs [[ description = [ Add support for NFS acls ] ]]
-           multibuild_c: 32 64"
+MYOPTIONS="
+    nfs [[ description = [ Add support for NFS acls ] ]]
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
@@ -23,25 +25,9 @@ DEPENDENCIES="
         nfs? ( net-libs/libnfsidmap )
 "
 
-WORK="${WORKBASE}"
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}"/${PN}-2.2.49-quote-strchr.patch
-    -p1 "${FILES}"/${PN}-2.2.51-config-shell.patch
-)
-
-unpack_prepare_one_multibuild() {
-    edo mkdir -p "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}"
-}
-
-src_unpack() {
-    easy-multibuild_run_phase
-}
+WORK=${WORKBASE}
 
 prepare_one_multibuild() {
-    # hack PATH with AC_PATH_PROG
-    edo sed -e '/^as_dummy=/s:=":="$PATH$PATH_SEPARATOR:' \
-            -i configure
     # update builddefs
     edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
             -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
@@ -49,12 +35,6 @@ prepare_one_multibuild() {
 
     default
 }
-
-src_prepare() {
-    easy-multibuild_run_phase
-}
-
-configure_prepare_one_multibuild() { :; }
 
 configure_one_multibuild() {
     filter-flags -m32
@@ -67,19 +47,21 @@ configure_one_multibuild() {
     export OPTIMIZER="${CFLAGS}"
     export DEBUG="-DNDEBUG"
 
-    econf --bindir=/bin --libdir=/${LIBDIR} \
-          --libexecdir=/usr/${LIBDIR} --enable-gettext --enable-shared
+    econf \
+        --bindir=/bin \
+        --libdir=/${LIBDIR} \
+        --libexecdir=/usr/${LIBDIR} \
+        --enable-gettext \
+        --enable-shared \
+        --disable-static
 }
 
 install_one_multibuild() {
-    emake -j1 DIST_ROOT="${IMAGE}" install install-dev install-lib
+    emake -j1 DESTDIR="${IMAGE}" install install-dev install-lib
 
     # We don't install static libraries, remove symlink to /${LIBDIR}
-    edo rm "${IMAGE}"/{usr/,}${LIBDIR}/libacl.{a,la,so}
+    edo rm "${IMAGE}"/{usr/,}${LIBDIR}/libacl.{la,so}
+    edo rm "${IMAGE}"/${LIBDIR}/libacl.a
     edo rmdir "${IMAGE}"/usr/${LIBDIR}
-
-    # Fix circular linking
-    into /
-    dosym /${LIBDIR}/libacl.so.1 /${LIBDIR}/libacl.so
 }
 
