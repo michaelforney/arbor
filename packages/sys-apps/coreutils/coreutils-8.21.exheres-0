@@ -17,7 +17,20 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/0001-Disable-tests-that-fail-with-sydbox.patch
-    "${FILES}"/0001-Disable-two-broken-gnulib-tests-unrelated-to-coreuti.patch
     "${FILES}"/0001-Disable-test-bind-and-test-connect-which-both-want-t.patch
+    "${FILES}"/b469fa044a81762a9eb0da92b4fb47467154c4f1.patch
 )
+
+# random failures for some tests (with sydbox), at least:
+# test-fchownat test-fdutimensat test-getaddrinfo test-getlogin test-linkat test-symlinkat test-unlinkat test-utimensat
+RESTRICT="test"
+
+src_test() {
+    # hard code the limit until we find a better way
+    edo sed -e 's/name_max=$(stat -f -c %l .)/name_max=150/' \
+        -i tests/du/long-from-unreadable.sh \
+        -i tests/rm/deep-2.sh
+
+    coreutils_src_test
+}
 
