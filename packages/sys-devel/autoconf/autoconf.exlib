@@ -39,7 +39,7 @@ autoconf_src_install() {
     default
 
     edo cd "${IMAGE}"/usr/share/info
-    local alternatives=( info-${PN} ${PNV} 0 ) info sinfo
+    local alternatives=( info-${PN} ${PNV} ${SLOT} ) info sinfo
     for info in ${PN}.info*; do
         sinfo=${PN}-${SLOT}.${info##*.}
         alternatives+=( /usr/share/info/${info} ${sinfo} )
