@@ -38,13 +38,11 @@ src_compile() { :; }
 src_install() {
     DESTDIR="${IMAGE}" ACPI="force" MAN_D="/usr/share/man" \
         LIB_D="${LIBDIR}" ULIB_D="/usr/${LIBDIR}" UDEV_D="${UDEVRULESDIR}" \
-        SYSTEMD="no" \
+        INIT_D="none" SYSTEMD="no" \
         edo ./install.sh
     keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
 
-    edo rm "${IMAGE}"/etc/init.d/laptop-mode
     option baselayout && newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
-    option baselayout || edo rmdir "${IMAGE}"/etc/init.d
 
     if option systemd ; then
         install_systemd_files
