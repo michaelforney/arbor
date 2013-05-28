@@ -496,6 +496,9 @@ EOT
     dosym /usr/${LIBDIR}/systemd/systemd-udevd /sbin/udevd
     dosym /usr/bin/udevadm /sbin/udevadm
 
+    # Exclude /var/tmp/paludis/build from cleaning
+    edo echo "x /var/tmp/paludis/build" >> "${IMAGE}"/usr/${LIBDIR}/tmpfiles.d/tmp.conf
+
     if option python ; then
         python_bytecompile
     fi
