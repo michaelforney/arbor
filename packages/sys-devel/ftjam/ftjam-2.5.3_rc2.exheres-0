@@ -1,0 +1,31 @@
+# Copyright 2013 Timo Gurr <tgurr@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Backwards compatible with classic Jam and can be used as a drop-in replacement for it"
+HOMEPAGE="http://freetype.sourceforge.net/jam/index.html"
+DOWNLOADS="http://david.freetype.org/jam/${PNV/_/}.tar.bz2"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/bison
+    build+run:
+        !sys-devel/boost-jam [[
+            description = [ boost-jam and ftjam both provide the jam binary. ftjam ist more compatible. ]
+            resolution = uninstall-blocked-before
+        ]]
+"
+
+WORK=${WORKBASE}/${PNV/_/}
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-2.5.3_rc2-nostrip.patch
+    "${FILES}"/${PN}-2.5.3_rc2-false-flags.patch
+    # https://bugs.gentoo.org/show_bug.cgi?id=213759
+    "${FILES}"/${PN}-2.5.3_rc2-i-hate-yacc.patch
+    "${FILES}"/${PN}-2.5.3_rc2-build.patch
+)
