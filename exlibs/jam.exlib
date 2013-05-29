@@ -5,7 +5,7 @@ export_exlib_phases src_compile src_install
 
 DEPENDENCIES="
     build:
-        sys-devel/boost-jam
+        sys-devel/ftjam
 "
 
 ejam() {
@@ -15,7 +15,7 @@ ejam() {
 }
 
 jam_src_compile() {
-    ejam -d+2 -j${EXJOBS:-1}
+    ejam -dx -q -j${EXJOBS:-1}
 }
 
 jam_src_install() {
