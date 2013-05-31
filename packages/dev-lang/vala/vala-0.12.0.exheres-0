@@ -1,8 +1,12 @@
 # Copyright 2010 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require vala_build
+# We need vala.exlib because we are patching the vala sources below
+# Make sure that the version in vala_slots is not doing that
+require vala_build vala [ vala_dep=true vala_slots=[ 0.20 ] ]
 
 SLOT="0.12"
 PLATFORMS="~amd64 ~ppc64 ~x86"
+
+DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/${PN}--ignore-instance-parameter.patch )
 

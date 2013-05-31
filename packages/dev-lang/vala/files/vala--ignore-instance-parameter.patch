@@ -1,0 +1,30 @@
+upstream: yes
+
+From c755bb4bd3b078363193ea41495e4c9f2782a9d8 Mon Sep 17 00:00:00 2001
+From: Jasper St. Pierre <jstpierre@mecheye.net>
+Date: Sat, 02 Feb 2013 09:56:39 +0000
+Subject: valagirparser: Ignore the new instance-parameter tag
+
+g-ir-scanner will now start emitting the instance parameter; since
+vala doesn't need this, just skip it.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=693054
+---
+diff --git a/vala/valagirparser.vala b/vala/valagirparser.vala
+index 0a90886..8256ef2 100644
+--- a/vala/valagirparser.vala
++++ b/vala/valagirparser.vala
+@@ -2896,6 +2896,11 @@ public class Vala.GirParser : CodeVisitor {
+ 			next ();
+ 
+ 			while (current_token == MarkupTokenType.START_ELEMENT) {
++				if (reader.name == "instance-parameter") {
++					skip_element ();
++					continue;
++				}
++
+ 				if (!push_metadata ()) {
+ 					skip_element ();
+ 					continue;
+--
+cgit v0.9.1
