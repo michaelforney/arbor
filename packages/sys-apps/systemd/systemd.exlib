@@ -111,12 +111,6 @@ DEPENDENCIES="
         qrencode? ( media-libs/qrencode )
         tcpd? ( sys-apps/tcp-wrappers )
         xattr? ( sys-apps/attr )
-    recommendation:
-        efi? ( sys-boot/gummiboot [[
-                note = [ Systemd can receive performance data and other information from supported bootloaders ]
-                url  = [ http://www.freedesktop.org/wiki/Software/systemd/BootLoaderInterface ]
-            ]]
-        )
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
@@ -135,6 +129,12 @@ DEPENDENCIES="
         dev-python/pycairo [[ description = [ Get fancy svgs about the boot process through systemd-analyze plot  ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
         sys-boot/dracut [[ description = [ Easily create an initramfs (if in doubt, don't take this) ] ]]
+        efi? (
+            sys-boot/gummiboot [[
+                note = [ Systemd can receive performance data and other information from supported bootloaders ]
+                url  = [ http://www.freedesktop.org/wiki/Software/systemd/BootLoaderInterface ]
+            ]]
+        )
 "
 
 AT_M4DIR=( m4 )

@@ -1,0 +1,30 @@
+Title: Stages set
+Author: Bo Ørsted Andresen <zlin@exherbo.org>
+Content-Type: text/plain
+Posted: 2013-05-31
+Revision: 1
+News-Item-Format: 1.0
+
+Stages come pre-installed with the contents of two sets. The system set is part
+of world and cannot be uninstalled. The stages set is a set of packages that are
+deemed useful for an initial install but are not required. Performing a
+'cave resolve world' will not upgrade those installed packages. Therefore you
+should inspect the packages listed by:
+
+    cave show stages
+
+You have three options on how to handle these.
+
+1. If you want all of them and any packages that may be added to this set in the
+   future, add the stages set to world:
+
+    cave resolve stages
+
+2. Add the individual packages you want to keep to world:
+
+    cave update-world $package
+
+3. Uninstall the packages you do not want to keep:
+
+    cave purge
+

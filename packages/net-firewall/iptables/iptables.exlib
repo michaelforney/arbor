@@ -27,13 +27,17 @@ LICENCES="GPL-2"
 SLOT="0"
 MYOPTIONS="baselayout"
 
-DEPENDENCIES=""
+DEPENDENCIES="
+    build+run:
+        net-libs/libnfnetlink
+"
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --sbindir=/sbin
     --libdir=/${LIBDIR}
     --libexecdir=/${LIBDIR}
     --without-kernel
+    --enable-bpf-compiler
     --enable-devel
     --enable-libipq
 )
@@ -45,6 +49,7 @@ WORK=${WORKBASE}/${MY_PNV}
 iptables_src_install() {
     default
 
+    keepdir /etc/xtables
     keepdir /var/lib/iptables
     keepdir /var/lib/ip6tables
 

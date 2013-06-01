@@ -1,5 +1,5 @@
 # Copyright 2008 Bernd Steinhauser <berniyh@exherbo.org>
-# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'lm_sensors-3.0.2.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
@@ -38,7 +38,6 @@ DEPENDENCIES="
         dev-lang/perl:*
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-3.3.1-sensors-detect.patch )
 DEFAULT_SRC_COMPILE_PARAMS=( CC="${CC}" )
 
 DEFAULT_SRC_INSTALL_PARAMS=(
@@ -66,6 +65,8 @@ lm_sensors_src_prepare() {
 
     if option systemd; then
         edo sed -e '/EnvironmentFile=/s:/etc/sysconfig/lm_sensors:/etc/conf.d/lm_sensors.conf:' -i "${WORK}"/prog/init/lm_sensors.service
+        edo sed -e '/EnvironmentFile=/s:/etc/sysconfig/lm_sensors:/etc/conf.d/lm_sensors.conf:' -i "${WORK}"/prog/init/fancontrol.service
+        edo sed -e '/EnvironmentFile=/s:/etc/sysconfig/sensord:/etc/conf.d/sensord.conf:' -i "${WORK}"/prog/init/sensord.service
         edo sed -e 's:\(/etc/conf.d/lm_sensors\):\1.conf:g' -i "${WORK}"/prog/detect/sensors-detect
     fi
 }
@@ -87,14 +88,11 @@ lm_sensors_src_install() {
     if option systemd ; then
         insinto ${SYSTEMDSYSTEMUNITDIR}
         doins prog/init/lm_sensors.service
+        doins prog/init/fancontrol.service
+        doins prog/init/sensord.service
         insinto /etc/conf.d
         doins "${FILES}"/lm_sensors.conf
     fi
-
-    install_systemd_files
-
-    docinto chips
-    dodoc doc/chips/*
 
     docinto developers
     dodoc doc/developers/applications
