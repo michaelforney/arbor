@@ -1,0 +1,36 @@
+# Copyright 2007-2009 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require coreutils
+
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+
+DEPENDENCIES="
+    build+run:
+        !sys-apps/net-tools[<1.60_p20120127084908-r1]  [[
+           description = [ used to install /bin/hostname ]
+           resolution = uninstall-blocked-after
+        ]]
+    test:
+        sys-apps/sydbox[>=0.6.8] [[ note = [ tests fail with sydbox older than 0.6.8 ] ]]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/0001-Disable-tests-that-fail-with-sydbox.patch
+    "${FILES}"/0001-Disable-test-bind-and-test-connect-which-both-want-t.patch
+    "${FILES}"/b469fa044a81762a9eb0da92b4fb47467154c4f1.patch
+)
+
+# random failures for some tests (with sydbox), at least:
+# test-fchownat test-fdutimensat test-getaddrinfo test-getlogin test-linkat test-symlinkat test-unlinkat test-utimensat
+RESTRICT="test"
+
+src_test() {
+    # hard code the limit until we find a better way
+    edo sed -e 's/name_max=$(stat -f -c %l .)/name_max=150/' \
+        -i tests/du/long-from-unreadable.sh \
+        -i tests/rm/deep-2.sh
+
+    coreutils_src_test
+}
+

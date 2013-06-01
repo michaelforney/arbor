@@ -1,0 +1,62 @@
+# Copyright 2009, 2010 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+
+require flag-o-matic
+
+SUMMARY="Libraries/utilities to handle ELF objects"
+HOMEPAGE="https://fedorahosted.org/releases/${PN:0:1}/${PN:1:1}/${PN}"
+DOWNLOADS="${HOMEPAGE}/${PV}/${PNV}.tar.bz2"
+
+LICENCES="GPL-3 || ( GPL-2 LGPL-3 )"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+    build+run:
+        app-arch/bzip2
+        app-arch/xz
+        sys-libs/zlib
+        !dev-libs/libelf [[
+            description = [ installs the same headers, but the libraries are ABI incompatible ]
+        ]]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/elfutils-0.155-binutils-pr-ld-13621.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--program-prefix=eu-' '--with-bzlib' '--with-zlib'
+                               '--with-lzma' )
+
+src_prepare() {
+    default
+
+    # TODO(compnerd) do this properly via autotools
+    edo sed -e '/^AR =/c AR = @host@-ar'        \
+            -i "${WORK}/lib/Makefile.in"        \
+            -i "${WORK}/libelf/Makefile.in"     \
+            -i "${WORK}/libebl/Makefile.in"     \
+            -i "${WORK}/libdwfl/Makefile.in"    \
+            -i "${WORK}/libdw/Makefile.in"      \
+            -i "${WORK}/libcpu/Makefile.in"     \
+            -i "${WORK}/libasm/Makefile.in"     \
+            -i "${WORK}/backends/Makefile.in"   \
+            -i "${WORK}/src/Makefile.in"
+    edo sed -e "s,nm,${CHOST}-nm,"              \
+            -i "${WORK}/tests/run-arsymtest.sh"
+}
+
+src_configure() {
+    # NOTE (abdulras) tests require that the debug information be present in the tools
+    expecting_tests && append-flags -g
+
+    # -Werror is bad
+    append-flags -Wno-error
+
+    # NOTE (compnerd) explicitly add -fPIC as the build fails on x86_64 with LTO without it
+    # contains RIP-relative relocations which may overflow requiring GOT-relative relocations
+    append-flags -fPIC
+
+    default
+}
+

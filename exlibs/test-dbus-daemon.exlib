@@ -12,7 +12,7 @@ fi
 test-dbus-daemon_start() {
     esandbox allow_net 'unix-abstract:/tmp/dbus-*'
 
-    echo "Launching DBus session bus..."
+    echo "Initiating DBus session bus..."
     eval "$(dbus-launch --sh-syntax)"
     [[ -z ${DBUS_SESSION_BUS_PID} ]] && die "Launching DBus session bus failed"
 }
@@ -20,18 +20,24 @@ test-dbus-daemon_start() {
 test-dbus-daemon_stop() {
     esandbox disallow_net 'unix-abstract:/tmp/dbus-*'
 
-    edo kill ${DBUS_SESSION_BUS_PID}
+    echo "Terminating DBus session bus..."
+    edo kill -TERM ${DBUS_SESSION_BUS_PID}
 }
 
 test-dbus-daemon_src_test() {
+    local ret=0
+
     local DBUS_SESSION_BUS_PID
     local DBUS_SESSION_BUS_ADDRESS
 
     test-dbus-daemon_start
-    default
+    nonfatal default
+    ret=${?}
     test-dbus-daemon_stop
 
     unset DBUS_SESSION_BUS_PID
     unset DBUS_SESSION_BUS_ADDRESS
+
+    [[ ${ret} == 0 ]] || die_unless_nonfatal "emake returned error $ret"
 }
 

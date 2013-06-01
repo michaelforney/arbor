@@ -1,0 +1,79 @@
+# Copyright 2007-2008 Bo Ørsted Andresen
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ] python
+
+SUMMARY="XML C Parser and Toolkit v2"
+HOMEPAGE="http://www.xmlsoft.org"
+BASE_URI="http://www.w3.org/XML"
+SCHEMA_TEST_URI="${BASE_URI}/2004/xml-schema-test-suite/xmlschema"
+TEST_VERSION="20080827"
+TAR1="2002-01-16"
+TAR2="2004-01-14"
+
+DOWNLOADS="ftp://www.xmlsoft.org/${PN}/${PNV}.tar.gz
+    ${BASE_URI}/Test/xmlts${TEST_VERSION}.tar.gz
+    ${SCHEMA_TEST_URI}${TAR1}/xsts-${TAR1}.tar.gz
+    ${SCHEMA_TEST_URI}${TAR2}/xsts-${TAR2}.tar.gz"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news.html"
+UPSTREAM_CHANGELOG="${HOMEPAGE}/ChangeLog.html"
+
+LICENCES="MIT"
+SLOT="2.0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="doc examples python"
+
+DEPENDENCIES="
+    build+run:
+        app-arch/xz
+        sys-libs/readline
+        sys-libs/zlib[>=1.2.5-r1]
+        python? ( dev-lang/python:= )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.9.1-fix_python_paths.patch )
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--enable-ipv6' '--with-history'
+                               '--with-readline' '--with-threads' '--without-icu' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'python' )
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.tests TODO_SCHEMAS )
+
+ECONF_SOURCE=${WORK}
+WORK=${WORKBASE}/build
+
+src_unpack() {
+    unpack ${PNV}.tar.gz
+
+    # test suite
+    edo cd "${ECONF_SOURCE}"
+    unpack xmlts${TEST_VERSION}.tar.gz
+
+    edo mkdir "${WORK}"
+}
+
+src_prepare() {
+    # prevent fetching with wget during src_test
+    edo ln -s "${FETCHEDDIR}"/xsts-{${TAR1},${TAR2}}.tar.gz "${ECONF_SOURCE}"/xstc/
+
+    # NOTE(?) tests don't support out-of-source builds
+    edo ln -s "${ECONF_SOURCE}/result" "${WORK}/result"
+    edo ln -s "${ECONF_SOURCE}/test" "${WORK}/test"
+
+    edo cd "${ECONF_SOURCE}"
+    autotools_src_prepare
+}
+
+src_install() {
+    default
+
+    option python && python_bytecompile
+
+    edo cp -pPR "${WORK}/doc/devhelp" "${IMAGE}/usr/share/doc/${PNVR}/html/"
+    option doc || edo rm -r "${IMAGE}/usr/share/gtk-doc"              \
+                            "${IMAGE}/usr/share/doc/${PNVR}/html"
+    option examples || edo rm -r "${IMAGE}/usr/share/doc/${PNVR}/examples"
+}
+

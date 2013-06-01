@@ -20,7 +20,7 @@ HOMEPAGE="http://www.ruby-lang.org/"
 DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
 MYOPTIONS="
-    berkdb gdbm ncurses readline ssl tk
+    berkdb gdbm ncurses readline tk
     examples ipv6
 "
 
@@ -32,10 +32,12 @@ DEPENDENCIES="
     build:
         virtual/pkg-config
     build+run:
+        berkdb? ( sys-libs/db:= )
+        gdbm? ( sys-libs/gdbm )
         ncurses? ( sys-libs/ncurses )
         readline? ( sys-libs/readline )
-        ssl? ( dev-libs/openssl )
         tk? ( dev-lang/tk )
+        dev-libs/openssl
 "
 
 DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
@@ -67,7 +69,6 @@ ruby-2.0_src_configure() {
         'gdbm'
         'ncurses curses'
         'readline'
-        'ssl openssl'
         'tk'
     )
     for opt_ext in "${opts[@]}"; do
@@ -116,6 +117,9 @@ ruby-2.0_src_install() {
 
     # FIXME: I don't know what this is
     keepdir /usr/${LIBDIR}/ruby/${SLOT}/racc/rdoc
+
+    # if dependencies are met, C API docs are installed
+    edo find "${IMAGE}"/usr/share/doc/${PNVR} -empty -type d -delete
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
     edo popd

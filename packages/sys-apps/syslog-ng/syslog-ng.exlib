@@ -1,78 +1,104 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2009-2011 Wulf C. Krueger
-# Copyright 2011 Alex Elsayed <eternaleye@gmail.com>
+# Copyright 2011,2013 Alex Elsayed <eternaleye@gmail.com>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'syslog-ng-2.0.9.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
 require systemd-service
 
-export_exlib_phases src_configure src_install pkg_postinst
+export_exlib_phases src_install pkg_postinst
 
 SUMMARY="Popular system logger"
 HOMEPAGE="http://www.balabit.com/network-security/${PN}/"
-ever is_scm || DOWNLOADS="http://www.balabit.com/downloads/files/${PN}/open-source-edition/${PV}/source/${PN}_${PV}.tar.gz"
+DOWNLOADS="http://www.balabit.com/downloads/files/${PN}/open-source-edition/${PV}/source/${PN}_${PV}.tar.gz"
 
 REMOTE_IDS="freecode:${PN}"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="baselayout caps ipv6 json mongodb pcre systemd tcpd vim-syntax"
+MYOPTIONS="baselayout caps ipv6 pcre systemd tcpd vim-syntax
+    amqp    [[ description = [ Output logs over AMQP ] ]]
+    json    [[ description = [ Ingest and produce json-formatted log data ] ]]
+    mongodb [[ description = [ Write logs to a mongodb instance ] ]]
+    sql     [[ description = [ Write logs to an SQL server ] ]]
+    smtp    [[ description = [ Send mail as part of the logging pipeline ] ]]"
 RESTRICT="test"
+# Fails to compile
+#    pacct   [[ description = [ Read process accounting logs (experimental) ] ]]
 
-# JSON support can use json-glib too, but it's a build time switch
-# and would be a hassle. json-c has no deps, so use it.
+# JSON support can use json-glib too, but:
+# a.) They can only be switched at build time
+# b.) While json output works with both, ingestion is json-c only.
+# Since json-c has no deps, ignore json-glib entirely.
 DEPENDENCIES="
     build:
         dev-util/pkg-config
     build+run:
         dev-libs/glib:2[>=2.10.1]
-        dev-libs/ivykis[>=0.30.1]
+        dev-libs/ivykis[>=0.36.1]
         dev-libs/openssl[>=0.9.8]
-        sys-apps/eventlog[>=0.2]
+        sys-apps/eventlog[>=0.2.12]
         sys-devel/bison
         caps? ( sys-libs/libcap )
-        json? ( dev-libs/json-c[>=0.7] )
-        mongodb? ( dev-libs/libmongo-client[>=0.1.0] )
-        pcre? ( dev-libs/pcre )
+        json? ( dev-libs/json-c[>=0.9] )
+        mongodb? ( net-libs/libmongo-client[>=0.1.6] )
+        pcre? ( dev-libs/pcre[>=6.1] )
+        smtp? ( net-libs/libesmtp )
+        sql? ( dev-libs/libdbi[>=0.8.0] )
         systemd? ( sys-apps/systemd[>=31] )
         tcpd? ( sys-apps/tcp-wrappers[>=7.6] )
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )
 "
+#        amqp? ( net-libs/librabbitmq-client[>=0.0.1] )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/syslog-ng.conf.doc )
 
-syslog-ng_src_configure() {
-    # If someone wants to use the new SQL logging option directly, please find me some good docs
-    # about it.
-    econf \
-        --with-pidfile-dir=/run \
-        --with-module-dir=/usr/${LIBDIR}/syslog-ng \
-        --sysconfdir=/etc/syslog-ng \
-        --disable-sql \
-        --disable-env-wrapper \
-        --disable-spoof-source \
-        --enable-dynamic-linking \
-        --enable-ssl \
-        --with-ivykis=system \
-        --without-libnet \
-        --without-compile-date \
-        $(option_enable caps linux-caps) \
-        $(option_enable json) \
-        $(option_enable ipv6) \
-        $(option_enable mongodb) \
-        $(option_enable pcre) \
-        $(option_enable systemd) \
-        $(option_enable tcpd tcp-wrapper) \
-        $(option_with systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}) \
-        $(option json && echo -n --with-json=json-c )
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --with-pidfile-dir=/run
+    --with-module-dir=/usr/${LIBDIR}/syslog-ng
+    --sysconfdir=/etc/syslog-ng
+    --enable-dynamic-linking
+    --enable-ssl
+    --disable-env-wrapper
+    # This seems to need a different library than net-libs/GeoIP
+    --disable-geoip
+    --disable-spoof-source
+    --with-ivykis=system
+    --without-libnet
+    --without-compile-date
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
+    amqp
+    "caps linux-caps"
+    json
+    ipv6
+    mongodb
+#    pacct
+    pcre
+    smtp
+    sql
+    systemd
+    "tcpd tcp-wrapper"
+)
+
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    # Enabling AMQP logging requires librabbitmq-client.
+    # Syslog-ng does ship a bundled version, which has
+    # not yet been split into a separate package
+    # upstream. Once it is, this will need to be
+    # updated to match.
+    "amqp librabbitmq-client internal"
+    "mongodb libmongo-client system"
+    "systemd systemdsystemunitdir ${SYSTEMDSYSTEMUNITDIR}"
+    "json json-c"
+)
 
 syslog-ng_src_install() {
     default
 
-    edo rmdir "${IMAGE}"/usr/libexec
     if option vim-syntax ; then
         insinto /usr/share/vim/vimfiles/syntax/
         doins "${WORK}"/contrib/syslog-ng.vim
@@ -89,9 +115,6 @@ syslog-ng_src_install() {
     newins "${FILES}"/syslog-ng.logrotate syslog-ng
 
     keepdir /etc/syslog-ng/patterndb.d
-    if ! ever at_least 3.3.0beta1; then
-        install_systemd_files
-    fi
 
     edo rmdir "${IMAGE}"/var/lib
     keepdir /var/log
@@ -104,8 +127,9 @@ syslog-ng_pkg_postinst() {
         nonfatal edo rm -r "${ROOT}"/etc/env.d/alternatives/systemd-logger || \
             ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
     fi
-    [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]] && \
+    if [[ -f "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic ]]; then
         nonfatal edo rm "${ROOT}"/usr/share/eclectic/modules/auto/systemd-logger.eclectic || \
             ewarn "Removing /etc/env.d/alternatives/systemd-logger failed"
+    fi
 }
 

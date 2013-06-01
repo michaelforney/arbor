@@ -1,0 +1,16 @@
+Source: Gentoo
+Reason: Build fix, jam Archive action seems to include the arguments which will break our AR export
+Upstream: Unknown
+
+diff -Naur ftjam-2.5.3rc2/Jamfile ftjam-2.5.3rc2.new/Jamfile
+--- ftjam-2.5.3rc2/Jamfile	2007-06-05 16:30:52.000000000 +0200
++++ ftjam-2.5.3rc2.new/Jamfile	2013-05-30 01:37:43.283845738 +0200
+@@ -315,3 +315,8 @@
+   Package $(VERSION).zip : $(ALLSOURCE) ;
+ }
+ 
++# jam Archive action seems to include the arguments which will break our AR export
++actions Archive
++{
++  $(AR) ru $(<) $(>)
++}

@@ -1,0 +1,41 @@
+# Copyright 2013 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require cmake [ api=2 ]
+
+SUMMARY="create ISO9660/Joliet/HFS filesystem with optional Rock Ridge attributes"
+DESCRIPTION="
+This is genisoimage from app-cdr/cdrkit. cdrkit and cdrtools block each other
+because they collide heavily. genisoimage is the only tool from cdrkit needed by
+some packages (e. g. libguestfs), though, and we prefer cdrtools.
+Thus, genisoimage is now on its own in order to avoid collisions and blockers.
+"
+HOMEPAGE="http://www.cdrkit.org/"
+DOWNLOADS="http://cdrkit.org/releases/cdrkit-${PV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        !app-cdr/cdrkit[<1.1.11-r1] [[
+            description = [ Older cdrkit versions contain genisoimage ]
+            resolution = upgrade-blocked-before
+        ]]
+"
+
+WORK=${WORKBASE}/cdrkit-${PV}
+CMAKE_SOURCE=${WORK}
+
+src_compile() {
+    emake edc genisoimage
+}
+
+src_install() {
+    dobin genisoimage/genisoimage
+    doman genisoimage/genisoimage.1
+    doman genisoimage/genisoimagerc.5
+}
+

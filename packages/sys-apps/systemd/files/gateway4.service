@@ -1,0 +1,13 @@
+[Unit]
+Description=Static gateway (IPv4)
+Wants=network.target
+Before=network.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/conf.d/network-gateway.conf
+ExecStart=/sbin/ip route add default via ${GATEWAY4}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

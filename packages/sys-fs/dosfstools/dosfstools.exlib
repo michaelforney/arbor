@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Utilities to create and check MS-DOS filesystems under Linux"
-DESCRIPTION="MS-DOS filesystem programs mkdosfs, mkfs.msdos,vfat and the related fsck programs"
-HOMEPAGE="http://www.daniel-baumann.ch/software/${PN}"
-DOWNLOADS="http://www.daniel-baumann.ch/files/software/${PN}/${PNV}.tar.xz"
+DESCRIPTION="MS-DOS filesystem programs mkdosfs, mkfs.msdos,vfat and the related fsck programs."
+HOMEPAGE="http://daniel-baumann.ch/software/${PN}"
+DOWNLOADS="http://daniel-baumann.ch/files/software/${PN}/${PNV}.tar.xz"
 
 REMOTE_IDS="freecode:${PN}"
 
@@ -24,6 +24,7 @@ src_prepare() {
 
     edo sed -e "/^PREFIX/s:=.*:= /usr:" \
             -e '/^OPTFLAGS/d' \
+            -e '/^DEBUGFLAGS/d' \
             -i Makefile
 }
 

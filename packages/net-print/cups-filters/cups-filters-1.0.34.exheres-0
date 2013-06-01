@@ -1,0 +1,80 @@
+# Copyright 2012-2013 Timo Gurr <tgurr@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require easy-multibuild systemd-service [ systemd_files=[ cups-browsed.service ] ]
+
+SUMMARY="OpenPrinting CUPS Filters"
+DESCRIPTION="
+This distribution contains backends, filters, and other software that was
+once part of the core CUPS distribution but is no longer maintained by
+Apple Inc. In addition it contains additional filters developed
+independently of Apple, especially filters for the PDF-centric printing
+workflow introduced by OpenPrinting.
+"
+HOMEPAGE="http://www.linuxfoundation.org/collaborate/workgroups/openprinting"
+DOWNLOADS="http://www.openprinting.org/download/${PN}/${PNV}.tar.xz"
+
+LICENCES="GPL-2 GPL-3 MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    avahi
+    systemd
+    multibuild_c: 32 64
+"
+
+DEPENDENCIES="
+    build:
+        virtual/pkg-config
+    build+run:
+        app-text/ghostscript[multibuild_c:*(-)?]
+        app-text/poppler[>=0.20.3-r2][lcms][multibuild_c:*(-)?]
+        app-text/qpdf[>=3.0.2][multibuild_c:*(-)?]
+        dev-libs/glib:2[>=2.30.2][multibuild_c:*(-)?]
+        media-libs/fontconfig[>=2.0.0][multibuild_c:*(-)?]
+        media-libs/freetype:2[multibuild_c:*(-)?]
+        media-libs/jpeg[multibuild_c:*(-)?]
+        media-libs/lcms2[multibuild_c:*(-)?]
+        media-libs/libpng[multibuild_c:*(-)?]
+        media-libs/tiff[multibuild_c:*(-)?]
+        net-print/cups[>=1.6][multibuild_c:*(-)?]
+        avahi? (
+            net-dns/avahi[multibuild_c:*(-)?]
+            net-print/cups[>=1.6][avahi][multibuild_c:*(-)?]
+        )
+    run:
+        sys-apps/bc                [[ note = [ pstopdf filter ] ]]
+    suggestion:
+        net-print/foomatic-db      [[ note = [ for non-PostScript printers ] ]]
+        net-print/foomatic-filters [[ note = [ for non-PostScript printers ] ]]
+"
+
+configure_one_multibuild() {
+    local args=(
+        --enable-imagefilters
+        --disable-static
+        --with-browseremoteprotocols=$(option avahi && echo 'DNSSD,')CUPS \
+        --with-fontdir=fonts/conf.avail
+        --with-jpeg
+        --with-pdftops=pdftops
+        --with-png
+        --with-test-font-path=/usr/share/fonts/X11/dejavu/DejaVuSans.ttf
+        --with-tiff
+        --without-php
+        --without-rcdir
+        $(option_enable avahi)
+    )
+
+    econf "${args[@]}"
+}
+
+install_one_multibuild() {
+    default
+
+    install_systemd_files
+
+    if option systemd && ! option avahi ; then
+        multibuild_default_target C && edo sed -i -e 's: avahi-daemon.service::g' "${IMAGE}"/usr/${LIBDIR}/systemd/system/cups-browsed.service
+    fi
+}
+

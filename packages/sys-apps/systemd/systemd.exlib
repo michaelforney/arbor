@@ -12,7 +12,8 @@ fi
 
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
         alternatives \
-        bash-completion \
+        kernel \
+        test-dbus-daemon \
         udev-rules \
         python [ has_lib=false ] \
         zsh-completion
@@ -43,6 +44,10 @@ MYOPTIONS="
     bash-completion
     bootchart [[ description = [ Enable integrated bootchart by Auke Kok ] ]]
     cryptsetup [[ description = [ Enable systemd's minimal cryptsetup unit generator ] ]]
+    efi [[
+        description = [ EFI information in various tools and mounting of efivars during boot ]
+        note = [ Needs (U)EFI compatible hardware and a fairly recent kernel with proper configuration ]
+    ]]
     gcrypt [[ description = [ Enable cryptographically secured journal files ] ]]
     gobject-introspection
     gtk-doc
@@ -56,6 +61,7 @@ MYOPTIONS="
     python [[ description = [ Build the man page index and systemd-python (bindings) ] ]]
     qrencode [[ description = [ For transferring the journal verification key to a smartphone ] ]]
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
+    static-net [[ description = [ Include a simple service for static networking ] ]]
     tcpd
     xattr
 "
@@ -96,15 +102,21 @@ DEPENDENCIES="
         cryptsetup? ( sys-fs/cryptsetup[>=1.4.2] )
         gcrypt? ( dev-libs/libgcrypt )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
-        polkit? ( sys-auth/polkit )
-        qrencode? ( media-libs/qrencode )
         journal-gateway? (
             net-libs/libmicrohttpd[>=0.9.5]
             user/systemd-journal-gateway
             group/systemd-journal-gateway
         )
+        polkit? ( sys-auth/polkit:1 )
+        qrencode? ( media-libs/qrencode )
         tcpd? ( sys-apps/tcp-wrappers )
         xattr? ( sys-apps/attr )
+    recommendation:
+        efi? ( sys-boot/gummiboot [[
+                note = [ Systemd can receive performance data and other information from supported bootloaders ]
+                url  = [ http://www.freedesktop.org/wiki/Software/systemd/BootLoaderInterface ]
+            ]]
+        )
     run:
         sys-apps/coreutils
         sys-apps/kbd[>=1.15.2-r1]
@@ -112,12 +124,14 @@ DEPENDENCIES="
         group/lock [[ note = [ Required for var-lock service ] ]]
         group/systemd-journal [[ note = [ Required for journal access by non-root users ] ]]
         simple-net? ( sys-apps/net-tools[>=1.60_p20120127084908] )
+        static-net? ( sys-apps/iproute2 )
     suggestion:
         app-admin/systemd-ui [[ description = [ Optional (G)UI tools for systemd ] ]]
         (
             gnome-bindings/pygobject:3
             gnome-desktop/gobject-introspection:1
         ) [[ description = [ Required for systemd-analyze - analyze the boot performance of your system ] ]]
+        dev-python/lxml [[ description = [ For a prettier directive index (man systemd.directives) ] ]]
         dev-python/pycairo [[ description = [ Get fancy svgs about the boot process through systemd-analyze plot  ] ]]
         sys-apps/kexec-tools [[ description = [ Support for systemctl kexec - booting a kernel immediately, skipping the BIOS ] ]]
         sys-boot/dracut [[ description = [ Easily create an initramfs (if in doubt, don't take this) ] ]]
@@ -128,15 +142,13 @@ AT_M4DIR=( m4 )
 ZSH_COMPLETIONS=( 'shell-completion/systemd-zsh-completion.zsh _systemd' )
 
 systemd_pkg_pretend() {
-    local kv=$(uname -r)
-
-    if [[ ${kv} < 2.6.39 ]] ; then
+    if ! kernel_version_at_least 2.6.39 ; then
         ewarn "You MUST install a kernel >= 2.6.39 to use systemd."
         ewarn "This check is based upon the kernel currently running, thus, if you already"
         ewarn "installed a suitable kernel and just need to boot it, you can disregard this."
     fi
 
-    if [[ ${kv} < 3.8 ]] ; then
+    if ! kernel_version_at_least 3.8 ; then
         ewarn "You SHOULD install a kernel >= 3.8 to get the best results."
         ewarn "Read http://cgit.freedesktop.org/systemd/systemd/plain/README for details."
     fi
@@ -148,9 +160,6 @@ systemd_pkg_pretend() {
     fi
 }
 
-# systemd >= 198 is not parallel safe
-DEFAULT_SRC_COMPILE_PARAMS=( -j1 )
-
 systemd_pkg_setup() {
     exdirectory --allow /etc/binfmt.d
     exdirectory --allow /etc/modules-load.d
@@ -161,6 +170,10 @@ systemd_pkg_setup() {
 }
 
 systemd_src_prepare() {
+    if [[ -d ${FILES}/patches ]]; then
+        expatch -p1 "${FILES}"/patches
+    fi
+
     if option gtk-doc ; then
         edo gtkdocize --copy --docdir docs/
     else
@@ -174,11 +187,13 @@ systemd_src_prepare() {
     # Paludis really hates the progress bar so let's disable it.
     edo sed -i -e "/journal_file_verify/s:true:false:" src/journal/test-journal-verify.c
 
-    # Disable a test that needs root privs.
+    # Disable tests that need root privs.
+    edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
+    edo sed -i -e '/test-unit-file/s:test-unit-file:$(NULL):' Makefile.am
     edo sed -i -e '/test-sched-prio/s:test-sched-prio:$(NULL):' Makefile.am
 
-    # This test needs both a running systemd and dbus. Disabling it.
-    edo sed -i -e '/test-unit-name/s:test-unit-name:$(NULL):' Makefile.am
+    # Broken.
+    edo sed -i -e '/test-hashmap/s:test-hashmap:$(NULL):' Makefile.am
 
     edo intltoolize --force --automake
     autotools_src_prepare
@@ -209,16 +224,14 @@ systemd_src_configure() {
         --enable-xz
         --disable-audit
         --disable-chkconfig
-        # I don't have any EFI system with Linux installed. Feel free to create an option.
-        --disable-efi
         --disable-ima
         --disable-selinux
-        --with-bashcompletiondir=/usr/share/bash-completion/completions
         # Uses pkg-config directly
         --with-dbuspolicydir=/etc/dbus-1/system.d
         --with-dbussessionservicedir=/usr/share/dbus-1/services
         --with-dbussystemservicedir=/usr/share/dbus-1/system-services
         --with-dbusinterfacedir=/usr/share/dbus-1/interfaces
+        --with-debug-tty=/dev/tty9
         --with-firmware-path=/usr/$(exhost --target)/lib/firmware/updates:/usr/$(exhost --target)/lib/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
@@ -232,6 +245,7 @@ systemd_src_configure() {
         $(option_enable acl)
         $(option_enable bootchart)
         $(option_enable cryptsetup libcryptsetup)
+        $(option_enable efi)
         $(option_enable gcrypt)
         $(option_enable gobject-introspection introspection)
         $(option_enable gtk-doc)
@@ -240,6 +254,7 @@ systemd_src_configure() {
         $(option_enable qrencode)
         $(option_enable tcpd tcpwrap)
         $(option_enable xattr)
+        $(option_with bash-completion bashcompletiondir /usr/share/bash-completion/completions)
         $(option_with python)
         ac_cv_func_malloc_0_nonnull=yes
         ac_cv_func_realloc_0_nonnull=yes
@@ -259,8 +274,10 @@ systemd_src_test() {
         if [[ -f /etc/machine-id ]]; then
             # The tests currently fail if run under sydbox.
             esandbox disable
-            emake check
+            esandbox disable_net
+            test-dbus-daemon_src_test
             esandbox enable
+            esandbox enable_net
         else
             ewarn "The tests require a valid, initialised /etc/machine-id which you don't seem to"
             ewarn "have. Please run /usr/bin/systemd-machine-id-setup and re-install systemd if you"
@@ -329,6 +346,22 @@ systemd_src_install() {
         doins "${FILES}"/network.service
         insinto /etc/conf.d
         doins "${FILES}"/network.conf
+    fi
+
+    if option static-net; then
+        insinto /usr/${LIBDIR}/systemd/system
+        doins "${FILES}"/network4@.service
+        doins "${FILES}"/gateway4.service
+        doins "${FILES}"/network6@.service
+        doins "${FILES}"/gateway6.service
+        insinto /etc/conf.d
+        doins "${FILES}"/network-gateway.conf
+        doins "${FILES}"/network-lo.conf
+        doins "${FILES}"/network-eth0.conf
+    fi
+
+    if ! option bash-completion ; then
+        edo rm -r "${IMAGE}"/no
     fi
 
     # Install the legacy.conf tmpdirs.d config file.
@@ -423,6 +456,10 @@ EOF
     # with specified owner, group and access mode.
     keepdir /etc/tmpfiles.d
 
+    # Helper dirs for the kernel-install utility.
+    keepdir /etc/kernel/install.d
+    keepdir /usr/${LIBDIR}/kernel/install.d
+
     # ntp units in ntp-units.d/?*.conf get read and the services started.
     keepdir /etc/systemd/ntp-units.d
 
@@ -449,6 +486,9 @@ EOT
     dosym /usr/${host}/lib/systemd/systemd-udevd /usr/${host}/sbin/udevd
     dosym /usr/${host}/bin/udevadm /usr/${host}/sbin/udevadm
 
+    # Exclude /var/tmp/paludis/build from cleaning
+    edo echo "x /var/tmp/paludis/build" >> "${IMAGE}"/usr/${LIBDIR}/tmpfiles.d/tmp.conf
+
     if option python ; then
         python_bytecompile
     fi
@@ -465,12 +505,6 @@ systemd_pkg_postinst() {
         nonfatal edo /usr/${CHOST}/bin/systemd-machine-id-setup || ewarn "systemd-machine-id-setup failed"
         nonfatal edo mkdir -p /var/lib/dbus || ewarn "mkdir /var/lib/dbus failed"
         nonfatal edo ln -snf /etc/machine-id /var/lib/dbus/machine-id || ewarn "creating machine-id symlink failed"
-
-        # Update the hwdb index
-        nonfatal edo /usr/${CHOST}/sbin/udevadm hwdb --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
-
-        # Update the message catalogue index
-        nonfatal edo /usr/${CHOST}/bin/journalctl --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
 
         # if the root of init does not match our root, we are in a chroot and should not perform the
         # restart of the udev process
@@ -504,6 +538,12 @@ systemd_pkg_postinst() {
             fi
         fi
     fi
+
+    # Update the hwdb index
+    nonfatal edo /usr/${CHOST}/sbin/udevadm hwdb --root="${ROOT}" --update || ewarn "Updating hwdb failed (udevadm hwdb --update)"
+
+    # Update the message catalogue index
+    nonfatal edo /usr/${CHOST}/bin/journalctl --root="${ROOT}" --update-catalog || ewarn "Updating journal message catalogue failed (journalctl --update-catalog)"
 
     local cruft=(
         "${ROOT}"/etc/init.d/sysinit.bash

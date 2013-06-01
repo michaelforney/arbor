@@ -15,6 +15,8 @@ install_udev_files() {
     for object in "${udev_files[@]}"; do
         if [[ -d ${object} ]]; then
             doins "${object}"/*
+        elif [[ -f ${object} ]]; then
+            doins "${object}"
         else
             doins "${FILES}"/udev/"${object}"
         fi

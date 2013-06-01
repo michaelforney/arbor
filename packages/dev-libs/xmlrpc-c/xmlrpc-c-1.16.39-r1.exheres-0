@@ -1,0 +1,68 @@
+# Copyright 2008 Wulf C. Krueger
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'xmlrpc-c-1.14.07.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation
+
+require sourceforge [ suffix=tgz ]
+
+SUMMARY="A lightweigt RPC library based on XML and HTTP"
+LICENCES="BSD-3"
+
+SLOT="0"
+PLATFORMS="~amd64 ~ppc64 ~x86"
+MYOPTIONS=""
+
+# The tests are... interesting. They need lots of gcc-4.3 fixes, the C++ tests
+# are missing a lot of C headers and even if it all builds fine and the examples
+# work, the tests always fail. If you want to try, you'll need to enable the
+# abyss server (not necessarily with threads).
+RESTRICT="test"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libxml2:2.0
+        net-misc/curl
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p1 "${FILES}"/xmlrpc-c_fix_building_with_newer_curl.patch
+)
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+        --disable-wininet-client
+        --disable-libwww-client
+        --disable-abyss-server
+        --disable-abyss-threads
+        --enable-libxml2-backend
+        --enable-cgi-server
+        --enable-curl-client
+        --enable-cplusplus
+        --hates=docdir
+)
+
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=(
+    doc/CREDITS
+    doc/HISTORY
+    doc/SECURITY
+    doc/TODO
+)
+
+src_prepare() {
+    # Respect the user's LDFLAGS.
+    export LADD=${LDFLAGS}
+
+    # Respect the user's CFLAGS/CXXFLAGS.
+    edo sed -i -e "/CFLAGS_COMMON/s:-g -O3$:${CFLAGS}:" \
+               -e "/CXXFLAGS_COMMON/s:-g$:${CXXFLAGS}:" common.mk
+
+    # Use the correct libdir.
+    edo sed -i -e "/LIBINST_DIR/s:lib:${LIBDIR}:" config.mk.in
+
+    edo sed -i -e "/libxmlrpc_server_abyss++/d" src/cpp/Makefile
+
+    # We need to filter this. cf. Gentoo bug 214137.
+    unset SRCDIR
+
+    default
+}
+

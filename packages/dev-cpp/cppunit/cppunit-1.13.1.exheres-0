@@ -1,0 +1,28 @@
+# Copyright 2008, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require easy-multibuild
+
+SUMMARY="C++ port of the famous JUnit framework for unit testing"
+
+HOMEPAGE="http://www.freedesktop.org/wiki/Software/cppunit"
+DOWNLOADS="http://dev-www.libreoffice.org/src/${PNV}.tar.gz"
+
+LICENCES="LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="doc
+    multibuild_c: 32 64"
+
+DEPENDENCIES="
+    build:
+        doc? (
+            app-doc/doxygen
+            media-gfx/graphviz
+        )
+"
+
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc dot' 'doc doxygen' )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( CodingGuideLines.txt )
+DEFAULT_SRC_INSTALL_EXTRA_SUBDIRS=( doc )
+

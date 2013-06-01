@@ -1,0 +1,47 @@
+# Copyright 2007, 2009 Bryan Østergaard <kloeri@exherbo.org>
+# Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=gz ]
+require elisp-optional
+
+SUMMARY="GNU localization utilties"
+
+LICENCES="GPL-3"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+MYOPTIONS="
+    acl
+    emacs
+    examples
+    openmp
+"
+
+DEPENDENCIES="
+    build:
+        sys-devel/gcc:*[openmp?]
+    build+run:
+        dev-libs/libxml2:2.0
+        acl? ( sys-apps/acl )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PN}-0.18-sydbox.patch" )
+
+# NOTE(tgurr) exporting EGREP fixes not building the shared library, already fixed in trunk
+DEFAULT_SRC_CONFIGURE_PARAMS=( EGREP=egrep )
+DEFAULT_SRC_CONFIGURE_PARAMS+=( "--htmldir=/usr/share/doc/${PNVR}/html" '--disable-csharp'
+                                '--disable-java' '--disable-native-java' '--disable-rpath'
+                                '--enable-nls' '--with-included-glib' '--with-included-croco'
+                                '--with-included-libunistring' '--without-cvs'
+                                '--without-included-gettext' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'acl' 'openmp' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( 'emacs' )
+
+perform_multiarch_install() {
+    default
+
+    option emacs && elisp-install-site-file
+    option examples || edo rm -fr "${IMAGE}/usr/share/doc/${PNVR}/examples"
+    edo rm -fr "${IMAGE}"/usr/share/doc/${PNVR}/html/{csharpdoc,javadoc2}
+}
+

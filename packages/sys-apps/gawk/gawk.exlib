@@ -62,13 +62,6 @@ src_compile() {
 }
 
 src_install() {
-    local alternatives=(
-        awk ${PN} 5
-
-        /usr/$(exhost --target)/bin/awk        /usr/$(exhost --target)/bin/${PN}
-        /usr/share/man/man1/awk.1   ${PN}.1
-    )
-
     default
 
     if option baselayout; then
@@ -78,6 +71,8 @@ src_install() {
 
     # NOTE(compnerd) awk symlink is managed via alternatives
     edo rm "${IMAGE}/usr/$(exhost --target)/bin/awk"
-    alternatives_for "${alternatives[@]}"
+    alternatives_for awk ${PN} 5 \
+        /usr/$(exhost --target)/bin/awk ${PN} \
+        /usr/share/man/man1/awk.1 ${PN}.1
 }
 

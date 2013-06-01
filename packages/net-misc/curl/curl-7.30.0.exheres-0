@@ -1,0 +1,91 @@
+# Copyright 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
+# Based in part upon previous work copyrighted to Gentoo Foundation.
+# Distributed under the terms of the GNU General Public License v2
+
+require common-metadata
+
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS="idn ipv6
+    ares [[ description = [ Enabled c-ares posix-threaded dns support, disables curl's own threaded resolver ] ]]
+    gnutls [[ description = [ Use GnuTLS instead of OpenSSL ] ]]
+"
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*
+        sys-apps/diffutils
+        virtual/pkg-config
+    build+run:
+        app-misc/ca-certificates
+        net-libs/libssh2[>=1.2.8]
+        sys-libs/zlib
+        ares? ( net-dns/c-ares[>=1.6.0] )
+       !gnutls? ( dev-libs/openssl[>=1.0.1] )
+        gnutls? (
+            dev-libs/gnutls[>=2.12.14]
+            dev-libs/nettle
+        )
+        idn? ( net-dns/libidn )
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/ddbda328b37eb4b5f43fbd1dd8248c301fd2b30e.patch )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-{cookies,crypto-auth,largefile,manual,proxy,tls-srp}
+    --enable-{dict,file,ftp,gopher,http,imap,pop3,rtsp,smtp,telnet,tftp}
+    --disable-static
+    --disable-werror
+    --disable-{ldap,ldaps,sspi}
+    --with-{libssh2,zlib}
+    --without-{ca-bundle,cyassl,gssapi,nss,krb4,libmetalink,librtmp,polarssl,spnego,axtls}
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ares '!ares threaded-resolver' ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'idn libidn'
+    '!gnutls ssl' '!gnutls ca-path /etc/ssl/certs'
+    gnutls 'gnutls ca-bundle /etc/ssl/certs/ca-certificates.crt'
+)
+DEFAULT_SRC_INSTALL_EXTRA_PREFIXES=( docs/ )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( BINDINGS DISTRO FEATURES INTERNALS MANUAL RESOURCES TheArtOfHttpScripting )
+
+src_prepare() {
+    # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
+    edo sed -e '/s_addr =/s:INADDR_ANY:htonl(INADDR_LOOPBACK):' -i tests/server/*.c
+
+    # Use `whoami` instead of $USER;
+    # sshserver.pl will refuse to run as root (which $USER might claim ever if we're not)
+    edo sed -e 's/\$ENV{USER}/`whoami`/' -i tests/*.pl
+
+    default
+}
+
+src_test() {
+    if exhost --is-native -q; then
+        cat <<-EOF >> tests/data/DISABLED
+# Work around broken DNS servers, Exherbo #207
+20
+507
+# Fails with too many open files
+537
+EOF
+
+        esandbox allow_net --connect "inet:127.0.0.1@9011"
+        esandbox allow_net --connect "inet:127.0.0.1@60000"
+
+        # Default TEST_F is -a -p -r; we add -n (no valgrind) -v (verbose) and remove -r (run time statistics)
+        local test_args=( -a -p -n -v )
+        test_args+=( '!'{600..639} )
+        emake test-full TEST_F="${test_args[*]}" # SSH tests hang
+
+        esandbox disallow_net --connect "inet:127.0.0.1@9011"
+        esandbox disallow_net --connect "inet:127.0.0.1@60000"
+    else
+        echo "cross compiled host, skipping tests"
+    fi
+}
+
+src_install() {
+    default
+
+    insinto /usr/share/aclocal
+    doins "${WORK}"/docs/libcurl/libcurl.m4
+}
+

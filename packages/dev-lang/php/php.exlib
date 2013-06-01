@@ -126,7 +126,7 @@ DEPENDENCIES="
         )
         php_extensions:tidy? ( app-text/tidy[>=20080116] )
         php_extensions:unixodbc? ( dev-db/unixODBC[>=2.2.14] )
-        php_extensions:xml? ( dev-libs/libxml2[>=2.7.2_p20081127] )
+        php_extensions:xml? ( dev-libs/libxml2:2.0[>=2.7.2_p20081127] )
         php_extensions:xsl? ( dev-libs/libxslt[>=1.1.0] )
 "
 
@@ -316,7 +316,7 @@ DEFAULT_SRC_INSTALL_EXCLUDE=(
 )
 
 php_pkg_pretend() {
-    if [[ -z "${SUHOSIN_VERSION}" ]] && has_version --root ${CATEGORY}/${PN}[suhosin]; then
+    if [[ -z ${SUHOSIN_VERSION} ]] && has_version --root ${CATEGORY}/${PN}[suhosin]; then
         elog "${PNV} doesn't (yet) support the Suhosin patch. If you rely on it, don't install ${PNV}."
     fi
 }

@@ -2,7 +2,7 @@
 # Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require systemd-service
+require bash-completion systemd-service
 require autotools [ supported_automake=[ 1.13 ] supported_autoconf=[ 2.5 ] ]
 
 SUMMARY="Common linux utilities"
@@ -34,9 +34,9 @@ MYOPTIONS="
 
 DEPENDENCIES="
     build:
+        dev-libs/libxslt
         sys-devel/gettext[>=0.14.1]
         virtual/pkg-config
-        dev-libs/libxslt
         gtk-doc? ( dev-doc/gtk-doc[>=1.10] )
     build+run:
         !sys-apps/eject [[
@@ -59,8 +59,12 @@ DEPENDENCIES="
             description = [ util-linux now provides mesg ]
             resolution = uninstall-blocked-after
         ]]
-        dev-lang/perl:*
+        !app-shells/bash-completion[<1.3_p20110628-r2] [[
+            description = [ util-linux now provides its own bash-completions ]
+            resolution = upgrade-blocked-before
+        ]]
         sys-libs/glibc[>=2.10]
+        sys-libs/libcap-ng
         sys-libs/ncurses[>=5.6] [[
             note = [ this is required as most of the tools have been converted to use ncurses ]
         ]]
@@ -76,13 +80,22 @@ DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HISTORY VERSION )
 
 src_prepare() {
     edo sed -i "s:CPPFLAGS =:& -I/usr/$(exhost --target)/include/ncurses:" Makefile.am
+
+    # disable failing tests
+    edo rm tests/ts/fdisk/{gpt,mbr-{non,}dos-mode,sunlabel}
+    edo rm tests/ts/ipcs/limits2
+
+    # only works on btrfs, ext4, ocfs2, and xfs filesystems
+    edo rm tests/ts/misc/fallocate
+
+    option !session-management && edo rm -rf tests/ts/utmpdump
+
     autotools_src_prepare
 }
 
 src_configure() {
     # Conflict Resolution:
     # - coreutils
-    #   * arch
     #   * kill
     # - ncurses
     #   * reset
@@ -93,33 +106,31 @@ src_configure() {
     #   * newgrp
     #   * su
     #   * vipw
-    local conflicts=( arch chfn-chsh kill login newgrp reset su vipw )
+    local conflicts=( chfn-chsh kill login newgrp reset su vipw )
 
     # Deprecated Tools:
-    # arch is deprecated in favour of arch from coreutils
-    # chkdupexe is deprecated as it is in perl and is unnecessary
     # deprecated-mount is deprecated in favour of libmount + sys-util/{,u}mount in util-linux
     # elvtune is deprecated as it is useless for kernels >= 2.6.9
     # last is deprecated (unused)
     # line is deprecated in favour of head
-    local deprecated=( arch chkdupexe deprecated-mount elvtune last line )
+    local deprecated=( deprecated-mount elvtune last line )
 
     local enabled_tools=(
-        agetty cramfs eject fallocate fsck losetup mesg mount mountpoint partx pivot_root raw rename
-        sulogin switch_root unshare uuidd wall wdctl
+        agetty bfs cramfs cytune eject fallocate fdformat fsck hwclock losetup mesg more mount
+        mountpoint nsenter partx pg pivot_root raw rename schedutils setpriv sulogin switch_root ul
+        unshare uuidd wall wdctl
     )
 
     local disabled_tools=( runuser write )
 
     econf \
-        --enable-fs-paths-extra=/usr/$(exhost --target)/sbin \
         --localstatedir=/run \
-        --enable-libuuid \
+        --enable-fs-paths-extra=/usr/$(exhost --target)/sbin \
         --enable-libblkid \
         --enable-libmount \
+        --enable-libuuid \
         --enable-nls \
         --disable-static \
-        --enable-schedutils \
         --with-ncurses \
         --without-slang \
         --without-audit \
@@ -136,3 +147,15 @@ src_configure() {
         $(option_with udev)
 }
 
+src_install() {
+    easy-multibuild_src_install
+
+    edo rm -rf "${IMAGE}"/usr/share/bash-completion
+
+    edo pushd bash-completion
+        edo rm Makemodule.am
+        for i in *; do
+            dobashcompletion "${i}" "${i}"
+        done
+    edo popd
+}

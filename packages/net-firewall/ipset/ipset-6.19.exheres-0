@@ -1,0 +1,27 @@
+# Copyright 2013 Wulf C. Krueger <philantrop@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="ipset is used to maintain IP sets in the kernel"
+DESCRIPTION="
+ipset allows administration of sets of IP addresses/networks, ports, MAC addresses,
+and interfaces, which are stored in hash or bitmap data structures. These can then
+be used in conjunction with iptables to do fast presence lookups.
+"
+HOMEPAGE="http://ipset.netfilter.org"
+DOWNLOADS="${HOMEPAGE}/${PNV}.tar.bz2"
+
+BUGS_TO="philantrop@exherbo.org"
+REMOTE_IDS="freecode:${PN}"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        net-libs/libmnl
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --without-kmod )
+

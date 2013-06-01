@@ -3,7 +3,11 @@
 
 export_exlib_phases pkg_pretend src_compile src_test src_install
 
-require systemd-service
+if ever at_least 9.2; then
+    require systemd-service [ systemd_files=[ 9.2/postgresql.service ] ]
+else
+    require systemd-service [ systemd_files=[ pre-9.2/postgresql.service ] ]
+fi
 
 PSQL_MAJOR_VERSION=$(ever range 1-2)
 

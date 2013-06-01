@@ -25,14 +25,16 @@ DEPENDENCIES="
         dev-util/dejagnu
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-no-gets.patch" )
-
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-d_type-optimisation' '--enable-leaf-optimisation'
-                               '--enable-nls' '--without-included-regex' '--without-selinux' )
 DEFAULT_SRC_COMPILE_PARAMS=( AR="${AR}" )
 
 src_configure() {
-    econf "--libexecdir=/usr/$(exhost --target)/libexec/${PN}"
+    econf \
+        --enable-d_type-optimisation \
+        --enable-leaf-optimisation \
+        --enable-nls \
+        --libexecdir=/usr/$(exhost --target)/libexec/${PN} \
+        --without-included-regex \
+        --without-selinux
 }
 
 findutils_src_test_expensive() {

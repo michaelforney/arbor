@@ -1,0 +1,127 @@
+# Copyright 2009 Ingmar Vanhassel <ingmar@exherbo.org>
+# Copyright 2013 Timo Gurr <tgurr@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ project=${PN,,} suffix=tar.xz ]
+
+SUMMARY="GraphicsMagick Image Processing System"
+DESCRIPTION="
+GraphicsMagick is the swiss army knife of image processing. Comprised of 337K
+lines of C and C++ code, it provides a robust and efficient collection of tools
+and libraries which support reading, writing, and manipulating an image in over
+88 major formats including important formats like DPX, GIF, JPEG, JPEG-2000,
+PNG, PDF, PNM, and TIFF.
+
+GraphicsMagick is originally derived from ImageMagick 5.5.2 but has been
+completely independent of the ImageMagick project since then. Since the fork
+from ImageMagick in 2002, many improvements have been made (see news) by many
+authors using an open development model but without breaking the API or
+utilities operation. (More on the homepage)
+"
+HOMEPAGE="http://www.graphicsmagick.org"
+
+BUGS_TO="ingmar@exherbo.org"
+REMOTE_IDS+=" freecode:${PN}"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/Changelog.html"
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/NEWS.html"
+UPSTREAM_DOCUMENTATION="${HOMEPAGE}/FAQ.html [[ lang = en description = [ FAQ ] ]]"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    X
+    doc
+    fpx [[ description = [ Support for the FlashPix image format ] ]]
+    imagemagick [[ description = [ Install ImageMagick utility shortcuts ] ]]
+    jpeg2000
+    lcms
+    openmp [[ description = [ Support for Open Multi-Processing ] ]]
+    tiff
+    truetype
+    wmf [[ description = [ Support for the Windows Metafile image format ] ]]
+"
+
+DEPENDENCIES="
+    build+run:
+        dev-libs/libxml2:2.0[>=2.7.8]
+        media-libs/jpeg[>=6b]
+        media-libs/libpng
+        X?  (
+            x11-libs/libSM
+            x11-libs/libICE
+            x11-libs/libX11
+            x11-libs/libXext
+        )
+        fpx? ( media-libs/libfpx )
+        imagemagick? (
+            !media-gfx/ImageMagick [[
+                description = [ GraphicsMagick is a fork of ImageMagick ]
+                resolution = uninstall-blocked-after
+            ]]
+        )
+        jpeg2000? ( media-libs/jasper )
+        lcms? ( media-libs/lcms2 )
+        openmp? ( sys-devel/gcc:*[openmp?] )
+        tiff? ( media-libs/tiff[>=3.5.5] )
+        truetype? (
+            fonts/corefonts
+            fonts/urw-fonts
+            media-libs/freetype:2
+        )
+        wmf? ( media-libs/libwmf )
+    suggestion:
+        sci-apps/gnuplot [[ description = [ Support for reading GNUPlot files ] ]]
+"
+
+# Tests fail with different compile time options not enabled
+RESTRICT=test
+
+# TODO
+# - configure.ac also has checks for: rst2html, txt2html p7zip, zip, but none of these are required
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-shared
+    # Disable OpenMP for algorithms which sometimes run slower
+    --disable-openmp-slow
+    --disable-static
+    --with-bzlib
+    --with-gs-font-dir=/usr/share/fonts/X11/urw-fonts
+    --with-jpeg
+    --with-lzma
+    --with-magick-plus-plus
+    --with-modules
+    --with-png
+    --with-quantum-depth=16
+    --with-threads
+    --with-xml
+    --with-zlib
+    --without-dps
+    --without-gslib
+    --without-included-ltdl
+    --without-jbig
+    --without-lcms
+    --without-perl
+    --without-trio
+)
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'imagemagick magick-compat' 'openmp' )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    'X x'
+    'fpx'
+    'jpeg2000 jp2'
+    'lcms lcms2'
+    'tiff'
+    'truetype ttf'
+    'truetype windows-font-dir /usr/share/fonts/X11/corefonts'
+    'wmf'
+)
+
+src_install() {
+    default
+
+    if ! option doc; then
+        edo rm -r "${IMAGE}"/usr/share/doc/${PNVR}/www
+    fi
+}
+

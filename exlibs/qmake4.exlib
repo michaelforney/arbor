@@ -6,30 +6,57 @@
 
 export_exlib_phases src_configure
 
+# Default to slot=4 for now
+myexparam slot=4
 myexparam -b no_qt_dependency=false
 
-exparam -b no_qt_dependency ||
-DEPENDENCIES="build: x11-libs/qt:4 [[ note = [ Qt-Core, for qmake ] ]]"
+if ! exparam -b no_qt_dependency ; then
+    case $(exparam slot) in
+        4)
+            DEPENDENCIES="build: x11-libs/qt:4 [[ note = [ Qt-Core, for qmake ] ]]"
+            ;;
+        5)
+            DEPENDENCIES="build: x11-libs/qtbase:5 [[ note = [ Qt-Core, for qmake ] ]]"
+            ;;
+        *)
+            die "qt slot $(exparam slot) is unsupported"
+            ;;
+    esac
+fi
 
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 
 eqmake4() {
     illegal_in_global_scope
 
+    local qt_slot
+    exparam -v qt_slot slot
+
     # Install into the correct libdir on 64 bit systems
     if [[ ${LIBDIR} == *64 ]] ; then
-        export QMAKESPEC="/usr/share/qt4/mkspecs/linux-g++-64"
+        export QMAKESPEC="/usr/share/qt${qt_slot}/mkspecs/linux-g++-64"
     else
-        export QMAKESPEC="/usr/share/qt4/mkspecs/linux-g++"
+        export QMAKESPEC="/usr/share/qt${qt_slot}/mkspecs/linux-g++"
     fi
 
-    [[ -x /usr/bin/qmake ]] || die "eqmake4() called but no qmake found"
+    local qmake_path
+
+    case ${qt_slot} in
+        4)
+            qmake_path=/usr/bin/qmake
+            ;;
+        5)
+            qmake_path=/usr/${LIBDIR}/qt5/bin/qmake
+            ;;
+    esac
+
+    [[ -x ${qmake_path} ]] || die "eqmake4() called but no qmake for $qt_slot) found"
 
     [[ ${@} == ${@%.pro} && -z ${EQMAKE4_SOURCES[@]} ]] && EQMAKE4_SOURCES=( ${PN}.pro )
 
-    edo /usr/bin/qmake \
+    edo ${qmake_path} \
         QTDIR="/usr/${LIBDIR}" \
-        QMAKE="/usr/bin/qmake" \
+        QMAKE="${qmake_path}" \
         QMAKE_CFLAGS_RELEASE="${CFLAGS}" \
         QMAKE_CXXFLAGS_RELEASE="${CXXFLAGS}" \
         QMAKE_LFLAGS_RELEASE="${LDFLAGS}" \

@@ -1,0 +1,63 @@
+Source: http://gcc.gnu.org/ml/gcc-patches/2012-08/msg01534.html
+Upstream: in a branch, commit message indicates its to be solved differently in trunk
+Reason: lto1: internal compiler error: in should_move_die_to_comdat, at dwarf2out.c:6974
+
+From gcc-patches-return-325098-listarch-gcc-patches=gcc dot gnu dot org at gcc dot gnu dot org Thu Aug 23 00:12:18 2012
+To: gcc-patches at gcc dot gnu dot org, ppluzhnikov at google dot com
+Subject: [google/gcc-4_7] Fix ICE in should_move_die_to_comdat
+Date: Wed, 22 Aug 2012 17:11:43 -0700 (PDT)
+From: ccoutant at google dot com (Cary Coutant)
+
+This patch is for the google/gcc-4_7 branch.
+
+If a function contains a local typedef of an anonymous structure, GCC
+will generate a typedef DIE in the function, where the typedef DIE points
+to a structure_type DIE at the top level.  That structure_type DIE, if
+it's a non-POD, can contain ctor and dtor definitions.  This causes an
+assertion in should_move_die_to_comdat to fail, as we have up to now
+assumed that this could never happen.
+
+Perhaps a better fix would be to fix the generation of the structure_type
+DIE somehow, but GDB seems happy with what we're generating, and we don't
+want to extract this type into a comdat type unit anyway, so this patch
+fixes things up so that we just skip the type instead of asserting.
+
+I'll explore other possible fixes for trunk, but this should be good
+for google/gcc-4_7.
+
+Tested with build and validate, and by compiling the failing test case.
+
+Google ref b/6669962.
+
+
+2012-08-22   Cary Coutant  <ccoutant@google.com>
+
+	* gcc/dwarf2out.c (should_move_die_to_comdat): A type definition
+	can contain a subprogram definition, but don't move it to a
+	comdat unit.
+
+
+Index: gcc/dwarf2out.c
+===================================================================
+--- gcc/dwarf2out.c	(revision 190603)
++++ gcc/dwarf2out.c	(working copy)
+@@ -7289,14 +7289,13 @@ should_move_die_to_comdat (dw_die_ref di
+     case DW_TAG_structure_type:
+     case DW_TAG_enumeration_type:
+     case DW_TAG_union_type:
+-      /* Don't move declarations, inlined instances, or types nested in a
+-	 subprogram.  */
++      /* Don't move declarations, inlined instances, types nested in a
++	 subprogram, or types that contain subprogram definitions.  */
+       if (is_declaration_die (die)
+           || get_AT (die, DW_AT_abstract_origin)
+-          || is_nested_in_subprogram (die))
++          || is_nested_in_subprogram (die)
++	  || contains_subprogram_definition (die))
+         return 0;
+-      /* A type definition should never contain a subprogram definition.  */
+-      gcc_assert (!contains_subprogram_definition (die));
+       return 1;
+     case DW_TAG_array_type:
+     case DW_TAG_interface_type:
+

@@ -1,0 +1,33 @@
+Upstream: No, https://bugzilla.gnome.org/show_bug.cgi?id=700628
+From 785e8c5bc896e6b13063d4841416fc0878418830 Mon Sep 17 00:00:00 2001
+From: Paul Seidler <sepek@lavabit.com>
+Date: Sun, 19 May 2013 12:40:53 +0200
+Subject: [PATCH] build: disable proxy tests unless PROXY is enabled
+
+---
+ Makefile.am | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 4cd21b0..54c85a2 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -7,14 +7,13 @@ SUBDIRS = po
+ 
+ if HAVE_LIBPROXY
+ SUBDIRS += proxy/libproxy
++SUBDIRS += proxy/tests
+ endif
+ 
+ if HAVE_GNOME_PROXY
+ SUBDIRS += proxy/gnome
+ endif
+ 
+-SUBDIRS += proxy/tests
+-
+ if HAVE_PKCS11
+ SUBDIRS += tls/pkcs11
+ endif
+-- 
+1.8.2.3
+

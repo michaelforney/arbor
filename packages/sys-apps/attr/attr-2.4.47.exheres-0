@@ -1,0 +1,50 @@
+# Copyright 2008 Wulf C. Krueger
+# Copyright 2008, 2009, 2010 Ingmar Vanhassel
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'attr-2.4.43.ebuild' from Gentoo, which is:
+#     Copyright 1999-2008 Gentoo Foundation.
+
+require flag-o-matic
+
+SUMMARY="Extended attributes tools"
+HOMEPAGE="http://savannah.nongnu.org/projects/${PN}/"
+DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
+
+LICENCES="LGPL-2 LGPL-2.1"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext
+"
+
+src_prepare() {
+    # update builddefs
+    edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \
+            -e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
+            -i include/builddefs.in
+
+    default
+}
+
+src_configure() {
+    unset PLATFORM # cf. Gentoo bug 184564
+    export OPTIMIZER="${CFLAGS}"
+    export DEBUG="-DNDEBUG"
+
+    econf \
+        --libexecdir=/usr/$(exhost --target)/lib \
+        --enable-gettext \
+        --enable-shared
+        --disable-static
+}
+
+src_install() {
+    emake -j1 DESTDIR="${IMAGE}" install install-dev install-lib
+
+    # Part of sys-apps/man-pages
+    edo rm -r "${IMAGE}"/usr/share/man/man2
+}
+

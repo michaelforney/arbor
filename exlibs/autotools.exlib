@@ -94,7 +94,7 @@ autotools_must_require() {
 #                    directories specified by AC_CONFIG_SUBDIRS.
 #   eaclocal()     - Runs aclocal.  Respects AT_M4DIR for additional directories
 #                    to search for macro's.
-#   _elibtoolize() - Runs libtoolize.
+#   elibtoolize()  - Runs libtoolize.
 #   eautoconf      - Runs autoconf.
 #   eautoheader    - Runs autoheader.
 #   eautomake      - Runs automake
@@ -126,7 +126,7 @@ eautoreconf() {
     echo "eautoreconf: running in ${PWD} ..."
     [[ -n ${auxdir} ]] && mkdir -p "${auxdir}"
     eaclocal
-    _elibtoolize --copy --force
+    elibtoolize --copy --force
     eautoconf
     eautoheader
     FROM_EAUTORECONF="yes" eautomake ${AM_OPTS}
@@ -162,7 +162,9 @@ eaclocal() {
         autotools_run_tool aclocal "$@" "${aclocal_opts[@]}"
 }
 
-_elibtoolize() {
+# Note that this function is in no way related to the atrocity that gentoo
+# calls elibtoolize in libtool.eclass
+elibtoolize() {
     illegal_in_global_scope
 
     autotools_select_versions

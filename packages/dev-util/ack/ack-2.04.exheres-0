@@ -1,0 +1,34 @@
+# Copyright 2008, 2009, 2010, 2012 Ingmar Vanhassel <ingmar@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+MODULE_AUTHOR=PETDANCE
+require perl-module [ module_author=${MODULE_AUTHOR} ]
+
+SUMMARY="Ack is a grep-like tool, aimed at programmers with large trees of source code."
+HOMEPAGE="http://betterthangrep.com/ http://petdance.com/ack/ http://search.cpan.org/~${MODULE_AUTHOR}/"
+BUGS_TO="ingmar@exherbo.org"
+
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        dev-lang/perl:*[>=5.8.9]
+    build+run:
+        dev-perl/File-Next[>=1.1]
+"
+
+DEFAULT_SRC_TEST_PARAMS=( -j1 )
+
+src_test() {
+    export TMPDIR=/tmp
+    default
+}
+
+src_install() {
+    perl-module_src_install
+
+    dodoc "${FILES}/ackrc.example"
+}
+

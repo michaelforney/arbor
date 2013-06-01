@@ -6,7 +6,7 @@
 unpack_makeself() {
     illegal_in_global_scope
 
-    local input v skip=0
+    local input v skip=0 compression=gz
     input=${1:-${ARCHIVES}}
 
     v=$(edo grep -a '#.*Makeself' "${FETCHEDDIR}/${input}" | edo awk '{print $NF}')
@@ -14,7 +14,12 @@ unpack_makeself() {
     case ${v} in
         1.6.0-nv)
             skip=$(edo grep -a ^skip= "${FETCHEDDIR}/${input}" | edo cut -d= -f2)
+            compression=gz
             ;; # NVIDIA version
+        1.6.0-nv2)
+            skip=$(edo grep -a ^skip= "${FETCHEDDIR}/${input}" | edo cut -d= -f2)
+            compression=xz
+            ;; # Newer NVIDIA version (xz compressed)
         2.*)
             skip=$(edo grep -a ^SKIP= "${FETCHEDDIR}/${input}" | edo cut -d\" -f2)
             (( skip++ )) # tail starts with $skip, makeself starts after $skip
@@ -22,11 +27,11 @@ unpack_makeself() {
         *) die "makeself sanity check failed, v=${v}" ;;
     esac
 
-    edo tail -n +${skip} "${FETCHEDDIR}/${input}" > ./${PNV}.tar.gz
+    edo tail -n +${skip} "${FETCHEDDIR}/${input}" > ./${PNV}.tar.${compression}
 
     edo mkdir "${WORK}"
     edo cd "${WORK}"
 
-    unpack ./../${PNV}.tar.gz
+    unpack ./../${PNV}.tar.${compression}
 }
 

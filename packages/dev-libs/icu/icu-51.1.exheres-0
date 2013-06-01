@@ -1,0 +1,34 @@
+# Copyright 2008 Saleem Abdulrasool <compnerd@compnerd.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require easy-multibuild
+
+SUMMARY="International Components for Unicode"
+HOMEPAGE="http://site.${PN}-project.org"
+DOWNLOADS="http://download.${PN}-project.org/files/${PN}4c/${PV}/${PN}4c-${PV//./_}-src.tgz"
+
+REMOTE_IDS="freecode:internationalcomponentsforunicodecc"
+
+UPSTREAM_CHANGELOG="${HOMEPAGE}/download/$(ever major) [[ lang = en ]]"
+
+LICENCES="icu"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="multibuild_c: 32 64"
+
+DEPENDENCIES=""
+
+WORK=${WORKBASE}/${PN}/source
+
+install_one_multibuild() {
+    default
+    if ! multibuild_default_target C; then
+        dodir /usr/${CHOST}/bin
+        edo mv "${IMAGE}"/usr/bin/${PN}-config "${IMAGE}"/usr/${CHOST}/bin
+    fi
+}
+
+test_one_multibuild() {
+    emake VERBOSE=1 check
+}
+

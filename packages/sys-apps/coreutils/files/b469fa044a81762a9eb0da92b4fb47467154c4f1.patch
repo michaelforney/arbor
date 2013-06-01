@@ -1,0 +1,45 @@
+Upstream: yes, in master
+From b469fa044a81762a9eb0da92b4fb47467154c4f1 Mon Sep 17 00:00:00 2001
+From: Pádraig Brady <P@draigBrady.com>
+Date: Tue, 19 Feb 2013 12:06:18 +0000
+Subject: tests: avoid false failures on file systems with smaller NAME_MAX
+
+* tests/du/long-from-unreadable.sh: This test requires a NAME_MAX
+of at least 200, so skip the test otherwise.
+* tests/rm/deep-2.sh: Likewise.
+Reported by C de-Avillez with ecryptfs where NAME_MAX = 143.
+---
+diff --git a/tests/du/long-from-unreadable.sh b/tests/du/long-from-unreadable.sh
+index 18bf384..ac1763a 100755
+--- a/tests/du/long-from-unreadable.sh
++++ b/tests/du/long-from-unreadable.sh
+@@ -31,6 +31,11 @@
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
+ print_ver_ du
+ 
++# ecryptfs for example uses some of the file name space
++# for encrypting filenames, so we must check dynamically.
++name_max=$(stat -f -c %l .)
++test "$name_max" -ge '200' || skip_ "NAME_MAX=$name_max is not sufficient"
++
+ proc_file=/proc/self/fd
+ if test ! -d $proc_file; then
+   skip_ 'This test would fail, since your system lacks /proc support.'
+diff --git a/tests/rm/deep-2.sh b/tests/rm/deep-2.sh
+index a03cd96..cb69db2 100755
+--- a/tests/rm/deep-2.sh
++++ b/tests/rm/deep-2.sh
+@@ -25,6 +25,11 @@ require_perl_
+ # the offending euidaccess_stat call.
+ skip_if_root_
+ 
++# ecryptfs for example uses some of the file name space
++# for encrypting filenames, so we must check dynamically.
++name_max=$(stat -f -c %l .)
++test "$name_max" -ge '200' || skip_ "NAME_MAX=$name_max is not sufficient"
++
+ mkdir x || framework_failure_
+ cd x || framework_failure_
+ 
+--
+cgit v0.9.0.2

@@ -7,7 +7,7 @@ PATCH_LEVEL=${PNV##*_p}
 
 require alternatives easy-multibuild
 
-export_exlib_phases src_prepare src_install
+export_exlib_phases src_prepare src_install src_test_expensive
 
 SUMMARY="Berkeley DB embeddable database engine"
 HOMEPAGE="http://www.oracle.com/us/products/database/berkeley-${PN}/overview/index.html"
@@ -86,6 +86,10 @@ run_std
 EOF
     tclsh testrunner.tcl
     grep -qs '^FAIL' ALL.OUT && die "Some tests failed, see ${WORK}/ALL.OUT"
+}
+
+db_src_test_expensive() {
+    easy-multibuild_run_phase
 }
 
 install_one_multibuild() {

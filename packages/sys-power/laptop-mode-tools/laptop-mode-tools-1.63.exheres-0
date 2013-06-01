@@ -1,0 +1,52 @@
+# Copyright 2008, 2009 Mike Kelly <pioto@exherbo.org>
+# Distributed under the terms of the GPL v2
+
+require udev-rules github [ user=rickysarraf rev="upstream/${PV}" ] systemd-service [ systemd_files=[ etc/systemd/laptop-mode.service ] ]
+
+SUMMARY="A laptop power saving package for Linux systems"
+DESCRIPTION="
+Laptop mode is a kernel \"mode\" that allows you to extend the battery
+life of your laptop. It does this by making disk write activity
+\"bursty\", so that only reads of uncached data result in a disk spinup.
+It causes a significant improvement in battery life (for usage patterns
+that allow it).
+"
+
+HOMEPAGE="http://samwel.tk/laptop_mode"
+
+BUGS_TO="pioto@exherbo.org"
+REMOTE_IDS="freecode:${PN}"
+
+UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/changelog"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="baselayout systemd"
+
+DEPENDENCIES="
+    run:
+        sys-power/acpid
+"
+
+WORK=${WORKBASE}/${PN}-upstream-${PV}
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-0001-Make-usr-lib-path-configurable.patch )
+
+src_compile() { :; }
+
+src_install() {
+    DESTDIR="${IMAGE}" ACPI="force" MAN_D="/usr/share/man" \
+        LIB_D="${LIBDIR}" ULIB_D="/usr/${LIBDIR}" UDEV_D="${UDEVRULESDIR}" \
+        INIT_D="none" SYSTEMD="no" \
+        edo ./install.sh
+    keepdir /etc/laptop-mode/{batt,lm-ac,nolm-ac}-{start,stop} /etc/laptop-mode/modules
+
+    option baselayout && newinitd "${FILES}"/laptop-mode.init.d-0 laptop-mode
+
+    if option systemd ; then
+        install_systemd_files
+        edo install -D -m 644 etc/systemd/laptop-mode.conf.tmpfiles "${IMAGE}"/usr/"${LIBDIR}"/tmpfiles.d/laptop-mode.conf
+    fi
+}
+

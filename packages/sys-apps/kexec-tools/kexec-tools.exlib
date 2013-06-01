@@ -1,4 +1,4 @@
-# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 export_exlib_phases src_install
@@ -27,6 +27,7 @@ DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --prefix=/
+    --with-lzma
     --with-zlib
     --without-booke
     --without-gamecube
@@ -38,7 +39,8 @@ kexec-tools_src_install() {
 
     doman \
         kdump/kdump.8 \
-        kexec/kexec.8
+        kexec/kexec.8 \
+        vmcore-dmesg/vmcore-dmesg.8
 
     dodoc \
         doc/linux-i386-boot.txt \
@@ -50,5 +52,9 @@ kexec-tools_src_install() {
         newinitd "${FILES}"/kexec.init kexec
         newconfd "${FILES}"/kexec.conf kexec
     fi
+
+    # Remove test payload - kexec'ing it will simply reboot the current kernel.
+    edo rm "${IMAGE}"/${LIBDIR}/kexec-tools/kexec_test
+    edo rmdir "${IMAGE}"/${LIBDIR}/{kexec-tools,}
 }
 
