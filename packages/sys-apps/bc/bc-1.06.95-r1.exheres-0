@@ -12,7 +12,7 @@ DOWNLOADS="ftp://alpha.gnu.org/gnu/${PN}/${PNV}.tar.bz2
 LICENCES="|| ( GPL-2 LGPL-2.1 )"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries documentation"
 
 DEPENDENCIES="
     build:
@@ -32,4 +32,11 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-libedit
 )
 DEFAULT_SRC_COMPILE_PARAMS=( AR="${AR}" )
+
+src_install() {
+    default
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart documentation /usr/share/{doc,info,man}
+}
 
