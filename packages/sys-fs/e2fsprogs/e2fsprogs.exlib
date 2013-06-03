@@ -43,9 +43,6 @@ e2fsprogs_src_configure() {
     export STRIP=:
 
     econf \
-        --bindir=/bin \
-        --sbindir=/sbin \
-        --libdir=/${LIBDIR} \
         --enable-elf-shlibs \
         --enable-nls \
         --enable-symlink-install \
@@ -82,25 +79,16 @@ e2fsprogs_src_test() {
 e2fsprogs_src_install() {
     default
 
-    # Move 'useless' stuff to /usr/
-    dosbin "${IMAGE}"/sbin/mklost+found
-    edo rm -f "${IMAGE}"/sbin/mklost+found
-    dobin "${IMAGE}"/bin/{compile_et,mk_cmds}
-    edo rm -f "${IMAGE}"/bin/{compile_et,mk_cmds}
-
     # e2fsprogs has references to the build directory here
     edo sed -i -e '/^ET_DIR=/s:=.*:=/usr/share/et:' \
-        "${IMAGE}"/usr/bin/compile_et
+        "${IMAGE}"/usr/$(exhost --target)/bin/compile_et
     edo sed -i -e '/^SS_DIR=/s:=.*:=/usr/share/ss:' \
-        "${IMAGE}"/usr/bin/mk_cmds
+        "${IMAGE}"/usr/$(exhost --target)/bin/mk_cmds
 
     if option static ; then
         for bin in "${STATIC_BINARIES[@]}" ; do
-            dosbin "${WORK}/${bin}" && mv "${IMAGE}"{/usr,}/sbin/"$(basename ${bin})"
+            dosbin "${WORK}/usr/$(exhost --target)/${bin}"
         done
     fi
-
-    dodir /usr/${LIBDIR}/
-    edo mv "${IMAGE}"/{,usr/}${LIBDIR}/pkgconfig
 }
 
