@@ -11,7 +11,7 @@ DOWNLOADS="http://www.bzip.org/${PV}/${PNV}.tar.gz"
 LICENCES="( bzip2-withdocs ) [[ last-checked = 1.0.6 ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries development documentation libraries"
 
 DEPENDENCIES=""
 
@@ -82,5 +82,10 @@ src_install() {
     dosym bzgrep /usr/$(exhost --target)/bin/bzfgrep
     dosym bzmore /usr/$(exhost --target)/bin/bzless
     dosym bzdiff /usr/$(exhost --target)/bin/bzcmp
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
 }
 
