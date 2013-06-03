@@ -15,7 +15,7 @@ DOWNLOADS="${HOMEPAGE}/${PNV}.tar.gz"
 LICENCES="ZLIB"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: development documentation libraries"
 
 DEPENDENCIES="
     build+run:
@@ -60,5 +60,9 @@ src_install() {
     edo pushd contrib/minizip
     default
     edo popd
+
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
 }
 
