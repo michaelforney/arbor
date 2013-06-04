@@ -13,7 +13,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news.${PV}.html [[ lang = en ]]"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries configuration documentation"
 
 DEPENDENCIES="
     suggestion:
@@ -26,5 +26,9 @@ src_install() {
     hereenvd 70less <<EOF
 LESS="-R -M --shift 5"
 EOF
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart configuration /etc
+    expart documentation /usr/share/{doc,man}
 }
 
