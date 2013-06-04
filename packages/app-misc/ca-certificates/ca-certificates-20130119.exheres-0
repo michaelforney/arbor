@@ -62,7 +62,7 @@ pkg_postinst() {
         || ewarn "Some broken symlinks couldn't be removed. You must fix this manually."
 
     if [[ ${ROOT} == "/" ]]; then
-        update-ca-certificates || ewarn "update-ca-certificates failed."
+        /usr/$(exhost --target)/sbin/update-ca-certificates || ewarn "update-ca-certificates failed."
     else
         ewarn "Cannot run update-ca-certificates because ROOT == ${ROOT} != /, you need to run it manually."
     fi
