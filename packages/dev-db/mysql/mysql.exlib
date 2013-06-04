@@ -30,8 +30,11 @@ http://dev.mysql.com/doc/relnotes/mysql/${MYSQL_MAJOR_VERSION}/en/ [[ lang = [ e
 
 LICENCES="GPL-2" # with-exceptions
 SLOT="0"
-MYOPTIONS="baselayout debug tcpd
+MYOPTIONS="
+    baselayout
+    debug
     embedded-server [[ description = [ The embedded MySQL server library, a full-featured MySQL server that can be run inside a client application ] ]]
+    tcpd
     multibuild_c: 32 64
 "
 
@@ -41,17 +44,22 @@ DEPENDENCIES="
         user/${PN}
         dev-libs/libaio[multibuild_c:*(-)?]
         dev-libs/openssl[>=0.9.7][multibuild_c:*(-)?]
-        sys-libs/readline[>=5.2][multibuild_c:*(-)?]
         sys-libs/zlib[>=1.2.3][multibuild_c:*(-)?]
         tcpd? ( sys-apps/tcp-wrappers[multibuild_c:*(-)?] )
     suggestion:
         app-admin/logrotate [[ description = [ Use logrotate for rotating logs ] ]]
 "
 
-if ever at_least 5.6.10 ; then
+if ever at_least 5.6.12 ; then
     DEPENDENCIES+="
         build+run:
+            dev-libs/libedit[multibuild_c:*(-)?]
             dev-libs/libevent[>=1.4.12][multibuild_c:*(-)?]
+    "
+else
+    DEPENDENCIES+="
+        build+run:
+            sys-libs/readline[>=5.2][multibuild_c:*(-)?]
     "
 fi
 
@@ -77,7 +85,6 @@ mysql_pkg_pretend() {
 configure_one_multibuild() {
     local cmakeargs=(
         -DBUILD_CONFIG:STRING=mysql_release
-        -DCMAKE_BUILD_TYPE:STRING=Release
         -DCMAKE_INSTALL_PREFIX:PATH=/usr
         -DCOMPILATION_COMMENT:STRING="Exherbo"
         -DDEFAULT_CHARSET:STRING=utf8
@@ -91,6 +98,8 @@ configure_one_multibuild() {
         -DINSTALL_LIBDIR:PATH=${LIBDIR}/mysql
         -DINSTALL_MANDIR:PATH=share/man
         -DINSTALL_MYSQLSHAREDIR:PATH=share/mysql
+        # Empty value to not install the mysql-test directory
+        -DINSTALL_MYSQLTESTDIR:STRING=
         -DINSTALL_PLUGINDIR:PATH=${LIBDIR}/mysql/plugin
         -DINSTALL_SBINDIR:PATH=sbin
         -DINSTALL_SCRIPTDIR:PATH=bin
@@ -100,14 +109,26 @@ configure_one_multibuild() {
         -DMYSQL_DATADIR:PATH=/var/lib/mysql
         -DMYSQL_UNIX_ADDR:PATH=/run/mysqld/mysqld.sock
         -DSYSCONFDIR:PATH=/etc/mysql
+        -DENABLED_PROFILING:BOOL=TRUE
         -DWITH_EXTRA_CHARSETS:STRING=all
         -DWITH_INNOBASE_STORAGE_ENGINE:BOOL=TRUE
         -DWITH_SSL:STRING=system
+        -DWITH_UNIT_TESTS:BOOL=TRUE
         -DWITH_VALGRIND:BOOL=FALSE
         -DWITH_ZLIB:STRING=system
     )
 
-    if ever at_least 5.6.11 ; then
+    if option debug ; then
+        cmakeargs+=(
+            -DCMAKE_BUILD_TYPE:STRING=Debug
+        )
+    else
+        cmakeargs+=(
+            -DCMAKE_BUILD_TYPE:STRING=Release
+        )
+    fi
+
+    if ever at_least 5.6.12 ; then
         cmakeargs+=(
             -DBUILD_WITH_WERROR:BOOL=FALSE
             -DCOMPILE_FLAG_WERROR:BOOL=FALSE
@@ -115,11 +136,8 @@ configure_one_multibuild() {
             -DENABLE_GCOV:BOOL=FALSE
             -DENABLE_GPROF:BOOL=FALSE
             -DENABLED_LOCAL_INFILE:BOOL=TRUE
-            -DENABLED_PROFILING:BOOL=TRUE
-            # 5.6.11 fails to build with system readline, use bundled libedit
-            -DWITH_LIBEDIT:BOOL=TRUE
+            -DWITH_EDITLINE:STRING=system
             -DWITH_LIBEVENT:STRING=system
-            -DWITH_UNIT_TESTS:BOOL=TRUE
         )
     else
         cmakeargs+=(
@@ -149,8 +167,8 @@ mysql_src_install() {
 
     easy-multibuild_src_install
 
-    # Contains lots of cruft & some empty dirs
-    edo rm -r "${IMAGE}"/usr/{data,mysql-test}
+    # Remove empty directories
+    edo rm -r "${IMAGE}"/usr/data
 
     keepdir /etc/mysql
 
