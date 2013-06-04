@@ -43,7 +43,7 @@ src_compile() {
 src_install() {
     emagicdocs
 
-    emake -j1 DESTDIR="${IMAGE}" prefix=/usr/$(exhost --target) lib=lib RAISE_SETFCAP=no install
+    emake -j1 DESTDIR="${IMAGE}" prefix=/usr/$(exhost --target) lib=lib man_prefix=/usr/share RAISE_SETFCAP=no install
 
     dopammod pam_cap/pam_cap.so
     dopamsecurity '' pam_cap/capability.conf
