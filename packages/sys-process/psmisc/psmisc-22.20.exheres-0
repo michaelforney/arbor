@@ -17,21 +17,18 @@ MYOPTIONS="ipv6"
 DEPENDENCIES=""
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
-    --bindir=/bin
     --enable-nls
     --disable-harden-flags
+    ac_cv_func_malloc_0_nonnull=yes
+    ac_cv_func_realloc_0_nonnull=yes
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
 src_install() {
     default
 
-    # Add /usr/bin symlinks
-    dodir /usr/bin
     for fname in fuser killall pstree peekfd ; do
-        if [[ -f ${IMAGE}/bin/${fname} ]]; then
-            dosym /bin/${fname} /usr/bin/${fname}
-        else
+        if [[ ! -f ${IMAGE}/usr/$(exhost --target)/bin/${fname} ]]; then
             edo rm "${IMAGE}"/usr/share/man/man1/${fname}.1
         fi
     done
