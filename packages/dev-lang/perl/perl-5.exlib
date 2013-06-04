@@ -58,6 +58,10 @@ perl-5_src_prepare() {
     test-flag-CC -fno-lto && \
     edo sed -e '/if(p())/{n; s/$ldflags/& -fno-lto/}' \
             -i Configure
+
+    # find errno.h on cross
+    edo sed -e "s#/usr/include/errno.h#/usr/$(exhost --target)/include/errno.h#g" \
+            -i ext/Errno/Errno_pm.PL
 }
 
 perl-5_src_configure() {
