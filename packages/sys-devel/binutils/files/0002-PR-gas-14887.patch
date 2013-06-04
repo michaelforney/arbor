@@ -1,0 +1,99 @@
+From 0442474f844dfcd15341652be184d41097858076 Mon Sep 17 00:00:00 2001
+From: Nick Clifton <nickc@redhat.com>
+Date: Mon, 7 Jan 2013 12:49:10 +0000
+Subject: [PATCH 2/2] 	PR gas/14887 	* config/tc-arm.c (skip_past_char):
+ Skip whitespace before the 	anticipated character. 	* config/tc-arm.c
+ (parse_address_main): Delete skip of whitespace 	here as it is no
+ longer needed.
+
+	PR gas/14887
+	* gas/arm/neon-ldst-es.s: Add more whitespace.
+
+Conflicts:
+	gas/ChangeLog
+	gas/testsuite/ChangeLog
+---
+ gas/ChangeLog                        | 8 ++++++++
+ gas/config/tc-arm.c                  | 9 ++++++---
+ gas/testsuite/ChangeLog              | 5 +++++
+ gas/testsuite/gas/arm/neon-ldst-es.s | 4 ++--
+ 4 files changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/gas/ChangeLog b/gas/ChangeLog
+index a7f4171..8aedf0a 100644
+--- a/gas/ChangeLog
++++ b/gas/ChangeLog
+@@ -1,3 +1,11 @@
++2013-01-07  Nick Clifton  <nickc@redhat.com>
++
++	PR gas/14887
++	* config/tc-arm.c (skip_past_char): Skip whitespace before the
++	anticipated character.
++	* config/tc-arm.c (parse_address_main): Delete skip of whitespace
++	here as it is no longer needed.
++
+ 2013-01-02  Nick Clifton  <nickc@redhat.com>
+ 
+ 	PR gas/14987
+diff --git a/gas/config/tc-arm.c b/gas/config/tc-arm.c
+index 6280e04..386b316 100644
+--- a/gas/config/tc-arm.c
++++ b/gas/config/tc-arm.c
+@@ -885,6 +885,9 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
+ static inline int
+ skip_past_char (char ** str, char c)
+ {
++  /* PR gas/14987: Allow for whitespace before the expected character.  */
++  skip_whitespace (*str);
++  
+   if (**str == c)
+     {
+       (*str)++;
+@@ -5168,6 +5171,9 @@ parse_address_main (char **str, int i, int group_relocations,
+       return PARSE_OPERAND_SUCCESS;
+     }
+ 
++  /* PR gas/14887: Allow for whitespace after the opening bracket.  */
++  skip_whitespace (p);
++
+   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
+     {
+       inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
+@@ -5291,9 +5297,6 @@ parse_address_main (char **str, int i, int group_relocations,
+ 	return result;
+     }
+ 
+-  /* PR gas/14987: Allow for whitespace before the closing bracket.  */
+-  skip_whitespace (p);
+-
+   if (skip_past_char (&p, ']') == FAIL)
+     {
+       inst.error = _("']' expected");
+diff --git a/gas/testsuite/ChangeLog b/gas/testsuite/ChangeLog
+index a80681a..e3785d4 100644
+--- a/gas/testsuite/ChangeLog
++++ b/gas/testsuite/ChangeLog
+@@ -1,3 +1,8 @@
++2013-01-07  Nick Clifton  <nickc@redhat.com>
++
++	PR gas/14887
++	* gas/arm/neon-ldst-es.s: Add more whitespace.
++
+ 2013-01-02  Nick Clifton  <nickc@redhat.com>
+ 
+ 	PR gas/14987
+diff --git a/gas/testsuite/gas/arm/neon-ldst-es.s b/gas/testsuite/gas/arm/neon-ldst-es.s
+index ea7de07..79f4b0c 100644
+--- a/gas/testsuite/gas/arm/neon-ldst-es.s
++++ b/gas/testsuite/gas/arm/neon-ldst-es.s
+@@ -58,5 +58,5 @@
+ 	vld4.32 {q1-q2},[r7]
+ 	vld4.32 {q14-q15},[r7]
+ 
+-	@ PR 14987: Allow for whitespace before the closing bracket.
+-	vld1.32 {d1[]}, [r2 ], r3
++	@ PR 14987 and 14887: Allow for whitespace in the instruction.
++	vld1.32 { d1 [ ] } , [ r2 ] , r3
+-- 
+1.8.3
+
