@@ -1,0 +1,2224 @@
+From f5165be0b9699ff8210952e26348dbea1c691b64 Mon Sep 17 00:00:00 2001
+From: Nick Clifton <nickc@redhat.com>
+Date: Wed, 2 Jan 2013 13:38:54 +0000
+Subject: [PATCH 1/2] 	PR gas/14987 	* gas/arm/neon-ldst-es.s: Add
+ whitespace test. 	* gas/arm/neon-ldst-es.d: Update expected disassembly.
+
+	* config/tc-arm.c (parse_address_main): Skip whitespace before a
+	closing bracket.
+
+Conflicts:
+	gas/ChangeLog
+	gas/testsuite/ChangeLog
+---
+ gas/ChangeLog                               |   6 +
+ gas/{ChangeLog => ChangeLog-2012}           | 798 ++++++++++++++++++++-----
+ gas/config/tc-arm.c                         |   3 +
+ gas/testsuite/ChangeLog                     |   6 +
+ gas/testsuite/{ChangeLog => ChangeLog-2012} | 864 +++++++++++++++++++++-------
+ gas/testsuite/gas/arm/neon-ldst-es.d        |   1 +
+ gas/testsuite/gas/arm/neon-ldst-es.s        |   3 +
+ 7 files changed, 1322 insertions(+), 359 deletions(-)
+ copy gas/{ChangeLog => ChangeLog-2012} (70%)
+ copy gas/testsuite/{ChangeLog => ChangeLog-2012} (68%)
+
+diff --git a/gas/ChangeLog b/gas/ChangeLog
+index 821acc9..a7f4171 100644
+--- a/gas/ChangeLog
++++ b/gas/ChangeLog
+@@ -1,3 +1,9 @@
++2013-01-02  Nick Clifton  <nickc@redhat.com>
++
++	PR gas/14987
++	* config/tc-arm.c (parse_address_main): Skip whitespace before a
++	closing bracket.
++
+ 2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+ 	* config/tc-aarch64.c (aarch64_imm_float_p): Rename 'e' to 'pattern';
+diff --git a/gas/ChangeLog b/gas/ChangeLog-2012
+similarity index 70%
+copy from gas/ChangeLog
+copy to gas/ChangeLog-2012
+index 821acc9..b191924 100644
+--- a/gas/ChangeLog
++++ b/gas/ChangeLog-2012
+@@ -1,50 +1,216 @@
+-2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-12-20  Greta Yorsh  <Greta.Yorsh@arm.com>
+ 
+-	* config/tc-aarch64.c (aarch64_imm_float_p): Rename 'e' to 'pattern';
+-	add comment.
+-	(aarch64_double_precision_fmovable): New function.
+-	(parse_aarch64_imm_float): Add parameter 'dp_p'; call the new
+-	function; handle hexadecimal representation of IEEE754 encoding.
+-	(parse_operands): Update the call to parse_aarch64_imm_float.
++	* config/tc-arm.c (rfefa,rfeea,rfeed): Fix encoding.
++	(rfe,srs,srsea,srsfa,srsed,srsfd): Add missing mnemonics.
++
++2012-12-17  Nick Clifton  <nickc@redhat.com>
++
++	* CONTRIBUTORS: Add copyright notice.
++	* MAINTAINERS: Likewise.
++	* Makefile.am: Likewise.
++	* NEWS: Likewise.
++	* README: Likewise.
++	* configure.com: Likewise.
++	* configure.in: Likewise.
++	* configure.tgt: Likewise.
++	* itbl-lex-wrapper.c: Likewise.
++	* makefile.vms: Likewise.
++	* config/bfin-lex-wrapper.c: Likewise.
++	* config/obj-fdpicelf.c: Likewise.
++	* config/obj-fdpicelf.h: Likewise.
++	* doc/Makefile.am: Likewise.
++	* doc/h8.texi: Likewise.
++	* Makefile.in: Regenerate.
++	* doc/Makefile.in: Regenerate.
+ 
+-2013-02-25  Terry Guo  <terry.guo@arm.com>
++2012-12-11  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+ 
+-	Apply mainline patche
+-	2013-02-25  Terry Guo  <terry.guo@arm.com>
+-	* config/tc-arm.c (arm_cpus): Add cortex-r7 entry.
+-	* doc/c-arm.texi: Add cortex-r7 and missing cortex-r5 to
+-	list of accepted CPUs.
++	* config/tc-microblaze.c: Define TLS offsets
++	(md_relax_table): Add TLS offsets
++	(imm_types), (match_imm), (get_imm_otype): New to support TLS offsets.
++	(tc_microblaze_fix_adjustable): Add TLS relocs.
++	(md_convert_frag): Support TLS offsets.
++	(md_apply_fix), (md_estimate_size_before_relax), (tc_gen_reloc):
++	Add TLS relocs
+ 
+-2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+-	* config/tc-aarch64.c (md_begin): Change to check if 'name' is
+-	NULL.
++	* config/tc-aarch64.c (exp_has_bignum_p): Remove.
++	(my_get_expression): Not get rid of bignums.
++	(s_ltorg): Increase the range of 'align'.
++	(programmer_friendly_fixup): Allow bignum expression.
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-29  David Holsgrove  <david.holsgrove@xilinx.com>
+ 
+-	* config/tc-aarch64.c (parse_operands): Change to compare the result
+-	of function call 'parse_sys_reg' with 'PARSE_FAIL' instead of 'FALSE'.
++	* config/tc-microblaze.c: Rename INST_TYPE_RD_R1_SPECIAL to
++	INST_TYPE_R1_R2_SPECIAL, don't set RD for wic.
+ 
+-2013-01-29  Roland McGrath  <mcgrathr@google.com>
++2012-11-28  Julian Brown  <julian@codesourcery.com>
+ 
+-	* config/tc-arm.c (md_apply_fix): Use as_bad_where for "bad
+-	immediate value for 8-bit offset" error so it shows line info.
++	* config/tc-arm.c (md_apply_fix): Fix conversion of BL to BLX for
++	local targets in Thumb mode.
+ 
+-2013-01-22  Alan Modra  <amodra@gmail.com>
++2012-11-23  Alan Modra  <amodra@gmail.com>
+ 
+-	Apply mainline patches
+-	2012-11-23  Alan Modra  <amodra@gmail.com>
+ 	* config/tc-ppc.c (sticky): New var.
+ 	(md_parse_option, ppc_machine): Update ppc_parse_cpu calls.
+ 
+-	2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
++2012-11-21  Edgar E. Iglesias <edgar.iglesias@gmail.com>
++
++	* config/tc-microblaze.c (parse_reg): Parse REG_SLR, REG_SHR
++
++2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR gas/14859
++	* gas/i386/x86-64-opcode.s: Add jecxz.
++	* gas/i386/x86-64-opcode.d: Updated.
++
++2012-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
++
++	* config/tc-aarch64.c (first_error_fmt): Add ATTRIBUTE_UNUSED to the
++	local variable "ret".
++
++2012-11-20  Roland McGrath  <mcgrathr@google.com>
++
++	* config/tc-arm.c (arm_symbol_chars): New variable.
++	* config/tc-arm.h (tc_symbol_chars): New macro, defined to that.
++
++2012-11-20  David S. Miller  <davem@davemloft.net>
++
++	* config/tc-sparc.c (md_parse_option): Only certain arch
++	specifications should override the object to be 32-bit
++	or 64-bit.
++
++2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* config/tc-microblaze.c (md_assemble): Add support for INST_TYPE_IMM5
++
++2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
++
+ 	* config/tc-ppc.c (md_apply_fix): Leave field zero when emitting
+ 	an ELF reloc on data as well.
+ 
+-	2012-11-06  Alan Modra  <amodra@gmail.com>
+-	* config/tc-ppc.c (md_apply_fix): Fix xcoff build breakage.
++2012-11-09  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* read.h (s_vendor_attribute): Move to...
++	* config/obj-elf.h (obj_elf_vendor_attribute): ... here.
++	* read.c (potable): Remove "gnu_attribute".
++	(skip_whitespace, skip_past_char, skip_past_comma): Delete, move
++	to config/obj-elf.c.
++	(s_vendor_attribute): Delete, move to obj_elf_vendor_attribute
++	in config/obj-elf.c.
++	(s_gnu_attribute): Delete, move to obj_elf_gnu_attribute in
++	config/obj-elf.c.
++	* config/obj-elf.c (elf_pseudo_table): Add "gnu_attribute".
++	(skip_whitespace, skip_past_char, skip_past_comma): New, moved
++	from read.c.
++	(obj_elf_vendor_attribute): New, moved from s_vendor_attribute
++	in read.c.
++	(obj_elf_gnu_attribute): New, moved from s_gnu_attribute in
++	read.c.
++	* config/tc-arm.c (s_arm_eabi_attribute): Rename
++	s_vendor_attribute to obj_elf_vendor_attribute.
++	* config/tc-tic6x.c (s_tic6x_c6xabi_attribute): Likewise.
++
++2012-11-09  Nick Clifton  <nickc@redhat.com>
++
++	* config/obj-elf.c (obj_elf_change_section): Allow init array
++	sections to have the SHF_EXECINSTR attribute for the RX target.
++	* config/tc-rx.c (elf_flags): Initialise with E_FLAG_RX_ABI.
++	(enum options): Add OPTION_USES_GCC_ABI and OPTION_USES_RX_ABI.
++	(md_longopts): Add -mgcc-abi and -mrx-abi.
++	(md_parse_option): Add support for OPTION_USES_GCC_ABI and
++	OPTION_USES_RX_ABI.
++	* doc/as.texinfo (RX Options): Add mention of remaining RX
++	options.
++	* doc/c-rx.texi: Document -mgcc-abi and -mrx-abi.
++
++	* config/tc-v850.c (v850_target_arch): New.
++	(v850_target_format): New.
++	(set_machine): Use v850_target_arch.
++	(md_begin): Likewise.
++	(md_show_usage): Document new switches.
++	(md_parse_option): Add -mgcc-abi, -mrh850-abi, -m8byte-align and
++	-m4byte-align.
++	* config/tc-v850.c (TARGET_ARCH) Use v850_target_arch.
++	(TARGET_FORMAT): Use v850_target_format.
++	* doc/c-v850.texi: Document new options.
++
++2012-11-09  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* tc-microblaze.c (md_longopts): Define OPTION_EB and
++	OPTION_EL for target.
++	(md_parse_option): Likewise.
++	* tc-microblaze.h: Set elf32-microblazeel if not
++	target_big_endian for TARGET_FORMAT.
++	* configure.tgt: Add microblazeel and set endian per target.
++
++2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* config/atof-ieee.c (gen_to_words): Remove trailing redundant
++	`;'.
++	* config/atof-vax.c (flonum_gen2vax): Likewise.
++	* config/tc-d10v.c (write_2_short): Likewise.
++	* config/tc-i386-intel.c (i386_intel_simplify): Likewise.
++	* config/tc-s390.c (tc_s390_force_relocation): Likewise.
++	* config/tc-v850.c (md_parse_option): Likewise.
++	* config/tc-xtensa.c (find_address_of_next_align_frag): Likewise.
++	* dwarf2dbg.c (out_header): Likewise.
++	* symbols.c (dollar_label_name): Likewise.
++	(fb_label_name): Likewise.
++
++2012-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (mips_ip) <'u'>: Default to BFD_RELOC_LO16.
++
++2012-11-08  Alan Modra  <amodra@gmail.com>
++
++	* po/POTFILES.in: Regenerate.
++
++2012-11-07  James Murray <jsm@jsm-net.demon.co.uk>
++
++	* config/tc-m68hc11.c: Fix R_M68HC12_16B relocation for movb/w
++
++2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* config/tc-microblaze.c: Remove special register condition check
++	for INST_TYPE_RFSL related instructions.
++
++2012-11-06  Alan Modra  <amodra@gmail.com>
++
++	* config/tc-xgate.c: Make some functions static.  Formatting
++	style and whitespace fixes.  Wrap overly long lines.  Format
++	help message.
++
++2012-11-06  Alan Modra  <amodra@gmail.com>
++
++	* config/tc-tic4x.c: Remove alignment TODO comments.
++	(tic4x_do_align): Enable subseg_text_p test.
++
++2012-11-06  Alan Modra  <amodra@gmail.com>
++
++	* config/tc-ppc.c (ppc_elf_adjust_symtab): New function, split out..
++	(ppc_frob_file_before_adjust): ..from here.
++	(md_apply_fix): Set BSF_KEEP on .TOC. if not @tocbase.
++	* config/tc-ppc.h (ppc_elf_adjust_symtab): Declare.
++	(tc_adjust_symtab): Define.
++
++2012-11-06  Alan Modra  <amodra@gmail.com>
++
++	* config/tc-ppc.c (md_apply_fix): Fix xcoff build breakage from
++	last patch.
++
++2012-11-05  Sean Keys  <skeys@ipdatasys.com>
++
++	* config/tc-xgate.c: Remove bogus use of <fx_pcrel_adjust>.
++	* config/tc-m68hc11.c: Likewise.
++
++2012-11-05  Alan Modra  <amodra@gmail.com>
++
++	* configure.in: Apply 2012-09-10 change to config.in here.
++
++2012-11-05  Alan Modra  <amodra@gmail.com>
+ 
+-	2012-11-05  Alan Modra  <amodra@gmail.com>
+ 	* config/tc-ppc.c (md_chars_to_number): Delete.
+ 	(ppc_setup_opcodes): Assert num_powerpc_operands fit.
+ 	(ppc_is_toc_sym): Move earlier in file.
+@@ -56,76 +222,200 @@
+ 	resolved instruction fields.  Leave insn field zero when
+ 	emitting an ELF reloc in most cases.
+ 
+-	2012-10-29  Alan Modra  <amodra@gmail.com>
++	* write.h (struct fix <fx_pcrel_adjust>): Make it a signed char.
++	* config/tc-m68k.c (tc_gen_reloc, md_pcrel_from): Remove explicit
++	sign extendion of fx_pxrel_adjust.
++
++2012-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (is_delay_slot_valid): Simplify expression.
++
++2012-11-01  Chao-ying Fu  <fu@mips.com>
++
++	* config/tc-mips.c (append_insn): Set fx_no_overflow for 16-bit
++	microMIPS branch relocations.
++
++2012-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (is_delay_slot_valid): Don't accept macros
++	in 16-bit delay slots.
++	(macro_build_jalr): Emit 32-bit JALR if placed in a 32-bit delay
++	slot.
++	(macro) <M_JAL_2>: Likewise
++
++2012-10-31  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* config/tc-microblaze.c: Check for weak symbols before
++	emitting relocation.
++
++2012-10-29  Alan Modra  <amodra@gmail.com>
++
+ 	* sb.c (sb_check): Use __builtin_clzll when size_t is not the
+ 	same size as long.
+ 
+-	2012-10-26  Alan Modra  <amodra@gmail.com>
+-	PR gas/14758
++2012-10-29  Alan Modra  <amodra@gmail.com>
++
++	* config/tc-ppc.c (ppc_znop): Remove unused vars.
++
++2012-10-26  Alan Modra  <amodra@gmail.com>
++
++	PR target/14758
+ 	* config/tc-ppc.c (ppc_setup_opcodes): Fix comment.
+ 	(md_assemble): Translate to _DS relocs for ppc32 as well as ppc64.
+ 	(tc_gen_reloc): Handle _DS relocs in ppc32 mode.
+ 
+-	2012-10-01  Alan Modra  <amodra@gmail.com>
+-	* write.c (chain_frchains_together_1): Reorder assertion to avoid
+-	uninit warning.
++2012-10-22  Simon Baldwin  <simonb@google.com>
+ 
+-	2012-08-01  James Lemke  <jwlemke@codesourcery.com>
+-	* dwarf2dbg.c (out_set_addr): Allow for non-constant value of
+-	DWARF2_LINE_MIN_INSN_LENGTH
+-	* config/tc-ppc.c (ppc_dwarf2_line_min_insn_length): Declare
+-	and initialize.
+-	(md_apply_fix): Branch addr can be a multiple of 2 or 4.
+-	* config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): Now a
+-	variable reference.
++	* as.c (dump_statistics): Compute data size as the delta between
++	current sbrk(0) and start_sbrk.
++	* (main): Set start_sbrk to sbrk(0) on entry.
+ 
+-2013-01-10  Roland McGrath  <mcgrathr@google.com>
++2012-10-18  Kai Tietz  <ktietz@redhat.com>
+ 
+-	* hash.c (hash_new_sized): Make it global.
+-	* hash.h: Declare it.
+-	* macro.c (define_macro): Use hash_new_sized instead of hash_new,
+-	pass a small size.
++	* config/obj-coff.c: Add include of struc-symbol.h header.
++	(coff_frob_symbol): Check that function-aux entries are generated for
++	defined symbols only.
+ 
+-2012-12-20  Greta Yorsh  <Greta.Yorsh@arm.com>
++	* doc/as.texinfo: Add missing documentation about section flag
++	exclude.
+ 
+-	* config/tc-arm.c (rfefa,rfeea,rfeed): Fix encoding.
+-	(rfe,srs,srsea,srsfa,srsed,srsfd): Add missing mnemonics.
++2012-10-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+ 
+-2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
++	* config/tc-hppa.c (pa_get_number): New.
++	(pa_get_absolute_expression): Simplify.
++	(pa_ip): Use pa_get_number instead of pa_get_absolute_expression
++	to get SOP, SFU and COPR identifiers.
+ 
+-	* config/tc-aarch64.c (exp_has_bignum_p): Remove.
+-	(my_get_expression): Not get rid of bignums.
+-	(s_ltorg): Increase the range of 'align'.
+-	(programmer_friendly_fixup): Allow bignum expression.
++	* config/tc-hppa.c (pa_ip): Reject double floating point stores and
++	loads that reference the right half of a floating point register.
+ 
+-2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
++2012-10-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+ 
+-	PR gas/14859
+-	* gas/i386/x86-64-opcode.s: Add jecxz.
+-	* gas/i386/x86-64-opcode.d: Updated.
++	* config/tc-hppa.c (pa_ip): Limit unit conditions for uxor to those
++	not involving a carry.
+ 
+-2012-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+-
+-	* config/tc-aarch64.c (first_error_fmt): Add ATTRIBUTE_UNUSED to the
+-	local variable "ret".
+-
+-2012-11-20  Roland McGrath  <mcgrathr@google.com>
++2012-10-12  Peter Bergner  <bergner@vnet.ibm.com>
+ 
+-	* config/tc-arm.c (arm_symbol_chars): New variable.
+-	* config/tc-arm.h (tc_symbol_chars): New macro, defined to that.
++	* doc/as.texinfo (-mpwr4, -mpwr7): Fix option name typos.
+ 
+-2012-11-07  James Murray <jsm@jsm-net.demon.co.uk>
++2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+ 
+-	* config/tc-m68hc11.c: Fix R_M68HC12_16B relocation for movb/w
++	* config/tc-arm.c: Change condition code insertion for
++	lds[hb] instructions from after the 2nd character to after the 3rd.
++	(tCM): Remove macro.
++	(TxCM): Likewise.
++	(TxCM_): Likewise.
++	(TCM): Likewise.
+ 
+ 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+ 
+ 	* config/tc-i386.c (cpu_arch): Add CPU_BDVER3_FLAGS.
+ 	* doc/c-i386.texi: Add -march=bdver3 option.
+ 
+-2012-11-05  Alan Modra  <amodra@gmail.com>
++2012-10-04  Nick Clifton  <nickc@redhat.com>
+ 
+-	* configure.in: Apply 2012-09-10 change to config.in here.
++	* config/tc-v850.c (v850_insert_operand): Use a static buffer for
++	the error message.
++
++2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
++
++	* config/tc-s390.c (s390_parse_cpu): Add new option zEC12.
++	* doc/as.texinfo: Document new option zEC12.
++	* doc/c-s390.texi: Likewise.
++
++2012-10-03  DJ Delorie  <dj@redhat.com>
++
++	* config/tc-rl78.c: Change line_separator to '@' so that '|' can
++	be used in expressions.
++
++2012-10-01  Alan Modra  <amodra@gmail.com>
++
++	* write.c (chain_frchains_together_1): Reorder assertion to avoid
++	uninit warning.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++
++	* config/tc-mips.h (TC_FORCE_RELOCATION): Remove comment.
++	* config/tc-mips.c (calculate_reloc): New function.
++	(append_insn): Use it.  Do not resolve compound relocations here.
++	(mips16_macro_build, mips16_ip): Use calculate_reloc.
++	(mips16_immed_extend): New function, split out from...
++	(mips16_immed): ...here.
++	(mips_frob_file): Handle null symbols.
++	(mips_force_relocation): Remove NEWABI handling.
++	(read_reloc_insn, write_reloc_insn): New functions.
++	(md_apply_fix): Report TLS relocations against constants.
++	Use read_reloc_insn, calculate_reloc and write_reloc_insn.
++	Report relocations against constants that can't be resolved
++	at assembly time.
++
++2012-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (append_insn) <BFD_RELOC_MIPS_JMP>: Don't
++	mark as incomplete for constant expressions.
++	<BFD_RELOC_MIPS16_JMP>: Likewise.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++	    Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.h (mips_record_label): Delete.
++	(mips_add_dot_label): Declare.
++	(tc_new_dot_label): Use it.
++	* config/tc-mips.c (mips_assembling_insn): New variable.
++	(md_assemble): Call mips_mark_labels.  Set mips_assembling_insn
++	while the main part of the function is executing.
++	(mips_compressed_mark_label): New function, split out from...
++	(mips_compressed_mark_labels): ...here.
++	(append_insn): Don't call mips_mark_labels here.
++	(mips_record_label): Make local.
++	(mips_add_dot_label): New function.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++
++	* config/tc-mips.c (SEXT_16BIT): New macro.
++	(mips16_immed): Take the reloc type as a parameter.  Do not impose
++	a signed vs. unsigned distinction on the value when a relocation
++	operator was used.
++	(mips16_macro_build, mips16_ip, md_convert_frag): Pass the reloc
++	type to mips16_immed.
++	(macro): Use SEXT_16BIT.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++
++	* config/tc-mips.c (read_insn, write_insn, read_compressed_insn):
++	New functions.
++	(install_insn, md_apply_fix, md_convert_frag, mips_handle_align):
++	Use them, and write_compressed_insn.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++
++	* config/tc-mips.c (mips_cl_insn): Remove use_extend and extend.
++	(MIPS16_EXTEND): New macro.
++	(mips16_opcode_length): New function.
++	(insn_length): Use it.
++	(create_insn): Update after mips_cl_insn change.
++	(write_compressed_insn): New function.
++	(install_insn): Use it.
++	(append_insn): Use insn_length to check for unextended MIPS16
++	instructions.
++	(mips16_macro_build): Update call to mips16_immed.
++	(mips16_ip): Likewise.  Use MIPS16_EXTEND to force an extended
++	instruction.
++	(mips16_immed): Remove use_extend and extend; install EXTEND
++	opcodes in the upper 16 bits of *INSN instead.  Keep the
++	instruction extended if it already is.  Replace warn, small
++	and ext with a forced_insn_length-like parameter.
++	(md_convert_frag): Update call mips16_immed.
++	Use write_compressed_insn.
++
++2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
++
++	* config/tc-i386.c (cpu_arch): Add .cx16.
++	* doc/c-i386.texi: Document .cx16.
++
++2012-09-19  Steve Ellcey  <sellcey@mips.com>
++
++	* configure.tgt: Add mips*-mti-elf* target.
+ 
+ 2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+ 
+@@ -136,80 +426,70 @@
+ 
+ 	* config/tc-aarch64.c (aarch64_archs): Rename 'armv8' to 'armv8-a'.
+ 
+-2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
++2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
+ 
+-	* config/tc-i386.c (cpu_arch): Add CPU_BTVER1_FLAGS and
+-	CPU_BTVER2_FLAGS.
+-	(i386_align_code): Add case for PROCESSOR_BT.
++	* configure: Regenerate.
+ 
+-	* config/tc-i386.h (enum processor_type): Add PROCESSOR_BT.
++2012-09-13  Anthony Green  <green@moxielogic.com>
+ 
+-	* doc/c-i386.texi: Add -march={btver1, btver2} options.
++	* config/tc-moxie.h (DEFAULT_TARGET_FORMAT): Define.
++	(TARGET_FORMAT): Don't hard-code endian-ness.
++	* config/tc-moxie.c (target_big_endian, moxie_target_format):
++	Define.
++	(md_assemble): Handle bi-endian encodings.
++	(md_shortopts, md_parse_option, md_show_usage, md_apply_fix)
++	(md_number_to_chars, md_chars_to_number): Update for bi-endian
++	support.
+ 
+-2012-09-10  Matthias Klose  <doko@ubuntu.com>
++2012-09-12  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
+ 
+-	* config.in: Disable sanity check for kfreebsd.
++	* config/tc-aarch64.c
++	(reloc_table): Add reloc to table entry.
++	(parse_address_main): Add support for #:<reloc_op>:<symbol>.
++	(parse_operands): Check for unused reloc.
++	(md_apply_fix): New case for reloc.
++	(aarch64_force_relocation): Likewise.
+ 
+-2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
++2012-09-11  Georg-Johann Lay  <avr@gjlay.de>
+ 
+-	PR gas/14521
+-	* config/tc-mmix.h (tc_frob_file_before_fix): Renumber sections
+-	after call to mmix_frob_file.
++	PR gas/13503
++	* config/tc-avr.h (TC_VALIDATE_FIX): Skip: BFD_RELOC_AVR_8_LO,
++	BFD_RELOC_AVR_8_HI, BFD_RELOC_AVR_8_HLO.
+ 
+-	* config/tc-mmix.c (loc_asserts): New variable.
+-	(mmix_greg_internal): Handle expressions not determinable at first
+-	pass.
+-	(s_loc): Ditto.  Record expressions where the section isn't
+-	determinable at the first pass, and assume they don't refer to
+-	other sections.
+-	(mmix_md_end): Verify that recorded LOC expressions weren't
+-	to other sections, else emit error messages.
++2012-09-11  Alan Modra  <amodra@gmail.com>
+ 
+-2012-08-31  Maciej W. Rozycki  <macro@codesourcery.com>
++	* Makefile.am (bootstrap): Add $EXEEXT to dependency.
++	* Makefile.in: Regenerate.
+ 
+-	* doc/c-mips.texi (MIPS Opts): Correct a typo in the -mips5
+-	option.
++2012-09-10  Matthias Klose  <doko@ubuntu.com>
+ 
+-2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
++	* config.in: Disable sanity check for kfreebsd.
+ 
+-	* config/tc-mips.c (NO_ISA_COP, COP_INSN): Remove macros.
+-	(is_opcode_valid): Remove coprocessor instruction exclusions.
+-	Replace OPCODE_IS_MEMBER with opcode_is_member.
+-	(is_opcode_valid_16): Replace OPCODE_IS_MEMBER with
+-	opcode_is_member.
+-	(macro): Remove coprocessor instruction exclusions.
++2012-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+-2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
++	* configure: Regenerated.
+ 
+-	* config/tc-mips.c (s_cpload, s_cpsetup): Fail if MIPS16 mode.
+-	(s_cplocal, s_cprestore, s_cpreturn): Likewise.
++2012-09-07  Anthony Green  <green@moxielogic.com>
+ 
+-2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++	* config/tc-moxie.c (md_pcrel_from): Branches are now relative
++	to the address following the branch instruction.
+ 
+-	* config/tc-mips.c (append_insn): Also handle moving delay-slot
+-	instruction across frags for fixed branches.
++2012-09-06  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+ 
+-2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
++	* config/tc-s390.c (set_highgprs_p): New variable.
++	(s390_machinemode): New function.
++	(md_pseudo_table): Add new pseudo command machinemode.
++	(md_parse_option): Set set_highgprs_p to TRUE if -mzarch was
++	specified on command line.
++	(s390_elf_final_processing): Set the highgprs flag in the ELF
++	header depending on set_highgprs_p.
+ 
+-	* frags.c (frag_grow): Never shrink the obstack size requested
+-	below the default.
++	* doc/c-s390.texi: Document new pseudo machinemode.
+ 
+-	* config/tc-mips.c (ISA_SUPPORTS_DSP_ASE): Also set if microMIPS
+-	mode.
+-	(ISA_SUPPORTS_DSPR2_ASE): Likewise.
+-	(macro_build) <'2'>: Handle microMIPS.
+-2012-07-31  Maciej W. Rozycki  <macro@codesourcery.com>
+-            Chao-Ying Fu  <fu@mips.com>
+-            Catherine Moore  <clm@codesourcery.com>
++2012-09-05  James Lemke  <jwlemke@codesourcery.com>
+ 
+-	* config/tc-mips.c (macro_build) <'2'>: Handle microMIPS.
+-	(macro) <M_BALIGN>: Update error handling.
+-	(validate_micromips_insn) <'2', '3', '4', '5', '6'>: New cases.
+-	<'7', '8', '0', '@', '^'>: Likewise.
+-	(mips_ip) <'2', '3', '4', '5', '6', '7', '8'>: Handle microMIPS.
+-	<'9'>: Fix formatting.
+-	<'0', '@'>: Handle microMIPS.
+-	<'^'>: New case.
++	* doc/c-ppc.texi: Document -mvle.
++	* doc/as.texinfo: Likewise.
+ 
+ 2012-09-04  Sergey A. Guriev  <sergey.a.guriev@intel.com>
+ 
+@@ -221,17 +501,38 @@
+ 	(md_begin): Add new register definition.
+ 	(specify_resource): Add new register recognition.
+ 
+-2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-09-01  Hans-Peter Nilsson  <hp@bitrange.com>
++
++	PR gas/14521
++	* config/tc-mmix.h (tc_frob_file_before_fix): Renumber sections
++	after call to mmix_frob_file.
++
++2012-08-31  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* doc/c-mips.texi (MIPS Opts): Correct a typo in the -mips5
++	option.
++
++2012-08-27  Walter Lee  <walt@tilera.com>
++
++	* tc-tilegx.c (O_hw0_plt): Define operator.
++	(O_hw1_plt): Ditto.
++	(O_hw1_last_plt): Ditto.
++	(O_hw2_last_plt): Ditto.
++	(md_begin): Handle new operators.
++	(emit_tilegx_instruction): Ditto.
++	(md_apply_fix): Ditto.
++	* doc/c-tilegx.texi: Document new operators.
++
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+ 
+-	Apply mainline patches
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+ 	* config/tc-arm.c (ARM_ENC_TAB): Add sha1h and sha2op entries.
+ 	(do_sha1h): New function.
+ 	(do_sha1su1): Likewise.
+ 	(do_sha256su0): Likewise.
+ 	(insns): Add 2 operand SHA instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (NEON_ENC_TAB): Add sha3op entry.
+ 	(do_crypto_3op_1): New function.
+ 	(do_sha1c): Likewise.
+@@ -243,13 +544,15 @@
+ 	(do_sha256su1): Likewise.
+ 	(insns): Add SHA 3 operand instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (neon_type_mask): Add P64 type.
+ 	(type_chk_of_el_type): Handle P64 type.
+ 	(el_type_of_type_chk): Likewise.
+ 	(do_neon_vmull): Handle VMULL.P64.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (NEON_ENC_TAB): Add aes entry.
+ 	(neon_type_mask): Add N_UNT.
+ 	(neon_check_type): Don't always decay typed to untyped sizes.
+@@ -260,7 +563,8 @@
+ 	(do_aesimc.8): Likewise.
+ 	(insns): Add AES instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (el_type_type_check): Add handling for 16-bit
+ 	floating point types.
+ 	(do_neon_cvttb_2): New function.
+@@ -268,7 +572,8 @@
+ 	(do_neon_cvtb): Refactor to use do_neon_cvttb_1.
+ 	(do_neon_cvtt): Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (NEON_ENC_TAB): Add vrint entries.
+ 	(neon_cvt_mode): Add neon_cvt_mode_r.
+ 	(do_vrint_1): New function.
+@@ -281,7 +586,8 @@
+ 	(do_vrint_m): Likewise.
+ 	(insns): Add VRINT instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (NEON_ENC_TAB): Add vcvta entry.
+ 	(neon_cvt_mode): New enumeration.
+ 	(do_vfp_nsyn_cvt_fpv8): New function.
+@@ -294,7 +600,8 @@
+ 	(do_neon_cvtm): Likewise.
+ 	(insns): Add new VCVT instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm>
++
+ 	* config/tc-arm.c (CVT_FLAVOUR_VAR): New define.
+ 	(CVT_VAR): New helper define.
+ 	(neon_cvt_flavour): New enumeration, function renamed...
+@@ -303,40 +610,47 @@
+ 	(do_vfp_nsyn_cvtz): Likewise.
+ 	(do_neon_cvt_1): Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (NEON_ENC_TAB): Add vmaxnm, vminnm entries.
+ 	(vfp_or_neon_is_neon_bits): Add NEON_CHECK_ARCH8 enumerator.
+ 	(vfp_or_neon_is_neon): Add check for SIMD for ARMv8.
+ 	(do_maxnm): New function.
+ 	(insns): Add vmaxnm, vminnm entries.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (NEON_ENC_TAB): Add entries for VSEL.
+ 	(NEON_ENC_FPV8_): New define.
+ 	(do_vfp_nsyn_fpv8): New function.
+ 	(do_vsel): Likewise.
+ 	(insns): Add VSEL instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (do_rm_rn): New function.
+ 	(do_strlex): Likewise.
+ 	(do_t_strlex): Likewise.
+ 	(insns): Add support for LDRA/STRL instructions.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (do_t_bkpt_hlt1): New function.
+ 	(do_t_hlt): New function.
+ 	(do_t_bkpt): Use do_t_bkpt_hlt1.
+ 	(insns): Add HLT.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (insns): Add DCPS instruction.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (T16_32_TAB): Add _sevl.
+ 	(insns): Add SEVL.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (asm_barrier_opt): Add arch field.
+ 	(mark_feature_used): New function.
+ 	(parse_barrier): Check specified option is valid for the
+@@ -344,11 +658,13 @@
+ 	(UL_BARRIER): New macro.
+ 	(barrier_opt_names): Update for new barrier options.
+ 
+-	2012-08-24  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (do_setend): Warn on deprecated SETEND.
+ 	(do_t_setend): Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (do_t_it): Fully initialise now_it.
+ 	(new_automatic_it_block): Likewise.
+ 	(handle_it_block): Record whether current instruction is
+@@ -358,17 +674,20 @@
+ 	(it_fsm_post_encode): Warn on deprecated uses.
+ 	* config/tc-arm.h (current_it): Add new fields.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (deprecated_coproc_regs_s): New structure.
+ 	(deprecated_coproc_regs): New variable.
+ 	(deprecated_coproc_reg_count): Likewise.
+ 	(do_co_reg): Error on obsolete & warn on deprecated registers.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.c (check_obsolete): New function.
+ 	(do_rd_rm_rn): Check swp{b} for obsoletion.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* config/tc-arm.h (arm_ext_v8): New variable.
+ 	(fpu_vfp_ext_armv8): Likewise.
+ 	(fpu_neon_ext_armv8): Likewise.
+@@ -381,7 +700,38 @@
+ 	* doc/c-arm.texi (ARM Options): Document new architecture and
+ 	extension options for ARMv8.
+ 
+-2012-08-16  Ian Bolton  <ian.bolton@arm.com>
++2012-08-20  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* doc/as.texinfo: Replace --n32 with --x32.
++
++2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
++
++	* config/tc-i386.c (cpu_arch): Add CPU_BTVER1_FLAGS and
++	CPU_BTVER2_FLAGS.
++	(i386_align_code): Add case for PROCESSOR_BT.
++
++	* config/tc-i386.h (enum processor_type): Add PROCESSOR_BT.
++
++	* doc/c-i386.texi: Add -march={btver1, btver2} options.
++
++2012-08-14  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR gas/14457
++	* config/tc-i386.c (i386_att_operand): Terminate register name
++	when reporting bad register.
++
++2012-08-14  Hans-Peter Nilsson  <hp@bitrange.com>
++
++	* config/tc-mmix.c (loc_asserts): New variable.
++	(mmix_greg_internal): Handle expressions not determinable at first
++	pass.
++	(s_loc): Ditto.  Record expressions where the section isn't
++	determinable at the first pass, and assume they don't refer to
++	other sections.
++	(mmix_md_end): Verify that recorded LOC expressions weren't
++	to other sections, else emit error messages.
++
++2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+             Laurent Desnogues  <laurent.desnogues@arm.com>
+             Jim MacArthur  <jim.macarthur@arm.com>
+             Marcus Shawcroft  <marcus.shawcroft@arm.com>
+@@ -405,10 +755,121 @@
+ 	* po/POTFILES.in: Regenerate.
+ 	* NEWS: Mention the new support.
+ 
+-2012-07-20  James Murray  <jsm@jsm-net.demon.co.uk>
++2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (NO_ISA_COP, COP_INSN): Remove macros.
++	(is_opcode_valid): Remove coprocessor instruction exclusions.
++	Replace OPCODE_IS_MEMBER with opcode_is_member.
++	(is_opcode_valid_16): Replace OPCODE_IS_MEMBER with
++	opcode_is_member.
++	(macro): Remove coprocessor instruction exclusions.
++
++2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (s_cpload, s_cpsetup): Fail if MIPS16 mode.
++	(s_cplocal, s_cprestore, s_cpreturn): Likewise.
++
++2012-08-07  Jan Beulich <jbeulich@suse.com>
++
++	* config/tc-i386-intel.c (build_modrm_byte): Split determining
++	default segment from figuring out encoding. Honor RegRex for
++	the former.
++
++2012-08-07  Jan Beulich <jbeulich@suse.com>
++
++	* config/tc-i386.c (set_check): Renamed from set_sse_check.
++	Generalize to also handle operand checking option.
++	(enum i386_error): New enumerator 'invalid_vector_register_set'.
++	(match_template): Handle it.
++	(enum check_kind): Give it a tag. Drop sse_ prefixes from
++	enumerators.
++	(operand_check): New.
++	(md_pseudo_table): Add "operand_check".
++	(check_VecOperands): Don't special case RIP addressing. Check
++	that vSIB operands use distinct vector registers unless no
++	checking was requested.
++	(OPTION_MOPERAND_CHECK): New.
++	(md_parse_option): Handle it.
++	(OPTION_MAVXSCALAR, OPTION_X32): Adjust.
++	(md_longopts): Add "moperand-check".
++	(md_show_usage): Add help text for it.
++
++2012-08-07  Jan Beulich <jbeulich@suse.com>
++
++	* config/tc-i386.c (register_number): New function.
++	(build_vex_prefix, process_immext, process_operands,
++	build_modrm_byte, i386_index_check): Use it.
+ 
+-	* config/tc-m68hc11.c (build_indexed_byte): Replace use of binary
+-	constant with hex for building on cygwin.
++2012-08-07  Daniel Green  <venix1@gmail.com>
++
++	* config/tc-i386.c (lex_got): Provide implementation for PE
++	format.
++
++2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* config/tc-mips.c (append_insn): Also handle moving delay-slot
++	instruction across frags for fixed branches.
++
++2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* frags.c (frag_grow): Never shrink the obstack size requested
++	below the default.
++
++2012-08-02  Sean Keys  <skeys@ipdatasys.com>
++
++	* config/tc-m68hc11.c (s_m68hc11_parse_pseudo_instruction):
++	New function to parse pseudo ops that are unreleated to
++	existing pseudo ops.
++
++2012-08-01  Catherine Moore  <clm@codesourcery.com>
++	    Sandra Loosemore  <sandra@codesourcery.com>
++
++	* config/mips/tc-mips.c (mips_cpu_info):  Add the 34kn.
++	* doc/c-mips.texi (MIPS Opts): Document it.
++
++2012-08-01  James Lemke  <jwlemke@codesourcery.com>
++
++	* dwarf2dbg.c (out_set_addr): Allow for non-constant value of
++	DWARF2_LINE_MIN_INSN_LENGTH
++	* config/tc-ppc.c (ppc_dwarf2_line_min_insn_length): Declare
++	and initialize.
++	(md_apply_fix): Branch addr can be a multiple of 2 or 4.
++	* config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): Now a
++	variable reference.
++
++2012-07-31  Maciej W. Rozycki  <macro@codesourcery.com>
++	    Chao-Ying Fu  <fu@mips.com>
++	    Catherine Moore  <clm@codesourcery.com>
++
++	* config/tc-mips.c (ISA_SUPPORTS_DSP_ASE): Also set if microMIPS
++	mode.
++	(ISA_SUPPORTS_DSPR2_ASE): Likewise.
++	(macro_build) <'2'>: Handle microMIPS.
++	(macro) <M_BALIGN>: Update error handling.
++	(validate_micromips_insn) <'2', '3', '4', '5', '6'>: New cases.
++	<'7', '8', '0', '@', '^'>: Likewise.
++	(mips_ip) <'2', '3', '4', '5', '6', '7', '8'>: Handle microMIPS.
++	<'9'>: Fix formatting.
++	<'0', '@'>: Handle microMIPS.
++	<'^'>: New case.
++
++2012-07-31  Jan Beulich <jbeulich@suse.com>
++
++	* config/tc-i386.c (match_template): Adjust error message
++	for 'bad_imm4' case.
++
++2012-07-31  Jan Beulich <jbeulich@suse.com>
++
++	* config/tc-i386.c (check_byte_reg): Check for I/O port
++	register earlier, and just once. Drop diagnostic that got
++	issued only for some registers.
++
++2012-07-31  Jan Beulich <jbeulich@suse.com>
++
++	* config/tc-i386.c (match_template): New local variable
++	'specific_error'. Set it from i.error after failed
++	check_VecOperands or VEX_check_operands. Use it if set in
++	preference to i.error when actually issuing disagnostic.
+ 
+ 2012-07-30  Nick Clifton  <nickc@redhat.com>
+ 
+@@ -417,10 +878,20 @@
+ 	* po/fi.po: Updated Finnish translation.
+ 	* po/fr.po: Updated French translation.
+ 
++2012-07-27  Mike Frysinger  <vapier@gentoo.org>
++
++	* configure.in (BFD_VERSION): Run bfd/configure --version and
++	parse the output of that.
++	* configure: Regenerate.
++
+ 2012-07-27  Tristan Gingold  <gingold@adacore.com>
+ 
+ 	* NEWS: Add marker for 2.23.
+ 
++2012-07-27  James Murray  <jsm@jsm-net.demon.co.uk>
++
++	* config/tc-m68hc11.c: Replace binary with hex for cygwin.
++
+ 2012-07-26  Segher Boessenkool  <segher@kernel.crashing.org>
+ 
+ 	* listing.c (struct list_message): New.
+@@ -452,6 +923,11 @@
+ 	* config/tc-i386.c: Add ADX, RDSEED and PRFCHW asm directives.
+ 	* doc/c-i386.texi: Document the new directives.
+ 
++2012-07-05  Sean Keys  <skeys@ipdatasys.com>
++
++	* config/tc-xgate.c: Revised assembler so that operands
++	are collected before the addressing mode is determined.
++
+ 2012-07-02  Nick Clifton  <nickc@redhat.com>
+ 
+ 	* write.c (fixup_segment): Only perform the subtraction of an
+@@ -497,6 +973,12 @@
+ 	by pre-biasing add_number.
+ 	* config/tc-h8300.h (DWARF2_USE_FIXED_ADVANCE_PC): Define to 0.
+ 
++2012-06-28  Sean Keys  <skeys@ipdatasys.com>
++
++	* config/tc-xgate.h: Defined tc_frob_symbol.
++	* config/tc-xgate.c (xgate_frob_symbol): Wrote new function to mark
++	symbols as being XGATE by setting st_target_internal value.
++
+ 2012-06-22  Roland McGrath  <mcgrathr@google.com>
+ 
+ 	* NEWS: Mention 'rep ret' too.
+@@ -579,6 +1061,10 @@
+ 	* input-file.c (input_file_get): Use ferror.
+ 	(input_file_give_next_buffer): Use input_file_get.
+ 
++2012-05-31  Sean Keys  <skeys@ipdatasys.com>
++
++	* config/tc-xgate.c (md_begin): Refactored code.
++
+ 2012-05-29  Roland McGrath  <mcgrathr@google.com>
+ 
+ 	* read.c [HANDLE_BUNDLE] (bundle_lock_depth): New variable.
+@@ -960,7 +1446,7 @@
+ 	Use nacl format variants.
+ 
+ 2012-04-12  Jie Zhang  <jie@codesourcery.com>
+-            Meador Inge  <meadori@codesourcery.com>
++	    Meador Inge  <meadori@codesourcery.com>
+ 
+ 	* config/tc-arm.c (only_one_reg_in_list): New function.
+ 	(encode_ldmstm): Ditto.
+@@ -1466,6 +1952,12 @@
+ 
+ For older changes see ChangeLog-2011
+ 
++Copyright (C) 2012 Free Software Foundation, Inc.
++
++Copying and distribution of this file, with or without modification,
++are permitted in any medium without royalty provided the copyright
++notice and this notice are preserved.
++
+ Local Variables:
+ mode: change-log
+ left-margin: 8
+diff --git a/gas/config/tc-arm.c b/gas/config/tc-arm.c
+index 48316a5..6280e04 100644
+--- a/gas/config/tc-arm.c
++++ b/gas/config/tc-arm.c
+@@ -5291,6 +5291,9 @@ parse_address_main (char **str, int i, int group_relocations,
+ 	return result;
+     }
+ 
++  /* PR gas/14987: Allow for whitespace before the closing bracket.  */
++  skip_whitespace (p);
++
+   if (skip_past_char (&p, ']') == FAIL)
+     {
+       inst.error = _("']' expected");
+diff --git a/gas/testsuite/ChangeLog b/gas/testsuite/ChangeLog
+index d1ebc3b..a80681a 100644
+--- a/gas/testsuite/ChangeLog
++++ b/gas/testsuite/ChangeLog
+@@ -1,3 +1,9 @@
++2013-01-02  Nick Clifton  <nickc@redhat.com>
++
++	PR gas/14987
++	* gas/arm/neon-ldst-es.s: Add whitespace test.
++	* gas/arm/neon-ldst-es.d: Update expected disassembly.
++
+ 2013-03-08  Christian Groessler  <chris@groessler.org>
+ 
+ 	Backport from mainline:
+diff --git a/gas/testsuite/ChangeLog b/gas/testsuite/ChangeLog-2012
+similarity index 68%
+copy from gas/testsuite/ChangeLog
+copy to gas/testsuite/ChangeLog-2012
+index d1ebc3b..1e310b8 100644
+--- a/gas/testsuite/ChangeLog
++++ b/gas/testsuite/ChangeLog-2012
+@@ -1,67 +1,188 @@
+-2013-03-08  Christian Groessler  <chris@groessler.org>
+-
+-	Backport from mainline:
++2012-12-20  Greta Yorsh  <Greta.Yorsh@arm.com>
+ 
+-	2012-10-26  Christian Groessler  <chris@groessler.org>
++	* gas/arm/srs-t2.s: Add tests for missing srs modes.
++	* gas/arm/srs-t2.l: Update expected output.
++	* gas/arm/srs-arm.s: Add tests for missing srs modes.
++	* gas/arm/srs-arm.l: Update expected output.
++	* gas/arm/archv6.s: Add tests for missing rfe modes.
++	* gas/arm/archv6.d: Update expected output.
+ 
+-	* gas/z8k/z8k.exp: Run translate-ops test.
+-	* gas/z8k/translate-ops.s: New file.
+-	* gas/z8k/translate-ops.d: New file.
++2012-12-18  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* gas/microblaze/relax_size.exp: New file - test object size after
++	linker relaxation.
++	* gas/microblaze/relax_size.s: Likewise.
++	* gas/microblaze/relax_size.elf: Likewise.
++	* gas/microblaze/relax_size2.s: Likewise.
++	* gas/microblaze/relax_size2.elf: Likewise.
++
++2012-12-17  Nick Clifton  <nickc@redhat.com>
++
++	* config/default.exp: Add copyright notice.
++	* gas/aarch64/aarch64.exp: Likewise.
++	* gas/all/gas.exp: Likewise.
++	* gas/alpha/alpha.exp: Likewise.
++	* gas/arc/arc.exp: Likewise.
++	* gas/arc/warn.exp: Likewise.
++	* gas/arm/arm.exp: Likewise.
++	* gas/bfin/bfin.exp: Likewise.
++	* gas/bfin/error.exp: Likewise.
++	* gas/cfi/cfi.exp: Likewise.
++	* gas/cr16/cr16.exp: Likewise.
++	* gas/cr16/pic.exp: Likewise.
++	* gas/crx/allinsn.exp: Likewise.
++	* gas/d10v/d10v.exp: Likewise.
++	* gas/d30v/d30.exp: Likewise.
++	* gas/dlx/alltests.exp: Likewise.
++	* gas/elf/elf.exp: Likewise.
++	* gas/epiphany/allinsn.exp: Likewise.
++	* gas/fr30/allinsn.exp: Likewise.
++	* gas/fr30/fr30.exp: Likewise.
++	* gas/frv/allinsn.exp: Likewise.
++	* gas/h8300/h8300-coff.exp: Likewise.
++	* gas/h8300/h8300-elf.exp: Likewise.
++	* gas/h8300/h8300.exp: Likewise.
++	* gas/h8300/t01_mov.exp: Likewise.
++	* gas/h8300/t02_mova.exp: Likewise.
++	* gas/h8300/t03_add.exp: Likewise.
++	* gas/h8300/t04_sub.exp: Likewise.
++	* gas/h8300/t05_cmp.exp: Likewise.
++	* gas/h8300/t06_ari2.exp: Likewise.
++	* gas/h8300/t07_ari3.exp: Likewise.
++	* gas/h8300/t08_or.exp: Likewise.
++	* gas/h8300/t09_xor.exp: Likewise.
++	* gas/h8300/t10_and.exp: Likewise.
++	* gas/h8300/t11_logs.exp: Likewise.
++	* gas/h8300/t12_bit.exp: Likewise.
++	* gas/h8300/t13_otr.exp: Likewise.
++	* gas/hppa/README: Likewise.
++	* gas/i386/i386.exp: Likewise.
++	* gas/i386/ilp32/ilp32.exp: Likewise.
++	* gas/i386/ilp32/cfi/ilp32.exp: Likewise.
++	* gas/i386/ilp32/elf/ilp32.exp: Likewise.
++	* gas/i386/ilp32/lns/ilp32.exp: Likewise.
++	* gas/i860/README.i860: Likewise.
++	* gas/i860/i860.exp: Likewise.
++	* gas/ia64/ia64.exp: Likewise.
++	* gas/ieee-fp/x930509a.exp: Likewise.
++	* gas/iq2000/allinsn.exp: Likewise.
++	* gas/iq2000/load-hazards.exp: Likewise.
++	* gas/iq2000/odd-ldw.exp: Likewise.
++	* gas/iq2000/odd-sdw.exp: Likewise.
++	* gas/iq2000/yield.exp: Likewise.
++	* gas/lm32/all.exp: Likewise.
++	* gas/lns/lns.exp: Likewise.
++	* gas/m32r/allinsn.exp: Likewise.
++	* gas/m32r/error.exp: Likewise.
++	* gas/m32r/m32r2.exp: Likewise.
++	* gas/m32r/m32rx.exp: Likewise.
++	* gas/m32r/pic.exp: Likewise.
++	* gas/m32r/rel32.exp: Likewise.
++	* gas/m68hc11/m68hc11.exp: Likewise.
++	* gas/m68k/all.exp: Likewise.
++	* gas/m68k-coff/gas.exp: Likewise.
++	* gas/mach-o/mach-o.exp: Likewise.
++	* gas/macros/macros.exp: Likewise.
++	* gas/mcore/allinsn.exp: Likewise.
++	* gas/mep/allinsn.exp: Likewise.
++	* gas/mep/complex-relocs.exp: Likewise.
++	* gas/microblaze/allinsn.exp: Likewise.
++	* gas/microblaze/endian.exp: Likewise.
++	* gas/microblaze/reloc_sym.exp: Likewise.
++	* gas/microblaze/special_reg.exp: Likewise.
++	* gas/mips/mips.exp: Likewise.
++	* gas/mri/mri.exp: Likewise.
++	* gas/msp430/msp430.exp: Likewise.
++	* gas/mt/errors.exp: Likewise.
++	* gas/mt/mt.exp: Likewise.
++	* gas/mt/relocs.exp: Likewise.
++	* gas/openrisc/allinsn.exp: Likewise.
++	* gas/pdp11/pdp11.exp: Likewise.
++	* gas/pj/pj.exp: Likewise.
++	* gas/ppc/ppc.exp: Likewise.
++	* gas/rx/make-d: Likewise.
++	* gas/rx/rx.exp: Likewise.
++	* gas/score/relax.exp: Likewise.
++	* gas/score/relax_32.exp: Likewise.
++	* gas/sparc/mismatch.exp: Likewise.
++	* gas/sparc/sparc.exp: Likewise.
++	* gas/sparc-solaris/addend.exp: Likewise.
++	* gas/sparc-solaris/gas.exp: Likewise.
++	* gas/sun4/addend.exp: Likewise.
++	* gas/symver/symver.exp: Likewise.
++	* gas/tic4x/tic4x.exp: Likewise.
++	* gas/tic54x/tic54x.exp: Likewise.
++	* gas/tic6x/tic6x.exp: Likewise.
++	* gas/vax/vax.exp: Likewise.
++	* gas/xc16x/xc16x.exp: Likewise.
++	* gas/xgate/xgate.exp: Likewise.
++	* gas/xstormy16/allinsn.exp: Likewise.
++	* gas/xtensa/all.exp: Likewise.
++	* gas/z80/z80.exp: Likewise.
++	* gas/z8k/z8k.exp: Likewise.
++	* lib/gas-dg.exp: Likewise.
+ 
+-2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+-	* gas/aarch64/diagnostic.s: Add test.
+-	* gas/aarch64/diagnostic.l: Update.
+-	* gas/aarch64/illegal.s: Add test.
++	* gas/aarch64/illegal.s: Add test for unaccepted LDR literal.
+ 	* gas/aarch64/illegal.l: Update.
+-	* gas/aarch64/fpmov.s: New file.
+-	* gas/aarch64/fpmov.d: New file.
++	* gas/aarch64/programmer-friendly.s: Add tests for LDR literal with
++	the auto-generation of literal in pool.
++	* gas/aarch64/programmer-friendly.d: Update.
+ 
+-2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-28  Julian Brown  <julian@codesourcery.com>
+ 
+-	* gas/aarch64/system.s: Add tests.
+-	* gas/aarch64/system.d: Update.
++	* gas/arm/bl-local-2.s: New test.
++	* gas/arm/bl-local-2.d: New.
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-27  Roland McGrath  <mcgrathr@google.com>
+ 
+-	* gas/aarch64/alias.s: Add new tests.
+-	* gas/aarch64/alias.d: Update.
+-	* gas/aarch64/no-aliases.d: Update.
++	* lib/gas-defs.exp (run_dump_test): If as options include
++	--compress-debug-sections and zlib is not available, report
++	the test as unsupported.
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-23  Alan Modra  <amodra@gmail.com>
+ 
+-	* gas/aarch64/diagnostic.s: Add test.
+-	* gas/aarch64/diagnostic.l: Update.
++	* gas/ppc/astest2.d: Pass -Mppc to objdump.
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-21  David Holsgrove  <david.holsgrove@xilinx.com>
+ 
+-	* gas/aarch64/int-insns.d: Update.
+-	* gas/aarch64/mov.d: Update.
+-	* gas/aarch64/reloc-insn.d: Update.
++	* gas/microblaze/allinsn.s: Add swapb, swaph
++	* gas/microblaze/allinsn.d: Likewise
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-21  David Holsgrove  <david.holsgrove@xilinx.com>
+ 
+-	* gas/aarch64/system.d: Update.
++	* gas/microblaze/allinsn.s: Test use of SHR, SLR
++	* gas/microblaze/allinsn.d: Likewise
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-20  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+ 
+-	* gas/aarch64/sysreg-1.s: Add tests of rmr_el1, rmr_el2 and rmr_el3.
+-	* gas/aarch64/sysreg-1.d: Update.
+-	* gas/aarch64/illegal.s: Add tests of daifset and daifclr.
+-	* gas/aarch64/illegal.d: Update.
++	* gas/s390/zarch-z9-109.d: Fix srstu opcode.
++	* gas/s390/zarch-z900.d: Replace lasp with strag.
+ 
+-2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-11-20  Roland McGrath  <mcgrathr@google.com>
+ 
+-	* gas/aarch64/illegal-2.s: Add test case.
+-	* gas/aarch64/illegal-2.l: Likewise.
++	* gas/arm/macro-pld.s: New file.
++	* gas/arm/macro-pld.d: New file.
+ 
+-2013-01-22  Alan Modra  <amodra@gmail.com>
++2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
+ 
+-	Apply mainline patches
+-	2012-11-23  Alan Modra  <amodra@gmail.com>
+-	* gas/ppc/astest2.d: Pass -Mppc to objdump.
++	* gas/microblaze/allinsn.s: Add mbar and sleep
++	* gas/microblaze/allinsn.d: Likewise
++
++2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* gas/microblaze/allinsn.s: Add clz insn
++	* gas/microblaze/allinsn.d: Likewise
++
++2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* gas/microblaze/allinsn.exp: New file - test newly added opcodes
++	* gas/microblaze/allinsn.s: Likewise
++	* gas/microblaze/allinsn.d: Likewise
++
++2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
+ 
+-	2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
+ 	* gas/ppc/astest.d: Update for fixup changes.
+ 	* gas/ppc/astest64.d: Likewise.
+ 	* gas/ppc/astest2.d: Likewise.
+@@ -69,7 +190,62 @@
+ 	* gas/ppc/test1elf32.d: Likewise.
+ 	* gas/ppc/test1elf64.d: Likewise.
+ 
+-	2012-10-29  Alan Modra  <amodra@gmail.com>
++2012-11-09  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* gas/microblaze/endian.exp: New file - endian testcase for microblaze / microblazeel.
++	* gas/microblaze/endian.s: Likewise.
++	* gas/microblaze/endian_be.d: Likewise.
++	* gas/microblaze/endian_le.d: Likewise.
++	* gas/microblaze/endian_le_elf.d: Likewise.
++	* gas/microblaze/reloc_sym.d: Update to accept targets other than elf32-microblaze.
++	* gas/microblaze/special_reg.d: Likewise.
++
++2012-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/lui.d: New test.
++	* gas/mips/micromips@lui.d: New test.
++	* gas/mips/lui-1.l: New list test.
++	* gas/mips/lui-2.l: New list test.
++	* gas/mips/lui.s: New test source.
++	* gas/mips/lui-1.s: New test source.
++	* gas/mips/lui-2.s: New test source.
++	* gas/mips/mips.exp: Run the new tests.
++
++2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* testsuite/gas/microblaze/special_reg.exp: Add test case.
++	* testsuite/gas/microblaze/special_reg.s: Likewise.
++	* testsuite/gas/microblaze/special_reg.d: Likewise.
++
++2012-11-01  Chao-ying Fu  <fu@mips.com>
++
++	* gas/mips/micromips-b16.d: New test.
++	* gas/mips/micromips-b16.s: New test source.
++	* gas/mips/mips.exp: Run the new test.
++
++2012-11-01  Chao-ying Fu  <fu@mips.com>
++            Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/micromips-branch-delay.l: Update messages for 16-bit
++	delay slot changes.
++	* gas/mips/micromips-warn-branch-delay.d: New test.
++	* gas/mips/micromips-warn-branch-delay.l: Stderr output for the
++	new test.
++	* gas/mips/micromips-warn-branch-delay-1.d: New test.
++	* gas/mips/micromips-warn-branch-delay.s: New test source.
++	* gas/mips/micromips-warn-branch-delay-1.s: New test source.
++	* gas/mips/mips.exp: Run the new tests.
++
++2012-10-31  David Holsgrove  <david.holsgrove@xilinx.com>
++
++	* gas/microblaze: New.
++	* gas/microblaze/reloc_sym.exp: Add test case.
++	* gas/microblaze/reloc_strongsym.s: Likewise.
++	* gas/microblaze/reloc_weaksym.s: Likewise.
++	* gas/microblaze/reloc_sym.d: Likewise.
++
++2012-10-29  Alan Modra  <amodra@gmail.com>
++
+ 	* gas/cfi/cfi.exp: Remove redundant ppc test.  Exclude
+ 	powerpc-pe targets from cfi-common-6 test.
+ 	* gas/cfi/cfi-ppc-1.d: Use objdump to handle pe.
+@@ -116,50 +292,89 @@
+ 	* gas/ppc/vle.s: Likewise.
+ 	* gas/ppc/vsx.d, * gas/ppc/vsx.s: Likewise.
+ 
+-	2012-10-26  Alan Modra  <amodra@gmail.com>
++2012-10-27  James Lemke  <jwlemke@codesourcery.com>
++
++	* gas/m68k/all.exp: Exclude pr11676 for fido-*-*.
++
++2012-10-26  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
++
++	* gas/testsuite/gas/s390/zarch-z10.d: Refreshed.
++	* gas/testsuite/gas/s390/zarch-z10.s: Refreshed.
++	* gas/testsuite/gas/s390/zarch-z196.d: Refreshed.
++	* gas/testsuite/gas/s390/zarch-z196.s: Refreshed.
++	* gas/testsuite/gas/s390/zarch-z9-109.d: Refreshed.
++	* gas/testsuite/gas/s390/zarch-z990.d: Refreshed.
++	* gas/testsuite/gas/s390/zarch-z990.s: Refreshed.
++	* gas/testsuite/gas/s390/zarch-zEC12.d: Refreshed.
++	* gas/testsuite/gas/s390/zarch-zEC12.s: Refreshed.
++
++2012-10-26  Christian Groessler  <chris@groessler.org>
++
++	* gas/z8k/z8k.exp: Run translate-ops test.
++	* gas/z8k/translate-ops.s: New file.
++	* gas/z8k/translate-ops.d: New file.
++
++2012-10-26  Alan Modra  <amodra@gmail.com>
++
+ 	* gas/ppc/power4.s: Fix invalid lq offsets.
+ 	* gas/ppc/power4.d: Update.
+ 
+-	2012-10-22  Peter Bergner  <bergner@vnet.ibm.com>
++2012-10-24  Roland McGrath  <mcgrathr@google.com>
++
++	* gas/i386/rex.s: Add test of REX prefix before fsave (i.e. fwait).
++	* gas/i386/rex.d: Update.
++
++2012-10-22  Peter Bergner  <bergner@vnet.ibm.com>
++
+ 	* gas/ppc/altivec.s <vcfpsxws>: Fix opcode spelling.
+ 
+-	2012-10-05  Peter Bergner  <bergner@vnet.ibm.com>
+-	* gas/ppc/power7.d: Add tests for mfppr, mfppr32, mtppr and mtppr32.
+-	* gas/ppc/power7.s: Likewise.
+-	* gas/ppc/altivec.d: Add tests for all legacy Altivec instructions.
+-	* gas/ppc/altivec.s: Likewise.
+-	* gas/ppc/altivec2.d: New test file.
+-	* gas/ppc/altivec2.s: Likewise.
+-	* gas/ppc/ppc.exp: Run it.
++2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+-	2012-08-01  James Lemke  <jwlemke@codesourcery.com>
+-	* gas/cfi/cfi-ppc-1.d: Allow for code alignment of 2 or 4.
++	* gas/aarch64/sysreg-1.s: Add tests of rmr_el1, rmr_el2 and rmr_el3.
++	* gas/aarch64/sysreg-1.d: Update.
++	* gas/aarch64/illegal.s: Add tests of daifset and daifclr.
++	* gas/aarch64/illegal.d: Update.
+ 
+-2012-12-20  Greta Yorsh  <Greta.Yorsh@arm.com>
++2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+-	* gas/arm/srs-t2.s: Add tests for missing srs modes.
+-	* gas/arm/srs-t2.l: Update expected output.
+-	* gas/arm/srs-arm.s: Add tests for missing srs modes.
+-	* gas/arm/srs-arm.l: Update expected output.
+-	* gas/arm/archv6.s: Add tests for missing rfe modes.
+-	* gas/arm/archv6.d: Update expected output.
++	* gas/aarch64/illegal-2.s: Add test case.
++	* gas/aarch64/illegal-2.l: Update.
+ 
+-2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-10-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+ 
+-	* gas/aarch64/programmer-friendly.s: Add tests for LDR literal with
+-	the auto-generation of literal in pool.
+-	* gas/aarch64/programmer-friendly.d: Update.
++	* gas/hppa/basic/fmemLRbug.s: Remove double load and store instructions
++	which reference the right half of a floating point register.
++	* gas/hppa/basic/basic.exp: Adjust expected results.
+ 
+-2012-11-27  Roland McGrath  <mcgrathr@google.com>
++2012-10-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+ 
+-	* lib/gas-defs.exp (run_dump_test): If as options include
+-	--compress-debug-sections and zlib is not available, report
+-	the test as unsupported.
++	* gas/hppa/basic/unit.s: Remove uxor instructions with unit condition
++	involving a carry.
++	* gas/hppa/basic/unit2.s: Likewise.
++	* gas/hppa/basic/basic.exp: Adjusted expected.
+ 
+-2012-11-20  Roland McGrath  <mcgrathr@google.com>
++2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+ 
+-	* gas/arm/macro-pld.s: New file.
+-	* gas/arm/macro-pld.d: New file.
++	* gas/arm/armv8-a+fp.d: Use preferred form of vrint instruction
++	variants for disassembly.
++	* gas/arm/armv8-a+fp.s: Likewise.
++	* gas/arm/armv8-a+simd.d: Likewise.
++	* gas/arm/armv8-a+simd.s: Likewise.
++
++2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
++
++	* gas/arm/ldgesb-bad.d: New file.
++	* gas/arm/ldgesb-bad.l: Likewise.
++	* gas/arm/ldgesb-bad.s: Likewise.
++	* gas/arm/ldgesh-bad.d: Likewise.
++	* gas/arm/ldgesh-bad.l: Likewise.
++	* gas/arm/ldgesh-bad.s: Likewise.
++	* gas/arm/ldsgeb.d: Likewise.
++	* gas/arm/ldsgeb.s: Likewise.
++	* gas/arm/ldsgeb.l: Likewise.
++	* gas/arm/ldsgeh.d: Likewise.
++	* gas/arm/ldsgeh.s: Likewise.
++	* gas/arm/ldsgeh.l: Likewise.
+ 
+ 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+ 
+@@ -169,116 +384,132 @@
+ 	* gas/i386/x86-64-nops-1-bdver3.d: New.
+ 	* gas/i386/x86-64-arch-2-bdver3.d: New.
+ 
+-2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
++2012-10-05  Peter Bergner  <bergner@vnet.ibm.com>
+ 
+-	* gas/arm/armv8-a-bad.l: Updated for changed mnemonics.
+-	* gas/arm/armv8-a-bad.s: Likewise.
+-	* gas/arm/armv8-a.d: Likewise.
+-	* gas/arm/armv8-a.s: Likewise.
+-	* gas/arm/inst.s: Added test for ldrt encoding compatibly with ldralt.
+-	* gas/arm/inst.d: Updated.
+-
+-2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
++	* gas/ppc/power7.d: Add tests for mfppr, mfppr32, mtppr and mtppr32.
++	* gas/ppc/power7.s: Likewise.
++	* gas/ppc/altivec.d: Add tests for all legacy Altivec instructions.
++	* gas/ppc/altivec.s: Likewise.
++	* gas/ppc/altivec2.d: New test file.
++	* gas/ppc/altivec2.s: Likewise.
++	* gas/ppc/ppc.exp: Run it.
+ 
+-	* gas/aarch64/crypto.d (#as): Update for v8->v8-A change.
+-	* gas/aarch64/int-insns.d (#as): Likewise.
+-	* gas/aarch64/legacy_reg_names.s (.arch): Likewise.
+-	* gas/aarch64/neon-not.s (.arch): Likewise.
+-	* gas/aarch64/neon-vfp-reglist-post.s (.arch): Likewise.
+-	* gas/aarch64/neon-vfp-reglist.s (.arch): Likewise.
++2012-10-04  Nick Clifton  <nickc@redhat.com>
+ 
+-2012-09-18  Chao-ying Fu  <fu@mips.com>
++	* gas/v850/v850e1.d: Fix expected disassembly of clr1, not1, set1
++	and tst1 insns.
+ 
+-	* gas/mips/micromips.d: Correct the disassembly of SWXC1.
+-	* gas/mips/micromips-trap.d: Likewise.
+-	* gas/mips/micromips@24k-triple-stores-1.d: Likewise.
+-	* gas/mips/micromips@mips4-fp.d: Likewise.
++2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+ 
+-2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
++	* gas/s390/zarch-zEC12.d: Fix branch preload instructions.
++	* gas/s390/zarch-zEC12.s: Likewise.
+ 
+-	* gas/i386/i386.exp: Run btver1 and btver2 test cases.
++2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+ 
+-	* gas/i386/nops-1-btver1.d: New.
+-	* gas/i386/nops-1-btver2.d: New.
+-	* gas/i386/arch-10-btver1.d: New.
+-	* gas/i386/arch-10-btver2.d: New.
+-	* gas/i386/x86-64-nops-1-btver1.d: New.
+-	* gas/i386/x86-64-nops-1-btver2.d: New.
+-	* gas/i386/x86-64-arch-2-btver1.d: New.
+-	* gas/i386/x86-64-arch-2-btver2.d: New.
++	* gas/s390/s390.exp: Run zEC12 tests.
++	* gas/s390/zarch-zEC12.d: New file.
++	* gas/s390/zarch-zEC12.s: New file.
+ 
+-2012-08-11  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
++2012-09-25  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+ 
+-	PR gas/14423
+-	* gas/i386/arch-10-bdver2.d: New file.
++	* gas/i386/arch-10-bdver1.d: New file to test bdver1 core.
++	* gas/i386/x86-64-arch-2-bdver1.d: Likewise.
++	* gas/i386/i386.exp: Run bdver1 testcases.
++	* gas/i386/arch-10-bdver2.d: Updated -march flags.
++	* gas/i386/arch-10-btver1.d: Likewise.
++	* gas/i386/arch-10-btver2.d: Likewise.
+ 	* gas/i386/x86-64-arch-2-bdver2.d: Likewise.
+-	* gas/i386/i386.exp: Run new test
++	* gas/i386/x86-64-arch-2-btver1.d: Likewise.
++	* gas/i386/x86-64-arch-2-btver2.d: Likewise.
++
++2012-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/hilo-diff-eb.d: New test.
++	* gas/mips/hilo-diff-eb-n32.d: New test.
++	* gas/mips/hilo-diff-eb-n64.d: New test.
++	* gas/mips/hilo-diff-el.d: New test.
++	* gas/mips/hilo-diff-el-n32.d: New test.
++	* gas/mips/hilo-diff-el-n64.d: New test.
++	* gas/mips/mips16@hilo-diff-eb.d: New test.
++	* gas/mips/mips16@hilo-diff-eb-n32.d: New test.
++	* gas/mips/mips16@hilo-diff-eb-n64.d: New test.
++	* gas/mips/mips16@hilo-diff-el.d: New test.
++	* gas/mips/mips16@hilo-diff-el-n32.d: New test.
++	* gas/mips/mips16@hilo-diff-el-n64.d: New test.
++	* gas/mips/micromips@hilo-diff-eb.d: New test.
++	* gas/mips/micromips@hilo-diff-eb-n32.d: New test.
++	* gas/mips/micromips@hilo-diff-eb-n64.d: New test.
++	* gas/mips/micromips@hilo-diff-el.d: New test.
++	* gas/mips/micromips@hilo-diff-el-n32.d: New test.
++	* gas/mips/micromips@hilo-diff-el-n64.d: New test.
++	* gas/mips/hilo-diff.s: New test source.
++	* gas/mips/mips.exp: Run the new tests.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++
++	* gas/mips/elf-rel22.s, gas/mips/elf-rel22.d: Add more tests.
++	* gas/mips/elf-rel29.s, gas/mips/elf-rel29.d,
++	gas/mips/micromips@elf-rel29.d, gas/mips/elf-rel30.s,
++	gas/mips/elf-rel30.l: New tests.
++	* gas/mips/mips.exp: Run them.
++
++2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
++
++	* gas/mips/dot-1.s, gas/mips/dot-1.d, gas/mips/micromips@dot-1.d,
++	gas/mips/mips16@dot-1.d: New test.
++	* gas/mips/mips.exp: Run it.
+ 
+-2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
++2012-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+-	PR gas/14521
+-	* gas/mmix/group-1.d, gas/mmix/group-1.s: New test.
++	* gas/i386/i386.exp: Run x86-64-arch-2-1 and x86-64-arch-2-2.
+ 
+-	* gas/mmix/err-fb-2.s: New test.
++	* gas/i386/x86-64-arch-2-1.l: New file.
++	* gas/i386/x86-64-arch-2-1.s: Likewise.
++	* gas/i386/x86-64-arch-2-2.l: Likewise.
++	* gas/i386/x86-64-arch-2-2.s: Likewise.
+ 
+-2012-09-10  Maciej W. Rozycki  <macro@codesourcery.com>
++2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+ 
+-	* gas/mips/mips.exp: Set has_newabi for all Linux targets.
+-	* gas/mips/cfi-n64-1.d: Adjust for targets that do not infer the
+-	ISA from the ABI.
+-	* gas/mips/elf-rel-got-n32.d: Likewise.
+-	* gas/mips/elf-rel-got-n64.d: Likewise.
+-	* gas/mips/elf-rel-xgot-n32.d: Likewise.
+-	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+-	* gas/mips/elf-rel18.d: Likewise.
+-	* gas/mips/elf-rel28-n32.d: Likewise.
+-	* gas/mips/elf-rel28-n64.d: Likewise.
+-	* gas/mips/jal-newabi.d: Likewise.
+-	* gas/mips/ldstla-n64-shared.d: Likewise.
+-	* gas/mips/ldstla-n64-sym32.d: Likewise.
+-	* gas/mips/ldstla-n64.d: Likewise.
+-	* gas/mips/macro-warn-1-n32.d: Likewise.
+-	* gas/mips/macro-warn-2-n32.d: Likewise.
+-	* gas/mips/n32-consec.d: Likewise.
++	* gas/i386/x86-64-arch-2.s: Add test for cmpxchg16b.
++	* gas/i386/x86-64-arch-2.d: Update correspondingly.
++	* gas/i386/x86-64-arch-2-bdver2.d: Likewise.
++	* gas/i386/x86-64-arch-2-btver1.d: Likewise.
++	* gas/i386/x86-64-arch-2-btver2.d: Likewise.
++	* gas/i386/x86-64-arch-2-lzcnt.d: Likewise.
++	* gas/i386/x86-64-arch-2-prefetchw.d: Likewise.
++	* gas/i386/ilp32/x86-64-arch-2.d: Likewise.
+ 
+-2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+ 
+-	* gas/mips/mips.exp: Set has_newabi for mips*-sde-elf* too.
+-	* gas/mips/elf-rel-got-n32.s: Adjust padding.
+-	* gas/mips/elf-rel-got-n64.s: Likewise.
+-	* gas/mips/elf-rel23.s: Likewise.
+-	* gas/mips/elf-rel28.s: Likewise.
+-	* gas/mips/n32-consec.s: Likewise.
+-	* gas/mips/elf-rel-xgot-n32.d: Adjust output expected.
+-	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+-	* gas/mips/elf-rel23.d: Likewise.
+-	* gas/mips/elf-rel23a.d: Likewise.
+-	* gas/mips/elf-rel23b.d: Likewise.
+-	* gas/mips/elf-rel28-n32.d: Likewise.
++	* gas/arm/armv8-a-bad.l: Updated for changed mnemonics.
++	* gas/arm/armv8-a-bad.s: Likewise.
++	* gas/arm/armv8-a.d: Likewise.
++	* gas/arm/armv8-a.s: Likewise.
++	* gas/arm/inst.s: Added test for ldrt encoding compatibly with ldralt.
++	* gas/arm/inst.d: Updated.
+ 
+-2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++2012-09-18  Chao-ying Fu  <fu@mips.com>
+ 
+-2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++	* gas/mips/micromips.d: Correct the disassembly of SWXC1.
++	* gas/mips/micromips-trap.d: Likewise.
++	* gas/mips/micromips@24k-triple-stores-1.d: Likewise.
++	* gas/mips/micromips@mips4-fp.d: Likewise.
+ 
+-	* gas/mips/branch-swap-2.l: New list test.
+-	* gas/mips/branch-swap-2.s: New test source.
+-	* gas/mips/mips.exp: Run the new test.
++2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+-	* gas/mips/micromips@mips32-dsp.d: New test.
+-	* gas/mips/micromips@mips32-dspr2.d: New test.
+-	* gas/mips/mips32-dsp.s: Update padding.
+-	* gas/mips/mips32-dspr2.s: Likewise.
+-	* gas/mips/mips.exp: Use run_dump_test_arches to run MIPS32 DSP
+-	tests.
+-2012-07-31  Catherine Moore  <clm@codesourcery.com>
+-            Maciej W. Rozycki  <macro@codesourcery.com>
++	* gas/aarch64/crypto.d (#as): Update for v8->v8-A change.
++	* gas/aarch64/int-insns.d (#as): Likewise.
++	* gas/aarch64/legacy_reg_names.s (.arch): Likewise.
++	* gas/aarch64/neon-not.s (.arch): Likewise.
++	* gas/aarch64/neon-vfp-reglist-post.s (.arch): Likewise.
++	* gas/aarch64/neon-vfp-reglist.s (.arch): Likewise.
+ 
+-	* gas/mips/micromips@mips32-dsp.d: New.
+-	* gas/mips/micromips@mips32-dspr2.d: New.
+-	* gas/mips/mips32-dsp.d: Remove -mips32r2.
+-	* gas/mips/mips32-dspr2.d: Likewise.
+-	* gas/mips/mips.exp: (mips_create_arch): Use -mips64r2
+-	for micromips.  Use run_dump_test_arches to run dsp tests.
++2012-09-12  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
++
++	* gas/aarch64/reloc-insn.d
++	(BFD_RELOC_AARCH64_GOT_LD_PREL19): Add expected asm for new reloc test.
++	* gas/aarch64/reloc-insn.s
++	(BFD_RELOC_AARCH64_GOT_LD_PREL19): Add test for reloc.
+ 
+ 2012-09-04  Sergey A. Guriev  <sergey.a.guriev@intel.com>
+ 
+@@ -288,101 +519,120 @@
+ 	* gas/testsuite/gas/ia64/opc-i.d: Fixed failing tests.
+ 	* gas/testsuite/gas/ia64/opc-m.d: Ditto.
+ 
+-2012-08-28  Peter Bergner  <bergner@vnet.ibm.com>
++2012-09-01  Hans-Peter Nilsson  <hp@bitrange.com>
++
++	PR gas/14521
++	* gas/mmix/group-1.d, gas/mmix/group-1.s: New test.
+ 
+-	Backport from mainline
+-	2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
++2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+-	* gas/ppc/common.d ("nop", "xnop"): Add tests.
+-	* gas/ppc/common.s: Likewise.
+-	* gas/ppc/power7.d ("yield", "mdoio", "mdoom"): Add tests.
+-	* gas/ppc/power7.s: Likewise.
++	* gas/elf/group0c.d: Skip Solaris.
+ 
+-	2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
++2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+-	* gas/ppc/power4.s <lq, stq>: Add more tests.
+-	* gas/ppc/power4.d: Likewise.
++	* gas/i386/ilp32/ilp32.exp (gas_64_check): Renamed to ...
++	(gas_x32_check): This.  Check elf32-x86-64.
++	Remove Solaris check.
++	* gas/i386/ilp32/cfi/ilp32.exp: Likewise.
++	* gas/i386/ilp32/elf/ilp32.exp: Likewise.
++	* gas/i386/ilp32/lns/ilp32.exp: Likewise.
+ 
+-	2012-08-20  Edmar Wienskoski  <edmar@freescale.com>
+-	* gas/ppc/e6500.d: Changed opcode for vabsdub, vabsduh, vabsduw,
+-	mviwsplt.
++2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* gas/i386/ilp32/ilp32.exp: Skip Solaris.
++	* gas/i386/ilp32/cfi/ilp32.exp: Likewise.
++	* gas/i386/ilp32/elf/ilp32.exp: Likewise.
++	* gas/i386/ilp32/lns/ilp32.exp: Likewise.
+ 
+-2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+ 
+-	Apply mainline patches
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+ 	* gas/arm/armv8-a+crypto.s: Update testcase.
+ 	* gas/arm/armv8-a+crypto.d: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+crypto.d: Update testcase.
+ 	* gas/arm/armv8-a+crypto.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+crypto.d: Update testcase.
+ 	* gas/arm/armv8-a+crypto.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+crypto.d: New testcase.
+ 	* gas/arm/armv8-a+crypto.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+fp.d: Update testcase.
+ 	* gas/arm/armv8-a+fp.s: Likewise.
+ 	* gas/arm/half-prec-vfpv3.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+fpv5.d: Update testcase.
+ 	* gas/arm/armv8-a+fpv5.s: Likewise.
+ 	* gas/arm/armv8-a+simdv3.d: Likewise.
+ 	* gas/arm/armv8-a+simdv3.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+fp.d: Update testcase.
+ 	* gas/arm/armv8-a+fp.s: Likewise.
+ 	* gas/arm/armv8-a+simd.d: Likewise.
+ 	* gas/arm/armv8-a+simd.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/testsuite/gas/armv8-a+fp.d: Update testcase.
+ 	* gas/testsuite/gas/armv8-a+fp.s: Likewise.
+ 	* gas/testsuite/gas/armv8-a+simd.d: New testcase.
+ 	* gas/testsuite/gas/armv8-a+simd.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a+fp.d: New testcase.
+ 	* gas/arm/armv8-a+fp.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-bad.l: Update testcase.
+ 	* gas/arm/armv8-a-bad.s: Likewise.
+ 	* gas/arm/armv8-a.d: Likewise.
+ 	* gas/arm/armv8-a.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-bad.l: Update for HLT.
+ 	* gas/arm/armv8-a-bad.s: Likewise.
+ 	* gas/arm/armv8-a.d: Likewise.
+ 	* gas/arm/armv8-a.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a.d: Update.
+ 	* gas/arm/armv8-a.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a.s: New testcase.
+ 	* gas/arm/armv8-a.d: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-barrier.s: New testcase.
+ 	* gas/arm/armv8-a-barrier-arm.d: Likewise.
+ 	* gas/arm/armv8-a-barrier-thumb.d: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-bad.l: Update
+ 	* gas/arm/armv8-a-bad.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-it-bad.d: New testcase.
+ 	* gas/arm/armv8-a-it-bad.l: Likewise.
+ 	* gas/arm/armv8-a-it-bad.s: Likewise.
+@@ -394,18 +644,21 @@
+ 	* gas/arm/vfp-fma-inc.s: Likewise.
+ 	* gas/arm/vfp-neon-syntax-inc.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-bad.l: Update testcase.
+ 	* gas/arm/armv8-a-bad.s: Likewise.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/armv8-a-bad.d: New testcase.
+ 	* gas/arm/armv8-a-bad.l: Likewise.
+ 	* gas/arm/armv8-a-bad.s: Likewise.
+ 	* gas/arm/depr-swp.l: Update for change in expected output.
+ 	* gas/arm/depr-swp.s: Add additional test.
+ 
+-	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
++
+ 	* gas/arm/attr-march-all.d: Update for change in expected
+ 	output.
+ 	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.
+@@ -415,16 +668,62 @@
+ 	* gas/arm/attr-march-armv8-a+simd.d: Likewise.
+ 	* gas/arm/attr-march-armv8-a.d: Likewise.
+ 
+-012-08-13  Ian Bolton  <ian.bolton@arm.com>
+-            Laurent Desnogues  <laurent.desnogues@arm.com>
+-            Jim MacArthur  <jim.macarthur@arm.com>
+-            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+-            Nigel Stephens  <nigel.stephens@arm.com>
+-            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+-            Richard Earnshaw  <rearnsha@arm.com>
+-            Sofiane Naci  <sofiane.naci@arm.com>
+-            Tejas Belagod  <tejas.belagod@arm.com>
+-            Yufeng Zhang  <yufeng.zhang@arm.com>
++2012-08-21  David S. Miller  <davem@davemloft.net>
++
++	* gas/sparc/crypto.d: Fix opcodes for 4-arg crypto instructions.
++
++2012-08-20  Edmar Wienskoski  <edmar@freescale.com>
++
++	* gas/ppc/e6500.d: Changed opcode for vabsdub, vabsduh, vabsduw,
++	mviwsplt.
++
++2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
++
++	* gas/i386/i386.exp: Run btver1 and btver2 test cases.
++
++	* gas/i386/nops-1-btver1.d: New.
++	* gas/i386/nops-1-btver2.d: New.
++	* gas/i386/arch-10-btver1.d: New.
++	* gas/i386/arch-10-btver2.d: New.
++	* gas/i386/x86-64-nops-1-btver1.d: New.
++	* gas/i386/x86-64-nops-1-btver2.d: New.
++	* gas/i386/x86-64-arch-2-btver1.d: New.
++	* gas/i386/x86-64-arch-2-btver2.d: New.
++
++2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
++
++	* gas/ppc/power4.s <lq, stq>: Add more tests.
++	* gas/ppc/power4.d: Likewise.
++
++2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
++
++	* gas/ppc/common.d ("nop", "xnop"): Add tests.
++	* gas/ppc/common.s: Likewise.
++	* gas/ppc/power7.d ("yield", "mdoio", "mdoom"): Add tests.
++	* gas/ppc/power7.s: Likewise.
++
++2012-08-14  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR gas/14457
++	* gas/i386/i386.exp: Run reg-bad.
++
++	* gas/i386/reg-bad.l: New.
++	* gas/i386/reg-bad.s: Likewise.
++
++2012-08-14  Hans-Peter Nilsson  <hp@bitrange.com>
++
++	* gas/mmix/err-fb-2.s: New test.
++
++2012-08-13  Ian Bolton  <ian.bolton@arm.com>
++	    Laurent Desnogues  <laurent.desnogues@arm.com>
++	    Jim MacArthur  <jim.macarthur@arm.com>
++	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
++	    Nigel Stephens  <nigel.stephens@arm.com>
++	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
++	    Richard Earnshaw  <rearnsha@arm.com>
++	    Sofiane Naci  <sofiane.naci@arm.com>
++	    Tejas Belagod  <tejas.belagod@arm.com>
++	    Yufeng Zhang  <yufeng.zhang@arm.com>
+ 
+ 	* gas/aarch64: New directory.
+ 	* gas/aarch64/aarch64.exp: New file.
+@@ -539,10 +838,157 @@
+ 	* gas/aarch64/verbose-error.l: New file.
+ 	* gas/aarch64/verbose-error.s: New file.
+ 
++2012-08-11  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
++
++	PR gas/14423
++	* gas/i386/arch-10-bdver2.d: New file.
++	* gas/i386/x86-64-arch-2-bdver2.d: Likewise.
++	* gas/i386/i386.exp: Run new test
++
++2012-08-07  Roland McGrath  <mcgrathr@google.com>
++
++	* gas/i386/prefetch.s: New file.
++	* gas/i386/prefetch.d: New file.
++	* gas/i386/prefetch-intel.d: New file.
++	* gas/i386/x86-64-prefetch.d: New file.
++	* gas/i386/x86-64-prefetch-intel.d: New file.
++	* gas/i386/i386.exp: Run them.
++
++2012-08-07  Jan Beulich <jbeulich@suse.com>
++
++	* gas/i386/x86-64-segovr.{s,l}: New.
++	* gas/i386/i386.exp: Run new test.
++
++2012-08-07  Jan Beulich <jbeulich@suse.com>
++
++	* gas/i386/vgather-check-error.{s,l}: New.
++	* gas/i386/vgather-check-none.{s,d}: New.
++	* gas/i386/vgather-check-warn.{d,e}: New.
++	* gas/i386/vgather-check.{s,d}: New.
++	* gas/i386/x86-64-vgather-check-error.{s,l}: New.
++	* gas/i386/x86-64-vgather-check-none.{s,d}: New.
++	* gas/i386/x86-64-vgather-check-warn.{d,e}: New.
++	* gas/i386/x86-64-vgather-check.{s,d}: New.
++	* gas/i386/i386.exp: Run new tests.
++
++2012-08-07  Jan Beulich <jbeulich@suse.com>
++
++	* gas/i386/x86-64-specific-reg.{s,l}: New.
++	* gas/i386/i386.exp: Run new test.
++
++2012-08-07  Nick Clifton  <nickc@redhat.com>
++
++	* gas/i386/secrel.s: Add test of <symbol>@SECREL32.
++	* gas/i386/secrel.d: Add expected disassembly.
++
++2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/mips.exp: Set has_newabi for all Linux targets.
++	* gas/mips/cfi-n64-1.d: Adjust for targets that do not infer the
++	ISA from the ABI.
++	* gas/mips/elf-rel-got-n32.d: Likewise.
++	* gas/mips/elf-rel-got-n64.d: Likewise.
++	* gas/mips/elf-rel-xgot-n32.d: Likewise.
++	* gas/mips/elf-rel-xgot-n64.d: Likewise.
++	* gas/mips/elf-rel18.d: Likewise.
++	* gas/mips/elf-rel28-n32.d: Likewise.
++	* gas/mips/elf-rel28-n64.d: Likewise.
++	* gas/mips/jal-newabi.d: Likewise.
++	* gas/mips/ldstla-n64-shared.d: Likewise.
++	* gas/mips/ldstla-n64-sym32.d: Likewise.
++	* gas/mips/ldstla-n64.d: Likewise.
++	* gas/mips/macro-warn-1-n32.d: Likewise.
++	* gas/mips/macro-warn-2-n32.d: Likewise.
++	* gas/mips/n32-consec.d: Likewise.
++
++2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/mips.exp: Set has_newabi for mips*-sde-elf* too.
++	* gas/mips/elf-rel-got-n32.s: Adjust padding.
++	* gas/mips/elf-rel-got-n64.s: Likewise.
++	* gas/mips/elf-rel23.s: Likewise.
++	* gas/mips/elf-rel28.s: Likewise.
++	* gas/mips/n32-consec.s: Likewise.
++	* gas/mips/elf-rel-xgot-n32.d: Adjust output expected.
++	* gas/mips/elf-rel-xgot-n64.d: Likewise.
++	* gas/mips/elf-rel23.d: Likewise.
++	* gas/mips/elf-rel23a.d: Likewise.
++	* gas/mips/elf-rel23b.d: Likewise.
++	* gas/mips/elf-rel28-n32.d: Likewise.
++
++2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/branch-swap-2.l: New list test.
++	* gas/mips/branch-swap-2.s: New test source.
++	* gas/mips/mips.exp: Run the new test.
++
++2012-08-06  Roland McGrath  <mcgrathr@google.com>
++
++	* gas/i386/x86-64-stack.s: Add cases for push segment register.
++	* gas/i386/x86-64-stack.d: Updated.
++	* gas/i386/x86-64-stack-suffix.d: Updated.
++	* gas/i386/x86-64-stack-intel.d: Updated.
++	* gas/i386/ilp32/x86-64-stack.d: Updated.
++	* gas/i386/ilp32/x86-64-stack-suffix.d: Updated.
++	* gas/i386/ilp32/x86-64-stack-intel.d: Updated.
++
++	* gas/i386/x86-64-stack.s: Add cases for push immediate.
++	* gas/testsuite/gas/i386/ilp32/x86-64-stack-intel.d: Updated.
++	* gas/testsuite/gas/i386/ilp32/x86-64-stack-suffix.d: Updated.
++	* gas/testsuite/gas/i386/ilp32/x86-64-stack.d: Updated.
++	* gas/testsuite/gas/i386/x86-64-stack-intel.d: Updated.
++	* gas/testsuite/gas/i386/x86-64-stack-suffix.d: Updated.
++	* gas/testsuite/gas/i386/x86-64-stack.d: Updated.
++
++	* gas/i386/x86-64-stack.s (try): Also try just rex.W (0x48) prefix.
++	* gas/testsuite/gas/i386/ilp32/x86-64-stack-intel.d: Updated.
++	* gas/testsuite/gas/i386/ilp32/x86-64-stack-suffix.d: Updated.
++	* gas/testsuite/gas/i386/ilp32/x86-64-stack.d: Updated.
++	* gas/testsuite/gas/i386/x86-64-stack-intel.d: Updated.
++	* gas/testsuite/gas/i386/x86-64-stack-suffix.d: Updated.
++	* gas/testsuite/gas/i386/x86-64-stack.d: Updated.
++
++2012-08-02  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/14420
++	* gas/elf/dwarf2-1.d: Updated.
++	* gas/elf/dwarf2-2.d: Likwise.
++	* gas/i386/dw2-compress-1.d: Likwise.
++
++2012-08-01  James Lemke  <jwlemke@codesourcery.com>
++
++	* gas/cfi/cfi-ppc-1.d: Allow for code alignment of 2 or 4.
++
++2012-07-31  Catherine Moore  <clm@codesourcery.com>
++	    Maciej W. Rozycki  <macro@codesourcery.com>
++
++	* gas/mips/micromips@mips32-dsp.d: New test.
++	* gas/mips/micromips@mips32-dspr2.d: New test.
++	* gas/mips/mips32-dsp.d: Remove -mips32r2.
++	* gas/mips/mips32-dspr2.d: Likewise.
++	* gas/mips/mips32-dsp.s: Update padding.
++	* gas/mips/mips32-dspr2.s: Likewise.
++	* gas/mips/mips.exp: Use run_dump_test_arches to run MIPS32 DSP
++	tests.
++
++2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* gas/d30v/bittest.l: Updated.
++
++2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
++
++	* gas/i386/rdseed-intel.d: Append "#pass".
++
+ 2012-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+ 	* gas/i386/inval-equ-2.l: Updated.
+ 
++2012-07-27  Sean Keys  <skeys@ipdatasys.com>
++
++	* gas/xgate/xgate.exp: Added hi/lo test.
++	* gas/xgate/hilo.d: New test file
++	* gas/xgate/hilo.s: Net test source file.
++
+ 2012-07-24  Sandra Loosemore  <sandra@codesourcery.com>
+ 	    Jie Zhang  <jzhang918@gmail.com>
+ 
+@@ -1029,7 +1475,7 @@
+ 	* gas/arm/thumbrel.d: Likewise.
+ 
+ 2012-04-12  Jie Zhang  <jie@codesourcery.com>
+-            Meador Inge  <meadori@codesourcery.com>
++	    Meador Inge  <meadori@codesourcery.com>
+ 
+ 	* gas/arm/push-pop.d: New testcase.
+ 	* gas/arm/push-pop.s: Ditto.
+@@ -1337,6 +1783,12 @@
+ 
+ For older changes see ChangeLog-2011
+ 
++Copyright (C) 2012 Free Software Foundation, Inc.
++
++Copying and distribution of this file, with or without modification,
++are permitted in any medium without royalty provided the copyright
++notice and this notice are preserved.
++
+ Local Variables:
+ mode: change-log
+ left-margin: 8
+diff --git a/gas/testsuite/gas/arm/neon-ldst-es.d b/gas/testsuite/gas/arm/neon-ldst-es.d
+index 82bbab3..6c22c69 100644
+--- a/gas/testsuite/gas/arm/neon-ldst-es.d
++++ b/gas/testsuite/gas/arm/neon-ldst-es.d
+@@ -55,3 +55,4 @@ Disassembly of section \.text:
+ 0[0-9a-f]+ <[^>]+> f427288f 	vld2\.32	{d2-d3}, \[r7\]
+ 0[0-9a-f]+ <[^>]+> f427208f 	vld4\.32	{d2-d5}, \[r7\]
+ 0[0-9a-f]+ <[^>]+> f467c08f 	vld4\.32	{d28-d31}, \[r7\]
++0[0-9a-f]+ <[^>]+> f4a21c83 	vld1\.32	{d1\[\]}, \[r2\], r3
+diff --git a/gas/testsuite/gas/arm/neon-ldst-es.s b/gas/testsuite/gas/arm/neon-ldst-es.s
+index c97794c..ea7de07 100644
+--- a/gas/testsuite/gas/arm/neon-ldst-es.s
++++ b/gas/testsuite/gas/arm/neon-ldst-es.s
+@@ -57,3 +57,6 @@
+ 	vld2.32 {q1},[r7]
+ 	vld4.32 {q1-q2},[r7]
+ 	vld4.32 {q14-q15},[r7]
++
++	@ PR 14987: Allow for whitespace before the closing bracket.
++	vld1.32 {d1[]}, [r2 ], r3
+-- 
+1.8.3
+
