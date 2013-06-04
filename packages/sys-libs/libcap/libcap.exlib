@@ -35,7 +35,7 @@ src_compile() {
 
     emake                                                           \
         BUILD_CC="${host_prefix}-gcc"                               \
-        BUILD_CFLAGS="${!build_cflags}"                             \
+        BUILD_CFLAGS="${!build_cflags} \$(IPATH)"                   \
         lib=lib                                                     \
         PAM_CAP=yes
 }
