@@ -1,8 +1,6 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require easy-multibuild
-
 MY_PV=${PV#*_p}-${PV%_p*}
 
 SUMMARY="The editline library provides generic line editing and history functions"
@@ -12,14 +10,11 @@ DOWNLOADS="http://www.thrysoee.dk/editline/${PN}-${MY_PV}.tar.gz"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="
-    debug
-    multibuild_c: 32 64
-"
+MYOPTIONS="debug"
 
 DEPENDENCIES="
     build+run:
-        sys-libs/ncurses[multibuild_c:*(-)?]
+        sys-libs/ncurses
 "
 
 WORK=${WORKBASE}/${PN}-${MY_PV}
