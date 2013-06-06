@@ -29,8 +29,6 @@ src_prepare() {
             -e "/^      /$(configure_string LFLAGS2 "\${LFLAGS2} ${LDFLAGS}")" \
             -e 's:^\[ -f .* \] && CPP=.*::' \
             -i unix/configure
-
-    edo sed -i -e 's:MANDIR = $(prefix):&/share:' unix/Makefile
 }
 
 src_configure() {
@@ -44,6 +42,7 @@ src_compile() {
 }
 
 src_install() {
-    emake -j1 prefix="${IMAGE}/usr" -f unix/Makefile install
+    emake -j1 prefix="${IMAGE}"/usr/$(exhost --target) MANDIR="${IMAGE}"'usr/share/man/man$(MANEXT)' \
+          -f unix/Makefile install
 }
 
