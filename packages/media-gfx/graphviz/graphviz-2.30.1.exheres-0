@@ -15,6 +15,7 @@ PLATFORMS="~amd64 ~x86"
 MYOPTIONS="
            svg [[ description = [ Support node shapes in svg output ] ]]
            gtk  [[ description = [ Provides canvas support and cairo renderer ] ]]
+           X
 " # perl python ruby"
 
 DEPENDENCIES="
@@ -25,17 +26,14 @@ DEPENDENCIES="
     build+run:
         dev-libs/expat[>=2.0.0]  [[ note = [ Required for HTML-like labels ] ]]
         dev-libs/glib:2[>=2.11]
-        media-libs/gd[>=2.0.34][truetype][jpeg(+)][png(+)]
         media-libs/fontconfig[>=2.3.95]
         media-libs/freetype:2[>=2.1.10]
         media-libs/libpng[>=1.2]
+        x11-libs/cairo[>=1.1.10]
+        x11-libs/pango[>=1.12.4]
         svg? ( gnome-desktop/librsvg:2 )
-        gtk? (
-            x11-libs/cairo[>=1.1.10]
-            x11-libs/gtk+:2[>=2.7]
-            x11-libs/libXaw
-            x11-libs/pango[>=1.12.4]
-        )
+        gtk? ( x11-libs/gtk+:2[>=2.7] )
+        X? ( x11-libs/libXaw )
 "
 
 TODO_DEPENDENCIES+="
@@ -59,13 +57,13 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-ltdl
     --disable-ltdl-install
     --enable-nls
+    --with-pangocairo
     --with-fontconfig
     --with-freetype2
     --with-jpeg
-    --with-libgd
-    --with-mylibgd=no
     --with-png
     --without-devil
+    --without-libgd
     # Deprecated crap
     --without-gdk-pixbuf
     --without-ming
@@ -88,9 +86,8 @@ TODO_DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
 
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     'svg rsvg'
-    'gtk x'
-    'gtk pangocairo'
     'gtk'
+    'X x'
 )
 
 src_install() {
