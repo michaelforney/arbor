@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Copyright 2008 Richard Brown
 # Copyright 2009 Bo Ørsted Andresen
-# Copyright 2010-2012 Wulf C. Krueger <philantrop@exherbo.org>
+# Copyright 2010-2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
 require sourceforge [ suffix=tar.xz ]
@@ -25,12 +25,8 @@ DEPENDENCIES="
 "
 
 # sydbox makes the tests fail even with all the disabled stuff below and
-# RESTRICT="userpriv".
+# RESTRICT="userpriv" due to the usage of ptrace.
 RESTRICT="test"
-
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-0001-util-fix-building-when-glibc-has-a-stub-process_vm_r.patch
-)
 
 src_prepare() {
     default
