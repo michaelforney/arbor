@@ -1,0 +1,208 @@
+Upstream: yes
+
+------------------------------------------------------------------------
+r13294 | tom | 2013-02-28 13:50:55 +0100 (Thu, 28 Feb 2013) | 5 lines
+
+Don't check the flags word in msghdr for sendmsg as the
+kernel will neither read nor write it.
+
+Patch from Mark Wielaard to fix BZ#315441.
+
+
+Index: memcheck/tests/Makefile.am
+===================================================================
+--- memcheck/tests/Makefile.am	(revision 13293)
++++ memcheck/tests/Makefile.am	(revision 13294)
+@@ -187,6 +187,7 @@
+ 	realloc2.stderr.exp realloc2.vgtest \
+ 	realloc3.stderr.exp realloc3.vgtest \
+ 	sbfragment.stdout.exp sbfragment.stderr.exp sbfragment.vgtest \
++	sendmsg.stderr.exp sendmsg.vgtest \
+ 	sh-mem.stderr.exp sh-mem.vgtest \
+ 	sh-mem-random.stderr.exp sh-mem-random.stdout.exp64 \
+ 	sh-mem-random.stdout.exp sh-mem-random.vgtest \
+@@ -292,6 +293,7 @@
+ 	realloc1 realloc2 realloc3 \
+ 	recursive-merge \
+ 	sbfragment \
++	sendmsg \
+ 	sh-mem sh-mem-random \
+ 	sigaltstack signal2 sigprocmask static_malloc sigkill \
+ 	strchr \
+Index: memcheck/tests/sendmsg.c
+===================================================================
+--- memcheck/tests/sendmsg.c	(revision 0)
++++ memcheck/tests/sendmsg.c	(revision 13294)
+@@ -0,0 +1,74 @@
++#include <netinet/ip.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++
++#define PORT 12345
++
++int
++main (int argc, char **argv)
++{
++  int fd;
++  struct sockaddr_in sa;
++  struct msghdr msg;
++  struct iovec iov[2];
++
++  fd = socket (AF_INET, SOCK_DGRAM, 0);
++  if (fd == -1)
++    {
++      perror ("socket()");
++      exit (EXIT_FAILURE);
++    }
++
++  sa.sin_family = AF_INET;
++  sa.sin_addr.s_addr = htonl (INADDR_LOOPBACK);
++  sa.sin_port = htons (PORT);
++  if (connect (fd, (struct sockaddr *) &sa, sizeof (sa)) == -1)
++    {
++      perror ("connect ()");
++      exit (EXIT_FAILURE);
++    }
++
++  // Create msg_hdr. Oops, we forget to set msg_name...
++  msg.msg_namelen = 0;
++  iov[0].iov_base = "one";
++  iov[0].iov_len = 3;
++  iov[1].iov_base = "two";
++  iov[1].iov_len = 3;
++  msg.msg_iov = &iov;
++  msg.msg_iovlen = 2;
++  msg.msg_control = NULL;
++  msg.msg_controllen = 0;
++
++  size_t s = sendmsg (fd, &msg, 0);
++
++  // Note how we now do set msg_name, but don't set msg_flags.
++  // The msg_flags field is ignored by sendmsg.
++  msg.msg_name = NULL;
++
++  fd = socket (AF_INET, SOCK_DGRAM, 0);
++  if (fd == -1)
++    {
++      perror ("socket()");
++      exit (EXIT_FAILURE);
++    }
++
++  if (connect (fd, (struct sockaddr *) &sa, sizeof (sa)) == -1)
++    {
++      perror ("connect ()");
++      exit (EXIT_FAILURE);
++    }
++
++  s = sendmsg (fd, &msg, 0);
++  if (s == -1)
++    {
++      perror ("sendmsg ()");
++      exit (EXIT_FAILURE);
++    }
++  else
++    fprintf (stderr, "sendmsg: %d\n", (int) s);
++
++  exit(0);
++}
+
+Property changes on: memcheck/tests/sendmsg.c
+___________________________________________________________________
+Added: svn:eol-style
+## -0,0 +1 ##
++native
+\ No newline at end of property
+Added: svn:mime-type
+## -0,0 +1 ##
++text/plain
+\ No newline at end of property
+Index: memcheck/tests/sendmsg.stderr.exp
+===================================================================
+--- memcheck/tests/sendmsg.stderr.exp	(revision 0)
++++ memcheck/tests/sendmsg.stderr.exp	(revision 13294)
+@@ -0,0 +1,6 @@
++Syscall param sendmsg(msg) points to uninitialised byte(s)
++   at 0x........: sendmsg (in /...libc...)
++   by 0x........: main (sendmsg.c:45)
++ Address 0x........ is on thread 1's stack
++
++sendmsg: 6
+Index: memcheck/tests/filter_stderr
+===================================================================
+--- memcheck/tests/filter_stderr	(revision 13293)
++++ memcheck/tests/filter_stderr	(revision 13294)
+@@ -22,6 +22,9 @@
+ # records.  So we filter out the loss record numbers.
+ perl -p -e "s/in loss record \d+ of \d+/in loss record ... of .../" |
+ 
++# Filter out glibc debuginfo if installed.
++perl -p -e "s/\(syscall-template.S:[0-9]*\)/(in \/...libc...)/" |
++
+ $dir/../../memcheck/tests/filter_memcheck "$@"
+ 
+ exit 0
+Index: memcheck/tests/sendmsg.vgtest
+===================================================================
+--- memcheck/tests/sendmsg.vgtest	(revision 0)
++++ memcheck/tests/sendmsg.vgtest	(revision 13294)
+@@ -0,0 +1,2 @@
++prog: sendmsg
++vgopts: -q
+Index: coregrind/m_syswrap/syswrap-generic.c
+===================================================================
+--- coregrind/m_syswrap/syswrap-generic.c	(revision 13293)
++++ coregrind/m_syswrap/syswrap-generic.c	(revision 13294)
+@@ -849,7 +849,8 @@
+         Char *name,
+         struct vki_msghdr *msg,
+         UInt length,
+-        void (*foreach_func)( ThreadId, Bool, Char *, Addr, SizeT ) 
++        void (*foreach_func)( ThreadId, Bool, Char *, Addr, SizeT ),
++        Bool recv
+      )
+ {
+    HChar *fieldName;
+@@ -867,8 +868,12 @@
+    foreach_func ( tid, True, fieldName, (Addr)&msg->msg_iovlen, sizeof( msg->msg_iovlen ) );
+    foreach_func ( tid, True, fieldName, (Addr)&msg->msg_control, sizeof( msg->msg_control ) );
+    foreach_func ( tid, True, fieldName, (Addr)&msg->msg_controllen, sizeof( msg->msg_controllen ) );
+-   foreach_func ( tid, False, fieldName, (Addr)&msg->msg_flags, sizeof( msg->msg_flags ) );
+ 
++   /* msg_flags is completely ignored for send_mesg, recv_mesg doesn't read
++      the field, but does write to it. */
++   if ( recv )
++      foreach_func ( tid, False, fieldName, (Addr)&msg->msg_flags, sizeof( msg->msg_flags ) );
++
+    if ( msg->msg_name ) {
+       VG_(sprintf) ( fieldName, "(%s.msg_name)", name );
+       foreach_func ( tid, False, fieldName, 
+@@ -1512,7 +1517,7 @@
+ ML_(generic_PRE_sys_sendmsg) ( ThreadId tid, const HChar *name,
+                                struct vki_msghdr *msg )
+ {
+-   msghdr_foreachfield ( tid, name, msg, ~0, pre_mem_read_sendmsg );
++   msghdr_foreachfield ( tid, name, msg, ~0, pre_mem_read_sendmsg, False );
+ }
+ 
+ /* ------ */
+@@ -1521,14 +1526,14 @@
+ void
+ ML_(generic_PRE_sys_recvmsg) ( ThreadId tid, Char *name, struct vki_msghdr *msg )
+ {
+-   msghdr_foreachfield ( tid, name, msg, ~0, pre_mem_write_recvmsg );
++   msghdr_foreachfield ( tid, name, msg, ~0, pre_mem_write_recvmsg, True );
+ }
+ 
+ void 
+ ML_(generic_POST_sys_recvmsg) ( ThreadId tid, Char *name, struct vki_msghdr *msg, UInt length )
+ {
+-   msghdr_foreachfield( tid, name, msg, length, post_mem_write_recvmsg );
++   msghdr_foreachfield( tid, name, msg, length, post_mem_write_recvmsg, True );
+    check_cmsg_for_fds( tid, msg );
+ }
+ 
+
+------------------------------------------------------------------------
