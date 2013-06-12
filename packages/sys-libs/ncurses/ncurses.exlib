@@ -70,9 +70,9 @@ ncurses_src_install() {
 
     expart binaries /usr/$(exhost --target)/bin
     expart data /usr/share
-    expart development /usr/$(exhost --target)/include
     expart documentation /usr/share/man
     expart libraries /usr/$(exhost --target)/lib
+    expart development /usr/$(exhost --target)/{include,lib/pkgconfig}
 }
 
 export_exlib_phases src_configure src_compile src_install

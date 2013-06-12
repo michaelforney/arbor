@@ -31,8 +31,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' )
 src_install() {
     default
 
-    expart development /usr/$(exhost --target)/include
     expart documentation /usr/share/{doc,man}
     expart libraries /usr/$(exhost --target)/lib
+    expart development /usr/$(exhost --target)/{include,lib/pkgconfig}
 }
 
