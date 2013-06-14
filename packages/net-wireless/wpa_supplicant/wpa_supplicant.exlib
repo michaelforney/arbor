@@ -312,10 +312,12 @@ EOF
     hereins wpa_supplicant.conf <<EOF
 # This is a network block that connects to any unsecured access point.
 # We give it a low priority so any defined blocks are preferred.
-network={
-    key_mgmt=NONE
-    priority=-9999999
-}
+# To enable it, uncomment the following lines. Keep in mind its a
+# possible security issue to connect to any unsecured access point.
+#network={
+#    key_mgmt=NONE
+#    priority=-9999999
+#}
 EOF
 
     emagicdocs
