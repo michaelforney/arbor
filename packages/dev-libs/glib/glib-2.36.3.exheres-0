@@ -20,19 +20,19 @@ DEPENDENCIES="
                      app-text/docbook-xsl-stylesheets
                      dev-libs/libxslt )
     build+run:
-        dev-util/elfutils[>=0.142][multibuild_c:*(-)?]
-        dev-libs/libffi[>=3.0.0][multibuild_c:*(-)?]
+        dev-util/elfutils[>=0.142]
+        dev-libs/libffi[>=3.0.0]
     test:
         dev-python/dbus-python
         dev-util/desktop-file-utils
         gnome-bindings/pygobject:3
-        sys-apps/dbus[>=1.2.14][multibuild_c:*(-)?] [[
+        sys-apps/dbus[>=1.2.14] [[
             note = [ Required for building GDBus tests ]
         ]]
         virtual/pkg-config[>=0.16]
         x11-misc/shared-mime-info
     recommendation:
-        sys-apps/dbus[>=1.2.14][multibuild_c:*(-)?] [[ note = [ Required for GDBus ] ]]
+        sys-apps/dbus[>=1.2.14] [[ note = [ Required for GDBus ] ]]
         dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
         gnome-desktop/dconf [[ description = [ default GSettings backend ] ]]
     suggestion:
@@ -55,7 +55,7 @@ src_prepare() {
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
 }
 
-configure_one_multibuild() {
+src_configure() {
     # Disable FAM support as FAM is no longer necessary with GIO's inotify support
     #
     # xattr support is also provided by libc.  glib will prefer to use glibc's xattr support over
