@@ -31,11 +31,12 @@ LICENCES="|| ( BSD-3 GPL-2 )"
 SLOT="0"
 
 MYOPTIONS="
+    ap       [[ description = [ Support Access Point mode                            ] ]]
     baselayout
     dbus     [[ description = [ Enable the DBus control interface                    ] ]]
     eap-fast [[
         description = [
-            Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'ssl' option) or internal
+            Enable EAP-FAST using either OpenSSL >=1.0.0 (requires 'openssl' option) or internal
             implementation
         ]
         requires = -gnutls
@@ -140,9 +141,6 @@ src_prepare() {
     # FILES is a reserved exheres-0 variable
     ${CHECKOUT} && edo sed -i -e 's:FILES:DOC_FILES:g' doc/docbook/Makefile
 
-    edo pushd "${WORKBASE}/${PNV}"
-        expatch "${FILES}"/${PN}-1.0-libnl_header.patch
-    edo popd
 }
 
 src_configure() {
@@ -151,6 +149,7 @@ src_configure() {
         CTRL_IFACE=unix \
         DEBUG_FILE \
         ELOOP=eloop \
+        IEEE80211N \
         IEEE80211R \
         IEEE8021X_EAPOL \
         MAIN=main \
@@ -159,6 +158,7 @@ src_configure() {
         PKCS12 \
         WPS
 
+    option ap       && config_enable AP
     option dbus     && config_enable CTRL_IFACE_DBUS{,_NEW,_INTRO}
     option pcap     && config_enable L2_PACKET=pcap ||
                        config_enable L2_PACKET=linux
