@@ -1,0 +1,29 @@
+Source: Bo Ørsted Andresen <zlin@exherbo.org>
+Upstream: No.
+Reason: CPPFLAGS are needed on some platforms.
+
+From 54426c0bf7c04ab38dc760bea6fa54fa390a0b35 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Bo=20=C3=98rsted=20Andresen?= <zlin@exherbo.org>
+Date: Sun, 16 Jun 2013 19:18:27 +0200
+Subject: [PATCH] Honour CPPFLAGS.
+
+---
+ src/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 9d6f777..741706b 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -55,7 +55,7 @@ CLEANFILES = signames.h
+ 
+ signames.h: signames.c Makefile
+ 		export LC_ALL=C ; \
+-		@CPP@ -dM $< |\
++		@CPP@ $(CPPFLAGS) -dM $< |\
+ 		tr -s '\t ' ' ' | sort -n -k 3 | sed \
+ 	's:#define SIG\([A-Z][A-Z]*[0-9]*\) \([0-9][0-9]*\).*$\:{\ \2,"\1" },:p;d' | \
+ 		  grep -v '[0-9][0-9][0-9]' >signames.h || \
+-- 
+1.8.3.1
+
