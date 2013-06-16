@@ -35,6 +35,23 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
+# Disable FAM support as FAM is no longer necessary with GIO's inotify support
+#
+# xattr support is also provided by libc.  glib will prefer to use glibc's xattr support over
+# libattr.  As a result, there is no dependency added for attr support.
+#
+# Enable libelf (via elf-utils) to read compressed module data
+#
+# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling"
+# Its usage is recommended by upstream, see also
+# http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
+                               '--enable-xattr' '--enable-libelf' '--with-pcre=internal'
+                               '--with-threads=posix' '--disable-dtrace' '--disable-systemtap'
+                               '--disable-gcov' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
+DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-modular-tests --disable-modular-tests' )
+
 src_unpack() {
     default
     scm_src_unpack
@@ -57,21 +74,6 @@ src_prepare() {
 
     # TODO: need 0.0.0.0
     edo sed -e '/socket\/ipv6_v4mapped/d' -i gio/tests/socket.c
-}
-
-# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
-# Its usage is recommended by upstream, see also
-# http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
-src_configure() {
-    econf \
-        --enable-static \
-        --disable-fam \
-        --disable-selinux \
-        --disable-xattr \
-        --with-pcre=internal \
-        --with-threads=posix \
-        $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests') \
-        $(option_enable doc gtk-doc)
 }
 
 src_install() {

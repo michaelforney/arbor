@@ -42,6 +42,23 @@ DEPENDENCIES="
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
+# Disable FAM support as FAM is no longer necessary with GIO's inotify support
+#
+# xattr support is also provided by libc.  glib will prefer to use glibc's xattr support over
+# libattr.  As a result, there is no dependency added for attr support.
+#
+# Enable libelf (via elf-utils) to read compressed module data
+#
+# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling"
+# Its usage is recommended by upstream, see also
+# http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
+DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
+                               '--enable-xattr' '--enable-libelf' '--with-pcre=internal'
+                               '--with-threads=posix' '--disable-dtrace' '--disable-systemtap'
+                               '--disable-gcov' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk-doc 'man-pages man' )
+DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-modular-tests --disable-modular-tests' )
+
 src_prepare() {
     glib_src_prepare
 
@@ -53,28 +70,6 @@ src_prepare() {
 
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
-}
-
-src_configure() {
-    # Disable FAM support as FAM is no longer necessary with GIO's inotify support
-    #
-    # xattr support is also provided by libc.  glib will prefer to use glibc's xattr support over
-    # libattr.  As a result, there is no dependency added for attr support.
-    #
-    # Enable libelf (via elf-utils) to read compressed module data
-    #
-    # The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling"
-    # Its usage is recommended by upstream, see also
-    # http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
-
-    local DEFAULT_SRC_CONFIGURE_PARAMS=(
-        '--enable-static' '--disable-fam' '--disable-selinux' '--enable-xattr' '--enable-libelf'
-        '--with-pcre=internal' '--with-threads=posix' '--disable-dtrace' '--disable-systemtap'
-        '--disable-gcov' $(option_enable gtk-doc) $(option_enable man-pages man)
-    )
-
-    econf "${DEFAULT_SRC_CONFIGURE_PARAMS[@]}" \
-          $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests')
 }
 
 src_install() {

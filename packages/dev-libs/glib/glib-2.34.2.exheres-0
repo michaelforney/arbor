@@ -10,8 +10,6 @@ MYOPTIONS="gtk-doc
     man-pages [[ description = [ Generate and install man pages ] ]]
 "
 
-# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
-# anything not in ::arbor, that means no recommendations, just suggestions
 DEPENDENCIES="
     build:
         app-doc/gtk-doc-autotools
@@ -48,9 +46,17 @@ DEPENDENCIES="
         ]]
 "
 
+# NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
+# anything not in ::arbor, that means no recommendations, just suggestions
+
+# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
+# Its usage is recommended by upstream, see also
+# http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
-                               '--disable-xattr' '--with-pcre=internal' '--with-threads=posix' )
+                               '--disable-xattr' '--with-pcre=internal' '--with-threads=posix'
+                               '--cache-file=config.cache' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'gtk-doc' 'man-pages man' )
+DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-modular-tests --disable-modular-tests' )
 
 src_prepare() {
     # fail under sydbox
@@ -70,13 +76,6 @@ src_prepare() {
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
 
-    glib_src_prepare
-}
-
-# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
-# Its usage is recommended by upstream, see also
-# http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
-src_configure() {
     cat > config.cache <<- EOF
 glib_cv_long_long_format=ll
 glib_cv_stack_grows=no
@@ -86,9 +85,12 @@ ac_cv_func_posix_getgrgid_r=yes
 ac_cv_use_pid_surrogate=yes
 EOF
 
-    PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig:/usr/lib/pkgconfig \
-    econf --cache-file=config.cache \
-        $(expecting_tests && echo '--enable-modular-tests' || echo '--disable-modular-tests')
+    glib_src_prepare
+}
+
+src_configure() {
+    export PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig:/usr/lib/pkgconfig
+    default
 }
 
 src_install() {
