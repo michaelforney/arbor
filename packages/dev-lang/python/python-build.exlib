@@ -8,11 +8,10 @@
 MY_PNV="Python-${PV}"
 
 # python: no has_lib as it needs only the pyc part of the exlib
-require flag-o-matic python [ has_lib=false ] alternatives \
-        autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 1.10 ] ]
-require easy-multibuild [ multiunpack=true work=${MY_PNV} ]
+require flag-o-matic python [ has_lib=false ] alternatives
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 1.10 ] ]
 
-export_exlib_phases src_prepare src_install pkg_preinst
+export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
 SUMMARY="Python interpreter"
 HOMEPAGE="http://www.${PN}.org/"
@@ -29,7 +28,6 @@ SLOT="$(ever range 1-2)"
 MYOPTIONS="dbm examples ipv6 readline sqlite tk
 ( berkdb gdbm ) [[ requires = dbm ]]
 dbm? ( ( berkdb gdbm ) [[ number-selected = exactly-one ]] )
-multibuild_c: ( 32 64 )
 "
 
 # FIXME: Internal copy of dev-libs/expat
@@ -37,19 +35,19 @@ DEPENDENCIES="
     build:
         virtual/pkg-config
     build+run:
-        app-arch/bzip2[multibuild_c:*(-)?]
-        dev-libs/libffi[multibuild_c:*(-)?]
-        sys-libs/ncurses[multibuild_c:*(-)?]
-        dev-libs/openssl[multibuild_c:*(-)?]
-        sys-libs/zlib[>=1.1.3][multibuild_c:*(-)?]
-        berkdb? ( sys-libs/db:=[>=4.6.21&<4.8][multibuild_c:*(-)?] [[ note = [ python:2.7 also supports 4.8 ] ]] )
-        gdbm? ( sys-libs/gdbm[multibuild_c:*(-)?] )
-        readline? ( sys-libs/readline[>=4.1][multibuild_c:*(-)?] )
-        sqlite? ( dev-db/sqlite:3[>=3.0.8][multibuild_c:*(-)?] )
-        tk? ( dev-lang/tk[>=8.0][multibuild_c:*(-)?] )
+        app-arch/bzip2
+        dev-libs/libffi
+        sys-libs/ncurses
+        dev-libs/openssl
+        sys-libs/zlib[>=1.1.3]
+        berkdb? ( sys-libs/db:=[>=4.6.21&<4.8] [[ note = [ python:2.7 also supports 4.8 ] ]] )
+        gdbm? ( sys-libs/gdbm )
+        readline? ( sys-libs/readline[>=4.1] )
+        sqlite? ( dev-db/sqlite:3[>=3.0.8] )
+        tk? ( dev-lang/tk[>=8.0] )
 "
 
-WORK="${WORKBASE}"
+WORK="${WORKBASE}/${MY_PNV}"
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     $(ever at_least 3 || echo --enable-unicode=ucs4)
@@ -57,47 +55,29 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
-python-build_prepare_one_multibuild() {
+python-build_pkg_pretend() {
+    # python currently can't be cross compiled.
+    # http://bugs.python.org/issue3754  (closed fixed, but it isn't)
+    exhost --is-native -q || die "You can't yet install python for a non-native target"
+}
+
+python-build_src_prepare() {
     # linux-3 support, applied upstream
-    ever at_least 2.7 && edo cp -r "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Lib/plat-linux2" "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Lib/plat-linux3"
+    ever at_least 3.3 || edo cp -r Lib/plat-linux2 Lib/plat-linux3
 
     [[ -d ${FILES}/${PV} ]] && expatch "${FILES}/${PV}/"
-
-    edo sed -i -e "s:@@EXHERBO_LIBDIR@@:${LIBDIR}:g" \
-        Lib/distutils/command/install.py \
-        Lib/distutils/sysconfig.py \
-        Lib/site.py \
-        Makefile.pre.in \
-        Modules/Setup.dist \
-        Modules/getpath.c \
-        setup.py
 
     edo cp "${FILES}"/"${PN}"-config.py .
 
     edo sed -i -e "s:@@SLOT@@:${SLOT}:g" \
-               -e "s:@@PKG_CONFIG_PATH@@:${PKG_CONFIG_PATH%%:*}:g" \
+               -e "s:@@EXHERBO_TARGET@@:$(exhost --target):g" \
+               -e "s:@@EXHERBO_TOOL_PREFIX@@:$(exhost --tool-prefix):g" \
         "${PN}"-config.py
-
-    if ever at_least 2.7.0; then
-        local prefix='/usr'
-        multibuild_default_target C || prefix="/usr/${CHOST}"
-        edo sed -i -e "s:@prefix@:${prefix}:g" "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/Python-${PV}/Misc/${PN}".pc.in
-    fi
 
     eautoreconf
 }
 
-prepare_one_multibuild() {
-    python-build_prepare_one_multibuild
-}
-
-python-build_src_prepare() {
-    easy-multibuild_run_phase
-}
-
-configure_prepare_one_multibuild() { :; }
-
-configure_one_multibuild() {
+python-build_src_configure() {
     # dbm module can link to berkdb or gdbm.
     # default to gdbm when both are enabled.
     local disable="ndbm" # not available
@@ -117,13 +97,13 @@ configure_one_multibuild() {
 
     # -fwrapv: http://bugs.python.org/issue11149
     export OPT="-fwrapv"
-    export CPPFLAGS="$(pkg-config --cflags-only-I libffi) $(multibuild_get_var C ${MULTIBUILD_TARGET} CPPFLAGS)"
-    export LDFLAGS="${LDFLAGS} -L/usr/${LIBDIR}"
+    export CPPFLAGS="$($(exhost --tool-prefix)pkg-config --cflags-only-I libffi) ${CPPFLAGS}"
+    export LDFLAGS="${LDFLAGS} -L/usr/$(exhost --target)/lib"
 
     default
 }
 
-python-build_test_one_multibuild() {
+python-build_src_test() {
     unset DISPLAY
 
     python_enable_pyc
@@ -146,16 +126,16 @@ python-build_test_one_multibuild() {
     python_disable_pyc
 }
 
-test_one_multibuild() {
-    python-build_test_one_multibuild
-}
-
-python-build_install_one_multibuild() {
+python-build_src_install() {
     default
+
+    # alternatives handling
+    local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
+    alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
 
     # for backward compatibility, have plat-linux3 and plat-linux2 folders
     # as long as they are identical, this shouldn't be a problem
-    pushd "${IMAGE}"/usr/${LIBDIR}/python${SLOT}/
+    pushd "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/
     if [[ -d plat-linux2 ]]; then
         edo cp -r plat-linux2 plat-linux3
     elif [[ -d plat-linux3 ]]; then
@@ -163,114 +143,63 @@ python-build_install_one_multibuild() {
     fi
     popd
 
-    ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/bin/smtpd.py
+    ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/smtpd.py
 
-    [ "${SLOT}" == "3.1" ] && edo mv "${IMAGE}"/usr/bin/2to3 "${IMAGE}"/usr/bin/2to3-3
+    [ "${SLOT}" == "3.1" ] && edo mv "${IMAGE}"/usr/$(exhost --target)/bin/2to3 "${IMAGE}"/usr/$(exhost --target)/bin/2to3-3
 
     if ever at_least 3.2; then
-        edo mv "${IMAGE}"/usr/${LIBDIR}/{python${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
-        edo rm "${IMAGE}"/usr/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
+        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
+        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
     else
-        edo mv "${IMAGE}"/usr/${LIBDIR}/{python${SLOT}/config,}/libpython${SLOT}.a
+        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config,}/libpython${SLOT}.a
     fi
 
     # alternatives handling
     local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
-    [ "${SLOT}" == "2.7" ] && edo rm "${IMAGE}"/usr/bin/python \
-                           && edo rm "${IMAGE}"/usr/bin/python$(ever major) \
-                           && edo rm "${IMAGE}"/usr/bin/python$(ever major)-config \
-                           && edo cp "${IMAGE}"/usr/bin/python${SLOT} "${IMAGE}"/usr/bin/python
+    [ "${SLOT}" == "2.7" ] && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python \
+                           && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python$(ever major) \
+                           && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python$(ever major)-config \
+                           && edo cp "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT} "${IMAGE}"/usr/$(exhost --target)/bin/python
     # they switched from python3 being the executable and python3.x being the symlink to python3
     # to python3.x being the executable and python3 being the symlink
-    ever at_least 3.3 && edo rm "${IMAGE}"/usr/bin/python${PYTHON_MAJOR} \
-                      && edo cp "${IMAGE}"/usr/bin/python{${SLOT},${PYTHON_MAJOR}}
-    edo rm "${IMAGE}"/usr/bin/python${SLOT}
-    edo rm "${IMAGE}"/usr/bin/python${SLOT}-config
-    edo rm "${IMAGE}"/usr/${LIBDIR}/pkgconfig/python${PYTHON_MAJOR}.pc
+    ever at_least 3.3 && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${PYTHON_MAJOR} \
+                      && edo cp "${IMAGE}"/usr/$(exhost --target)/bin/python{${SLOT},${PYTHON_MAJOR}}
+    edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}
+    edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}-config
+    edo rm "${IMAGE}"/usr/$(exhost --target)/lib/pkgconfig/python${PYTHON_MAJOR}.pc
 
     if ever at_least 3.2; then
-        edo mv "${IMAGE}"/usr/bin/python{${SLOT}m,${PYTHON_MAJOR}}-config
-        edo mv "${IMAGE}"/usr/${LIBDIR}/libpython${PYTHON_MAJOR}{,-${SLOT}}.so
-        alternatives+=( /usr/${LIBDIR}/libpython${PYTHON_MAJOR}.so libpython${PYTHON_MAJOR}-${SLOT}.so )
+        edo mv "${IMAGE}"/usr/$(exhost --target)/bin/python{${SLOT}m,${PYTHON_MAJOR}}-config
+        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/libpython${PYTHON_MAJOR}{,-${SLOT}}.so
+        alternatives+=( /usr/$(exhost --target)/lib/libpython${PYTHON_MAJOR}.so libpython${PYTHON_MAJOR}-${SLOT}.so )
     else
-        newbin "${WORKBASE}"/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${MY_PNV}/python-config.py python${PYTHON_MAJOR}-config
+        into /usr/$(exhost --target)
+        newbin "${WORKBASE}"/${MY_PNV}/python-config.py python${PYTHON_MAJOR}-config
     fi
 
-    # pyconfig.h contains PLATFORMS specific bits
-    local prefix='/usr'
-    if ! multibuild_default_target C; then
-        local m
-        ever at_least 3.2 && m="m"
-
-        prefix="/usr/${CHOST}"
-        dodir ${prefix}/{bin,include/python${SLOT}${m}}
-        edo mv "${IMAGE}"/usr/bin/python{${PYTHON_MAJOR}-config,${PYTHON_MAJOR}} \
-            "${IMAGE}"/${prefix}/bin
-        edo mv "${IMAGE}"/usr/include/python${SLOT}${m}/*.h \
-            "${IMAGE}"/${prefix}/include/python${SLOT}${m}
-        [ "$(ever major)" == 2 ] && \
-            alternatives+=(
-                /usr/${CHOST}/bin/python python$(ever major)
-                /usr/${CHOST}/bin/python-config python$(ever major)-config
-            )
-        alternatives+=(
-            /usr/${CHOST}/bin/python$(ever major) python${SLOT}
-            /usr/${CHOST}/bin/python$(ever major)-config python${SLOT}-config
-        )
-
-        if ever at_least 3.2; then
-            edo pushd "${IMAGE}"/usr/${CHOST}/bin
-            edo ln -s python${SLOT} python${SLOT}${m}
-            edo ln -s python${SLOT}-config python${SLOT}${m}-config
-            edo popd
-        fi
-    fi
-
-    alternatives+=( /usr/${LIBDIR}/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc )
-}
-
-install_one_multibuild() {
-    python-build_install_one_multibuild
-}
-
-python-build_src_install() {
-    # alternatives handling
-    local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
-    alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
-
-    easy-multibuild_src_install
+    alternatives+=( /usr/$(exhost --target)/lib/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc )
 
     [ "$(ever major)" == 2 ] && \
         alternatives+=(
-            /usr/bin/python python$(ever major)
-            /usr/bin/python-config python$(ever major)-config
+            /usr/$(exhost --target)/bin/python python$(ever major)
+            /usr/$(exhost --target)/bin/python-config python$(ever major)-config
         )
 
     alternatives+=(
-        /usr/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3-${SLOT}
-        /usr/bin/idle${PYTHON_MAJOR} idle${SLOT}
-        /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
-        /usr/bin/python$(ever major) python${SLOT}
-        /usr/bin/python$(ever major)-config python${SLOT}-config
+        /usr/$(exhost --target)/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3-${SLOT}
+        /usr/$(exhost --target)/bin/idle${PYTHON_MAJOR} idle${SLOT}
+        /usr/$(exhost --target)/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
+        /usr/$(exhost --target)/bin/python$(ever major) python${SLOT}
+        /usr/$(exhost --target)/bin/python$(ever major)-config python${SLOT}-config
     )
 
     alternatives_for "${alternatives[@]}"
 
     if ever at_least 3.2; then
-        edo pushd "${IMAGE}"/usr/bin
+        edo pushd "${IMAGE}"/usr/$(exhost --target)/bin
         edo ln -s python${SLOT} python${SLOT}m
         edo ln -s python${SLOT}-config python${SLOT}m-config
         edo popd
-    fi
-}
-
-# replace symlinks with directories
-# accidentally incorrectly introduced with 52cca7bfe38138653fe2b329472bcb90e43a548d
-python-build_pkg_preinst() {
-    if [[ -L "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux2 ]]; then
-        edo rm "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux2
-    elif [[ -L "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux3 ]]; then
-        edo rm "${ROOT}"/usr/${LIBDIR}/python${SLOT}/plat-linux3
     fi
 }
 

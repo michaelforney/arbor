@@ -1,4 +1,4 @@
-#!/usr/bin/python@@SLOT@@
+#!/usr/@@EXHERBO_TARGET@@/bin/python@@SLOT@@
 
 import os, sys
 
@@ -12,7 +12,7 @@ def output_opts():
 	return '|'.join(valid_opts)
 
 def exec_pkgconfig_cmd(pkgconfig_arg):
-	os.system('PKG_CONFIG_PATH=@@PKG_CONFIG_PATH@@ pkg-config {0} python-@@SLOT@@'.format(pkgconfig_arg))
+	os.system('PKG_CONFIG_PATH=/usr/@@EXHERBO_TARGET@@/lib/pkgconfig:/usr/share/pkgconfig @@EXHERBO_TOOL_PREFIX@@pkg-config {0} python-@@SLOT@@'.format(pkgconfig_arg))
 
 if len(sys.argv) == 1:
 	exit_with_usage(1)

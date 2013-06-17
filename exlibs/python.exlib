@@ -21,7 +21,9 @@ elif exparam -b has_lib; then
 "
 fi
 
-export PYTHON="/usr/bin/python"
+# BIG TODO: this assumes the `build` can execute `target` python
+# For now, we only allow native builds
+export PYTHON="/usr/$(exhost --target)/bin/python"
 
 
 # Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
@@ -57,7 +59,7 @@ python_get_abi() {
 python_get_libdir() {
     illegal_in_global_scope
 
-    echo -n "/usr/${LIBDIR}/python$(python_get_abi)"
+    echo -n "/usr/$(exhost --target)/lib/python$(python_get_abi)"
 }
 
 # Run without arguments, returns the python site-packages directory.
