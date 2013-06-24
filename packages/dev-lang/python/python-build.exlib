@@ -1,6 +1,7 @@
 # Copyright 2007-2007 Bryan Østergaard
 # Copyright 2008 Ali Polatel
 # Copyright 2009, 2010 Ingmar Vanhassel
+# Copyright 2013 Benedikt Morbach <moben@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'python-2.5.2-r4.ebuild' from Gentoo, which is:
 #  Copyright 1999-2008 Gentoo Foundation
@@ -62,7 +63,7 @@ python-build_pkg_pretend() {
 }
 
 python-build_src_prepare() {
-    # linux-3 support, applied upstream
+    # linux-3 support, applied upstream, python-3.3+ only has `plat-linux`
     ever at_least 3.3 || edo cp -r Lib/plat-linux2 Lib/plat-linux3
 
     [[ -d ${FILES}/${PV} ]] && expatch "${FILES}/${PV}/"
@@ -129,61 +130,69 @@ python-build_src_test() {
 python-build_src_install() {
     default
 
-    # alternatives handling
-    local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
-    alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
-
     # for backward compatibility, have plat-linux3 and plat-linux2 folders
     # as long as they are identical, this shouldn't be a problem
-    pushd "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/
-    if [[ -d plat-linux2 ]]; then
+    edo pushd "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/
+    if   [[ -d plat-linux2 ]] ; then
         edo cp -r plat-linux2 plat-linux3
-    elif [[ -d plat-linux3 ]]; then
+    elif [[ -d plat-linux3 ]] ; then
         edo cp -r plat-linux3 plat-linux2
     fi
-    popd
+    edo popd
 
-    ! ever at_least 3.1 && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/smtpd.py
-
-    [ "${SLOT}" == "3.1" ] && edo mv "${IMAGE}"/usr/$(exhost --target)/bin/2to3 "${IMAGE}"/usr/$(exhost --target)/bin/2to3-3
-
-    if ever at_least 3.2; then
-        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
-        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
-    else
-        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config,}/libpython${SLOT}.a
+    if ! ever at_least 3.1 ; then
+        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/smtpd.py
     fi
 
-    # alternatives handling
+
+    ### alternatives preparation
     local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
-    [ "${SLOT}" == "2.7" ] && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python \
-                           && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python$(ever major) \
-                           && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python$(ever major)-config \
-                           && edo cp "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT} "${IMAGE}"/usr/$(exhost --target)/bin/python
+
+    if   [[ ${SLOT} == '2.7' ]] ; then
+        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python{,2,2-config}
+        edo cp "${IMAGE}"/usr/$(exhost --target)/bin/python{2.7,}
+    elif [[ ${SLOT} == '3.1' ]] ; then
+        edo mv "${IMAGE}"/usr/$(exhost --target)/bin/2to3{,-3}
+    fi
+
+    if ever at_least 3.2 ; then
+        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
+
+        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
+        edo mv "${IMAGE}"/usr/$(exhost --target)/bin/python{${SLOT}m,3}-config
+    else
+        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config,}/libpython${SLOT}.a
+
+        into /usr/$(exhost --target)
+        newbin "${WORK}"/python-config.py python${PYTHON_MAJOR}-config
+    fi
+
     # they switched from python3 being the executable and python3.x being the symlink to python3
     # to python3.x being the executable and python3 being the symlink
-    ever at_least 3.3 && edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${PYTHON_MAJOR} \
-                      && edo cp "${IMAGE}"/usr/$(exhost --target)/bin/python{${SLOT},${PYTHON_MAJOR}}
-    edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}
+    if ever at_least 3.3 ; then
+        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python3
+    else
+        edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}
+    fi
+
     edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}-config
     edo rm "${IMAGE}"/usr/$(exhost --target)/lib/pkgconfig/python${PYTHON_MAJOR}.pc
 
+
+    ### alternatives handling
+    alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
+
     if ever at_least 3.2; then
-        edo mv "${IMAGE}"/usr/$(exhost --target)/bin/python{${SLOT}m,${PYTHON_MAJOR}}-config
-        edo mv "${IMAGE}"/usr/$(exhost --target)/lib/libpython${PYTHON_MAJOR}{,-${SLOT}}.so
-        alternatives+=( /usr/$(exhost --target)/lib/libpython${PYTHON_MAJOR}.so libpython${PYTHON_MAJOR}-${SLOT}.so )
-    else
-        into /usr/$(exhost --target)
-        newbin "${WORKBASE}"/${MY_PNV}/python-config.py python${PYTHON_MAJOR}-config
+        alternatives+=( /usr/$(exhost --target)/lib/libpython3.so libpython3-${SLOT}.so )
     fi
 
-    alternatives+=( /usr/$(exhost --target)/lib/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc )
-
-    [ "$(ever major)" == 2 ] && \
+    # `python` == python2 (for now)
+    if [[ $(ever major) == 2 ]] ; then
         alternatives+=(
             /usr/$(exhost --target)/bin/python python$(ever major)
             /usr/$(exhost --target)/bin/python-config python$(ever major)-config
         )
+    fi
 
     alternatives+=(
         /usr/$(exhost --target)/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3-${SLOT}
@@ -191,15 +200,15 @@ python-build_src_install() {
         /usr/$(exhost --target)/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
         /usr/$(exhost --target)/bin/python$(ever major) python${SLOT}
         /usr/$(exhost --target)/bin/python$(ever major)-config python${SLOT}-config
+        /usr/$(exhost --target)/lib/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc
     )
 
     alternatives_for "${alternatives[@]}"
 
-    if ever at_least 3.2; then
-        edo pushd "${IMAGE}"/usr/$(exhost --target)/bin
-        edo ln -s python${SLOT} python${SLOT}m
-        edo ln -s python${SLOT}-config python${SLOT}m-config
-        edo popd
+
+    if ever at_least 3.2 ; then
+        edo ln -s python${SLOT}        "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}m
+        edo ln -s python${SLOT}-config "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}m-config
     fi
 }
 
