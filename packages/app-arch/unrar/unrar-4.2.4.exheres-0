@@ -1,0 +1,40 @@
+# Copyright 2008 Bernd Steinhauser
+# Distributed under the terms of the GNU General Public License v2
+# Based in part upon 'unrar-3.7.8.ebuild' from Gentoo, which is:
+#     Copyright 1999-2007 Gentoo Foundation
+
+MY_PN=${PN}src
+
+SUMMARY="Uncompress rar files"
+HOMEPAGE="http://www.rarlab.com"
+DOWNLOADS="${HOMEPAGE}/rar/${MY_PN}-${PV}.tar.gz"
+
+REMOTE_IDS="freecode:${PN}"
+
+LICENCES="unRAR"
+SLOT="4"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+WORK=${WORKBASE}/${PN}
+
+src_prepare() {
+    # By default, the library prints the same information as the CLI
+    edo sed \
+        -e '/^LIBFLAGS=/s:$: -DSILENT:' \
+        -e "/^CXX=/s:g++:${CXX}:" \
+        -e "/^CXXFLAGS=/s:-O2:${CXXFLAGS}:" \
+        -e "s:^#\(LDFLAGS\)=.*:\1=${LDFLAGS}:" \
+        -i makefile.unix
+}
+
+src_compile() {
+    emake -f makefile.unix -j1 unrar STRIP="true"
+}
+
+src_install() {
+    newbin unrar unrar4
+}
+
