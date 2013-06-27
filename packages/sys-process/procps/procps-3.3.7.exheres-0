@@ -11,7 +11,7 @@ DOWNLOADS="http://gitorious.org/${PN}/${PN}/archive-tarball/v${PV} -> ${PNV}.tar
 LICENCES="GPL-2 LGPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries development documentation libraries"
 
 DEPENDENCIES="
     build:
@@ -56,5 +56,10 @@ src_install() {
     edo rm "${IMAGE}"/usr/share/man/man1/uptime.1
 
     edo find "${IMAGE}"/ -type d -empty -delete
+
+    expart binaries /usr/$(exhost --target)/{,s}bin
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
+    expart development /usr/$(exhost --target)/{include,lib/pkgconfig}
 }
 
