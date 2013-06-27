@@ -8,7 +8,7 @@ SUMMARY="Tool for generating lexical scanners"
 LICENCES="BSD-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries development documentation libraries"
 
 DEPENDENCIES="
     build:
@@ -30,3 +30,11 @@ src_prepare() {
             -i "${WORK}/Makefile.in"
 }
 
+src_install() {
+    default
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,info,man}
+    expart libraries /usr/$(exhost --target)/lib
+}
