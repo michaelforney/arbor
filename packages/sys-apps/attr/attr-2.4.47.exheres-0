@@ -13,7 +13,7 @@ DOWNLOADS="http://download.savannah.gnu.org/releases/${PN}/${PNV}.src.tar.gz"
 LICENCES="LGPL-2 LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries development documentation libraries"
 
 DEPENDENCIES="
     build:
@@ -46,5 +46,10 @@ src_install() {
 
     # Part of sys-apps/man-pages
     edo rm -r "${IMAGE}"/usr/share/man/man2
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
 }
 
