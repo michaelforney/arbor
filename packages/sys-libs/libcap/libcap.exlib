@@ -11,7 +11,7 @@ DOWNLOADS="mirror://kernel/linux/libs/security/linux-privs/${PN}${PV:0:1}/${PNV}
 
 LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries configuration development documentation libraries"
 
 DEPENDENCIES="
     build:
@@ -49,5 +49,11 @@ src_install() {
     dopamsecurity '' pam_cap/capability.conf
 
     dodoc doc/capability.notes
+
+    expart binaries /usr/$(exhost --target)/sbin
+    expart configuration /etc
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
 }
 
