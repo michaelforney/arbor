@@ -24,6 +24,7 @@ LICENCES="|| ( GPL-2 BSD-3 )"
 SLOT="0"
 MYOPTIONS="
     nis [[ description = [ Network Information Service support ] ]]
+    parts: binaries configuration development documentation libraries
 "
 
 DEPENDENCIES="
@@ -107,5 +108,11 @@ pam_build_src_install() {
 
     # install base pam configuration files
     dopamd "${FILES}"/pam.d/*
+
+    expart binaries /usr/$(exhost --target)/sbin
+    expart configuration /etc
+    expart development /usr/$(exhost --target)/include
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
 }
 
