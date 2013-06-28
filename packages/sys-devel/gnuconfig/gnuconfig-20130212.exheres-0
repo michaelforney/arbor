@@ -8,7 +8,7 @@ DOWNLOADS="http://dev.exherbo.org/~tgurr/distfiles/${PN}/${PNV}.tar.bz2"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: data documentation"
 
 DEPENDENCIES=""
 
@@ -17,5 +17,8 @@ src_install() {
     insinto /usr/share/${PN}
     doins config.guess config.sub
     dodoc ChangeLog
+
+    expart data /usr/share/gnuconfig
+    expart documentation /usr/share/doc
 }
 
