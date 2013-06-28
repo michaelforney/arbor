@@ -14,7 +14,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news/announce.html [[ lang = en ]]"
 LICENCES="${PN}"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries configuration development documentation libraries"
 
 DEPENDENCIES=""
 
@@ -56,5 +56,11 @@ src_install() {
     emake -j1 INSTALL_PREFIX="${IMAGE}" LIBDIR=lib MANDIR=/usr/share/man install
     keepdir /etc/ssl/{certs,private}
     emagicdocs
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart configuration /etc
+    expart documentation /usr/share/{doc,man}
+    expart libraries /usr/$(exhost --target)/lib
+    expart development /usr/$(exhost --target)/{include,lib/pkgconfig}
 }
 
