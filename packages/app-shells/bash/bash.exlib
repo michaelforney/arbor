@@ -38,7 +38,7 @@ REMOTE_IDS="freecode:gnu${PN}"
 
 LICENCES="GPL-3"
 SLOT="0"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries configuration documentation"
 
 DEPENDENCIES="
     build:
@@ -87,6 +87,10 @@ EOF
 EOF
 
     keepdir /etc/bash/bashrc.d
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart configuration /etc
+    expart documentation /usr/share/{doc,info,man}
 }
 
 pkg_preinst() {
