@@ -9,7 +9,8 @@ SUMMARY="GNU sed stream editor"
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="acl"
+MYOPTIONS="acl
+    parts: binaries documentation"
 
 DEPENDENCIES="
     build:
@@ -20,6 +21,13 @@ DEPENDENCIES="
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--without-included-gettext' )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( acl )
+
+src_install() {
+    default
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart documentation /usr/share/{doc,info,man}
+}
 
 pkg_preinst() {
     if exhost --is-native -q && [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
