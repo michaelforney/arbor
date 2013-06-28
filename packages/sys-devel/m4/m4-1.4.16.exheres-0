@@ -10,7 +10,7 @@ REMOTE_IDS="freecode:gnu${PN}"
 LICENCES="GPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS=""
+MYOPTIONS="parts: binaries documentation"
 
 DEPENDENCIES=""
 
@@ -30,6 +30,13 @@ src_prepare() {
     edo sed -e '/^AR = /c AR = @host@-ar'  \
             -i "${WORK}/lib/Makefile.in"    \
             -i "${WORK}/tests/Makefile.in"
+}
+
+src_install() {
+    default
+
+    expart binaries /usr/$(exhost --target)/bin
+    expart documentation /usr/share/{doc,info,man}
 }
 
 pkg_postinst() {
