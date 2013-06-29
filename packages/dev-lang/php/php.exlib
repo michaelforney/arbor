@@ -74,6 +74,15 @@ MYOPTIONS="
     )
 "
 
+if ever at_least 5.5.0; then
+    MYOPTIONS+="
+        (
+            php_extensions:
+                vpx           [[ description = [ Support for media using vpx. ] ]]
+        )
+    "
+fi
+
 DEPENDENCIES="
     build:
         sys-devel/gettext
@@ -85,7 +94,6 @@ DEPENDENCIES="
         php_extensions:berkdb? ( sys-libs/db:=[>=4.6.21] )
         php_extensions:ftp? ( dev-libs/openssl[>=0.9.6] )
         php_extensions:gd? (
-            media-libs/gd[>=2.0.35]
             media-libs/jpeg[>=6b]
             media-libs/libpng[>=1.2.35]
             x11-libs/libXpm[>=3.5.7]
@@ -129,6 +137,13 @@ DEPENDENCIES="
         php_extensions:xml? ( dev-libs/libxml2:2.0[>=2.7.2_p20081127] )
         php_extensions:xsl? ( dev-libs/libxslt[>=1.1.0] )
 "
+
+if ever at_least 5.5.0; then
+    DEPENDENCIES+="
+        build+run:
+            php_extensions:vpx? ( media-libs/libvpx )
+    "
+fi
 
 if [[ -n "${SUHOSIN_VERSION}" ]]; then
     DOWNLOADS+="
@@ -262,7 +277,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:curl curl"
     "php_extensions:curlwrappers curlwrappers"
     "php_extensions:berkdb db4"
-    "php_extensions:gd gd /usr"
+    "php_extensions:gd gd"
     "php_extensions:gd jpeg-dir /usr"
     "php_extensions:gd freetype-dir /usr"
     "php_extensions:gd png-dir /usr"
@@ -300,6 +315,13 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
     "php_extensions:xmlrpc xmlrpc"
     "php_extensions:xsl xsl"
 )
+
+if ever at_least 5.5.0; then
+    DEFAULT_SRC_CONFIGURE_OPTION_WITHS+=(
+        "systemd fpm-systemd"
+        "php_extensions:vpx vpx /usr"
+    )
+fi
 
 DEFAULT_SRC_INSTALL_PARAMS=( INSTALL_ROOT="${IMAGE}" )
 
@@ -396,7 +418,7 @@ php_src_install() {
     fi
 
     if option fpm; then
-       rmdir "${IMAGE}"/var/{run,log} "${IMAGE}"/var
+        edo rmdir "${IMAGE}"/var/{run,log} "${IMAGE}"/var
     fi
 
     install_systemd_files
