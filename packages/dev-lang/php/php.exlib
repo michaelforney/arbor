@@ -418,7 +418,10 @@ php_src_install() {
     fi
 
     if option fpm; then
-        edo rmdir "${IMAGE}"/var/{run,log} "${IMAGE}"/var
+        edo rmdir "${IMAGE}"/var/{run,log}
+        if ! option pear; then
+            edo rmdir "${IMAGE}"/var
+        fi
     fi
 
     install_systemd_files
