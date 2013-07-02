@@ -23,8 +23,8 @@ SUMMARY="The extensible, customizable, self-documenting, real-time display edito
 LICENCES="GPL-3"
 SLOT="0"
 MYOPTIONS="
-    X alsa dbus freetype gif gpm gtk gtk3 otf svg tiff tiff xpm
-    ( freetype gif gtk gtk3 otf svg tiff xpm ) [[ requires = X ]]
+    X alsa dbus freetype gif gpm gtk gtk3 otf svg tiff tiff xpm xim
+    ( freetype gif gtk gtk3 otf svg tiff xpm xim ) [[ requires = X ]]
     ( gtk gtk3 ) [[ number-selected = at-most-one ]]
     gconf [[
         description = [ Allows emacs to determine the system font ]
@@ -33,6 +33,9 @@ MYOPTIONS="
     otf [[
         description = [ Support for OpenType fonts ]
         requires = freetype
+    ]]
+    xim [[
+        description = [ Support for X Input Method ]
     ]]
 "
 
@@ -105,7 +108,6 @@ emacs_src_configure() {
         --without-kerberos5
         --without-m17n-flt
         --without-selinux
-        --without-xim
     )
 
     config_withs=(
@@ -114,7 +116,7 @@ emacs_src_configure() {
         'freetype xft'
         'otf libotf'
         'svg rsvg'
-        'dbus' 'gconf' 'gif' 'gpm' 'tiff' 'xpm'
+        'dbus' 'gconf' 'gif' 'gpm' 'tiff' 'xpm' 'xim'
     )
 
     local toolkit=no
