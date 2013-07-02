@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 SUMMARY="Utilities to create and check MS-DOS filesystems under Linux"
-DESCRIPTION="MS-DOS filesystem programs mkdosfs, mkfs.msdos,vfat and the related fsck programs."
+DESCRIPTION="MS-DOS filesystem programs mkfs.fat, fatlabel and fsck.fat."
 HOMEPAGE="http://daniel-baumann.ch/software/${PN}"
 DOWNLOADS="http://daniel-baumann.ch/files/software/${PN}/${PNV}.tar.xz"
 
@@ -32,6 +32,6 @@ src_install() {
     default
 
     edo mv "${IMAGE}"/usr/share/doc/{${PN}/*,${PNVR}}
-    edo rmdir "${IMAGE}"/usr/share/doc/dosfstools
+    edo rmdir "${IMAGE}"/usr/share/doc/${PN}
 }
 
