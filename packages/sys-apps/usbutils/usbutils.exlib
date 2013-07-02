@@ -6,7 +6,7 @@ DESCRIPTION="
 usbutils is a utility for displaying information
 about USB buses in the system and the devices connected to them.
 "
-HOMEPAGE="http://linux-usb.sourceforge.net"
+HOMEPAGE="http://www.linux-usb.org"
 DOWNLOADS="mirror://kernel/linux/utils/usb/${PN}/${PNV}.tar.xz"
 
 LICENCES="GPL-2"
@@ -26,6 +26,7 @@ DEPENDENCIES="
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --datarootdir=/usr/share
     --datadir=/usr/share/misc
+    --disable-static
     --disable-usbids
     --disable-zlib
 )
@@ -41,8 +42,7 @@ src_install() {
 
     option python || edo rm -f "${IMAGE}"/usr/bin/lsusb.py
 
-    # emtpy directories
-    edo rmdir "${IMAGE}"/usr/sbin
+    # remove emtpy directory
     edo rmdir "${IMAGE}"/usr/share/misc
 }
 
