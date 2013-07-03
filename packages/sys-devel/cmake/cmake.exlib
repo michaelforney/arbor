@@ -16,7 +16,11 @@ UPSTREAM_CHANGELOG="${HOMEPAGE}/files/v$(ever range 1-2)/CMakeChangeLog-${PV}"
 
 LICENCES="CMake"
 SLOT="0"
-MYOPTIONS="emacs qt4 vim-syntax"
+MYOPTIONS="emacs qt4
+    qt5 [[ description = [ Build against Qt5 instead of Qt4. ] ]]
+    vim-syntax
+
+    ( qt4 qt5 )  [[ number-selected = at-most-one ]]"
 
 DEPENDENCIES="
     build+run:
@@ -26,6 +30,7 @@ DEPENDENCIES="
         dev-libs/expat[>=2.0.1]
         dev-libs/libxml2:2.0[>=2.6.28]
         qt4? ( x11-libs/qt:4 )
+        qt5? ( x11-libs/qtbase:5 )
 "
 
 VIMFILE="${PN}.vim"
@@ -46,12 +51,13 @@ src_prepare() {
 src_configure() {
     edo ./bootstrap \
         --parallel=${EXJOBS:-1} \
-        --$(option qt4 || echo "no-")qt-gui \
+        --$(option qt5 || option qt4 || echo "no-")qt-gui \
         --system-libs \
         --prefix=/usr \
         --docdir=/share/doc/${PNVR} \
         --datadir=/share/${PN} \
-        --mandir=/share/man
+        --mandir=/share/man \
+        $(option qt4 && echo " -- -DCMAKE_DISABLE_FIND_PACKAGE_Qt5Core:BOOL=TRUE")
 }
 
 src_compile() {

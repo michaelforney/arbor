@@ -43,8 +43,16 @@ LICENCES="PostgreSQL"
 SLOT="0"
 MYOPTIONS="
     hstore [[ description = [ Adds support for hstore module ] ]]
-    ldap pam perl python readline ssl tcl
-    xml [[ description = [ Add support for XML data type ] ]]"
+    ldap
+    pam
+    perl
+    pgcrypto [[ description = [ Adds support for pgcrypto module ] ]]
+    python
+    readline
+    ssl
+    tcl
+    xml [[ description = [ Add support for XML data type ] ]]
+"
 
 DEPENDENCIES="
     build:
@@ -109,6 +117,12 @@ postgresql_src_compile() {
         emake
         edo popd
     fi
+    if option pgcrypto; then
+        edo pushd contrib/pgcrypto
+        emake
+        edo popd
+    fi
+
 }
 
 # XXX: See http://wiki.postgresql.org/wiki/Detailed_installation_guides
@@ -130,6 +144,12 @@ EOF
         emake DESTDIR="${IMAGE}" install
         edo popd
     fi
+    if option pgcrypto; then
+        edo pushd contrib/pgcrypto
+        emake DESTDIR="${IMAGE}" install
+        edo popd
+    fi
+
 }
 
 postgresql_src_test() {
