@@ -53,13 +53,23 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --enable-shared
     $(ever at_least 3 || echo --enable-unicode=ucs4)
     --with-system-ffi
+    ac_cv_file__dev_ptc=no
+    ac_cv_file__dev_ptmx=yes
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
 python-build_pkg_pretend() {
-    # python currently can't be cross compiled.
-    # http://bugs.python.org/issue3754  (closed fixed, but it isn't)
-    exhost --is-native -q || die "You can't yet install python for a non-native target"
+    if [[ ${SLOT} == '2.7' ]] || ever at_least 3.3 ; then
+        # for native builds, the version we are about to build does the .pyc compiling
+        if ! exhost --is-native -q && [[ ! -x /usr/$(exhost --build)/bin/python${SLOT} ]] ; then
+            ewarn "You need to install python:${SLOT} for $(exhost --build) if "
+            ewarn "you want to build python:${SLOT} for $(exhost --target)"
+            die "install python:${SLOT} !"
+        fi
+    else
+        # http://bugs.python.org/issue3754
+        exhost --is-native -q || die "You can't cross compile this version of python, try 2.7 or 3.3+"
+    fi
 }
 
 python-build_src_prepare() {
@@ -74,6 +84,9 @@ python-build_src_prepare() {
                -e "s:@@EXHERBO_TARGET@@:$(exhost --target):g" \
                -e "s:@@EXHERBO_TOOL_PREFIX@@:$(exhost --tool-prefix):g" \
         "${PN}"-config.py
+
+    # Needs to run `host` code to regen this
+    edo touch Include/graminit.h Python/graminit.c
 
     eautoreconf
 }
@@ -106,6 +119,11 @@ python-build_src_configure() {
 
 python-build_src_test() {
     unset DISPLAY
+
+    if ! exhost --is-native -q ; then
+        echo "cross compiled host, skipping tests"
+        return
+    fi
 
     python_enable_pyc
 
@@ -186,7 +204,7 @@ python-build_src_install() {
 
 
     ### alternatives handling
-    alternatives=("${PN}$(ever major)" "${SLOT}" "${SLOT}")
+    alternatives=("${PN}$(ever major)-$(exhost --target)" "${SLOT}" "${SLOT}")
 
     if ever at_least 3.2; then
         alternatives+=( /usr/$(exhost --target)/lib/libpython3.so libpython3-${SLOT}.so )

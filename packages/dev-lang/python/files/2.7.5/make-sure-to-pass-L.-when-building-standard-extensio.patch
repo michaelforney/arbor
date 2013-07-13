@@ -1,0 +1,62 @@
+Upstream: submitted, http://bugs.python.org/issue18976
+
+From 5f18cd8361df48558c038d7eedd23da55af4456e Mon Sep 17 00:00:00 2001
+From: Benedikt Morbach <benedikt.morbach@googlemail.com>
+Date: Sun, 8 Sep 2013 17:03:21 +0200
+Subject: [PATCH] make sure to pass '-L.' when building standard extensions
+Organization: Chocolate Cookie Conspiracy
+
+The previous check fails to pass '-L.' when cross compiling, because
+the build-platform's 'python' executable is used.
+It also failed to pass the 'LIBDIR' to third-party extensions, when the
+interpreter was called e.g. via a symlink (see bug #16326)
+
+For this check to break, you have to do something stupid like
+build/symlink your own python in $PWD
+---
+ Lib/distutils/command/build_ext.py | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/Lib/distutils/command/build_ext.py b/Lib/distutils/command/build_ext.py
+index 923197b..30c0d9c 100644
+--- a/Lib/distutils/command/build_ext.py
++++ b/Lib/distutils/command/build_ext.py
+@@ -222,14 +222,14 @@ class build_ext (Command):
+         # for extensions under Cygwin and AtheOS Python's library directory must be
+         # appended to library_dirs
+         if sys.platform[:6] == 'cygwin' or sys.platform[:6] == 'atheos':
+-            if sys.executable.startswith(os.path.join(sys.exec_prefix, "bin")):
++            if sys.executable.startswith(os.getcwd()):
++                # building python standard extensions
++                self.library_dirs.append('.')
++            else:
+                 # building third party extensions
+                 self.library_dirs.append(os.path.join(sys.prefix, "lib",
+                                                       "python" + get_python_version(),
+                                                       "config"))
+-            else:
+-                # building python standard extensions
+-                self.library_dirs.append('.')
+ 
+         # for extensions under Linux or Solaris with a shared Python library,
+         # Python's library directory must be appended to library_dirs
+@@ -237,12 +237,12 @@ class build_ext (Command):
+         if ((sys.platform.startswith('linux') or sys.platform.startswith('gnu')
+              or sys.platform.startswith('sunos'))
+             and sysconfig.get_config_var('Py_ENABLE_SHARED')):
+-            if sys.executable.startswith(os.path.join(sys.exec_prefix, "bin")):
+-                # building third party extensions
+-                self.library_dirs.append(sysconfig.get_config_var('LIBDIR'))
+-            else:
++            if sys.executable.startswith(os.getcwd()):
+                 # building python standard extensions
+                 self.library_dirs.append('.')
++            else:
++                # building third party extensions
++                self.library_dirs.append(sysconfig.get_config_var('LIBDIR'))
+ 
+         # The argument parsing will result in self.define being a string, but
+         # it has to be a list of 2-tuples.  All the preprocessor symbols
+-- 
+1.8.4
+
