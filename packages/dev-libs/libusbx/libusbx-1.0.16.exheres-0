@@ -21,9 +21,22 @@ DEPENDENCIES="
         sys-kernel/linux-headers[>=2.6.27]
         sys-libs/glibc[>=2.9]
     build+run:
+        sys-apps/systemd [[ note = [ udev is used for device enumeration and hotplug support ] ]]
         !dev-libs/libusb:1 [[
             description = [ dev-libs/libusbx is a fork and drop-in replacement of dev-libs/libusb ]
             resolution = uninstall-blocked-after
         ]]
 "
 
+configure_one_multibuild() {
+    econf \
+        --enable-udev \
+        --disable-static \
+        $(expecting_tests && echo '--enable-tests-build' || echo '--disable-tests-build')
+}
+
+test_one_multibuild() {
+    default
+
+    edo tests/stress
+}
