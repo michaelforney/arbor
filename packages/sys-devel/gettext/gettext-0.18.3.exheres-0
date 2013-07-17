@@ -21,20 +21,24 @@ DEPENDENCIES="
         sys-devel/gcc:*[openmp?]
     build+run:
         dev-libs/libxml2:2.0[multibuild_c:*(-)?]
+        sys-libs/ncurses[multibuild_c:*(-)?]
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --htmldir=/usr/share/doc/${PNVR}/html
+    --enable-curses
     --enable-nls
     --disable-csharp
     --disable-java
     --disable-native-java
     --disable-rpath
+    --disable-static
     --with-included-glib
     --with-included-libcroco
     --with-included-libunistring
     --without-cvs
+    --without-git
     --without-included-gettext
 )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( emacs )
