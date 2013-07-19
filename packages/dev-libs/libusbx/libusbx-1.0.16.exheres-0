@@ -28,12 +28,11 @@ DEPENDENCIES="
         ]]
 "
 
-configure_one_multibuild() {
-    econf \
-        --enable-udev \
-        --disable-static \
-        $(expecting_tests && echo '--enable-tests-build' || echo '--disable-tests-build')
-}
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-udev
+    --disable-static
+)
+DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-tests-build --disable-tests-build' )
 
 test_one_multibuild() {
     default
