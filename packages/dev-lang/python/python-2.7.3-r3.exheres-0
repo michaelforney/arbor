@@ -27,9 +27,14 @@ test_one_multibuild() {
     local DISABLE_TESTS
     # test_install_lib (test_distuils) has problems with path resolution
     # test_gdb: fails under sydbox (scm, a1f1106)
-    # the rest wants to bind to 0.0.0.0/::
-    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_socket"
+    # the rest wants to bind to 0.0.0.0/::, test_uuid: socket.gethostname() name->resolution
+    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_socket test_uuid test_urllib2"
+
+    # for test_ssl
+    esandbox allow_net --connect "inet:127.0.0.1@0"
 
     python-build_test_one_multibuild
+
+    esandbox disallow_net --connect "inet:127.0.0.1@0"
 }
 
