@@ -9,6 +9,8 @@ myexparam suffix=tar.bz2
 
 HOMEPAGE="http://$(exparam group).tuxfamily.org/"
 
-DOWNLOADS="http://download.tuxfamily.org/$(exparam group)/$(exparam pn)/$(exparam pnv).$(exparam suffix)"
-WORK="${WORKBASE}"/$(exparam pnv)
+if ! ever is_scm; then
+    DOWNLOADS="http://download.tuxfamily.org/$(exparam group)/$(exparam pn)/$(exparam pnv).$(exparam suffix)"
+    WORK="${WORKBASE}"/$(exparam pnv)
+fi
 
