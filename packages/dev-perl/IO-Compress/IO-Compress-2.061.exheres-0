@@ -11,7 +11,14 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        dev-perl/Compress-Raw-Bzip2[>=2.037]
-        dev-perl/Compress-Raw-Zlib[>=2.037]
+        dev-perl/Compress-Raw-Bzip2[>=2.061]
+        dev-perl/Compress-Raw-Zlib[>=2.061]
 "
+
+src_install() {
+    default
+    edo rm "${IMAGE}"/usr/{bin/zipdetails,share/man/man1/zipdetails.1} \
+        "${IMAGE}"/usr/${LIBDIR}/perl5/*/*/perllocal.pod
+    edo find "${IMAGE}"/usr -empty -delete
+}
 
