@@ -1,0 +1,24 @@
+Upstream: yes
+From 7f43748544f26008d0dd337704f02a6ed3200aaf Mon Sep 17 00:00:00 2001
+From: Dave Reisner <dreisner@archlinux.org>
+Date: Mon, 17 Jun 2013 18:01:46 +0000
+Subject: Fix error in texi2pod intriduced with Perl 5.18
+
+---
+(limited to 'doc/texi2pod.pl')
+
+diff --git a/doc/texi2pod.pl b/doc/texi2pod.pl
+index 86c4b18..9db6de1 100755
+--- a/doc/texi2pod.pl
++++ b/doc/texi2pod.pl
+@@ -291,7 +291,7 @@ while(<$inf>) {
+ 	if (defined $1) {
+             my $thing = $1;
+             if ($ic =~ /\@asis/) {
+-                $_ = "\n=item $thing\n";
++                $_ = "\n=item C<$thing>\n";
+             } else {
+                 # Entity escapes prevent munging by the <> processing below.
+                 $_ = "\n=item $ic\&LT;$thing\&GT;\n";
+--
+cgit v0.9.0.2
