@@ -85,7 +85,7 @@ DEPENDENCIES="
         app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
         sys-apps/dbus[>=1.4.0][multibuild_c:*(-)?]
-        sys-apps/kmod[>=5][multibuild_c:*(-)?]
+        sys-apps/kmod[>=14][multibuild_c:*(-)?]
         sys-apps/pciutils
         sys-apps/skeleton-filesystem-layout
         sys-apps/usbutils[>=0.82]
@@ -102,7 +102,7 @@ DEPENDENCIES="
             resolution = uninstall-blocked-after
         ]]
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
-        cryptsetup? ( sys-fs/cryptsetup[>=1.4.2][multibuild_c:*(-)?] )
+        cryptsetup? ( sys-fs/cryptsetup[>=1.6.0][multibuild_c:*(-)?] )
         gcrypt? ( dev-libs/libgcrypt[multibuild_c:*(-)?] )
         gobject-introspection? ( gnome-desktop/gobject-introspection:1[>=1.31.1] )
         journal-gateway? (
@@ -231,7 +231,6 @@ configure_one_multibuild() {
         --enable-coredump
         --enable-gudev
         --enable-hostnamed
-        --enable-keymap
         --enable-kmod
         --enable-localed
         --enable-logind
