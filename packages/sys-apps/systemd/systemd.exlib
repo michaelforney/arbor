@@ -343,7 +343,11 @@ systemd_src_install() {
 
     if [[ -d ${IMAGE}/usr/lib/rpm ]]; then
         edo rm -r "${IMAGE}"/usr/lib/rpm
-        edo rmdir "${IMAGE}"/usr/lib
+
+        # breaks non ~amd64 systems
+        if [[ ${LIBDIR} != lib ]]; then
+            edo rmdir "${IMAGE}"/usr/lib
+        fi
     fi
 
     # Install simple-net if requested
