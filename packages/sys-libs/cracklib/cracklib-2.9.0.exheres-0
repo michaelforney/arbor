@@ -8,7 +8,10 @@ SUMMARY="A proactive password sanity library"
 LICENCES="LGPL-2.1"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
-MYOPTIONS="python multibuild_c: 32 64"
+MYOPTIONS="
+    python
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
@@ -38,6 +41,7 @@ configure_one_multibuild() {
 
 install_one_multibuild() {
     default
+
     option python && python_bytecompile
 }
 
@@ -53,7 +57,7 @@ src_install() {
 }
 
 pkg_postinst() {
-    edo cracklib-format "${ROOT}/usr/share/dict/cracklib-small" \
-        | cracklib-packer "${ROOT}/var/cache/${PN}/cracklib_dict"
+    edo cracklib-format "${ROOT}"/usr/share/dict/cracklib-small \
+        | cracklib-packer "${ROOT}"/var/cache/${PN}/cracklib_dict
 }
 
