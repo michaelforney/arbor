@@ -9,6 +9,7 @@ myexparam classes=[ C ]
 exparam -v EASY_MULTIBUILD_CLASSES classes[@]
 
 myexparam -b multiunpack=false
+myexparam -b skip_nondefault_tests=false
 
 if ! exparam -b multiunpack ; then
     myexparam work=
@@ -52,6 +53,13 @@ easy-multibuild_run_phase() {
                     echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
                     continue
                 fi
+            fi
+
+            if exparam -b skip_nondefault_tests &&
+                [[ ${EXHERES_PHASE} == *test* && ${MULTIBUILD_CLASS} == C ]] &&
+                ! multibuild_default_target C ; then
+                echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (tests skipped)"
+                continue
             fi
 
             echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET}"
