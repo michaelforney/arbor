@@ -70,6 +70,9 @@ e2fsprogs_src_test() {
         return
     fi
 
+    # Not everyone has 2TB of free space.
+    edo rm -rf tests/{r_64bit_big_expand,r_bigalloc_big_expand,r_ext4_big_expand}
+
     # The test script uses $IMAGE for its own purposes.
     local IMAGE
     # the default blkid file is /etc/blkid.tab which results in sydbox violations
