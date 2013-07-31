@@ -16,6 +16,7 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.
         kernel \
         test-dbus-daemon \
         udev-rules \
+        pam \
         python [ has_lib=false ] \
         zsh-completion
 
@@ -518,6 +519,9 @@ EOT
     if option old-net ; then
         dosym /dev/null /etc/udev/rules.d/80-net-name-slot.rules
     fi
+
+    # Install pam configuration for systemd --user
+    dopamd "${FILES}"/pam.d/*
 }
 
 systemd_pkg_postinst() {
