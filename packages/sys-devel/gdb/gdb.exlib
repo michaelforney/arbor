@@ -62,5 +62,9 @@ src_install() {
     if option !python ; then
         edo rm -r "${IMAGE}"/usr/share/gdb/python/{gdb,}
     fi
+
+    # sys-devel/binutils installs opcodes.mo
+    edo find "${IMAGE}" -name opcodes.mo -delete
+    edo find "${IMAGE}" -depth -type d -empty -delete
 }
 

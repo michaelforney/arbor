@@ -1,0 +1,16 @@
+# Copyright 2013 Quentin "Sardem FF7" Glidic <sardemff7@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+myexparam pn=${MY_PN:-${PN}}
+myexparam pv=${MY_PV:-${PV}}
+myexparam pnv=${MY_PNV:-$(exparam pn)-$(exparam pv)}
+myexparam group=$(exparam pn)
+myexparam suffix=tar.bz2
+
+HOMEPAGE="http://$(exparam group).tuxfamily.org/"
+
+if ! ever is_scm; then
+    DOWNLOADS="http://download.tuxfamily.org/$(exparam group)/$(exparam pn)/$(exparam pnv).$(exparam suffix)"
+    WORK="${WORKBASE}"/$(exparam pnv)
+fi
+

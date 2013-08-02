@@ -21,9 +21,22 @@ DEPENDENCIES="
         sys-kernel/linux-headers[>=2.6.27]
         sys-libs/glibc[>=2.9]
     build+run:
+        sys-apps/systemd [[ note = [ udev is used for device enumeration and hotplug support ] ]]
         !dev-libs/libusb:1 [[
             description = [ dev-libs/libusbx is a fork and drop-in replacement of dev-libs/libusb ]
             resolution = uninstall-blocked-after
         ]]
 "
+
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --enable-udev
+    --disable-static
+)
+DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-tests-build --disable-tests-build' )
+
+src_test() {
+    default
+
+    edo tests/stress
+}
 

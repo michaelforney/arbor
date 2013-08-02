@@ -37,3 +37,28 @@ index 869381a..0b41e93 100644
 -- 
 1.7.7.4
 
+diff -udr a/Lib/test/test_ssl.py b/Lib/test/test_ssl.py
+--- a/Lib/test/test_ssl.py	2013-04-06 09:41:44.000000000 +0200
++++ b/Lib/test/test_ssl.py	2013-07-14 14:23:30.497423584 +0200
+@@ -1175,7 +1175,7 @@
+             def __init__(self, certfile):
+                 self.certfile = certfile
+                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-                self.port = support.bind_port(sock, '')
++                self.port = support.bind_port(sock)
+                 asyncore.dispatcher.__init__(self, sock)
+                 self.listen(5)
+ 
+diff -udr a/Lib/test/test_multiprocessing.py b/Lib/test/test_multiprocessing.py
+--- a/Lib/test/test_multiprocessing.py	2013-04-06 09:41:44.000000000 +0200
++++ b/Lib/test/test_multiprocessing.py	2013-07-14 15:13:00.929575610 +0200
+@@ -3204,7 +3204,7 @@
+     def test_wait_socket(self, slow=False):
+         from multiprocessing.connection import wait
+         l = socket.socket()
+-        l.bind(('', 0))
++        l.bind(('localhost', 0))
+         l.listen(4)
+         addr = ('localhost', l.getsockname()[1])
+         readers = []
+
