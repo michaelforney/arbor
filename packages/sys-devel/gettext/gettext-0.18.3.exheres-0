@@ -25,6 +25,7 @@ DEPENDENCIES="
         acl? ( sys-apps/acl[multibuild_c:*(-)?] )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-0.18-sydbox.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --htmldir=/usr/share/doc/${PNVR}/html
     --enable-curses
@@ -45,9 +46,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( emacs )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     acl
     openmp
-)
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PN}-0.18-sydbox.patch
 )
 
 src_install() {
