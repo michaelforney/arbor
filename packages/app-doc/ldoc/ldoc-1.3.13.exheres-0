@@ -1,0 +1,42 @@
+# Copyright 2013 Jakob Nixdorf <flocke@shadowice.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=stevedonovan pn=LDoc rev=${PV} ] lua
+
+SUMMARY="A LuaDoc-compatible documentation generation system"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-lang/lua
+        dev-lua/penlight
+"
+
+BUGS_TO="flocke@shadowice.org"
+
+# Tests fail to generate documentation without ldoc already being installed
+# and even after successful generation the reference to which it should be
+# compared is missing
+RESTRICT="test"
+
+src_install() {
+    lua_version
+
+    insinto /usr/share/lua/${LUAVER}/ldoc
+    doins ldoc/*.lua
+
+    insinto /usr/share/lua/${LUAVER}/ldoc/html
+    doins ldoc/html/*.lua
+
+    insinto /usr/share/lua/${LUAVER}/ldoc/builtin
+    doins ldoc/builtin/*.lua
+
+    dobin ldoc.lua
+    ln -s ldoc.lua ${IMAGE}/${DESTTREE}/bin/ldoc
+
+    dodoc readme.md doc/doc.md
+}
