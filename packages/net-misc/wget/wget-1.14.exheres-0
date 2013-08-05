@@ -47,3 +47,8 @@ src_configure() {
     econf ${myconf[@]}
 }
 
+src_test() {
+    unset http_proxy https_proxy ftp_proxy
+    default
+}
+
