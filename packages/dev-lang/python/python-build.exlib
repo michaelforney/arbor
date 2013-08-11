@@ -176,9 +176,12 @@ python-build_install_one_multibuild() {
 
     # alternatives handling
     local PYTHON_MAJOR="$(ever at_least 3 && echo 3)"
+    [ "${SLOT}" == "2.6" ] && edo mv "${IMAGE}"/usr/share/man/man1/python.1 "${IMAGE}"/usr/share/man/man1/python${SLOT}.1
+
     [ "${SLOT}" == "2.7" ] && edo rm "${IMAGE}"/usr/bin/python \
                            && edo rm "${IMAGE}"/usr/bin/python$(ever major) \
                            && edo rm "${IMAGE}"/usr/bin/python$(ever major)-config \
+                           && edo rm "${IMAGE}"/usr/share/man/man1/python.1 \
                            && edo cp "${IMAGE}"/usr/bin/python${SLOT} "${IMAGE}"/usr/bin/python
     # they switched from python3 being the executable and python3.x being the symlink to python3
     # to python3.x being the executable and python3 being the symlink
@@ -252,6 +255,7 @@ python-build_src_install() {
         /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
         /usr/bin/python$(ever major) python${SLOT}
         /usr/bin/python$(ever major)-config python${SLOT}-config
+        /usr/share/man/man1/python.1 python${SLOT}.1
     )
 
     alternatives_for "${alternatives[@]}"
