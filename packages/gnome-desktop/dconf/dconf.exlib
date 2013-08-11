@@ -37,7 +37,11 @@ dconf_src_test() {
 }
 
 dconf_src_install() {
-    default
+    if ever at_least 0.17; then
+        gsettings_src_install
+    else
+        default
+    fi
 
     hereenvd 80dconf-databases << EOF
 CONFIG_PROTECT_MASK="/etc/dconf/db"
