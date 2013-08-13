@@ -3,7 +3,7 @@
 # Based in part upon 'ghostscript-8.62.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ] easy-multibuild [ multiunpack=true ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.14 ] ] easy-multibuild [ multiunpack=true ]
 
 SUMMARY="An interpreter for the PostScript language and for PDF"
 HOMEPAGE="http://${PN}.com"
@@ -12,9 +12,14 @@ DOWNLOADS="http://downloads.${PN}.com/public/${PNV}.tar.bz2"
 LICENCES="AGPL-3"
 SLOT="0"
 PLATFORMS="~amd64 ~ppc64 ~x86"
-MYOPTIONS="cups dbus idn jpeg2000 X
+MYOPTIONS="
+    cups
+    dbus
+    idn
     gtk [[ requires = [ X ] ]]
-    multibuild_c: 32 64"
+    X
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
@@ -35,7 +40,6 @@ DEPENDENCIES="
         dbus? ( sys-apps/dbus[multibuild_c:*(-)?] )
         gtk? ( x11-libs/gtk+:3[multibuild_c:*(-)?] )
         idn? ( net-dns/libidn[multibuild_c:*(-)?] )
-        jpeg2000? ( media-libs/OpenJPEG )
         X? (
             x11-libs/libXext[multibuild_c:*(-)?]
             x11-libs/libXt[multibuild_c:*(-)?]
@@ -48,7 +52,7 @@ DEPENDENCIES="
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-9.05-cups-filters.patch )
 
 prepare_one_multibuild() {
-    edo rm -r ./{expat,freetype,jbig2dec,jpeg,lcms{,2},libpng,openjpeg,tiff,zlib}
+    edo rm -r ./{expat,freetype,jbig2dec,jpeg,lcms{,2},libpng,tiff,zlib}
     edo rm -r ./Resource/{CMap,Font}
 
     if option !gtk; then
@@ -59,7 +63,7 @@ prepare_one_multibuild() {
 
     edo sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak
 
-    # automake-1.13 compatibility
+    # automake-1.13 compatibility (fixed in next release 9.08)
     edo sed -e '/AM_PROG_CC_STDC/d' -i ijs/configure.ac
 
     default
@@ -87,6 +91,7 @@ configure_one_multibuild() {
         --enable-dynamic \
         --enable-freetype \
         --enable-fontconfig \
+        --enable-openjpeg \
         --disable-compile-inits \
         --with-drivers=ALL \
         --with-fontpath="$FONTPATH" \
@@ -99,7 +104,6 @@ configure_one_multibuild() {
         $(option_enable cups) \
         $(option_enable dbus) \
         $(option_enable gtk) \
-        $(option_enable jpeg2000 openjpeg) \
         $(option_with cups install-cups) \
         $(option_with cups pdftoraster) \
         $(option_with idn libidn) \

@@ -1,0 +1,30 @@
+# Copyright 2013 Jakob Nixdorf <flocke@shadowice.org>
+# Distributed under the terms of the GNU General Public License v2
+
+require github [ user=stevedonovan pn=Penlight rev=${PV} ] lua
+
+SUMMARY="Lua libraries focusing on input data handling"
+
+LICENCES="MIT"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build+run:
+        dev-lang/lua
+        dev-lua/luafilesystem
+"
+
+BUGS_TO="flocke@shadowice.org"
+
+src_install() {
+    lua_version
+
+    insinto /usr/share/lua/${LUAVER}/pl
+    doins lua/pl/*.lua
+
+    dodoc README.md CHANGES.md
+    docinto manual
+    dodoc doc/manual/*
+}

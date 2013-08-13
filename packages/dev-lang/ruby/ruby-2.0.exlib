@@ -21,7 +21,7 @@ DOWNLOADS="mirror://ruby/${SLOT}/${MY_PNV}.tar.bz2"
 
 MYOPTIONS="
     berkdb gdbm ncurses readline tk
-    examples ipv6
+    doc examples ipv6
 "
 
 tag_number=$(ever replace_all '_' ${PV})
@@ -30,6 +30,10 @@ UPSTREAM_DOCUMENTATION="${HOMEPAGE}en/documentation/"
 
 DEPENDENCIES="
     build:
+        doc? (
+            app-doc/doxygen
+            media-gfx/graphviz
+        )
         virtual/pkg-config
     build+run:
         berkdb? ( sys-libs/db:= )
@@ -37,7 +41,10 @@ DEPENDENCIES="
         ncurses? ( sys-libs/ncurses )
         readline? ( sys-libs/readline )
         tk? ( dev-lang/tk )
+        dev-libs/libffi
+        dev-libs/libyaml
         dev-libs/openssl
+        sys-libs/zlib
 "
 
 DEFAULT_SRC_COMPILE_PARAMS=( EXTLDFLAGS="${LDFLAGS}" )
@@ -52,6 +59,7 @@ ruby-2.0_src_configure() {
         # Yes, this does always call --enable-ipv6
         --enable-ipv6
         $(option ipv6 || echo --with-lookup-order-hack=INET)
+        $(option_enable doc install-doc)
 
         --with-ruby-version=minor
         --with-rubylibprefix=/usr/${LIBDIR}/ruby

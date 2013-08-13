@@ -63,7 +63,7 @@ src_prepare() {
     glib_src_prepare
 
     # else src_compile will fail, seems to depend on automake-1.13.1
-    autotools_src_prepare
+    eautoreconf
 
     # we have no guarantee for ipv6 support, so we disable those tests
     edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
