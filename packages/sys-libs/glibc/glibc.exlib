@@ -165,6 +165,8 @@ EOF
                   --with-add-ons                                            \
                   --enable-kernel=${MINIMUM_KERNEL_VERSION}                 \
                   $(ever at_least 2.14.1-r2 && echo --enable-obsolete-rpc)  \
+                  $(ever at_least 2.18  && echo --enable-lock-elision)      \
+                  $(ever at_least 2.18  && echo --enable-pt_chown)          \
                   --enable-stackguard-randomization                         \
                   --with-headers=/usr/include                               \
                   --with-crypt                                              \
