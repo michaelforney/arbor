@@ -248,11 +248,6 @@ python-build_src_install() {
         alternatives+=(
             /usr/bin/python python$(ever major)
             /usr/bin/python-config python$(ever major)-config
-            /usr/share/man/man1/python.1 python${SLOT}.1
-        )
-    else
-        alternatives+=(
-            /usr/share/man/man1/python3.1 python${SLOT}.1
         )
     fi
 
@@ -262,6 +257,7 @@ python-build_src_install() {
         /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
         /usr/bin/python$(ever major) python${SLOT}
         /usr/bin/python$(ever major)-config python${SLOT}-config
+        /usr/share/man/man1/python${PYTHON_MAJOR}.1 python${SLOT}.1
     )
 
     alternatives_for "${alternatives[@]}"
