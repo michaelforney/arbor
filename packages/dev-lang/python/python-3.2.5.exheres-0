@@ -32,7 +32,8 @@ test_one_multibuild() {
     # test_install_lib (test_distuils) has problems with path resolution
     # test_gdb: fails under sydbox (scm, a1f1106)
     # the rest want to bind to 0.0.0.0/::
-    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_pydoc test_socket"
+    # test_urllib2: wants access to DNS
+    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_pydoc test_socket test_urllib2"
 
     python-build_test_one_multibuild
 }
