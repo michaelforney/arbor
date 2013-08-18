@@ -153,6 +153,7 @@ python-build_src_install() {
     elif [[ ${SLOT} == '2.7' ]] ; then
         edo rm "${IMAGE}"/usr/$(exhost --target)/bin/python{,2,2-config}
         edo cp "${IMAGE}"/usr/$(exhost --target)/bin/python{2.7,}
+
         edo rm "${IMAGE}"/usr/share/man/man1/python.1
     elif [[ ${SLOT} == '3.1' ]] ; then
         edo mv "${IMAGE}"/usr/$(exhost --target)/bin/2to3{,-3}
@@ -163,6 +164,8 @@ python-build_src_install() {
 
         edo rm "${IMAGE}"/usr/$(exhost --target)/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
         edo mv "${IMAGE}"/usr/$(exhost --target)/bin/python{${SLOT}m,3}-config
+
+        edo rm "${IMAGE}"/usr/share/man/man1/python3.1
     else
         edo mv "${IMAGE}"/usr/$(exhost --target)/lib/{python${SLOT}/config,}/libpython${SLOT}.a
 
@@ -204,7 +207,7 @@ python-build_src_install() {
         /usr/$(exhost --target)/bin/python$(ever major) python${SLOT}
         /usr/$(exhost --target)/bin/python$(ever major)-config python${SLOT}-config
         /usr/$(exhost --target)/lib/pkgconfig/python${PYTHON_MAJOR}.pc python-${SLOT}.pc
-        /usr/share/man/man1/python.1 python${SLOT}.1
+        /usr/share/man/man1/python${PYTHON_MAJOR}.1 python${SLOT}.1
     )
 
     alternatives_for "${alternatives[@]}"

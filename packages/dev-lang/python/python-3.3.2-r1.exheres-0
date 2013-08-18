@@ -8,6 +8,9 @@ PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 DEPENDENCIES+="
     build+run:
         dev-libs/expat
+        !dev-lang/python:3.2[=3.2.5] [[
+            description = [ Man file collision ]
+        ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS+=( '--with-system-expat' )
