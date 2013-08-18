@@ -170,6 +170,7 @@ python-build_install_one_multibuild() {
     if ever at_least 3.2; then
         edo mv "${IMAGE}"/usr/${LIBDIR}/{python${SLOT}/config-${SLOT}m,}/libpython${SLOT}m.a
         edo rm "${IMAGE}"/usr/bin/{2to3,idle3,pydoc3,python3-config,python${SLOT}m}
+        edo rm "${IMAGE}"/usr/share/man/man1/python3.1
     else
         edo mv "${IMAGE}"/usr/${LIBDIR}/{python${SLOT}/config,}/libpython${SLOT}.a
     fi
@@ -243,11 +244,17 @@ python-build_src_install() {
 
     easy-multibuild_src_install
 
-    [ "$(ever major)" == 2 ] && \
+    if [[ $(ever major) == 2 ]]; then
         alternatives+=(
             /usr/bin/python python$(ever major)
             /usr/bin/python-config python$(ever major)-config
+            /usr/share/man/man1/python.1 python${SLOT}.1
         )
+    else
+        alternatives+=(
+            /usr/share/man/man1/python3.1 python${SLOT}.1
+        )
+    fi
 
     alternatives+=(
         /usr/bin/2to3$(ever at_least 3 && echo "-")${PYTHON_MAJOR} 2to3-${SLOT}
@@ -255,7 +262,6 @@ python-build_src_install() {
         /usr/bin/pydoc${PYTHON_MAJOR} pydoc${SLOT}
         /usr/bin/python$(ever major) python${SLOT}
         /usr/bin/python$(ever major)-config python${SLOT}-config
-        /usr/share/man/man1/python.1 python${SLOT}.1
     )
 
     alternatives_for "${alternatives[@]}"
