@@ -41,7 +41,7 @@ configure_one_multibuild() {
 }
 
 test_one_multibuild() {
-    PATH=/usr/libexec/llvm:$PATH CLANG=${PWD}/bin/clang emake clang-test
+    PATH=/usr/libexec/llvm:${PWD}/utils/TableGen/clang_tblgen_build_subdir:$PATH CLANG=${PWD}/bin/clang emake clang-test
 }
 
 src_install() {

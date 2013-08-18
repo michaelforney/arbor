@@ -350,6 +350,11 @@ php_src_prepare() {
         expatch -p1 "${WORKBASE}"/suhosin-patch-${SUHOSIN_VERSION}.patch
     fi
 
+    if [[ ${PV} == 5.4.18 ]]; then
+        edo rm -f Zend/zend_{language,ini}_parser.[ch]
+        edo ./genfiles
+    fi
+
     # Workaround for PHP bug #48795
     export EXTRA_LIBS="${EXTRA_LIBS} -lstdc++"
 }

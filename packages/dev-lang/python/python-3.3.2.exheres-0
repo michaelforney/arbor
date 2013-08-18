@@ -18,7 +18,8 @@ src_test() {
     # test_gdb: never-ending threads running under gdb
     # test_socket: seems to hang
     # the rest want to bind to 0.0.0.0/::
-    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_pydoc test_socket"
+    # test_ssl test_timeout test_urllibnet test_urllib2net: wants access to DNS 
+    DISABLE_TESTS="test_distutils test_ftplib test_gdb test_pydoc test_socket test_ssl test_timeout test_urllibnet test_urllib2net"
 
     # for test_socketserver
     esandbox allow_net "unix:${TEMP%/}"'/unix_socket.*'

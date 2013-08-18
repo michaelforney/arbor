@@ -1,0 +1,34 @@
+Author: Andrew Gallagher
+Upstream: http://llvm.org/bugs/show_bug.cgi?id=14970
+Reason: BugPoint fails some tests without this patch on some machines
+
+
+diff -ur a/llvm-3.3.src/test/BugPoint/crash-narrowfunctiontest.ll b/llvm-3.3.src/test/BugPoint/crash-narrowfunctiontest.ll
+--- a/llvm-3.3.src/test/BugPoint/crash-narrowfunctiontest.ll	2012-10-26 04:19:02.000000000 +0200
++++ b/llvm-3.3.src/test/BugPoint/crash-narrowfunctiontest.ll	2013-08-13 21:29:49.728839302 +0200
+@@ -1,6 +1,6 @@
+ ; Test that bugpoint can narrow down the testcase to the important function
+ ;
+-; RUN: bugpoint -load %llvmshlibdir/BugpointPasses%shlibext %s -output-prefix %t -bugpoint-crashcalls -silence-passes > /dev/null
++; RUN: bugpoint -load %llvmshlibdir/BugpointPasses%shlibext %s -output-prefix %t -bugpoint-crashcalls -silence-passes -mlimit=0 > /dev/null
+ ; REQUIRES: loadable_module
+ ; XFAIL: lto_on_osx
+ 
+diff -ur a/llvm-3.3.src/test/BugPoint/metadata.ll b/llvm-3.3.src/test/BugPoint/metadata.ll
+--- a/llvm-3.3.src/test/BugPoint/metadata.ll	2012-10-26 04:19:02.000000000 +0200
++++ b/llvm-3.3.src/test/BugPoint/metadata.ll	2013-08-13 21:30:25.395836863 +0200
+@@ -1,4 +1,4 @@
+-; RUN: bugpoint -load %llvmshlibdir/BugpointPasses%shlibext %s -output-prefix %t -bugpoint-crashcalls -silence-passes > /dev/null
++; RUN: bugpoint -load %llvmshlibdir/BugpointPasses%shlibext %s -output-prefix %t -bugpoint-crashcalls -silence-passes -mlimit=0 > /dev/null
+ ; RUN: llvm-dis %t-reduced-simplified.bc -o - | FileCheck %s
+ ; REQUIRES: loadable_module
+ ; XFAIL: lto_on_osx
+diff -ur a/llvm-3.3.src/test/BugPoint/remove_arguments_test.ll b/llvm-3.3.src/test/BugPoint/remove_arguments_test.ll
+--- a/llvm-3.3.src/test/BugPoint/remove_arguments_test.ll	2012-10-26 04:19:02.000000000 +0200
++++ b/llvm-3.3.src/test/BugPoint/remove_arguments_test.ll	2013-08-13 21:30:45.837835466 +0200
+@@ -1,4 +1,4 @@
+-; RUN: bugpoint -load %llvmshlibdir/BugpointPasses%shlibext %s -output-prefix %t -bugpoint-crashcalls -silence-passes
++; RUN: bugpoint -load %llvmshlibdir/BugpointPasses%shlibext %s -output-prefix %t -bugpoint-crashcalls -silence-passes -mlimit=0
+ ; RUN: llvm-dis %t-reduced-simplified.bc -o - | FileCheck %s
+ ; REQUIRES: loadable_module
+ ; XFAIL: lto_on_osx
