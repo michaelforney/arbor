@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Ingmar Vanhassel
+# Copyright 2008, 2009, 2013 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'tig-0.9.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
@@ -21,12 +21,21 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libiconv )
-DEFAULT_SRC_INSTALL_EXTRA_DOCS=( {tig.1,tigrc.5,tigmanual.7}.{html,txt} contrib/tigrc )
+if ever at_least 1.2-scm ; then
+    DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/{tig.1,tigrc.5,tigmanual.7}.{html,asciidoc} contrib/tigrc )
+else
+    DEFAULT_SRC_INSTALL_EXTRA_DOCS=( {tig.1,tigrc.5,tigmanual.7}.{html,txt} contrib/tigrc )
+fi
 
 src_install() {
     default
 
-    doman ${PN}.1 ${PN}rc.5
+    if ever at_least 1.2-scm ; then
+        doman doc/${PN}.1 doc/${PN}rc.5 doc/${PN}manual.7
+    else
+        doman ${PN}.1 ${PN}rc.5 ${PN}manual.7
+    fi
+
     dobashcompletion contrib/${PN}-completion.bash
 }
 

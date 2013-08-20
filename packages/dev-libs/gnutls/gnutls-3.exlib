@@ -2,7 +2,7 @@
 # Copyright 2011 Elias Pipping <pipping@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.11 ] ]
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.14 ] ]
 
 require easy-multibuild
 
@@ -39,6 +39,11 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'doc gtk-doc' )
 AT_M4DIR=( m4 gl/m4 src/libopts/m4/ )
 
 gnutls-3_src_prepare() {
+    # Thomas Witt
+    # Upstream: reported
+    # Reason: cert-test, complex-cert fails if builddir and srcdir differ
+    edo sed -i -e 's+$srcdir/tmp-pem.pem+tmp-pem.pem+' tests/cert-tests/pem-decoding
+
     # Source: Trond A Ekseth <troeks@gmail.com>
     # Upstream: No
     # Reason: Binding to 0.0.0.0 creates access violations under sydbox.
@@ -50,7 +55,7 @@ gnutls-3_src_prepare() {
 
     # gnutls-serv will always run on 0.0.0.0 and these tests use it
     edo sed -e '/TESTS =/s:testdsa::' -i tests/dsa/Makefile.am
-    edo sed -e '/TESTS =/s:testcerts::' -i tests/openpgp-certs/Makefile.am
+    edo sed -e '/TESTS +=/s:testcerts::' -i tests/openpgp-certs/Makefile.am
 
     # Disable a test that fails to return
     edo sed -i -e s/mini-loss-time// tests/Makefile.am

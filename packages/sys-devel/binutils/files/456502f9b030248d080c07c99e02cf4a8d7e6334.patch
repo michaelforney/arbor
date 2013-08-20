@@ -1,0 +1,383 @@
+commit 456502f9b030248d080c07c99e02cf4a8d7e6334
+Author: Cary Coutant <ccoutant@google.com>
+Date:   Fri Jun 14 12:57:17 2013 -0700
+
+    Fix problem where linker complains about a TLS symbol mismatch when a
+    plugin-claimed file provides a TLS symbol.
+    
+    2013-06-14  Cary Coutant  <ccoutant@google.com>
+    
+    gold/
+    	* resolve.cc (Symbol::override_base): Don't override st_type
+    	from plugin placeholder symbols.
+    	(Symbol_table::resolve): Likewise.
+    	(Symbol_table::should_override): Don't complain about TLS mismatch
+    	if the TO symbol is a plugin placeholder.
+    	* testsuite/Makefile.am (plugin_test_tls): New test.
+    	* testsuite/Makefile.in: Regenerate.
+    	* testsuite/plugin_test_tls.sh: New test script.
+    	* testsuite/two_file_test_2_tls.cc: New test source.
+    	* testsuite/two_file_test_tls.cc: New test source.
+
+diff --git a/gold/resolve.cc b/gold/resolve.cc
+index 0da8da2..3b6e706 100644
+--- a/gold/resolve.cc
++++ b/gold/resolve.cc
+@@ -96,7 +96,9 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
+   this->override_version(version);
+   this->u_.from_object.shndx = st_shndx;
+   this->is_ordinary_shndx_ = is_ordinary;
+-  this->type_ = sym.get_st_type();
++  // Don't override st_type from plugin placeholder symbols.
++  if (object->pluginobj() == NULL)
++    this->type_ = sym.get_st_type();
+   this->binding_ = sym.get_st_bind();
+   this->override_visibility(sym.get_st_visibility());
+   this->nonvis_ = sym.get_st_nonvis();
+@@ -343,15 +345,20 @@ Symbol_table::resolve(Sized_symbol<size>* to,
+       this->candidate_odr_violations_[to->name()].insert(toloc);
+     }
+ 
++  // Plugins don't provide a symbol type, so adopt the existing type
++  // if the FROM symbol is from a plugin.
++  elfcpp::STT fromtype = (object->pluginobj() != NULL
++			  ? to->type()
++			  : sym.get_st_type());
+   unsigned int frombits = symbol_to_bits(sym.get_st_bind(),
+                                          object->is_dynamic(),
+ 					 st_shndx, is_ordinary,
+-                                         sym.get_st_type());
++                                         fromtype);
+ 
+   bool adjust_common_sizes;
+   bool adjust_dyndef;
+   typename Sized_symbol<size>::Size_type tosize = to->symsize();
+-  if (Symbol_table::should_override(to, frombits, sym.get_st_type(), OBJECT,
++  if (Symbol_table::should_override(to, frombits, fromtype, OBJECT,
+ 				    object, &adjust_common_sizes,
+ 				    &adjust_dyndef))
+     {
+@@ -445,9 +452,8 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
+ 			      to->type());
+     }
+ 
+-  if (to->type() == elfcpp::STT_TLS
+-      ? fromtype != elfcpp::STT_TLS
+-      : fromtype == elfcpp::STT_TLS)
++  if ((to->type() == elfcpp::STT_TLS) ^ (fromtype == elfcpp::STT_TLS)
++      && !to->is_placeholder())
+     Symbol_table::report_resolve_problem(true,
+ 					 _("symbol '%s' used as both __thread "
+ 					   "and non-__thread"),
+diff --git a/gold/testsuite/Makefile.am b/gold/testsuite/Makefile.am
+index bccf54d..9f8081a 100644
+--- a/gold/testsuite/Makefile.am
++++ b/gold/testsuite/Makefile.am
+@@ -1612,6 +1612,22 @@ empty.syms:
+ 	@echo "" >$@
+ 	@echo "Symbol table" >>$@
+ 
++if TLS
++
++check_PROGRAMS += plugin_test_tls
++check_SCRIPTS += plugin_test_tls.sh
++check_DATA += plugin_test_tls.err
++MOSTLYCLEANFILES += plugin_test_tls.err
++plugin_test_tls: two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms gcctestdir/ld plugin_test.so
++	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms 2>plugin_test_tls.err
++plugin_test_tls.err: plugin_test_tls
++	@touch plugin_test_tls.err
++
++two_file_test_2_tls.syms: two_file_test_2_tls.o
++	$(TEST_READELF) -sW $< >$@ 2>/dev/null
++
++endif TLS
++
+ MOSTLYCLEANFILES += unused.c
+ unused.syms: unused.o
+ 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+diff --git a/gold/testsuite/plugin_test_tls.sh b/gold/testsuite/plugin_test_tls.sh
+new file mode 100755
+index 0000000..22b5458
+--- /dev/null
++++ b/gold/testsuite/plugin_test_tls.sh
+@@ -0,0 +1,60 @@
++#!/bin/sh
++
++# plugin_test_tls.sh -- a test case for the plugin API.
++
++# Copyright 2013 Free Software Foundation, Inc.
++# Written by Cary Coutant <ccoutant@google.com>.
++
++# This file is part of gold.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
++# MA 02110-1301, USA.
++
++# This file goes with plugin_test.c, a simple plug-in library that
++# exercises the basic interfaces and prints out version numbers and
++# options passed to the plugin.
++
++check()
++{
++    if ! grep -q "$2" "$1"
++    then
++	echo "Did not find expected output in $1:"
++	echo "   $2"
++	echo ""
++	echo "Actual output below:"
++	cat "$1"
++	exit 1
++    fi
++}
++
++check plugin_test_tls.err "API version:"
++check plugin_test_tls.err "gold version:"
++check plugin_test_tls.err "option: _Z4f13iv"
++check plugin_test_tls.err "two_file_test_tls.o: claim file hook called"
++check plugin_test_tls.err "two_file_test_1.syms: claim file hook called"
++check plugin_test_tls.err "two_file_test_1b.syms: claim file hook called"
++check plugin_test_tls.err "two_file_test_2_tls.syms: claim file hook called"
++check plugin_test_tls.err "two_file_test_1.syms: _Z4f13iv: PREVAILING_DEF_IRONLY"
++check plugin_test_tls.err "two_file_test_1.syms: _Z2t2v: PREVAILING_DEF_REG"
++check plugin_test_tls.err "two_file_test_1.syms: v2: RESOLVED_IR"
++check plugin_test_tls.err "two_file_test_1.syms: t17data: RESOLVED_IR"
++check plugin_test_tls.err "two_file_test_2_tls.syms: _Z4f13iv: PREEMPTED_IR"
++check plugin_test_tls.err "two_file_test_2_tls.syms: tls1: PREVAILING_DEF_REG"
++check plugin_test_tls.err "two_file_test_1.o: adding new input file"
++check plugin_test_tls.err "two_file_test_1b.o: adding new input file"
++check plugin_test_tls.err "two_file_test_2_tls.o: adding new input file"
++check plugin_test_tls.err "cleanup hook called"
++
++exit 0
+diff --git a/gold/testsuite/two_file_test_2_tls.cc b/gold/testsuite/two_file_test_2_tls.cc
+new file mode 100644
+index 0000000..6c74c69
+--- /dev/null
++++ b/gold/testsuite/two_file_test_2_tls.cc
+@@ -0,0 +1,147 @@
++// two_file_test_2_tls.cc -- a two file test case for gold, with a TLS symbol
++
++// Copyright 2006, 2007, 2008, 2013 Free Software Foundation, Inc.
++// Written by Ian Lance Taylor <iant@google.com>.
++
++// This file is part of gold.
++
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 3 of the License, or
++// (at your option) any later version.
++
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// You should have received a copy of the GNU General Public License
++// along with this program; if not, write to the Free Software
++// Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
++// MA 02110-1301, USA.
++
++// This tests references between files.  This is file 2, and
++// two_file_test_1.cc is file 1.  See file 1 for details.
++
++#include "two_file_test.h"
++
++// 1  Code in file 1 calls code in file 2.
++
++__thread int tls1 = 123;
++
++int
++t1_2()
++{
++  return tls1;
++}
++
++bool
++t1a()
++{
++  return t1_2() == 123;
++}
++
++// 2  Code in file 1 refers to global data in file 2.
++
++int v2 = 456;
++
++// 3 Code in file 1 referes to common symbol in file 2.  This is
++// initialized at runtime to 789.
++
++int v3;
++
++// 4  Code in file 1 refers to offset within global data in file 2.
++
++char v4[] = "Hello, world";
++
++// 5 Code in file 1 refers to offset within common symbol in file 2.
++// This is initialized at runtime to a copy of v4.
++
++char v5[13];
++
++// 6  Data in file 1 refers to global data in file 2.  This reuses v2.
++
++// 7  Data in file 1 refers to common symbol in file 2.  This reuses v3.
++
++// 8 Data in file 1 refers to offset within global data in file 2.
++// This reuses v4.
++
++// 9 Data in file 1 refers to offset within common symbol in file 2.
++// This reuses v5.
++
++// 10 Data in file 1 refers to function in file 2.
++
++int
++f10()
++{
++  return 135;
++}
++
++// 11 Pass function pointer from file 1 to file 2.
++
++int
++f11b(int (*pfn)())
++{
++  return (*pfn)();
++}
++
++// 12 Compare address of function for equality in both files.
++
++bool
++(*f12())()
++{
++  return &t12;
++}
++
++// 13 Compare address of inline function for equality in both files.
++
++void
++(*f13())()
++{
++  return &f13i;
++}
++
++// 14 Compare string constants in file 1 and file 2.
++
++const char*
++f14()
++{
++  return TEST_STRING_CONSTANT;
++}
++
++// 15 Compare wide string constants in file 1 and file 2.
++
++const wchar_t*
++f15()
++{
++  return TEST_WIDE_STRING_CONSTANT;
++}
++
++// 17 File 1 checks array of string constants defined in file 2.
++
++const char* t17data[T17_COUNT] =
++{
++  "a", "b", "c", "d", "e"
++};
++
++// 18 File 1 checks string constants referenced directly in file 2.
++
++const char*
++f18(int i)
++{
++  switch (i)
++    {
++    case 0:
++      return "a";
++    case 1:
++      return "b";
++    case 2:
++      return "c";
++    case 3:
++      return "d";
++    case 4:
++      return "e";
++    default:
++      return 0;
++    }
++}
+diff --git a/gold/testsuite/two_file_test_tls.cc b/gold/testsuite/two_file_test_tls.cc
+new file mode 100644
+index 0000000..d9a1c39
+--- /dev/null
++++ b/gold/testsuite/two_file_test_tls.cc
+@@ -0,0 +1,60 @@
++// two_file_test_tls.cc -- a two file test case for gold, main function, with TLS
++
++// Copyright 2006, 2007, 2008, 2013 Free Software Foundation, Inc.
++// Written by Ian Lance Taylor <iant@google.com>.
++
++// This file is part of gold.
++
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 3 of the License, or
++// (at your option) any later version.
++
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// You should have received a copy of the GNU General Public License
++// along with this program; if not, write to the Free Software
++// Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
++// MA 02110-1301, USA.
++
++// This tests references between files.  This is the main file.  See
++// two_file_test_1.cc for details.
++
++#include <cassert>
++
++#include "two_file_test.h"
++
++extern __thread int tls1;
++
++int
++main()
++{
++  // Initialize common data.
++  v3 = 789;
++  for (int i = 0; i < 13; ++i)
++    v5[i] = v4[i];
++
++  assert(tls1 == 123);
++  assert(t1());
++  assert(t1a());
++  assert(t2());
++  assert(t3());
++  assert(t4());
++  assert(t5());
++  assert(t6());
++  assert(t7());
++  assert(t8());
++  assert(t9());
++  assert(t10());
++  assert(t11());
++  assert(t12());
++  assert(t13());
++  assert(t16());
++  assert(t16a());
++  assert(t17());
++  assert(t18());
++  return 0;
++}
