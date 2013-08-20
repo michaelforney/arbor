@@ -1,26 +1,20 @@
-From b8ea19679e7043793b4eabcffe2eef15dbc0643e Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Bo=20=C3=98rsted=20Andresen?= <zlin@exherbo.org>
-Date: Thu, 3 Jun 2010 04:24:25 +0000
-Subject: [PATCH] Exherbo configuration.
+Source: Bryan Østergaard <kloeri@exherbo.org>, based on old version
+by Bo Andreasen <zlin@exherbo.org>
+Upstream: no, distribution specific settings
+Reason: needed for the build process
 
----
- src/EDITME |   41 +++++++++++++++++++++--------------------
- 1 files changed, 21 insertions(+), 20 deletions(-)
-
-diff --git a/src/EDITME b/src/EDITME
-index 9869eb1..582d75d 100644
---- a/src/EDITME
-+++ b/src/EDITME
-@@ -100,7 +100,7 @@
+--- a/src/EDITME	2013-08-20 23:09:51.073514390 +0000
++++ b/src/EDITME	2013-08-20 23:17:45.138506401 +0000
+@@ -98,7 +98,7 @@
  # /usr/local/sbin. The installation script will try to create this directory,
  # and any superior directories, if they do not exist.
  
 -BIN_DIRECTORY=/usr/exim/bin
-+BIN_DIRECTORY=/usr/sbin
++BIN_DIRECTORY=/usr/bin
  
  
  #------------------------------------------------------------------------------
-@@ -116,7 +116,7 @@ BIN_DIRECTORY=/usr/exim/bin
+@@ -114,7 +114,7 @@
  # don't exist. It will also install a default runtime configuration if this
  # file does not exist.
  
@@ -29,12 +23,12 @@ index 9869eb1..582d75d 100644
  
  # It is possible to specify a colon-separated list of files for CONFIGURE_FILE.
  # In this case, Exim will use the first of them that exists when it is run.
-@@ -134,14 +134,14 @@ CONFIGURE_FILE=/usr/exim/configure
- # owner of a local mailbox.) Specifying these values as root is very strongly
- # discouraged.
+@@ -131,14 +131,14 @@
+ # deliveries. (Local deliveries run as various non-root users, typically as the
+ # owner of a local mailbox.) Specifying these values as root is not supported.
  
 -EXIM_USER=
-+# EXIM_USER=mail
++EXIM_USER=mail
  
  # If you specify EXIM_USER as a name, this is looked up at build time, and the
  # uid number is built into the binary. However, you can specify that this
@@ -46,7 +40,7 @@ index 9869eb1..582d75d 100644
  
  # In other words, put "ref:" in front of the user name. If you set EXIM_USER
  # like this, any value specified for EXIM_GROUP is also passed "by reference".
-@@ -244,8 +244,8 @@ TRANSPORT_SMTP=yes
+@@ -241,8 +241,8 @@
  # MBX, is included only when requested. If you do not know what this is about,
  # leave these settings commented out.
  
@@ -57,7 +51,7 @@ index 9869eb1..582d75d 100644
  # SUPPORT_MBX=yes
  
  
-@@ -262,15 +262,15 @@ LOOKUP_DBM=yes
+@@ -296,15 +296,15 @@
  LOOKUP_LSEARCH=yes
  LOOKUP_DNSDB=yes
  
@@ -75,8 +69,8 @@ index 9869eb1..582d75d 100644
 +LOOKUP_PASSWD=yes
  # LOOKUP_PGSQL=yes
  # LOOKUP_SQLITE=yes
- # LOOKUP_WHOSON=yes
-@@ -333,7 +333,7 @@ PCRE_LIBS=-lpcre
+ # LOOKUP_SQLITE_PC=sqlite3
+@@ -373,7 +373,7 @@
  # files are defaulted in the OS/Makefile-Default file, but can be overridden in
  # local OS-specific make files.
  
@@ -85,7 +79,7 @@ index 9869eb1..582d75d 100644
  
  
  #------------------------------------------------------------------------------
-@@ -486,11 +486,11 @@ FIXED_NEVER_USERS=root
+@@ -578,15 +578,15 @@
  # included in the Exim binary. You will then need to set up the run time
  # configuration to make use of the mechanism(s) selected.
  
@@ -93,6 +87,10 @@ index 9869eb1..582d75d 100644
 +AUTH_CRAM_MD5=yes
  # AUTH_CYRUS_SASL=yes
  # AUTH_DOVECOT=yes
+ # AUTH_GSASL=yes
+ # AUTH_GSASL_PC=libgsasl
+ # AUTH_HEIMDAL_GSSAPI=yes
+ # AUTH_HEIMDAL_GSSAPI_PC=heimdal-gssapi
 -# AUTH_PLAINTEXT=yes
 -# AUTH_SPA=yes
 +AUTH_PLAINTEXT=yes
@@ -100,7 +98,7 @@ index 9869eb1..582d75d 100644
  
  
  #------------------------------------------------------------------------------
-@@ -643,7 +643,7 @@ HEADERS_CHARSET="ISO-8859-1"
+@@ -751,7 +751,7 @@
  # Once you have done this, "make install" will build the info files and
  # install them in the directory you have defined.
  
@@ -109,7 +107,7 @@ index 9869eb1..582d75d 100644
  
  
  #------------------------------------------------------------------------------
-@@ -656,7 +656,7 @@ HEADERS_CHARSET="ISO-8859-1"
+@@ -764,7 +764,7 @@
  # %s. This will be replaced by one of the strings "main", "panic", or "reject"
  # to form the final file names. Some installations may want something like this:
  
@@ -118,7 +116,7 @@ index 9869eb1..582d75d 100644
  
  # which results in files with names /var/log/exim_mainlog, etc. The directory
  # in which the log files are placed must exist; Exim does not try to create
-@@ -705,7 +705,7 @@ EXICYCLOG_MAX=10
+@@ -813,7 +813,7 @@
  # files. Both the name of the command and the suffix that it adds to files
  # need to be defined here. See also the EXICYCLOG_MAX configuration.
  
@@ -127,7 +125,7 @@ index 9869eb1..582d75d 100644
  COMPRESS_SUFFIX=gz
  
  
-@@ -713,7 +713,7 @@ COMPRESS_SUFFIX=gz
+@@ -821,7 +821,7 @@
  # If the exigrep utility is fed compressed log files, it tries to uncompress
  # them using this command.
  
@@ -136,7 +134,7 @@ index 9869eb1..582d75d 100644
  
  
  #------------------------------------------------------------------------------
-@@ -810,7 +810,8 @@ ZCAT_COMMAND=/usr/bin/zcat
+@@ -918,7 +918,8 @@
  # group. Once you have installed saslauthd, you should arrange for it to be
  # started by root at boot time.
  
@@ -146,7 +144,7 @@ index 9869eb1..582d75d 100644
  
  
  #------------------------------------------------------------------------------
-@@ -851,7 +852,7 @@ ZCAT_COMMAND=/usr/bin/zcat
+@@ -966,7 +967,7 @@
  # aliases). The following setting can be changed to specify a different
  # location for the system alias file.
  
@@ -155,7 +153,7 @@ index 9869eb1..582d75d 100644
  
  
  #------------------------------------------------------------------------------
-@@ -1097,7 +1098,7 @@ TMPDIR="/tmp"
+@@ -1222,7 +1223,7 @@
  # (process id) to a file so that it can easily be identified. The path of the
  # file can be specified here. Some installations may want something like this:
  
@@ -164,6 +162,3 @@ index 9869eb1..582d75d 100644
  
  # If PID_FILE_PATH is not defined, Exim writes a file in its spool directory
  # using the name "exim-daemon.pid".
--- 
-1.7.1
-
