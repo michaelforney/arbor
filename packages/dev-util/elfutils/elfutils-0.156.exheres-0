@@ -10,21 +10,28 @@ DOWNLOADS="${HOMEPAGE}/${PV}/${PNV}.tar.bz2"
 LICENCES="GPL-3 || ( GPL-2 LGPL-3 )"
 SLOT="0"
 PLATFORMS="~amd64 ~x86"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS="
+    multibuild_c: 32 64
+"
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        sys-devel/gettext[>=0.18.2]
     build+run:
-        !dev-libs/libelf
         app-arch/bzip2[multibuild_c:*(-)?]
         app-arch/xz[multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
+        !dev-libs/libelf
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/elfutils-0.155-binutils-pr-ld-13621.patch )
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' '--program-prefix=eu-' '--with-bzlib' '--with-zlib'
-                               '--with-lzma' )
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --program-prefix=eu-
+    --enable-nls
+    --disable-valgrind
+    --with-bzlib
+    --with-lzma
+    --with-zlib
+)
 
 configure_one_multibuild() {
     # NOTE (abdulras) tests require that the debug information be present in the tools
