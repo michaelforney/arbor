@@ -1,0 +1,45 @@
+Source: RedHat/Fedora
+Upstream: No, see notes
+Reason: Multibuild packages fail to build against c-ares
+
+Multibuild CURL cannot build against a multibuild
+c-ares because ares_build.h is arch-specific. This
+patch is not upstream because upstream indicates
+that they intend for situations where multiple
+ABIs must be supported to install the header into a
+per-ABI prefix, and distros which simply want 32/64
+multilib to merge it themselves. RedHat has done
+so, and we can reuse their work.
+
+http://pkgs.fedoraproject.org/gitweb/?p=c-ares.git
+
+diff -up c-ares-1.10.0/ares_build.h.in.multilib c-ares-1.10.0/ares_build.h.in
+--- c-ares-1.10.0/ares_build.h.in.multilib	2013-05-13 11:40:22.697814087 +0200
++++ c-ares-1.10.0/ares_build.h.in	2013-05-13 11:40:26.236813966 +0200
+@@ -96,7 +96,14 @@
+ #endif
+ 
+ /* The size of `long', as computed by sizeof. */
+-#undef CARES_SIZEOF_LONG
++#include <bits/wordsize.h>
++#if __WORDSIZE == 32
++#define CARES_SIZEOF_LONG 4
++#elif __WORDSIZE == 64
++#define CARES_SIZEOF_LONG 8
++#else
++#error "Unknown word size"
++#endif
+ 
+ /* Integral data type used for ares_socklen_t. */
+ #undef CARES_TYPEOF_ARES_SOCKLEN_T
+diff -up c-ares-1.10.0/configure.ac.multilib c-ares-1.10.0/configure.ac
+--- c-ares-1.10.0/configure.ac.multilib	2013-05-13 11:41:00.480812797 +0200
++++ c-ares-1.10.0/configure.ac	2013-05-13 11:41:17.210812226 +0200
+@@ -457,7 +457,6 @@ AC_CHECK_SIZEOF(size_t)
+ AC_CHECK_SIZEOF(long)
+ AC_CHECK_SIZEOF(int)
+ AC_CHECK_SIZEOF(short)
+-CARES_CONFIGURE_LONG
+ AC_CHECK_SIZEOF(time_t)
+ 
+ AC_CHECK_TYPE(long long,

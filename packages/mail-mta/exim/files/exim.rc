@@ -12,7 +12,7 @@ depend() {
 
 start() {
     ebegin "Starting exim"
-    start-stop-daemon --start --quiet --exec /usr/sbin/exim --pidfile /run/exim.pid -- ${EXIM_OPTS:--bd -q15m}
+    start-stop-daemon --start --quiet --exec /usr/bin/exim --pidfile /run/exim.pid -- ${EXIM_OPTS:--bd -q15m}
     eend $?
 }
 
