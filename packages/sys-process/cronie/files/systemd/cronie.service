@@ -3,7 +3,8 @@ Description=Command Scheduler
 After=syslog.target
 
 [Service]
-ExecStart=/usr/sbin/crond -n
+EnvironmentFile=/etc/conf.d/cronie.conf
+ExecStart=/usr/sbin/crond -n $CRONDARGS
 
 [Install]
 WantedBy=multi-user.target
