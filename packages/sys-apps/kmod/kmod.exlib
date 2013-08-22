@@ -22,6 +22,7 @@ UPSTREAM_RELEASE_NOTES="http://git.kernel.org/?p=utils/kernel/kmod/kmod.git;a=bl
 LICENCES="GPL-2 LGPL-2.1"
 SLOT="0"
 MYOPTIONS="
+    bash-completion
     debug
     doc [[ description = [ Build libkmod's API documentation using gtk-doc ] ]]
     multibuild_c: 32 64
@@ -52,6 +53,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     "doc gtk-doc"
 )
 
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=(
+    "bash-completion bashcompletiondir /usr/share/bash-completion/completions"
+)
+
 AT_M4DIR=( m4 )
 
 kmod_test_one_multibuild() {
@@ -76,6 +81,10 @@ kmod_src_install() {
             /usr/share/man/man8/${a}.8 ${PN}.${a}.8
         )
     done
+
+    if ! option bash-completion ; then
+        edo rm -r "${IMAGE}"/no
+    fi
 
     dosym ../usr/bin/kmod /bin/lsmod
     dosym ../usr/bin/kmod /sbin/lsmod
