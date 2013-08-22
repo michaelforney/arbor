@@ -71,11 +71,9 @@ cronie_src_install() {
     newpamd "${FILES}"/pamd.compatible crond
 
     option baselayout && newinitd "${FILES}"/cronie.bl1 cronie
+
     install_systemd_files
-    if option systemd ; then
-        insinto /etc/conf.d
-        doins "${FILES}"/systemd/cronie.conf
-    fi
+    option systemd && doconfd "${FILES}"/systemd/cronie.conf
 
     # alternatives
     local alternatives=(
