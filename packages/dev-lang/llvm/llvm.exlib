@@ -31,7 +31,11 @@ src_prepare() {
         expatch "${FILES}"/${PN}-fix-multibuild-tests.patch
     fi
 
-    expatch "${FILES}"/llvm-config-path.patch
+    if ever at_least scm; then
+        expatch "${FILES}"/llvm-config-path-v2.patch
+    else
+        expatch "${FILES}"/llvm-config-path.patch
+    fi
 
     default
     edo popd
