@@ -1,0 +1,256 @@
+Source: written by Johannes Nixdorf, updated by Arne Janbu
+Upstream: No, see http://llvm.org/bugs/show_bug.cgi?id=9136
+Reason: Without this patch, llvm-config returns a wrong path with multilib
+
+From 149dafe2cfa9b40366b0e7411d8ef1a1e18c0fb5 Mon Sep 17 00:00:00 2001
+From: Johannes Nixdorf <mixi@exherbo.org>
+Date: Sat, 9 Mar 2013 22:39:26 +0100
+Subject: [PATCH] llvm-config: don't use the executable path if not in a
+ development tree
+
+There is no reason to use the current path to guess the library install
+dir if it is not in a development tree.
+
+This behaviour broke LLVM_LIBDIR_SUFFIX when using cmake and --libdir,
+--bindir and --includedir when using autotools.
+
+With this change moving llvm-config to a different location (used by us
+to support 32bit and 64bit libraries on the same file system) is also
+supported as long as the new location doesn't look like a development
+tree.
+
+Arne Janbu: Added the re-inclusion of LLVM_LIBDIR. It was removed
+upsteam and we need it to specify /usr/lib{32,64}.
+---
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 27010d2..13958d1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -73,6 +73,12 @@ set(LLVM_TOOLS_BINARY_DIR ${LLVM_BINARY_DIR}/bin)
+ set(LLVM_EXAMPLES_BINARY_DIR ${LLVM_BINARY_DIR}/examples)
+ set(LLVM_LIBDIR_SUFFIX "" CACHE STRING "Define suffix of library directory name (32/64)" )
+ 
++# set LLVM_*DIR for include/llvm/Config/llvm-config.h
++set(LLVM_PREFIX ${CMAKE_INSTALL_PREFIX})
++set(LLVM_LIBDIR ${LLVM_PREFIX}/lib${LLVM_LIBDIR_SUFFIX})
++set(LLVM_INCLUDEDIR ${LLVM_PREFIX}/include)
++set(LLVM_BINDIR ${LLVM_PREFIX}/bin)
++
+ set(LLVM_ALL_TARGETS
+   AArch64
+   ARM
+diff --git a/autoconf/configure.ac b/autoconf/configure.ac
+index 31edd35..7d22b65 100644
+--- a/autoconf/configure.ac
++++ b/autoconf/configure.ac
+@@ -1772,6 +1772,7 @@ if test "${prefix}" = "NONE" ; then
+ fi
+ eval LLVM_PREFIX="${prefix}";
+ eval LLVM_BINDIR="${prefix}/bin";
++eval LLVM_LIBDIR="${prefix}/lib";
+ eval LLVM_DATADIR="${prefix}/share/llvm";
+ eval LLVM_DOCSDIR="${prefix}/share/doc/llvm";
+ eval LLVM_ETCDIR="${prefix}/etc/llvm";
+@@ -1781,6 +1782,7 @@ eval LLVM_MANDIR="${prefix}/man";
+ LLVM_CONFIGTIME=`date`
+ AC_SUBST(LLVM_PREFIX)
+ AC_SUBST(LLVM_BINDIR)
++AC_SUBST(LLVM_LIBDIR)
+ AC_SUBST(LLVM_DATADIR)
+ AC_SUBST(LLVM_DOCSDIR)
+ AC_SUBST(LLVM_ETCDIR)
+@@ -1800,6 +1802,8 @@ AC_DEFINE_UNQUOTED(LLVM_PREFIX,"$LLVM_PREFIX",
+                    [Installation prefix directory])
+ AC_DEFINE_UNQUOTED(LLVM_BINDIR, "$LLVM_BINDIR",
+                    [Installation directory for binary executables])
++AC_DEFINE_UNQUOTED(LLVM_LIBDIR, "$LLVM_LIBDIR",
++                   [Installation directory for libraries])
+ AC_DEFINE_UNQUOTED(LLVM_DATADIR, "$LLVM_DATADIR",
+                    [Installation directory for data files])
+ AC_DEFINE_UNQUOTED(LLVM_DOCSDIR, "$LLVM_DOCSDIR",
+@@ -1859,7 +1863,7 @@ for a_binding in $BINDINGS_TO_BUILD ; do
+         AC_SUBST(OCAML_LIBDIR,$ocaml_stdlib)
+       else
+         # ocaml stdlib is outside our prefix; use libdir/ocaml
+-        AC_SUBST(OCAML_LIBDIR,${prefix}/lib/ocaml)
++        AC_SUBST(OCAML_LIBDIR,$LLVM_LIBDIR/ocaml)
+       fi
+     fi
+     ;;
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index 93046fe..5b7becc 100755
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -459,4 +459,3 @@ if (LLVM_ENABLE_ZLIB )
+   endif()
+ endif()
+ 
+-set(LLVM_PREFIX ${CMAKE_INSTALL_PREFIX})
+diff --git a/configure b/configure
+index 739b150..7ba24e4 100755
+--- a/configure
++++ b/configure
+@@ -787,6 +787,7 @@ SHLIBEXT
+ SHLIBPATH_VAR
+ LLVM_PREFIX
+ LLVM_BINDIR
++LLVM_LIBDIR
+ LLVM_DATADIR
+ LLVM_DOCSDIR
+ LLVM_ETCDIR
+@@ -21922,6 +21923,7 @@ if test "${prefix}" = "NONE" ; then
+ fi
+ eval LLVM_PREFIX="${prefix}";
+ eval LLVM_BINDIR="${prefix}/bin";
++eval LLVM_LIBDIR="${prefix}/lib";
+ eval LLVM_DATADIR="${prefix}/share/llvm";
+ eval LLVM_DOCSDIR="${prefix}/share/doc/llvm";
+ eval LLVM_ETCDIR="${prefix}/etc/llvm";
+@@ -21953,6 +21955,9 @@ cat >>confdefs.h <<_ACEOF
+ #define LLVM_BINDIR "$LLVM_BINDIR"
+ _ACEOF
+ 
++cat >>confdefs.h <<_ACEOF
++#define LLVM_LIBDIR "$LLVM_LIBDIR"
++_ACEOF
+ 
+ cat >>confdefs.h <<_ACEOF
+ #define LLVM_DATADIR "$LLVM_DATADIR"
+@@ -22041,7 +22046,7 @@ echo "$as_me: WARNING: --enable-bindings=ocaml specified, but ocamlopt not found
+ 
+       else
+         # ocaml stdlib is outside our prefix; use libdir/ocaml
+-        OCAML_LIBDIR=${prefix}/lib/ocaml
++        OCAML_LIBDIRi=$LLVM_LIBDIR/ocaml
+ 
+       fi
+     fi
+@@ -23126,6 +23131,7 @@ SHLIBEXT!$SHLIBEXT$ac_delim
+ SHLIBPATH_VAR!$SHLIBPATH_VAR$ac_delim
+ LLVM_PREFIX!$LLVM_PREFIX$ac_delim
+ LLVM_BINDIR!$LLVM_BINDIR$ac_delim
++LLVM_LIBDIR!$LLVM_LIBDIR$ac_delim
+ LLVM_DATADIR!$LLVM_DATADIR$ac_delim
+ LLVM_DOCSDIR!$LLVM_DOCSDIR$ac_delim
+ LLVM_ETCDIR!$LLVM_ETCDIR$ac_delim
+@@ -23135,6 +23141,7 @@ LLVM_MANDIR!$LLVM_MANDIR$ac_delim
+ LLVM_CONFIGTIME!$LLVM_CONFIGTIME$ac_delim
+ BINDINGS_TO_BUILD!$BINDINGS_TO_BUILD$ac_delim
+ ALL_BINDINGS!$ALL_BINDINGS$ac_delim
++OCALM_LIBDIR!$OCAML_LIBDIR$ac_delim
+ _ACEOF
+ 
+   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
+diff --git a/include/llvm/Config/config.h.cmake b/include/llvm/Config/config.h.cmake
+index 572fb6f..455fc02 100644
+--- a/include/llvm/Config/config.h.cmake
++++ b/include/llvm/Config/config.h.cmake
+@@ -525,6 +525,9 @@
+ /* Installation directory for .info files */
+ #cmakedefine LLVM_INFODIR "${LLVM_INFODIR}"
+ 
++/* Installation directory for libraries */
++#cmakedefine LLVM_LIBDIR "${LLVM_LIBDIR}"
++
+ /* Installation directory for man pages */
+ #cmakedefine LLVM_MANDIR "${LLVM_MANDIR}"
+ 
+diff --git a/include/llvm/Config/config.h.in b/include/llvm/Config/config.h.in
+index 6dc8c6e..b9164da 100644
+--- a/include/llvm/Config/config.h.in
++++ b/include/llvm/Config/config.h.in
+@@ -560,6 +560,9 @@
+ /* Installation directory for .info files */
+ #undef LLVM_INFODIR
+ 
++/* Installation directory for libraries */
++#undef LLVM_LIBDIR
++
+ /* Installation directory for man pages */
+ #undef LLVM_MANDIR
+ 
+diff --git a/include/llvm/Config/llvm-config.h.cmake b/include/llvm/Config/llvm-config.h.cmake
+index 80616ef..c6f2bef 100644
+--- a/include/llvm/Config/llvm-config.h.cmake
++++ b/include/llvm/Config/llvm-config.h.cmake
+@@ -49,6 +49,9 @@
+ /* Installation directory for .info files */
+ #cmakedefine LLVM_INFODIR "${LLVM_INFODIR}"
+ 
++/* Installation directory for libraries */
++#cmakedefine LLVM_LIBDIR "${LLVM_LIBDIR}"
++
+ /* Installation directory for man pages */
+ #cmakedefine LLVM_MANDIR "${LLVM_MANDIR}"
+ 
+diff --git a/include/llvm/Config/llvm-config.h.in b/include/llvm/Config/llvm-config.h.in
+index a4fae55..a5209fa 100644
+--- a/include/llvm/Config/llvm-config.h.in
++++ b/include/llvm/Config/llvm-config.h.in
+@@ -49,6 +49,9 @@
+ /* Installation directory for .info files */
+ #undef LLVM_INFODIR
+ 
++/* Installation directory for libraries */
++#undef LLVM_LIBDIR
++
+ /* Installation directory for man pages */
+ #undef LLVM_MANDIR
+ 
+diff --git a/projects/sample/autoconf/configure.ac b/projects/sample/autoconf/configure.ac
+index 46fd549..098f944 100644
+--- a/projects/sample/autoconf/configure.ac
++++ b/projects/sample/autoconf/configure.ac
+@@ -1412,6 +1412,7 @@ if test "${prefix}" = "NONE" ; then
+ fi
+ eval LLVM_PREFIX="${prefix}";
+ eval LLVM_BINDIR="${prefix}/bin";
++eval LLVM_LIBDIR="${prefix}/lib";
+ eval LLVM_DATADIR="${prefix}/share/llvm";
+ eval LLVM_DOCSDIR="${prefix}/share/doc/llvm";
+ eval LLVM_ETCDIR="${prefix}/etc/llvm";
+@@ -1421,6 +1422,7 @@ eval LLVM_MANDIR="${prefix}/man";
+ LLVM_CONFIGTIME=`date`
+ AC_SUBST(LLVM_PREFIX)
+ AC_SUBST(LLVM_BINDIR)
++AC_SUBST(LLVM_LIBDIR)
+ AC_SUBST(LLVM_DATADIR)
+ AC_SUBST(LLVM_DOCSDIR)
+ AC_SUBST(LLVM_ETCDIR)
+@@ -1435,6 +1437,8 @@ AC_DEFINE_UNQUOTED(LLVM_PREFIX,"$LLVM_PREFIX",
+                    [Installation prefix directory])
+ AC_DEFINE_UNQUOTED(LLVM_BINDIR, "$LLVM_BINDIR",
+                    [Installation directory for binary executables])
++AC_DEFINE_UNQUOTED(LLVM_LIBDIR, "$LLVM_LIBDIR",
++                   [Installation directory for libraries])
+ AC_DEFINE_UNQUOTED(LLVM_DATADIR, "$LLVM_DATADIR",
+                    [Installation directory for data files])
+ AC_DEFINE_UNQUOTED(LLVM_DOCSDIR, "$LLVM_DOCSDIR",
+@@ -1492,7 +1496,7 @@ for a_binding in $BINDINGS_TO_BUILD ; do
+         AC_SUBST(OCAML_LIBDIR,$ocaml_stdlib)
+       else
+         # ocaml stdlib is outside our prefix; use libdir/ocaml
+-        AC_SUBST(OCAML_LIBDIR,${prefix}/lib/ocaml)
++        AC_SUBST(OCAML_LIBDIR,$LLVM_LIBDIR/ocaml)
+       fi
+     fi
+     ;;
+diff --git a/tools/llvm-config/llvm-config.cpp b/tools/llvm-config/llvm-config.cpp
+index 3924e2e..d89de38 100644
+--- a/tools/llvm-config/llvm-config.cpp
++++ b/tools/llvm-config/llvm-config.cpp
+@@ -247,10 +247,10 @@ int main(int argc, char **argv) {
+     ActiveIncludeOption = ("-I" + ActiveIncludeDir + " " +
+                            "-I" + ActiveObjRoot + "/include");
+   } else {
+-    ActivePrefix = CurrentExecPrefix;
+-    ActiveIncludeDir = ActivePrefix + "/include";
+-    ActiveBinDir = ActivePrefix + "/bin";
+-    ActiveLibDir = ActivePrefix + "/lib";
++    ActivePrefix = LLVM_PREFIX;
++    ActiveIncludeDir = LLVM_INCLUDEDIR;
++    ActiveBinDir = LLVM_BINDIR;
++    ActiveLibDir = LLVM_LIBDIR;
+     ActiveIncludeOption = "-I" + ActiveIncludeDir;
+   }
+ 

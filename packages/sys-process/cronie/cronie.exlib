@@ -2,7 +2,7 @@
 # Copyright 2011 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require pam systemd-service cron-install [ crond=src/crond crontab=src/crontab ] alternatives
+require pam systemd-service [ systemd_files=[ cronie.service ] ] cron-install [ crond=src/crond crontab=src/crontab ] alternatives
 
 export_exlib_phases src_install pkg_postinst
 
@@ -71,7 +71,9 @@ cronie_src_install() {
     newpamd "${FILES}"/pamd.compatible crond
 
     option baselayout && newinitd "${FILES}"/cronie.bl1 cronie
+
     install_systemd_files
+    option systemd && doconfd "${FILES}"/systemd/cronie.conf
 
     # alternatives
     local alternatives=(

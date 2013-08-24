@@ -32,8 +32,8 @@ DEPENDENCIES="
         media-libs/freetype:2[>=2.4.2][multibuild_c:*(-)?]
         media-libs/jbig2dec
         media-libs/jpeg[multibuild_c:*(-)?]
-        media-libs/lcms2[>=2.4-r1][multibuild_c:*(-)?]
-        media-libs/libpng[multibuild_c:*(-)?]
+        media-libs/lcms2[>=2.5][multibuild_c:*(-)?]
+        media-libs/libpng[>=1.5.7][multibuild_c:*(-)?]
         media-libs/tiff[multibuild_c:*(-)?]
         sys-libs/zlib[multibuild_c:*(-)?]
         cups? ( net-print/cups[multibuild_c:*(-)?] )
@@ -49,22 +49,18 @@ DEPENDENCIES="
         fonts/urw-fonts [[ note = [ PostScript standard fonts ] ]]
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-9.05-cups-filters.patch )
-
 prepare_one_multibuild() {
-    edo rm -r ./{expat,freetype,jbig2dec,jpeg,lcms{,2},libpng,tiff,zlib}
+    edo rm -r ./{cups/libs,expat,freetype,jbig2dec,jpeg,lcms{,2},libpng,tiff,zlib}
     edo rm -r ./Resource/{CMap,Font}
 
     if option !gtk; then
         edo sed -e 's:\$(GSSOX)::' \
                 -e 's:.*\$(GSSOX_XENAME)$::' \
-                -i base/*.mak
+                -i base/unix-dll.mak
     fi
 
-    edo sed -e 's:^\(docdir=\).*$:\1@docdir@:' -i base/Makefile.in base/*.mak
-
-    # automake-1.13 compatibility (fixed in next release 9.08)
-    edo sed -e '/AM_PROG_CC_STDC/d' -i ijs/configure.ac
+    edo sed -e 's:^\(docdir=\).*$:\1@docdir@:' \
+            -i Makefile.in base/*.mak
 
     default
     eautoreconf
@@ -104,7 +100,6 @@ configure_one_multibuild() {
         $(option_enable cups) \
         $(option_enable dbus) \
         $(option_enable gtk) \
-        $(option_with cups install-cups) \
         $(option_with cups pdftoraster) \
         $(option_with idn libidn) \
         $(option_with X x)

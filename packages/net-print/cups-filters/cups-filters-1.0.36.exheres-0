@@ -42,6 +42,10 @@ DEPENDENCIES="
             net-dns/avahi[multibuild_c:*(-)?]
             net-print/cups[>=1.6][avahi][multibuild_c:*(-)?]
         )
+        !app-text/ghostscript[<9.09] [[
+            description = [ cups-filters now provides gstopxl and gstoraster ]
+            resolution = upgrade-blocked-before
+        ]]
     run:
         sys-apps/bc                [[ note = [ pstopdf filter ] ]]
     suggestion:
@@ -76,5 +80,7 @@ install_one_multibuild() {
     if option systemd && ! option avahi ; then
         multibuild_default_target C && edo sed -i -e 's: avahi-daemon.service::g' "${IMAGE}"/usr/${LIBDIR}/systemd/system/cups-browsed.service
     fi
+
+    edo sed -e 's:/var/lib::g' -i "${IMAGE}"/etc/cups/cups-browsed.conf
 }
 
