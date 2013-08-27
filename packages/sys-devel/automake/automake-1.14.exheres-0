@@ -3,6 +3,13 @@
 
 require automake
 
+DEPENDENCIES="
+    build+run:
+        !sys-devel/automake:1.14 [[
+            description = [ File collision ]
+        ]]
+"
+
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 src_install() {
