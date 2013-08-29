@@ -3,13 +3,20 @@
 
 require automake
 
+DEPENDENCIES="
+    build+run:
+        !sys-devel/automake:1.14 [[
+            description = [ File collision ]
+        ]]
+"
+
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 src_install() {
     automake_src_install
 
-    for man in "${IMAGE}"/usr/share/man/man?/*-${SLOT}-${SLOT}.? ; do
-        edo mv "${man}" "${man/${SLOT}-${SLOT}/${SLOT}}"
+    for man in "${IMAGE}"/usr/share/man/man?/*-$(ever range 1-2)-${SLOT}.? ; do
+        edo mv "${man}" "${man/$(ever range 1-2)-${SLOT}/${SLOT}}"
     done
     edo mv "${IMAGE}"/usr/share/aclocal/README "${IMAGE}"/usr/share/aclocal/README-${PV}
     keepdir /usr/share/aclocal

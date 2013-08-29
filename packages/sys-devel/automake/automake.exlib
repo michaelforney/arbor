@@ -25,7 +25,13 @@ elif ever at_least 1.10.1; then
 else
     LICENCES="GPL-2"
 fi
-SLOT="$(ever range 1-2)"
+
+if ever at_least 1.13; then
+    SLOT="1.13"
+else
+    SLOT="$(ever range 1-2)"
+fi
+
 MYOPTIONS=""
 RESTRICT="test"
 
@@ -34,6 +40,12 @@ DEPENDENCIES="
         sys-devel/autoconf:2.5
     run:
         sys-devel/automake-wrapper[>=0.2]"
+
+if ever at_least 1.13; then
+    DEPENDENCIES+="
+        run:
+            sys-devel/automake-wrapper[>=0.8]"
+fi
 
 WORK="${WORKBASE}/${MY_PNV}"
 
