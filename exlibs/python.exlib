@@ -9,7 +9,21 @@ myexparam python_dep=
 myexparam -b has_lib=true
 myexparam -b has_bin=false
 
-PYTHON_EXLIB_API=1
+PYTHON_EXLIB_API=2
+
+if [[ -n $(exparam python_dep) ]]; then
+    exparam -v PYTHON_DEP python_dep
+    if ([ "${PYTHON_DEP:0:1}" != '[' ] && [ "${PYTHON_DEP:0:1}" != '' ]); then
+        PYTHON_EXLIB_API=1
+    else
+        ewarn "The API is not declared stable yet so expect breakages."
+    fi
+else
+    # if not bin nor lib, we don't have a dependency and everything should work
+    if exparam -b has_lib || exparam -b has_bin; then
+        PYTHON_EXLIB_API=1
+    fi
+fi
 
 case ${PYTHON_EXLIB_API} in
     1)
@@ -85,6 +99,116 @@ case ${PYTHON_EXLIB_API} in
 
             edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
             edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
+        }
+        ;;
+    2)
+        myexparam python_sup="3.3 3.2 3.1 2.7 2.6" # supported python majors
+        myexparam option_name=python
+
+        myexparam -b has_lib=true
+        myexparam -b has_bin=false
+        myexparam -b with_opt=false
+
+        exparam -v OPTION_NAME option_name
+
+        # set dependencies ( eg python_abis:2.6? ( dev-lang/python:2.6[>=0] ) )
+        python_dependencies() {
+            for so in $(exparam python_sup); do
+                echo "python_abis:${so}? ( dev-lang/python:${so}${PYTHON_DEP} )"
+            done
+        }
+
+        if exparam -b with_opt; then
+            MYOPTIONS="${OPTION_NAME}"
+        fi
+
+        if exparam -b has_lib; then
+            # starting construction of MYOPTIONS
+            MYOPTIONS+=' ('
+            exparam -b with_opt && MYOPTIONS+=" ${OPTION_NAME}?"
+            # define python subotions with description, requires and number_select
+            MYOPTIONS+=" ( python_abis: ( $(exparam python_sup) ) [["
+            # set the maximum of enabled python_abis:*
+            MYOPTIONS+=' number-selected = exactly-one'
+            MYOPTIONS+=' ]] )'
+            # finish construction of MYOPTIONS
+            MYOPTIONS+=" )"
+            DEPENDENCIES+="build+run: ("
+            exparam -b with_opt && DEPENDENCIES+=" ${OPTION_NAME}?"
+            DEPENDENCIES+=" ( $(python_dependencies) ) )"
+
+            # set python version which we will build against - add comment why this is legal
+            # PYTHON_ABIS is set via the suboption
+            export PYTHON="/usr/bin/python${PYTHON_ABIS}"
+        else
+            if exparam -b has_bin; then
+                DEPENDENCIES+="
+                    build+run:
+                        ( $(exparam -b with_opt && echo "${OPTION_NAME}?") ( dev-lang/python:*${PYTHON_DEP} ) )
+                "
+            fi
+            exparam -b has_lib || export PYTHON="/usr/bin/python"
+        fi
+
+        # Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
+        # stamps don't match. this is done to protect sandbox.
+        #
+        # NOTE: Supported by dev-lang/python[>=2.6] only.
+        python_disable_pyc() {
+            illegal_in_global_scope
+
+            export PYTHONDONTWRITEBYTECODE=1
+        }
+
+        python_enable_pyc() {
+            illegal_in_global_scope
+
+            unset PYTHONDONTWRITEBYTECODE
+        }
+
+        # Returns the current python abi
+        python_get_abi() {
+            ewarn 'python_get_abi() is deprecated, use ${PYTHON_ABIS} instead'
+
+            illegal_in_global_scope
+
+            local python_abi
+
+            python_abi=$(${PYTHON} -V 2>&1)
+            python_abi=${python_abi#Python }
+            python_abi=$(ever range 1-2 ${python_abi})
+
+            echo -n "${python_abi}"
+        }
+
+        # Run without arguments, returns the python library directory.
+        python_get_libdir() {
+            illegal_in_global_scope
+
+            echo -n "/usr/${LIBDIR}/python${PYTHON_ABIS}"
+        }
+
+        # Run without arguments, returns the python site-packages directory.
+        python_get_sitedir() {
+            illegal_in_global_scope
+
+            echo -n "$(python_get_libdir)/site-packages"
+        }
+
+        # Byte-compiles all .py files in ${IMAGE}$(python_get_libdir). Changing the mtime of a .py file
+        # invalidates the byte-compiled versions. python_bytecompile() should thus be run at the end of
+        # src_install(). Both .pyc & .pyo (optimized & byte-compiled) files are generated.
+        python_bytecompile() {
+            illegal_in_global_scope
+
+            [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
+
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
+            edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
+
+            edo python${PYTHON_ABIS}    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
+            edo python${PYTHON_ABIS} -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
         }
         ;;
     *)
