@@ -9,77 +9,85 @@ myexparam python_dep=
 myexparam -b has_lib=true
 myexparam -b has_bin=false
 
-if exparam -b has_bin; then
-    [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
-    build+run:
-        dev-lang/python:*[>=$(exparam python_dep)]
-"
-elif exparam -b has_lib; then
-    [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
-    build+run:
-        dev-lang/python:=[>=$(exparam python_dep)]
-"
-fi
+PYTHON_EXLIB_API=1
 
-export PYTHON="/usr/bin/python"
+case ${PYTHON_EXLIB_API} in
+    1)
+        if exparam -b has_bin; then
+            [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
+            build+run:
+                dev-lang/python:*[>=$(exparam python_dep)]
+        "
+        elif exparam -b has_lib; then
+            [[ -n $(exparam python_dep) ]] && DEPENDENCIES+="
+            build+run:
+                dev-lang/python:=[>=$(exparam python_dep)]
+        "
+        fi
+
+        export PYTHON="/usr/bin/python"
 
 
-# Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
-# stamps don't match. this is done to protect sandbox.
-#
-# NOTE: Supported by dev-lang/python[>=2.6] only.
-python_disable_pyc() {
-    illegal_in_global_scope
+        # Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
+        # stamps don't match. this is done to protect sandbox.
+        #
+        # NOTE: Supported by dev-lang/python[>=2.6] only.
+        python_disable_pyc() {
+            illegal_in_global_scope
 
-    export PYTHONDONTWRITEBYTECODE=1
-}
+            export PYTHONDONTWRITEBYTECODE=1
+        }
 
-python_enable_pyc() {
-    illegal_in_global_scope
+        python_enable_pyc() {
+            illegal_in_global_scope
 
-    unset PYTHONDONTWRITEBYTECODE
-}
+            unset PYTHONDONTWRITEBYTECODE
+        }
 
-# Returns the current python abi
-python_get_abi() {
-    illegal_in_global_scope
+        # Returns the current python abi
+        python_get_abi() {
+            illegal_in_global_scope
 
-    local python_abi
+            local python_abi
 
-    python_abi=$(${PYTHON} -V 2>&1)
-    python_abi=${python_abi#Python }
-    python_abi=$(ever range 1-2 ${python_abi})
+            python_abi=$(${PYTHON} -V 2>&1)
+            python_abi=${python_abi#Python }
+            python_abi=$(ever range 1-2 ${python_abi})
 
-    echo -n "${python_abi}"
-}
+            echo -n "${python_abi}"
+        }
 
-# Run without arguments, returns the python library directory.
-python_get_libdir() {
-    illegal_in_global_scope
+        # Run without arguments, returns the python library directory.
+        python_get_libdir() {
+            illegal_in_global_scope
 
-    echo -n "/usr/${LIBDIR}/python$(python_get_abi)"
-}
+            echo -n "/usr/${LIBDIR}/python$(python_get_abi)"
+        }
 
-# Run without arguments, returns the python site-packages directory.
-python_get_sitedir() {
-    illegal_in_global_scope
+        # Run without arguments, returns the python site-packages directory.
+        python_get_sitedir() {
+            illegal_in_global_scope
 
-    echo -n "$(python_get_libdir)/site-packages"
-}
+            echo -n "$(python_get_libdir)/site-packages"
+        }
 
-# Byte-compiles all .py files in ${IMAGE}$(python_get_libdir). Changing the mtime of a .py file
-# invalidates the byte-compiled versions. python_bytecompile() should thus be run at the end of
-# src_install(). Both .pyc & .pyo (optimized & byte-compiled) files are generated.
-python_bytecompile() {
-    illegal_in_global_scope
+        # Byte-compiles all .py files in ${IMAGE}$(python_get_libdir). Changing the mtime of a .py file
+        # invalidates the byte-compiled versions. python_bytecompile() should thus be run at the end of
+        # src_install(). Both .pyc & .pyo (optimized & byte-compiled) files are generated.
+        python_bytecompile() {
+            illegal_in_global_scope
 
-    [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
+            [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
-    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
 
-    edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
+            edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
 
-    edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
-    edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
-}
-
+            edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
+            edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${IMAGE}$(python_get_libdir)"
+        }
+        ;;
+    *)
+        die "Detecting python exlib api went wrong"
+        ;;
+esac
