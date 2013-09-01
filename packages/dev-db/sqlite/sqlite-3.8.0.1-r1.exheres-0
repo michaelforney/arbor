@@ -23,8 +23,9 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/releaselog/$(ever replace_all _).html [[ lan
 LICENCES="public-domain"
 SLOT="3"
 PLATFORMS="~amd64 ~arm ~ppc64 ~x86"
-MYOPTIONS="doc readline
-    unlock-notify [[ description = [ Enables an API for notifications when a database is unlocked in shared-cache mode, cf. http://www.sqlite.org/c3ref/unlock_notify.html ] ]]
+MYOPTIONS="
+    doc
+    readline
     multibuild_c: 32 64
 "
 
@@ -45,9 +46,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 WORK=${WORKBASE}/${PN}-autoconf-${SCHNARF_PV}/
 
 configure_one_multibuild() {
-    append-cppflags -DSQLITE_ENABLE_COLUMN_METADATA
-
-    option unlock-notify && append-cppflags -DSQLITE_ENABLE_UNLOCK_NOTIFY
+    append-cppflags -DSQLITE_ENABLE_{COLUMN_METADATA,UNLOCK_NOTIFY}
 
     default
 }
