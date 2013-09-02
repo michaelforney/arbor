@@ -15,8 +15,6 @@ if [[ -n $(exparam python_dep) ]]; then
     exparam -v PYTHON_DEP python_dep
     if ([ "${PYTHON_DEP:0:1}" != '[' ] && [ "${PYTHON_DEP:0:1}" != '' ]); then
         PYTHON_EXLIB_API=1
-    else
-        ewarn "The API is not declared stable yet so expect breakages."
     fi
 else
     # if not bin nor lib, we don't have a dependency and everything should work
