@@ -105,7 +105,9 @@ configure_one_multibuild() {
         $(option_with X x)
 
     edo cd ./ijs
-    econf
+    econf \
+        --enable-shared \
+        --disable-static
 }
 
 compile_one_multibuild() {
