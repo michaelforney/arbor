@@ -17,7 +17,7 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.
         test-dbus-daemon \
         udev-rules \
         pam \
-        python [ has_lib=false ] \
+        python [ python_dep='[>=2.7][multibuild_c:*(-)?]' python_sup='3.3 3.2 2.7' with_opt=true ] \
         zsh-completion
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_install pkg_postinst
@@ -81,7 +81,6 @@ DEPENDENCIES="
             app-doc/gtk-doc-autotools[>=1.18]
             dev-libs/libxslt
         )
-        python? ( dev-lang/python:=[>=2.7][multibuild_c:*(-)?] )
     build+run:
         app-arch/xz[multibuild_c:*(-)?]
         dev-libs/glib:2[>=2.26][multibuild_c:*(-)?]
