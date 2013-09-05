@@ -16,7 +16,38 @@ exparam -v PYTHON_DEP python_dep
 exparam -v PYTHON_HAS_LIB has_lib
 exparam -v PYTHON_HAS_BIN has_bin
 
-require python [ python_dep="${PYTHON_DEP}" has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" ]
+PYTHON_EXLIB_API=2
+
+if [[ -n $(exparam python_dep) ]]; then
+    exparam -v PYTHON_DEP python_dep
+    if ([ "${PYTHON_DEP:0:1}" != '[' ] && [ "${PYTHON_DEP:0:1}" != '' ]); then
+        PYTHON_EXLIB_API=1
+    fi
+else
+    # if not bin nor lib, we don't have a dependency and everything should work
+    if exparam -b has_lib || exparam -b has_bin; then
+        PYTHON_EXLIB_API=1
+    fi
+fi
+
+case ${PYTHON_EXLIB_API} in
+    1)
+        require python [ python_dep="${PYTHON_DEP}" has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" ]
+        ;;
+    2)
+        myexparam python_sup="3.3 3.2 3.1 2.7 2.6"
+        myexparam -b with_opt=false
+
+        exparam -v PYTHON_SUP python_sup
+        exparam -v PYTHON_WITH_OPT with_opt
+        require python [ python_dep="${PYTHON_DEP}" python_sup="${PYTHON_SUP}" \
+                         has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" \
+                         with_opt="${PYTHON_WITH_OPT}" ]
+        ;;
+    *)
+        die "Detecting python exlib api went wrong"
+        ;;
+esac
 
 export_exlib_phases src_prepare src_compile src_install
 

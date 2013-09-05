@@ -154,6 +154,7 @@ cmake_with() {
 #    CMAKE_SRC_CONFIGURE_OPTIONS
 #    CMAKE_SRC_CONFIGURE_OPTION_WANTS
 #    CMAKE_SRC_CONFIGURE_OPTION_WITHS
+#    CMAKE_SRC_CONFIGURE_TESTS
 ecmake() {
     illegal_in_global_scope
 
@@ -228,6 +229,9 @@ cmake_src_configure() {
         done ) \
         $(for s in "${CMAKE_SRC_CONFIGURE_OPTION_WITHS[@]}" ; do
             cmake_with ${s}
+        done ) \
+        $(for s in "${CMAKE_SRC_CONFIGURE_TESTS[@]}" ; do
+            expecting_tests ${s}
         done )
 }
 
