@@ -37,12 +37,15 @@ case ${PYTHON_EXLIB_API} in
     2)
         myexparam python_sup="3.3 3.2 3.1 2.7 2.6"
         myexparam -b with_opt=false
+        myexparam option_name=python
 
         exparam -v PYTHON_SUP python_sup
         exparam -v PYTHON_WITH_OPT with_opt
+        exparam -v OPTION_NAME option_name
+
         require python [ python_dep="${PYTHON_DEP}" python_sup="${PYTHON_SUP}" \
                          has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" \
-                         with_opt="${PYTHON_WITH_OPT}" ]
+                         with_opt="${PYTHON_WITH_OPT}" option_name="${OPTION_NAME}" ]
         ;;
     *)
         die "Detecting python exlib api went wrong"
