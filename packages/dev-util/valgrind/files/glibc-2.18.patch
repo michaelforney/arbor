@@ -1,18 +1,12 @@
-From 3781ac11ff374b3517011c1710ec517d52f25cd2 Mon Sep 17 00:00:00 2001
-From: tom <tom@a5019735-40e9-0310-863c-91ae7b9d1cf9>
-Date: Mon, 14 Jan 2013 09:48:49 +0000
-Subject: [PATCH] Accept glibc 2.17 as valid.
+Author: upstream (tom & mjw)
+Upstream: taken from upstream svn (commits 13228 and 13504)
+Reason: Support glibc 2.17 and 2.18
 
-git-svn-id: svn://svn.valgrind.org/valgrind/trunk@13228 a5019735-40e9-0310-863c-91ae7b9d1cf9
----
- configure.in |    9 ++++++++-
- 1 files changed, 8 insertions(+), 1 deletions(-)
 
-diff --git a/configure.in b/configure.in
-index e0fb12d..0f3b3df 100644
+diff -ru a/configure.in b/configure.in
 --- a/configure.in
 +++ b/configure.in
-@@ -906,6 +906,13 @@ case "${GLIBC_VERSION}" in
+@@ -906,6 +906,20 @@
  	DEFAULT_SUPP="glibc-2.34567-NPTL-helgrind.supp ${DEFAULT_SUPP}"
  	DEFAULT_SUPP="glibc-2.X-drd.supp ${DEFAULT_SUPP}"
  	;;
@@ -20,21 +14,25 @@ index e0fb12d..0f3b3df 100644
 +	AC_MSG_RESULT(2.17 family)
 +	AC_DEFINE([GLIBC_2_17], 1, [Define to 1 if you're using glibc 2.17.x])
 +	DEFAULT_SUPP="glibc-2.X.supp ${DEFAULT_SUPP}"
++	DEFAULT_SUPP="glibc-2.34567-NPTL-helgrind.supp${DEFAULT_SUPP}"
++	DEFAULT_SUPP="glibc-2.X-drd.supp ${DEFAULT_SUPP}"
++	;;
++     2.18)
++	AC_MSG_RESULT(2.18 family)
++	AC_DEFINE([GLIBC_2_18], 1, [Define to 1 if you're using glibc 2.18.x])
++	DEFAULT_SUPP="glibc-2.X.supp ${DEFAULT_SUPP}"
 +	DEFAULT_SUPP="glibc-2.34567-NPTL-helgrind.supp ${DEFAULT_SUPP}"
 +	DEFAULT_SUPP="glibc-2.X-drd.supp ${DEFAULT_SUPP}"
 +	;;
       darwin)
  	AC_MSG_RESULT(Darwin)
  	AC_DEFINE([DARWIN_LIBC], 1, [Define to 1 if you're using Darwin])
-@@ -919,7 +926,7 @@ case "${GLIBC_VERSION}" in
+@@ -919,7 +933,7 @@
  
       *)
  	AC_MSG_RESULT([unsupported version ${GLIBC_VERSION}])
 -	AC_MSG_ERROR([Valgrind requires glibc version 2.2 - 2.16])
-+	AC_MSG_ERROR([Valgrind requires glibc version 2.2 - 2.17])
++	AC_MSG_ERROR([Valgrind requires glibc version 2.2 - 2.18])
  	AC_MSG_ERROR([or Darwin libc])
  	;;
  esac
--- 
-1.6.5.GIT
-
