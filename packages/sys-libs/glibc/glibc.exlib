@@ -142,29 +142,29 @@ EOF
     # TODO(compnerd) determine how to handle non-gcc compilers
     # NOTE(compnerd) export readelf and NM explicitly because the immensely dumb configure
     # script does not bother to check for the prefixed tools!
-    edo env                                                 \
-    READELF="${target}-readelf"                             \
-    NM="${target}-nm"                                       \
-    BUILD_CC="${build}-gcc -B/usr/${build}/${build}/bin"    \
-    CC="/usr/${build}/bin/${target}-static-gcc"             \
-    CPP=/usr/${build}/bin/${target}-static-cpp              \
-    CXX="/usr/${build}/bin/${target}-static-g++"            \
-        "${WORKBASE}/${PNV}/configure"                      \
-            --cache-file=config.cache                       \
-            --build=${build}                                \
-            --host=${target}                                \
-            --prefix=/usr/${target}                         \
-            --datarootdir=/usr/share                        \
-            --libdir=/usr/${target}/lib                     \
-            --localedir=/usr/share/locale                   \
-            --localstatedir=/var/$(exhost --target)         \
-            --sysconfdir=/etc                               \
-            --enable-addons                                 \
-            --enable-kernel=${MINIMUM_KERNEL_VERSION}       \
-            --enable-obsolete-rpc                           \
-            $(ever at_least 2.18  && echo --enable-lock-elision)      \
-            $(ever at_least 2.18  && echo --enable-pt_chown)          \
-            --enable-stackguard-randomization               \
+    edo env                                                         \
+    READELF="${target}-readelf"                                     \
+    NM="${target}-nm"                                               \
+    BUILD_CC="${build}-gcc -B/usr/${build}/${build}/bin"            \
+    CC="/usr/${build}/bin/${target}-static-gcc"                     \
+    CPP=/usr/${build}/bin/${target}-static-cpp                      \
+    CXX="/usr/${build}/bin/${target}-static-g++"                    \
+        "${WORKBASE}/${PNV}/configure"                              \
+            --cache-file=config.cache                               \
+            --build=${build}                                        \
+            --host=${target}                                        \
+            --prefix=/usr/${target}                                 \
+            --datarootdir=/usr/share                                \
+            --libdir=/usr/${target}/lib                             \
+            --localedir=/usr/share/locale                           \
+            --localstatedir=/var/$(exhost --target)                 \
+            --sysconfdir=/etc                                       \
+            --enable-addons                                         \
+            --enable-kernel=${MINIMUM_KERNEL_VERSION}               \
+            --enable-obsolete-rpc                                   \
+            $(ever at_least 2.18  && echo --enable-lock-elision)    \
+            $(ever at_least 2.18  && echo --enable-pt_chown)        \
+            --enable-stackguard-randomization                       \
             --with-headers=/usr/${target}/include
 }
 
