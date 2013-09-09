@@ -69,6 +69,13 @@ case ${PYTHON_EXLIB_API} in
             echo -n "${python_abi}"
         }
 
+        # Run without arguments, returns the python include directory.
+        python_get_incdir() {
+            illegal_in_global_scope
+
+            echo -n "/usr/$(exhost --target)/include/python$(python_get_abi)"
+        }
+
         # Run without arguments, returns the python library directory.
         python_get_libdir() {
             illegal_in_global_scope
@@ -170,6 +177,13 @@ case ${PYTHON_EXLIB_API} in
 
             # only one can be active at any time, atm
             echo -n "${PYTHON_ABIS}"
+        }
+
+        # Run without arguments, returns the python include directory.
+        python_get_incdir() {
+            illegal_in_global_scope
+
+            echo -n "/usr/$(exhost --target)/include/python${PYTHON_ABIS}"
         }
 
         # Run without arguments, returns the python library directory.
