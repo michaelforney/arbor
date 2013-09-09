@@ -235,5 +235,12 @@ python-build_src_install() {
         edo ln -s python${SLOT}        "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}m
         edo ln -s python${SLOT}-config "${IMAGE}"/usr/$(exhost --target)/bin/python${SLOT}m-config
     fi
+
+    # The Makefile also does this but tries to use `build` python with `target` python modules
+    if ! exhost --is-native -q ; then
+        PYTHON_ABIS=${SLOT} python_bytecompile -x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data'
+        edo python${SLOT} -m lib2to3.pgen2.driver "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/lib2to3/Grammar.txt
+        edo python${SLOT} -m lib2to3.pgen2.driver "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/lib2to3/PatternGrammar.txt
+    fi
 }
 
