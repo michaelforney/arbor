@@ -1,0 +1,36 @@
+Upstream: yes, at least 3.3 and master
+
+From 45a580e8ccf652a99dac98dda4b92bbe7beb9e0b Mon Sep 17 00:00:00 2001
+From: Guido van Rossum <guido@python.org>
+Date: Sun, 15 Jul 2007 13:12:42 +0000
+Subject: [PATCH] Don't stop installing if compileall fails -- ever.
+Organization: Chocolate Cookie Conspiracy
+
+Conflicts:
+	Makefile.pre.in
+---
+ Makefile.pre.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.pre.in b/Makefile.pre.in
+index 9d55550..0c70fa6 100644
+--- a/Makefile.pre.in
++++ b/Makefile.pre.in
+@@ -1000,12 +1000,12 @@ libinstall:	build_all $(srcdir)/Lib/$(PLATDIR) $(srcdir)/Modules/xxmodule.c
+ 		$(INSTALL_DATA) $(srcdir)/Modules/xxmodule.c \
+ 			$(DESTDIR)$(LIBDEST)/distutils/tests ; \
+ 	fi
+-	PYTHONPATH=$(DESTDIR)$(LIBDEST)  $(RUNSHARED) \
++	-PYTHONPATH=$(DESTDIR)$(LIBDEST)  $(RUNSHARED) \
+ 		$(PYTHON_FOR_BUILD) -Wi -tt $(DESTDIR)$(LIBDEST)/compileall.py \
+ 		-d $(LIBDEST) -f \
+ 		-x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data' \
+ 		$(DESTDIR)$(LIBDEST)
+-	PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
++	-PYTHONPATH=$(DESTDIR)$(LIBDEST) $(RUNSHARED) \
+ 		$(PYTHON_FOR_BUILD) -Wi -tt -O $(DESTDIR)$(LIBDEST)/compileall.py \
+ 		-d $(LIBDEST) -f \
+ 		-x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data' \
+-- 
+1.8.4
+
