@@ -60,6 +60,11 @@ export_exlib_phases src_test
 
 setuptools_src_test() {
     [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
-    edo ${PYTHON} -B setup.py test "${SETUPTOOLS_SRC_TEST_PARAMS[@]}"
+
+    if exhost --is-native -q ; then
+        edo ${PYTHON} -B setup.py test "${SETUPTOOLS_SRC_TEST_PARAMS[@]}"
+    else
+        echo "cross compiled host, skipping tests"
+    fi
 }
 
