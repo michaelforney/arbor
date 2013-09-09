@@ -37,9 +37,7 @@ case ${PYTHON_EXLIB_API} in
         "
         fi
 
-        # BIG TODO: this assumes the `build` can execute `target` python
-        # For now, we only allow native builds
-        export PYTHON="/usr/$(exhost --target)/bin/python"
+        export PYTHON="/usr/$(exhost --build)/bin/python"
 
 
         # Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
@@ -64,9 +62,9 @@ case ${PYTHON_EXLIB_API} in
 
             local python_abi
 
-            python_abi=$(${PYTHON} -V 2>&1)
-            python_abi=${python_abi#Python }
-            python_abi=$(ever range 1-2 ${python_abi})
+            # TODO(moben) this assumes that python == python2
+            # hopefully we have migrated everything to API=2 of this exlib until that changes
+            python_abi=$(eclectic python2-$(exhost --target) show)
 
             echo -n "${python_abi}"
         }
@@ -139,9 +137,7 @@ case ${PYTHON_EXLIB_API} in
 
             # set python version which we will build against - add comment why this is legal
             # PYTHON_ABIS is set via the suboption
-            # BIG TODO: this assumes the `build` can execute `target` python
-            # For now, we only allow native builds
-            export PYTHON="/usr/$(exhost --target)/bin/python${PYTHON_ABIS}"
+            export PYTHON="/usr/$(exhost --build)/bin/python${PYTHON_ABIS}"
         else
             if exparam -b has_bin; then
                 DEPENDENCIES+="
@@ -149,9 +145,7 @@ case ${PYTHON_EXLIB_API} in
                         ( $(exparam -b with_opt && echo "${OPTION_NAME}?") ( dev-lang/python:*${PYTHON_DEP} ) )
                 "
             fi
-            # BIG TODO: this assumes the `build` can execute `target` python
-            # For now, we only allow native builds
-            export PYTHON="/usr/$(exhost --target)/bin/python"
+            export PYTHON="/usr/$(exhost --build)/bin/python"
         fi
 
         # Tells python not to automatically recompile modules to .pyc/.pyo even if the timestamps/version
@@ -172,17 +166,10 @@ case ${PYTHON_EXLIB_API} in
 
         # Returns the current python abi
         python_get_abi() {
-            ewarn 'python_get_abi() is deprecated, use ${PYTHON_ABIS} instead'
-
             illegal_in_global_scope
 
-            local python_abi
-
-            python_abi=$(${PYTHON} -V 2>&1)
-            python_abi=${python_abi#Python }
-            python_abi=$(ever range 1-2 ${python_abi})
-
-            echo -n "${python_abi}"
+            # only one can be active at any time, atm
+            echo -n "${PYTHON_ABIS}"
         }
 
         # Run without arguments, returns the python library directory.
