@@ -17,9 +17,3 @@ WORK="${WORKBASE}/$(exparam pnv)"
 REMOTE_IDS+=" launchpad:$(exparam project) "
 UPSTREAM_RELEASE_NOTES="${HOMEPAGE}$(exparam branch)/$(exparam pv)/"
 
-if has $(exparam suffix) tar.lzma tar.xz; then
-    DEPENDENCIES+="
-        build:
-            app-arch/xz"
-fi
-

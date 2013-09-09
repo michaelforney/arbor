@@ -18,11 +18,7 @@ fi
 # See Atom feed @ http://code.google.com/feeds/p/$(exparam project)/downloads/basic
 # REMOTE_IDS+=" googlecode:$(exparam project)"
 
-if has $(exparam suffix) tar.lzma tar.xz; then
-    DEPENDENCIES+="
-        build:
-            app-arch/xz"
-elif has $(exparam suffix) zip; then
+if has $(exparam suffix) zip; then
     DEPENDENCIES+="
         build:
             app-arch/unzip"
