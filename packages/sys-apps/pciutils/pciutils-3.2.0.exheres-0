@@ -34,6 +34,7 @@ src_compile() {
     params=(
         AR="${AR}"
         CC="${CC}"
+        PKG_CONFIG="$(exhost --tool-prefix)pkg-config"
         DNS="no"
         IDSDIR=/usr/share/misc
         OPT="${CFLAGS} -fPIC"
@@ -56,10 +57,9 @@ src_compile() {
 src_install() {
     params=(
         DESTDIR="${IMAGE}"
+        PREFIX=/usr/$(exhost --target)
         IDSDIR=/usr/share/misc
-        LIBDIR=/usr/${LIBDIR}
         MANDIR=/usr/share/man
-        PREFIX=/usr
         STRIP=""
     )
 
@@ -81,7 +81,7 @@ src_install() {
     edo rmdir "${IMAGE}"/usr/share/misc
 
     # not needed
-    edo rm -f "${IMAGE}"/usr/sbin/update-pciids
+    edo rm -f "${IMAGE}"/usr/$(exhost --target)/sbin/update-pciids
     edo rm -f "${IMAGE}"/usr/share/man/man8/update-pciids.8
 
     emagicdocs
