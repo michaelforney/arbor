@@ -19,9 +19,11 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-configure.in.patch"
                               "${FILES}/${PNV}-root-support.patch"
                               "${FILES}/${PNV}-automake-fix.patch" )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --prefix=/usr )
+DEFAULT_SRC_INSTALL_PARAMS=( bindir=/usr/$(exhost --target)/bin )
 
 pkg_postinst() {
-    local installer="${ROOT}"/usr/bin/install-catalog
+    local installer="${ROOT}"/usr/$(exhost --build)/bin/install-catalog
     if [[ ! -x $installer ]] ; then
         die "install-catalog not found"
     fi
@@ -36,7 +38,7 @@ pkg_postinst() {
 }
 
 pkg_prerm() {
-    cp "${ROOT}"/usr/bin/install-catalog "${TEMP}"
+    cp "${ROOT}"/usr/$(exhost --build)/bin/install-catalog "${TEMP}"
 }
 
 pkg_postrm() {
