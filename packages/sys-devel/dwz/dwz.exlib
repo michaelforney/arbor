@@ -1,9 +1,11 @@
 # Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-if is_scm ; then
+if ever is_scm ; then
     SCM_REPOSITORY="git://sourceware.org/git/dwz.git"
-    SCM_TAG="${PNV}"
+    if ! ever at_least scm; then
+        SCM_TAG="${PNV%-scm}"
+    fi
 
     require scm-git
 else
