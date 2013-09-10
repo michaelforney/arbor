@@ -18,12 +18,6 @@ fi
 #FIXME: handle project != pn if remote ids gets extended to allow it
 REMOTE_IDS+=" sourceforge:$(exparam project) "
 
-if has $(exparam suffix) tar.lzma tar.xz ; then
-    DEPENDENCIES+="
-        build:
-            app-arch/xz"
-fi
-
 if has $(exparam suffix) zip ; then
     DEPENDENCIES+="
         build:
