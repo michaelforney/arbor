@@ -89,6 +89,7 @@ distutils_src_install() {
     edo ${PYTHON} -B setup.py install      \
         --root="${IMAGE}"                  \
         --install-lib=$(python_get_libdir) \
+        --install-data=/usr                \
         --prefix=/usr/$(exhost --target)   \
         --no-compile                       \
         "${DISTUTILS_SRC_INSTALL_PARAMS[@]}"
