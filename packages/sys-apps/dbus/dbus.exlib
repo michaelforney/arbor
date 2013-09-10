@@ -136,5 +136,8 @@ dbus_src_install() {
     fi
 
     edo rmdir "${IMAGE}"/var/run/{dbus,}
+
+    # hardcodes the path to the setuid helper that is used to launch system services
+    exhost --is-native -q || edo rm "${IMAGE}"/etc/dbus-1/system.conf
 }
 
