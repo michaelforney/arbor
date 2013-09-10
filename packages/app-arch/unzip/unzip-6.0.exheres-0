@@ -23,7 +23,11 @@ MYOPTIONS="platform: x86"
 DEPENDENCIES=""
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-no-exec-stack.patch )
-DEFAULT_SRC_INSTALL_PARAMS=( prefix="${IMAGE}/usr" -f unix/Makefile )
+DEFAULT_SRC_INSTALL_PARAMS=(
+    prefix="${IMAGE}"/usr/$(exhost --target)
+    MANDIR="${IMAGE}"/usr/share/man/man1
+    -f unix/Makefile
+)
 
 WORK="${WORKBASE}/${MY_PNV}"
 
@@ -39,7 +43,6 @@ src_prepare() {
         -e 's:LF = :LF = $(LDFLAGS) :' \
         -e 's:SL = :SL = $(LDFLAGS) :' \
         -e 's:FL = :FL = $(LDFLAGS) :' \
-        -e 's:MANDIR = $(prefix):&/share:' \
         unix/Makefile
 
     append-lfs-flags # https://bugs.gentoo.org/104315
@@ -49,7 +52,7 @@ src_prepare() {
 
 src_compile() {
     local target=linux_noasm
-    option platform:x86 && target=linux_asm
+    [[ $(exhost --target) == 'i686_pc_linux_gnu' ]] && target=linux_asm
 
     append-cppflags \
         -DNO_LCHMOD \
