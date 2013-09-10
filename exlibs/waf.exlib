@@ -35,6 +35,14 @@ ewaf() {
     edo ${WAF_EXECUTABLE} "${args[@]}"
 }
 
+configure_one_multibuild() {
+    waf_configure_one_multibuild
+}
+
+waf_configure_one_multibuild() {
+    waf_src_configure
+}
+
 waf_src_configure() {
     ewaf --jobs=1 configure \
         --prefix=/usr/ \
