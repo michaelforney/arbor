@@ -20,21 +20,11 @@ DEPENDENCIES="
         dev-scm/git[>=1.5.4]
 "
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libiconv )
-if ever at_least 1.2-scm ; then
-    DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/{tig.1,tigrc.5,tigmanual.7}.{html,asciidoc} contrib/tigrc )
-else
-    DEFAULT_SRC_INSTALL_EXTRA_DOCS=( {tig.1,tigrc.5,tigmanual.7}.{html,txt} contrib/tigrc )
-fi
+DEFAULT_SRC_INSTALL_PARAMS=( install-doc )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( contrib/tigrc )
 
 src_install() {
     default
-
-    if ever at_least 1.2-scm ; then
-        doman doc/${PN}.1 doc/${PN}rc.5 doc/${PN}manual.7
-    else
-        doman ${PN}.1 ${PN}rc.5 ${PN}manual.7
-    fi
 
     dobashcompletion contrib/${PN}-completion.bash
 }
