@@ -45,8 +45,8 @@ src_compile() {
 }
 
 src_install() {
-    exeinto /usr/bin/
-    doexe gtkdoc-rebase gtkdocize
+    into /usr/$(exhost --target)
+    dobin gtkdoc-rebase gtkdocize
 
     insinto /usr/share/aclocal/
     doins gtk-doc.m4
