@@ -4,7 +4,8 @@
 myexparam valac_slot
 exparam -v valac_slot valac_slot
 
-require bash-completion gnome.org [ suffix=.tar.xz ] gtk-icon-cache vala [ vala_dep=false vala_slots=[ $(exparam valac_slot) ] ]
+require bash-completion gnome.org [ suffix=.tar.xz ] vala [ vala_dep=false vala_slots=[ $(exparam valac_slot) ] ]
+require gtk-icon-cache test-dbus-daemon
 
 export_exlib_phases src_test src_install
 
@@ -18,22 +19,11 @@ dconf_src_test() {
     unset DBUS_SESSION_BUS_ADDRESS
     unset DBUS_SESSION_BUS_PID
 
-    esandbox allow_net 'unix-abstract:/tmp/dbus-*'
-
-    echo "Launching DBus session bus..."
-    eval "$(dbus-launch --sh-syntax)"
-    [[ -z ${DBUS_SESSION_BUS_PID} ]] && die "Launching DBus session bus failed"
-
     esandbox allow_net --connect 'unix:/run/dbus/system_bus_socket'
-    if ! nonfatal emake check ; then
-        edo kill ${DBUS_SESSION_BUS_PID}
-        die "emake check failed"
-    fi
+
+    test-dbus-daemon_src_test
+
     esandbox disallow_net --connect 'unix:/run/dbus/system_bus_socket'
-
-    esandbox disallow_net 'unix-abstract:/tmp/dbus-*'
-
-    edo kill ${DBUS_SESSION_BUS_PID}
 }
 
 dconf_src_install() {
