@@ -4,7 +4,7 @@
 #     Copyright 1999-2010 Gentoo Foundation
 
 MY_PN="gtk-doc"
-MY_PNV="${MY_PN}-${PV}"
+require gnome.org [ suffix=.tar.xz ]
 
 SUMMARY="Macros and utilities used by autotools from gtk-doc"
 DESCRIPTION="
@@ -12,9 +12,6 @@ This package installs macros and utilities from the gtk-doc package that are
 used by autotools based build systems that use gtk-doc documentation.
 "
 HOMEPAGE="http://www.gtk.org/gtk-doc/"
-DOWNLOADS="mirror://gnome/sources/${MY_PN}/$(ever range 1-2)/${MY_PNV}.tar.xz"
-
-BUGS_TO="spoonb@exherbo.org"
 
 LICENCES="GPL-2 FDL-1.1"
 SLOT="0"
@@ -38,7 +35,7 @@ DEPENDENCIES="
 
 RESTRICT="test" # we don't build anything so we can't run tests
 
-WORK=${WORKBASE}/${MY_PNV}
+WORK=${WORKBASE}/${MY_PN}-${PV}
 
 src_compile() {
     :
