@@ -1,13 +1,17 @@
 # Copyright 2012 Saleem Abdulrasool <compnerd@compnerd.org>
 # Distributed under the terms of the GNU General Public License v2
 
-if is_scm ; then
+if ever is_scm ; then
     SCM_REPOSITORY="git://sourceware.org/git/dwz.git"
-    SCM_TAG="${PNV}"
+    if ! ever at_least scm; then
+        SCM_TAG="${PNV%-scm}"
+    fi
 
     require scm-git
 else
-    DOWNLOADS="http://dev.exherbo.org/~woutershep/distfiles/${PNV}.tar.xz"
+    DOWNLOADS="http://dev.exherbo.org/distfiles/${PN}/${PNV}.tar.xz"
+    # generate tarball by:
+    # $ git archive --prefix=${PNV}/ --format=tar ${PNV} | xz > ${PNV}.tar.xz
 fi
 
 SUMMARY="DWARF optimization and duplicate removal tool"
@@ -21,4 +25,9 @@ compilation units (CUs) for duplicated information and using
 DW_TAG_imported_unit to import it into each CU that needs it.
 "
 HOMEPAGE="http://sourceware.org/git/?p=dwz.git;a=summary"
+
+DEPENDENCIES="
+    build+run:
+        dev-util/elfutils
+"
 
