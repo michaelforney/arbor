@@ -115,7 +115,7 @@ scm-bzr_do_appraise() {
             return 2
         else
             echo "$(scm-bzr_local_branch) does not contain the $(
-                    if [[ -n $(scm_get_var REVISION); then
+                    if [[ -n $(scm_get_var REVISION) ]]; then
                         echo revision $(scm_get_var REVISION)
                     else
                         echo tag $(scm_get_var TAG)
