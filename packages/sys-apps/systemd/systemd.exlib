@@ -370,7 +370,7 @@ systemd_src_install() {
         doins "${FILES}"/network-eth0.conf
     fi
 
-    if ! option bash-completion ; then
+    if [[ -d "${IMAGE}"/no ]]; then
         edo rm -r "${IMAGE}"/no
     fi
 
