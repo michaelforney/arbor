@@ -1,0 +1,171 @@
+# Upstream: yes
+# Source: http://www.sudo.ws/repos/sudo/rev/d62a8ea32db9?revcount=120
+# HG changeset patch
+# User Todd C. Miller <Todd.Miller@courtesan.com>
+# Date 1376320478 21600
+# Node ID d62a8ea32db9b7f567e12e3321436d55db5bdfd9
+# Parent  da3b2b06605c594746f033ac1db9596d69d07b8b
+Don't allow max_groups to be set to zero, it just complicates things
+needlessly.  Fixes an assertion in visudo when there is a group-based
+Defaults entry.
+
+diff -r da3b2b06605c -r d62a8ea32db9 MANIFEST
+--- a/MANIFEST	Thu Aug 08 11:40:36 2013 -0600
++++ b/MANIFEST	Mon Aug 12 09:14:38 2013 -0600
+@@ -27,6 +27,10 @@
+ common/regress/sudo_conf/test3.out.ok
+ common/regress/sudo_conf/test4.in
+ common/regress/sudo_conf/test4.out.ok
++common/regress/sudo_conf/test5.in
++common/regress/sudo_conf/test5.out.ok
++common/regress/sudo_conf/test6.in
++common/regress/sudo_conf/test6.out.ok
+ common/regress/sudo_parseln/parseln_test.c
+ common/regress/sudo_parseln/test1.in
+ common/regress/sudo_parseln/test1.out.ok
+diff -r da3b2b06605c -r d62a8ea32db9 common/regress/sudo_conf/test5.in
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/common/regress/sudo_conf/test5.in	Mon Aug 12 09:14:38 2013 -0600
+@@ -0,0 +1,1 @@
++Set max_groups 0
+diff -r da3b2b06605c -r d62a8ea32db9 common/regress/sudo_conf/test5.out.ok
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/common/regress/sudo_conf/test5.out.ok	Mon Aug 12 09:14:38 2013 -0600
+@@ -0,0 +1,3 @@
++Set disable_coredump true
++Set group_source adaptive
++Set max_groups -1
+diff -r da3b2b06605c -r d62a8ea32db9 common/regress/sudo_conf/test6.in
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/common/regress/sudo_conf/test6.in	Mon Aug 12 09:14:38 2013 -0600
+@@ -0,0 +1,1 @@
++Set max_groups 16
+diff -r da3b2b06605c -r d62a8ea32db9 common/regress/sudo_conf/test6.out.ok
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/common/regress/sudo_conf/test6.out.ok	Mon Aug 12 09:14:38 2013 -0600
+@@ -0,0 +1,3 @@
++Set disable_coredump true
++Set group_source adaptive
++Set max_groups 16
+diff -r da3b2b06605c -r d62a8ea32db9 common/sudo_conf.c
+--- a/common/sudo_conf.c	Thu Aug 08 11:40:36 2013 -0600
++++ b/common/sudo_conf.c	Mon Aug 12 09:14:38 2013 -0600
+@@ -181,7 +181,7 @@
+     char *ep;
+ 
+     lval = strtol(entry, &ep, 10);
+-    if (*entry == '\0' || *ep != '\0' || lval < 0 || lval > INT_MAX ||
++    if (*entry == '\0' || *ep != '\0' || lval <= 0 || lval > INT_MAX ||
+ 	(errno == ERANGE && lval == LONG_MAX)) {
+ 	warningx(_("invalid max groups `%s' in %s, line %d"), entry,
+ 		    conf_file, conf_lineno);
+diff -r da3b2b06605c -r d62a8ea32db9 doc/sudo.conf.cat
+--- a/doc/sudo.conf.cat	Thu Aug 08 11:40:36 2013 -0600
++++ b/doc/sudo.conf.cat	Mon Aug 12 09:14:38 2013 -0600
+@@ -178,15 +178,15 @@
+ 
+      max_groups
+                The maximum number of user groups to retrieve from the group
+-               database.  This setting is only used when querying the group
+-               database directly.  It is intended to be used on systems where
+-               it is not possible to detect when the array to be populated
+-               with group entries is not sufficiently large.  By default, ssuuddoo
+-               will allocate four times the system's maximum number of groups
+-               (see above) and retry with double that number if the group
+-               database query fails.  However, some systems just return as
+-               many entries as will fit and do not indicate an error when
+-               there is a lack of space.
++               database.  Values less than one will be ignored.  This setting
++               is only used when querying the group database directly.  It is
++               intended to be used on systems where it is not possible to
++               detect when the array to be populated with group entries is not
++               sufficiently large.  By default, ssuuddoo will allocate four times
++               the system's maximum number of groups (see above) and retry
++               with double that number if the group database query fails.
++               However, some systems just return as many entries as will fit
++               and do not indicate an error when there is a lack of space.
+ 
+                This setting is only available in ssuuddoo version 1.8.7 and
+                higher.
+@@ -361,4 +361,4 @@
+      file distributed with ssuuddoo or http://www.sudo.ws/sudo/license.html for
+      complete details.
+ 
+-Sudo 1.8.7                      March 14, 2013                      Sudo 1.8.7
++Sudo 1.8.8                      August 12, 2013                     Sudo 1.8.8
+diff -r da3b2b06605c -r d62a8ea32db9 doc/sudo.conf.man.in
+--- a/doc/sudo.conf.man.in	Thu Aug 08 11:40:36 2013 -0600
++++ b/doc/sudo.conf.man.in	Mon Aug 12 09:14:38 2013 -0600
+@@ -16,7 +16,7 @@
+ .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ .\"
+-.TH "SUDO" "5" "March 14, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
++.TH "SUDO" "5" "August 12, 2013" "Sudo @PACKAGE_VERSION@" "OpenBSD Programmer's Manual"
+ .nh
+ .if n .ad l
+ .SH "NAME"
+@@ -367,6 +367,7 @@
+ .TP 10n
+ max_groups
+ The maximum number of user groups to retrieve from the group database.
++Values less than one will be ignored.
+ This setting is only used when querying the group database directly.
+ It is intended to be used on systems where it is not possible to detect
+ when the array to be populated with group entries is not sufficiently large.
+diff -r da3b2b06605c -r d62a8ea32db9 doc/sudo.conf.mdoc.in
+--- a/doc/sudo.conf.mdoc.in	Thu Aug 08 11:40:36 2013 -0600
++++ b/doc/sudo.conf.mdoc.in	Mon Aug 12 09:14:38 2013 -0600
+@@ -14,7 +14,7 @@
+ .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ .\" ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ .\"
+-.Dd March 14, 2013
++.Dd August 12, 2013
+ .Dt SUDO @mansectform@
+ .Os Sudo @PACKAGE_VERSION@
+ .Sh NAME
+@@ -327,6 +327,7 @@
+ version 1.8.7 and higher.
+ .It max_groups
+ The maximum number of user groups to retrieve from the group database.
++Values less than one will be ignored.
+ This setting is only used when querying the group database directly.
+ It is intended to be used on systems where it is not possible to detect
+ when the array to be populated with group entries is not sufficiently large.
+diff -r da3b2b06605c -r d62a8ea32db9 plugins/sudoers/policy.c
+--- a/plugins/sudoers/policy.c	Thu Aug 08 11:40:36 2013 -0600
++++ b/plugins/sudoers/policy.c	Mon Aug 12 09:14:38 2013 -0600
+@@ -134,7 +134,6 @@
+ 
+     /* Parse command line settings. */
+     user_closefrom = -1;
+-    sudo_user.max_groups = -1;
+     for (cur = info->settings; *cur != NULL; cur++) {
+ 	if (MATCHES(*cur, "closefrom=")) {
+ 	    user_closefrom = atoi(*cur + sizeof("closefrom=") - 1);
+diff -r da3b2b06605c -r d62a8ea32db9 plugins/sudoers/pwutil_impl.c
+--- a/plugins/sudoers/pwutil_impl.c	Thu Aug 08 11:40:36 2013 -0600
++++ b/plugins/sudoers/pwutil_impl.c	Mon Aug 12 09:14:38 2013 -0600
+@@ -243,7 +243,7 @@
+ 	user_gids = NULL;
+ 	user_ngids = 0;
+     } else {
+-	if (sudo_user.max_groups != -1) {
++	if (sudo_user.max_groups > 0) {
+ 	    ngids = sudo_user.max_groups;
+ 	    gids = emalloc2(ngids, sizeof(GETGROUPS_T));
+ 	    (void)getgrouplist(pw->pw_name, pw->pw_gid, gids, &ngids);
+diff -r da3b2b06605c -r d62a8ea32db9 src/sudo.c
+--- a/src/sudo.c	Thu Aug 08 11:40:36 2013 -0600
++++ b/src/sudo.c	Mon Aug 12 09:14:38 2013 -0600
+@@ -354,7 +354,7 @@
+      * trying getgrouplist() until we have enough room in the array.
+      */
+     ud->ngroups = sudo_conf_max_groups();
+-    if (ud->ngroups != -1) {
++    if (ud->ngroups > 0) {
+ 	ud->groups = emalloc2(ud->ngroups, sizeof(GETGROUPS_T));
+ 	/* No error on insufficient space if user specified max_groups. */
+ 	(void)getgrouplist(ud->username, ud->gid, ud->groups, &ud->ngroups);
+
