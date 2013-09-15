@@ -33,55 +33,132 @@ fi
 case ${PYTHON_EXLIB_API} in
     1)
         require python [ python_dep="${PYTHON_DEP}" has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" ]
+
+        export_exlib_phases src_prepare src_compile src_install
+
+        distutils_src_prepare() {
+            default
+
+            # remove ez_setup stuff to prevent packages
+            # from installing setuptools on their own
+            rm -rf ez_setup*
+            echo "def use_setuptools(*args, **kwargs): pass" > ez_setup.py
+        }
+
+        distutils_src_compile() {
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+            edo ${PYTHON} -B setup.py build "${DISTUTILS_SRC_COMPILE_PARAMS[@]}"
+        }
+
+        distutils_src_install() {
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
+            # need this for python-2.5 + setuptools in cases where
+            # a package uses distutils but does not install anything
+            # in site-packages. (eg. dev-java/java-config-2.x)
+            # - liquidx (14/08/2006)
+            pylibdir="$(${PYTHON} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
+            [[ -n "${pylibdir}" ]] && dodir "${pylibdir}"
+
+            edo ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "${DISTUTILS_SRC_INSTALL_PARAMS[@]}"
+
+            emagicdocs
+
+            python_bytecompile
+        }
         ;;
     2)
         myexparam python_sup="3.3 3.2 3.1 2.7 2.6"
+        myexparam -b multibuild=true
         myexparam -b with_opt=false
-        myexparam option_name=python
 
         exparam -v PYTHON_SUP python_sup
-        exparam -v PYTHON_WITH_OPT with_opt
-        exparam -v OPTION_NAME option_name
+        exparam -v DISTUTILS_MULTIBUILD multibuild
+        exparam -v DISTUTILS_WITH_OPT with_opt
+
+        if exparam -b multibuild; then
+            myexparam work=${PNV}
+            exparam -v DISTUTILS_WORK work
+            DISTUTILS_MULTIBUILD="${DISTUTILS_MULTIBUILD} multiunpack=true work=${DISTUTILS_WORK}"
+        fi
+
+        if exparam -b with_opt; then
+            myexparam option_name=python
+            exparam -v OPTION_NAME option_name
+            DISTUTILS_WITH_OPT="${DISTUTILS_WITH_OPT} option_name=${OPTION_NAME}"
+        fi
 
         require python [ python_dep="${PYTHON_DEP}" python_sup="${PYTHON_SUP}" \
                          has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" \
-                         with_opt="${PYTHON_WITH_OPT}" option_name="${OPTION_NAME}" ]
+                         multibuild=${DISTUTILS_MULTIBUILD} with_opt=${DISTUTILS_WITH_OPT} ]
+
+        distutils_run_phase() {
+            if exparam -b multibuild; then
+                python_run_phase
+            else
+                distutils_${EXHERES_PHASE}_one_multibuild
+            fi
+        }
+
+        export_exlib_phases src_prepare src_compile src_install
+
+        distutils_prepare_one_multibuild() {
+            default
+
+            # remove ez_setup stuff to prevent packages
+            # from installing setuptools on their own
+            rm -rf ez_setup*
+            echo "def use_setuptools(*args, **kwargs): pass" > ez_setup.py
+        }
+
+        prepare_one_multibuild() {
+            distutils_prepare_one_multibuild
+        }
+
+        distutils_src_prepare() {
+            distutils_run_phase
+        }
+
+        distutils_compile_one_multibuild() {
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+            edo ${PYTHON} -B setup.py build "${DISTUTILS_SRC_COMPILE_PARAMS[@]}"
+        }
+
+        compile_one_multibuild() {
+            distutils_compile_one_multibuild
+        }
+
+        distutils_src_compile() {
+            distutils_run_phase
+        }
+
+        distutils_install_one_multibuild() {
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
+            # need this for python-2.5 + setuptools in cases where
+            # a package uses distutils but does not install anything
+            # in site-packages. (eg. dev-java/java-config-2.x)
+            # - liquidx (14/08/2006)
+            pylibdir="$(${PYTHON} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
+            [[ -n "${pylibdir}" ]] && dodir "${pylibdir}"
+
+            edo ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "${DISTUTILS_SRC_INSTALL_PARAMS[@]}"
+
+            emagicdocs
+
+            python_bytecompile "${DISTUTILS_BYTECOMPILE_PARAMS[@]}"
+        }
+
+        install_one_multibuild() {
+            distutils_install_one_multibuild
+        }
+
+        distutils_src_install() {
+            distutils_run_phase
+        }
         ;;
     *)
         die "Detecting python exlib api went wrong"
         ;;
 esac
-
-export_exlib_phases src_prepare src_compile src_install
-
-distutils_src_prepare() {
-    default
-
-    # remove ez_setup stuff to prevent packages
-    # from installing setuptools on their own
-    rm -rf ez_setup*
-    echo "def use_setuptools(*args, **kwargs): pass" > ez_setup.py
-}
-
-distutils_src_compile() {
-    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
-    edo ${PYTHON} -B setup.py build "${DISTUTILS_SRC_COMPILE_PARAMS[@]}"
-}
-
-distutils_src_install() {
-    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
-
-    # need this for python-2.5 + setuptools in cases where
-    # a package uses distutils but does not install anything
-    # in site-packages. (eg. dev-java/java-config-2.x)
-    # - liquidx (14/08/2006)
-    pylibdir="$(${PYTHON} -c 'from distutils.sysconfig import get_python_lib; print get_python_lib()')"
-    [[ -n "${pylibdir}" ]] && dodir "${pylibdir}"
-
-    edo ${PYTHON} -B setup.py install --root="${IMAGE}" --no-compile "${DISTUTILS_SRC_INSTALL_PARAMS[@]}"
-
-    emagicdocs
-
-    python_bytecompile "${DISTUTILS_BYTECOMPILE_PARAMS[@]}"
-}
 
