@@ -518,9 +518,6 @@ EOT
     if option old-net ; then
         dosym /dev/null /etc/udev/rules.d/80-net-name-slot.rules
     fi
-
-    # Install pam configuration for systemd --user
-    dopamd "${FILES}"/pam.d/*
 }
 
 systemd_pkg_postinst() {
