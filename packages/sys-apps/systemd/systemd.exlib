@@ -16,8 +16,7 @@ require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.
         test-dbus-daemon \
         udev-rules \
         pam \
-        python [ python_dep='[>=2.7]' python_sup='3.3 3.2 2.7' with_opt=true ] \
-        zsh-completion
+        python [ python_dep='[>=2.7]' python_sup='3.3 3.2 2.7' with_opt=true ]
 
 export_exlib_phases pkg_pretend pkg_setup src_prepare src_configure src_test src_install pkg_postinst
 
@@ -139,8 +138,6 @@ DEPENDENCIES="
 
 AT_M4DIR=( m4 )
 
-ZSH_COMPLETIONS=( 'shell-completion/systemd-zsh-completion.zsh _systemd' )
-
 systemd_pkg_pretend() {
     if ! kernel_version_at_least 2.6.39 ; then
         ewarn "You MUST install a kernel >= 2.6.39 to use systemd."
@@ -204,6 +201,7 @@ systemd_src_configure() {
         --with-rootprefix=/usr/$(exhost --target)
         --libexecdir=/usr/$(exhost --target)/lib
         --localstatedir=/var
+        --enable-backlight
         --enable-binfmt
         --enable-blkid
         --enable-coredump
@@ -232,6 +230,7 @@ systemd_src_configure() {
         --with-firmware-path=/usr/$(exhost --target)/lib/firmware/updates:/usr/$(exhost --target)/lib/firmware
         --with-kbd-loadkeys=/bin/loadkeys
         --with-kbd-setfont=/bin/setfont
+        --with-pamconfdir=/etc/pam.d
         --with-pamlibdir=/usr/$(exhost --target)/lib/security
         # Disable SysV init compatibility.
         --with-rc-local-script-path-start=""
@@ -248,11 +247,13 @@ systemd_src_configure() {
         $(option_enable gtk-doc)
         $(option_enable journal-gateway microhttpd)
         $(option_enable polkit)
+        $(option_enable python python-devel)
         $(option_enable qrencode)
         $(option_enable tcpd tcpwrap)
         $(option_enable xattr)
         $(option_with bash-completion bashcompletiondir /usr/share/bash-completion/completions)
         $(option_with python)
+        $(option_with zsh-completion zshcompletiondir /usr/share/zsh/site-functions)
     )
 
     edo mkdir -p src/gudev
@@ -327,8 +328,6 @@ systemd_src_install() {
 
     alternatives_for "${alternatives[@]}"
 
-    install-zsh-completions
-
     # Don't install funny RPM macros.
     if [[ -d ${IMAGE}/etc/rpm ]]; then
         edo rm -r "${IMAGE}"/etc/rpm
@@ -363,7 +362,7 @@ systemd_src_install() {
         doins "${FILES}"/network-eth0.conf
     fi
 
-    if ! option bash-completion ; then
+    if [[ -d "${IMAGE}"/no ]]; then
         edo rm -r "${IMAGE}"/no
     fi
 

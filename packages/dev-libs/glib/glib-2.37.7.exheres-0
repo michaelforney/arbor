@@ -23,7 +23,6 @@ DEPENDENCIES="
         dev-util/elfutils[>=0.142]
         dev-libs/libffi[>=3.0.0]
     test:
-        dev-python/dbus-python
         dev-util/desktop-file-utils
         gnome-bindings/pygobject:3
         sys-apps/dbus[>=1.2.14] [[
@@ -62,14 +61,17 @@ DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-modular-tests --disable-modular-tests' )
 src_prepare() {
     glib_src_prepare
 
-    # else src_compile will fail, seems to depend on automake-1.13.1
-    eautoreconf
-
     # we have no guarantee for ipv6 support, so we disable those tests
     edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
 
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
+
+    # hangs forever
+    edo sed -e '/dbus-appinfo/d' -i gio/tests/Makefile.am
+
+    # else src_compile will fail, seems to depend on automake-1.13.1
+    eautoreconf
 }
 
 src_install() {

@@ -1,0 +1,33 @@
+# Copyright 2013 Bryan Østergaard <kloeri@exherbo.org>
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Tools to sign and check DNSSEC DNS zones."
+HOMEPAGE="http://www.dnssec-tools.org/"
+DOWNLOADS="http://www.dnssec-tools.org/download/${PNV}.tar.gz"
+
+LICENCES="dnssec"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS="ipv6 perl threads"
+
+DEPENDENCIES="
+    build:
+    build+run:
+        net-dns/bind
+        perl? (
+            dev-lang/perl:*
+            dev-perl/Net-DNS
+            dev-perl/XML-Simple
+        )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --with-libval --with-validator )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( ipv6 perl threads )
+
+src_install() {
+    default
+
+    edo rmdir ${IMAGE}/usr/sbin
+    rmdir -p ${IMAGE}/usr/share/man/man*
+}
+
