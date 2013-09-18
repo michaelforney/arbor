@@ -126,7 +126,7 @@ vim_src_prepare() {
     expatch "${patches[@]}"
 
     # Fixup a script to use awk instead of nawk
-    edo sed -i -e '1s|.*|#!/usr/bin/awk -f|' "${WORK}"/runtime/tools/mve.awk
+    edo sed -i -e "1s|.*|#!/usr/$(exhost --target)/bin/awk -f|" "${WORK}"/runtime/tools/mve.awk
 
     # Read vimrc and gvimrc from /etc/vim
     echo '#define SYS_VIMRC_FILE "/etc/vim/vimrc"' >> "${WORK}"/src/feature.h
@@ -341,7 +341,7 @@ vim_src_test() {
 
 vim_src_install() {
     if [[ "${PN}" == "vim-runtime" ]] ; then
-        dodir /usr/{bin,share/{man/man1,vim}}
+        dodir /usr/{$(exhost --target)/bin,share/{man/man1,vim}}
         edo cd src
         emake \
             installruntime \
@@ -353,7 +353,6 @@ vim_src_install() {
             install-languages \
             install-icons \
             DESTDIR="${IMAGE}" \
-            BINDIR=/usr/bin \
             MANDIR=/usr/share/man \
             DATADIR=/usr/share
 
@@ -370,10 +369,11 @@ vim_src_install() {
         rm -f "${IMAGE}"/usr/share/vim/vim${VIM_VERSION/.}/tools/{vimspell.sh,tcltags}
 
     elif [[ "${PN}" == "gvim" ]] ; then
+        into /usr/$(exhost --target)
         dobin src/gvim
         local dest
         for dest in gvimdiff evim eview gview rgvim rgview; do
-            dosym gvim /usr/bin/${dest}
+            dosym gvim /usr/$(exhost --target)/bin/${dest}
         done
 
         dodir /usr/share/man/man1
@@ -381,14 +381,15 @@ vim_src_install() {
         dosym vim.1 /usr/share/man/man1/gview.1
         dosym vimdiff.1 /usr/share/man/man1/gvimdiff.1
     else
+        into /usr/$(exhost --target)
         dobin src/vim
         local dest
         for dest in vimdiff rvim ex view rview; do
-            dosym vim /usr/bin/${dest}
+            dosym vim /usr/$(exhost --target)/bin/${dest}
         done
         if option vim-pager ; then
-            dosym /usr/share/vim/vim${VIM_VERSION//./}/macros/less.sh /usr/bin/vimpager
-            dosym /usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh /usr/bin/vimmanpager
+            dosym /usr/share/vim/vim${VIM_VERSION//./}/macros/less.sh /usr/$(exhost --target)/bin/vimpager
+            dosym /usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh /usr/$(exhost --target)/bin/vimmanpager
             insinto /usr/share/vim/vim${VIM_VERSION//./}/macros
             doins runtime/macros/manpager.sh
             edo chmod a+x "${IMAGE}"/usr/share/vim/vim${VIM_VERSION//./}/macros/manpager.sh
@@ -405,21 +406,21 @@ vim_src_install() {
         ;;
     esac
 
-    # We shouldn't be installing the ex or view man page symlinks, as they
+    # W shouldn't be installing the ex or view man page symlinks, as they
     # are managed by eclectic
     edo rm -f "${IMAGE}"/usr/share/man/man1/{ex,view}.1
-    # Same for these /usr/bin symlinks
-    edo rm -f "${IMAGE}"/usr/bin/{ex,view}
+    # Same for these /usr/$(exhost --target)/bin symlinks
+    edo rm -f "${IMAGE}"/usr/$(exhost --target)/bin/{ex,view}
 
     if [[ "${PN}" != 'vim-runtime' ]] ; then
         local importance
         [[ ${PN} == vim ]] && importance=10 || importance=5
-        alternatives_for 'vi' "${PN}" "${importance}" '/usr/bin/vi' "${PN}"
-        alternatives_for 'vi' "${PN}" "${importance}" '/usr/share/man/man1/vi.1' 'vim.1'
-        alternatives_for 'vi' "${PN}" "${importance}" '/usr/bin/ex' "${PN}"
-        alternatives_for 'vi' "${PN}" "${importance}" '/usr/share/man/man1/ex.1' 'vim.1'
-        alternatives_for 'vi' "${PN}" "${importance}" '/usr/bin/view' "${PN}"
-        alternatives_for 'vi' "${PN}" "${importance}" '/usr/share/man/man1/view.1' 'vim.1'
+        alternatives_for 'vi' "${PN}" "${importance}" "/usr/$(exhost --target)/bin/vi" "${PN}"
+        alternatives_for 'vi' "${PN}" "${importance}" "/usr/share/man/man1/vi.1" 'vim.1'
+        alternatives_for 'vi' "${PN}" "${importance}" "/usr/$(exhost --target)/bin/ex" "${PN}"
+        alternatives_for 'vi' "${PN}" "${importance}" "/usr/share/man/man1/ex.1" 'vim.1'
+        alternatives_for 'vi' "${PN}" "${importance}" "/usr/$(exhost --target)/bin/view" "${PN}"
+        alternatives_for 'vi' "${PN}" "${importance}" "/usr/share/man/man1/view.1" 'vim.1'
     fi
 }
 
@@ -431,21 +432,21 @@ update_vim_symlinks() {
     syms="vimdiff rvim rview"
 
     # Make or remove convenience symlink, vim -> gvim
-    if [[ -f ${ROOT}/usr/bin/gvim ]]; then
-        ln -s gvim "${ROOT}"/usr/bin/vim 2>/dev/null
-    elif [[ -L ${ROOT}/usr/bin/vim && ! -f ${ROOT}/usr/bin/vim ]]; then
-        rm "${ROOT}"/usr/bin/vim
+    if [[ -f ${ROOT}/usr/$(exhost --target)/bin/gvim ]]; then
+        ln -s gvim "${ROOT}"/usr/$(exhost --target)/bin/vim 2>/dev/null
+    elif [[ -L ${ROOT}/usr/$(exhost --target)/bin/vim && ! -f ${ROOT}/usr/$(exhost --target)/bin/vim ]]; then
+        rm "${ROOT}"/usr/$(exhost --target)/bin/vim
     fi
 
     # Make or remove convenience symlinks to vim
-    if [[ -f ${ROOT}/usr/bin/vim ]]; then
+    if [[ -f ${ROOT}/usr/$(exhost --target)/bin/vim ]]; then
         for f in ${syms}; do
-            ln -s vim "${ROOT}"/usr/bin/${f} 2>/dev/null
+            ln -s vim "${ROOT}"/usr/$(exhost --target)/bin/${f} 2>/dev/null
         done
     else
         for f in ${syms}; do
-            if [[ -L ${ROOT}/usr/bin/${f} && ! -f ${ROOT}/usr/bin/${f} ]]; then
-                rm -f "${ROOT}"/usr/bin/${f}
+            if [[ -L ${ROOT}/usr/$(exhost --target)/bin/${f} && ! -f ${ROOT}/usr/$(exhost --target)/bin/${f} ]]; then
+                rm -f "${ROOT}"/usr/$(exhost --target)/bin/${f}
             fi
         done
     fi
