@@ -268,6 +268,16 @@ vim_src_configure() {
 
     myconf+=" --disable-selinux"
 
+    # cross-compiling fixes
+    myconf+="
+        vim_cv_getcwd_broken=no
+        vim_cv_memmove_handles_overlap=yes
+        vim_cv_stat_ignores_slash=no
+        vim_cv_terminfo=yes
+        vim_cv_toupper_broken=no
+        vim_cv_tty_group=world
+    "
+
     # Do not prestrip binaries.
     export ac_cv_prog_STRIP="$(type -P true ) faking strip"
 
@@ -294,6 +304,11 @@ vim_src_compile() {
 }
 
 vim_src_test() {
+
+    if ! exhost --is-native -q ; then
+        echo "cross compiled host, skipping tests"
+        return
+    fi
 
     if [[ "${PN}" == "vim-runtime" ]] ; then
         echo "No testing needs to be done for vim-runtime"
