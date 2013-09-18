@@ -62,13 +62,27 @@ src_prepare() {
     glib_src_prepare
 
     # we have no guarantee for ipv6 support, so we disable those tests
-    edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
+    edo sed -e '\:/socket/ipv6_a\?sync:d'  \
+            -e '\:/socket/ipv6_v4mapped:d' \
+            -i gio/tests/socket.c
+
+    # uses inet@0.0.0.0
+    edo sed -e '\:/socket/datagram_get_available:d' -i gio/tests/socket.c
 
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
 
+    # tries to access to root's dconf stuff
+    edo sed -e ':/network-monitor/default:d'         \
+            -e ':/network-monitor/add_networks:d'    \
+            -e ':/network-monitor/remove_networks:d' \
+            -i gio/tests/network-monitor.c
+
     # hangs forever
     edo sed -e '/dbus-appinfo/d' -i gio/tests/Makefile.am
+
+    # does some gdb vaudoo on missing file
+    edo sed -e '/run-assert-msg-test.sh/d' -i tests/Makefile.am
 
     # else src_compile will fail, seems to depend on automake-1.13.1
     eautoreconf
