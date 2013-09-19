@@ -1,7 +1,7 @@
 # Copyright 2007 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require gnu [ suffix=bz2 ]
+require gnu [ suffix=bz2 ] autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 SUMMARY="Tar archiver"
 
@@ -15,20 +15,16 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/${PNV}-no-gets.patch" )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-look-for-host-prefixed-ar.patch
+    "${FILES}"/${PNV}-no-gets.patch
+)
 
 DEFAULT_SRC_TEST_PARAMS=( TESTSUITEFLAGS='-k !sparse03' )
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
-src_prepare() {
-    default
-
-    # TODO(compnerd) fix this properly using autotools
-    edo sed -e '/^AR =/c AR = @host@-ar'    \
-            -i "${WORK}/gnu/Makefile.in"    \
-            -i "${WORK}/lib/Makefile.in"
-}
+AT_M4DIR=( m4 )
 
 src_configure() {
     # NOTE(?) configuration takes a million years without this hack.
@@ -39,7 +35,6 @@ src_configure() {
 
 src_install() {
     default
-    edo rmdir "${IMAGE}/usr/$(exhost --target)/sbin"
 
     # generate man page
     edo cd "${WORK}"
