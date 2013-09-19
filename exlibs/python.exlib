@@ -91,10 +91,16 @@ case ${PYTHON_EXLIB_API} in
 
             [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
             edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
 
-            edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
-            edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
+            local excludes=()
+            [[ -n "${PYTHON_BYTECOMPILE_EXCLUDES[@]}" ]] && \
+                excludes=( -x "$(IFS='|' ; echo "${PYTHON_BYTECOMPILE_EXCLUDES[*]}")" )
+
+            edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${excludes[@]}" "${IMAGE}$(python_get_libdir)"
+            edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${excludes[@]}" "${IMAGE}$(python_get_libdir)"
         }
         ;;
     2)
@@ -242,10 +248,16 @@ case ${PYTHON_EXLIB_API} in
 
             [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
             edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
 
-            edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
-            edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
+            local excludes=()
+            [[ -n "${PYTHON_BYTECOMPILE_EXCLUDES[@]}" ]] && \
+                excludes=( -x "$(IFS='|' ; echo "${PYTHON_BYTECOMPILE_EXCLUDES[*]}")" )
+
+            edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${excludes[@]}" "${IMAGE}$(python_get_libdir)"
+            edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${excludes[@]}" "${IMAGE}$(python_get_libdir)"
         }
         ;;
     *)
