@@ -26,13 +26,14 @@ WORK=${WORKBASE}
 
 src_unpack() {
     default
-    unpack ./data.tar.gz
-    edo rm -f {control,data}.tar.gz debian-binary
+    unpack ./data.tar.xz
+    edo rm -f control.tar.gz data.tar.xz debian-binary
 }
 
 src_install() {
-    # Handle documentation & manuals Exherbo-style
+    # Handle documentation & manuals Exherbo-style and remove the Debian specific examples
     edo find ./usr/share -type f -name '*.gz' | xargs gunzip || die 'Failed to unzip docs/man-pages.'
+    edo rm -r ./usr/share/doc/ca-certificates/examples
     dodoc ./usr/share/doc/ca-certificates/*
     edo rm -r ./usr/share/doc/ca-certificates
 
