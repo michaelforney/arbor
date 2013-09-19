@@ -1,0 +1,27 @@
+From e9bb673186e6cb3680170bc16459a3d02025a20d Mon Sep 17 00:00:00 2001
+From: Benedikt Morbach <benedikt.morbach@googlemail.com>
+Date: Thu, 19 Sep 2013 11:19:37 +0200
+Subject: [PATCH] also look for host-prefixed ar
+Organization: Exherbo
+
+useful when cross-compiling
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 4a1b503..460addd 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -30,7 +30,7 @@ AC_PROG_CPP
+ AC_PROG_RANLIB
+ AC_PROG_INSTALL
+ AC_PROG_EGREP
+-AC_PATH_PROG([AR], [ar])
++AC_CHECK_TOOLS([AR], [ar])
+ AC_PATH_PROG([CAT], [cat])
+ AC_PATH_PROG([KILL], [kill])
+ AC_PATH_PROGS([PERL], [perl5 perl])
+-- 
+1.8.4
+

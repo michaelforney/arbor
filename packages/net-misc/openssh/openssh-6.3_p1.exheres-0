@@ -69,6 +69,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}--allow-host-prefixed-ar.patch
     -p0 "${FILES}"/${PN}-4.7_p1-GSSAPI-dns.patch
 )
 
@@ -111,8 +112,7 @@ src_configure() {
         $(option_with ldns) \
         $(option_with readline libedit) \
         $(option_with pam) \
-        $(option_with tcpd tcp-wrappers) \
-        ac_cv_path_AR="${AR}"
+        $(option_with tcpd tcp-wrappers)
 }
 
 src_compile() {
