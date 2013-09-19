@@ -1,0 +1,31 @@
+Upstream: submitted, https://savannah.gnu.org/bugs/index.php?40067
+
+From e8577bdd2581215f8248ec5826476e20ed815572 Mon Sep 17 00:00:00 2001
+From: Benedikt Morbach <benedikt.morbach@googlemail.com>
+Date: Thu, 19 Sep 2013 14:01:21 +0200
+Subject: [PATCH] configure.ac: look for prefixed ar
+Organization: Exherbo
+
+Look for '${host}-ar' as set by AC_CANONICAL_HOST before looking for the unprefixed 'ar'.
+This is useful when cross-compiling when all your binutils are prefixed.
+
+I used AC_CHECK_TOOLS instead of AC_CHECK_TOOL, since autoconf docs say that the former calls AC_SUBST.
+---
+ configure.ac | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configure.ac b/configure.ac
+index 21c864a..a5c375d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -6,6 +6,7 @@ AM_INIT_AUTOMAKE
+ AC_CONFIG_SRCDIR([find/pred.c])
+ AC_CONFIG_HEADERS([config.h])
+ AC_CANONICAL_HOST
++AC_CHECK_TOOLS([AR], [ar])
+ AC_CONFIG_MACRO_DIR(gl/m4)
+ 
+ dnl Set of available languages.
+-- 
+1.8.4
+

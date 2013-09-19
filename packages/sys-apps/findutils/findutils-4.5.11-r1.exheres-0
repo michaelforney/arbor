@@ -1,24 +1,26 @@
 # Copyright 2009 Bryan Østergaard
 # Distributed under the terms of the GNU General Public License v2
 
-require findutils
+require findutils autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
 
 DEFAULT_SRC_TEST_PARAMS=( RUNTESTFLAGS='--ignore sv-bug-14535.exp' )
 
 DEFAULT_SRC_PREPARE_PATCHES=(
-    -p1 "${FILES}"/${PN}-4.5.11-locate.patch
+    "${FILES}"/${PNV}-locate.patch
+    "${FILES}"/${PNV}-look-for-prefixed-ar.patch
 )
+
+AT_M4DIR=( m4 )
 
 src_prepare() {
     # disable 2 tests which fail under sydbox
-    # running autoconf is broken...
     edo sed \
       -e '/symlinkat/d' \
       -e '/unlinkat/d' \
-      -i tests/Makefile.{am,in}
+      -i tests/Makefile.am
 
-    default
+    autotools_src_prepare
 }
 
