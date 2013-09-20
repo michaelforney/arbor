@@ -58,6 +58,8 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 )
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
 
+PYTHON_BYTECOMPILE_EXCLUDES=( bad_coding badsyntax lib2to3/tests/data site-packages )
+
 python-build_pkg_pretend() {
     if [[ ${SLOT} == '2.7' ]] || ever at_least 3.3 ; then
         # for native builds, the version we are about to build does the .pyc compiling
@@ -238,7 +240,7 @@ python-build_src_install() {
 
     # The Makefile also does this but tries to use `build` python with `target` python modules
     if ! exhost --is-native -q ; then
-        PYTHON_ABIS=${SLOT} python_bytecompile -x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data'
+        PYTHON_ABIS=${SLOT} python_bytecompile
         edo python${SLOT} -m lib2to3.pgen2.driver "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/lib2to3/Grammar.txt
         edo python${SLOT} -m lib2to3.pgen2.driver "${IMAGE}"/usr/$(exhost --target)/lib/python${SLOT}/lib2to3/PatternGrammar.txt
     fi
