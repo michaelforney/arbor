@@ -98,21 +98,28 @@ case ${PYTHON_EXLIB_API} in
 
             [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
             edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
 
             edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
+                -x $(IFS='|' ; echo "${PYTHON_BYTECOMPILE_EXCLUDES[*]}") "${IMAGE}$(python_get_libdir)"
             edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
+                -x $(IFS='|' ; echo "${PYTHON_BYTECOMPILE_EXCLUDES[*]}") "${IMAGE}$(python_get_libdir)"
         }
         ;;
     2)
-        myexparam python_sup="3.3 3.2 3.1 2.7 2.6" # supported python majors
-        myexparam option_name=python
+        myexparam python_sup="2.6 2.7 3.1 3.2 3.3" # supported python majors
 
         myexparam -b has_lib=true
         myexparam -b has_bin=false
+        myexparam -b multibuild=true
         myexparam -b with_opt=false
 
-        exparam -v OPTION_NAME option_name
+        if exparam -b with_opt; then
+            myexparam option_name=python
+            exparam -v OPTION_NAME option_name
+        fi
 
         # set dependencies ( eg python_abis:2.6? ( dev-lang/python:2.6[>=0] ) )
         python_dependencies() {
@@ -126,13 +133,25 @@ case ${PYTHON_EXLIB_API} in
         fi
 
         if exparam -b has_lib; then
+            # NOTE: currently it's only possible to use classes C or PYTHON_ABIS
+            if exparam -b multibuild; then
+                myexparam -b multiunpack=false
+                exparam -b multiunpack && myexparam work=${PNV} && exparam -v PYTHON_WORK work
+
+                exparam -v PYTHON_MULTIUNPACK multiunpack
+
+                require easy-multibuild [ classes=[ PYTHON_ABIS ] \
+                                          multiunpack=${PYTHON_MULTIUNPACK} $(exparam -b multiunpack && echo "work=${PYTHON_WORK}") ]
+            fi
+            exparam -v MULTIBUILD_PYTHON_ABIS_TARGETS python_sup
+
             # starting construction of MYOPTIONS
             MYOPTIONS+=' ('
             exparam -b with_opt && MYOPTIONS+=" ${OPTION_NAME}?"
             # define python subotions with description, requires and number_select
             MYOPTIONS+=" ( python_abis: ( $(exparam python_sup) ) [["
             # set the maximum of enabled python_abis:*
-            MYOPTIONS+=' number-selected = exactly-one'
+            exparam -b multibuild && MYOPTIONS+=' number-selected = at-least-one' || MYOPTIONS+=' number-selected = exactly-one'
             MYOPTIONS+=' ]] )'
             # finish construction of MYOPTIONS
             MYOPTIONS+=" )"
@@ -140,9 +159,41 @@ case ${PYTHON_EXLIB_API} in
             exparam -b with_opt && DEPENDENCIES+=" ${OPTION_NAME}?"
             DEPENDENCIES+=" ( $(python_dependencies) ) )"
 
-            # set python version which we will build against - add comment why this is legal
+            # set python version which we will build against, we need that until easy-multibuild is fixed
             # PYTHON_ABIS is set via the suboption
-            export PYTHON="/usr/$(exhost --build)/bin/python${PYTHON_ABIS}"
+            if exparam -b multibuild; then
+                export_exlib_phases src_configure src_compile src_test src_install
+
+                python_run_phase() {
+                    if exparam -b with_opt; then
+                        if [[ $(type -t "easy-multibuild_src_${EXHERES_PHASE}") == function ]]; then
+                            option "${OPTION_NAME}" && easy-multibuild_src_${EXHERES_PHASE}
+                        else
+                            default
+                        fi
+                    else
+                        easy-multibuild_src_${EXHERES_PHASE}
+                    fi
+                }
+
+                python_src_configure() {
+                    python_run_phase
+                }
+
+                python_src_compile() {
+                    python_run_phase
+                }
+
+                python_src_test() {
+                    python_run_phase
+                }
+
+                python_src_install() {
+                    python_run_phase
+                }
+            else
+                export PYTHON="/usr/$(exhost --build)/bin/python${PYTHON_ABIS}"
+            fi
         else
             if exparam -b has_bin; then
                 DEPENDENCIES+="
@@ -173,22 +224,25 @@ case ${PYTHON_EXLIB_API} in
         python_get_abi() {
             illegal_in_global_scope
 
-            # only one can be active at any time, atm
-            echo -n "${PYTHON_ABIS}"
+            if exparam -b multibuild; then
+                echo -n "${MULTIBUILD_PYTHON_ABIS_CURRENT_TARGET}"
+            else
+                echo -n "${PYTHON_ABIS}"
+            fi
         }
 
         # Run without arguments, returns the python include directory.
         python_get_incdir() {
             illegal_in_global_scope
 
-            echo -n "/usr/$(exhost --target)/include/python${PYTHON_ABIS}"
+            echo -n "/usr/$(exhost --target)/include/python$(python_get_abi)"
         }
 
         # Run without arguments, returns the python library directory.
         python_get_libdir() {
             illegal_in_global_scope
 
-            echo -n "/usr/$(exhost --target)/lib/python${PYTHON_ABIS}"
+            echo -n "/usr/$(exhost --target)/lib/python$(python_get_abi)"
         }
 
         # Run without arguments, returns the python site-packages directory.
@@ -206,10 +260,14 @@ case ${PYTHON_EXLIB_API} in
 
             [[ ${EXHERES_PHASE} != install ]] && die "${FUNCNAME} should only be run in src_install()"
 
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
             edo find "${IMAGE}$(python_get_libdir)" -type f -name '*.py' -exec touch {} +
 
-            edo python${PYTHON_ABIS}    -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
-            edo python${PYTHON_ABIS} -O -mcompileall -f -q -d $(python_get_libdir) "${@}" "${IMAGE}$(python_get_libdir)"
+            edo python$(python_get_abi)    -mcompileall -f -q -d $(python_get_libdir) \
+                -x $(IFS='|' ; echo "${PYTHON_BYTECOMPILE_EXCLUDES[*]}") "${IMAGE}$(python_get_libdir)"
+            edo python$(python_get_abi) -O -mcompileall -f -q -d $(python_get_libdir) \
+                -x $(IFS='|' ; echo "${PYTHON_BYTECOMPILE_EXCLUDES[*]}") "${IMAGE}$(python_get_libdir)"
         }
         ;;
     *)

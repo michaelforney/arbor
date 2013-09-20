@@ -42,9 +42,16 @@ easy-multibuild_run_phase() {
         echo "Multibuild Class: ${MULTIBUILD_CLASS} (${targetsv})"
 
         for MULTIBUILD_TARGET in ${!targetsv} ; do
-            if ! option multibuild_${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
-                echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
-                continue
+            if [[ ${MULTIBUILD_CLASS} = C ]]; then
+                if ! option multibuild_${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
+                    echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
+                    continue
+                fi
+            else
+                if ! option ${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
+                    echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET} (disabled)"
+                    continue
+                fi
             fi
 
             echo "  ${MULTIBUILD_CLASS} Target: ${MULTIBUILD_TARGET}"
@@ -87,8 +94,14 @@ if exparam -b multiunpack ; then
         for MULTIBUILD_CLASS in "${EASY_MULTIBUILD_CLASSES[@]}" ; do
             targetsv="MULTIBUILD_${MULTIBUILD_CLASS}_TARGETS"
             for MULTIBUILD_TARGET in ${!targetsv} ; do
-                if option multibuild_${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
-                    scm_multiunpack "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${unpack_to#${WORKBASE}/}"
+                if [[ ${MULTIBUILD_CLASS} = C ]]; then
+                    if option multibuild_${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
+                        scm_multiunpack "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${unpack_to#${WORKBASE}/}"
+                    fi
+                else
+                    if option ${MULTIBUILD_CLASS,,}:${MULTIBUILD_TARGET} ; then
+                        scm_multiunpack "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/${unpack_to#${WORKBASE}/}"
+                    fi
                 fi
             done
         done

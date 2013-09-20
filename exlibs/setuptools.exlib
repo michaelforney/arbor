@@ -32,39 +32,105 @@ case ${PYTHON_EXLIB_API} in
             build:
                 dev-python/setuptools
         "
+
+        export_exlib_phases src_test
+
+        setuptools_src_test() {
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
+            if exhost --is-native -q ; then
+                edo ${PYTHON} -B setup.py test "${SETUPTOOLS_SRC_TEST_PARAMS[@]}"
+            else
+                echo "cross compiled host, skipping tests"
+            fi
+        }
         ;;
     2)
-        myexparam python_sup="3.3 3.2 3.1 2.7 2.6"
+        # we currently don't support 3.1 du to test failures
+        myexparam python_sup="2.6 2.7 3.2 3.3"
+
+        myexparam -b multibuild=true
         myexparam -b with_opt=false
-        myexparam option_name=python
 
         exparam -v PYTHON_SUP python_sup
-        exparam -v PYTHON_WITH_OPT with_opt
-        exparam -v OPTION_NAME option_name
+        exparam -v SETUPTOOLS_WITH_OPT with_opt
+        exparam -v SETUPTOOLS_MULTIBUILD multibuild
+
+        if exparam -b multibuild; then
+            myexparam work=${PNV}
+            exparam -v SETUPTOOLS_WORK work
+            SETUPTOOLS_MULTIBUILD="${SETUPTOOLS_MULTIBUILD} work=${SETUPTOOLS_WORK}"
+        fi
+
+        if exparam -b with_opt; then
+            myexparam option_name=python
+            exparam -v OPTION_NAME option_name
+            SETUPTOOLS_WITH_OPT="${SETUPTOOLS_WITH_OPT} option_name=${OPTION_NAME}"
+        fi
 
         require distutils [ python_dep="${PYTHON_DEP}" python_sup="${PYTHON_SUP}" \
                             has_lib="${PYTHON_HAS_LIB}" has_bin="${PYTHON_HAS_BIN}" \
-                            with_opt="${PYTHON_WITH_OPT}" option_name="${OPTION_NAME}" ]
+                            multibuild=${SETUPTOOLS_MULTIBUILD} with_opt=${SETUPTOOLS_WITH_OPT} ]
 
         DEPENDENCIES+="
             build:
                 ( $(exparam -b with_opt && echo "${OPTION_NAME}?") ( dev-python/setuptools[python_abis:*(-)?] ) )
         "
+
+        setuptools_run_phase() {
+            if exparam -b multibuild; then
+                distutils_run_phase
+            else
+                setuptools_${EXHERES_PHASE}_one_multibuild
+            fi
+        }
+
+        export_exlib_phases src_prepare src_compile src_test src_install
+
+        setuptools_prepare_one_multibuild() {
+            distutils_prepare_one_multibuild
+        }
+
+        setuptools_src_prepare() {
+            setuptools_run_phase
+        }
+
+        setuptools_compile_one_multibuild() {
+            distutils_compile_one_multibuild
+        }
+
+        setuptools_src_compile() {
+            setuptools_run_phase
+        }
+
+        setuptools_test_one_multibuild() {
+            [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
+
+            if exhost --is-native -q ; then
+                edo ${PYTHON} -B setup.py test "${SETUPTOOLS_SRC_TEST_PARAMS[@]}"
+            else
+                echo "cross compiled host, skipping tests"
+            fi
+        }
+
+        test_one_multibuild() {
+            setuptools_test_one_multibuild
+        }
+
+        setuptools_src_test() {
+            setuptools_run_phase
+        }
+
+        setuptools_install_one_multibuild() {
+            distutils_install_one_multibuild
+        }
+
+        setuptools_src_install() {
+            setuptools_run_phase
+        }
         ;;
     *)
         die "Detecting python exlib api went wrong"
         ;;
 esac
-
-export_exlib_phases src_test
-
-setuptools_src_test() {
-    [[ -n ${@} ]] && die "${FUNCNAME} takes no arguments"
-
-    if exhost --is-native -q ; then
-        edo ${PYTHON} -B setup.py test "${SETUPTOOLS_SRC_TEST_PARAMS[@]}"
-    else
-        echo "cross compiled host, skipping tests"
-    fi
-}
 
