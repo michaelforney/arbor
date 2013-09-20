@@ -8,8 +8,8 @@
 
 MY_PNV="Python-${PV}"
 
-# python: no has_lib as it needs only the pyc part of the exlib
-require flag-o-matic python [ has_lib=false ] alternatives
+# python: no has_lib or multibuild as it needs only the pyc part of the exlib
+require flag-o-matic python [ has_lib=false multibuild=false ] alternatives
 require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 1.10 ] ]
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
