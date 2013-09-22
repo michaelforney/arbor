@@ -79,36 +79,38 @@ perl-5_src_configure() {
     # -O3 breaks ext/XS/APItest/t/exception.t and maybe other stuff
     replace-flags -O3 -O2
 
-    edo sh \
-        "${WORKBASE}/${MY_PNV:-${PNV}}/Configure" \
-        -des \
-        -Dcc="${CC}" \
-        -Dar="${AR}" \
-        -Dnm="${NM}" \
-        -Dranlib="${RANLIB}" \
-        -Dcf_by='Exherbo' \
-        -Dprefix=/usr \
-        -Dvendorprefix=/usr \
-        -Dsiteprefix=/usr \
-        -Doptimize="${CFLAGS}" \
-        -Dldflags="${LDFLAGS}" \
-        -Darchname="${CHOST%%-*}-linux" \
-        -Dlibperl="libperl.so.1.${MY_PVM}" \
-        -Dprivlib="/usr/${LIBDIR}/perl5/${MY_PVM}" \
-        -Darchlib="/usr/${LIBDIR}/perl5/${MY_PVM}/$archname" \
-        -Dsitelib="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}" \
-        -Dsitearch="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}/$archname" \
-        -Dvendorlib="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}" \
-        -Dvendorarch="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}/$archname" \
-        -Uinstallusrbinperl= \
-        -Duseshrplib \
-        -Dmksymlinks \
-        -Duselargefiles \
-        -Ui_ndbm \
-        -$(db_define ithreads)usethreads \
-        -$(db_define gdbm)i_gdbm \
-        -$(db_define berkdb)i_db \
-        "${PERL5_CONFIGURE_PARAMS[@]}"
+    local myconf=(
+        "${WORKBASE}/${MY_PNV:-${PNV}}/Configure"
+        -des
+        -Dcc="${CC}"
+        -Dar="${AR}"
+        -Dnm="${NM}"
+        -Dranlib="${RANLIB}"
+        -Dcf_by='Exherbo'
+        -Dprefix=/usr
+        -Dvendorprefix=/usr
+        -Dsiteprefix=/usr
+        -Doptimize="${CFLAGS}"
+        -Dldflags="${LDFLAGS}"
+        -Darchname="${archname}"
+        -Dlibperl="libperl.so.1.${MY_PVM}"
+        -Dprivlib="/usr/${LIBDIR}/perl5/${MY_PVM}"
+        -Darchlib="/usr/${LIBDIR}/perl5/${MY_PVM}/$archname"
+        -Dsitelib="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}"
+        -Dsitearch="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}/$archname"
+        -Dvendorlib="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}"
+        -Dvendorarch="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}/$archname"
+        -Uinstallusrbinperl=
+        -Duseshrplib
+        -Dmksymlinks
+        -Duselargefiles
+        -Ui_ndbm
+        -$(db_define ithreads)usethreads
+        -$(db_define gdbm)i_gdbm
+        -$(db_define berkdb)i_db
+    )
+
+    edo sh "${myconf[@]}" "${PERL5_CONFIGURE_PARAMS[@]}"
 }
 
 perl-5_src_test() {
@@ -143,8 +145,11 @@ perl-5_src_test() {
 perl-5_src_install() {
     default
 
+    # see configure
+    local archname="${CHOST%%-*}-linux"
+
     # Library symlinks
-    local perllibdir="/usr/${LIBDIR}/${PN}5/${MY_PVM}/${CHOST%%-*}-linux/CORE/"
+    local perllibdir="/usr/${LIBDIR}/${PN}5/${MY_PVM}/${archname}/CORE/"
     dosym ${perllibdir}/libperl.so.1{.${MY_PVM},}
     dosym ${perllibdir}/libperl.so{.1,}
 
@@ -172,7 +177,7 @@ perl-5_src_install() {
         edo mv "${manpage}" "${manpage/%.1/-${MY_PVM}.1}"
     done
 
-    keepdir /usr/${LIBDIR}/${PN}5/{site,vendor}_perl/${MY_PVM}/${CHOST%%-*}-linux
+    keepdir /usr/${LIBDIR}/${PN}5/{site,vendor}_perl/${MY_PVM}/${archname}
 
     # We don't need packlists
     edo find "${IMAGE}/usr/${LIBDIR}" -type f -name .packlist -delete

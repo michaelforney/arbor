@@ -1,6 +1,18 @@
 # Copyright 2012-2013 Wulf C. Krueger <philantrop@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
+require vala [ vala_slots=[ 0.22 0.20 ] ]
+
+if ever is_scm ; then
+    SCM_REPOSITORY="git://git.freedesktop.org/git/systemd/systemd-ui.git"
+    require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ]
+    require scm-git
+else
+    DOWNLOADS="
+        http://www.freedesktop.org/software/systemd/${PNV}.tar.xz
+    "
+fi
+
 SUMMARY="(G)UI tools for systemd"
 DESCRIPTION="
 Split off upstream from systemd, this package contains systemadm, the GTK+ gui
@@ -8,7 +20,6 @@ for systemd and systemd-gnome-ask-password-agent.
 This avoids having the gtk option on systemd and the vala dependency.
 "
 HOMEPAGE="http://www.freedesktop.org/wiki/Software/systemd"
-DOWNLOADS="http://www.freedesktop.org/software/systemd/${PNV}.tar.xz"
 
 BUGS_TO="philantrop@exherbo.org"
 
@@ -17,8 +28,6 @@ SLOT="0"
 MYOPTIONS=""
 
 DEPENDENCIES="
-    build:
-        dev-lang/vala:*[>=0.12]
     build+run:
         base/libgee:0.8
         dev-libs/glib:2[>=2.26]
