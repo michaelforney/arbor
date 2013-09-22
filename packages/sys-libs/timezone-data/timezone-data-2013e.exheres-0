@@ -11,6 +11,8 @@ DOWNLOADS="
     mirror://timezone-data/tzdata${TZDATA_PV}.tar.gz
 "
 
+BUGS_TO="philantrop@exherbo.org"
+
 LICENCES="GPL-2 public-domain"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -26,11 +28,11 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     TZDIR="/usr/share/zoneinfo"
 )
 DEFAULT_SRC_INSTALL_PARAMS=(
-    TZDIR="${IMAGE}"/usr/share/zoneinfo
-    ETCDIR="${IMAGE}"/usr/bin
-    LIBDIR="${IMAGE}"/usr/${LIBDIR}
-    MANDIR="${IMAGE}"/usr/share/man
-    TOPDIR="${IMAGE}"
+    TZDIR=/usr/share/zoneinfo
+    ETCDIR=/usr/bin
+    LIBDIR=/usr/${LIBDIR}
+    MANDIR=/usr/share/man
+    TOPDIR=/
 )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Theory )
 
@@ -41,11 +43,21 @@ src_test() {
     emake AWK=awk check
 }
 
+pkg_preinst() {
+    if [[ -d ${ROOT}/usr/share/zoneinfo/posix ]]; then
+        edo rm -r "${ROOT}"/usr/share/zoneinfo/posix
+    fi
+}
+
 src_install() {
     # Fix weird installation paths
     edo sed -i -e 's:-posix:/posix:' \
                -e 's:-leaps:/leaps:' Makefile
 
     default
+
+    # Fix symlink
+    edo rm "${IMAGE}"/usr/share/zoneinfo/posix
+    dosym ../zoneinfo /usr/share/zoneinfo/posix
 }
 
