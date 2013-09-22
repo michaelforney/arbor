@@ -24,6 +24,8 @@ MYOPTIONS="debug doc"
 # All tests are slow, run only slow tests
 RESTRICT="test"
 
+DEFAULT_SRC_PREPARE_PATCHES=( -p0 "${FILES}"/formatter.int64.patch )
+
 DEPENDENCIES="
     build:
         doc? (
