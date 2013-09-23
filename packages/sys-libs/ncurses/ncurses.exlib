@@ -16,7 +16,6 @@ DEPENDENCIES="
 configure_one_multibuild() {
     local myconf=(
         --hates=docdir
-        --disable-termcap
         --with-normal
         --with-shared
         --without-ada
@@ -24,6 +23,7 @@ configure_one_multibuild() {
         $(option_with gpm)
         --libdir=/${LIBDIR}
         --enable-pc-files
+        --enable-termcap
     )
 
     edo mkdir "${WORKBASE}/${MULTIBUILD_CLASS}/${MULTIBUILD_TARGET}/narrow"
