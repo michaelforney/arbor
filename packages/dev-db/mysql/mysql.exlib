@@ -111,12 +111,16 @@ configure_one_multibuild() {
         -DSYSCONFDIR:PATH=/etc/mysql
         -DENABLED_PROFILING:BOOL=TRUE
         -DWITH_EXTRA_CHARSETS:STRING=all
+        # Default ENGINES for MySQL 5.6 community build (currently == xlarge) minus embedded
+        -DWITH_ARCHIVE_STORAGE_ENGINE:BOOL=TRUE
+        -DWITH_BLACKHOLE_STORAGE_ENGINE:BOOL=TRUE
+        -DWITH_FEDERATED_STORAGE_ENGINE:BOOL=TRUE
         -DWITH_INNOBASE_STORAGE_ENGINE:BOOL=TRUE
+        -DWITH_PARTITION_STORAGE_ENGINE:BOOL=TRUE
         -DWITH_SSL:STRING=system
         -DWITH_UNIT_TESTS:BOOL=TRUE
         -DWITH_VALGRIND:BOOL=FALSE
         -DWITH_ZLIB:STRING=system
-        -DWITH_FEDERATED_STORAGE_ENGINE=1
     )
 
     if option debug ; then
