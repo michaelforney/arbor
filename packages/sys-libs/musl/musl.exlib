@@ -1,0 +1,50 @@
+# Copyright 2013 Michael Forney
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="musl is a lightweight, fast, simple, and free libc"
+DESCRIPTION="
+musl, is a new standard library to power a new generation of Linux-based devices. musl is
+lightweight, fast, simple, free, and strives to be correct in the sense of standards-conformance and
+safety.
+"
+HOMEPAGE="http://www.musl-libc.org"
+
+if ! ever is_scm ; then
+    DOWNLOADS="http://www.musl-libc.org/releases/${PNV}.tar.gz"
+fi
+
+LICENCES="MIT BSD-2"
+SLOT="0"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+    build+run:
+"
+
+BUGS_TO="mforney@mforney.org"
+
+src_configure() {
+    local host=$(exhost --target) tool_prefix=$(exhost --tool-prefix)
+
+    edo env                                         \
+        CC=${tool_prefix}static-gcc                 \
+        CROSS_COMPILE=${tool_prefix}                \
+    ./configure                                     \
+            --target=${host}                        \
+            --prefix=/usr/${host}                   \
+            --enable-shared                         \
+            --enable-static                         \
+            --disable-gcc-wrapper
+}
+
+src_install() {
+    local host=$(exhost --target)
+    local arch=$(echo 'all: ; @echo $(ARCH)$(SUBARCH)' | make -f config.mak -f -)
+
+    default
+
+    insinto /etc
+    echo /usr/${host}/lib | hereins ld-musl-${arch}.path
+}
+

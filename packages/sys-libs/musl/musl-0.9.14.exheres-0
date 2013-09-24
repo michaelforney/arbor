@@ -1,0 +1,13 @@
+# Copyright 2013 Michael Forney
+# Distributed under the terms of the GNU General Public License v2
+
+require musl
+
+PLATFORMS="~amd64"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-Add-logwtmp-stub.patch
+    "${FILES}"/${PNV}-fix-buffer-overflow-in-mbsrtowcs.patch
+    "${FILES}"/${PNV}-fix-off-by-one-error-in-getgrnam_r-and-getgrgid_r-cl.patch
+)
+

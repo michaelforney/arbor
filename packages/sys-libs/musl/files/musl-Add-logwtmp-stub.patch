@@ -1,0 +1,40 @@
+From b5bd8c36ee7cbb65eb5c2ceb95d8be6a5bdf051c Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Sep 2013 03:42:54 -0700
+Subject: [PATCH] Add logwtmp stub
+
+---
+ include/utmp.h     | 1 +
+ src/legacy/utmpx.c | 4 ++++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/include/utmp.h b/include/utmp.h
+index b357ac8..7b60c88 100644
+--- a/include/utmp.h
++++ b/include/utmp.h
+@@ -31,6 +31,7 @@ struct utmp *pututline(const struct utmp *);
+ void         setutent(void);
+ 
+ void updwtmp(const char *, const struct utmp *);
++void logwtmp(const char *, const char *, const char *);
+ 
+ #define _PATH_UTMP "/dev/null/utmp"
+ #define _PATH_WTMP "/dev/null/wtmp"
+diff --git a/src/legacy/utmpx.c b/src/legacy/utmpx.c
+index c483e4e..ec92ae1 100644
+--- a/src/legacy/utmpx.c
++++ b/src/legacy/utmpx.c
+@@ -34,6 +34,10 @@ void updwtmpx(const char *f, const struct utmpx *u)
+ {
+ }
+ 
++void logwtmp(const char *line, const char *name, const char *host)
++{
++}
++
+ weak_alias(endutxent, endutent);
+ weak_alias(setutxent, setutent);
+ weak_alias(getutxent, getutent);
+-- 
+1.8.4
+
