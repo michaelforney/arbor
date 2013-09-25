@@ -5,8 +5,8 @@
 #     Copyright 1999-2008 Gentoo Foundation
 
 SUMMARY="Keyboard and console utilities"
-HOMEPAGE="http://www.${PN}-project.org/"
-DOWNLOADS="ftp://ftp.altlinux.org/pub/people/legion/kbd/${PNV}.tar.gz"
+HOMEPAGE="http://www.${PN}-project.org"
+DOWNLOADS="mirror://kernel/linux/utils/${PN}/${PNV}.tar.xz"
 
 REMOTE_IDS="freecode:${PN}"
 
@@ -17,7 +17,11 @@ MYOPTIONS=""
 
 DEPENDENCIES="
     build:
-        sys-devel/gettext
+        dev-libs/check[>=0.9.4]
+        sys-devel/gettext[>=0.14.1]
+        virtual/pkg-config[>=0.9.0]
+    build+run:
+        sys-libs/pam [[ note = [ required for vlock ] ]]
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' )
@@ -26,6 +30,6 @@ src_install() {
     default
 
     insinto /usr/share/doc/${PNVR}/html
-    doins "${WORK}"/doc/*.html
+    doins docs/doc/*.html
 }
 

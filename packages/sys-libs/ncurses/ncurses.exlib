@@ -20,14 +20,14 @@ ncurses_src_configure() {
     local myconf=(
         --hates=datarootdir
         --hates=docdir
-        --disable-termcap
-        --enable-overwrite
         --with-normal
         --with-shared
         --without-ada
         --without-hashed-db
         $(option_with gpm)
+        --enable-overwrite
         --enable-pc-files
+        --enable-termcap
     )
 
     edo mkdir -p "${WORKBASE}/build/narrow"
