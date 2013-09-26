@@ -1,0 +1,29 @@
+Source: Upstream
+Reason: Build fix with musl
+
+From fc364ba9e3e39bc8d75016a9bf66e4bbbb5a1c87 Mon Sep 17 00:00:00 2001
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Date: Thu, 15 Aug 2013 09:54:51 +0200
+Subject: [PATCH] fix build error with musl libc due to if_slip.h
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+---
+ networking/ifconfig.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/networking/ifconfig.c b/networking/ifconfig.c
+index 999305a..8984b02 100644
+--- a/networking/ifconfig.c
++++ b/networking/ifconfig.c
+@@ -56,7 +56,7 @@
+ #endif
+ 
+ #if ENABLE_FEATURE_IFCONFIG_SLIP
+-# include <net/if_slip.h>
++# include <linux/if_slip.h>
+ #endif
+ 
+ /* I don't know if this is needed for busybox or not.  Anyone? */
+-- 
+1.8.4
+

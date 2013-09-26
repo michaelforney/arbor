@@ -21,6 +21,8 @@ DEPENDENCIES="
         app-arch/zip
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/0001-fix-build-error-with-musl-libc-due-to-if_slip.h.patch )
+
 bb_make() {
     local make_options=(
         AR="${AR}"
