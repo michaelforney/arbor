@@ -1,0 +1,27 @@
+From 6ecf429d1462d90846d7f24fb437b44b8c2b82ee Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Thu, 26 Sep 2013 04:05:20 -0700
+Subject: [PATCH] Disable bash malloc on musl
+
+---
+ configure | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/configure b/configure
+index 7ec72fe..4f27543 100755
+--- a/configure
++++ b/configure
+@@ -2204,6 +2204,10 @@ sparc-linux*)	opt_bash_malloc=no ;;	# sparc running linux; requires ELF
+ *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
+ esac
+ 
++case "${host_os}" in
++*musl*)		opt_bash_malloc=no ;;	# doesn't work with musl
++esac
++
+ # memory scrambling on free()
+ case "${host_os}" in
+ sco3.2v5*|sco3.2v4*)	opt_memscramble=no ;;
+-- 
+1.8.4
+
