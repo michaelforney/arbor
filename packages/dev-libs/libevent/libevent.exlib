@@ -4,7 +4,7 @@
 #     Copyright 1999-2008 Gentoo Foundation
 
 MY_PNV="${PNV}-stable"
-require sourceforge [ project=levent pnv=${MY_PNV} suffix=tar.gz ] easy-multibuild [ multiunpack=true work=${MY_PNV} ]
+require sourceforge [ project=levent pnv=${MY_PNV} suffix=tar.gz ]
 
 SUMMARY="A library to execute a function when a specific event occurs on a file descriptor"
 HOMEPAGE="http://${PN}.org"
@@ -13,17 +13,19 @@ REMOTE_IDS+=" freecode:${PN}"
 
 LICENCES="BSD-3"
 SLOT="0"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build+run:
-        dev-libs/openssl[multibuild_c:*(-)?]
+        dev-libs/openssl
 "
+
+WORK="${WORKBASE}"/${MY_PNV}
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.0.10-test.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-openssl --disable-static )
 
-test_one_multibuild() {
+src_test() {
     pushd test
     edo ./test.sh > "${TEMP}"/tests
     cat "${TEMP}"/tests
