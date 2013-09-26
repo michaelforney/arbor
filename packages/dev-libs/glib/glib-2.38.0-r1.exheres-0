@@ -61,6 +61,10 @@ DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-modular-tests --disable-modular-tests' )
 src_prepare() {
     glib_src_prepare
 
+    # with multipy, we end up with #!python2.7 as a shebang
+    edo sed -e 's:@PYTHON@:/usr/bin/env @PYTHON@:' \
+            -i gio/gdbus-2.0/codegen/gdbus-codegen.in
+
     # we have no guarantee for ipv6 support, so we disable those tests
     edo sed -e '\:/socket/ipv6_a\?sync:d'  \
             -e '\:/socket/ipv6_v4mapped:d' \
