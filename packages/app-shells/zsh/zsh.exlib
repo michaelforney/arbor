@@ -48,8 +48,6 @@ DEFAULT_SRC_INSTALL_EXCLUDE=( FAQ.yo )
 
 zsh_src_configure() {
     econf \
-        --bindir=/bin \
-        --libdir=/usr/${LIBDIR} \
         --htmldir=/usr/share/doc/${PNVR}/html \
         --enable-etcdir=/etc/zsh \
         --enable-fndir=/usr/share/zsh/${PV%_*}/functions \
@@ -98,6 +96,14 @@ zsh_src_install() {
 
     if exparam -b docs && option doc ; then
         doins "${WORK}"/Doc/${PN}.pdf
+    fi
+}
+
+pkg_preinst() {
+    if exhost --is-native -q && [[ $(readlink -f "${ROOT##/}"/bin) == ${ROOT##/}/bin ]] ; then
+        # NOTE(tridactyla) preserve legacy paths for user shells
+        nonfatal edo rm "${ROOT}"/bin/zsh &&
+        nonfatal edo cp "${IMAGE}"/usr/$(exhost --build)/bin/zsh "${ROOT}"/bin/zsh
     fi
 }
 
