@@ -44,6 +44,10 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk-doc )
 src_prepare() {
     glib_src_prepare
 
+    # with multipy, we end up with #!python2.7 as a shebang
+    edo sed -e 's:@PYTHON@:/usr/bin/env @PYTHON@:' \
+            -i gio/gdbus-2.0/codegen/gdbus-codegen.in
+
     # race condition worsened by sydbox
     edo sed -e '/mainloop\/invoke/d' -i glib/tests/mainloop.c
 

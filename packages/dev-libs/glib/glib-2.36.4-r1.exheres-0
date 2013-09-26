@@ -3,6 +3,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 require bash-completion glib
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 SLOT="2"
 PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
@@ -31,72 +32,57 @@ DEPENDENCIES="
         virtual/pkg-config[>=0.16]
         x11-misc/shared-mime-info
     recommendation:
-        sys-apps/dbus[>=1.2.14] [[
-            note = [ Required for GDBus ]
-        ]]
-        dev-libs/glib-networking [[
-            description = [ Required for GNet ]
-        ]]
-        gnome-desktop/dconf [[
-            description = [ default GSettings backend ]
-        ]]
+        sys-apps/dbus[>=1.2.14] [[ note = [ Required for GDBus ] ]]
+        dev-libs/glib-networking [[ description = [ Required for GNet ] ]]
+        gnome-desktop/dconf [[ description = [ default GSettings backend ] ]]
     suggestion:
-        gnome-desktop/gvfs [[
-            description = [ Provides utilities and support for GIO ]
-        ]]
+        gnome-desktop/gvfs [[ description = [ Provides utilities and support for GIO ] ]]
 "
 
 # NOTE: glib:2 is used by sydbox, and thus in system. For this reason it shouldn't hard depend on
 # anything not in ::arbor, that means no recommendations, just suggestions
 
-# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling".
+# Disable FAM support as FAM is no longer necessary with GIO's inotify support
+#
+# xattr support is also provided by libc.  glib will prefer to use glibc's xattr support over
+# libattr.  As a result, there is no dependency added for attr support.
+#
+# Enable libelf (via elf-utils) to read compressed module data
+#
+# The internal copy of PCRE is "patched to use GLib for memory management and Unicode handling"
 # Its usage is recommended by upstream, see also
 # http://developer.gnome.org/glib/2.32/glib-building.html#dependencies
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-static' '--disable-fam' '--disable-selinux'
-                               '--disable-xattr' '--with-pcre=internal' '--with-threads=posix'
-                               '--cache-file=config.cache' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( 'gtk-doc' 'man-pages man' )
+                               '--enable-xattr' '--enable-libelf' '--with-pcre=internal'
+                               '--with-threads=posix' '--disable-dtrace' '--disable-systemtap'
+                               '--disable-gcov' )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( gtk-doc 'man-pages man' )
 DEFAULT_SRC_CONFIGURE_TESTS=( '--enable-modular-tests --disable-modular-tests' )
 
 src_prepare() {
-    # fail under sydbox
-    edo sed -e '/gwakeup\/semantics/d' -i glib/tests/gwakeuptest.c # randomly
-    edo sed -e '/gapplication\/basic/d' -i gio/tests/gapplication.c
-    edo sed -e '/\/DBUS_COOKIE_SHA1/d' -i gio/tests/gdbus-auth.c
-    edo sed -e 's/run-assert-msg-test.sh//' -i tests/Makefile.{am,in}
+    glib_src_prepare
+
+    # with multipy, we end up with #!python2.7 as a shebang
+    edo sed -e 's:@PYTHON@:/usr/bin/env @PYTHON@:' \
+            -i gio/gdbus-2.0/codegen/gdbus-codegen.in
 
     # we have no guarantee for ipv6 support, so we disable those tests
     edo sed -e '\:/socket/ipv6_a\?sync:d' -i gio/tests/socket.c
 
-    # TODO: need 0.0.0.0
-    edo sed -e 's/g_inet_address_new_any/g_inet_address_new_loopback/'  \
-            -e '/socket\/ipv6_v4mapped/d'                               \
-            -i gio/tests/socket.c
-
     # broken test: https://bugzilla.gnome.org/show_bug.cgi?id=684690
     edo sed -e '/appinfo\/launch"/d' -i gio/tests/appinfo.c
 
-    cat > config.cache <<- EOF
-glib_cv_long_long_format=ll
-glib_cv_stack_grows=no
-glib_cv_uscore=no
-ac_cv_func_posix_getpwuid_r=yes
-ac_cv_func_posix_getgrgid_r=yes
-ac_cv_use_pid_surrogate=yes
-EOF
+    # hangs forever
+    edo sed -e '/dbus-appinfo/d' -i gio/tests/Makefile.am
 
-    glib_src_prepare
-}
-
-src_configure() {
-    export PKG_CONFIG_LIBDIR=/usr/$(exhost --target)/lib/pkgconfig:/usr/lib/pkgconfig
-    default
+    # else src_compile will fail, seems to depend on automake-1.13.1
+    eautoreconf
 }
 
 src_install() {
     glib_src_install
 
-    if option !bash-completion; then
+    if option !bash-completion ; then
         edo rm "${IMAGE}"/usr/share/bash-completion/completions/{gdbus,gresource,gsettings}
         edo rmdir "${IMAGE}"/usr/share/bash-completion/{completions/,}
     fi
