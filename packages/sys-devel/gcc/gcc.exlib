@@ -185,7 +185,7 @@ gcc_src_prepare() {
     # TODO(compnerd) convert these into part of exherbo-multiarch-paths patch
     edo sed -e "/SHLIB_DIR = /c SHLIB_DIR = ." \
             -i "${WORK}/libgcc/config/t-slibgcc"
-    edo sed -e "/libsubdir = /clibsubdir = /usr/${CHOST}/lib/gcc/\$(host_noncanonical)/\$(version)" \
+    edo sed -e "/libsubdir = /clibsubdir = /usr/$(exhost --target)/lib/gcc/\$(host_noncanonical)/\$(version)" \
             -i "${WORK}/libgcc/Makefile.in"                                                         \
             -i "${WORK}/libitm/Makefile.in"                                                         \
             -i "${WORK}/libmudflap/Makefile.in"
@@ -200,7 +200,10 @@ gcc_src_prepare() {
 gcc_src_configure() {
     local cxxlibraries=( libstdc++-v3 libitm ) library=
     local language= languages=( c c++ )
-    local target=
+    local host=$(exhost --target) target=
+    local build_cflags_var=${CHOST//-/_}_CFLAGS
+    local build_ldflags_var=${CHOST//-/_}_LDFLAGS
+    local build_cxxflags_var=${CHOST//-/_}_CXXFLAGS
     local cloog_backend=
 
     # support for optional languages
@@ -270,24 +273,36 @@ gcc_cv_objdump=${target}-objdump
 gcc_cv_libc_provides_ssp=yes
 EOF
 
-        # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${CHOST} results
+        # TODO(compnerd) figure out why the program transformation for ${TARGET} = ${host} results
         # in a double prefix
         # NOTE(compnerd) the --with-sysroot='""' is a brilliant hack designed to allow gcc to
         # function properly in the multiarch'ed environment.  It configures the compiler to be a
         # sysroot'ed cross-compiler with an empty sysroot prefix, treating the system root as the
         # sysroot.
+        # TODO(tridactyla) Cross-compiling requires the use of tools from the CHOST. However, we
+        # don't have access to the tool prefix for the CHOST because this is set in the main
+        # installed repository. Until this is fixed, just assume the prefix is "${CHOST}-".
         edo env                                                                                     \
-            CC="${CHOST}-gcc -B/usr/${CHOST}/${CHOST}/bin"                                          \
+            CC="${host}-gcc -B/usr/${CHOST}/${host}/bin"                                            \
             CFLAGS_FOR_TARGET="${!target_cflags_var}"                                               \
             LDFLAGS_FOR_TARGET="${!target_ldflags_var}"                                             \
             CXXFLAGS_FOR_TARGET="${!target_cxxflags_var}"                                           \
+            AR_FOR_BUILD="${CHOST}-ar"                                                              \
+            AS_FOR_BUILD="${CHOST}-as"                                                              \
+            CC_FOR_BUILD="${CHOST}-gcc"                                                             \
+            CXX_FOR_BUILD="${CHOST}-g++"                                                            \
+            NM_FOR_BUILD="${CHOST}-nm"                                                              \
+            RANLIB_FOR_BUILD="${CHOST}-ranlib"                                                      \
+            CFLAGS_FOR_BUILD="${!build_cflags_var}"                                                 \
+            LDFLAGS_FOR_BUILD="${!build_ldflags_var}"                                               \
+            CXXFLAGS_FOR_BUILD="${!build_cxxflags_var}"                                             \
             target_configargs="--prefix=/usr/${target} --with-slibdir=/usr/${target}/lib"           \
         "${WORKBASE}/${PNV/_p/-}/configure"                                                         \
                 --cache-file=config.cache                                                           \
                 --build=${CHOST}                                                                    \
-                --host=${CHOST}                                                                     \
+                --host=${host}                                                                      \
                 --target=${target}                                                                  \
-                --prefix=/usr/${CHOST}                                                              \
+                --prefix=/usr/${host}                                                               \
                 --datarootdir=/usr/share                                                            \
                 --localstatedir=/var                                                                \
                 --sysconfdir=/etc                                                                   \
@@ -316,13 +331,13 @@ EOF
                 $(option_enable openmp libgomp)                                                     \
                 $(option_enable objc-runtime libobjc)                                               \
                 $(option_enable propolice libssp)                                                   \
-                $(if test x"${target}" = x"${CHOST}" ; then
+                $(if test x"${target}" = x"${host}" ; then
                     echo --program-suffix=-${SLOT}
                   else
                     echo --program-transform="s,^,${target}-,;s,$,-${SLOT},"
                   fi)                                                                               \
-                --with-as=/usr/${CHOST}/bin/${target}-as                                            \
-                --with-ld=/usr/${CHOST}/bin/${target}-ld                                            \
+                --with-as=/usr/${host}/bin/${target}-as                                             \
+                --with-ld=/usr/${host}/bin/${target}-ld                                             \
                 --with-pkgversion="exherbo ${PNVR}"                                                 \
                 --with-system-zlib                                                                  \
                 --with-sysroot='""'                                                                 \
@@ -380,7 +395,7 @@ __gcc_slot_ada() {
     option ada || return
 
     for program in "${programs[@]}" ; do
-        edo mv "${IMAGE}"/usr/${CHOST}/bin/${program}{,-${SLOT}}
+        edo mv "${IMAGE}"/usr/$(exhost --host)/bin/${program}{,-${SLOT}}
     done
 }
 
@@ -389,7 +404,7 @@ __gcc_slot_java() {
     # If not, it *should* be.  Although ecj is the compiler, it is designed to run atop the JVM,
     # and as such, is host agnostic.  There is no reason to have a version per CHOST.
     local unslotted=(
-        "${IMAGE}"/usr/${CHOST}/*/security/classpath.security
+        "${IMAGE}"/usr/$(exhost --target)/*/security/classpath.security
         "${IMAGE}"/usr/share/java/ecj.jar
     )
     local extension= item= name=
@@ -430,10 +445,11 @@ __gcc_slot_shared_data() {
 
 __gcc_slot_runtime() {
     local library=
+    local host=$(exhost --target)
 
     # to avoid collisions with links as they will be handled properly in pkg_postinst, remove any
     # symbolic links first
-    for library in "${IMAGE}"/usr/${CHOST}/lib/* ; do
+    for library in "${IMAGE}"/usr/${host}/lib/* ; do
         if [[ -L ${library} ]] ; then
             edo rm "${library}"
             # used to sanity check that the link is handled
@@ -441,7 +457,7 @@ __gcc_slot_runtime() {
         fi
     done
 
-    for library in "${IMAGE}"/usr/${CHOST}/lib/* ; do
+    for library in "${IMAGE}"/usr/${host}/lib/* ; do
         [[ -f ${library} ]] || continue
 
         library=${library##${IMAGE}}
@@ -451,7 +467,7 @@ __gcc_slot_runtime() {
         case "${name}" in
         # always use newest available so version and create so symlinks
         libatomic.so*|libffi.so*|libgcc_s.so*|libgfortran.so*|libgcj_bc.so*|libgomp.so*|libitm.so*|libobjc.so*|*.so.0.0.0)
-            # rename /usr/${CHOST}/lib/libffi.so.4.0.1 => /usr/${CHOST}/lib/libffi-4.3.so.4.0.1
+            # rename /usr/${host}/lib/libffi.so.4.0.1 => /usr/${host}/lib/libffi-4.3.so.4.0.1
             edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
 
             symlinks+=( "${library%.${extension}}-${SLOT}.${extension}" )
@@ -468,7 +484,7 @@ __gcc_slot_runtime() {
         ;;
         # always use newest available version
         *.a|*.la|*.spec|*.security|*.properties)
-            # rename /usr/${CHOST}/lib/libffi.la => /usr/${CHOST}/lib/libffi-4.3.la
+            # rename /usr/${host}/lib/libffi.la => /usr/${host}/lib/libffi-4.3.la
             edo mv "${IMAGE}${library%.${extension}}"{,-${SLOT}}.${extension}
 
             symlinks+=( "${library%.${extension}}-${SLOT}.${extension}" )
@@ -486,7 +502,7 @@ __gcc_setup_gdb_extension() {
     # c.f. http://gcc.gnu.org/ml/gcc/2009-09/msg00085.html
     # NOTE(compnerd) these are formatters which are platform agnostic, so simply grab the
     # version from the host ABI
-    for item in "${IMAGE}"/usr/${CHOST}/lib/*-gdb.py ; do
+    for item in "${IMAGE}"/usr/$(exhost --target)/lib/*-gdb.py ; do
         local name=
 
         [[ -f ${item} ]] || continue
@@ -501,19 +517,20 @@ __gcc_setup_gdb_extension() {
 __gcc_provide_slot_alternatives() {
     local alternatives=( "${PN}" "${SLOT}" "${SLOT}" )
     local program= item= location= name= section=
+    local host=$(exhost --target)
 
     # binaries
-    for program in "${IMAGE}"/usr/${CHOST}/bin/*-${SLOT} ; do
+    for program in "${IMAGE}"/usr/${host}/bin/*-${SLOT} ; do
         name=$(basename "${program}" -${SLOT})
-        alternatives+=( "/usr/${CHOST}/bin/${name}" "${name}-${SLOT}" )
+        alternatives+=( "/usr/${host}/bin/${name}" "${name}-${SLOT}" )
     done
 
-    alternatives+=( "/usr/${CHOST}/bin/cc" "${CHOST}-gcc-${SLOT}" )
-    alternatives+=( "/usr/${CHOST}/bin/c++" "${CHOST}-g++-${SLOT}" )
+    alternatives+=( "/usr/${host}/bin/cc" "${host}-gcc-${SLOT}" )
+    alternatives+=( "/usr/${host}/bin/c++" "${host}-g++-${SLOT}" )
 
     # java runtime
     if option java ; then
-        for item in "${IMAGE}"/usr/${CHOST}/*/security/classpath.security ; do
+        for item in "${IMAGE}"/usr/${host}/*/security/classpath.security ; do
             alternatives+=( "${ROOT:-/}${item##${IMAGE}/}" "classpath-${SLOT}.security" )
         done
 
@@ -553,6 +570,7 @@ __gcc_provide_slot_alternatives() {
 
 gcc_src_install() {
     local target= dir=
+    local host=$(exhost --target)
 
     for target in ${CROSS_COMPILE_TARGETS} ; do
         if option !targets:${target} ; then
@@ -564,10 +582,10 @@ gcc_src_install() {
 
         edo cd "${WORKBASE}/build/${target}"
         emake -j1 DESTDIR="${IMAGE}" install
-        edo rm "${IMAGE}/usr/${CHOST}/bin/${target}-gcc-${PV}"
-        if [[ ${target} == ${CHOST} ]] ; then
+        edo rm "${IMAGE}/usr/${host}/bin/${target}-gcc-${PV}"
+        if [[ ${target} == ${host} ]] ; then
             for tool in cpp gcov ; do
-                edo mv "${IMAGE}"/usr/${CHOST}/bin/{,${target}-}${tool}-${SLOT}
+                edo mv "${IMAGE}"/usr/${host}/bin/{,${target}-}${tool}-${SLOT}
             done
         fi
     done
@@ -577,7 +595,7 @@ gcc_src_install() {
 
     if option doc ; then
         insinto /usr/share/doc/${PNVR}/html
-        edo pushd "${WORKBASE}/build/${CHOST}/${CHOST}/libstdc++-v3/doc"
+        edo pushd "${WORKBASE}/build/${host}/${host}/libstdc++-v3/doc"
         emake doc-html-doxygen
         doins -r doxygen/html/*
         edo popd
