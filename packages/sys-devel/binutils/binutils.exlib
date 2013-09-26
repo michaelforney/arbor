@@ -47,7 +47,7 @@ binutils_src_prepare() {
 }
 
 binutils_src_configure() {
-    local target=
+    local host=$(exhost --target) target=
 
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local libpath=/${target}/lib:/usr/${target}/lib
@@ -63,9 +63,9 @@ binutils_src_configure() {
         edo cd "${WORKBASE}/build/${target}"
         edo "${WORKBASE}/${PNV}/configure"                  \
                 --build=${CHOST}                            \
-                --host=${CHOST}                             \
+                --host=${host}                              \
                 --target=${target}                          \
-                --prefix=/usr/${CHOST}                      \
+                --prefix=/usr/${host}                       \
                 --datarootdir=/usr/share                    \
                 --localstatedir=/var                        \
                 --sysconfdir=/etc                           \
@@ -79,8 +79,8 @@ binutils_src_configure() {
                 --enable-shared                             \
                 --enable-threads                            \
                 --with-lib-path=${libpath}                  \
-                $(if test x"${target}" = x"${CHOST}" ; then
-                    echo --program-prefix=${CHOST}-
+                $(if test x"${target}" = x"${host}" ; then
+                    echo --program-prefix=${host}-
                   fi)                                       \
         || die
     done
@@ -117,12 +117,12 @@ binutils_src_test_expensive() {
 }
 
 binutils_src_install() {
-    local target=
+    local host=$(exhost --target) target=
 
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local m symbols
         # eclectic managed files
-        local em=( /usr/${CHOST}/bin/${target}-ld /usr/${CHOST}/${target}/bin/ld )
+        local em=( /usr/${host}/bin/${target}-ld /usr/${host}/${target}/bin/ld )
 
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
@@ -137,11 +137,11 @@ binutils_src_install() {
         default
 
         # don't install everything twice
-        for f in "${IMAGE}"/usr/${CHOST}/${target}/bin/* ; do
-            local t=${f#${IMAGE}/usr/${CHOST}}
+        for f in "${IMAGE}"/usr/${host}/${target}/bin/* ; do
+            local t=${f#${IMAGE}/usr/${host}}
             local name=${f##*/}
 
-            dosym ..${t} /usr/${CHOST}/bin/${target}-${name}
+            dosym ..${t} /usr/${host}/bin/${target}-${name}
         done
 
         # alternatives setup
@@ -160,7 +160,7 @@ binutils_src_install() {
 
             alternatives=( ld ${provider} ${priority} )
             for m in "${em[@]}" ; do
-                alternatives+=( "${m}" "/usr/${CHOST}/${target}/bin/ld.${provider}" )
+                alternatives+=( "${m}" "/usr/${host}/${target}/bin/ld.${provider}" )
             done
             alternatives_for "${alternatives[@]}"
         done
