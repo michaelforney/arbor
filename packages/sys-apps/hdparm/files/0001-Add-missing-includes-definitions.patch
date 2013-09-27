@@ -1,0 +1,49 @@
+From 8f9a0a121515a777671b35ed1eefe2e045bfb4ab Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Fri, 27 Sep 2013 14:49:08 -0700
+Subject: [PATCH] Add missing includes/definitions
+
+---
+ fallocate.c | 1 +
+ hdparm.h    | 1 +
+ sysfs.c     | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/fallocate.c b/fallocate.c
+index 1c7ec81..e5b7596 100644
+--- a/fallocate.c
++++ b/fallocate.c
+@@ -9,6 +9,7 @@
+ #include <string.h>
+ #include <stdlib.h>
+ #include <stdio.h>
++#define _GNU_SOURCE	/* for loff_t */
+ #include <fcntl.h>
+ #include <errno.h>
+ #include <sys/syscall.h>
+diff --git a/hdparm.h b/hdparm.h
+index 83a42da..bb09eca 100644
+--- a/hdparm.h
++++ b/hdparm.h
+@@ -1,5 +1,6 @@
+ /* Some prototypes for extern functions. */
+ 
++#include <sys/types.h>
+ //#undef __KERNEL_STRICT_NAMES
+ #include <linux/types.h>
+ 
+diff --git a/sysfs.c b/sysfs.c
+index 36ba2ca..b5eddc6 100644
+--- a/sysfs.c
++++ b/sysfs.c
+@@ -13,6 +13,7 @@
+ #include <fcntl.h>
+ #include <errno.h>
+ #include <dirent.h>
++#include <limits.h>
+ #include <sys/stat.h>
+ #include <linux/types.h>
+ 
+-- 
+1.8.4
+
