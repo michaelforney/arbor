@@ -30,6 +30,7 @@ MYOPTIONS="
     examples [[ description = [ Build doxyapp ] requires = [ qt4 ] ]]
     qt4      [[ description = [ Build doxywizard ] ]]
 " # latex
+  # sqlite - stores data gathered by doxygen in a sqlite3 database, experimental
 
 DEPENDENCIES="
     build:
@@ -47,6 +48,7 @@ DEPENDENCIES="
         qt4? ( x11-libs/qt:4[>=4.3.0] )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-Fixed-compilation-issues-in-doxyapp.patch )
 # Prevent Makefiles from running "qmake"; run "eqmake4" instead in src_configure
 DEFAULT_SRC_COMPILE_PARAMS=( QMAKE=true )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( LANGUAGE.HOWTO )
@@ -73,10 +75,6 @@ src_prepare() {
         # Without this, qt:3 is picked up if installed
         export QTDIR=/usr
 
-        # Fix DESTDIR issues with the doxywizard binary
-        edo sed -e 's:$(INSTALL):$(DESTDIR)$(INSTALL):g' \
-                -i addon/doxywizard/Makefile.in
-
         if option examples; then
             # Without this, doxyapp complains about unresolved libpthread symbols
             edo sed -e '/^LIBS[[:space:]]/s~$~ -lpthread~' \
@@ -95,6 +93,7 @@ src_configure() {
         --shared \
         $(option qt4 && echo "--with-doxywizard") \
         $(option examples && echo "--with-doxyapp")
+    #   $(option sqlite && echo "--with-sqlite3")
 }
 
 src_compile() {
@@ -132,5 +131,10 @@ src_install() {
     fi
 
     option examples && dobin bin/doxyapp
+}
+
+src_test() {
+    # diretory "testing" is referenced in the makefile but not contained in the tarball
+    :
 }
 

@@ -5,3 +5,8 @@ require systemd
 
 PLATFORMS="~amd64 ~ppc64 ~x86"
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+   "${FILES}"/0001-swap-fix-reverse-dependencies.patch
+   "${FILES}"/0002-swap-create-.wants-symlink-to-auto-swap-devices.patch
+)
+
