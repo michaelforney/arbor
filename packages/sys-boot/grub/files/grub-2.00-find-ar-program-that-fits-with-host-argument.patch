@@ -1,0 +1,47 @@
+Reason: Check for prefixed ar
+Upstream: Fixed in gnulib, gnulib updated in latest grub
+
+diff -ur a/m4/gnulib-common.m4 b/m4/gnulib-common.m4
+--- a/m4/gnulib-common.m4	2010-12-01 06:45:43.000000000 -0800
++++ b/m4/gnulib-common.m4	2013-09-30 18:05:10.124644041 -0700
+@@ -1,4 +1,4 @@
+-# gnulib-common.m4 serial 20
++# gnulib-common.m4 serial 30
+ dnl Copyright (C) 2007-2010 Free Software Foundation, Inc.
+ dnl This file is free software; the Free Software Foundation
+ dnl gives unlimited permission to copy and/or distribute it,
+@@ -117,6 +117,20 @@
+ [m4_define([AS_VAR_IF],
+ [AS_IF([test x"AS_VAR_GET([$1])" = x""$2], [$3], [$4])])])
+ 
++# gl_PROG_AR_RANLIB
++# Determines the values for AR, ARFLAGS, RANLIB that fit with the compiler.
++AC_DEFUN([gl_PROG_AR_RANLIB],
++[
++  dnl Use the Automake-documented default values for AR and ARFLAGS,
++  dnl but prefer ${host}-ar over ar (useful for cross-compiling).
++  AC_CHECK_TOOL([AR], [ar], [ar])
++  ARFLAGS='cru'
++  dnl Use the ranlib program if it is available.
++  AC_PROG_RANLIB
++  AC_SUBST([AR])
++  AC_SUBST([ARFLAGS])
++])
++
+ # AC_PROG_MKDIR_P
+ # is a backport of autoconf-2.60's AC_PROG_MKDIR_P, with a fix
+ # for interoperability with automake-1.9.6 from autoconf-2.62.
+Only in b/m4: gnulib-common.m4.orig
+Only in b/m4: gnulib-common.m4.rej
+diff -ur a/m4/gnulib-comp.m4 b/m4/gnulib-comp.m4
+--- a/m4/gnulib-comp.m4	2010-12-01 06:45:43.000000000 -0800
++++ b/m4/gnulib-comp.m4	2013-09-30 18:06:28.564644041 -0700
+@@ -25,7 +25,7 @@
+   m4_pattern_allow([^gl_ES$])dnl a valid locale name
+   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
+   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
+-  AC_REQUIRE([AC_PROG_RANLIB])
++  AC_REQUIRE([gl_PROG_AR_RANLIB])
+   # Code from module alloca:
+   # Code from module alloca-opt:
+   # Code from module arg-nonnull:
