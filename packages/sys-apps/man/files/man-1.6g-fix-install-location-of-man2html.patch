@@ -1,0 +1,24 @@
+Source: Michael Forney
+Reason: Fix installation directory of man2html for multiarch
+Upstream: Emailed patch to maintainer, will be included in 1.6h
+
+---
+ man2html/Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/man2html/Makefile.in b/man2html/Makefile.in
+index b41eaba..7096dee 100644
+--- a/man2html/Makefile.in
++++ b/man2html/Makefile.in
+@@ -2,7 +2,7 @@ CC = @CC@
+ CFLAGS += -Wall -Wstrict-prototypes -Wmissing-prototypes
+ OBJECTS = man2html.o cgibase.o abbrev.o strdefs.o
+ EXEEXT = @EXEEXT@
+-bindir = $(DESTDIR)$(PREFIX)/usr/bin
++bindir = $(DESTDIR)$(PREFIX)@bindir@
+ mandir = $(DESTDIR)$(PREFIX)@mandir@
+ vardir = $(DESTDIR)$(PREFIX)/var
+ httpdir = $(DESTDIR)$(PREFIX)/home/httpd
+-- 
+1.8.4
+
