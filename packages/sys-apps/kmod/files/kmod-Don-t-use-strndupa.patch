@@ -1,0 +1,32 @@
+Reason: Fix build on musl
+
+From a805794ddf458b4326b69b430caa068adb23e06d Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Sep 2013 05:24:32 -0700
+Subject: [PATCH] Don't use strndupa
+
+strndupa is not portable.
+---
+ libkmod/libkmod-util.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/libkmod/libkmod-util.c b/libkmod/libkmod-util.c
+index d686250..6d5e39d 100644
+--- a/libkmod/libkmod-util.c
++++ b/libkmod/libkmod-util.c
+@@ -323,8 +323,11 @@ static inline int is_dir(const char *path)
+ int mkdir_p(const char *path, int len, mode_t mode)
+ {
+ 	char *start, *end;
++	char buf[len+1];
+ 
+-	start = strndupa(path, len);
++	memcpy(buf, path, len);
++	buf[len] = '\0';
++	start = buf;
+ 	end = start + len;
+ 
+ 	/*
+-- 
+1.8.4
+

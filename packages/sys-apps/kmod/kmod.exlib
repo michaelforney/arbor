@@ -40,6 +40,8 @@ DEPENDENCIES="
 ECONF_SOURCE=${WORK}
 WORK=${WORKBASE}/build
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-Don-t-use-strndupa.patch )
+
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-logging' '--enable-manpages' '--enable-tools' '--with-xz'
                                '--with-zlib' )
 
@@ -54,6 +56,11 @@ AT_M4DIR=( m4 )
 src_unpack() {
     default
     edo mkdir "${WORK}"
+}
+
+src_prepare() {
+    edo cd "${ECONF_SOURCE}"
+    default
 }
 
 src_test() {
