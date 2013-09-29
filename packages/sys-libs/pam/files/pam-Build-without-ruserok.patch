@@ -1,0 +1,47 @@
+Source: buildroot
+Reason: Fix build on systems without ruserok
+
+From 5059617356fafde9a8691b23609b180803434702 Mon Sep 17 00:00:00 2001
+From: Dmitry Golubovsky <golubovsky@gmail.com>
+Date: Sun, 29 Sep 2013 03:14:00 -0700
+Subject: [PATCH] Build without ruserok
+
+---
+ configure.in                    | 2 +-
+ modules/pam_rhosts/pam_rhosts.c | 6 +++++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/configure.in b/configure.in
+index 14715ce..84bc812 100644
+--- a/configure.in
++++ b/configure.in
+@@ -532,7 +532,7 @@ AC_CHECK_FUNCS(fseeko getdomainname gethostname gettimeofday lckpwdf mkdir selec
+ AC_CHECK_FUNCS(strcspn strdup strspn strstr strtol uname)
+ AC_CHECK_FUNCS(getutent_r getpwnam_r getpwuid_r getgrnam_r getgrgid_r getspnam_r)
+ AC_CHECK_FUNCS(getgrouplist getline getdelim)
+-AC_CHECK_FUNCS(inet_ntop inet_pton innetgr ruserok_af)
++AC_CHECK_FUNCS(inet_ntop inet_pton innetgr ruserok_af ruserok)
+ 
+ AC_CHECK_FUNCS(unshare, [UNSHARE=yes], [UNSHARE=no])
+ AM_CONDITIONAL([HAVE_UNSHARE], [test "$UNSHARE" = yes])
+diff --git a/modules/pam_rhosts/pam_rhosts.c b/modules/pam_rhosts/pam_rhosts.c
+index 8e12061..cfffacb 100644
+--- a/modules/pam_rhosts/pam_rhosts.c
++++ b/modules/pam_rhosts/pam_rhosts.c
+@@ -114,8 +114,12 @@ int pam_sm_authenticate (pam_handle_t *pamh, int flags, int argc,
+ #ifdef HAVE_RUSEROK_AF
+     retval = ruserok_af (rhost, as_root, ruser, luser, PF_UNSPEC);
+ #else
++# ifdef HAVE_RUSEROK
+     retval = ruserok (rhost, as_root, ruser, luser);
+-#endif
++# else
++    retval = -1;
++# endif /* HAVE_RUSEROK */
++#endif /* HAVE_RUSEROK_AF */
+     if (retval != 0) {
+       if (!opt_silent || opt_debug)
+ 	pam_syslog(pamh, LOG_WARNING, "denied access to %s@%s as %s",
+-- 
+1.8.4
+

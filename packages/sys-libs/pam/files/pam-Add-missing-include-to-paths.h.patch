@@ -1,0 +1,26 @@
+Reason: Fix build on musl
+
+From 0f62fd533643fe4f0d0d0ee73c87806be44598ca Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Sep 2013 03:25:29 -0700
+Subject: [PATCH] Add missing include to paths.h
+
+---
+ modules/pam_lastlog/pam_lastlog.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules/pam_lastlog/pam_lastlog.c b/modules/pam_lastlog/pam_lastlog.c
+index bd454ff..543e6fb 100644
+--- a/modules/pam_lastlog/pam_lastlog.c
++++ b/modules/pam_lastlog/pam_lastlog.c
+@@ -26,6 +26,7 @@
+ #include <sys/types.h>
+ #include <syslog.h>
+ #include <unistd.h>
++#include <paths.h>
+ 
+ #if defined(hpux) || defined(sunos) || defined(solaris)
+ # ifndef _PATH_LASTLOG
+-- 
+1.8.4
+

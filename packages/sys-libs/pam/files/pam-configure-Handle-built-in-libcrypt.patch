@@ -1,0 +1,29 @@
+Reason: Fix build with libc with built-in libcrypt
+
+From 870a19c517a528700201c8852d6fb0b40d75ec60 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Sep 2013 02:19:46 -0700
+Subject: [PATCH] configure: Handle built-in libcrypt
+
+---
+ configure.in | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/configure.in b/configure.in
+index 424a634..14715ce 100644
+--- a/configure.in
++++ b/configure.in
+@@ -404,7 +404,9 @@ AS_IF([test "x$ac_cv_header_xcrypt_h" = "xyes"],
+   [crypt_libs="crypt"])
+ 
+ BACKUP_LIBS=$LIBS
+-AC_SEARCH_LIBS([crypt],[$crypt_libs], LIBCRYPT="-l$ac_lib", LIBCRYPT="")
++AC_SEARCH_LIBS([crypt],[$crypt_libs],
++               [test "$ac_cv_search_crypt" = "none required" || LIBCRYPT="$ac_cv_search_crypt"],
++               LIBCRYPT="")
+ AC_CHECK_FUNCS(crypt_r crypt_gensalt_r)
+ LIBS=$BACKUP_LIBS
+ AC_SUBST(LIBCRYPT)
+-- 
+1.8.4
+

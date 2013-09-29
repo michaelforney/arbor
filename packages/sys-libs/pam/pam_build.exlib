@@ -39,7 +39,13 @@ DEPENDENCIES="
 WORK=${WORKBASE}/${MY_PNV}
 AT_M4DIR=( m4 )
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-fix-cppflags.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-fix-cppflags.patch
+    "${FILES}"/${PN}-configure-Handle-built-in-libcrypt.patch
+    "${FILES}"/${PN}-Build-without-innetgr.patch
+    "${FILES}"/${PN}-Build-without-ruserok.patch
+    "${FILES}"/${PN}-Add-missing-include-to-paths.h.patch
+)
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-audit' '--disable-prelude' '--disable-regenerate-docu'
                                '--disable-selinux' '--enable-cracklib' '--enable-db=no'
