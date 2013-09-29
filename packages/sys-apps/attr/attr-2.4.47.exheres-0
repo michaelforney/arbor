@@ -20,6 +20,10 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-Remove-uses-of-__BEGIN_DECLS-and-__THROW.patch
+)
+
 src_prepare() {
     # update builddefs
     edo sed -e "/^PKG_DOC_DIR/s:@pkg_name@:${PNVR}:" \

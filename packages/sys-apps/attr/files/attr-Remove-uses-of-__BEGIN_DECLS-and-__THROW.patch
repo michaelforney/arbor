@@ -1,0 +1,82 @@
+Reason: Fix build with musl
+Upstream: https://savannah.nongnu.org/bugs/?40463
+
+From c98b4488043561720fd31b7136125363d7c38893 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Sep 2013 12:00:22 +0000
+Subject: [PATCH] Remove uses of __BEGIN_DECLS and __THROW
+
+This macros are not portable and not used in the other headers anyway.
+---
+ include/xattr.h | 35 ++++++++++++++++++-----------------
+ 1 file changed, 18 insertions(+), 17 deletions(-)
+
+diff --git a/include/xattr.h b/include/xattr.h
+index 70a84be..3996f28 100644
+--- a/include/xattr.h
++++ b/include/xattr.h
+@@ -20,8 +20,6 @@
+ #ifndef __XATTR_H__
+ #define __XATTR_H__
+ 
+-#include <features.h>
+-
+ #include <errno.h>
+ #ifndef ENOATTR
+ # define ENOATTR ENODATA        /* No such attribute */
+@@ -30,34 +28,37 @@
+ #define XATTR_CREATE  0x1       /* set value, fail if attr already exists */
+ #define XATTR_REPLACE 0x2       /* set value, fail if attr does not exist */
+ 
+-
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ extern int setxattr (const char *__path, const char *__name,
+-		      const void *__value, size_t __size, int __flags) __THROW;
++		      const void *__value, size_t __size, int __flags);
+ extern int lsetxattr (const char *__path, const char *__name,
+-		      const void *__value, size_t __size, int __flags) __THROW;
++		      const void *__value, size_t __size, int __flags);
+ extern int fsetxattr (int __filedes, const char *__name,
+-		      const void *__value, size_t __size, int __flags) __THROW;
++		      const void *__value, size_t __size, int __flags);
+ 
+ extern ssize_t getxattr (const char *__path, const char *__name,
+-				void *__value, size_t __size) __THROW;
++				void *__value, size_t __size);
+ extern ssize_t lgetxattr (const char *__path, const char *__name,
+-				void *__value, size_t __size) __THROW;
++				void *__value, size_t __size);
+ extern ssize_t fgetxattr (int __filedes, const char *__name,
+-				void *__value, size_t __size) __THROW;
++				void *__value, size_t __size);
+ 
+ extern ssize_t listxattr (const char *__path, char *__list,
+-				size_t __size) __THROW;
++				size_t __size);
+ extern ssize_t llistxattr (const char *__path, char *__list,
+-				size_t __size) __THROW;
++				size_t __size);
+ extern ssize_t flistxattr (int __filedes, char *__list,
+-				size_t __size) __THROW;
++				size_t __size);
+ 
+-extern int removexattr (const char *__path, const char *__name) __THROW;
+-extern int lremovexattr (const char *__path, const char *__name) __THROW;
+-extern int fremovexattr (int __filedes,   const char *__name) __THROW;
++extern int removexattr (const char *__path, const char *__name);
++extern int lremovexattr (const char *__path, const char *__name);
++extern int fremovexattr (int __filedes,   const char *__name);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif	/* __XATTR_H__ */
+-- 
+1.8.4
+
