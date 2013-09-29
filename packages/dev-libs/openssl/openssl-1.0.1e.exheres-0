@@ -21,6 +21,7 @@ DEPENDENCIES=""
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-0.9.8o-CFLAGS.patch
     "${FILES}"/${PN}-1.0.1e-fix_pod_syntax-1.patch
+    "${FILES}"/${PN}-Use-supplied-terminal-interface.patch
 )
 
 # TODO(compnerd) fix parallel build
@@ -46,6 +47,9 @@ _openssl_host_os() {
 }
 
 src_configure() {
+    # Use more portable termios.h
+    export CFLAGS="${CFLAGS} -DTERMIOS"
+
     edo "${WORK}"/Configure $(_openssl_host_os) \
         --test-sanity
 
