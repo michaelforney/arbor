@@ -1,0 +1,27 @@
+Reason: Fix build on musl
+Upstream: FIXME
+
+From 68a6511400144888909d2acbfe5d629b928a76ab Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 29 Sep 2013 13:16:24 -0700
+Subject: [PATCH] Add missing sys/types.h include
+
+---
+ utils/proc-llist.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/utils/proc-llist.h b/utils/proc-llist.h
+index 4e21430..b5af622 100644
+--- a/utils/proc-llist.h
++++ b/utils/proc-llist.h
+@@ -26,6 +26,7 @@
+ 
+ #include "config.h"
+ 
++#include <sys/types.h>
+ 
+ /* This is the node of the linked list. Any data elements that are per
+  *  record goes here. */
+-- 
+1.8.4
+
