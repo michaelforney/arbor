@@ -3,7 +3,7 @@
 # Based in part upon 'pam-1.0.1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require flag-o-matic pam
+require flag-o-matic pam autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 export_exlib_phases pkg_pretend src_prepare src_configure src_test src_install
 
@@ -62,14 +62,10 @@ pam_build_src_prepare() {
     for readme in modules/pam_*/README; do
         edo cp -f "${readme}" doc/txt/README.$(dirname "${readme}" | sed -e 's|^modules/||')
     done
-    default
+    autotools_src_prepare
 }
 
 pam_build_src_configure() {
-    # Works around an autoconf 2.62 bug; libintl.h is included before
-    # _GNU_SOURCE is defined in config.h. cf. Gentoo bug 217154.
-    append-flags -D_GNU_SOURCE
-
     local host_prefix=$(exhost --build)
     local build_cflags=${host_prefix//-/_}_CFLAGS                   \
         build_cppflags=${host_prefix//-/_}_CPPFLAGS                 \
