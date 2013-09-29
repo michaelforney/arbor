@@ -1,0 +1,37 @@
+Reason: Fix build on musl
+
+diff -ur a/loginrec.c b/loginrec.c
+--- a/loginrec.c	2013-06-01 15:07:32.000000000 -0700
++++ b/loginrec.c	2013-09-29 04:27:14.846644041 -0700
+@@ -737,7 +737,7 @@
+ void
+ construct_utmpx(struct logininfo *li, struct utmpx *utx)
+ {
+-# ifdef HAVE_ADDR_V6_IN_UTMP
++# ifdef HAVE_ADDR_V6_IN_UTMPX
+ 	struct sockaddr_in6 *sa6;
+ #  endif
+ 	memset(utx, '\0', sizeof(*utx));
+@@ -780,16 +780,16 @@
+ 	if (li->hostaddr.sa.sa_family == AF_INET)
+ 		utx->ut_addr = li->hostaddr.sa_in.sin_addr.s_addr;
+ # endif
+-# ifdef HAVE_ADDR_V6_IN_UTMP
++# ifdef HAVE_ADDR_V6_IN_UTMPX
+ 	/* this is just a 128-bit IPv6 address */
+ 	if (li->hostaddr.sa.sa_family == AF_INET6) {
+ 		sa6 = ((struct sockaddr_in6 *)&li->hostaddr.sa);
+-		memcpy(ut->ut_addr_v6, sa6->sin6_addr.s6_addr, 16);
++		memcpy(utx->ut_addr_v6, sa6->sin6_addr.s6_addr, 16);
+ 		if (IN6_IS_ADDR_V4MAPPED(&sa6->sin6_addr)) {
+-			ut->ut_addr_v6[0] = ut->ut_addr_v6[3];
+-			ut->ut_addr_v6[1] = 0;
+-			ut->ut_addr_v6[2] = 0;
+-			ut->ut_addr_v6[3] = 0;
++			utx->ut_addr_v6[0] = utx->ut_addr_v6[3];
++			utx->ut_addr_v6[1] = 0;
++			utx->ut_addr_v6[2] = 0;
++			utx->ut_addr_v6[3] = 0;
+ 		}
+ 	}
+ # endif

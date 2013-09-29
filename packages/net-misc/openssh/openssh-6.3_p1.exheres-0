@@ -4,7 +4,8 @@
 # Based in part upon 'openssh-5.0_p1-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] pam systemd-service
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 ] ] \
+        pam systemd-service flag-o-matic
 
 MY_PNV=${PNV/_/}
 
@@ -70,6 +71,8 @@ DEPENDENCIES="
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PNV}-allow-host-prefixed-ar.patch
+    "${FILES}"/${PN}-add-missing-includes.patch
+    "${FILES}"/${PN}-fix-check-for-addr-v6-in-utmpx.patch
     -p0 "${FILES}"/${PN}-4.7_p1-GSSAPI-dns.patch
 )
 
@@ -96,6 +99,10 @@ src_prepare() {
 
 src_configure() {
     export LD="${CC}"
+
+    # Work around http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58245 by disabling the noreturn
+    # attribute in exit(). This trick is from sabotage linux.
+    [[ $(exhost --target) == *-*-*musl* ]] && append-flags -fno-builtin-exit -D__noreturn__=
 
     econf \
         --sysconfdir=/etc/ssh \

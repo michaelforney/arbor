@@ -1,0 +1,68 @@
+Reason: Fix build on musl
+
+diff -ur a/channels.c b/channels.c
+--- a/channels.c	2013-09-12 23:19:31.000000000 -0700
++++ b/channels.c	2013-09-29 04:09:48.349644041 -0700
+@@ -45,6 +45,7 @@
+ #include <sys/ioctl.h>
+ #include <sys/un.h>
+ #include <sys/socket.h>
++#include <sys/param.h>
+ #ifdef HAVE_SYS_TIME_H
+ # include <sys/time.h>
+ #endif
+diff -ur a/loginrec.c b/loginrec.c
+--- a/loginrec.c        2013-06-01 15:07:32.000000000 -0700
++++ b/loginrec.c        2013-09-29 04:24:17.312644041 -0700
+@@ -150,6 +150,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/socket.h>
++#include <sys/time.h>
+ 
+ #include <netinet/in.h>
+ 
+diff -ur a/sshconnect.c b/sshconnect.c
+--- a/sshconnect.c	2013-06-01 14:31:19.000000000 -0700
++++ b/sshconnect.c	2013-09-29 04:08:58.228644041 -0700
+@@ -19,6 +19,7 @@
+ #include <sys/wait.h>
+ #include <sys/stat.h>
+ #include <sys/socket.h>
++#include <sys/param.h>
+ #ifdef HAVE_SYS_TIME_H
+ # include <sys/time.h>
+ #endif
+diff -ur a/sshd.c b/sshd.c
+--- a/sshd.c    2013-07-19 20:21:53.000000000 -0700
++++ b/sshd.c    2013-09-29 04:14:55.601644041 -0700
+@@ -47,6 +47,7 @@
+ #include <sys/types.h>
+ #include <sys/ioctl.h>
+ #include <sys/socket.h>
++#include <sys/param.h>
+ #ifdef HAVE_SYS_STAT_H
+ # include <sys/stat.h>
+ #endif
+diff -ur a/ssh-keyscan.c b/ssh-keyscan.c
+--- a/ssh-keyscan.c     2013-06-01 14:31:19.000000000 -0700
++++ b/ssh-keyscan.c     2013-09-29 04:32:21.323644041 -0700
+@@ -11,6 +11,7 @@
+  
+ #include "openbsd-compat/sys-queue.h"
+ #include <sys/resource.h>
++#include <sys/param.h>
+ #ifdef HAVE_SYS_TIME_H
+ # include <sys/time.h>
+ #endif
+diff -ur a/ssh-pkcs11-helper.c b/ssh-pkcs11-helper.c
+--- a/ssh-pkcs11-helper.c       2013-06-01 14:31:19.000000000 -0700
++++ b/ssh-pkcs11-helper.c       2013-09-29 04:34:47.643644041 -0700
+@@ -18,6 +18,7 @@
+ #include "includes.h"
+ 
+ #include <sys/types.h>
++#include <sys/param.h>
+ #ifdef HAVE_SYS_TIME_H
+ # include <sys/time.h>
+ #endif
