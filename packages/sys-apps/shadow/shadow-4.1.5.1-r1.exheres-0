@@ -59,7 +59,7 @@ src_prepare() {
     edo sed -i -e "s:@LIBDIR@:$(exhost --build)/lib:" etc/login.defs
 }
 
-perform_multiarch_install() {
+src_install() {
     default
 
     dosym useradd /usr/$(exhost --target)/sbin/adduser
