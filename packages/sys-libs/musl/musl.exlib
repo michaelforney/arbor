@@ -13,7 +13,7 @@ if ! ever is_scm ; then
     DOWNLOADS="http://www.musl-libc.org/releases/${PNV}.tar.gz"
 fi
 
-LICENCES="MIT BSD-2"
+LICENCES="MIT BSD-2 BSD-3"
 SLOT="0"
 MYOPTIONS=""
 
@@ -43,6 +43,9 @@ src_install() {
     local arch=$(echo 'all: ; @echo $(ARCH)$(SUBARCH)' | make -f config.mak -f -)
 
     default
+
+    insinto /usr/$(exhost --target)/include/sys
+    newins "${FILES}"/sys-queue.h queue.h
 
     insinto /etc
     echo /usr/${host}/lib | hereins ld-musl-${arch}.path
