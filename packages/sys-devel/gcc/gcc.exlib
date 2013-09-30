@@ -226,6 +226,12 @@ gcc_src_configure() {
         local target_cflags_var=${target//-/_}_CFLAGS
         local target_ldflags_var=${target//-/_}_LDFLAGS
         local target_cxxflags_var=${target//-/_}_CXXFLAGS
+        local target_clocale=
+
+        case ${target} in
+            *-*-*musl*) target_clocale=generic  ;;
+            *)          target_clocale=gnu      ;;
+        esac
 
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
@@ -312,7 +318,7 @@ EOF
                 --disable-multilib                                                                  \
                 --disable-libstdcxx-pch                                                             \
                 --enable-fast-install                                                               \
-                --enable-clocale=gnu                                                                \
+                --enable-clocale=${target_clocale}                                                  \
                 --enable-languages="$(IFS=, ; echo "${languages[*]}")"                              \
                 --enable-lto $(! ever at_least 4.6 && echo --with-libelf)                           \
                 --enable-nls                                                                        \
@@ -331,6 +337,7 @@ EOF
                 $(option_enable openmp libgomp)                                                     \
                 $(option_enable objc-runtime libobjc)                                               \
                 $(option_enable propolice libssp)                                                   \
+                $([[ ${target} == *-*-*musl* ]] && echo --disable-libmudflap)                       \
                 $(if test x"${target}" = x"${host}" ; then
                     echo --program-suffix=-${SLOT}
                   else
