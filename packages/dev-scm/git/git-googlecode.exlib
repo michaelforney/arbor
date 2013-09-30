@@ -122,10 +122,12 @@ git-googlecode_src_configure() {
 }
 
 myemake() {
+    local target=$(exhost --target)
+
     emake \
         DESTDIR="${IMAGE}" \
-        prefix=/usr \
-        gitexecdir=/usr/libexec/${PN} \
+        prefix=/usr/${target} \
+        gitexecdir=/usr/${target}/libexec/${PN} \
         gitwebdir=/usr/share/gitweb \
         template_dir=/usr/share/${PN}/templates \
         INSTALLSITELIB=${VENDOR_LIB} \
@@ -151,6 +153,8 @@ git-googlecode_src_test() {
 }
 
 git-googlecode_src_install() {
+    local host=$(exhost --target)
+
     myemake install
 
     if exparam -b manpages ; then
@@ -191,8 +195,8 @@ git-googlecode_src_install() {
     dodoc gitweb/{INSTALL,README}
 
     fixlocalpod
-    edo find "${IMAGE}/usr/${LIBDIR}/perl5" -type f -name .packlist -delete
-    edo find "${IMAGE}/usr/${LIBDIR}/perl5" -type d -empty -delete
+    edo find "${IMAGE}/usr/${host}/lib/perl5" -type f -name .packlist -delete
+    edo find "${IMAGE}/usr/${host}/lib/perl5" -type d -empty -delete
 
     if option baselayout ; then
         newinitd "${FILES}"/git-daemon.initd git-daemon
