@@ -3,7 +3,7 @@
 # Based in part upon 'shadow-4.1.2-r1.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation
 
-require pam
+require pam autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
 
 SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
@@ -36,6 +36,7 @@ DEPENDENCIES="
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-Disable-RLOGIN-if-ruserok-does-not-exist.patch
     -p0 "${FILES}"/${PN}-login.defs.patch
 )
 
@@ -58,7 +59,7 @@ DEFAULT_SRC_INSTALL_EXTRA_PREFIXES="doc/"
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( HOWTO WISHLIST console.c.spec.txt )
 
 src_prepare() {
-    default
+    autotools_src_prepare
 
     edo sed -i -e "s:@LIBDIR@:$(exhost --build)/lib:" etc/login.defs
 }
