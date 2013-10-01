@@ -26,11 +26,13 @@ else
     LICENCES="GPL-2"
 fi
 
+APIVERSION="$(ever range 1-2)"
 if ever at_least 1.13; then
     SLOT="1.13"
 else
-    SLOT="$(ever range 1-2)"
+    SLOT="${APIVERSION}"
 fi
+SUFFIX="-${SLOT}"
 
 MYOPTIONS=""
 RESTRICT="test"
@@ -49,7 +51,7 @@ fi
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=-${SLOT} )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=${SUFFIX} )
 
 automake_src_test_expensive() {
     emake check
@@ -58,9 +60,9 @@ automake_src_test_expensive() {
 automake_src_install() {
     default
 
-    local slotslot=( "${IMAGE}"/usr/bin/*-${SLOT}-${SLOT} )
-    if [[ -e ${slotslot[0]} ]]; then
-        edo rm "${slotslot[@]}"
+    local doublever=( "${IMAGE}"/usr/bin/*${SUFFIX}-${APIVERSION} )
+    if [[ -e ${doublever[0]} ]]; then
+        edo rm "${doublever[@]}"
     fi
 
     edo cd "${IMAGE}"/usr/share/info
