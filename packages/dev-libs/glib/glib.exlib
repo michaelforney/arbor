@@ -28,6 +28,14 @@ if ! ever at_least 2.31.2 ; then
     DEFAULT_SRC_PREPARE_PATCHES=(  "${FILES}"/glib-clang-test.patch )
 fi
 
+if ! ever at_least 2.38.0 ; then
+    DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/glib-configure-Use-AC_USE_SYSTEM_EXTENSIONS.patch )
+fi
+
+if ! ever is_scm ; then
+    DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/glib-add-missing-string-include.patch )
+fi
+
 glib_src_prepare() {
     edo cp "${WORKBASE}"/pkg-config-*/pkg.m4 "${WORKBASE}"/
     default

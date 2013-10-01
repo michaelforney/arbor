@@ -1,0 +1,28 @@
+Reason: Fix build with musl
+Upstream: Fixed in 1606bd967609b2df7f815481858a3e9eeca6e55d
+
+From 1606bd967609b2df7f815481858a3e9eeca6e55d Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Tue, 1 Oct 2013 05:19:55 -0700
+Subject: [PATCH 2/2] Add missing string.h include
+
+Required for memset()
+---
+ gio/gnetworkmonitornetlink.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/gio/gnetworkmonitornetlink.c b/gio/gnetworkmonitornetlink.c
+index 4f7d089..9ce9f88 100644
+--- a/gio/gnetworkmonitornetlink.c
++++ b/gio/gnetworkmonitornetlink.c
+@@ -21,6 +21,7 @@
+ #include "config.h"
+ 
+ #include <errno.h>
++#include <string.h>
+ #include <unistd.h>
+ 
+ #include "gnetworkmonitornetlink.h"
+-- 
+1.8.4
+
