@@ -1,0 +1,149 @@
+Source: Michael Forney
+Reason: Fix build with musl
+Upstream: https://gitorious.org/procps/procps/merge_requests/19
+
+From 1e819ecbe80e852bda4a4e4e3a094b788690b3c1 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Tue, 1 Oct 2013 02:36:58 +0000
+Subject: [PATCH 1/3] Handle 'none required' result from AC_SEARCH_LIBS
+
+---
+ configure.ac | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 06daec2..e0a794d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -220,7 +220,9 @@ if test "x$disable_numa" = x"yes"; then
+ else
+   AC_SEARCH_LIBS([dlopen], [dl], [],
+     [AC_MSG_ERROR([dynamic linking unavailable, circumvent with --disable-numa])])
+-  DL_LIB="$ac_cv_search_dlopen"
++  if test "x$ac_cv_search_dlopen" != "xnone required"; then
++    DL_LIB="$ac_cv_search_dlopen"
++  fi
+ fi
+ AC_SUBST([DL_LIB])
+ 
+-- 
+1.8.4
+
+
+From 0878c50e60668337bef189ee2fd9f92ffd8768dd Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Tue, 1 Oct 2013 05:34:36 +0000
+Subject: [PATCH 2/3] Support libc's without GLOB_TILDE
+
+GLOB_TILDE is a GNU extension and may not be present on all systems.
+---
+ sysctl.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/sysctl.c b/sysctl.c
+index 1425709..563ae3e 100644
+--- a/sysctl.c
++++ b/sysctl.c
+@@ -500,7 +500,15 @@ static int Preload(const char *restrict const filename)
+ 	int globerr;
+ 	int j;
+ 
++#ifdef GLOB_TILDE
+ 	globerr = glob(filename, GLOB_NOCHECK | GLOB_TILDE, NULL, &globbuf);
++#else
++	if (filename[0] == '~')
++		xwarnx(_("GLOB_TILDE is not supported on your platform, "
++			 "the tilde in \"%s\" won't be expanded."), filename);
++	globerr = glob(filename, GLOB_NOCHECK, NULL, &globbuf);
++#endif
++
+ 	if (globerr != 0 && globerr != GLOB_NOMATCH)
+ 		xerr(EXIT_FAILURE, _("glob failed"));
+ 
+-- 
+1.8.4
+
+
+From b84839a782ab2759b4a858097d19871fafeb4064 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Tue, 1 Oct 2013 05:44:46 +0000
+Subject: [PATCH 3/3] Also emulate error_at_line if not present
+
+---
+ include/c.h  | 18 ++++++++++++++++++
+ ps/display.c |  2 +-
+ ps/global.c  |  2 +-
+ 3 files changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/include/c.h b/include/c.h
+index 6bcdf5f..aca88a7 100644
+--- a/include/c.h
++++ b/include/c.h
+@@ -123,6 +123,24 @@ static void error(int status, int errnum, const char *format, ...)
+         if (status != 0)
+                 exit(status);
+ }
++
++/* Emulate the error_at_line() function from glibc */
++__attribute__((__format__(__printf__, 5, 6)))
++static void error_at_line(int status, int errnum, const char *filename,
++                          unsigned int linenum, const char *format, ...)
++{
++        va_list argp;
++        fprintf(stderr, "%s:%s:%u: ", program_invocation_short_name,
++                filename, linenum);
++        va_start(argp, format);
++        vfprintf(stderr, format, argp);
++        va_end(argp);
++        if (errnum != 0)
++                fprintf(stderr, ": error code %d", errnum);
++        fprintf(stderr, "\n");
++        if (status != 0)
++                exit(status);
++}
+ #endif
+ #define xwarn(...) error(0, errno, __VA_ARGS__)
+ #define xwarnx(...) error(0, 0, __VA_ARGS__)
+diff --git a/ps/display.c b/ps/display.c
+index c20285d..087269c 100644
+--- a/ps/display.c
++++ b/ps/display.c
+@@ -25,7 +25,6 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
+-#include <error.h>
+ 
+ #include <sys/sysmacros.h>
+ #include <sys/types.h>
+@@ -38,6 +37,7 @@
+ #include "../proc/wchan.h"
+ 
+ #include "../include/fileutils.h"
++#include "../include/c.h"
+ #include "common.h"
+ 
+ #ifndef SIGCHLD
+diff --git a/ps/global.c b/ps/global.c
+index b75f728..5a4f1e5 100644
+--- a/ps/global.c
++++ b/ps/global.c
+@@ -25,7 +25,6 @@
+ #include <string.h>
+ #include <termios.h>
+ #include <unistd.h>
+-#include <error.h>
+ 
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
+@@ -36,6 +35,7 @@
+ #include "../proc/version.h"
+ #include "../proc/sysinfo.h"
+ 
++#include "../include/c.h"
+ #include "common.h"
+ 
+ #ifndef __GNU_LIBRARY__
+-- 
+1.8.4
+
