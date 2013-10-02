@@ -74,10 +74,6 @@ perl-5_src_configure() {
 
     # -Dfoo = define foo, -Ufoo = undefine foo.
 
-    # This probably needs some further work... but should be okay for
-    # now. At least parrot breaks if we don't have -${osname} in ${archname}
-    local archname="${CHOST%%-*}-linux"
-
     # -O3 breaks ext/XS/APItest/t/exception.t and maybe other stuff
     replace-flags -O3 -O2
 
@@ -94,13 +90,15 @@ perl-5_src_configure() {
         $(define siteprefix   /usr)
         "$(define optimize "${CFLAGS}"  )"
         "$(define ldflags  "${LDFLAGS}" )"
-        "$(define archname "${archname}")"
-        "$(define privlib    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}"              )"
-        "$(define archlib    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}/${archname}"  )"
-        "$(define sitelib    "/usr/${LIBDIR}/perl5/site_perl/${SLOT}"              )"
-        "$(define sitearch   "/usr/${LIBDIR}/perl5/site_perl/${SLOT}/${archname}"  )"
-        "$(define vendorlib  "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}"            )"
-        "$(define vendorarch "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}/${archname}")"
+        # This probably needs some further work... but should be okay for
+        # now. At least parrot breaks if we do not have -${osname} in ${archname}
+        "$(define archname "${CHOST}")"
+        $(define privlib    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-pure"  )
+        $(define archlib    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-arch"  )
+        $(define sitelib    "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-pure"  )
+        $(define sitearch   "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-arch"  )
+        $(define vendorlib  "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-pure")
+        $(define vendorarch "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-arch")
         $(define perlpath    "/usr/bin/${PN}${SLOT}")
         $(define startperl "#!/usr/bin/${PN}${SLOT}")
         $(define scriptdir /usr/bin)
@@ -147,11 +145,8 @@ perl-5_src_install() {
 
     edo cd "${IMAGE}"
 
-    # see configure
-    local archname="${CHOST%%-*}-linux"
-
     # Library symlinks
-    local perllibdir="/usr/${LIBDIR}/perl5/core_perl/${SLOT}/${archname}/CORE/"
+    local perllibdir=/usr/${LIBDIR}/perl5/core_perl/${SLOT}-arch/CORE
     dosym libperl.so.1.${SLOT} ${perllibdir}/libperl.so.1
     dosym libperl.so.1         ${perllibdir}/libperl.so
 
@@ -160,7 +155,7 @@ perl-5_src_install() {
     edo rm usr/bin/${PN}$(ever range 1-3)
 
     # Create & keep site and vendor dirs
-    keepdir /usr/${LIBDIR}/perl5/{site,vendor}_perl/${SLOT}/${archname}
+    keepdir /usr/${LIBDIR}/perl5/{site,vendor}_perl/${SLOT}-{arch,pure}
 
     # We don't need packlists or perllocal.pod
     edo find usr/${LIBDIR} -type f -name .packlist -or -name perllocal.pod -delete
