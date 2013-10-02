@@ -3,6 +3,9 @@
 # Based in part upon 'zsh-4.3.6.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
+# Need autotools for AC_FUNC_MMAP, AC_FUNC_STRCOLL
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ none ] ]
+
 export_exlib_phases src_configure src_test src_install
 
 myexparam -b docs=true
