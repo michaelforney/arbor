@@ -1,0 +1,228 @@
+Source: Upstream
+Reason: Allow overriding of ar and ranlib
+
+From 381c7cc0a4f4773c96cf602db803a9cce0ef9fed Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Wed, 2 Oct 2013 10:48:46 -0700
+Subject: [PATCH] build: Makefile fixes; let user give AR and RANLIB; local
+ libtz.a
+
+* Makefile: Let the user override AR, and build libtz.a before
+installing it, as suggested by Michael Forney in
+<https://github.com/eggert/tz/pull/3>.  Also, let the user
+override RANLIB.  Modernize a bit by assuming POSIX.2-1992 or
+later; this is safe nowadays and simplifies the libtz.a business.
+And treat 'leapseconds' more like we used to, since it's
+machine-independent a 'make clean' doesn't need to remove it.
+(TZLIB): Remove.
+(AR, RANLIB): New macros.
+(TABDATA): Add leapseconds, so that 'make' builds it by default.
+(DATA): Remove leapseconds, since $(TABDATA) now has it.
+(all): Depend on libtz.a, not $(LIBOBJS).
+(install): Install libtz.a using 'cp', like other files.
+Also invoke $(RANLIB) on it, after installing.
+Do not assume that TZDIR is not overridden.
+(install, INSTALL, check_time_t_alternatives): Use 'mkdir -p', as
+it's safe to assume nowadays (standardized in POSIX.2-1992).
+(install, INSTALL): Prefer 'cp -f' to 'rm' followed by 'cp', as
+it's safe to assume 'cp -f' nowadays (also standardized in POSIX.2-1992).
+(libtz.a): Rename from $(DESTDIR)$(TZLIB), since we now build it here.
+Use $(AR) rather than ar.
+Use $(RANLIB) rather than trying to guess it.
+(clean_misc): Do not remove 'leapseconds', as it's machine-independent.
+(maintainer-clean): Remove 'leapseconds' here instead.
+(clean, check_public): Standardize on 'rm -fr' rather than 'rm -f -r';
+formerly the makefile was inconsistent.
+(set-timestamps.out): Don't ignore failurs of the actual touch command.
+---
+ Makefile | 92 ++++++++++++++++++++++++++++++----------------------------------
+ 1 file changed, 43 insertions(+), 49 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 7653278..715bcef 100644
+--- a/Makefile
++++ b/Makefile
+@@ -72,7 +72,6 @@ MANDIR=		$(TOPDIR)/man
+ # Library functions are put in an archive in LIBDIR.
+ 
+ LIBDIR=		$(TOPDIR)/lib
+-TZLIB=		$(LIBDIR)/libtz.a
+ 
+ # If you always want time values interpreted as "seconds since the epoch
+ # (not counting leap seconds)", use
+@@ -298,6 +297,11 @@ GZIPFLAGS=	-9n
+ cc=		cc
+ CC=		$(cc) -DTZDIR=\"$(TZDIR)\"
+ 
++AR=		ar
++
++# ':' on typical hosts; 'ranlib' on the ancient hosts that still need ranlib.
++RANLIB=		:
++
+ TZCSRCS=	zic.c localtime.c asctime.c scheck.c ialloc.c
+ TZCOBJS=	zic.o localtime.o asctime.o scheck.o ialloc.o
+ TZDSRCS=	zdump.c localtime.c ialloc.c asctime.o
+@@ -324,10 +328,10 @@ YDATA=		$(PRIMARY_YDATA) pacificnew etcetera backward
+ NDATA=		systemv factory
+ SDATA=		solar87 solar88 solar89
+ TDATA=		$(YDATA) $(NDATA) $(SDATA)
+-TABDATA=	iso3166.tab zone.tab
++TABDATA=	iso3166.tab zone.tab leapseconds
+ LEAP_DEPS=	leapseconds.awk leap-seconds.list
+ DATA=		$(YDATA) $(NDATA) $(SDATA) $(TABDATA) \
+-			leapseconds $(LEAP_DEPS) yearistype.sh
++			$(LEAP_DEPS) yearistype.sh
+ WEB_PAGES=	tz-art.htm tz-link.htm
+ AWK_SCRIPTS=	checktab.awk leapseconds.awk
+ MISC=		usno1988 usno1989 usno1989a usno1995 usno1997 usno1998 \
+@@ -340,38 +344,29 @@ ENCHILADA=	$(COMMON) $(DOCS) $(SOURCES) $(DATA) $(MISC)
+ 
+ SHELL=		/bin/sh
+ 
+-all:		tzselect zic zdump $(LIBOBJS) $(TABDATA)
++all:		tzselect zic zdump libtz.a $(TABDATA)
+ 
+ ALL:		all date
+ 
+-install:	all $(DATA) $(REDO) $(DESTDIR)$(TZLIB) $(MANS)
++install:	all $(DATA) $(REDO) $(MANS)
++		mkdir -p $(DESTDIR)$(ETCDIR) $(DESTDIR)$(TZDIR) \
++			$(DESTDIR)$(LIBDIR) \
++			$(DESTDIR)$(MANDIR)/man3 $(DESTDIR)$(MANDIR)/man5 \
++			$(DESTDIR)$(MANDIR)/man8
+ 		$(ZIC) -y $(YEARISTYPE) \
+ 			-d $(DESTDIR)$(TZDIR) -l $(LOCALTIME) -p $(POSIXRULES)
+-		-rm -f $(DESTDIR)$(TZDIR)/iso3166.tab \
+-			$(DESTDIR)$(TZDIR)/zone.tab
+-		cp iso3166.tab zone.tab $(DESTDIR)$(TZDIR)/.
+-		-mkdir $(DESTDIR)$(TOPDIR) $(DESTDIR)$(ETCDIR)
++		cp -f iso3166.tab zone.tab $(DESTDIR)$(TZDIR)/.
+ 		cp tzselect zic zdump $(DESTDIR)$(ETCDIR)/.
+-		-mkdir $(DESTDIR)$(TOPDIR) $(DESTDIR)$(MANDIR) \
+-			$(DESTDIR)$(MANDIR)/man3 $(DESTDIR)$(MANDIR)/man5 \
+-			$(DESTDIR)$(MANDIR)/man8
+-		-rm -f $(DESTDIR)$(MANDIR)/man3/newctime.3 \
+-			$(DESTDIR)$(MANDIR)/man3/newtzset.3 \
+-			$(DESTDIR)$(MANDIR)/man5/tzfile.5 \
+-			$(DESTDIR)$(MANDIR)/man8/tzselect.8 \
+-			$(DESTDIR)$(MANDIR)/man8/zdump.8 \
+-			$(DESTDIR)$(MANDIR)/man8/zic.8
+-		cp newctime.3 newtzset.3 $(DESTDIR)$(MANDIR)/man3/.
+-		cp tzfile.5 $(DESTDIR)$(MANDIR)/man5/.
+-		cp tzselect.8 zdump.8 zic.8 $(DESTDIR)$(MANDIR)/man8/.
++		cp libtz.a $(DESTDIR)$(LIBDIR)/.
++		$(RANLIB) $(DESTDIR)$(LIBDIR)/libtz.a
++		cp -f newctime.3 newtzset.3 $(DESTDIR)$(MANDIR)/man3/.
++		cp -f tzfile.5 $(DESTDIR)$(MANDIR)/man5/.
++		cp -f tzselect.8 zdump.8 zic.8 $(DESTDIR)$(MANDIR)/man8/.
+ 
+ INSTALL:	ALL install date.1
+-		-mkdir $(DESTDIR)$(TOPDIR) $(DESTDIR)$(BINDIR)
++		mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1
+ 		cp date $(DESTDIR)$(BINDIR)/.
+-		-mkdir $(DESTDIR)$(TOPDIR) $(DESTDIR)$(MANDIR) \
+-			$(DESTDIR)$(MANDIR)/man1
+-		-rm -f $(DESTDIR)$(MANDIR)/man1/date.1
+-		cp date.1 $(DESTDIR)$(MANDIR)/man1/.
++		cp -f date.1 $(DESTDIR)$(MANDIR)/man1/.
+ 
+ version.h:
+ 		(echo 'static char const PKGVERSION[]="($(PACKAGE)) ";' && \
+@@ -426,11 +421,9 @@ posix_right:	posix_only leapseconds
+ 
+ zones:		$(REDO)
+ 
+-$(DESTDIR)$(TZLIB): $(LIBOBJS)
+-		-mkdir -p $(DESTDIR)$(TOPDIR) $(DESTDIR)$(LIBDIR)
+-		ar ru $@ $(LIBOBJS)
+-		if [ -x /usr/ucb/ranlib ] || [ -x /usr/bin/ranlib ]; \
+-			then ranlib $@ ; fi
++libtz.a:	$(LIBOBJS)
++		$(AR) ru $@ $(LIBOBJS)
++		$(RANLIB) $@
+ 
+ date:		$(DATEOBJS)
+ 		$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(DATEOBJS) $(LDLIBS)
+@@ -459,14 +452,14 @@ check_web:	$(WEB_PAGES)
+ 
+ clean_misc:
+ 		rm -f core *.o *.out \
+-		  date leapseconds tzselect version.h zdump zic yearistype
++		  date tzselect version.h zdump zic yearistype
+ clean:		clean_misc
+-		rm -f -r tzpublic
++		rm -fr tzpublic
+ 
+ maintainer-clean: clean
+ 		@echo 'This command is intended for maintainers to use; it'
+ 		@echo 'deletes files that may need special tools to rebuild.'
+-		rm -f $(MANTXTS) *.asc *.tar.gz
++		rm -f leapseconds $(MANTXTS) *.asc *.tar.gz
+ 
+ names:
+ 		@echo $(ENCHILADA)
+@@ -491,21 +484,23 @@ $(MANTXTS):	workman.sh
+ # and if the files have not changed since then.
+ # This uses GNU 'touch' syntax 'touch -d@N FILE',
+ # where N is the number of seconds since 1970.
+-# If git or GNU 'touch' is absent, do nothing and fail.
++# If git or GNU 'touch' is absent, don't bother to sync with git timestamps.
+ # Also, set the timestamp of each prebuilt file like 'leapseconds'
+ # to be the maximum of the files it depends on.
+ set-timestamps.out: $(ENCHILADA)
+ 		rm -f $@
+-		-files=`git ls-files $(ENCHILADA)` && \
+-		touch -md @1 test.out && rm -f test.out && \
+-		for file in $$files; do \
+-		  if git diff --quiet $$file; then \
+-		    time=`git log -1 --format='tformat:%ct' $$file` && \
+-		    touch -cmd @$$time $$file; \
+-		  else \
+-		    echo >&2 "$$file: warning: does not match repository"; \
+-		  fi || exit; \
+-		done
++		if files=`git ls-files $(ENCHILADA)` && \
++		   touch -md @1 test.out; then \
++		  rm -f test.out && \
++		  for file in $$files; do \
++		    if git diff --quiet $$file; then \
++		      time=`git log -1 --format='tformat:%ct' $$file` && \
++		      touch -cmd @$$time $$file; \
++		    else \
++		      echo >&2 "$$file: warning: does not match repository"; \
++		    fi || exit; \
++		  done; \
++		fi
+ 		touch -cmr `ls -t $(LEAP_DEPS) | sed 1q` leapseconds
+ 		for file in `ls $(MANTXTS) | sed 's/\.txt$$//'`; do \
+ 		  touch -cmr `ls -t $$file workman.sh | sed 1q` $$file.txt || \
+@@ -524,15 +519,14 @@ check_public:	$(ENCHILADA)
+ 		  $(zic) -v -d tzpublic $$i 2>&1 || exit; \
+ 		done
+ 		$(zic) -v -d tzpublic $(TDATA)
+-		rm -f -r tzpublic
++		rm -fr tzpublic
+ 
+ # Check that the code works under various alternative
+ # implementations of time_t.
+ check_time_t_alternatives:
+-		mkdir tzpublic
+ 		zones=`$(AWK) '/^[^#]/ { print $$3 }' <zone.tab` && \
+ 		for type in $(TIME_T_ALTERNATIVES); do \
+-		  mkdir tzpublic/$$type && \
++		  mkdir -p tzpublic/$$type && \
+ 		  make clean_misc && \
+ 		  make TOPDIR=`pwd`/tzpublic/$$type \
+ 		    CFLAGS='$(CFLAGS) -Dtime_tz='"'$$type'" \
+@@ -553,7 +547,7 @@ check_time_t_alternatives:
+ 		  diff -u tzpublic/int64_t.out tzpublic/$$type.out \
+ 		    || exit; \
+ 		done
+-		rm -f -r tzpublic
++		rm -fr tzpublic
+ 
+ tarballs:	tzcode$(VERSION).tar.gz tzdata$(VERSION).tar.gz
+ 
+-- 
+1.8.4
+
