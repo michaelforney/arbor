@@ -33,8 +33,9 @@ DEFAULT_SRC_COMPILE_PARAMS=(
 )
 DEFAULT_SRC_INSTALL_PARAMS=(
     TZDIR=/usr/share/zoneinfo
-    ETCDIR=/usr/bin
-    LIBDIR=/usr/${LIBDIR}
+    # NOTE: timezone-data installs tzselect, zic, zdump, and nothing else to ETCDIR.
+    ETCDIR=/usr/$(exhost --target)/bin
+    LIBDIR=/usr/$(exhost --target)/lib
     MANDIR=/usr/share/man
     TOPDIR=/
 )
