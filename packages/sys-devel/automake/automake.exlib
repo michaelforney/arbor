@@ -26,11 +26,8 @@ else
     LICENCES="GPL-2"
 fi
 
-if ever at_least 1.13; then
-    SLOT="1.13"
-else
-    SLOT="$(ever range 1-2)"
-fi
+APIVERSION="$(ever range 1-2)"
+SUFFIX="-${SLOT}"
 
 MYOPTIONS=""
 RESTRICT="test"
@@ -41,15 +38,10 @@ DEPENDENCIES="
     run:
         sys-devel/automake-wrapper[>=0.2]"
 
-if ever at_least 1.13; then
-    DEPENDENCIES+="
-        run:
-            sys-devel/automake-wrapper[>=0.8]"
-fi
 
 WORK="${WORKBASE}/${MY_PNV}"
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=-${SLOT} )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --program-suffix=${SUFFIX} )
 
 automake_src_test_expensive() {
     if exhost --is-native -q ; then
@@ -62,9 +54,9 @@ automake_src_test_expensive() {
 automake_src_install() {
     default
 
-    local slotslot=( "${IMAGE}"/usr/$(exhost --target)/bin/*-${SLOT}-${SLOT} )
-    if [[ -e ${slotslot[0]} ]]; then
-        edo rm "${slotslot[@]}"
+    local doublever=( "${IMAGE}"/usr/$(exhost --target)/bin/*${SUFFIX}-${APIVERSION} )
+    if [[ -e ${doublever[0]} ]]; then
+        edo rm "${doublever[@]}"
     fi
 
     edo cd "${IMAGE}"/usr/share/info
