@@ -4,7 +4,7 @@
 # Based in part upon 'tcl-8.5.3.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 1.10 ] ] easy-multibuild
+require autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 1.11 1.10 ] ]
 require sourceforge [ suffix=tar.gz pnv=${PN}${PV}-src ]
 
 MY_PNV="${PN}${PV}"
@@ -24,7 +24,7 @@ REMOTE_IDS+=" freecode:tcltk"
 LICENCES="BSD-3"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS="debug multibuild_c: 32 64"
+MYOPTIONS="debug"
 
 DEPENDENCIES=""
 
@@ -40,7 +40,7 @@ DEFAULT_SRC_PREPARE_PATCHES=(
 DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug symbols" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threads )
 
-install_one_multibuild() {
+src_install() {
     default
     nonfatal emake DESTDIR="${IMAGE}" install-private-headers || die "emake install-private-headers failed"
 
