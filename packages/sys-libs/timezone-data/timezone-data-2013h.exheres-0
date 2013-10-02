@@ -28,7 +28,9 @@ DEFAULT_SRC_COMPILE_PARAMS=(
     cc="${CC}"
     AR="${AR}"
     RANLIB="${RANLIB}"
-    CFLAGS="${CFLAGS}"
+    # NOTE: We need to tell private.h we have stdint.h on non glibc targets because C99 is not
+    # enabled by default in gcc
+    CFLAGS="${CFLAGS} -DHAVE_STDINT_H"
     TZDIR="/usr/share/zoneinfo"
 )
 DEFAULT_SRC_INSTALL_PARAMS=(
