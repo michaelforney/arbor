@@ -41,13 +41,15 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug symbols" )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threads )
 
 src_install() {
+    local target=$(exhost --target)
+
     default
     nonfatal emake DESTDIR="${IMAGE}" install-private-headers || die "emake install-private-headers failed"
 
-    keepdir /usr/${LIBDIR}/${PN}8/8.3/
+    keepdir /usr/${target}/lib/${PN}8/8.3/
 
     local v1=$(ever range 1-2)
-    dosym /usr/bin/tclsh{${v1},}
+    dosym /usr/${target}/bin/tclsh{${v1},}
 
     dodoc "${WORKBASE}"/${MY_PNV}/{ChangeLog*,changes,README}
 }
