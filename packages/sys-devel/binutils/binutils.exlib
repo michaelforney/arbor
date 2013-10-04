@@ -32,6 +32,8 @@ RESTRICT="test"
 
 DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}/76_all_use-new-ld-dtags.patch" )
 
+ECONF_SOURCE="${WORKBASE}"/${PNV}
+
 binutils_src_prepare() {
     # fixup broken locale install paths
     edo sed -e '/^localedir = /clocaledir = /usr/share/locale'          \
@@ -62,17 +64,9 @@ binutils_src_configure() {
 
         edo mkdir -p "${WORKBASE}/build/${target}"
         edo cd "${WORKBASE}/build/${target}"
-        edo "${WORKBASE}/${PNV}/configure"                  \
-                --build=${CHOST}                            \
-                --host=${host}                              \
+        econf                                               \
                 --target=${target}                          \
-                --prefix=/usr/${host}                       \
-                --datarootdir=/usr/share                    \
-                --localstatedir=/var                        \
-                --sysconfdir=/etc                           \
-                --disable-dependency-tracking               \
                 --disable-werror                            \
-                --enable-fast-install                       \
                 --enable-gold                               \
                 --enable-ld                                 \
                 --enable-lto                                \
