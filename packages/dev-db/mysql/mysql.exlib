@@ -40,6 +40,10 @@ MYOPTIONS="
 
 DEPENDENCIES="
     build+run:
+        !dev-db/mariadb [[
+            description = [ MariaDB is a drop-in replacement for MySQL with same binary names ]
+            resolution = uninstall-blocked-after
+        ]]
         group/${PN}
         user/${PN}
         dev-libs/libaio[multibuild_c:*(-)?]
