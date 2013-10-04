@@ -37,8 +37,26 @@ DEFAULT_SRC_PREPARE_PATCHES=(
         "${FILES}/${PN}-tclm4-soname.patch"
         "${FILES}/${PN}-tclConfig-paths.patch"
 )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( "debug symbols" )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --enable-threads )
+
+src_configure() {
+    local extra_params=( )
+
+    if ! exhost --is-native -q ; then
+        extra_params+=(
+            # NOTE(tridactyla) When cross-compiling, tcl conservatively assumes that the
+            # implementations of these functions are buggy because it cannot test that they are not.
+            # Due to a bug in tcl (http://core.tcl.tk/tcl/tktview?name=1195167fff), this causes a
+            # compilation failure because of duplicate fixstrod symbols. Instead, just assume that
+            # they work correctly.
+            tcl_cv_strstr_unbroken=ok
+            tcl_cv_strtoul_unbroken=ok
+            tcl_cv_strtod_unbroken=ok
+            tcl_cv_strtod_buggy=ok
+        )
+    fi
+
+    econf --enable-threads $(option_enable debug symbols) ${extra_params[@]}
+}
 
 src_install() {
     local target=$(exhost --target)
