@@ -19,7 +19,7 @@ HOMEPAGE="http://www.kernel.org"
 
 LICENCES="GPL-2"
 SLOT="0"
-MYOPTIONS="platform: amd64 arm ia64 ppc64 x86"
+MYOPTIONS="platform: amd64 arm ia64 x86"
 
 WORK=${WORKBASE}/linux-${PV}
 
@@ -36,11 +36,10 @@ linux-headers_pkg_pretend() {
 linux-headers_src_compile() {
     # Fix ARCH to match linux-headers values
     local x myarch platform_to_arch_map=(
-        #alpha mips sparc
+        #alpha mips sparc ppc64:powerpc
         amd64:x86_64
         arm
         ia64
-        ppc64:powerpc
         x86:i386
     )
     for x in "${platform_to_arch_map[@]}"; do

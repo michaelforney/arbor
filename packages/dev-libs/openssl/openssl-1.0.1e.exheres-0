@@ -16,7 +16,7 @@ UPSTREAM_RELEASE_NOTES="${HOMEPAGE}/news/announce.html [[ lang = en ]]"
 LICENCES="${PN}"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~ia64 ~x86"
-MYOPTIONS="platform: ppc64 multibuild_c: 32 64"
+MYOPTIONS="multibuild_c: 32 64"
 
 DEPENDENCIES=""
 
@@ -46,10 +46,7 @@ configure_prepare_one_multibuild() { :; }
 configure_one_multibuild() {
     edo ./config --test-sanity
 
-    # ppc64 needs to be configured manually with Configure instead of config.
-    if option platform:ppc64; then
-        edo ./Configure linux-ppc64 --prefix=/usr --openssldir=/etc/ssl shared threads
-    elif option multibuild_c:32 && [[ "${MULTIBUILD_CLASS}${MULTIBUILD_TARGET}" == "C32" ]]; then
+    if option multibuild_c:32 && [[ "${MULTIBUILD_CLASS}${MULTIBUILD_TARGET}" == "C32" ]]; then
         edo ./Configure linux-elf --prefix=/usr --openssldir=/etc/ssl shared threads
     else
         edo ./config --prefix=/usr --openssldir=/etc/ssl shared threads
