@@ -122,7 +122,7 @@ binutils_src_install() {
     for target in ${CROSS_COMPILE_TARGETS} ; do
         local m symbols
         # eclectic managed files
-        local em=( /usr/bin/${target}-ld /usr/${CHOST}/${target}/bin/ld )
+        local em=( /usr/${CHOST}/bin/${target}-ld /usr/${CHOST}/${target}/bin/ld )
 
         if option !targets:${target} ; then
             echo "    Cross-Compile Target: ${target} (disabled)"
@@ -135,6 +135,14 @@ binutils_src_install() {
 
         # default installation
         default
+
+        # don't install everything twice
+        for f in "${IMAGE}"/usr/${CHOST}/${target}/bin/* ; do
+            local t=${f#${IMAGE}/usr/${CHOST}}
+            local name=${f##*/}
+
+            dosym ..${t} /usr/${CHOST}/bin/${target}-${name}
+        done
 
         # alternatives setup
         for m in "${em[@]}" ; do
