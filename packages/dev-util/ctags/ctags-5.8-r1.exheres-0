@@ -21,7 +21,7 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
 src_install() {
     einstall
     alternatives_for ctags exuberant-ctags 1000 \
-        /usr/bin/ctags exuberant-ctags \
+        /usr/$(exhost --target)/bin/ctags exuberant-ctags \
         /usr/share/man/man1/ctags.1 exuberant-ctags.1
 }
 
