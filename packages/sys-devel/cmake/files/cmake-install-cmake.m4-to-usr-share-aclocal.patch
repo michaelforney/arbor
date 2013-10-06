@@ -1,0 +1,28 @@
+Reason: Install cmake.m4 to /usr/share/aclocal/
+Upstream: http://www.cmake.org/Bug/view.php?id=14461
+
+From fcfdf3d04ef00fc425f074ee40fb0704ec92d1ce Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 6 Oct 2013 11:35:23 +0000
+Subject: [PATCH] Install cmake.m4 to /usr/share/aclocal/
+
+---
+ Utilities/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Utilities/CMakeLists.txt b/Utilities/CMakeLists.txt
+index b8f6b3c..8042b15 100644
+--- a/Utilities/CMakeLists.txt
++++ b/Utilities/CMakeLists.txt
+@@ -129,7 +129,7 @@ install_files(${CMAKE_DOC_DIR} FILES
+   ${HTML_FILES}
+   ${DOCBOOK_FILES}
+   )
+-install(FILES cmake.m4 DESTINATION share/aclocal)
++install(FILES cmake.m4 DESTINATION ${CMAKE_DATA_DIR}/../aclocal)
+ 
+ # Drive documentation generation.
+ add_custom_target(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
+-- 
+1.8.4
+

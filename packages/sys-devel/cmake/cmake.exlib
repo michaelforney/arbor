@@ -42,6 +42,7 @@ VIMFILE="${PN}.vim"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/remove-test-failure-submits-via-network2.patch
+    "${FILES}"/${PN}-install-cmake.m4-to-usr-share-aclocal.patch
 )
 DEFAULT_SRC_TEST_PARAMS=( ARGS=--verbose )
 
@@ -60,10 +61,10 @@ src_configure() {
         --parallel=${EXJOBS:-1} \
         --$(option qt5 || option qt4 || echo "no-")qt-gui \
         --system-libs \
-        --prefix=/usr \
-        --docdir=/share/doc/${PNVR} \
-        --datadir=/share/${PN} \
-        --mandir=/share/man \
+        --prefix=/usr/$(exhost --target) \
+        --docdir=/../share/doc/${PNVR} \
+        --datadir=/../share/${PN} \
+        --mandir=/../share/man \
         --verbose \
         $(option qt4 && echo " -- -DCMAKE_DISABLE_FIND_PACKAGE_Qt5Core:BOOL=TRUE")
 }
