@@ -5,7 +5,7 @@ require gnu [ suffix=bz2 ]
 
 SUMMARY="Tar archiver"
 
-LICENCES="( GPL-3 ) [[ last-checked = 1.26 ]]"
+LICENCES="( GPL-3 ) [[ last-checked = 1.27 ]]"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
 MYOPTIONS=""
@@ -15,7 +15,6 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-no-gets.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --bindir=/bin )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
@@ -42,6 +41,5 @@ src_test_expensive() {
 src_install() {
     default
     doman tar.1
-    edo rmdir "${IMAGE}"/usr/sbin
 }
 
