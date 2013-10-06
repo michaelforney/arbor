@@ -1,0 +1,94 @@
+Source: gnulib upstream
+Reason: Fix build with musl libc
+Upstream: Upstream gnulib tracked by git; should be included in next release
+
+diff -Nur a/configure.ac b/configure.ac
+--- a/configure.ac	2010-03-29 02:35:26.000000000 +0000
++++ b/configure.ac	2013-10-06 03:44:23.134644041 +0000
+@@ -17,7 +17,7 @@
+ dnl Process this file with autoconf to produce a configure script.
+ 
+ AC_PREREQ([2.63])
+-AC_INIT
++AC_INIT([libunistring], [0.9.3])
+ AC_CONFIG_SRCDIR([lib/unistring/version.in.h])
+ AC_CONFIG_AUX_DIR([build-aux])
+ . $srcdir/version.sh
+diff -Nur a/gnulib-m4/fseterr.m4 b/gnulib-m4/fseterr.m4
+--- a/gnulib-m4/fseterr.m4	1970-01-01 00:00:00.000000000 +0000
++++ b/gnulib-m4/fseterr.m4	2013-10-06 03:20:42.038644041 +0000
+@@ -0,0 +1,10 @@
++# fseterr.m4 serial 1
++dnl Copyright (C) 2012 Free Software Foundation, Inc.
++dnl This file is free software; the Free Software Foundation
++dnl gives unlimited permission to copy and/or distribute it,
++dnl with or without modifications, as long as this notice is preserved.
++
++AC_DEFUN([gl_FUNC_FSETERR],
++[
++  AC_CHECK_FUNCS_ONCE([__fseterr])
++])
+diff -Nur a/gnulib-m4/gnulib-comp.m4 b/gnulib-m4/gnulib-comp.m4
+--- a/gnulib-m4/gnulib-comp.m4	2010-05-02 12:46:06.000000000 +0000
++++ b/gnulib-m4/gnulib-comp.m4	2013-10-06 03:20:54.237644041 +0000
+@@ -1039,6 +1039,10 @@
+   gl_FUNC_FREXPL_NO_LIBM
+   gl_MATH_MODULE_INDICATOR([frexpl])
+   # Code from module fseterr:
++  gl_FUNC_FSETERR
++  if test $ac_cv_func___fseterr = no; then
++    AC_LIBOBJ([fseterr])
++  fi
+   # Code from module gperf:
+   # Code from module havelib:
+   # Code from module iconv:
+diff -Nur a/lib/Makefile.gnulib b/lib/Makefile.gnulib
+--- a/lib/Makefile.gnulib	2010-05-02 21:26:54.000000000 +0000
++++ b/lib/Makefile.gnulib	2013-10-06 04:08:35.802644041 +0000
+@@ -239,8 +239,6 @@
+ 
+ ## begin gnulib module fseterr
+ 
+-libunistring_la_SOURCES += fseterr.c
+-
+ EXTRA_DIST += fseterr.h stdio-impl.h
+ 
+ ## end   gnulib module fseterr
+diff -Nur a/lib/fseterr.h b/lib/fseterr.h
+--- a/lib/fseterr.h	2010-01-01 10:02:02.000000000 +0000
++++ b/lib/fseterr.h	2013-10-06 03:20:42.037644041 +0000
+@@ -19,19 +19,27 @@
+ 
+ #include <stdio.h>
+ 
+-#ifdef __cplusplus
+-extern "C" {
+-#endif
+-
+-
+ /* Set the error indicator of the stream FP.
+    The "error indicator" is set when an I/O operation on the stream fails, and
+    is cleared (together with the "end-of-file" indicator) by clearerr (FP).  */
+-extern void fseterr (FILE *fp);
+ 
++#if HAVE___FSETERR /* musl libc */
++
++# include <stdio_ext.h>
++# define fseterr(fp) __fseterr (fp)
+ 
+-#ifdef __cplusplus
++#else
++
++# ifdef __cplusplus
++extern "C" {
++# endif
++
++extern void fseterr (FILE *fp);
++
++# ifdef __cplusplus
+ }
++# endif
++
+ #endif
+ 
+ #endif /* _FSETERR_H */
