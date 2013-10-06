@@ -10,7 +10,7 @@ export_exlib_phases src_configure
 myexparam slot=4
 myexparam -b no_qt_dependency=false
 
-if ! exparam -b no_qt_dependency ; then
+if exparam -b no_qt_dependency ; then
     case $(exparam slot) in
         4)
             DEPENDENCIES="build: x11-libs/qt:4 [[ note = [ Qt-Core, for qmake ] ]]"
