@@ -1,0 +1,47 @@
+Reason: Fix build with musl
+Upstream: Yes (in a much more elaborate commit)
+
+From 7a9194a83cea9cfc97c02ef3ff0cd89ead04e4a2 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 6 Oct 2013 04:50:30 +0000
+Subject: [PATCH] Only include execinfo.h if available
+
+---
+ Source/kwsys/CMakeLists.txt        | 7 +++++++
+ Source/kwsys/SystemInformation.cxx | 2 +-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/Source/kwsys/CMakeLists.txt b/Source/kwsys/CMakeLists.txt
+index 124b8ac..60b3140 100644
+--- a/Source/kwsys/CMakeLists.txt
++++ b/Source/kwsys/CMakeLists.txt
+@@ -612,6 +612,13 @@ IF(KWSYS_USE_SystemInformation)
+         COMPILE_DEFINITIONS KWSYS_SYS_HAS_MACHINE_CPU_H=1)
+     ENDIF()
+   ENDIF()
++  IF(CMAKE_SYSTEM MATCHES "Linux")
++    CHECK_INCLUDE_FILES("execinfo.h" KWSYS_SYS_HAS_EXECINFO_H)
++    IF(KWSYS_SYS_HAS_EXECINFO_H)
++      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
++        COMPILE_DEFINITIONS KWSYS_SYS_HAS_EXECINFO_H=1)
++    ENDIF()
++  ENDIF()
+   IF(KWSYS_LFS_AVAILABLE AND NOT KWSYS_LFS_DISABLE)
+     SET(KWSYS_PLATFORM_CXX_TEST_DEFINES -DKWSYS_HAS_LFS=1)
+   ENDIF()
+diff --git a/Source/kwsys/SystemInformation.cxx b/Source/kwsys/SystemInformation.cxx
+index 9e2a93d..6470061 100644
+--- a/Source/kwsys/SystemInformation.cxx
++++ b/Source/kwsys/SystemInformation.cxx
+@@ -130,7 +130,7 @@ typedef int siginfo_t;
+ #   define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
+ #  endif
+ # endif
+-# if defined(__GNUC__)
++# if defined(KWSYS_SYS_HAS_EXECINFO_H)
+ #  include <execinfo.h>
+ #  if !(defined(__LSB_VERSION__) && __LSB_VERSION__ < 41)
+ #   define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
+-- 
+1.8.4
+
