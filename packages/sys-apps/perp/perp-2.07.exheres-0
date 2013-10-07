@@ -36,6 +36,8 @@ DEPENDENCIES="
 
 BUGS_TO="alip@exherbo.org"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-allow-override-of-ar-ranlib.patch )
+
 src_prepare() {
     local host=$(exhost --target) cc=${CC}
 
@@ -45,6 +47,8 @@ src_prepare() {
 
     cat >> conf.mk <<- EOF
 CC = ${cc}
+AR = ${AR}
+RANLIB = ${RANLIB}
 CFLAGS = ${CFLAGS}
 BINDIR = /usr/${host}/bin
 SBINDIR = /usr/${host}/sbin
