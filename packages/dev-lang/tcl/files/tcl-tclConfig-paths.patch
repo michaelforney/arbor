@@ -1,0 +1,53 @@
+Source: written by Michael Forney <mforney@mforney.org>
+Reason: Remove references to build directory
+Upstream: No
+
+diff -ur a/unix/tclConfig.sh.in b/unix/tclConfig.sh.in
+--- a/unix/tclConfig.sh.in	2011-11-04 12:47:57.000000000 +0000
++++ b/unix/tclConfig.sh.in	2013-10-03 23:15:49.120644041 +0000
+@@ -85,8 +85,8 @@
+ # run-time dynamic linker where to look for shared libraries such as
+ # libtcl.so.  Used when linking applications.  Only works if there
+ # is a variable "LIB_RUNTIME_DIR" defined in the Makefile.
+-TCL_CC_SEARCH_FLAGS='@CC_SEARCH_FLAGS@'
+-TCL_LD_SEARCH_FLAGS='@LD_SEARCH_FLAGS@'
++TCL_CC_SEARCH_FLAGS='@CC_SEARCH_FLAGS@:@libdir@'
++TCL_LD_SEARCH_FLAGS='@LD_SEARCH_FLAGS@:@libdir@'
+ 
+ # Additional object files linked with Tcl to provide compatibility
+ # with standard facilities from ANSI C or POSIX.
+@@ -100,7 +100,7 @@
+ 
+ # String to pass to linker to pick up the Tcl library from its
+ # build directory.
+-TCL_BUILD_LIB_SPEC='@TCL_BUILD_LIB_SPEC@'
++TCL_BUILD_LIB_SPEC='@TCL_LIB_SPEC@'
+ 
+ # String to pass to linker to pick up the Tcl library from its
+ # installed directory.
+@@ -135,7 +135,7 @@
+ # different place than the directory containing the source files, this
+ # points to the location of the sources, not the location where Tcl was
+ # compiled.
+-TCL_SRC_DIR='@TCL_SRC_DIR@'
++TCL_SRC_DIR=''
+ 
+ # List of standard directories in which to look for packages during
+ # "package require" commands.  Contains the "prefix" directory plus also
+@@ -153,14 +153,14 @@
+ 
+ # String to pass to linker to pick up the Tcl stub library from its
+ # build directory.
+-TCL_BUILD_STUB_LIB_SPEC='@TCL_BUILD_STUB_LIB_SPEC@'
++TCL_BUILD_STUB_LIB_SPEC='@TCL_STUB_LIB_SPEC@'
+ 
+ # String to pass to linker to pick up the Tcl stub library from its
+ # installed directory.
+ TCL_STUB_LIB_SPEC='@TCL_STUB_LIB_SPEC@'
+ 
+ # Path to the Tcl stub library in the build directory.
+-TCL_BUILD_STUB_LIB_PATH='@TCL_BUILD_STUB_LIB_PATH@'
++TCL_BUILD_STUB_LIB_PATH='@TCL_STUB_LIB_PATH@'
+ 
+ # Path to the Tcl stub library in the install directory.
+ TCL_STUB_LIB_PATH='@TCL_STUB_LIB_PATH@'

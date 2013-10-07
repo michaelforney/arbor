@@ -5,9 +5,9 @@ require gnu [ suffix=bz2 ] autotools [ supported_autoconf=[ 2.5 ] supported_auto
 
 SUMMARY="Tar archiver"
 
-LICENCES="( GPL-3 ) [[ last-checked = 1.26 ]]"
+LICENCES="( GPL-3 ) [[ last-checked = 1.27 ]]"
 SLOT="0"
-PLATFORMS="~amd64 ~arm ~ia64 ~ppc64 ~x86"
+PLATFORMS="~amd64 ~arm ~x86"
 MYOPTIONS=""
 
 DEPENDENCIES="
@@ -15,13 +15,7 @@ DEPENDENCIES="
         sys-devel/gettext
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=(
-    "${FILES}"/${PNV}-look-for-host-prefixed-ar.patch
-    "${FILES}"/${PNV}-no-gets.patch
-)
-
-DEFAULT_SRC_TEST_PARAMS=( TESTSUITEFLAGS='-k !sparse03' )
-
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PNV}-look-for-host-prefixed-ar.patch )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( PORTS )
 
 AT_M4DIR=( m4 )

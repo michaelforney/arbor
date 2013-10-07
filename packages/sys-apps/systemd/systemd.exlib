@@ -63,8 +63,8 @@ MYOPTIONS="
     simple-net [[ description = [ Include an extremely simple service for static networking ] ]]
     static-net [[ description = [ Include a simple service for static networking ] ]]
     tcpd
-    zsh-completion
     xattr
+    zsh-completion
 "
 
 DEPENDENCIES="
@@ -471,10 +471,6 @@ EOF
 
     # Keep the administrator's udev hardware database dir.
     keepdir /etc/udev/hwdb.d
-
-    # platform rules
-    #insinto "${UDEVRULESDIR}"
-    #option platform:ia64 && doins "rules/arch/40-ia64.rules"
 
     # module loading configuration
     insinto /etc/modprobe.d

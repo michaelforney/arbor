@@ -16,9 +16,8 @@ DEPENDENCIES="
 "
 
 src_install() {
-    default
-    edo rm "${IMAGE}"/usr/{bin/zipdetails,share/man/man1/zipdetails.1} \
-        "${IMAGE}"/usr/${LIBDIR}/perl5/*/*/perllocal.pod
+    perl-module_src_install
+    edo rm "${IMAGE}"/usr/{bin/zipdetails,share/man/man1/zipdetails.1}
     edo find "${IMAGE}"/usr -empty -delete
 }
 

@@ -12,21 +12,30 @@ require dependencies-helpers
 
 myexparam -b vala_dep=$(ever is_scm && echo true || echo false)
 myexparam vala_slots[]
-myexparam deps_var=DEPENDENCIES
+myexparam -b with_opt=false
+
+exparam -b with_opt && myexparam option_name=vapi
 
 exparam -v vala_slots vala_slots[@]
+if exparam -b with_opt; then
+    exparam -v OPTION_NAME option_name
+    MYOPTIONS="${OPTION_NAME}"
+fi
+
 
 export_exlib_phases pkg_setup
 
 if exparam -b vala_dep; then
-    printf -v "$(exparam deps_var)" "%s" "
-        build:
-            $(print_slot_dependencies dev-lang/vala ${vala_slots[@]})
+    DEPENDENCIES="
+        $(exparam -b with_opt && echo ${OPTION_NAME}?) (
+            build:
+                $(print_slot_dependencies dev-lang/vala ${vala_slots[@]})
+        )
     "
 fi
 
 vala_pkg_setup() {
-    if exparam -b vala_dep; then
+    if exparam -b vala_dep && { ! exparam -b with_opt || { exparam -b with_opt && option ${OPTION_NAME} ; } }; then
         local vala_version=$(get_best_slot_dependency dev-lang/vala ${vala_slots[@]})
         [[ -z ${vala_version} ]] && die "No vala installed"
         export VALAC="$(type -P valac-${vala_version})"
