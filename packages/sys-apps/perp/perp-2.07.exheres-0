@@ -37,7 +37,7 @@ DEPENDENCIES="
 BUGS_TO="alip@exherbo.org"
 
 src_prepare() {
-    local cc=${CC}
+    local host=$(exhost --target) cc=${CC}
 
     default
 
@@ -46,8 +46,8 @@ src_prepare() {
     cat >> conf.mk <<- EOF
 CC = ${cc}
 CFLAGS = ${CFLAGS}
-BINDIR = /bin
-SBINDIR = /sbin
+BINDIR = /usr/${host}/bin
+SBINDIR = /usr/${host}/sbin
 EOF
 }
 
