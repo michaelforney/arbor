@@ -57,18 +57,35 @@ src_prepare() {
 }
 
 src_configure() {
-    edo ./bootstrap \
-        --parallel=${EXJOBS:-1} \
-        --$(option qt5 || option qt4 || echo "no-")qt-gui \
-        --system-libs \
-        --prefix=/usr/$(exhost --target) \
-        --docdir=/../share/doc/${PNVR} \
-        --datadir=/../share/${PN} \
-        --mandir=/../share/man \
-        --verbose \
-        -- \
-        -DCMAKE_AR:PATH="${AR}" \
-        -DCMAKE_RANLIB:PATH="${RANLIB}" \
+    local host=$(exhost --target)
+    local build_cflags_var=${CHOST//-/_}_CFLAGS
+    local build_ldflags_var=${CHOST//-/_}_LDFLAGS
+    local build_cxxflags_var=${CHOST//-/_}_CXXFLAGS
+
+    edo env                                                                     \
+        CC="${CHOST}-gcc"                                                       \
+        CXX="${CHOST}-g++"                                                      \
+        CFLAGS="${!build_cflags_var}"                                           \
+        LDFLAGS="${!build_ldflags_var}"                                         \
+        CXXFLAGS="${!build_cxxflags_var}"                                       \
+    ./bootstrap                                                                 \
+        --parallel=${EXJOBS:-1}                                                 \
+        --$(option qt5 || option qt4 || echo "no-")qt-gui                       \
+        --system-libs                                                           \
+        --prefix=/usr/${host}                                                   \
+        --docdir=/../share/doc/${PNVR}                                          \
+        --datadir=/../share/${PN}                                               \
+        --mandir=/../share/man                                                  \
+        --verbose                                                               \
+        --                                                                      \
+        -DCMAKE_C_COMPILER:PATH="${CC}"                                         \
+        -DCMAKE_CXX_COMPILER:PATH="${CXX}"                                      \
+        -DCMAKE_C_FLAGS:STRING="${CFLAGS}"                                      \
+        -DCMAKE_CXX_FLAGS:STRING="${CXXFLAGS}"                                  \
+        -DCMAKE_AR:PATH="${AR}"                                                 \
+        -DCMAKE_RANLIB:PATH="${RANLIB}"                                         \
+        -DCMAKE_LIBRARY_PATH:STRING=/usr/${host}/lib                            \
+        -DCMAKE_INCLUDE_PATH:STRING=/usr/${host}/include                        \
         $(option qt4 && echo "-DCMAKE_DISABLE_FIND_PACKAGE_Qt5Core:BOOL=TRUE")
 }
 
