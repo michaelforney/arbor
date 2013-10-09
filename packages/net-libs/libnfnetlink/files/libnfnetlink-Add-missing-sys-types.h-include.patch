@@ -1,0 +1,25 @@
+From 4d8d466e89257faab77f364524e4929a6293b479 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 9 Oct 2013 00:27:57 +0000
+Subject: [PATCH] Add missing sys/types.h include
+
+For u_int*_t
+---
+ include/libnfnetlink/linux_nfnetlink.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/libnfnetlink/linux_nfnetlink.h b/include/libnfnetlink/linux_nfnetlink.h
+index 76a8550..5538ac5 100644
+--- a/include/libnfnetlink/linux_nfnetlink.h
++++ b/include/libnfnetlink/linux_nfnetlink.h
+@@ -1,6 +1,7 @@
+ #ifndef _NFNETLINK_H
+ #define _NFNETLINK_H
+ #include <linux/types.h>
++#include <sys/types.h>
+ #include <libnfnetlink/linux_nfnetlink_compat.h>
+ 
+ enum nfnetlink_groups {
+-- 
+1.8.4
+
