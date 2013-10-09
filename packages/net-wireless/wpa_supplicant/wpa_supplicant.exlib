@@ -283,28 +283,18 @@ src_install() {
         popd
     fi
 
-    if option systemd ; then
-        insinto /etc/conf.d
-        hereins wpa_supplicant.conf <<EOF
-# If you wish to start the wpa_supplicant daemon to be controlled via the DBus
-# interface by another service then IFACE can be commented out or empty.
-#
-# See man wpa_supplicant(8) for details
-
-CONFIG="-c/etc/wpa_supplicant/wpa_supplicant.conf"
-IFACE="-iwlan0"
-DRIVER="-Dnl80211,wext"
-EOF
+    if option systemd; then
+        insinto "${SYSTEMDSYSTEMUNITDIR}"
+        doins "${WORK}"/systemd/{wpa_supplicant@,wpa_supplicant-nl80211@,wpa_supplicant-wired@}.service
+        option dbus && doins "${WORK}"/systemd/wpa_supplicant.service
     fi
-    install_systemd_files
 
     if option baselayout ; then
         exeinto /etc/wpa_supplicant
         doexe "${FILES}"/wpa_cli.sh
-    fi
 
-    insinto /etc/wpa_supplicant
-    hereins wpa_supplicant.conf <<EOF
+        insinto /etc/wpa_supplicant
+        hereins wpa_supplicant.conf <<EOF
 # This is a network block that connects to any unsecured access point.
 # We give it a low priority so any defined blocks are preferred.
 # To enable it, uncomment the following lines. Keep in mind its a
@@ -314,6 +304,7 @@ EOF
 #    priority=-9999999
 #}
 EOF
+    fi
 
     emagicdocs
     doman doc/docbook/*.{5,8}

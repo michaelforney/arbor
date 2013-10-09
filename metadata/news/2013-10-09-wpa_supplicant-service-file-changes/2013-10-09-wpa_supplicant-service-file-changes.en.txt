@@ -1,0 +1,28 @@
+Title: wpa_supplicant upstream systemd service file changes
+Author: Paul Seidler <sepek@exherbo.org>
+Content-Type: text/plain
+Posted: 2013-10-09
+Revision: 1
+News-Item-Format: 1.0
+Display-If-Installed: net-wireless/wpa_supplicant[<=2.0][systemd]
+
+From now on we don't use our own service file for wpa_supplicant.
+The respective config file can be removed (
+/etc/conf.d/wpa_supplicant.conf).
+NetworkManager users can probably safely ignore that change.
+For the others:
+You specify that stuff in a per device config, e.g. for wlp2s0:
+/etc/wpa_supplicant/wpa_supplicant-nl80211-wlp2s0.conf
+You can find an example for the config:
+/usr/share/doc/wpa_supplicant-2.0/wpa_supplicant.conf
+and enable it with:
+systemctl start wpa_supplicant-nl80211@wlp2s0.service
+
+There are:
+wpa_supplicant@.service, wpa_supplicant-nl80211@.service and
+wpa_supplicant-wired@.service
+Also:
+wpa_supplicant.service which is for the DBUS interface only.
+
+For more information consult the documentation of wpa_supplicant and
+systemd.
