@@ -33,6 +33,7 @@ DEPENDENCIES="
         net-libs/libnfnetlink
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-fix-build-with-musl.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --without-kernel
     --enable-bpf-compiler
