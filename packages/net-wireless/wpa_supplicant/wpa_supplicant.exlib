@@ -258,15 +258,13 @@ src_compile() {
 #}
 
 src_install() {
-    dobin wpa_cli wpa_passphrase
-    dosbin wpa_supplicant
+    dobin wpa_cli wpa_passphrase wpa_supplicant
 
     # Symlinks for compatibility with baselayout-1
     if has_version "sys-apps/baselayout[<2.0.0]" ; then
         dodir /bin
         dosym /usr/bin/wpa_cli /bin/wpa_cli
-        dodir /sbin
-        dosym /usr/sbin/wpa_supplicant /sbin/wpa_supplicant
+        dosym /usr/bin/wpa_supplicant /sbin/wpa_supplicant
     fi
 
     option qt4 && dobin wpa_gui-qt4/wpa_gui
@@ -276,9 +274,6 @@ src_install() {
 
         insinto /etc/dbus-1/system.d/
         newins {dbus-,}wpa_supplicant.conf
-
-        edo sed -e '/^Exec=/s:/usr/bin:/usr/sbin:' -i 'fi.epitest.hostap.WPASupplicant.service'
-        edo sed -e '/^Exec=/s:/usr/bin:/usr/sbin:' -i 'fi.w1.wpa_supplicant1.service'
 
         # Will probably need to be moved to session services if privilege separation is implemented
         insinto /usr/share/dbus-1/system-services/
