@@ -1,0 +1,31 @@
+Source: Upstream
+Reason: Fix build with musl
+
+From 9f166ce09e61a97fd285f96b94bd953947145fa4 Mon Sep 17 00:00:00 2001
+From: Romain Francoise <romain@orebokech.com>
+Date: Sat, 15 Jun 2013 17:19:15 +0200
+Subject: [PATCH] fad-null: rename pcap_findalldevs() to
+ pcap_findalldevs_interfaces()
+
+This file is used on Debian GNU/Hurd where libpcap is expected to build,
+even though it doesn't have the ability to do live captures.
+---
+ fad-null.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fad-null.c b/fad-null.c
+index 26d791d..f6384fd 100644
+--- a/fad-null.c
++++ b/fad-null.c
+@@ -53,7 +53,7 @@ static const char rcsid[] _U_ =
+  * packet capture.
+  */
+ int
+-pcap_findalldevs(pcap_if_t **alldevsp, char *errbuf)
++pcap_findalldevs_interfaces(pcap_if_t **alldevsp, char *errbuf)
+ {
+ 	/*
+ 	 * Succeed, but don't return any interfaces; we return only those
+-- 
+1.8.4
+
