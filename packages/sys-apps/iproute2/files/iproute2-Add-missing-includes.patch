@@ -1,0 +1,66 @@
+From b06909ab9a643ba3760df82ca0833df37bb65b1f Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 9 Oct 2013 02:05:25 +0000
+Subject: [PATCH] Add missing includes
+
+limits.h: For ULONG_MAX
+sys/param.h: For MIN
+sys/types.h: For struct timeval
+---
+ bridge/fdb.c  | 1 +
+ misc/lnstat.h | 1 +
+ tc/tc_stab.c  | 1 +
+ tc/tc_util.c  | 1 +
+ 4 files changed, 4 insertions(+)
+
+diff --git a/bridge/fdb.c b/bridge/fdb.c
+index e2e53f1..edc2471 100644
+--- a/bridge/fdb.c
++++ b/bridge/fdb.c
+@@ -12,6 +12,7 @@
+ #include <netdb.h>
+ #include <time.h>
+ #include <fcntl.h>
++#include <limits.h>
+ #include <sys/socket.h>
+ #include <sys/time.h>
+ #include <net/if.h>
+diff --git a/misc/lnstat.h b/misc/lnstat.h
+index 06774ab..5339a64 100644
+--- a/misc/lnstat.h
++++ b/misc/lnstat.h
+@@ -2,6 +2,7 @@
+ #define _LNSTAT_H
+ 
+ #include <limits.h>
++#include <sys/types.h>
+ 
+ #define LNSTAT_VERSION "0.02 041002"
+ 
+diff --git a/tc/tc_stab.c b/tc/tc_stab.c
+index 47b4e5e..a8404f8 100644
+--- a/tc/tc_stab.c
++++ b/tc/tc_stab.c
+@@ -17,6 +17,7 @@
+ #include <fcntl.h>
+ #include <math.h>
+ #include <sys/socket.h>
++#include <sys/param.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <string.h>
+diff --git a/tc/tc_util.c b/tc/tc_util.c
+index be3ed07..d2790cc 100644
+--- a/tc/tc_util.c
++++ b/tc/tc_util.c
+@@ -16,6 +16,7 @@
+ #include <syslog.h>
+ #include <fcntl.h>
+ #include <sys/socket.h>
++#include <sys/param.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <string.h>
+-- 
+1.8.4
+

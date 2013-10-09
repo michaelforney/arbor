@@ -40,6 +40,8 @@ DEPENDENCIES="
         berkdb? ( sys-libs/db:= )
 "
 
+DEFAULT_SRC_PREPARE_PATCHES+=( "${FILES}"/${PN}-Add-missing-includes.patch )
+
 DEFAULT_SRC_COMPILE_PARAMS+=(
     CC="${CC}"
     AR="${AR}"
