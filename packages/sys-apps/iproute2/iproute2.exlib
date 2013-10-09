@@ -93,8 +93,8 @@ src_install() {
         edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
     fi
 
-    if ! option atm ; then
-        [[ -d "${IMAGE}"/${LIBDIR}/tc ]] && edo rmdir "${IMAGE}"/${LIBDIR}/{tc,}
+    if ! ever at_least 3.4.0 && ! option atm ; then
+        edo rmdir "${IMAGE}"/${LIBDIR}/{tc,}
     fi
 }
 
