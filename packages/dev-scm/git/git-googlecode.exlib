@@ -8,10 +8,7 @@ myexparam git_remote_helpers[]
 
 exparam -v GIT_REMOTE_HELPERS git_remote_helpers[@]
 
-require perl-module python bash-completion elisp-optional [ source_directory=contrib/emacs ] systemd-service
-if ever at_least 1.8.1; then
-    require zsh-completion
-fi
+require perl-module python bash-completion elisp-optional [ source_directory=contrib/emacs ] systemd-service zsh-completion
 
 export_exlib_phases src_unpack src_configure src_compile src_test src_install
 
@@ -62,6 +59,18 @@ DEPENDENCIES="
         )
         webdav? ( dev-libs/expat )
     run:
+        git_remote_helpers:bzr? (
+            dev-lang/python:=
+            dev-scm/bzr
+        )
+        git_remote_helpers:mercurial? (
+            dev-lang/python:=
+            dev-scm/mercurial
+        )
+        !dev-scm/git-remote-helpers [[
+            description = [ The remote helpers are included since git-1.8.2 ]
+            resolution = uninstall-blocked-after
+        ]]
         xinetd? ( sys-apps/xinetd ) [[ description = [ Enables support for the xinetd super-server ] ]]
     suggestion:
         app-crypt/gnupg             [[ description = [ Needed for signing and verifying tags ] ]]
@@ -87,36 +96,6 @@ DEPENDENCIES="
         net-misc/rsync              [[ description = [ Enables support for rsync:// URIs ] ]]
         curl? ( net-misc/curl[ssl(+)]  [[ description = [ Enables support for https:// URIs ] ]] )
 "
-
-if ever at_least 1.8.2 ; then
-    DEPENDENCIES+="
-        run:
-            git_remote_helpers:bzr? (
-                dev-lang/python:=
-                dev-scm/bzr
-            )
-            git_remote_helpers:mercurial? (
-                dev-lang/python:=
-                dev-scm/mercurial
-            )
-            !dev-scm/git-remote-helpers [[
-                description = [ The remote helpers are included since git-1.8.2 ]
-                resolution = uninstall-blocked-after
-            ]]
-    "
-elif ever at_least 1.8.1.5 ; then
-    DEPENDENCIES+="
-        run:
-            git_remote_helpers:mercurial? (
-                dev-lang/python:=
-                dev-scm/mercurial
-            )
-            !dev-scm/git-remote-helpers[mercurial] [[
-                description = [ The Mercurial remote helper is included since git-1.8.1.5 ]
-                resolution = uninstall-blocked-after
-            ]]
-    "
-fi
 
 WORK=${WORKBASE}/${PNV/_/.}
 
@@ -194,8 +173,8 @@ git-googlecode_src_install() {
 
     dobashcompletion contrib/completion/git-completion.bash
     # zsh completion uses bash completion internally
-    ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.zsh _git
-    ever at_least 1.8.1 && dozshcompletion contrib/completion/git-completion.bash
+    dozshcompletion contrib/completion/git-completion.zsh _git
+    dozshcompletion contrib/completion/git-completion.bash
     elisp-optional_src_install
 
     option git_remote_helpers:bzr && dobin contrib/remote-helpers/git-remote-bzr
