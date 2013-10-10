@@ -1,0 +1,43 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From 9169fa92afe4dec0c702f7135134110b53dc3252 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Thu, 10 Oct 2013 07:23:11 +0000
+Subject: [PATCH] Use standard int types
+
+---
+ lib/ext2fs/unix_io.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/lib/ext2fs/unix_io.c b/lib/ext2fs/unix_io.c
+index 19be630..8aef065 100644
+--- a/lib/ext2fs/unix_io.c
++++ b/lib/ext2fs/unix_io.c
+@@ -30,6 +30,9 @@
+ #if HAVE_ERRNO_H
+ #include <errno.h>
+ #endif
++#if HAVE_INTTYPES_H
++#include <inttypes.h>
++#endif
+ #include <fcntl.h>
+ #include <time.h>
+ #ifdef __linux__
+@@ -931,10 +934,10 @@ static errcode_t unix_discard(io_channel channel, unsigned long long block,
+ 
+ 	if (channel->flags & CHANNEL_FLAGS_BLOCK_DEVICE) {
+ #ifdef BLKDISCARD
+-		__uint64_t range[2];
++		uint64_t range[2];
+ 
+-		range[0] = (__uint64_t)(block) * channel->block_size;
+-		range[1] = (__uint64_t)(count) * channel->block_size;
++		range[0] = (uint64_t)(block) * channel->block_size;
++		range[1] = (uint64_t)(count) * channel->block_size;
+ 
+ 		ret = ioctl(data->dev, BLKDISCARD, &range);
+ #else
+-- 
+1.8.4
+
