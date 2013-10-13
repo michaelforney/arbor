@@ -1,0 +1,22 @@
+# Copyright 2013 Jorge Aparicio
+# Distributed under the terms of the GNU General Public License v2
+
+SUMMARY="Very fast lossless compression algorithm"
+HOMEPAGE="https://code.google.com/p/${PN}"
+DOWNLOADS="https://dl.dropboxusercontent.com/u/59565338/LZ4/${PN}-r${PV}.tar.gz"
+
+LICENCES="BSD-3"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES=""
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    -p0
+    ${FILES}/${PNV}-destdir-support.patch
+    ${FILES}/${PNV}-install-lz4c.patch
+)
+
+WORK=${WORKBASE}/${PN}-r${PV}
+
