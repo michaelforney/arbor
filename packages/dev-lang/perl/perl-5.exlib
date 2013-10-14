@@ -190,10 +190,13 @@ perl-5_src_install() {
     local bin manpage manfile
 
     for bin in usr/bin/* ; do
-        [[ ${bin} == usr/bin/perl${MY_PVM} ]] && continue
+        # skip perl${PVM} and config_data-perl-${MY_PVM}
+        [[ ${bin} == *${MY_PVM} ]] && continue
         perl_alternatives+=( "/${bin}" "${bin##*/}-${MY_PVM}" )
     done
     for manpage in usr/share/man/man1/*.1; do
+        # skip config_data-perl-${MY_PVM}.1
+        [[ ${manpage} == *${MY_PVM}.1 ]] && continue
         manfile=${manpage##*/}
         perl_alternatives+=( "/${manpage}" "${manfile/%.1/-${MY_PVM}.1}" )
     done
