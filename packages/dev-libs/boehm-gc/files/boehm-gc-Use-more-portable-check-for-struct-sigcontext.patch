@@ -1,0 +1,67 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From d5d84b178ed4e26c11116eb659f561d719b793b9 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Tue, 15 Oct 2013 19:27:34 +0000
+Subject: [PATCH] Use more portable check for struct sigcontext
+
+---
+ configure.ac | 13 +++++++++++++
+ os_dep.c     | 12 +++++-------
+ 2 files changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index ee6693d..9adf48f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -644,6 +644,19 @@ if test $ac_is_dgux = yes; then
+     AC_SUBST(CXXFLAGS)
+ fi
+ 
++AC_CHECK_HEADERS(signal.h sigcontext.h)
++AC_CHECK_TYPE(struct sigcontext,
++              AC_DEFINE([HAVE_STRUCT_SIGCONTEXT], 1,
++                        [Define to 1 if you have struct sigcontext]),,
++              [
++#ifdef HAVE_SIGNAL_H
++# include <signal.h>
++#endif
++#ifdef HAVE_SIGCONTEXT_H
++# include <sigcontext.h>
++#endif
++])
++
+ AC_ARG_ENABLE(java-finalization,
+     [AC_HELP_STRING([--disable-java-finalization],
+         [Disable support for java finalization.])])
+diff --git a/os_dep.c b/os_dep.c
+index da0f24d..b9ccccb 100644
+--- a/os_dep.c
++++ b/os_dep.c
+@@ -32,17 +32,15 @@
+     /* prototypes, so we have to include the top-level sigcontext.h to    */
+     /* make sure the former gets defined to be the latter if appropriate. */
+ #   include <features.h>
+-#   if 2 <= __GLIBC__
+-#     if 2 == __GLIBC__ && 0 == __GLIBC_MINOR__
+-        /* glibc 2.1 no longer has sigcontext.h.  But signal.h          */
+-        /* has the right declaration for glibc 2.1.                     */
++#   ifdef HAVE_STRUCT_SIGCONTEXT
++#     ifdef HAVE_SIGCONTEXT_H
+ #       include <sigcontext.h>
+-#     endif /* 0 == __GLIBC_MINOR__ */
+-#   else /* not 2 <= __GLIBC__ */
++#     endif /* HAVE_SIGCONTEXT_H */
++#   else /* not HAVE_STRUCT_SIGCONTEXT */
+       /* libc5 doesn't have <sigcontext.h>: go directly with the kernel   */
+       /* one.  Check LINUX_VERSION_CODE to see which we should reference. */
+ #     include <asm/sigcontext.h>
+-#   endif /* 2 <= __GLIBC__ */
++#   endif /* HAVE_STRUCT_SIGCONTEXT */
+ # endif
+ #endif
+ 
+-- 
+1.8.4
+
