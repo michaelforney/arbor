@@ -1,0 +1,32 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From c1c2bc1825ecd0a784dda84b02007494fa96e242 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 16 Oct 2013 12:16:46 +0000
+Subject: [PATCH] Provide fallback definition of TIMESPEC_TO_TIMEVAL
+
+---
+ libusb/libusbi.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/libusb/libusbi.h b/libusb/libusbi.h
+index a4d74f6..64bd48f 100644
+--- a/libusb/libusbi.h
++++ b/libusb/libusbi.h
+@@ -149,6 +149,12 @@ static inline void *usbi_reallocf(void *ptr, size_t size)
+ 
+ #define TIMESPEC_IS_SET(ts) ((ts)->tv_sec != 0 || (ts)->tv_nsec != 0)
+ 
++#ifndef TIMESPEC_TO_TIMEVAL
++#define TIMESPEC_TO_TIMEVAL(tv, ts) \
++    do { (tv)->tv_sec = (ts)->tv_sec; \
++	 (tv)->tv_usec = (ts)->tv_nsec / 1000; } while (0)
++#endif
++
+ void usbi_log(struct libusb_context *ctx, enum libusb_log_level level,
+ 	const char *function, const char *format, ...);
+ 
+-- 
+1.8.4
+
