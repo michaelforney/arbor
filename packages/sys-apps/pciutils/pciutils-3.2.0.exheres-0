@@ -23,9 +23,12 @@ DEPENDENCIES="
         sys-apps/pciutils-data
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-Always-include-sys-io.h.patch )
 DEFAULT_SRC_INSTALL_EXCLUDE=( "README.Windows" )
 
 src_prepare() {
+    default
+
     edo cp -r "${WORK}" "${WORKBASE}"/static
     edo cp -r "${WORK}" "${WORKBASE}"/shared
 }

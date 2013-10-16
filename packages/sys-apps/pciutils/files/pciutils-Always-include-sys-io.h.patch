@@ -1,0 +1,31 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From 77c22e34c4ee44266d8fdae7095fb2807721c949 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 16 Oct 2013 14:12:33 +0000
+Subject: [PATCH] Always include sys/io.h
+
+---
+ lib/i386-io-linux.h | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/lib/i386-io-linux.h b/lib/i386-io-linux.h
+index 672897f..1e52d73 100644
+--- a/lib/i386-io-linux.h
++++ b/lib/i386-io-linux.h
+@@ -6,11 +6,7 @@
+  *	Can be freely distributed and used under the terms of the GNU GPL.
+  */
+ 
+-#ifdef __GLIBC__
+ #include <sys/io.h>
+-#else
+-#include <asm/io.h>
+-#endif
+ 
+ static int
+ intel_setup_io(struct pci_access *a UNUSED)
+-- 
+1.8.4
+
