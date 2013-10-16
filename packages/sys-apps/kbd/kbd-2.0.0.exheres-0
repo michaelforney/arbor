@@ -24,6 +24,7 @@ DEPENDENCIES="
         sys-libs/pam [[ note = [ required for vlock ] ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-fix-build-with-musl.patch )
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--enable-nls' )
 
 src_install() {

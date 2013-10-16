@@ -1,0 +1,433 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From e5d0b7016eefa584e60cd77cd62f180cdaa8cb74 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 16 Oct 2013 14:50:54 +0000
+Subject: [PATCH 1/3] resizecons: Don't include linux headers
+
+---
+ src/resizecons.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/src/resizecons.c b/src/resizecons.c
+index 5f84845..289bace 100644
+--- a/src/resizecons.c
++++ b/src/resizecons.c
+@@ -78,12 +78,6 @@
+ #include <signal.h>
+ #include <sys/io.h>
+ #include <sys/ioctl.h>
+-#if (__GNU_LIBRARY__ >= 6)
+-#include <sys/perm.h>
+-#else
+-#include <linux/types.h>
+-#include <linux/termios.h>
+-#endif
+ #include <linux/vt.h>
+ #include "paths.h"
+ #include "getfd.h"
+-- 
+1.8.4
+
+
+From 94077343378e4a23c154f2bc18abd7a33d1f456a Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 16 Oct 2013 14:54:47 +0000
+Subject: [PATCH 2/3] Add missing includes
+
+fcntl.h: For open()
+limits.h: For NAME_MAX
+sys/types.h: For u_* types
+---
+ src/kbdrate.c           | 1 +
+ src/libkeymap/dump.c    | 1 +
+ src/libkeymap/kmap.c    | 1 +
+ src/libkeymap/summary.c | 1 +
+ src/openvt.c            | 2 ++
+ 5 files changed, 6 insertions(+)
+
+diff --git a/src/kbdrate.c b/src/kbdrate.c
+index 2ab8388..46437e3 100644
+--- a/src/kbdrate.c
++++ b/src/kbdrate.c
+@@ -71,6 +71,7 @@ beats rebuilding the kernel!
+ #include <stdio.h>
+ #include <unistd.h>
+ #include <stdlib.h>
++#include <fcntl.h>
+ #include <errno.h>
+ #include <sys/file.h>
+ #include <sys/ioctl.h>
+diff --git a/src/libkeymap/dump.c b/src/libkeymap/dump.c
+index 3cab746..9a46caa 100644
+--- a/src/libkeymap/dump.c
++++ b/src/libkeymap/dump.c
+@@ -13,6 +13,7 @@
+ #include <string.h>
+ #include <ctype.h>
+ #include <unistd.h>
++#include <sys/types.h>
+ 
+ #include "keymap.h"
+ 
+diff --git a/src/libkeymap/kmap.c b/src/libkeymap/kmap.c
+index c7945bc..1ae10ca 100644
+--- a/src/libkeymap/kmap.c
++++ b/src/libkeymap/kmap.c
+@@ -1,5 +1,6 @@
+ #include <stdlib.h>
+ #include <string.h>
++#include <sys/types.h>
+ 
+ #include "nls.h"
+ #include "kbd.h"
+diff --git a/src/libkeymap/summary.c b/src/libkeymap/summary.c
+index d85778d..ac68eb0 100644
+--- a/src/libkeymap/summary.c
++++ b/src/libkeymap/summary.c
+@@ -9,6 +9,7 @@
+ #include <string.h>
+ #include <errno.h>
+ #include <sys/ioctl.h>
++#include <sys/types.h>
+ 
+ #include "keymap.h"
+ 
+diff --git a/src/openvt.c b/src/openvt.c
+index 075136f..9a1f1f4 100644
+--- a/src/openvt.c
++++ b/src/openvt.c
+@@ -1,10 +1,12 @@
+ #include <stdio.h>
+ #include <stdarg.h>
+ #include <unistd.h>
++#include <fcntl.h>
+ #include <getopt.h>
+ #include <dirent.h>
+ #include <pwd.h>
+ #include <errno.h>
++#include <limits.h>
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
+ #include <sys/vt.h>
+-- 
+1.8.4
+
+
+From 498f056ac68af138833cac1a9f6cb5d9bf322869 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Wed, 16 Oct 2013 15:00:01 +0000
+Subject: [PATCH 3/3] Don't use error()
+
+---
+ src/kbdinfo.c        | 25 ++++++++++++++---------
+ src/setvtrgb.c       | 56 ++++++++++++++++++++++++++++++++--------------------
+ src/vlock/auth.c     |  1 -
+ src/vlock/pam.c      |  7 +++----
+ src/vlock/username.c | 13 +++++++-----
+ src/vlock/vlock.c    |  7 ++++---
+ src/vlock/vt.c       |  5 ++---
+ 7 files changed, 68 insertions(+), 46 deletions(-)
+
+diff --git a/src/kbdinfo.c b/src/kbdinfo.c
+index e5f122d..19d227f 100644
+--- a/src/kbdinfo.c
++++ b/src/kbdinfo.c
+@@ -1,6 +1,5 @@
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <unistd.h>
+ #include <sys/ioctl.h>
+ #include <linux/kd.h>
+@@ -74,8 +73,10 @@ main(int argc, char **argv) {
+ 	fd = getfd(console);
+ 
+ 	if (!strcasecmp("GETMODE", action)) {
+-		if (ioctl(fd, KDGETMODE, &mode) == -1)
+-			error(EXIT_FAILURE, errno, "ioctl");
++		if (ioctl(fd, KDGETMODE, &mode) == -1) {
++			fprintf(stderr, "ioctl: %s\n", strerror(errno));
++			exit(EXIT_FAILURE);
++		}
+ 
+ 		switch (mode) {
+ 			case KD_TEXT:		rc = answer("text");		break;
+@@ -83,8 +84,10 @@ main(int argc, char **argv) {
+ 		}
+ 
+ 	} else if (!strcasecmp("GKBMODE", action)) {
+-		if (ioctl(fd, KDGKBMODE, &mode) == -1)
+-			error(EXIT_FAILURE, errno, "ioctl");
++		if (ioctl(fd, KDGKBMODE, &mode) == -1) {
++			fprintf(stderr, "ioctl: %s\n", strerror(errno));
++			exit(EXIT_FAILURE);
++		}
+ 
+ 		switch (mode) {
+ 			case K_RAW:		rc = answer("raw");		break;
+@@ -94,8 +97,10 @@ main(int argc, char **argv) {
+ 		}
+ 
+ 	} else if (!strcasecmp("GKBMETA", action)) {
+-		if (ioctl(fd, KDGKBMETA, &mode) == -1)
+-			error(EXIT_FAILURE, errno, "ioctl");
++		if (ioctl(fd, KDGKBMETA, &mode) == -1) {
++			fprintf(stderr, "ioctl: %s\n", strerror(errno));
++			exit(EXIT_FAILURE);
++		}
+ 
+ 		switch (mode) {
+ 			case K_METABIT:		rc = answer("metabit");		break;
+@@ -103,8 +108,10 @@ main(int argc, char **argv) {
+ 		}
+ 
+ 	} else if (!strcasecmp("GKBLED", action)) {
+-		if (ioctl(fd, KDGKBLED, &flags) == -1)
+-			error(EXIT_FAILURE, errno, "ioctl");
++		if (ioctl(fd, KDGKBLED, &flags) == -1) {
++			fprintf(stderr, "ioctl: %s\n", strerror(errno));
++			exit(EXIT_FAILURE);
++		}
+ 
+ 		mode = (flags & 0x7);
+ 
+diff --git a/src/setvtrgb.c b/src/setvtrgb.c
+index f99badc..6bf9dfb 100644
+--- a/src/setvtrgb.c
++++ b/src/setvtrgb.c
+@@ -5,7 +5,6 @@
+ #include <sys/ioctl.h>
+ #include <linux/kd.h>
+ #include <errno.h>
+-#include <error.h>
+ #include "kbd.h"
+ #include "getfd.h"
+ #include "nls.h"
+@@ -59,8 +58,10 @@ set_colormap(unsigned char *colormap)
+ 	int fd = getfd(NULL);
+ 
+ 	/* Apply the color map to the tty via ioctl */
+-	if (ioctl(fd, PIO_CMAP, colormap) == -1)
+-		error(EXIT_FAILURE, errno, "ioctl");
++	if (ioctl(fd, PIO_CMAP, colormap) == -1) {
++		fprintf(stderr, "ioctl: %s\n", strerror(errno));
++		exit(EXIT_FAILURE);
++	}
+ 
+ 	close(fd);
+ }
+@@ -71,36 +72,47 @@ parse_file(FILE *fd, const char *filename)
+ 	int c;
+ 	unsigned int rows, cols, val;
+ 
+-	if ((cmap = calloc(3 * 16, sizeof(unsigned char))) == NULL)
+-		error(EXIT_FAILURE, errno, "calloc");
++	if ((cmap = calloc(3 * 16, sizeof(unsigned char))) == NULL) {
++		fprintf(stderr, "calloc: %s\n", strerror(errno));
++		exit(EXIT_FAILURE);
++	}
+ 
+ 	for (rows = 0; rows < 3; rows++) {
+ 		cols = 0;
+ 
+ 		while (cols < 16) {
+ 			if ((c = fscanf(fd, "%u", &val)) != 1) {
+-				if (c == EOF)
+-					error(EXIT_FAILURE, errno, "fscanf");
+-
+-				error(EXIT_FAILURE, 0, _("Error: %s: Invalid value in field %u in line %u."),
+-				      filename, rows + 1, cols + 1);
++				if (c == EOF) {
++					fprintf(stderr, "fscanf: %s\n", strerror(errno));
++					exit(EXIT_FAILURE);
++				}
++
++				fprintf(stderr, _("Error: %s: Invalid value in field %u in line %u.\n"),
++					filename, rows + 1, cols + 1);
++				exit(EXIT_FAILURE);
+ 			}
+ 
+ 			cmap[rows + cols * 3] = (unsigned char) val;
+ 
+-			if (cols < 15 && fgetc(fd) != ',')
+-				error(EXIT_FAILURE, 0, _("Error: %s: Insufficient number of fields in line %u."),
+-				      filename, rows + 1);
++			if (cols < 15 && fgetc(fd) != ',') {
++				fprintf(stderr, _("Error: %s: Insufficient number of fields in line %u.\n"),
++					filename, rows + 1);
++				exit(EXIT_FAILURE);
++			}
+ 			cols++;
+ 		}
+ 
+-		if ((c = fgetc(fd)) == EOF)
+-			error(EXIT_FAILURE, 0, _("Error: %s: Line %u has ended unexpectedly.\n"),
+-			      filename, rows + 1); 
++		if ((c = fgetc(fd)) == EOF) {
++			fprintf(stderr, _("Error: %s: Line %u has ended unexpectedly.\n"),
++				filename, rows + 1);
++			exit(EXIT_FAILURE);
++		}
+ 
+-		if (c != '\n')
+-			error(EXIT_FAILURE, 0, _("Error: %s: Line %u is too long.\n"),
+-			      filename, rows + 1);
++		if (c != '\n') {
++			fprintf(stderr, _("Error: %s: Line %u is too long.\n"),
++				filename, rows + 1);
++			exit(EXIT_FAILURE);
++		}
+ 	}
+ }
+ 
+@@ -140,8 +152,10 @@ main(int argc, char **argv) {
+ 		parse_file(stdin, "stdin");
+ 
+ 	} else {
+-		if ((fd = fopen(file, "r")) == NULL)
+-			error(EXIT_FAILURE, errno, "fopen");
++		if ((fd = fopen(file, "r")) == NULL) {
++			fprintf(stderr, "fopen: %s\n", strerror(errno));
++			exit(EXIT_FAILURE);
++		}
+ 
+ 		parse_file(fd, file);
+ 		fclose(fd);
+diff --git a/src/vlock/auth.c b/src/vlock/auth.c
+index 71c8f15..d7b1c84 100644
+--- a/src/vlock/auth.c
++++ b/src/vlock/auth.c
+@@ -22,7 +22,6 @@
+ */
+ 
+ #include <errno.h>
+-#include <error.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
+diff --git a/src/vlock/pam.c b/src/vlock/pam.c
+index ab255db..a05645b 100644
+--- a/src/vlock/pam.c
++++ b/src/vlock/pam.c
+@@ -22,7 +22,6 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <stdlib.h>
+ #include <syslog.h>
+ 
+@@ -48,7 +47,7 @@ init_pam (const char *username, const char *tty, int log)
+ 		if (log)
+ 			syslog (LOG_WARNING, "pam_start failed: %m");
+ 		else
+-			error (EXIT_SUCCESS, errno, "pam_start");
++			fprintf (stderr, "pam_start: %s\n", strerror(errno));
+ 		return 0;
+ 	}
+ 
+@@ -59,8 +58,8 @@ init_pam (const char *username, const char *tty, int log)
+ 			syslog (LOG_WARNING, "pam_set_item: %s",
+ 				pam_strerror (pamh, rc));
+ 		else
+-			error (EXIT_SUCCESS, 0, "pam_set_item: %s",
+-			       pam_strerror (pamh, rc));
++			fprintf (stderr, "pam_set_item: %s\n",
++				 pam_strerror (pamh, rc));
+ 		pam_end (pamh, rc);
+ 		return 0;
+ 	}
+diff --git a/src/vlock/username.c b/src/vlock/username.c
+index 9626946..fa3b36f 100644
+--- a/src/vlock/username.c
++++ b/src/vlock/username.c
+@@ -22,7 +22,6 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <unistd.h>
+@@ -53,12 +52,16 @@ get_username (void)
+ 	if (!pw)
+ 		pw = getpwuid (uid);
+ 
+-	if (!pw)
+-		error (EXIT_FAILURE, 0, _("unrecognized user"));
++	if (!pw) {
++		fprintf (stderr, _("unrecognized user\n"));
++		exit (EXIT_FAILURE);
++	}
+ 
+ 	name = strdup (pw->pw_name);
+-	if (!name)
+-		error (EXIT_FAILURE, errno, "strdup");
++	if (!name) {
++		fprintf (stderr, "strdup: %s\n", strerror(errno));
++		exit (EXIT_FAILURE);
++	}
+ 
+ 	endpwent ();
+ 	return name;
+diff --git a/src/vlock/vlock.c b/src/vlock/vlock.c
+index c2c4158..6e2b2fc 100644
+--- a/src/vlock/vlock.c
++++ b/src/vlock/vlock.c
+@@ -23,7 +23,6 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <unistd.h>
+@@ -51,9 +50,11 @@ main (int ac, char *const av[])
+ 
+ 	/* 2nd, find out tty name... */
+ 	tty = ttyname (STDIN_FILENO);
+-	if (!tty)
++	if (!tty) {
+ 		/* stdin is not a tty, so no need to try. */
+-		error (EXIT_FAILURE, 0, _("stdin is not a tty"));
++		fprintf(stderr, _("stdin is not a tty\n"));
++		exit (EXIT_FAILURE);
++	}
+ 
+ 	/* ... and strip its /dev/ prefix. */
+ 	if (!strncmp (tty, dev_prefix, sizeof (dev_prefix) - 1))
+diff --git a/src/vlock/vt.c b/src/vlock/vt.c
+index 4e5282b..8f1e46b 100644
+--- a/src/vlock/vt.c
++++ b/src/vlock/vt.c
+@@ -23,7 +23,6 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <unistd.h>
+@@ -136,7 +135,7 @@ init_vt (const char *tty)
+ 	vfd = open (dev_tty, O_RDWR);
+ 	if (vfd < 0)
+ 	{
+-		error (EXIT_SUCCESS, errno, "could not open %s", dev_tty);
++		fprintf (stderr, "could not open %s: %s\n", dev_tty, strerror(errno));
+ 		return 0;
+ 	}
+ 
+@@ -187,7 +186,7 @@ init_vt (const char *tty)
+ 		/* Set mode of active vt. */
+ 		if (ioctl (vfd, VT_SETMODE, &vtm) < 0)
+ 		{
+-			error (EXIT_SUCCESS, errno, "ioctl VT_SETMODE");
++			fprintf (stderr, "ioctl VT_SETMODE: %s\n", strerror(errno));
+ 			return 0;
+ 		}
+ 	}
+-- 
+1.8.4
+
