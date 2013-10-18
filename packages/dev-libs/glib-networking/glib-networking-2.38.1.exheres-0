@@ -40,6 +40,6 @@ DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( gnome-proxy gnutls libproxy pkcs11 )
 src_install() {
     easy-multibuild_src_install
 
-    edo rm -r "${IMAGE}"/files
+    option gnutls && edo rm -r "${IMAGE}"/files
 }
 
