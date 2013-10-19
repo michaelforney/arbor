@@ -12,7 +12,7 @@ DOWNLOADS="http://dev.exherbo.org/~philantrop/distfiles/${PN}-base-etc-${BASE_TA
 LICENCES="GPL-2"
 SLOT="0"
 PLATFORMS="~amd64 ~arm ~x86"
-MYOPTIONS=""
+MYOPTIONS="targets: ${CROSS_COMPILE_TARGETS}"
 
 DEPENDENCIES=""
 
@@ -36,14 +36,11 @@ create_device_node() {
 }
 
 pkg_pretend() {
-    local x
-    if [[ ${LIBDIR} != lib ]]; then
-        for x in {,/usr,/usr/local}/lib; do
-            if [[ -e "${ROOT}${x}" && ! -L "${ROOT}${x}" ]]; then
-                die "${x}: Expected a symlink but found a directory"
-            fi
-        done
-    fi
+    for x in {,/usr}/{bin,sbin} ; do
+        if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
+            ewarn "${x}: Expected a symlink but found a directory"
+        fi
+    done
 }
 
 src_install() {
@@ -51,19 +48,26 @@ src_install() {
     doins "${FILES}"/exherbo-release
     doins "${FILES}"/os-release
 
-    if [[ ${LIBDIR} != lib ]]; then
-        local multibuild_c_target ldpath=()
-        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-            multibuild_switch_build_target C ${multibuild_c_target}
-            ldpath=( /usr/${LIBDIR} /${LIBDIR} "${ldpath[@]}" )
-        done
-        IFS=": " ldpath="${ldpath[*]}"
-        hereenvd 10multilib <<EOF
+    local target ldpath=()
+    for target in ${CROSS_COMPILE_TARGETS} ; do
+        ldpath=( /usr/${target}/lib "${ldpath[@]}" )
+    done
+    IFS=": " ldpath="${ldpath[*]}"
+    hereenvd 10multiarch <<EOF
 LDPATH="${ldpath}"
 EOF
-    fi
 
     doins -r "${WORK}"/${PN}-base-etc-${BASE_TARBALL_PV}/*
+
+    hereenvd 00basic <<EOF
+PATH="/usr/${CHOST}/bin:/opt/bin"
+ROOTPATH="/usr/${CHOST}/sbin:/usr/${CHOST}/bin:/opt/bin"
+LDPATH="/usr/${CHOST}/lib:/usr/local/lib"
+MANPATH="/usr/local/share/man:/usr/share/man"
+INFOPATH="/usr/share/info"
+CVS_RSH="ssh"
+PAGER="/bin/less"
+EOF
 }
 
 pkg_preinst() {
@@ -80,9 +84,8 @@ pkg_postinst() {
     local x
     # create directory structure. for readability leave out /usr and /var
     # structures and create them separately.
-    for x in bin boot dev{,/pts} etc home mnt \
-        media opt proc run sbin sys; do
-            create_root_owned_directory "${ROOT}${x}"
+    for x in boot dev{,/pts} etc home mnt media opt proc run sys; do
+        create_root_owned_directory "${ROOT}${x}"
     done
 
     edo chmod 0640 "${ROOT}"/etc/sysctl.conf
@@ -94,11 +97,6 @@ pkg_postinst() {
 
     # create /etc/mtab
     edo ln -sf /proc/self/mounts "${ROOT}"/etc/mtab
-
-    # /usr structure
-    for x in usr{,/bin,/include,/sbin,/share,/src}; do
-        create_root_owned_directory "${ROOT}${x}"
-    done
 
     # /usr/local structure
     for x in usr/local{,/bin,/etc,/man,/sbin,/share{,/man}}; do
@@ -138,23 +136,28 @@ pkg_postinst() {
         create_root_owned_directory "${ROOT}${x}" 1777
     done
 
-    # create LIBDIRs and lib symlinks if applicable
-    if [[ ${LIBDIR} != lib ]]; then
-        local multibuild_c_target
-        for multibuild_c_target in ${MULTIBUILD_C_TARGETS} ; do
-            multibuild_switch_build_target C ${multibuild_c_target}
-            create_root_owned_directory "${ROOT}${LIBDIR}"
-            create_root_owned_directory "${ROOT}usr/${LIBDIR}"
-            create_root_owned_directory "${ROOT}usr/local/${LIBDIR}"
-        done
+    # create /usr/${target} directories
+    local target
+    for target in ${CROSS_COMPILE_TARGET} ; do
+        create_root_owned_directory "${ROOT}usr/${target}"
+        create_root_owned_directory "${ROOT}usr/${LIBDIR}"
+        create_root_owned_directory "${ROOT}usr/local/${LIBDIR}"
 
-        for x in {,usr/,usr/local/}lib ; do
-            if [[ -e ${ROOT}${x} && ! -L ${ROOT}${x} ]] ; then
-                die "${x}: Expected a symlink but found a directory"
+        for x in usr/${target}{,/{bin,include,lib,sbin,share,src}}; do
+            create_root_owned_directory "${ROOT}${x}"
+        done
+    done
+
+    for x in bin sbin ; do
+        for p in {,/usr}/${x} ; do
+            if [[ -e ${ROOT}${p} && ! -L ${ROOT}${p} ]] ; then
+                ewarn "${p}: Expected a symlink but found a directory"
+                continue
             fi
-
-            edo ln -sfn "${LIBDIR}" "${ROOT}${x}"
         done
-    fi
+
+        edo ln -sfn "${CHOST}/${x}" "${ROOT}/usr/${x}"
+        edo ln -sfn "usr/${CHOST}/${x}" "${ROOT}/${x}"
+    done
 }
 
