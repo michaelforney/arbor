@@ -33,22 +33,22 @@ src_prepare() {
 }
 
 src_configure() {
-    local args=(
-        -DCLANG_PATH_TO_LLVM_BUILD:STRING=/usr
-        -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
-    )
-    ecmake "${args[@]}"
+    ecmake -DCLANG_PATH_TO_LLVM_BUILD:STRING=/usr/$(exhost --target)
 }
 
 src_test() {
-    PATH=/usr/libexec/llvm:${PWD}/utils/TableGen/clang_tblgen_build_subdir:$PATH CLANG=${PWD}/bin/clang emake clang-test
+    PATH=/usr/${CHOST}/libexec/llvm:${PWD}/utils/TableGen/clang_tblgen_build_subdir:${PATH} \
+    CLANG=${PWD}/bin/clang \
+        emake clang-test
 }
 
 src_install() {
+    local host=$(exhost --target)
+
     default
 
     # the sole file here, config.h, is explicitly not installed
-    edo rmdir "${IMAGE}"/usr/include/clang/Config
+    edo rmdir "${IMAGE}"/usr/${host}/include/clang/Config
 
     edo pushd "${CMAKE_SOURCE}"/tools
     insinto /usr/share/clang-analyzer
