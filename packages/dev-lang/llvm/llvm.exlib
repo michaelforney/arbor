@@ -43,12 +43,11 @@ src_prepare() {
 
 src_configure() {
     local args=(
-        -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
         -DLLVM_ENABLE_ASSERTIONS:BOOL=FALSE
         # the jit tests segfault when a i686 build is built with the
-        # wrong LLVM_DEFAULT_TARGET_TRIPLE which happens on x86_64
-        -DLLVM_DEFAULT_TARGET_TRIPLE:STRING=${CHOST}
-        -DLLVM_BINUTILS_INCDIR:STRING=/usr/include
+        # wrong LLVM_DEFAULT_TARGET_TRIPLE which happens on x86_64.
+        # LLVM_DEFAULT_TARGET_TRIPLE is by default set to LLVM_HOST_TRIPLE
+        -DLLVM_HOST_TRIPLE:STRING=$(exhost --target)
         -DBUILD_SHARED_LIBS:BOOL=TRUE
     )
     if ever at_least 3.2; then
@@ -68,13 +67,15 @@ src_compile() {
 }
 
 src_install() {
+    local host=$(exhost --target)
+
     cmake_src_install
 
     # remove gtest remains
-    edo rm "${IMAGE}"/usr/${LIBDIR}/libgtest*
+    edo rm "${IMAGE}"/usr/${host}/lib/libgtest*
 
     # Required by the clang test suite
-    exeinto /usr/libexec/llvm
+    exeinto /usr/${host}/libexec/llvm
     doexe bin/FileCheck bin/not bin/count
 
     edo pushd "${CMAKE_SOURCE}"/utils/lit
@@ -83,11 +84,11 @@ src_install() {
 
     # Replace the automatically installed ugly version with the clean version from
     # utils/lit
-    edo mv "${IMAGE}"/usr/bin/{lit,llvm-lit}
+    edo mv "${IMAGE}"/usr/${host}/bin/{lit,llvm-lit}
 
     # Make sure e.g. clang will not look for tools in the build directory
     edo sed \
-        -e 's:^set(LLVM_TOOLS_BINARY_DIR .*)$:set(LLVM_TOOLS_BINARY_DIR /usr/bin):' \
+        -e 's:^set(LLVM_TOOLS_BINARY_DIR .*)$:set(LLVM_TOOLS_BINARY_DIR /bin):' \
         -i "${IMAGE}"/usr/share/llvm/cmake/LLVMConfig.cmake
 }
 
