@@ -175,10 +175,8 @@ ecmake() {
         -DCMAKE_NM:PATH="${NM}"
         -DCMAKE_C_COMPILER:PATH="${CC}"
         -DCMAKE_CXX_COMPILER:PATH="${CXX}"
-        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX:=/usr}"
-        -DLIB_INSTALL_DIR:PATH="${PREFIX}/${LIBDIR}"
-        -DLIB_SUFFIX:STRING=${LIBDIR#lib}
-        -DCMAKE_PREFIX_PATH:PATH=/usr/${LIBDIR}
+        -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX:=/usr/$(exhost --target)}"
+        -DCMAKE_PREFIX_PATH:PATH="${PREFIX}"
     )
 
     local cmake_api
@@ -255,6 +253,10 @@ cmake_src_install() {
             fi
             ;;
     esac
+
+    if [[ -d "${IMAGE}"/usr/$(exhost --target)/share ]] ; then
+        edo mv "${IMAGE}"/usr/$(exhost --target)/share /usr
+    fi
 }
 
 ### Functions below this are for internal use only.
