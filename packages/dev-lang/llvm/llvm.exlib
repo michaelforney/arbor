@@ -37,6 +37,10 @@ src_prepare() {
         expatch "${FILES}"/llvm-config-path.patch
     fi
 
+    if [[ ${CHOST} == *-*-*musl* ]] ; then
+        expatch "${FILES}"/llvm-fix-build-with-musl.patch
+    fi
+
     default
     edo popd
 }

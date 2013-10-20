@@ -1,0 +1,175 @@
+Source: http://wiki.musl-libc.org/wiki/BuildingLLVM
+Reason: Fix build with musl
+Upstream: No (I don't think it would be accepted as is). FIXME: Figure out why
+          these changes are needed and how to make them portable.
+
+From 6946c0fc57bde5ba251b231b650409125df09379 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 20 Oct 2013 15:27:48 +0000
+Subject: [PATCH 1/2] Remove use of fopen64, fseeko64, ftello64, and tmpfile64
+
+---
+ include/llvm/Target/TargetLibraryInfo.h |  8 --------
+ lib/Target/TargetLibraryInfo.cpp        |  8 --------
+ lib/Transforms/IPO/FunctionAttrs.cpp    | 26 --------------------------
+ 3 files changed, 42 deletions(-)
+
+diff --git a/include/llvm/Target/TargetLibraryInfo.h b/include/llvm/Target/TargetLibraryInfo.h
+index 9111cb1..789e24d 100644
+--- a/include/llvm/Target/TargetLibraryInfo.h
++++ b/include/llvm/Target/TargetLibraryInfo.h
+@@ -247,8 +247,6 @@ namespace llvm {
+       fmodl,
+       /// FILE *fopen(const char *filename, const char *mode);
+       fopen,
+-      /// FILE *fopen64(const char *filename, const char *opentype)
+-      fopen64,
+       /// int fprintf(FILE *stream, const char *format, ...);
+       fprintf,
+       /// int fputc(int c, FILE *stream);
+@@ -271,8 +269,6 @@ namespace llvm {
+       fseek,
+       /// int fseeko(FILE *stream, off_t offset, int whence);
+       fseeko,
+-      /// int fseeko64(FILE *stream, off64_t offset, int whence)
+-      fseeko64,
+       /// int fsetpos(FILE *stream, const fpos_t *pos);
+       fsetpos,
+       /// int fstat(int fildes, struct stat *buf);
+@@ -287,8 +283,6 @@ namespace llvm {
+       ftell,
+       /// off_t ftello(FILE *stream);
+       ftello,
+-      /// off64_t ftello64(FILE *stream)
+-      ftello64,
+       /// int ftrylockfile(FILE *file);
+       ftrylockfile,
+       /// void funlockfile(FILE *file);
+@@ -594,8 +588,6 @@ namespace llvm {
+       times,
+       /// FILE *tmpfile(void);
+       tmpfile,
+-      /// FILE *tmpfile64(void)
+-      tmpfile64,
+       /// int toascii(int c);
+       toascii,
+       /// double trunc(double x);
+diff --git a/lib/Target/TargetLibraryInfo.cpp b/lib/Target/TargetLibraryInfo.cpp
+index 972f7cb..d1f9a63 100644
+--- a/lib/Target/TargetLibraryInfo.cpp
++++ b/lib/Target/TargetLibraryInfo.cpp
+@@ -138,7 +138,6 @@ const char* TargetLibraryInfo::StandardNames[LibFunc::NumLibFuncs] =
+     "fmodf",
+     "fmodl",
+     "fopen",
+-    "fopen64",
+     "fprintf",
+     "fputc",
+     "fputs",
+@@ -150,7 +149,6 @@ const char* TargetLibraryInfo::StandardNames[LibFunc::NumLibFuncs] =
+     "fscanf",
+     "fseek",
+     "fseeko",
+-    "fseeko64",
+     "fsetpos",
+     "fstat",
+     "fstat64",
+@@ -158,7 +156,6 @@ const char* TargetLibraryInfo::StandardNames[LibFunc::NumLibFuncs] =
+     "fstatvfs64",
+     "ftell",
+     "ftello",
+-    "ftello64",
+     "ftrylockfile",
+     "funlockfile",
+     "fwrite",
+@@ -309,7 +306,6 @@ const char* TargetLibraryInfo::StandardNames[LibFunc::NumLibFuncs] =
+     "tanl",
+     "times",
+     "tmpfile",
+-    "tmpfile64",
+     "toascii",
+     "trunc",
+     "truncf",
+@@ -570,16 +566,12 @@ static void initialize(TargetLibraryInfo &TLI, const Triple &T,
+     TLI.setUnavailable(LibFunc::under_IO_getc);
+     TLI.setUnavailable(LibFunc::under_IO_putc);
+     TLI.setUnavailable(LibFunc::memalign);
+-    TLI.setUnavailable(LibFunc::fopen64);
+-    TLI.setUnavailable(LibFunc::fseeko64);
+     TLI.setUnavailable(LibFunc::fstat64);
+     TLI.setUnavailable(LibFunc::fstatvfs64);
+-    TLI.setUnavailable(LibFunc::ftello64);
+     TLI.setUnavailable(LibFunc::lstat64);
+     TLI.setUnavailable(LibFunc::open64);
+     TLI.setUnavailable(LibFunc::stat64);
+     TLI.setUnavailable(LibFunc::statvfs64);
+-    TLI.setUnavailable(LibFunc::tmpfile64);
+   }
+ }
+ 
+diff --git a/lib/Transforms/IPO/FunctionAttrs.cpp b/lib/Transforms/IPO/FunctionAttrs.cpp
+index 386cb71..ee90e15 100644
+--- a/lib/Transforms/IPO/FunctionAttrs.cpp
++++ b/lib/Transforms/IPO/FunctionAttrs.cpp
+@@ -1599,32 +1599,6 @@ bool FunctionAttrs::inferPrototypeAttributes(Function &F) {
+     setOnlyReadsMemory(F, 1);
+     setOnlyReadsMemory(F, 2);
+     break;
+-  case LibFunc::fopen64:
+-    if (FTy->getNumParams() != 2 ||
+-        !FTy->getReturnType()->isPointerTy() ||
+-        !FTy->getParamType(0)->isPointerTy() ||
+-        !FTy->getParamType(1)->isPointerTy())
+-      return false;
+-    setDoesNotThrow(F);
+-    setDoesNotAlias(F, 0);
+-    setDoesNotCapture(F, 1);
+-    setDoesNotCapture(F, 2);
+-    setOnlyReadsMemory(F, 1);
+-    setOnlyReadsMemory(F, 2);
+-    break;
+-  case LibFunc::fseeko64:
+-  case LibFunc::ftello64:
+-    if (FTy->getNumParams() == 0 || !FTy->getParamType(0)->isPointerTy())
+-      return false;
+-    setDoesNotThrow(F);
+-    setDoesNotCapture(F, 1);
+-    break;
+-  case LibFunc::tmpfile64:
+-    if (!FTy->getReturnType()->isPointerTy())
+-      return false;
+-    setDoesNotThrow(F);
+-    setDoesNotAlias(F, 0);
+-    break;
+   case LibFunc::fstat64:
+   case LibFunc::fstatvfs64:
+     if (FTy->getNumParams() != 2 || !FTy->getParamType(1)->isPointerTy())
+-- 
+1.8.4
+
+
+From 5cd51168a3097e0508c7ccdce7d2d953eff1f91e Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 20 Oct 2013 15:28:08 +0000
+Subject: [PATCH 2/2] Fix check for musl libc
+
+---
+ lib/Support/DynamicLibrary.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/Support/DynamicLibrary.cpp b/lib/Support/DynamicLibrary.cpp
+index c063f53..6eb5364 100644
+--- a/lib/Support/DynamicLibrary.cpp
++++ b/lib/Support/DynamicLibrary.cpp
+@@ -142,7 +142,7 @@ void* DynamicLibrary::SearchForAddressOfSymbol(const char *symbolName) {
+ // On linux we have a weird situation. The stderr/out/in symbols are both
+ // macros and global variables because of standards requirements. So, we
+ // boldly use the EXPLICIT_SYMBOL macro without checking for a #define first.
+-#if defined(__linux__) and !defined(__ANDROID__)
++#if defined(__GLIBC__)
+   {
+     EXPLICIT_SYMBOL(stderr);
+     EXPLICIT_SYMBOL(stdout);
+-- 
+1.8.4
+
