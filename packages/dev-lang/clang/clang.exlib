@@ -1,14 +1,14 @@
 # Copyright 2012 Elias Pipping <pipping@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require cmake [ api=2 ] easy-multibuild
+require cmake [ api=2 ]
 
 SUMMARY="C language family frontend for LLVM"
 HOMEPAGE="http://clang.llvm.org/"
 
 LICENCES="UoI-NCSA"
 SLOT="0"
-MYOPTIONS="multibuild_c: 32 64"
+MYOPTIONS=""
 
 DEPENDENCIES="
     build:
@@ -32,7 +32,7 @@ src_prepare() {
     edo popd
 }
 
-configure_one_multibuild() {
+src_configure() {
     local args=(
         -DCLANG_PATH_TO_LLVM_BUILD:STRING=/usr
         -DLLVM_LIBDIR_SUFFIX:STRING=${LIBDIR#lib}
@@ -40,12 +40,12 @@ configure_one_multibuild() {
     ecmake "${args[@]}"
 }
 
-test_one_multibuild() {
+src_test() {
     PATH=/usr/libexec/llvm:${PWD}/utils/TableGen/clang_tblgen_build_subdir:$PATH CLANG=${PWD}/bin/clang emake clang-test
 }
 
 src_install() {
-    easy-multibuild_src_install
+    default
 
     # the sole file here, config.h, is explicitly not installed
     edo rmdir "${IMAGE}"/usr/include/clang/Config
