@@ -17,6 +17,7 @@ myexparam Module_Build_pv=
 
 SUMMARY="Perl is a general-purpose programming language originally developed for text manipulation"
 HOMEPAGE="http://www.perl.org"
+DOWNLOADS="mirror://cpan/src/5.0/${PNV}.tar.bz2"
 
 REMOTE_IDS="cpan:${PN} freecode:${PN}"
 
@@ -38,11 +39,14 @@ DEPENDENCIES="
 
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( Changes5 )
 
-# WORK="${TEMP}/build"
 WORK="${WORKBASE}/build"
 
-db_define() {
-    option "${1}" && echo 'D' || echo 'U'
+define() {
+    echo "-D${1}=${2}"
+}
+
+option_define() {
+    option "${1}" '-D' '-U'
 }
 
 perl-5_src_unpack() {
@@ -51,13 +55,12 @@ perl-5_src_unpack() {
 }
 
 perl-5_src_prepare() {
-    edo cd "${WORKBASE}/${MY_PNV:-${PNV}}"
+    edo cd "${WORKBASE}/${PNV}"
     default
 
     # https://rt.perl.org/rt3//Public/Bug/Display.html?id=113022
-    test-flag-CC -fno-lto && \
-    edo sed -e '/if(p())/{n; s/$ldflags/& -fno-lto/}' \
-            -i Configure
+    test-flag-CC -fno-lto && edo sed -e '/if(p())/{n; s/$ldflags/& -fno-lto/}' \
+                                     -i Configure
 
     # find errno.h on cross
     edo sed -e "s#/usr/include/errno.h#/usr/$(exhost --target)/include/errno.h#g" \
@@ -67,48 +70,48 @@ perl-5_src_prepare() {
 perl-5_src_configure() {
     # Binaries are installed to /usr/bin/, with ${MY_PVM} appended
     # Alternatives manages executables in /usr/bin/
-    # Libraries go into /usr/${LIBDIR}/${PN}5/${MY_PVM}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
+    # Libraries go into /usr/${LIBDIR}/perl5/${MY_PVM}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
     # `man 1` are installed with a version
 
     # -Dfoo = define foo, -Ufoo = undefine foo.
 
     # This probably needs some further work... but should be okay for
-    # now. At least parrot breaks if we don't have -$osname in $archname
+    # now. At least parrot breaks if we don't have -${osname} in ${archname}
     local archname="${CHOST%%-*}-linux"
 
     # -O3 breaks ext/XS/APItest/t/exception.t and maybe other stuff
     replace-flags -O3 -O2
 
     local myconf=(
-        "${WORKBASE}/${MY_PNV:-${PNV}}/Configure"
+        "${WORKBASE}/${PNV}/Configure"
         -des
-        -Dcc="${CC}"
-        -Dar="${AR}"
-        -Dnm="${NM}"
-        -Dranlib="${RANLIB}"
-        -Dcf_by='Exherbo'
-        -Dprefix=/usr
-        -Dvendorprefix=/usr
-        -Dsiteprefix=/usr
-        -Doptimize="${CFLAGS}"
-        -Dldflags="${LDFLAGS}"
-        -Darchname="${archname}"
-        -Dlibperl="libperl.so.1.${MY_PVM}"
-        -Dprivlib="/usr/${LIBDIR}/perl5/${MY_PVM}"
-        -Darchlib="/usr/${LIBDIR}/perl5/${MY_PVM}/$archname"
-        -Dsitelib="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}"
-        -Dsitearch="/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}/$archname"
-        -Dvendorlib="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}"
-        -Dvendorarch="/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}/$archname"
-        -Dscriptdir=/usr/bin
-        -Uinstallusrbinperl=
+        $(define cf_by Exherbo)
+        "$(define cc     "${CC}"    )"
+        "$(define ar     "${AR}"    )"
+        "$(define nm     "${NM}"    )"
+        "$(define ranlib "${RANLIB}")"
+        $(define prefix       /usr)
+        $(define vendorprefix /usr)
+        $(define siteprefix   /usr)
+        "$(define optimize "${CFLAGS}"  )"
+        "$(define ldflags  "${LDFLAGS}" )"
+        "$(define archname "${archname}")"
+        "$(define privlib    "/usr/${LIBDIR}/perl5/${MY_PVM}"                        )"
+        "$(define archlib    "/usr/${LIBDIR}/perl5/${MY_PVM}/${archname}"            )"
+        "$(define sitelib    "/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}"              )"
+        "$(define sitearch   "/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}/${archname}"  )"
+        "$(define vendorlib  "/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}"            )"
+        "$(define vendorarch "/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}/${archname}")"
+        $(define scriptdir /usr/bin)
+        $(define libperl libperl.so.1.${MY_PVM})
         -Duseshrplib
         -Dmksymlinks
         -Duselargefiles
+        -Uinstallusrbinperl
         -Ui_ndbm
-        -$(db_define ithreads)usethreads
-        -$(db_define gdbm)i_gdbm
-        -$(db_define berkdb)i_db
+        $(option_define ithreads)usethreads
+        $(option_define gdbm)i_gdbm
+        $(option_define berkdb)i_db
     )
 
     edo sh "${myconf[@]}" "${PERL5_CONFIGURE_PARAMS[@]}"
@@ -130,89 +133,78 @@ perl-5_src_test() {
 
     [[ -v http_proxy ]] && unset http_proxy
 
-    if ever at_least 5.10.1 ; then
-        TEST_JOBS="${EXJOBS:-1}" emake test_harness
-    else
-        emake test
-    fi
+    TEST_JOBS="${EXJOBS:-1}" emake test_harness
 
     esandbox disallow_net "unix:${TEMP}/**"
     esandbox disallow_net "unix:${WORK}/t/sock-*"
     esandbox disallow_net --connect "inet:127.0.0.1@7"
     esandbox disallow_net "unix:${WORK}/dist/IO/sock-*"
-
 }
 
 perl-5_src_install() {
     default
 
+    edo cd "${IMAGE}"
+
     # see configure
     local archname="${CHOST%%-*}-linux"
 
     # Library symlinks
-    local perllibdir="/usr/${LIBDIR}/${PN}5/${MY_PVM}/${archname}/CORE/"
-    dosym ${perllibdir}/libperl.so.1{.${MY_PVM},}
-    dosym ${perllibdir}/libperl.so{.1,}
+    local perllibdir="/usr/${LIBDIR}/perl5/${MY_PVM}/${archname}/CORE/"
+    dosym libperl.so.1.${MY_PVM} ${perllibdir}/libperl.so.1
+    dosym libperl.so.1           ${perllibdir}/libperl.so
 
     # We only want /usr/bin/perl5.8.8, not /usr/bin/perl (without the dash, standard across distros)
-    # with -Uinstallusrbinperl this shouldn't even get installed, but it does happen anyway, for some reason..
-    if [[ -f "${IMAGE}"/usr/bin/${PN} ]]; then
-        edo rm "${IMAGE}"/usr/bin/${PN}
-    fi
+    nonfatal edo rm usr/bin/perl
 
     # Version executables
     local executable
-    for executable in "${IMAGE}"/usr/bin/*; do
+    for executable in usr/bin/*; do
         if egrep -q '^#!/usr/bin/perl( +.*)?$' "${executable}"; then
             edo sed -i -e '/^#!\/usr\/bin\/perl$/s/perl/perl'${MY_PVM}/ "${executable}"
         fi
-        if [[ ${executable##*/} != *${MY_PVM} ]]; then
-            edo mv "${executable}" "${executable}-${MY_PVM}"
-        fi
     done
 
-    # Version man1 manpages, discard man3 manpages (use perldoc)
-    edo rm -r "${IMAGE}"/usr/share/man/man3
-    local manpage
-    for manpage in "${IMAGE}"/usr/share/man/man1/*.1; do
-        edo mv "${manpage}" "${manpage/%.1/-${MY_PVM}.1}"
-    done
+    # Create & keep site and vendor dirs
+    keepdir /usr/${LIBDIR}/perl5/{site,vendor}_perl/${MY_PVM}/${archname}
 
-    keepdir /usr/${LIBDIR}/${PN}5/{site,vendor}_perl/${MY_PVM}/${archname}
+    # We don't need packlists or perllocal.pod
+    edo find usr/${LIBDIR} -type f -name .packlist -or -name perllocal.pod -delete
 
-    # We don't need packlists
-    edo find "${IMAGE}/usr/${LIBDIR}" -type f -name .packlist -delete
+    # Discard man3 manpages (use perldoc)
+    edo rm -r usr/share/man/man3
 
-    # Save a list of what executables & man-pages we're installing
-    edo cd "${IMAGE}"
-    local src target alternatives=() Module_Build_pv Module_Build_importance
+    # Add alternative for Module-Build's config_data
+    local Module_Build_pv Module_Build_alternatives=()
     exparam -v Module_Build_pv Module_Build_pv
-    if [[ -n ${Module_Build_pv} ]]; then
-        Module_Build_importance=${Module_Build_pv%.*}
-        local decimal=${Module_Build_pv#*.}
-        while [[ -n ${decimal} ]]; do
-            Module_Build_importance+=.${decimal:0:2}
-            decimal=${decimal:2}
-        done
-    fi
+    [[ -z ${Module_Build_pv} ]] && die "Module_Build_pv exparam is not set"
 
-    for src in usr/bin/*${MY_PVM} usr/share/man/man1/*${MY_PVM}.1; do
-        if [[ ${src} == usr/bin/config_data*${MY_PVM} ]]; then
-            [[ -n ${Module_Build_pv} ]] || die "Module_Build_pv not set"
-            edo mv ${src} usr/bin/config_data-perl-${MY_PVM}
-            alternatives_for config_data ${Module_Build_pv}_perl-${SLOT} ${Module_Build_importance} \
-                /usr/bin/config_data config_data-perl-${MY_PVM}
-        elif [[ ${src} == usr/share/man/man1/config_data-${MY_PVM}.1 ]]; then
-            [[ -n ${Module_Build_pv} ]] || die "Module_Build_pv not set"
-            edo mv ${src} usr/share/man/man1/config_data-perl-${MY_PVM}.1
-            alternatives_for config_data ${Module_Build_pv}_perl-${SLOT} ${Module_Build_importance} \
-                /usr/share/man/man1/config_data.1 config_data-perl-${MY_PVM}.1
-        else
-            [[ ${src/-${MY_PVM}} == ${src} ]] && target=${src/${MY_PVM}} || target=${src/-${MY_PVM}}
-            alternatives+=( /${target} ${src##*/} )
-        fi
+    Module_Build_alternatives+=(
+        /usr/bin/config_data              config_data-perl-${MY_PVM}
+        /usr/share/man/man1/config_data.1 config_data-perl-${MY_PVM}.1
+    )
+    alternatives_for config_data        \
+        ${Module_Build_pv}_perl-${SLOT} \
+        ${Module_Build_pv}              \
+        "${Module_Build_alternatives[@]}"
+
+    # Add alternative for perl tools and manpages
+    # perl${MY_PVM} doesn't have a dash, handle that here
+    local perl_alternatives=( /usr/bin/perl perl${MY_PVM} )
+    local bin manpage manfile
+
+    for bin in usr/bin/* ; do
+        # skip perl${PVM} and config_data-perl-${MY_PVM}
+        [[ ${bin} == *${MY_PVM} ]] && continue
+        perl_alternatives+=( "/${bin}" "${bin##*/}-${MY_PVM}" )
+    done
+    for manpage in usr/share/man/man1/*.1; do
+        # skip config_data-perl-${MY_PVM}.1
+        [[ ${manpage} == *${MY_PVM}.1 ]] && continue
+        manfile=${manpage##*/}
+        perl_alternatives+=( "/${manpage}" "${manfile/%.1/-${MY_PVM}.1}" )
     done
 
-    alternatives_for ${PN} ${SLOT} ${SLOT} "${alternatives[@]}"
+    alternatives_for ${PN} ${SLOT} ${SLOT} "${perl_alternatives[@]}"
 }
 

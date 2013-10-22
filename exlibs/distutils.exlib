@@ -20,7 +20,7 @@ PYTHON_EXLIB_API=2
 
 if [[ -n $(exparam python_dep) ]]; then
     exparam -v PYTHON_DEP python_dep
-    if ([ "${PYTHON_DEP:0:1}" != '[' ] && [ "${PYTHON_DEP:0:1}" != '' ]); then
+    if [[ "${PYTHON_DEP:0:1}" != '[' && "${PYTHON_DEP:0:1}" != '' ]]; then
         PYTHON_EXLIB_API=1
     fi
 else

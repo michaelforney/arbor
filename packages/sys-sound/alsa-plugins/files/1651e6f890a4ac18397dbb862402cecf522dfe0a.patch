@@ -1,0 +1,46 @@
+From 1651e6f890a4ac18397dbb862402cecf522dfe0a Mon Sep 17 00:00:00 2001
+From: Takashi Iwai <tiwai@suse.de>
+Date: Wed, 9 Oct 2013 17:24:35 +0200
+Subject: [PATCH] a52: Fix build error with the recent version
+
+The version check for USE_AVCODEC_FRAME wasn't done correctly, and it
+failed to build with version 54.x or later.
+
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+---
+ a52/pcm_a52.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/a52/pcm_a52.c b/a52/pcm_a52.c
+index 75c68bd..8fd52c2 100644
+--- a/a52/pcm_a52.c
++++ b/a52/pcm_a52.c
+@@ -28,12 +28,6 @@
+ #include AVCODEC_HEADER
+ #include <libavutil/avutil.h>
+ 
+-#if LIBAVCODEC_VERSION_MAJOR >= 53 && LIBAVCODEC_VERSION_MINOR >= 34
+-#include <libavutil/audioconvert.h>
+-#include <libavutil/mem.h>
+-#define USE_AVCODEC_FRAME
+-#endif
+-
+ /* some compatibility wrappers */
+ #ifndef AV_VERSION_INT
+ #define AV_VERSION_INT(a, b, c) (((a) << 16) | ((b) << 8) | (c))
+@@ -44,6 +38,12 @@
+                                                LIBAVCODEC_VERSION_MICRO)
+ #endif
+ 
++#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 34, 0)
++#include <libavutil/audioconvert.h>
++#include <libavutil/mem.h>
++#define USE_AVCODEC_FRAME
++#endif
++
+ #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 0, 0)
+ #ifndef AV_CH_LAYOUT_STEREO
+ #define AV_CH_LAYOUT_STEREO	CH_LAYOUT_STEREO
+-- 
+1.7.11.7
+

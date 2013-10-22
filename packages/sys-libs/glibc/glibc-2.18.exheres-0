@@ -9,6 +9,8 @@ PLATFORMS="~amd64 ~arm ~x86"
 src_prepare() {
     edo cd "${ECONF_SOURCE}"
 
+    expatch "${FILES}"/0001-configure-allow-building-with-GNU-Make-4.patch
+
     # fail with sydbox
     edo sed \
         -e '68s:tst-dir ::' -i "${WORKBASE}"/${PNV}/posix/Makefile

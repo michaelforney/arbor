@@ -4,7 +4,7 @@
 # Based in part upon 'cmake-2.6.0.ebuild' from Gentoo, which is:
 #     Copyright 1999-2008 Gentoo Foundation.
 
-require elisp-optional [ source_directory=Docs ]
+require bash-completion elisp-optional [ source_directory=Docs ]
 
 SUMMARY="Cross platform Make"
 HOMEPAGE="http://www.cmake.org"
@@ -33,6 +33,11 @@ DEPENDENCIES="
         qt5? ( x11-libs/qtbase:5 )
 "
 
+BASH_COMPLETIONS=(
+     Docs/bash-completion/cmake
+     'Docs/bash-completion/cpack cpack'
+     'Docs/bash-completion/ctest ctest'
+)
 VIMFILE="${PN}.vim"
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -44,8 +49,10 @@ src_prepare() {
     default
 
     if option qt4; then
-        sed -i -e '/Icon/ s/\.png$//' Source/QtDialog/CMake.desktop
+        edo sed -i -e '/Icon/ s/\.png$//' Source/QtDialog/CMake.desktop
     fi
+    # Don't install bash-completions, use bash-completion.exlib
+    edo sed -i -e '/^install(FILES cmake cpack/d' Docs/bash-completion/CMakeLists.txt
 }
 
 src_configure() {
@@ -57,6 +64,7 @@ src_configure() {
         --docdir=/share/doc/${PNVR} \
         --datadir=/share/${PN} \
         --mandir=/share/man \
+        --verbose \
         $(option qt4 && echo " -- -DCMAKE_DISABLE_FIND_PACKAGE_Qt5Core:BOOL=TRUE")
 }
 
@@ -68,6 +76,7 @@ src_compile() {
 src_install() {
     default
 
+    bash-completion_src_install
     elisp-optional_src_install
 
     if option vim-syntax; then

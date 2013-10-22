@@ -23,7 +23,8 @@ DEPENDENCIES="
         socks? ( net-proxy/dante )
 "
 
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( dane(?) ipv6 )
+DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( ipv6 )
+ever at_least 0.8.16-rc1 && DEFAULT_SRC_CONFIGURE_OPTION_ENABLES+=( dane )
 DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( bot perl proxy socks )
 DEFAULT_SRC_CONFIGURE_PARAMS=( --with-ncurses --with-perl-lib=vendor --enable-ssl )
 DEFAULT_SRC_INSTALL_PARAMS=( docdir=/usr/share/doc/${PNVR}/ )

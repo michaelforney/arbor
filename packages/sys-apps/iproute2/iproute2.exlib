@@ -49,7 +49,6 @@ DEFAULT_SRC_COMPILE_PARAMS+=(
 
 DEFAULT_SRC_INSTALL_PARAMS+=(
     LIBDIR=/usr/${LIBDIR}
-    DESTDIR="${IMAGE}"
     DOCDIR=/usr/share/doc/${PNVR}
     MANDIR=/usr/share/man
 )
@@ -94,8 +93,8 @@ src_install() {
         edo rmdir "${IMAGE}"/var/{lib/{arpd,},}
     fi
 
-    if ! option atm ; then
-        [[ -d "${IMAGE}"/${LIBDIR}/tc ]] && edo rmdir "${IMAGE}"/${LIBDIR}/{tc,}
+    if ! ever at_least 3.4.0 && ! option atm ; then
+        edo rmdir "${IMAGE}"/${LIBDIR}/{tc,}
     fi
 }
 

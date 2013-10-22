@@ -1,0 +1,18 @@
+Source: Jorge Aparicio
+Upstream: https://code.google.com/p/lz4/issues/detail?id=90
+Reason: Make installs directly to / instead of $IMAGE (sandbox violation)
+
+Index: Makefile
+===================================================================
+--- Makefile	(revision 106)
++++ Makefile	(working copy)
+@@ -31,7 +31,8 @@
+ # ################################################################
+ 
+ RELEASE=r106
+-PREFIX=/usr
++DESTDIR=
++PREFIX=${DESTDIR}/usr
+ BINDIR=$(PREFIX)/bin
+ MANDIR=$(PREFIX)/share/man/man1
+ DISTRIBNAME=lz4-$(RELEASE).tar.gz

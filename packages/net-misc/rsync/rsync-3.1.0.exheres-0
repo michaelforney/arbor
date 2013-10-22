@@ -21,6 +21,7 @@ MYOPTIONS="acl ipv6 xattr
 DEPENDENCIES="
     build+run:
         dev-libs/popt
+        sys-libs/zlib
         acl? ( sys-apps/acl )
         xattr? ( sys-apps/attr )
 "
@@ -30,7 +31,7 @@ DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=(
     'ipv6'
     'xattr xattr-support'
 )
-DEFAULT_SRC_CONFIGURE_PARAMS=( --without-included-popt )
+DEFAULT_SRC_CONFIGURE_PARAMS=( --without-included-popt --with-included-zlib=no )
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( OLDNEWS )
 
 src_install() {

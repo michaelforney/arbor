@@ -2,7 +2,8 @@
 # Copyright (c) 2008, 2009, 2010, 2011 Ingmar Vanhassel <ingmar@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require bash-completion zsh-completion elisp-optional [ source_directory=contrib ] distutils
+require bash-completion zsh-completion elisp-optional [ source_directory=contrib ]
+require distutils [ python_dep='[>=2.4]' has_bin=true multibuild=false python_sup='2.7 2.6' ]
 
 SUMMARY="A fast, lightweight, distributed source control management system"
 HOMEPAGE="http://mercurial.selenic.com/"
@@ -27,7 +28,6 @@ MYOPTIONS="emacs tk [[ description = [ Install hgk, a port to mercurial of git's
 
 DEPENDENCIES="
     build+run:
-        dev-lang/python:=[>=2.4]
         tk? (
             dev-lang/tcl[>=8.4]
             dev-lang/tk[>=8.4]

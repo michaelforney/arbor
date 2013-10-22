@@ -1,0 +1,32 @@
+# Copyright 2007 Bryan Østergaard
+# Distributed under the terms of the GNU General Public License v2
+
+require gnu [ suffix=bz2 ]
+
+SUMMARY="GNU tool which simplifies the build process for users"
+DESCRIPTION="
+Make is a tool which controls the generation of executables and other non-source files of a program
+from the program's source files. Make gets its knowledge of how to build your program from a file
+called the makefile, which lists each of the non-source files and how to compute it from other
+files. When you write a program, you should write a makefile for it, so that it is possible to use
+Make to build and install the program.
+"
+
+LICENCES="GPL-3 [[ last-checked = 3.82 ]]"
+SLOT="0"
+PLATFORMS="~amd64 ~arm ~x86"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    build:
+        sys-devel/gettext[>=0.14.1]
+"
+
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PNV}-fix-archieve-ref-bug.patch
+    -p0 "${FILES}"/${PNV}-parallel_intermediates.patch
+)
+DEFAULT_SRC_CONFIGURE_PARAMS=(
+    --hates=docdir
+    --enable-nls
+)
