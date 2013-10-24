@@ -1,0 +1,26 @@
+# Copyright 2008 Kim Højgaard-Hansen
+# Distributed under the terms of the GNU General Public License v2
+
+require sourceforge [ suffix=tar.xz ]
+
+SUMMARY="The Multiple Network Graphics reference library"
+
+LICENCES="ZLIB"
+SLOT="0"
+PLATFORMS="~amd64 ~x86"
+MYOPTIONS="
+    lcms
+    multibuild_c: 32 64
+"
+
+DEPENDENCIES="
+    build+run:
+        media-libs/jpeg[multibuild_c:*(-)?]
+        sys-libs/zlib[multibuild_c:*(-)?]
+        lcms? ( media-libs/lcms2 )
+"
+
+DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-static )
+DEFAULT_SRC_CONFIGURE_OPTION_WITHS=( lcms )
+DEFAULT_SRC_INSTALL_EXTRA_DOCS=( README.examples doc/{${PN}.txt,doc.readme} )
+
