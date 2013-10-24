@@ -1,7 +1,7 @@
 # Copyright 2008 Alexander Færøy <ahf@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 
-require sourceforge [ suffix=tar.xz ] easy-multibuild
+require sourceforge [ suffix=tar.xz ]
 
 SUMMARY="Portable Network Graphics library"
 
@@ -11,12 +11,11 @@ LICENCES="ZLIB"
 SLOT="0"
 MYOPTIONS="
     arm_cpu_features: neon
-    multibuild_c: 32 64
 "
 
 DEPENDENCIES="
     build+run:
-        sys-libs/zlib[multibuild_c:*(-)?]
+        sys-libs/zlib
 "
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( --disable-static )
