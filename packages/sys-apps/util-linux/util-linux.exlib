@@ -63,7 +63,10 @@ DEPENDENCIES="
             description = [ util-linux now provides its own bash-completions ]
             resolution = upgrade-blocked-before
         ]]
-        sys-libs/glibc[>=2.10]
+        || (
+            sys-libs/glibc[>=2.10]
+            sys-libs/musl
+        )
         sys-libs/libcap-ng
         sys-libs/ncurses[>=5.6] [[
             note = [ this is required as most of the tools have been converted to use ncurses ]
