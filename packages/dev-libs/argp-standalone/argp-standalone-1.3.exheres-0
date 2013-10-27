@@ -1,0 +1,61 @@
+# Copyright 2013 Michael Forney
+# Distributed under the terms of the GNU General Public License v2
+
+require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 ] ]
+
+SUMMARY="arpp-standalone is a standalone argp implementation"
+HOMEPAGE="http://www.lysator.liu.se/~nisse/archive/"
+DOWNLOADS="http://www.lysator.liu.se/~nisse/archive/${PNV}.tar.gz"
+
+LICENCES="GPL-2"
+SLOT="0"
+PLATFORMS="~amd64"
+MYOPTIONS=""
+
+DEPENDENCIES="
+    !sys-libs/glibc [[
+        description = [ Built-in to glibc ]
+        resolution = manual
+    ]]
+"
+
+BUGS_TO="mforney@mforney.org"
+
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-support-prefixed-ar.patch )
+
+WORK="${WORKBASE}"
+ECONF_SOURCE="${WORKBASE}/${PNV}"
+
+src_prepare() {
+    edo cd ${PNV}
+    autotools_src_prepare
+}
+
+src_configure() {
+    for lib in static shared ; do
+        edo mkdir ${lib}
+        edo pushd ${lib}
+        [[ ${lib} == shared ]] && append-flags -fPIC
+        default
+        edo popd
+    done
+}
+
+src_compile() {
+    for lib in static shared ; do
+        edo pushd ${lib}
+        default
+        edo popd
+    done
+}
+
+src_install() {
+    dolib.a static/libargp.a
+    newlib.a shared/libargp.a libargp-pic.a
+
+    insinto /usr/$(exhost --target)/include
+    doins "${WORKBASE}"/${PNV}/argp.h
+
+    emagicdocs
+}
+
