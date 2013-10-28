@@ -67,7 +67,8 @@ perl-5_src_prepare() {
 }
 
 perl-5_src_configure() {
-    local perl_base=/usr/${LIBDIR}/perl5
+    local host=$(exhost --target)
+    local perl_base=/usr/${host}/lib/perl5
 
     # Binaries are installed to /usr/bin/, with ${SLOT} appended
     # Alternatives manages executables in /usr/bin/
@@ -87,9 +88,9 @@ perl-5_src_configure() {
         "$(define ar     "${AR}"    )"
         "$(define nm     "${NM}"    )"
         "$(define ranlib "${RANLIB}")"
-        $(define prefix       /usr)
-        $(define vendorprefix /usr)
-        $(define siteprefix   /usr)
+        $(define prefix       /usr/${host})
+        $(define vendorprefix /usr/${host})
+        $(define siteprefix   /usr/${host})
         "$(define optimize "${CFLAGS}"  )"
         "$(define ldflags  "${LDFLAGS}" )"
         # This probably needs some further work... but should be okay for
@@ -151,7 +152,8 @@ perl-5_src_test() {
 }
 
 perl-5_src_install() {
-    local perl_base=/usr/${LIBDIR}/perl5
+    local host=$(exhost --target)
+    local perl_base=/usr/${host}/lib/perl5
 
     default
 
@@ -174,7 +176,7 @@ perl-5_src_install() {
     keepdir ${perl_base}/{site,vendor}_perl/${SLOT}-{arch,bin,man/man1,pure}
 
     # We don't need packlists or perllocal.pod
-    edo find usr/${LIBDIR} -type f -name .packlist -or -name perllocal.pod -delete
+    edo find usr/${host}/lib -type f -name .packlist -or -name perllocal.pod -delete
 
     # Discard man3 manpages (use perldoc)
     edo rm -r ${perl_base#/}/core_perl/${SLOT}-man/man3
@@ -188,7 +190,7 @@ perl-5_src_install() {
         ${perl_base}/core_perl/man   ${SLOT}-man
         ${perl_base}/site_perl/man   ${SLOT}-man
         ${perl_base}/vendor_perl/man ${SLOT}-man
-        /usr/bin/perl                        ${perlbindir}/perl${SLOT}
+        /usr/${host}/bin/perl        ${perlbindir}/perl${SLOT}
     )
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${perl_alternatives[@]}"
