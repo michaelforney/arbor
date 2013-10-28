@@ -20,7 +20,7 @@ UPSTREAM_RELEASE_NOTES="${UPSTREAM_DOCUMENTATION}/whatsnew.html"
 
 LICENCES="GPL-2"
 SLOT="0"
-LANGS="ca cs es fr ja ru"
+LANGS="ca cs es fr it ja ru"
 MYOPTIONS="
     baselayout dbus debug gnutls kerberos pam perl python xinetd
     acl [[ description = [ Support POSIX ACL when authenticating with the CUPS daemon ] ]]
@@ -75,9 +75,6 @@ prepare_one_multibuild() {
     # do not gzip manpages by default
     edo sed -i -e '/MAN[0-9]EXT=/s:\.gz::g' config-scripts/cups-manpages.m4
 
-    # disable the xinetd service by default
-    option xinetd && edo sed -i -e "s:^{:{\n\tdisable = yes:" scheduler/cups-lpd.xinetd.in
-
     # Disable silent rules
     edo sed -i '/^\.SILENT:$/d' Makedefs.in
 
@@ -104,6 +101,7 @@ configure_one_multibuild() {
         --with-cups-{group,user}=lp \
         --with-docdir="/usr/share/doc/${PNVR}/handbook" \
         --with-languages="${CUPSLANGS}" \
+        --with-rundir=/run/cups \
         --with-system-groups=lpadmin \
         --with-optim="" \
         --without-java \
@@ -174,6 +172,9 @@ install_one_multibuild() {
     edo rm "${IMAGE}"/usr/share/cups/banners/{classified,confidential,secret,standard,topsecret,unclassified}
     edo rm "${IMAGE}"/usr/share/cups/data/testprint
     edo rmdir "${IMAGE}"/usr/share/cups/{banners,data}
+
+    # directories are created automatically on startup
+    edo rm -r "${IMAGE}"/run
 }
 
 pkg_postinst() {
