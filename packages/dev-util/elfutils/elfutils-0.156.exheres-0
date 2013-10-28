@@ -1,7 +1,7 @@
 # Copyright 2009, 2010 Ingmar Vanhassel
 # Distributed under the terms of the GNU General Public License v2
 
-require flag-o-matic
+require flag-o-matic autotools [ supported_autoconf=[ 2.5 ] supported_automake=[ 1.13 1.12 ] ]
 
 SUMMARY="Libraries/utilities to handle ELF objects"
 HOMEPAGE="https://fedorahosted.org/releases/${PN:0:1}/${PN:1:1}/${PN}"
@@ -24,6 +24,8 @@ DEPENDENCIES="
         ]]
 "
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-check-for-prefixed-ar-readelf-and-nm.patch )
+
 DEFAULT_SRC_CONFIGURE_PARAMS=(
     --program-prefix=eu-
     --enable-nls
@@ -32,24 +34,6 @@ DEFAULT_SRC_CONFIGURE_PARAMS=(
     --with-lzma
     --with-zlib
 )
-
-src_prepare() {
-    default
-
-    # TODO(compnerd) do this properly via autotools
-    edo sed -e '/^AR =/c AR = @host@-ar'        \
-            -i "${WORK}/lib/Makefile.in"        \
-            -i "${WORK}/libelf/Makefile.in"     \
-            -i "${WORK}/libebl/Makefile.in"     \
-            -i "${WORK}/libdwfl/Makefile.in"    \
-            -i "${WORK}/libdw/Makefile.in"      \
-            -i "${WORK}/libcpu/Makefile.in"     \
-            -i "${WORK}/libasm/Makefile.in"     \
-            -i "${WORK}/backends/Makefile.in"   \
-            -i "${WORK}/src/Makefile.in"
-    edo sed -e "s,nm,${CHOST}-nm,"              \
-            -i "${WORK}/tests/run-arsymtest.sh"
-}
 
 src_configure() {
     # NOTE (abdulras) tests require that the debug information be present in the tools

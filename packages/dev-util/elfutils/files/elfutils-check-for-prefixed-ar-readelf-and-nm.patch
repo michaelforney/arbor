@@ -1,0 +1,133 @@
+Reason: Check for prefixed ar, readelf, and nm
+Upstream: Yes
+
+From a13a4600a24122c994d56b74c403405335813dc5 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 01:30:48 +0000
+Subject: [PATCH] Check for prefixed ar, readelf, and nm
+
+Sometimes with cross-compile toolchains, the tools are prefixed with the
+target arch. Using AC_CHECK_TOOL looks for tools named like this.
+---
+ config/eu.am           | 2 +-
+ configure.ac           | 3 +++
+ libasm/Makefile.am     | 2 +-
+ libdw/Makefile.am      | 5 +++--
+ libelf/Makefile.am     | 2 +-
+ tests/Makefile.am      | 6 ++++--
+ tests/run-arsymtest.sh | 2 +-
+ 7 files changed, 14 insertions(+), 8 deletions(-)
+
+diff --git a/config/eu.am b/config/eu.am
+index 86e5a4e..38718c7 100644
+--- a/config/eu.am
++++ b/config/eu.am
+@@ -61,4 +61,4 @@ endif
+ 
+ CLEANFILES = *.gcno *.gcda
+ 
+-textrel_check = if readelf -d $@ | fgrep -q TEXTREL; then exit 1; fi
++textrel_check = if $(READELF) -d $@ | fgrep -q TEXTREL; then exit 1; fi
+diff --git a/configure.ac b/configure.ac
+index b4c249c..c69dd3e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -79,6 +79,9 @@ AC_PROG_CC
+ AC_PROG_RANLIB
+ AC_PROG_YACC
+ AM_PROG_LEX
++AM_PROG_AR
++AC_CHECK_TOOL([READELF], [readelf])
++AC_CHECK_TOOL([NM], [nm])
+ 
+ AC_CACHE_CHECK([for gcc with C99 support], ac_cv_c99, [dnl
+ old_CFLAGS="$CFLAGS"
+diff --git a/libasm/Makefile.am b/libasm/Makefile.am
+index e16d4be..4d81536 100644
+--- a/libasm/Makefile.am
++++ b/libasm/Makefile.am
+@@ -69,7 +69,7 @@ libasm.so: libasm_pic.a libasm.map
+ 		-Wl,--version-script,$(srcdir)/libasm.map,--no-undefined \
+ 		-Wl,--soname,$@.$(VERSION) \
+ 		../libebl/libebl.a ../libelf/libelf.so  $(libasm_so_LDLIBS)
+-	if readelf -d $@ | fgrep -q TEXTREL; then exit 1; fi
++	if $(READELF) -d $@ | fgrep -q TEXTREL; then exit 1; fi
+ 	ln -fs $@ $@.$(VERSION)
+ 
+ install: install-am libasm.so
+diff --git a/libdw/Makefile.am b/libdw/Makefile.am
+index 5fef2e1..a22166a 100644
+--- a/libdw/Makefile.am
++++ b/libdw/Makefile.am
+@@ -113,7 +113,7 @@ libdw.so: $(srcdir)/libdw.map libdw_pic.a \
+ 		-Wl,--version-script,$<,--no-undefined \
+ 		-Wl,--whole-archive $(filter-out $<,$^) -Wl,--no-whole-archive\
+ 		-ldl $(zip_LIBS)
+-	if readelf -d $@ | fgrep -q TEXTREL; then exit 1; fi
++	if $(READELF) -d $@ | fgrep -q TEXTREL; then exit 1; fi
+ 	ln -fs $@ $@.$(VERSION)
+ 
+ install: install-am libdw.so
+@@ -129,7 +129,8 @@ uninstall: uninstall-am
+ 	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(includedir)/elfutils
+ endif
+ 
+-libdw_a_LIBADD = $(addprefix ../libdwfl/,$(shell $(AR) t ../libdwfl/libdwfl.a))
++libdwfl_objects = $(shell $(AR) t ../libdwfl/libdwfl.a)
++libdw_a_LIBADD = $(addprefix ../libdwfl/,$(libdwfl_objects))
+ 
+ noinst_HEADERS = libdwP.h memory-access.h dwarf_abbrev_hash.h \
+ 		 dwarf_sig8_hash.h cfi.h encoded-value.h
+diff --git a/libelf/Makefile.am b/libelf/Makefile.am
+index 5903ea8..4646fba 100644
+--- a/libelf/Makefile.am
++++ b/libelf/Makefile.am
+@@ -106,7 +106,7 @@ libelf.so: libelf_pic.a libelf.map
+ 	$(LINK) -shared -o $@ -Wl,--whole-archive,$<,--no-whole-archive \
+ 		-Wl,--version-script,$(srcdir)/libelf.map,--no-undefined \
+ 		-Wl,--soname,$@.$(VERSION),-z,defs,-z,relro $(libelf_so_LDLIBS)
+-	if readelf -d $@ | fgrep -q TEXTREL; then exit 1; fi
++	if $(READELF) -d $@ | fgrep -q TEXTREL; then exit 1; fi
+ 	ln -fs $@ $@.$(VERSION)
+ 
+ install: install-am libelf.so
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index d07cb0b..bc97523 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -231,7 +231,8 @@ installed_TESTS_ENVIRONMENT = libdir=$(DESTDIR)$(libdir); \
+ 			      export abs_srcdir; export abs_builddir; \
+ 			      export abs_top_builddir; \
+ 			      export libdir; export bindir; \
+-			      export LC_ALL; export LANG; export VALGRIND_CMD;
++			      export LC_ALL; export LANG; export VALGRIND_CMD; \
++			      NM=$(NM); export NM;
+ installed_LOG_COMPILER = $(abs_srcdir)/test-wrapper.sh \
+ 			 installed $(tests_rpath) \
+ 			 '$(program_transform_name)'
+@@ -244,7 +245,8 @@ TESTS_ENVIRONMENT = LC_ALL=C; LANG=C; VALGRIND_CMD=$(valgrind_cmd); \
+ 		    abs_top_builddir=$(abs_top_builddir); \
+ 		    export abs_srcdir; export abs_builddir; \
+ 		    export abs_top_builddir; \
+-		    export LC_ALL; export LANG; export VALGRIND_CMD;
++		    export LC_ALL; export LANG; export VALGRIND_CMD; \
++		    NM=$(NM); export NM;
+ LOG_COMPILER = $(abs_srcdir)/test-wrapper.sh \
+ 	       $(abs_top_builddir)/libdw:$(abs_top_builddir)/backends:$(abs_top_builddir)/libelf:$(abs_top_builddir)/libasm
+ 
+diff --git a/tests/run-arsymtest.sh b/tests/run-arsymtest.sh
+index dc016e1..b0fdfcd 100755
+--- a/tests/run-arsymtest.sh
++++ b/tests/run-arsymtest.sh
+@@ -28,7 +28,7 @@ tempfiles $okfile $tmpfile $testfile
+ result=77
+ if test -f $lib; then
+     # Generate list using `nm' we check against.
+-    nm -s $lib |
++    ${NM} -s $lib |
+     sed -e '1,/^Arch/d' -e '/^$/,$d' |
+     sort > $okfile
+ 
+-- 
+1.8.4
+
