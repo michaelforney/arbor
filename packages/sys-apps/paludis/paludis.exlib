@@ -54,16 +54,10 @@ DEPENDENCIES="
         net-misc/wget
         net-misc/rsync
         sys-apps/sydbox[>=0.7.6]
+        sys-devel/dwz
         bash-completion? (  app-shells/bash-completion[>=1.1] )
     post:
         vim-syntax? ( app-editors/vim-runtime:*[>=7] )"
-
-if ever at_least 0.83 ; then
-    DEPENDENCIES+="
-        run:
-            sys-devel/dwz
-    "
-fi
 
 if ever is_scm; then
     DEPENDENCIES+="
