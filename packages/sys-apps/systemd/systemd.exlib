@@ -183,6 +183,7 @@ systemd_src_prepare() {
             -e "/^userunitdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^tmpfilesdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^sysctldir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^linksdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^usergeneratordir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^catalogdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^kernelinstalldir = /s:/lib/:/${LIBDIR}/:" \
@@ -336,11 +337,11 @@ systemd_src_install() {
     dosym ../usr/bin/systemctl /bin/systemctl
 
     # Don't install funny RPM macros.
-    if [[ -d ${IMAGE}/etc/rpm ]]; then
+    if [[ -d "${IMAGE}"/etc/rpm ]]; then
         edo rm -r "${IMAGE}"/etc/rpm
     fi
 
-    if [[ -d ${IMAGE}/usr/lib/rpm ]]; then
+    if [[ -d "${IMAGE}"/usr/lib/rpm ]]; then
         edo rm -r "${IMAGE}"/usr/lib/rpm
 
         # breaks non ~amd64 systems
@@ -483,6 +484,10 @@ EOF
     keepdir /etc/systemd/ntp-units.d
     keepdir /usr/${LIBDIR}/systemd/ntp-units.d
     keepdir /usr/${LIBDIR}/systemd/system-sleep
+
+    # udev link-config rules files
+    keepdir /etc/net/links
+    keepdir /usr/${LIBDIR}/net/links
 
     # Keep the administrator's udev rules dir.
     keepdir /etc/udev/rules.d
