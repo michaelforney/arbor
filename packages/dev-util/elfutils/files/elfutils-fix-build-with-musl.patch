@@ -1,0 +1,3441 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From 1e81f0bfba56f1a89a3fb985ced7cf076bdca112 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 01:03:36 +0000
+Subject: [PATCH 01/18] libelf/elf.h: Use extern "C" directly
+
+__{BEGIN,END}_DECLS is not standard, and libelf/libelf.h uses extern "C"
+directly as well.
+---
+ lib/fixedsizehash.h | 1 -
+ libelf/elf.h        | 8 ++++++--
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/lib/fixedsizehash.h b/lib/fixedsizehash.h
+index 06ce6a2..73ce9da 100644
+--- a/lib/fixedsizehash.h
++++ b/lib/fixedsizehash.h
+@@ -30,7 +30,6 @@
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/cdefs.h>
+ #include <sys/param.h>
+ 
+ #include <system.h>
+diff --git a/libelf/elf.h b/libelf/elf.h
+index a05ea3b..e357404 100644
+--- a/libelf/elf.h
++++ b/libelf/elf.h
+@@ -21,7 +21,9 @@
+ 
+ #include <features.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /* Standard ELF types.  */
+ 
+@@ -3330,6 +3332,8 @@ typedef Elf32_Addr Elf32_Conflict;
+ #define R_TILEGX_NUM		130
+ 
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif	/* elf.h */
+-- 
+1.8.4
+
+
+From ad17521d4a396986d635d63377e0ac0444aa6723 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 01:06:41 +0000
+Subject: [PATCH 02/18] Use mempcpy instead of __mempcpy
+
+The __ prefix is reserved for internal implementation use.
+---
+ libelf/elf_begin.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libelf/elf_begin.c b/libelf/elf_begin.c
+index b9d5cea..31e50a4 100644
+--- a/libelf/elf_begin.c
++++ b/libelf/elf_begin.c
+@@ -775,7 +775,7 @@ __libelf_next_arhdr_wrlock (elf)
+     }
+ 
+   /* Copy the raw name over to a NUL terminated buffer.  */
+-  *((char *) __mempcpy (elf->state.ar.raw_name, ar_hdr->ar_name, 16)) = '\0';
++  *((char *) mempcpy (elf->state.ar.raw_name, ar_hdr->ar_name, 16)) = '\0';
+ 
+   elf_ar_hdr = &elf->state.ar.elf_ar_hdr;
+ 
+@@ -871,7 +871,7 @@ __libelf_next_arhdr_wrlock (elf)
+       const char *string = ar_hdr->FIELD;				      \
+       if (ar_hdr->FIELD[sizeof (ar_hdr->FIELD) - 1] != ' ')		      \
+ 	{								      \
+-	  *((char *) __mempcpy (buf, ar_hdr->FIELD, sizeof (ar_hdr->FIELD)))  \
++	  *((char *) mempcpy (buf, ar_hdr->FIELD, sizeof (ar_hdr->FIELD)))    \
+ 	    = '\0';							      \
+ 	  string = buf;							      \
+ 	}								      \
+-- 
+1.8.4
+
+
+From bd483b461301f2f4f12b2adf484e2f74caf6faf4 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:39:30 +0000
+Subject: [PATCH 03/18] Support building without mcheck.h
+
+---
+ configure.ac    | 2 ++
+ src/addr2line.c | 6 +++++-
+ src/ar.c        | 6 +++++-
+ src/ld.c        | 6 ++++--
+ src/nm.c        | 6 +++++-
+ src/objdump.c   | 6 +++++-
+ src/ranlib.c    | 6 +++++-
+ src/size.c      | 6 +++++-
+ src/strip.c     | 6 +++++-
+ src/unstrip.c   | 6 +++++-
+ 10 files changed, 46 insertions(+), 10 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index c69dd3e..d98ba0b 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -115,6 +115,8 @@ dnl tests, because the choice of the file model can (in principle) affect
+ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
++AC_CHECK_HEADERS([mcheck.h])
++
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+ dnl will be slightly faster, small, and has fewer dependencies.
+diff --git a/src/addr2line.c b/src/addr2line.c
+index 82e80b1..9322243 100644
+--- a/src/addr2line.c
++++ b/src/addr2line.c
+@@ -30,7 +30,9 @@
+ #include <dwarf.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdio_ext.h>
+@@ -127,8 +129,10 @@ main (int argc, char *argv[])
+   int remaining;
+   int result = 0;
+ 
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   (void) __fsetlocking (stdout, FSETLOCKING_BYCALLER);
+diff --git a/src/ar.c b/src/ar.c
+index f51f0ef..eabcda8 100644
+--- a/src/ar.c
++++ b/src/ar.c
+@@ -28,7 +28,9 @@
+ #include <libintl.h>
+ #include <limits.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <search.h>
+ #include <stdbool.h>
+ #include <stdlib.h>
+@@ -141,8 +143,10 @@ static enum { ipos_none, ipos_before, ipos_after } ipos;
+ int
+ main (int argc, char *argv[])
+ {
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   (void) __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+diff --git a/src/ld.c b/src/ld.c
+index 73e4f04..f37b099 100644
+--- a/src/ld.c
++++ b/src/ld.c
+@@ -26,7 +26,9 @@
+ #include <libelf.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <stdio.h>
+ #include <stdio_ext.h>
+ #include <stdlib.h>
+@@ -277,7 +279,7 @@ main (int argc, char *argv[])
+   int remaining;
+   int err;
+ 
+-#ifndef NDEBUG
++#if defined(HAVE_MCHECK_H) && !defined(NDEBUG)
+   /* Enable memory debugging.  */
+   mtrace ();
+ #endif
+diff --git a/src/nm.c b/src/nm.c
+index 7aae84b..671bcaa 100644
+--- a/src/nm.c
++++ b/src/nm.c
+@@ -33,7 +33,9 @@
+ #include <libdw.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <obstack.h>
+ #include <search.h>
+ #include <stdbool.h>
+@@ -217,8 +219,10 @@ main (int argc, char *argv[])
+   int remaining;
+   int result = 0;
+ 
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   (void) __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+diff --git a/src/objdump.c b/src/objdump.c
+index ebad25d..f951e09 100644
+--- a/src/objdump.c
++++ b/src/objdump.c
+@@ -26,7 +26,9 @@
+ #include <inttypes.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdio_ext.h>
+@@ -131,8 +133,10 @@ static bool print_disasm;
+ int
+ main (int argc, char *argv[])
+ {
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   (void) __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+diff --git a/src/ranlib.c b/src/ranlib.c
+index 8435fc1..b63642c 100644
+--- a/src/ranlib.c
++++ b/src/ranlib.c
+@@ -29,7 +29,9 @@
+ #include <gelf.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <obstack.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+@@ -78,8 +80,10 @@ static const struct argp argp =
+ int
+ main (int argc, char *argv[])
+ {
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   (void) __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+diff --git a/src/size.c b/src/size.c
+index dfa46b1..145f435 100644
+--- a/src/size.c
++++ b/src/size.c
+@@ -28,7 +28,9 @@
+ #include <libelf.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdio_ext.h>
+@@ -160,8 +162,10 @@ main (int argc, char *argv[])
+   int remaining;
+   int result = 0;
+ 
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+diff --git a/src/strip.c b/src/strip.c
+index 05adc20..9731a5d 100644
+--- a/src/strip.c
++++ b/src/strip.c
+@@ -30,7 +30,9 @@
+ #include <libelf.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdio_ext.h>
+@@ -155,8 +157,10 @@ main (int argc, char *argv[])
+   int remaining;
+   int result = 0;
+ 
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+diff --git a/src/unstrip.c b/src/unstrip.c
+index f6660a3..b1f629a 100644
+--- a/src/unstrip.c
++++ b/src/unstrip.c
+@@ -36,7 +36,9 @@
+ #include <fnmatch.h>
+ #include <libintl.h>
+ #include <locale.h>
+-#include <mcheck.h>
++#ifdef HAVE_MCHECK_H
++# include <mcheck.h>
++#endif
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdio_ext.h>
+@@ -2215,8 +2217,10 @@ handle_implicit_modules (const struct arg_info *info)
+ int
+ main (int argc, char **argv)
+ {
++#ifdef HAVE_MCHECK_H
+   /* Make memory leak detection possible.  */
+   mtrace ();
++#endif
+ 
+   /* We use no threads here which can interfere with handling a stream.  */
+   __fsetlocking (stdin, FSETLOCKING_BYCALLER);
+-- 
+1.8.4
+
+
+From 0612e0e7ac9640f56b345fe464119761a83fca49 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:40:45 +0000
+Subject: [PATCH 04/18] Don't use comparison_fn_t typedef
+
+It is non-standard and the explicit signature isn't much longer.
+---
+ libcpu/i386_parse.y | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/libcpu/i386_parse.y b/libcpu/i386_parse.y
+index 689ba22..626968c 100644
+--- a/libcpu/i386_parse.y
++++ b/libcpu/i386_parse.y
+@@ -309,10 +309,12 @@ instr:		  bytes ':' bitfieldopt kID bitfieldopt optargs
+ 			  newp->mnemonic = $4;
+ 			  if (newp->mnemonic != (void *) -1l
+ 			      && tfind ($4, &mnemonics,
+-					(comparison_fn_t) strcmp) == NULL)
++					(int (*)(const void *, const void *))
++					strcmp) == NULL)
+ 			    {
+ 			      if (tsearch ($4, &mnemonics,
+-					   (comparison_fn_t) strcmp) == NULL)
++					   (int (*)(const void *, const void *))
++					   strcmp) == NULL)
+ 				error (EXIT_FAILURE, errno, "tsearch");
+ 			      ++nmnemonics;
+ 			    }
+-- 
+1.8.4
+
+
+From 53af1a88082f52adf9a2dc294e0852ffa50a4992 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 06:18:48 +0000
+Subject: [PATCH 05/18] Add fallback TEMP_FAILURE_RETRY implementation
+
+---
+ lib/crc32_file.c                 |  1 +
+ lib/fallbacks.h                  | 15 +++++++++++++++
+ lib/system.h                     |  2 ++
+ libdwfl/dwfl_build_id_find_elf.c |  3 ++-
+ libdwfl/dwfl_module_getdwarf.c   |  1 +
+ libdwfl/linux-kernel-modules.c   |  1 +
+ 6 files changed, 22 insertions(+), 1 deletion(-)
+ create mode 100644 lib/fallbacks.h
+
+diff --git a/lib/crc32_file.c b/lib/crc32_file.c
+index 9a168f6..f546a3e 100644
+--- a/lib/crc32_file.c
++++ b/lib/crc32_file.c
+@@ -27,6 +27,7 @@
+    not, see <http://www.gnu.org/licenses/>.  */
+ 
+ #include "system.h"
++#include "fallbacks.h"
+ #include <errno.h>
+ #include <unistd.h>
+ #include <sys/stat.h>
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+new file mode 100644
+index 0000000..3a2d01e
+--- /dev/null
++++ b/lib/fallbacks.h
+@@ -0,0 +1,15 @@
++/* lib/fallbacks.h */
++
++#ifndef LIB_FALLBACKS_H
++#define LIB_FALLBACKS_H 1
++
++#ifndef TEMP_FAILURE_RETRY
++# define TEMP_FAILURE_RETRY(expr) \
++    ({ ssize_t _ret; \
++       do _ret = (expr); \
++       while (_ret == -1 && errno == EINTR); \
++       _ret; })
++#endif
++
++#endif
++
+diff --git a/lib/system.h b/lib/system.h
+index f31cfd0..83203df 100644
+--- a/lib/system.h
++++ b/lib/system.h
+@@ -35,6 +35,8 @@
+ #include <endian.h>
+ #include <byteswap.h>
+ #include <unistd.h>
++#include <errno.h>
++#include "fallbacks.h"
+ 
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+ # define LE32(n)	(n)
+diff --git a/libdwfl/dwfl_build_id_find_elf.c b/libdwfl/dwfl_build_id_find_elf.c
+index 9272c1f..5d6b81e 100644
+--- a/libdwfl/dwfl_build_id_find_elf.c
++++ b/libdwfl/dwfl_build_id_find_elf.c
+@@ -30,6 +30,7 @@
+ #include <inttypes.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include "../lib/system.h"
+ 
+ 
+ int
+@@ -88,7 +89,7 @@ __libdwfl_open_by_build_id (Dwfl_Module *mod, bool debug, char **file_name)
+ 	{
+ 	  if (*file_name != NULL)
+ 	    free (*file_name);
+-	  *file_name = canonicalize_file_name (name);
++	  *file_name = realpath (name, NULL);
+ 	  if (*file_name == NULL)
+ 	    {
+ 	      *file_name = name;
+diff --git a/libdwfl/dwfl_module_getdwarf.c b/libdwfl/dwfl_module_getdwarf.c
+index 7a65ec3..9f79b18 100644
+--- a/libdwfl/dwfl_module_getdwarf.c
++++ b/libdwfl/dwfl_module_getdwarf.c
+@@ -32,6 +32,7 @@
+ #include <unistd.h>
+ #include "../libdw/libdwP.h"	/* DWARF_E_* values are here.  */
+ #include "../libelf/libelfP.h"
++#include "../lib/system.h"
+ 
+ 
+ /* Open libelf FILE->fd and compute the load base of ELF as loaded in MOD.
+diff --git a/libdwfl/linux-kernel-modules.c b/libdwfl/linux-kernel-modules.c
+index fe01028..1959611 100644
+--- a/libdwfl/linux-kernel-modules.c
++++ b/libdwfl/linux-kernel-modules.c
+@@ -43,6 +43,7 @@
+ #include <sys/utsname.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include "fallbacks.h"
+ 
+ 
+ #define KERNEL_MODNAME	"kernel"
+-- 
+1.8.4
+
+
+From 8f80de617d8214a788d4516ae8e4060c6ff67c9f Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 06:16:46 +0000
+Subject: [PATCH 06/18] Add fallback rawmemchr implementation
+
+---
+ configure.ac              | 1 +
+ lib/fallbacks.h           | 4 ++++
+ libdw/dwarf_getpubnames.c | 1 +
+ 3 files changed, 6 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index d98ba0b..83abf5f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -116,6 +116,7 @@ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
+ AC_CHECK_HEADERS([mcheck.h])
++AC_CHECK_FUNCS([rawmemchr])
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+index 3a2d01e..c620f80 100644
+--- a/lib/fallbacks.h
++++ b/lib/fallbacks.h
+@@ -11,5 +11,9 @@
+        _ret; })
+ #endif
+ 
++#ifndef HAVE_RAWMEMCHR
++# define rawmemchr(s, c) memchr((s), (c), (size_t) -1)
++#endif
++
+ #endif
+ 
+diff --git a/libdw/dwarf_getpubnames.c b/libdw/dwarf_getpubnames.c
+index 12728a3..826823b 100644
+--- a/libdw/dwarf_getpubnames.c
++++ b/libdw/dwarf_getpubnames.c
+@@ -38,6 +38,7 @@
+ 
+ #include <libdwP.h>
+ #include <dwarf.h>
++#include <system.h>
+ 
+ 
+ static int
+-- 
+1.8.4
+
+
+From 0dad2d66d1132e82e76c4eb7810ce4648b964b55 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 06:24:09 +0000
+Subject: [PATCH 07/18] Add fallback canonicalize_file_name implementation
+
+---
+ configure.ac    | 2 +-
+ lib/fallbacks.h | 4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 83abf5f..564906b 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -116,7 +116,7 @@ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
+ AC_CHECK_HEADERS([mcheck.h])
+-AC_CHECK_FUNCS([rawmemchr])
++AC_CHECK_FUNCS([rawmemchr canonicalize_file_name])
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+index c620f80..ecd2b09 100644
+--- a/lib/fallbacks.h
++++ b/lib/fallbacks.h
+@@ -15,5 +15,9 @@
+ # define rawmemchr(s, c) memchr((s), (c), (size_t) -1)
+ #endif
+ 
++#ifndef HAVE_CANONICALIZE_FILE_NAME
++# define canonicalize_file_name(p) realpath((p), NULL)
++#endif
++
+ #endif
+ 
+-- 
+1.8.4
+
+
+From 9b5eae0655c79c4089a8270dd4433e23123a288a Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:54:33 +0000
+Subject: [PATCH 08/18] Add fallback TIMESPEC_TO_TIMEVAL implementation
+
+---
+ lib/fallbacks.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+index ecd2b09..a4bc792 100644
+--- a/lib/fallbacks.h
++++ b/lib/fallbacks.h
+@@ -11,6 +11,13 @@
+        _ret; })
+ #endif
+ 
++#ifndef TIMESPEC_TO_TIMEVAL
++# define TIMESPEC_TO_TIMEVAL(tv, ts) \
++    do { (tv)->tv_sec = (ts)->tv_sec; \
++         (tv)->tv_usec = (ts)->tv_nsec / 1000; } \
++    while (0);
++#endif
++
+ #ifndef HAVE_RAWMEMCHR
+ # define rawmemchr(s, c) memchr((s), (c), (size_t) -1)
+ #endif
+-- 
+1.8.4
+
+
+From e274a6c2d90ef4f62d67f3a82d40eb5fd589df84 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:55:55 +0000
+Subject: [PATCH 09/18] Support dlfcn.h without DL_CALL_FCT
+
+---
+ lib/fallbacks.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+index a4bc792..db760c9 100644
+--- a/lib/fallbacks.h
++++ b/lib/fallbacks.h
+@@ -18,6 +18,10 @@
+     while (0);
+ #endif
+ 
++#ifndef DL_CALL_FCT
++# define DL_CALL_FCT(fctp, args) ((*(fctp)) args)
++#endif
++
+ #ifndef HAVE_RAWMEMCHR
+ # define rawmemchr(s, c) memchr((s), (c), (size_t) -1)
+ #endif
+-- 
+1.8.4
+
+
+From d769733a4178b926d438515f0952c8196b24ffe5 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 06:20:04 +0000
+Subject: [PATCH 10/18] Use normal preprocessor concatenation if __CONCAT is
+ not defined
+
+---
+ lib/fixedsizehash.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/lib/fixedsizehash.h b/lib/fixedsizehash.h
+index 73ce9da..67cfc26 100644
+--- a/lib/fixedsizehash.h
++++ b/lib/fixedsizehash.h
+@@ -34,6 +34,10 @@
+ 
+ #include <system.h>
+ 
++#ifndef __CONCAT
++# define __CONCAT(t1,t2) t1 ## t2
++#endif
++
+ #define CONCAT(t1,t2) __CONCAT (t1,t2)
+ 
+ /* Before including this file the following macros must be defined:
+-- 
+1.8.4
+
+
+From 199de571fe1298ff6c315cb64d806b6196839305 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:55:12 +0000
+Subject: [PATCH 11/18] Add fallback stat mode convenience macros
+
+---
+ lib/fallbacks.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+index db760c9..88901be 100644
+--- a/lib/fallbacks.h
++++ b/lib/fallbacks.h
+@@ -22,6 +22,18 @@
+ # define DL_CALL_FCT(fctp, args) ((*(fctp)) args)
+ #endif
+ 
++#ifndef ACCESSPERMS
++# define ACCESSPERMS (S_IRWXU | S_IRWXG | S_IRWXO)
++#endif
++#ifndef ALLPERMS
++# define ALLPERMS (S_ISUID | S_ISGID | S_ISVTX \
++                   | S_IRWXU | S_IRWXG | S_IRWXO)
++#endif
++#ifndef DEFFILEMODE
++# define DEFFILEMODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP \
++                      | S_IROTH | S_IWOTH)
++#endif
++
+ #ifndef HAVE_RAWMEMCHR
+ # define rawmemchr(s, c) memchr((s), (c), (size_t) -1)
+ #endif
+-- 
+1.8.4
+
+
+From 7a5403929e2ec177b359f3580f0aad9ee79d75a0 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:57:17 +0000
+Subject: [PATCH 12/18] Add fallback strndupa implementation
+
+---
+ configure.ac    | 2 +-
+ lib/fallbacks.h | 7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 564906b..e2125b4 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -116,7 +116,7 @@ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
+ AC_CHECK_HEADERS([mcheck.h])
+-AC_CHECK_FUNCS([rawmemchr canonicalize_file_name])
++AC_CHECK_FUNCS([rawmemchr canonicalize_file_name strndupa])
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+diff --git a/lib/fallbacks.h b/lib/fallbacks.h
+index 88901be..ee73eed 100644
+--- a/lib/fallbacks.h
++++ b/lib/fallbacks.h
+@@ -42,5 +42,12 @@
+ # define canonicalize_file_name(p) realpath((p), NULL)
+ #endif
+ 
++#ifndef HAVE_STRNDUPA
++# define strndupa(s, n) \
++    ({ char * _result = alloca(n); \
++       memcpy(_result, s, n); \
++       _result; })
++#endif
++
+ #endif
+ 
+-- 
+1.8.4
+
+
+From 45fbf343b523d706b6db389f51e9002a5ff7dd24 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:46:42 +0000
+Subject: [PATCH 13/18] Add fallback error implementation
+
+---
+ configure.ac |  2 +-
+ lib/error.h  | 37 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+ create mode 100644 lib/error.h
+
+diff --git a/configure.ac b/configure.ac
+index e2125b4..668c11c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -115,7 +115,7 @@ dnl tests, because the choice of the file model can (in principle) affect
+ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
+-AC_CHECK_HEADERS([mcheck.h])
++AC_CHECK_HEADERS([mcheck.h error.h])
+ AC_CHECK_FUNCS([rawmemchr canonicalize_file_name strndupa])
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+diff --git a/lib/error.h b/lib/error.h
+new file mode 100644
+index 0000000..f357685
+--- /dev/null
++++ b/lib/error.h
+@@ -0,0 +1,37 @@
++/* lib/error.h */
++
++#ifndef LIB_ERROR_H
++#define LIB_ERROR_H 1
++
++#include <config.h>
++
++#ifdef HAVE_ERROR_H
++# include <error.h>
++#else
++# include <stdlib.h>
++# include <stdio.h>
++# include <stdarg.h>
++# include <string.h>
++# include <errno.h>
++static unsigned int error_message_count = 0;
++static inline void
++error(int status, int errnum, const char *format, ...)
++{
++    va_list args;
++
++    error_message_count++;
++    fflush(stdout);
++    fprintf(stderr, "%s: ", program_invocation_name);
++    va_start(args, format);
++    vfprintf(stderr, format, args);
++    va_end(args);
++    if (errnum != 0)
++        fprintf(stderr, ": %s", strerror(errnum));
++    fputc('\n', stderr);
++    if (status != 0)
++        exit(status);
++}
++#endif
++
++#endif
++
+-- 
+1.8.4
+
+
+From 04240cb5d6b1c6190f9b0c5fecb2beabd94ff679 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 00:52:58 +0000
+Subject: [PATCH 14/18] Use atexit instead of on_exit
+
+It should be safe to unlink the tmpfile even if the exit status is 0.
+---
+ src/ldgeneric.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/ldgeneric.c b/src/ldgeneric.c
+index 1b5d0f9..7b24e14 100644
+--- a/src/ldgeneric.c
++++ b/src/ldgeneric.c
+@@ -2628,12 +2628,12 @@ ld_generic_generate_sections (struct ld_state *statep)
+ }
+ 
+ 
+-/* Callback function registered with on_exit to make sure the temporary
++/* Callback function registered with atexit to make sure the temporary
+    files gets removed if something goes wrong.  */
+ static void
+-remove_tempfile (int status, void *arg)
++remove_tempfile (void)
+ {
+-  if (status != 0 && ld_state.tempfname != NULL)
++  if (ld_state.tempfname != NULL)
+     unlink (ld_state.tempfname);
+ }
+ 
+@@ -2680,7 +2680,7 @@ ld_generic_open_outfile (struct ld_state *statep, int machine, int klass,
+ 
+   /* Make sure we remove the temporary file in case something goes
+      wrong.  */
+-  on_exit (remove_tempfile, NULL);
++  atexit (remove_tempfile);
+ 
+   /* Create the ELF file data for the output file.  */
+   Elf *elf = ld_state.outelf = elf_begin (fd,
+-- 
+1.8.4
+
+
+From 1d2cb8b034660da046889d026b93d95170094c39 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 06:20:53 +0000
+Subject: [PATCH 15/18] Use off_t instead of loff_t
+
+---
+ libdwfl/core-file.c | 22 +++++++++++-----------
+ libelf/libelf.h     | 12 ++++++------
+ 2 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/libdwfl/core-file.c b/libdwfl/core-file.c
+index 7207591..4787de1 100644
+--- a/libdwfl/core-file.c
++++ b/libdwfl/core-file.c
+@@ -43,7 +43,7 @@
+    This implementation is pessimal for non-mmap cases and should
+    be replaced by more diddling inside libelf internals.  */
+ static Elf *
+-elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
++elf_begin_rand (Elf *parent, off_t offset, off_t size, off_t *next)
+ {
+   if (parent == NULL)
+     return NULL;
+@@ -58,14 +58,14 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
+     return NULL;
+   }
+ 
+-  loff_t min = (parent->kind == ELF_K_ELF ?
+-		(parent->class == ELFCLASS32
+-		 ? sizeof (Elf32_Ehdr) : sizeof (Elf64_Ehdr))
+-		: parent->kind == ELF_K_AR ? SARMAG
+-		: 0);
++  off_t min = (parent->kind == ELF_K_ELF ?
++	       (parent->class == ELFCLASS32
++		? sizeof (Elf32_Ehdr) : sizeof (Elf64_Ehdr))
++	       : parent->kind == ELF_K_AR ? SARMAG
++	       : 0);
+ 
+   if (unlikely (offset < min)
+-      || unlikely (offset >= (loff_t) parent->maximum_size))
++      || unlikely (offset >= (off_t) parent->maximum_size))
+     return fail (ELF_E_RANGE);
+ 
+   /* For an archive, fetch just the size field
+@@ -92,11 +92,11 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
+       char *endp;
+       size = strtoll (h.ar_size, &endp, 10);
+       if (unlikely (endp == h.ar_size)
+-	  || unlikely ((loff_t) parent->maximum_size - offset < size))
++	  || unlikely ((off_t) parent->maximum_size - offset < size))
+ 	return fail (ELF_E_INVALID_ARCHIVE);
+     }
+ 
+-  if (unlikely ((loff_t) parent->maximum_size - offset < size))
++  if (unlikely ((off_t) parent->maximum_size - offset < size))
+     return fail (ELF_E_RANGE);
+ 
+   /* Even if we fail at this point, update *NEXT to point past the file.  */
+@@ -104,7 +104,7 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
+     *next = offset + size;
+ 
+   if (unlikely (offset == 0)
+-      && unlikely (size == (loff_t) parent->maximum_size))
++      && unlikely (size == (off_t) parent->maximum_size))
+     return elf_clone (parent, parent->cmd);
+ 
+   /* Note the image is guaranteed live only as long as PARENT
+@@ -114,7 +114,7 @@ elf_begin_rand (Elf *parent, loff_t offset, loff_t size, loff_t *next)
+   Elf_Data *data = elf_getdata_rawchunk (parent, offset, size, ELF_T_BYTE);
+   if (data == NULL)
+     return NULL;
+-  assert ((loff_t) data->d_size == size);
++  assert ((off_t) data->d_size == size);
+   return elf_memory (data->d_buf, size);
+ }
+ 
+diff --git a/libelf/libelf.h b/libelf/libelf.h
+index 5a2b3af..f4cc8a7 100644
+--- a/libelf/libelf.h
++++ b/libelf/libelf.h
+@@ -74,7 +74,7 @@ typedef struct
+   Elf_Type d_type;		/* Type of this piece of data.  */
+   unsigned int d_version;	/* ELF version.  */
+   size_t d_size;		/* Size in bytes.  */
+-  loff_t d_off;			/* Offset into section.  */
++  off_t d_off;			/* Offset into section.  */
+   size_t d_align;		/* Alignment in section.  */
+ } Elf_Data;
+ 
+@@ -136,7 +136,7 @@ typedef struct
+   uid_t ar_uid;			/* User ID.  */
+   gid_t ar_gid;			/* Group ID.  */
+   mode_t ar_mode;		/* File mode.  */
+-  loff_t ar_size;		/* File size.  */
++  off_t ar_size;		/* File size.  */
+   char *ar_rawname;		/* Original name of archive member.  */
+ } Elf_Arhdr;
+ 
+@@ -177,13 +177,13 @@ extern Elf_Cmd elf_next (Elf *__elf);
+ extern int elf_end (Elf *__elf);
+ 
+ /* Update ELF descriptor and write file to disk.  */
+-extern loff_t elf_update (Elf *__elf, Elf_Cmd __cmd);
++extern off_t elf_update (Elf *__elf, Elf_Cmd __cmd);
+ 
+ /* Determine what kind of file is associated with ELF.  */
+ extern Elf_Kind elf_kind (Elf *__elf) __attribute__ ((__pure__));
+ 
+ /* Get the base offset for an object file.  */
+-extern loff_t elf_getbase (Elf *__elf);
++extern off_t elf_getbase (Elf *__elf);
+ 
+ 
+ /* Retrieve file identification data.  */
+@@ -301,7 +301,7 @@ extern Elf_Data *elf_newdata (Elf_Scn *__scn);
+    would be for TYPE.  The resulting Elf_Data pointer is valid until
+    elf_end (ELF) is called.  */
+ extern Elf_Data *elf_getdata_rawchunk (Elf *__elf,
+-				       loff_t __offset, size_t __size,
++				       off_t __offset, size_t __size,
+ 				       Elf_Type __type);
+ 
+ 
+@@ -313,7 +313,7 @@ extern char *elf_strptr (Elf *__elf, size_t __index, size_t __offset);
+ extern Elf_Arhdr *elf_getarhdr (Elf *__elf);
+ 
+ /* Return offset in archive for current file ELF.  */
+-extern loff_t elf_getaroff (Elf *__elf);
++extern off_t elf_getaroff (Elf *__elf);
+ 
+ /* Select archive element at OFFSET.  */
+ extern size_t elf_rand (Elf *__elf, size_t __offset);
+-- 
+1.8.4
+
+
+From 50560541ac3890b23f8e636f7acb7c8fd6469e0d Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 04:03:40 +0000
+Subject: [PATCH 16/18] Use argp routines from libargp if not available in libc
+
+libargp is provided by the package argp-standalone, which is used by
+various projects such as openwrt and buildroot.
+
+This first checks for argp_parse in libc, and if not found, will check
+in libargp.
+---
+ configure.ac      | 4 ++++
+ libdw/Makefile.am | 2 +-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 668c11c..41883d5 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -117,6 +117,10 @@ AC_SYS_LARGEFILE
+ 
+ AC_CHECK_HEADERS([mcheck.h error.h])
+ AC_CHECK_FUNCS([rawmemchr canonicalize_file_name strndupa])
++AC_SEARCH_LIBS([argp_parse], [argp-pic argp])
++if test x"$ac_cv_search_argp_parse" != x"none required" ; then
++    AC_SUBST([libargp], [$ac_cv_search_argp_parse])
++fi
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+diff --git a/libdw/Makefile.am b/libdw/Makefile.am
+index a22166a..ba47af7 100644
+--- a/libdw/Makefile.am
++++ b/libdw/Makefile.am
+@@ -112,7 +112,7 @@ libdw.so: $(srcdir)/libdw.map libdw_pic.a \
+ 		-Wl,--enable-new-dtags,-rpath,$(pkglibdir) \
+ 		-Wl,--version-script,$<,--no-undefined \
+ 		-Wl,--whole-archive $(filter-out $<,$^) -Wl,--no-whole-archive\
+-		-ldl $(zip_LIBS)
++		-ldl $(zip_LIBS) $(libargp)
+ 	if $(READELF) -d $@ | fgrep -q TEXTREL; then exit 1; fi
+ 	ln -fs $@ $@.$(VERSION)
+ 
+-- 
+1.8.4
+
+
+From 4a32bd933cddef04cbcfe239c74e829ebd35b0cb Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 06:56:57 +0000
+Subject: [PATCH 17/18] Add obstack implementation from gnulib
+
+---
+ configure.ac    |   5 +-
+ lib/Makefile.am |   5 +
+ lib/obstack.c   | 486 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ lib/obstack.h   | 512 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 1007 insertions(+), 1 deletion(-)
+ create mode 100644 lib/obstack.c
+ create mode 100644 lib/obstack.h
+
+diff --git a/configure.ac b/configure.ac
+index 41883d5..ff7a2a4 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -115,12 +115,15 @@ dnl tests, because the choice of the file model can (in principle) affect
+ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
+-AC_CHECK_HEADERS([mcheck.h error.h])
++AC_CHECK_HEADERS([mcheck.h error.h obstack.h])
+ AC_CHECK_FUNCS([rawmemchr canonicalize_file_name strndupa])
+ AC_SEARCH_LIBS([argp_parse], [argp-pic argp])
+ if test x"$ac_cv_search_argp_parse" != x"none required" ; then
+     AC_SUBST([libargp], [$ac_cv_search_argp_parse])
+ fi
++AC_FUNC_OBSTACK
++
++AM_CONDITIONAL([NEED_OBSTACK], [test x"$ac_cv_header_obstack_h" != x"yes"])
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 97f295e..7a4c11c 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -41,6 +41,11 @@ noinst_HEADERS = fixedsizehash.h system.h dynamicsizehash.h list.h md5.h \
+ 		 sha1.h eu-config.h
+ EXTRA_DIST = dynamicsizehash.c
+ 
++if NEED_OBSTACK
++libeu_a_SOURCES += obstack.c
++noinst_HEADERS += obstack.h
++endif
++
+ if !GPROF
+ xmalloc_CFLAGS = -ffunction-sections
+ endif
+diff --git a/lib/obstack.c b/lib/obstack.c
+new file mode 100644
+index 0000000..2ba0378
+--- /dev/null
++++ b/lib/obstack.c
+@@ -0,0 +1,486 @@
++/* obstack.c - subroutines used implicitly by object stack macros
++
++   Copyright (C) 1988-1994, 1996-2006, 2009-2013 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++#include "obstack.h"
++
++/* NOTE BEFORE MODIFYING THIS FILE: This version number must be
++   incremented whenever callers compiled using an old obstack.h can no
++   longer properly call the functions in this obstack.c.  */
++#define OBSTACK_INTERFACE_VERSION 1
++
++/* Comment out all this code if we are using the GNU C Library, and are not
++   actually compiling the library itself, and the installed library
++   supports the same library interface we do.  This code is part of the GNU
++   C Library, but also included in many other GNU distributions.  Compiling
++   and linking in this code is a waste when using the GNU C library
++   (especially if it is a shared library).  Rather than having every GNU
++   program understand 'configure --with-gnu-libc' and omit the object
++   files, it is simpler to just do this in the source for each such file.  */
++
++#include <stdio.h>              /* Random thing to get __GNU_LIBRARY__.  */
++#if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
++# include <gnu-versions.h>
++# if _GNU_OBSTACK_INTERFACE_VERSION == OBSTACK_INTERFACE_VERSION
++#  define ELIDE_CODE
++# endif
++#endif
++
++#include <stddef.h>
++
++#ifndef ELIDE_CODE
++
++# include <stdint.h>
++
++/* Determine default alignment.  */
++union fooround
++{
++  uintmax_t i;
++  long double d;
++  void *p;
++};
++struct fooalign
++{
++  char c;
++  union fooround u;
++};
++/* If malloc were really smart, it would round addresses to DEFAULT_ALIGNMENT.
++   But in fact it might be less smart and round addresses to as much as
++   DEFAULT_ROUNDING.  So we prepare for it to do that.  */
++enum
++  {
++    DEFAULT_ALIGNMENT = offsetof (struct fooalign, u),
++    DEFAULT_ROUNDING = sizeof (union fooround)
++  };
++
++/* When we copy a long block of data, this is the unit to do it with.
++   On some machines, copying successive ints does not work;
++   in such a case, redefine COPYING_UNIT to 'long' (if that works)
++   or 'char' as a last resort.  */
++# ifndef COPYING_UNIT
++#  define COPYING_UNIT int
++# endif
++
++
++/* The functions allocating more room by calling 'obstack_chunk_alloc'
++   jump to the handler pointed to by 'obstack_alloc_failed_handler'.
++   This can be set to a user defined function which should either
++   abort gracefully or use longjump - but shouldn't return.  This
++   variable by default points to the internal function
++   'print_and_abort'.  */
++static _Noreturn void print_and_abort (void);
++void (*obstack_alloc_failed_handler) (void) = print_and_abort;
++
++/* Exit value used when 'print_and_abort' is used.  */
++# include <stdlib.h>
++int obstack_exit_failure = EXIT_FAILURE;
++
++# ifdef _LIBC
++#  if SHLIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_3_4)
++/* A looong time ago (before 1994, anyway; we're not sure) this global variable
++   was used by non-GNU-C macros to avoid multiple evaluation.  The GNU C
++   library still exports it because somebody might use it.  */
++struct obstack *_obstack_compat;
++compat_symbol (libc, _obstack_compat, _obstack, GLIBC_2_0);
++#  endif
++# endif
++
++/* Define a macro that either calls functions with the traditional malloc/free
++   calling interface, or calls functions with the mmalloc/mfree interface
++   (that adds an extra first argument), based on the state of use_extra_arg.
++   For free, do not use ?:, since some compilers, like the MIPS compilers,
++   do not allow (expr) ? void : void.  */
++
++# define CALL_CHUNKFUN(h, size) \
++  (((h) -> use_extra_arg) \
++   ? (*(h)->chunkfun) ((h)->extra_arg, (size)) \
++   : (*(struct _obstack_chunk *(*) (long)) (h)->chunkfun) ((size)))
++
++# define CALL_FREEFUN(h, old_chunk) \
++  do { \
++    if ((h) -> use_extra_arg) \
++      (*(h)->freefun) ((h)->extra_arg, (old_chunk)); \
++    else \
++      (*(void (*) (void *)) (h)->freefun) ((old_chunk)); \
++  } while (0)
++
++
++/* Initialize an obstack H for use.  Specify chunk size SIZE (0 means default).
++   Objects start on multiples of ALIGNMENT (0 means use default).
++   CHUNKFUN is the function to use to allocate chunks,
++   and FREEFUN the function to free them.
++
++   Return nonzero if successful, calls obstack_alloc_failed_handler if
++   allocation fails.  */
++
++int
++_obstack_begin (struct obstack *h,
++                int size, int alignment,
++                void *(*chunkfun) (long),
++                void (*freefun) (void *))
++{
++  register struct _obstack_chunk *chunk; /* points to new chunk */
++
++  if (alignment == 0)
++    alignment = DEFAULT_ALIGNMENT;
++  if (size == 0)
++    /* Default size is what GNU malloc can fit in a 4096-byte block.  */
++    {
++      /* 12 is sizeof (mhead) and 4 is EXTRA from GNU malloc.
++         Use the values for range checking, because if range checking is off,
++         the extra bytes won't be missed terribly, but if range checking is on
++         and we used a larger request, a whole extra 4096 bytes would be
++         allocated.
++
++         These number are irrelevant to the new GNU malloc.  I suspect it is
++         less sensitive to the size of the request.  */
++      int extra = ((((12 + DEFAULT_ROUNDING - 1) & ~(DEFAULT_ROUNDING - 1))
++                    + 4 + DEFAULT_ROUNDING - 1)
++                   & ~(DEFAULT_ROUNDING - 1));
++      size = 4096 - extra;
++    }
++
++  h->chunkfun = (struct _obstack_chunk * (*)(void *, long)) chunkfun;
++  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
++  h->chunk_size = size;
++  h->alignment_mask = alignment - 1;
++  h->use_extra_arg = 0;
++
++  chunk = h->chunk = CALL_CHUNKFUN (h, h -> chunk_size);
++  if (!chunk)
++    (*obstack_alloc_failed_handler) ();
++  h->next_free = h->object_base = __PTR_ALIGN ((char *) chunk, chunk->contents,
++                                               alignment - 1);
++  h->chunk_limit = chunk->limit
++    = (char *) chunk + h->chunk_size;
++  chunk->prev = 0;
++  /* The initial chunk now contains no empty object.  */
++  h->maybe_empty_object = 0;
++  h->alloc_failed = 0;
++  return 1;
++}
++
++int
++_obstack_begin_1 (struct obstack *h, int size, int alignment,
++                  void *(*chunkfun) (void *, long),
++                  void (*freefun) (void *, void *),
++                  void *arg)
++{
++  register struct _obstack_chunk *chunk; /* points to new chunk */
++
++  if (alignment == 0)
++    alignment = DEFAULT_ALIGNMENT;
++  if (size == 0)
++    /* Default size is what GNU malloc can fit in a 4096-byte block.  */
++    {
++      /* 12 is sizeof (mhead) and 4 is EXTRA from GNU malloc.
++         Use the values for range checking, because if range checking is off,
++         the extra bytes won't be missed terribly, but if range checking is on
++         and we used a larger request, a whole extra 4096 bytes would be
++         allocated.
++
++         These number are irrelevant to the new GNU malloc.  I suspect it is
++         less sensitive to the size of the request.  */
++      int extra = ((((12 + DEFAULT_ROUNDING - 1) & ~(DEFAULT_ROUNDING - 1))
++                    + 4 + DEFAULT_ROUNDING - 1)
++                   & ~(DEFAULT_ROUNDING - 1));
++      size = 4096 - extra;
++    }
++
++  h->chunkfun = (struct _obstack_chunk * (*)(void *,long)) chunkfun;
++  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
++  h->chunk_size = size;
++  h->alignment_mask = alignment - 1;
++  h->extra_arg = arg;
++  h->use_extra_arg = 1;
++
++  chunk = h->chunk = CALL_CHUNKFUN (h, h -> chunk_size);
++  if (!chunk)
++    (*obstack_alloc_failed_handler) ();
++  h->next_free = h->object_base = __PTR_ALIGN ((char *) chunk, chunk->contents,
++                                               alignment - 1);
++  h->chunk_limit = chunk->limit
++    = (char *) chunk + h->chunk_size;
++  chunk->prev = 0;
++  /* The initial chunk now contains no empty object.  */
++  h->maybe_empty_object = 0;
++  h->alloc_failed = 0;
++  return 1;
++}
++
++/* Allocate a new current chunk for the obstack *H
++   on the assumption that LENGTH bytes need to be added
++   to the current object, or a new object of length LENGTH allocated.
++   Copies any partial object from the end of the old chunk
++   to the beginning of the new one.  */
++
++void
++_obstack_newchunk (struct obstack *h, int length)
++{
++  register struct _obstack_chunk *old_chunk = h->chunk;
++  register struct _obstack_chunk *new_chunk;
++  register long new_size;
++  register long obj_size = h->next_free - h->object_base;
++  register long i;
++  long already;
++  char *object_base;
++
++  /* Compute size for new chunk.  */
++  new_size = (obj_size + length) + (obj_size >> 3) + h->alignment_mask + 100;
++  if (new_size < h->chunk_size)
++    new_size = h->chunk_size;
++
++  /* Allocate and initialize the new chunk.  */
++  new_chunk = CALL_CHUNKFUN (h, new_size);
++  if (!new_chunk)
++    (*obstack_alloc_failed_handler) ();
++  h->chunk = new_chunk;
++  new_chunk->prev = old_chunk;
++  new_chunk->limit = h->chunk_limit = (char *) new_chunk + new_size;
++
++  /* Compute an aligned object_base in the new chunk */
++  object_base =
++    __PTR_ALIGN ((char *) new_chunk, new_chunk->contents, h->alignment_mask);
++
++  /* Move the existing object to the new chunk.
++     Word at a time is fast and is safe if the object
++     is sufficiently aligned.  */
++  if (h->alignment_mask + 1 >= DEFAULT_ALIGNMENT)
++    {
++      for (i = obj_size / sizeof (COPYING_UNIT) - 1;
++           i >= 0; i--)
++        ((COPYING_UNIT *)object_base)[i]
++          = ((COPYING_UNIT *)h->object_base)[i];
++      /* We used to copy the odd few remaining bytes as one extra COPYING_UNIT,
++         but that can cross a page boundary on a machine
++         which does not do strict alignment for COPYING_UNITS.  */
++      already = obj_size / sizeof (COPYING_UNIT) * sizeof (COPYING_UNIT);
++    }
++  else
++    already = 0;
++  /* Copy remaining bytes one by one.  */
++  for (i = already; i < obj_size; i++)
++    object_base[i] = h->object_base[i];
++
++  /* If the object just copied was the only data in OLD_CHUNK,
++     free that chunk and remove it from the chain.
++     But not if that chunk might contain an empty object.  */
++  if (! h->maybe_empty_object
++      && (h->object_base
++          == __PTR_ALIGN ((char *) old_chunk, old_chunk->contents,
++                          h->alignment_mask)))
++    {
++      new_chunk->prev = old_chunk->prev;
++      CALL_FREEFUN (h, old_chunk);
++    }
++
++  h->object_base = object_base;
++  h->next_free = h->object_base + obj_size;
++  /* The new chunk certainly contains no empty object yet.  */
++  h->maybe_empty_object = 0;
++}
++# ifdef _LIBC
++libc_hidden_def (_obstack_newchunk)
++# endif
++
++/* Return nonzero if object OBJ has been allocated from obstack H.
++   This is here for debugging.
++   If you use it in a program, you are probably losing.  */
++
++/* Suppress -Wmissing-prototypes warning.  We don't want to declare this in
++   obstack.h because it is just for debugging.  */
++int _obstack_allocated_p (struct obstack *h, void *obj);
++
++int
++_obstack_allocated_p (struct obstack *h, void *obj)
++{
++  register struct _obstack_chunk *lp;   /* below addr of any objects in this chunk */
++  register struct _obstack_chunk *plp;  /* point to previous chunk if any */
++
++  lp = (h)->chunk;
++  /* We use >= rather than > since the object cannot be exactly at
++     the beginning of the chunk but might be an empty object exactly
++     at the end of an adjacent chunk.  */
++  while (lp != 0 && ((void *) lp >= obj || (void *) (lp)->limit < obj))
++    {
++      plp = lp->prev;
++      lp = plp;
++    }
++  return lp != 0;
++}
++
++/* Free objects in obstack H, including OBJ and everything allocate
++   more recently than OBJ.  If OBJ is zero, free everything in H.  */
++
++# undef obstack_free
++
++void
++__obstack_free (struct obstack *h, void *obj)
++{
++  register struct _obstack_chunk *lp;   /* below addr of any objects in this chunk */
++  register struct _obstack_chunk *plp;  /* point to previous chunk if any */
++
++  lp = h->chunk;
++  /* We use >= because there cannot be an object at the beginning of a chunk.
++     But there can be an empty object at that address
++     at the end of another chunk.  */
++  while (lp != 0 && ((void *) lp >= obj || (void *) (lp)->limit < obj))
++    {
++      plp = lp->prev;
++      CALL_FREEFUN (h, lp);
++      lp = plp;
++      /* If we switch chunks, we can't tell whether the new current
++         chunk contains an empty object, so assume that it may.  */
++      h->maybe_empty_object = 1;
++    }
++  if (lp)
++    {
++      h->object_base = h->next_free = (char *) (obj);
++      h->chunk_limit = lp->limit;
++      h->chunk = lp;
++    }
++  else if (obj != 0)
++    /* obj is not in any of the chunks! */
++    abort ();
++}
++
++# ifdef _LIBC
++/* Older versions of libc used a function _obstack_free intended to be
++   called by non-GCC compilers.  */
++strong_alias (obstack_free, _obstack_free)
++# endif
++
++int
++_obstack_memory_used (struct obstack *h)
++{
++  register struct _obstack_chunk* lp;
++  register int nbytes = 0;
++
++  for (lp = h->chunk; lp != 0; lp = lp->prev)
++    {
++      nbytes += lp->limit - (char *) lp;
++    }
++  return nbytes;
++}
++
++/* Define the error handler.  */
++# include <libintl.h>
++# ifndef _
++#  define _(msgid) gettext (msgid)
++# endif
++
++# ifdef _LIBC
++#  include <libio/iolibio.h>
++# endif
++
++static _Noreturn void
++print_and_abort (void)
++{
++  /* Don't change any of these strings.  Yes, it would be possible to add
++     the newline to the string and use fputs or so.  But this must not
++     happen because the "memory exhausted" message appears in other places
++     like this and the translation should be reused instead of creating
++     a very similar string which requires a separate translation.  */
++# ifdef _LIBC
++  (void) __fxprintf (NULL, "%s\n", _("memory exhausted"));
++# else
++  fprintf (stderr, "%s\n", _("memory exhausted"));
++# endif
++  exit (obstack_exit_failure);
++}
++
++/* obstack_printf */
++# include <errno.h>
++
++char *
++vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
++{
++    size_t bufsize = *lengthp;
++
++    if (resultbuf && (*lengthp = snprintf(resultbuf, bufsize, format, args)) <= bufsize)
++        return resultbuf;
++
++    if ((*lengthp = vasprintf (&resultbuf, format, args)) == (size_t) -1)
++        return NULL;
++
++    return resultbuf;
++}
++
++/* Grow an obstack with formatted output.  Return the number of bytes
++   added to OBS.  No trailing nul byte is added, and the object should
++   be closed with obstack_finish before use.
++
++   Upon memory allocation error, call obstack_alloc_failed_handler.
++   Upon other error, return -1.  */
++int
++obstack_printf (struct obstack *obs, const char *format, ...)
++{
++  va_list args;
++  int result;
++
++  va_start (args, format);
++  result = obstack_vprintf (obs, format, args);
++  va_end (args);
++  return result;
++}
++
++/* Grow an obstack with formatted output.  Return the number of bytes
++   added to OBS.  No trailing nul byte is added, and the object should
++   be closed with obstack_finish before use.
++
++   Upon memory allocation error, call obstack_alloc_failed_handler.
++   Upon other error, return -1.  */
++int
++obstack_vprintf (struct obstack *obs, const char *format, va_list args)
++{
++  /* If we are close to the end of the current obstack chunk, use a
++     stack-allocated buffer and copy, to reduce the likelihood of a
++     small-size malloc.  Otherwise, print directly into the
++     obstack.  */
++  enum { CUTOFF = 1024 };
++  char buf[CUTOFF];
++  char *base = obstack_next_free (obs);
++  size_t len = obstack_room (obs);
++  char *str;
++
++  if (len < CUTOFF)
++    {
++      base = buf;
++      len = CUTOFF;
++    }
++  str = vasnprintf (base, &len, format, args);
++  if (!str)
++    {
++      if (errno == ENOMEM)
++        obstack_alloc_failed_handler ();
++      return -1;
++    }
++  if (str == base && str != buf)
++    /* The output was already computed in place, but we need to
++       account for its size.  */
++    obstack_blank_fast (obs, len);
++  else
++    {
++      /* The output exceeded available obstack space or we used buf;
++         copy the resulting string.  */
++      obstack_grow (obs, str, len);
++      if (str != buf)
++        free (str);
++    }
++  return len;
++}
++
++#endif  /* !ELIDE_CODE */
+diff --git a/lib/obstack.h b/lib/obstack.h
+new file mode 100644
+index 0000000..dddcdf8
+--- /dev/null
++++ b/lib/obstack.h
+@@ -0,0 +1,512 @@
++/* obstack.h - object stack macros
++   Copyright (C) 1988-1994, 1996-1999, 2003-2006, 2009-2013 Free Software
++   Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++/* Summary:
++
++All the apparent functions defined here are macros. The idea
++is that you would use these pre-tested macros to solve a
++very specific set of problems, and they would run fast.
++Caution: no side-effects in arguments please!! They may be
++evaluated MANY times!!
++
++These macros operate a stack of objects.  Each object starts life
++small, and may grow to maturity.  (Consider building a word syllable
++by syllable.)  An object can move while it is growing.  Once it has
++been "finished" it never changes address again.  So the "top of the
++stack" is typically an immature growing object, while the rest of the
++stack is of mature, fixed size and fixed address objects.
++
++These routines grab large chunks of memory, using a function you
++supply, called 'obstack_chunk_alloc'.  On occasion, they free chunks,
++by calling 'obstack_chunk_free'.  You must define them and declare
++them before using any obstack macros.
++
++Each independent stack is represented by a 'struct obstack'.
++Each of the obstack macros expects a pointer to such a structure
++as the first argument.
++
++One motivation for this package is the problem of growing char strings
++in symbol tables.  Unless you are "fascist pig with a read-only mind"
++--Gosper's immortal quote from HAKMEM item 154, out of context--you
++would not like to put any arbitrary upper limit on the length of your
++symbols.
++
++In practice this often means you will build many short symbols and a
++few long symbols.  At the time you are reading a symbol you don't know
++how long it is.  One traditional method is to read a symbol into a
++buffer, realloc()ating the buffer every time you try to read a symbol
++that is longer than the buffer.  This is beaut, but you still will
++want to copy the symbol from the buffer to a more permanent
++symbol-table entry say about half the time.
++
++With obstacks, you can work differently.  Use one obstack for all symbol
++names.  As you read a symbol, grow the name in the obstack gradually.
++When the name is complete, finalize it.  Then, if the symbol exists already,
++free the newly read name.
++
++The way we do this is to take a large chunk, allocating memory from
++low addresses.  When you want to build a symbol in the chunk you just
++add chars above the current "high water mark" in the chunk.  When you
++have finished adding chars, because you got to the end of the symbol,
++you know how long the chars are, and you can create a new object.
++Mostly the chars will not burst over the highest address of the chunk,
++because you would typically expect a chunk to be (say) 100 times as
++long as an average object.
++
++In case that isn't clear, when we have enough chars to make up
++the object, THEY ARE ALREADY CONTIGUOUS IN THE CHUNK (guaranteed)
++so we just point to it where it lies.  No moving of chars is
++needed and this is the second win: potentially long strings need
++never be explicitly shuffled. Once an object is formed, it does not
++change its address during its lifetime.
++
++When the chars burst over a chunk boundary, we allocate a larger
++chunk, and then copy the partly formed object from the end of the old
++chunk to the beginning of the new larger chunk.  We then carry on
++accreting characters to the end of the object as we normally would.
++
++A special macro is provided to add a single char at a time to a
++growing object.  This allows the use of register variables, which
++break the ordinary 'growth' macro.
++
++Summary:
++        We allocate large chunks.
++        We carve out one object at a time from the current chunk.
++        Once carved, an object never moves.
++        We are free to append data of any size to the currently
++          growing object.
++        Exactly one object is growing in an obstack at any one time.
++        You can run one obstack per control block.
++        You may have as many control blocks as you dare.
++        Because of the way we do it, you can "unwind" an obstack
++          back to a previous state. (You may remove objects much
++          as you would with a stack.)
++*/
++
++
++/* Don't do the contents of this file more than once.  */
++
++#ifndef _OBSTACK_H
++#define _OBSTACK_H 1
++
++
++#include <stddef.h>
++#include <stdarg.h>
++
++/* If B is the base of an object addressed by P, return the result of
++   aligning P to the next multiple of A + 1.  B and P must be of type
++   char *.  A + 1 must be a power of 2.  */
++
++#define __BPTR_ALIGN(B, P, A) ((B) + (((P) - (B) + (A)) & ~(A)))
++
++/* Similar to _BPTR_ALIGN (B, P, A), except optimize the common case
++   where pointers can be converted to integers, aligned as integers,
++   and converted back again.  If ptrdiff_t is narrower than a
++   pointer (e.g., the AS/400), play it safe and compute the alignment
++   relative to B.  Otherwise, use the faster strategy of computing the
++   alignment relative to 0.  */
++
++#define __PTR_ALIGN(B, P, A)                                                \
++  __BPTR_ALIGN (sizeof (ptrdiff_t) < sizeof (void *) ? (B) : (char *) 0, \
++                P, A)
++
++#include <string.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++struct _obstack_chunk           /* Lives at front of each chunk. */
++{
++  char  *limit;                 /* 1 past end of this chunk */
++  struct _obstack_chunk *prev;  /* address of prior chunk or NULL */
++  char  contents[4];            /* objects begin here */
++};
++
++struct obstack          /* control current object in current chunk */
++{
++  long  chunk_size;             /* preferred size to allocate chunks in */
++  struct _obstack_chunk *chunk; /* address of current struct obstack_chunk */
++  char  *object_base;           /* address of object we are building */
++  char  *next_free;             /* where to add next char to current object */
++  char  *chunk_limit;           /* address of char after current chunk */
++  union
++  {
++    ptrdiff_t tempint;
++    void *tempptr;
++  } temp;                       /* Temporary for some macros.  */
++  int   alignment_mask;         /* Mask of alignment for each object. */
++  /* These prototypes vary based on 'use_extra_arg', and we use
++     casts to the prototypeless function type in all assignments,
++     but having prototypes here quiets -Wstrict-prototypes.  */
++  struct _obstack_chunk *(*chunkfun) (void *, long);
++  void (*freefun) (void *, struct _obstack_chunk *);
++  void *extra_arg;              /* first arg for chunk alloc/dealloc funcs */
++  unsigned use_extra_arg:1;     /* chunk alloc/dealloc funcs take extra arg */
++  unsigned maybe_empty_object:1;/* There is a possibility that the current
++                                   chunk contains a zero-length object.  This
++                                   prevents freeing the chunk if we allocate
++                                   a bigger chunk to replace it. */
++  unsigned alloc_failed:1;      /* No longer used, as we now call the failed
++                                   handler on error, but retained for binary
++                                   compatibility.  */
++};
++
++/* Declare the external functions we use; they are in obstack.c.  */
++
++extern void _obstack_newchunk (struct obstack *, int);
++extern int _obstack_begin (struct obstack *, int, int,
++                            void *(*) (long), void (*) (void *));
++extern int _obstack_begin_1 (struct obstack *, int, int,
++                             void *(*) (void *, long),
++                             void (*) (void *, void *), void *);
++extern int _obstack_memory_used (struct obstack *);
++
++/* The default name of the function for freeing a chunk is 'obstack_free',
++   but gnulib users can override this by defining '__obstack_free'.  */
++#ifndef __obstack_free
++# define __obstack_free obstack_free
++#endif
++extern void __obstack_free (struct obstack *obstack, void *block);
++
++
++/* Error handler called when 'obstack_chunk_alloc' failed to allocate
++   more memory.  This can be set to a user defined function which
++   should either abort gracefully or use longjump - but shouldn't
++   return.  The default action is to print a message and abort.  */
++extern void (*obstack_alloc_failed_handler) (void);
++
++/* Exit value used when 'print_and_abort' is used.  */
++extern int obstack_exit_failure;
++
++/* Pointer to beginning of object being allocated or to be allocated next.
++   Note that this might not be the final address of the object
++   because a new chunk might be needed to hold the final size.  */
++
++#define obstack_base(h) ((void *) (h)->object_base)
++
++/* Size for allocating ordinary chunks.  */
++
++#define obstack_chunk_size(h) ((h)->chunk_size)
++
++/* Pointer to next byte not yet allocated in current chunk.  */
++
++#define obstack_next_free(h)    ((h)->next_free)
++
++/* Mask specifying low bits that should be clear in address of an object.  */
++
++#define obstack_alignment_mask(h) ((h)->alignment_mask)
++
++/* To prevent prototype warnings provide complete argument list.  */
++#define obstack_init(h)                                         \
++  _obstack_begin ((h), 0, 0,                                    \
++                  (void *(*) (long)) obstack_chunk_alloc,       \
++                  (void (*) (void *)) obstack_chunk_free)
++
++#define obstack_begin(h, size)                                  \
++  _obstack_begin ((h), (size), 0,                               \
++                  (void *(*) (long)) obstack_chunk_alloc,       \
++                  (void (*) (void *)) obstack_chunk_free)
++
++#define obstack_specify_allocation(h, size, alignment, chunkfun, freefun)  \
++  _obstack_begin ((h), (size), (alignment),                                \
++                  (void *(*) (long)) (chunkfun),                           \
++                  (void (*) (void *)) (freefun))
++
++#define obstack_specify_allocation_with_arg(h, size, alignment, chunkfun, freefun, arg) \
++  _obstack_begin_1 ((h), (size), (alignment),                           \
++                    (void *(*) (void *, long)) (chunkfun),              \
++                    (void (*) (void *, void *)) (freefun), (arg))
++
++#define obstack_chunkfun(h, newchunkfun) \
++  ((h) -> chunkfun = (struct _obstack_chunk *(*)(void *, long)) (newchunkfun))
++
++#define obstack_freefun(h, newfreefun) \
++  ((h) -> freefun = (void (*)(void *, struct _obstack_chunk *)) (newfreefun))
++
++#define obstack_1grow_fast(h,achar) (*((h)->next_free)++ = (achar))
++
++#define obstack_blank_fast(h,n) ((h)->next_free += (n))
++
++#define obstack_memory_used(h) _obstack_memory_used (h)
++
++#if defined __GNUC__
++/* NextStep 2.0 cc is really gcc 1.93 but it defines __GNUC__ = 2 and
++   does not implement __extension__.  But that compiler doesn't define
++   __GNUC_MINOR__.  */
++# if __GNUC__ < 2 || (__NeXT__ && !__GNUC_MINOR__)
++#  define __extension__
++# endif
++
++/* For GNU C, if not -traditional,
++   we can define these macros to compute all args only once
++   without using a global variable.
++   Also, we can avoid using the 'temp' slot, to make faster code.  */
++
++# define obstack_object_size(OBSTACK)                                   \
++  __extension__                                                         \
++  ({ struct obstack const *__o = (OBSTACK);                             \
++     (unsigned) (__o->next_free - __o->object_base); })
++
++# define obstack_room(OBSTACK)                                          \
++  __extension__                                                         \
++  ({ struct obstack const *__o = (OBSTACK);                             \
++     (unsigned) (__o->chunk_limit - __o->next_free); })
++
++# define obstack_make_room(OBSTACK,length)                              \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->chunk_limit - __o->next_free < __len)                       \
++     _obstack_newchunk (__o, __len);                                    \
++   (void) 0; })
++
++# define obstack_empty_p(OBSTACK)                                       \
++  __extension__                                                         \
++  ({ struct obstack const *__o = (OBSTACK);                             \
++     (__o->chunk->prev == 0                                             \
++      && __o->next_free == __PTR_ALIGN ((char *) __o->chunk,            \
++                                        __o->chunk->contents,           \
++                                        __o->alignment_mask)); })
++
++# define obstack_grow(OBSTACK,where,length)                             \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->next_free + __len > __o->chunk_limit)                       \
++     _obstack_newchunk (__o, __len);                                    \
++   memcpy (__o->next_free, where, __len);                               \
++   __o->next_free += __len;                                             \
++   (void) 0; })
++
++# define obstack_grow0(OBSTACK,where,length)                            \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->next_free + __len + 1 > __o->chunk_limit)                   \
++     _obstack_newchunk (__o, __len + 1);                                \
++   memcpy (__o->next_free, where, __len);                               \
++   __o->next_free += __len;                                             \
++   *(__o->next_free)++ = 0;                                             \
++   (void) 0; })
++
++# define obstack_1grow(OBSTACK,datum)                                   \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   if (__o->next_free + 1 > __o->chunk_limit)                           \
++     _obstack_newchunk (__o, 1);                                        \
++   obstack_1grow_fast (__o, datum);                                     \
++   (void) 0; })
++
++/* These assume that the obstack alignment is good enough for pointers
++   or ints, and that the data added so far to the current object
++   shares that much alignment.  */
++
++# define obstack_ptr_grow(OBSTACK,datum)                                \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   if (__o->next_free + sizeof (void *) > __o->chunk_limit)             \
++     _obstack_newchunk (__o, sizeof (void *));                          \
++   obstack_ptr_grow_fast (__o, datum); })                               \
++
++# define obstack_int_grow(OBSTACK,datum)                                \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   if (__o->next_free + sizeof (int) > __o->chunk_limit)                \
++     _obstack_newchunk (__o, sizeof (int));                             \
++   obstack_int_grow_fast (__o, datum); })
++
++# define obstack_ptr_grow_fast(OBSTACK,aptr)                            \
++__extension__                                                           \
++({ struct obstack *__o1 = (OBSTACK);                                    \
++   void *__p1 = __o1->next_free;                                        \
++   *(const void **) __p1 = (aptr);                                      \
++   __o1->next_free += sizeof (const void *);                            \
++   (void) 0; })
++
++# define obstack_int_grow_fast(OBSTACK,aint)                            \
++__extension__                                                           \
++({ struct obstack *__o1 = (OBSTACK);                                    \
++   void *__p1 = __o1->next_free;                                        \
++   *(int *) __p1 = (aint);                                              \
++   __o1->next_free += sizeof (int);                                     \
++   (void) 0; })
++
++# define obstack_blank(OBSTACK,length)                                  \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->chunk_limit - __o->next_free < __len)                       \
++     _obstack_newchunk (__o, __len);                                    \
++   obstack_blank_fast (__o, __len);                                     \
++   (void) 0; })
++
++# define obstack_alloc(OBSTACK,length)                                  \
++__extension__                                                           \
++({ struct obstack *__h = (OBSTACK);                                     \
++   obstack_blank (__h, (length));                                       \
++   obstack_finish (__h); })
++
++# define obstack_copy(OBSTACK,where,length)                             \
++__extension__                                                           \
++({ struct obstack *__h = (OBSTACK);                                     \
++   obstack_grow (__h, (where), (length));                               \
++   obstack_finish (__h); })
++
++# define obstack_copy0(OBSTACK,where,length)                            \
++__extension__                                                           \
++({ struct obstack *__h = (OBSTACK);                                     \
++   obstack_grow0 (__h, (where), (length));                              \
++   obstack_finish (__h); })
++
++/* The local variable is named __o1 to avoid a name conflict
++   when obstack_blank is called.  */
++# define obstack_finish(OBSTACK)                                        \
++__extension__                                                           \
++({ struct obstack *__o1 = (OBSTACK);                                    \
++   void *__value = (void *) __o1->object_base;                          \
++   if (__o1->next_free == __value)                                      \
++     __o1->maybe_empty_object = 1;                                      \
++   __o1->next_free                                                      \
++     = __PTR_ALIGN (__o1->object_base, __o1->next_free,                 \
++                    __o1->alignment_mask);                              \
++   if (__o1->next_free - (char *)__o1->chunk                            \
++       > __o1->chunk_limit - (char *)__o1->chunk)                       \
++     __o1->next_free = __o1->chunk_limit;                               \
++   __o1->object_base = __o1->next_free;                                 \
++   __value; })
++
++# define obstack_free(OBSTACK, OBJ)                                     \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   void *__obj = (OBJ);                                                 \
++   if (__obj > (void *)__o->chunk && __obj < (void *)__o->chunk_limit)  \
++     __o->next_free = __o->object_base = (char *)__obj;                 \
++   else (__obstack_free) (__o, __obj); })
++
++#else /* not __GNUC__ */
++
++# define obstack_object_size(h) \
++ (unsigned) ((h)->next_free - (h)->object_base)
++
++# define obstack_room(h)                \
++ (unsigned) ((h)->chunk_limit - (h)->next_free)
++
++# define obstack_empty_p(h) \
++ ((h)->chunk->prev == 0                                                 \
++  && (h)->next_free == __PTR_ALIGN ((char *) (h)->chunk,                \
++                                    (h)->chunk->contents,               \
++                                    (h)->alignment_mask))
++
++/* Note that the call to _obstack_newchunk is enclosed in (..., 0)
++   so that we can avoid having void expressions
++   in the arms of the conditional expression.
++   Casting the third operand to void was tried before,
++   but some compilers won't accept it.  */
++
++# define obstack_make_room(h,length)                                    \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->next_free + (h)->temp.tempint > (h)->chunk_limit)              \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint), 0) : 0))
++
++# define obstack_grow(h,where,length)                                   \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->next_free + (h)->temp.tempint > (h)->chunk_limit)              \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint), 0) : 0),              \
++  memcpy ((h)->next_free, where, (h)->temp.tempint),                    \
++  (h)->next_free += (h)->temp.tempint)
++
++# define obstack_grow0(h,where,length)                                  \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->next_free + (h)->temp.tempint + 1 > (h)->chunk_limit)          \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint + 1), 0) : 0),          \
++  memcpy ((h)->next_free, where, (h)->temp.tempint),                    \
++  (h)->next_free += (h)->temp.tempint,                                  \
++  *((h)->next_free)++ = 0)
++
++# define obstack_1grow(h,datum)                                         \
++( (((h)->next_free + 1 > (h)->chunk_limit)                              \
++   ? (_obstack_newchunk ((h), 1), 0) : 0),                              \
++  obstack_1grow_fast (h, datum))
++
++# define obstack_ptr_grow(h,datum)                                      \
++( (((h)->next_free + sizeof (char *) > (h)->chunk_limit)                \
++   ? (_obstack_newchunk ((h), sizeof (char *)), 0) : 0),                \
++  obstack_ptr_grow_fast (h, datum))
++
++# define obstack_int_grow(h,datum)                                      \
++( (((h)->next_free + sizeof (int) > (h)->chunk_limit)                   \
++   ? (_obstack_newchunk ((h), sizeof (int)), 0) : 0),                   \
++  obstack_int_grow_fast (h, datum))
++
++# define obstack_ptr_grow_fast(h,aptr)                                  \
++  (((const void **) ((h)->next_free += sizeof (void *)))[-1] = (aptr))
++
++# define obstack_int_grow_fast(h,aint)                                  \
++  (((int *) ((h)->next_free += sizeof (int)))[-1] = (aint))
++
++# define obstack_blank(h,length)                                        \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->chunk_limit - (h)->next_free < (h)->temp.tempint)              \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint), 0) : 0),              \
++  obstack_blank_fast (h, (h)->temp.tempint))
++
++# define obstack_alloc(h,length)                                        \
++ (obstack_blank ((h), (length)), obstack_finish ((h)))
++
++# define obstack_copy(h,where,length)                                   \
++ (obstack_grow ((h), (where), (length)), obstack_finish ((h)))
++
++# define obstack_copy0(h,where,length)                                  \
++ (obstack_grow0 ((h), (where), (length)), obstack_finish ((h)))
++
++# define obstack_finish(h)                                              \
++( ((h)->next_free == (h)->object_base                                   \
++   ? (((h)->maybe_empty_object = 1), 0)                                 \
++   : 0),                                                                \
++  (h)->temp.tempptr = (h)->object_base,                                 \
++  (h)->next_free                                                        \
++    = __PTR_ALIGN ((h)->object_base, (h)->next_free,                    \
++                   (h)->alignment_mask),                                \
++  (((h)->next_free - (char *) (h)->chunk                                \
++    > (h)->chunk_limit - (char *) (h)->chunk)                           \
++   ? ((h)->next_free = (h)->chunk_limit) : 0),                          \
++  (h)->object_base = (h)->next_free,                                    \
++  (h)->temp.tempptr)
++
++# define obstack_free(h,obj)                                            \
++( (h)->temp.tempint = (char *) (obj) - (char *) (h)->chunk,             \
++  ((((h)->temp.tempint > 0                                              \
++    && (h)->temp.tempint < (h)->chunk_limit - (char *) (h)->chunk))     \
++   ? (int) ((h)->next_free = (h)->object_base                           \
++            = (h)->temp.tempint + (char *) (h)->chunk)                  \
++   : (((__obstack_free) ((h), (h)->temp.tempint + (char *) (h)->chunk), 0), 0)))
++
++#endif /* not __GNUC__ */
++
++#ifdef __cplusplus
++}       /* C++ */
++#endif
++
++extern int obstack_printf (struct obstack *obs, const char *format, ...)
++    __attribute__((format(printf,2,3), __nonnull__(1,2)));
++
++extern int obstack_vprintf (struct obstack *obs, const char *format, va_list args)
++    __attribute__((format(printf,2,0), __nonnull__(1,2)));
++
++#endif /* obstack.h */
+-- 
+1.8.4
+
+
+From 946c0877c3630463f63bb35b835f8e0a3f885cf6 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 03:27:00 +0000
+Subject: [PATCH 18/18] Add fallback fts implementation from uClibc
+
+---
+ configure.ac        |    3 +-
+ libdwfl/Makefile.am |    3 +
+ libdwfl/fts.c       | 1114 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ libdwfl/fts.h       |  137 +++++++
+ 4 files changed, 1256 insertions(+), 1 deletion(-)
+ create mode 100644 libdwfl/fts.c
+ create mode 100644 libdwfl/fts.h
+
+diff --git a/configure.ac b/configure.ac
+index ff7a2a4..61cb477 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -115,7 +115,7 @@ dnl tests, because the choice of the file model can (in principle) affect
+ dnl whether functions and headers are available, whether they work, etc.
+ AC_SYS_LARGEFILE
+ 
+-AC_CHECK_HEADERS([mcheck.h error.h obstack.h])
++AC_CHECK_HEADERS([mcheck.h error.h obstack.h fts.h])
+ AC_CHECK_FUNCS([rawmemchr canonicalize_file_name strndupa])
+ AC_SEARCH_LIBS([argp_parse], [argp-pic argp])
+ if test x"$ac_cv_search_argp_parse" != x"none required" ; then
+@@ -124,6 +124,7 @@ fi
+ AC_FUNC_OBSTACK
+ 
+ AM_CONDITIONAL([NEED_OBSTACK], [test x"$ac_cv_header_obstack_h" != x"yes"])
++AM_CONDITIONAL([NEED_FTS], [test x"$ac_cv_header_fts_h" != x"yes"])
+ 
+ dnl Enable the linker to be build as a native-only linker.  By default it
+ dnl can handle all architectures but this comes at a cost.  A native
+diff --git a/libdwfl/Makefile.am b/libdwfl/Makefile.am
+index 3ef4dd6..6624eca 100644
+--- a/libdwfl/Makefile.am
++++ b/libdwfl/Makefile.am
+@@ -79,6 +79,9 @@ endif
+ if LZMA
+ libdwfl_a_SOURCES += lzma.c
+ endif
++if NEED_FTS
++libdwfl_a_SOURCES += fts.c
++endif
+ 
+ if MUDFLAP
+ libdwfl = libdwfl.a $(libdw) $(libebl) $(libelf) $(libeu)
+diff --git a/libdwfl/fts.c b/libdwfl/fts.c
+new file mode 100644
+index 0000000..f16cf6d
+--- /dev/null
++++ b/libdwfl/fts.c
+@@ -0,0 +1,1114 @@
++/*-
++ * Copyright (c) 1990, 1993, 1994
++ *	The Regents of the University of California.  All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 4. Neither the name of the University nor the names of its contributors
++ *    may be used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
++ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
++ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
++ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
++ * SUCH DAMAGE.
++ */
++
++#include <sys/param.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <dirent.h>
++#include <errno.h>
++#include <fts.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++
++#ifdef __UCLIBC_HAS_LFS__
++/* this is wrong, either you include this header as first, or not at all */
++# include <_lfs_64.h>
++#else
++# define stat64 stat
++# define fstat64 fstat
++#endif
++
++/* Largest alignment size needed, minus one.
++   Usually long double is the worst case.  */
++#ifndef ALIGNBYTES
++#define ALIGNBYTES	(__alignof__ (long double) - 1)
++#endif
++/* Align P to that size.  */
++#ifndef ALIGN
++#define	ALIGN(p)	(((unsigned long int) (p) + ALIGNBYTES) & ~ALIGNBYTES)
++#endif
++
++
++static FTSENT	*fts_alloc (FTS *, const char *, size_t) internal_function;
++static FTSENT	*fts_build (FTS *, int) internal_function;
++static void	 fts_lfree (FTSENT *) internal_function;
++static void	 fts_load (FTS *, FTSENT *) internal_function;
++static size_t	 fts_maxarglen (char * const *) internal_function;
++static void	 fts_padjust (FTS *, FTSENT *) internal_function;
++static int	 fts_palloc (FTS *, size_t) internal_function;
++static FTSENT	*fts_sort (FTS *, FTSENT *, int) internal_function;
++static u_short	 fts_stat (FTS *, FTSENT *, int) internal_function;
++static int      fts_safe_changedir (FTS *, FTSENT *, int, const char *)
++     internal_function;
++
++#ifndef MAX
++#define MAX(a, b)	({ __typeof__ (a) _a = (a); \
++			   __typeof__ (b) _b = (b); \
++			   _a > _b ? _a : _b; })
++#endif
++
++#define	ISDOT(a)	(a[0] == '.' && (!a[1] || (a[1] == '.' && !a[2])))
++
++#define CLR(opt)	(sp->fts_options &= ~(opt))
++#define	ISSET(opt)	(sp->fts_options & (opt))
++#define	SET(opt)	(sp->fts_options |= (opt))
++
++#define	FCHDIR(sp, fd)	(!ISSET(FTS_NOCHDIR) && fchdir(fd))
++
++/* fts_build flags */
++#define	BCHILD		1		/* fts_children */
++#define	BNAMES		2		/* fts_children, names only */
++#define	BREAD		3		/* fts_read */
++
++FTS *
++fts_open( char * const *argv, register int options,
++		int (*compar) (const FTSENT **, const FTSENT **))
++{
++	register FTS *sp;
++	register FTSENT *p, *root;
++	register int nitems;
++	FTSENT *parent = NULL;
++	FTSENT *tmp = NULL;
++
++	/* Options check. */
++	if (options & ~FTS_OPTIONMASK) {
++		errno = EINVAL;
++		return (NULL);
++	}
++
++	/* Allocate/initialize the stream */
++	if ((sp = malloc((u_int)sizeof(FTS))) == NULL)
++		return (NULL);
++	memset(sp, 0, sizeof(FTS));
++	sp->fts_compar = (int (*) (const void *, const void *)) compar;
++	sp->fts_options = options;
++
++	/* Logical walks turn on NOCHDIR; symbolic links are too hard. */
++	if (ISSET(FTS_LOGICAL))
++		SET(FTS_NOCHDIR);
++
++	/*
++	 * Start out with 1K of path space, and enough, in any case,
++	 * to hold the user's paths.
++	 */
++#ifndef MAXPATHLEN
++#define MAXPATHLEN 1024
++#endif
++	size_t maxarglen = fts_maxarglen(argv);
++	if (fts_palloc(sp, MAX(maxarglen, MAXPATHLEN)))
++		goto mem1;
++
++	/* Allocate/initialize root's parent. */
++	if (*argv != NULL) {
++		if ((parent = fts_alloc(sp, "", 0)) == NULL)
++			goto mem2;
++		parent->fts_level = FTS_ROOTPARENTLEVEL;
++	  }
++
++	/* Allocate/initialize root(s). */
++	for (root = NULL, nitems = 0; *argv != NULL; ++argv, ++nitems) {
++		/* Don't allow zero-length paths. */
++		size_t len = strlen(*argv);
++		if (len == 0) {
++			errno = ENOENT;
++			goto mem3;
++		}
++
++		p = fts_alloc(sp, *argv, len);
++		p->fts_level = FTS_ROOTLEVEL;
++		p->fts_parent = parent;
++		p->fts_accpath = p->fts_name;
++		p->fts_info = fts_stat(sp, p, ISSET(FTS_COMFOLLOW));
++
++		/* Command-line "." and ".." are real directories. */
++		if (p->fts_info == FTS_DOT)
++			p->fts_info = FTS_D;
++
++		/*
++		 * If comparison routine supplied, traverse in sorted
++		 * order; otherwise traverse in the order specified.
++		 */
++		if (compar) {
++			p->fts_link = root;
++			root = p;
++		} else {
++			p->fts_link = NULL;
++			if (root == NULL)
++				tmp = root = p;
++			else {
++				tmp->fts_link = p;
++				tmp = p;
++			}
++		}
++	}
++	if (compar && nitems > 1)
++		root = fts_sort(sp, root, nitems);
++
++	/*
++	 * Allocate a dummy pointer and make fts_read think that we've just
++	 * finished the node before the root(s); set p->fts_info to FTS_INIT
++	 * so that everything about the "current" node is ignored.
++	 */
++	if ((sp->fts_cur = fts_alloc(sp, "", 0)) == NULL)
++		goto mem3;
++	sp->fts_cur->fts_link = root;
++	sp->fts_cur->fts_info = FTS_INIT;
++
++	/*
++	 * If using chdir(2), grab a file descriptor pointing to dot to ensure
++	 * that we can get back here; this could be avoided for some paths,
++	 * but almost certainly not worth the effort.  Slashes, symbolic links,
++	 * and ".." are all fairly nasty problems.  Note, if we can't get the
++	 * descriptor we run anyway, just more slowly.
++	 */
++	if (!ISSET(FTS_NOCHDIR)
++	    && (sp->fts_rfd = open(".", O_RDONLY, 0)) < 0)
++		SET(FTS_NOCHDIR);
++
++	return (sp);
++
++mem3:	fts_lfree(root);
++	free(parent);
++mem2:	free(sp->fts_path);
++mem1:	free(sp);
++	return (NULL);
++}
++
++static void
++internal_function
++fts_load(FTS *sp, register FTSENT *p)
++{
++	register int len;
++	register char *cp;
++
++	/*
++	 * Load the stream structure for the next traversal.  Since we don't
++	 * actually enter the directory until after the preorder visit, set
++	 * the fts_accpath field specially so the chdir gets done to the right
++	 * place and the user can access the first node.  From fts_open it's
++	 * known that the path will fit.
++	 */
++	len = p->fts_pathlen = p->fts_namelen;
++	memmove(sp->fts_path, p->fts_name, len + 1);
++	if ((cp = strrchr(p->fts_name, '/')) && (cp != p->fts_name || cp[1])) {
++		len = strlen(++cp);
++		memmove(p->fts_name, cp, len + 1);
++		p->fts_namelen = len;
++	}
++	p->fts_accpath = p->fts_path = sp->fts_path;
++	sp->fts_dev = p->fts_dev;
++}
++
++int
++fts_close(FTS *sp)
++{
++	register FTSENT *freep, *p;
++	int saved_errno;
++
++	/*
++	 * This still works if we haven't read anything -- the dummy structure
++	 * points to the root list, so we step through to the end of the root
++	 * list which has a valid parent pointer.
++	 */
++	if (sp->fts_cur) {
++		for (p = sp->fts_cur; p->fts_level >= FTS_ROOTLEVEL;) {
++			freep = p;
++			p = p->fts_link != NULL ? p->fts_link : p->fts_parent;
++			free(freep);
++		}
++		free(p);
++	}
++
++	/* Free up child linked list, sort array, path buffer. */
++	if (sp->fts_child)
++		fts_lfree(sp->fts_child);
++	free(sp->fts_array);
++	free(sp->fts_path);
++
++	/* Return to original directory, save errno if necessary. */
++	if (!ISSET(FTS_NOCHDIR)) {
++		saved_errno = fchdir(sp->fts_rfd) ? errno : 0;
++		(void)close(sp->fts_rfd);
++
++		/* Set errno and return. */
++		if (saved_errno != 0) {
++			/* Free up the stream pointer. */
++			free(sp);
++			errno = saved_errno;
++			return (-1);
++		}
++	}
++
++	/* Free up the stream pointer. */
++	free(sp);
++	return (0);
++}
++
++/*
++ * Special case of "/" at the end of the path so that slashes aren't
++ * appended which would cause paths to be written as "....//foo".
++ */
++#define	NAPPEND(p)							\
++	(p->fts_path[p->fts_pathlen - 1] == '/'				\
++	    ? p->fts_pathlen - 1 : p->fts_pathlen)
++
++FTSENT *
++fts_read(register FTS *sp)
++{
++	register FTSENT *p, *tmp;
++	register int instr;
++	register char *t;
++	int saved_errno;
++
++	/* If finished or unrecoverable error, return NULL. */
++	if (sp->fts_cur == NULL || ISSET(FTS_STOP))
++		return (NULL);
++
++	/* Set current node pointer. */
++	p = sp->fts_cur;
++
++	/* Save and zero out user instructions. */
++	instr = p->fts_instr;
++	p->fts_instr = FTS_NOINSTR;
++
++	/* Any type of file may be re-visited; re-stat and re-turn. */
++	if (instr == FTS_AGAIN) {
++		p->fts_info = fts_stat(sp, p, 0);
++		return (p);
++	}
++
++	/*
++	 * Following a symlink -- SLNONE test allows application to see
++	 * SLNONE and recover.  If indirecting through a symlink, have
++	 * keep a pointer to current location.  If unable to get that
++	 * pointer, follow fails.
++	 */
++	if (instr == FTS_FOLLOW &&
++	    (p->fts_info == FTS_SL || p->fts_info == FTS_SLNONE)) {
++		p->fts_info = fts_stat(sp, p, 1);
++		if (p->fts_info == FTS_D && !ISSET(FTS_NOCHDIR)) {
++			if ((p->fts_symfd = open(".", O_RDONLY, 0)) < 0) {
++				p->fts_errno = errno;
++				p->fts_info = FTS_ERR;
++			} else
++				p->fts_flags |= FTS_SYMFOLLOW;
++		}
++		return (p);
++	}
++
++	/* Directory in pre-order. */
++	if (p->fts_info == FTS_D) {
++		/* If skipped or crossed mount point, do post-order visit. */
++		if (instr == FTS_SKIP ||
++		    (ISSET(FTS_XDEV) && p->fts_dev != sp->fts_dev)) {
++			if (p->fts_flags & FTS_SYMFOLLOW)
++				(void)close(p->fts_symfd);
++			if (sp->fts_child) {
++				fts_lfree(sp->fts_child);
++				sp->fts_child = NULL;
++			}
++			p->fts_info = FTS_DP;
++			return (p);
++		}
++
++		/* Rebuild if only read the names and now traversing. */
++		if (sp->fts_child != NULL && ISSET(FTS_NAMEONLY)) {
++			CLR(FTS_NAMEONLY);
++			fts_lfree(sp->fts_child);
++			sp->fts_child = NULL;
++		}
++
++		/*
++		 * Cd to the subdirectory.
++		 *
++		 * If have already read and now fail to chdir, whack the list
++		 * to make the names come out right, and set the parent errno
++		 * so the application will eventually get an error condition.
++		 * Set the FTS_DONTCHDIR flag so that when we logically change
++		 * directories back to the parent we don't do a chdir.
++		 *
++		 * If haven't read do so.  If the read fails, fts_build sets
++		 * FTS_STOP or the fts_info field of the node.
++		 */
++		if (sp->fts_child != NULL) {
++			if (fts_safe_changedir(sp, p, -1, p->fts_accpath)) {
++				p->fts_errno = errno;
++				p->fts_flags |= FTS_DONTCHDIR;
++				for (p = sp->fts_child; p != NULL;
++				     p = p->fts_link)
++					p->fts_accpath =
++					    p->fts_parent->fts_accpath;
++			}
++		} else if ((sp->fts_child = fts_build(sp, BREAD)) == NULL) {
++			if (ISSET(FTS_STOP))
++				return (NULL);
++			return (p);
++		}
++		p = sp->fts_child;
++		sp->fts_child = NULL;
++		sp->fts_cur = p;
++		goto name;
++	}
++
++	/* Move to the next node on this level. */
++next:	tmp = p;
++	if ((p = p->fts_link) != NULL) {
++		sp->fts_cur = p;
++		free(tmp);
++
++		/*
++		 * If reached the top, return to the original directory (or
++		 * the root of the tree), and load the paths for the next root.
++		 */
++		if (p->fts_level == FTS_ROOTLEVEL) {
++			if (FCHDIR(sp, sp->fts_rfd)) {
++				SET(FTS_STOP);
++				return (NULL);
++			}
++			fts_load(sp, p);
++			return p;
++		}
++
++		/*
++		 * User may have called fts_set on the node.  If skipped,
++		 * ignore.  If followed, get a file descriptor so we can
++		 * get back if necessary.
++		 */
++		if (p->fts_instr == FTS_SKIP)
++			goto next;
++		if (p->fts_instr == FTS_FOLLOW) {
++			p->fts_info = fts_stat(sp, p, 1);
++			if (p->fts_info == FTS_D && !ISSET(FTS_NOCHDIR)) {
++				if ((p->fts_symfd =
++				    open(".", O_RDONLY, 0)) < 0) {
++					p->fts_errno = errno;
++					p->fts_info = FTS_ERR;
++				} else
++					p->fts_flags |= FTS_SYMFOLLOW;
++			}
++			p->fts_instr = FTS_NOINSTR;
++		}
++
++name:		t = sp->fts_path + NAPPEND(p->fts_parent);
++		*t++ = '/';
++		memmove(t, p->fts_name, p->fts_namelen + 1);
++		return p;
++	}
++
++	/* Move up to the parent node. */
++	p = tmp->fts_parent;
++	sp->fts_cur = p;
++	free(tmp);
++
++	if (p->fts_level == FTS_ROOTPARENTLEVEL) {
++		/*
++		 * Done; free everything up and set errno to 0 so the user
++		 * can distinguish between error and EOF.
++		 */
++		free(p);
++		errno = 0;
++		return (sp->fts_cur = NULL);
++	}
++
++	/* NUL terminate the pathname. */
++	sp->fts_path[p->fts_pathlen] = '\0';
++
++	/*
++	 * Return to the parent directory.  If at a root node or came through
++	 * a symlink, go back through the file descriptor.  Otherwise, cd up
++	 * one directory.
++	 */
++	if (p->fts_level == FTS_ROOTLEVEL) {
++		if (FCHDIR(sp, sp->fts_rfd)) {
++			SET(FTS_STOP);
++			return (NULL);
++		}
++	} else if (p->fts_flags & FTS_SYMFOLLOW) {
++		if (FCHDIR(sp, p->fts_symfd)) {
++			saved_errno = errno;
++			(void)close(p->fts_symfd);
++			errno = saved_errno;
++			SET(FTS_STOP);
++			return (NULL);
++		}
++		(void)close(p->fts_symfd);
++	} else if (!(p->fts_flags & FTS_DONTCHDIR) &&
++		   fts_safe_changedir(sp, p->fts_parent, -1, "..")) {
++		SET(FTS_STOP);
++		return (NULL);
++	}
++	p->fts_info = p->fts_errno ? FTS_ERR : FTS_DP;
++	return p;
++}
++
++/*
++ * Fts_set takes the stream as an argument although it's not used in this
++ * implementation; it would be necessary if anyone wanted to add global
++ * semantics to fts using fts_set.  An error return is allowed for similar
++ * reasons.
++ */
++/* ARGSUSED */
++int
++fts_set(FTS *sp, FTSENT *p, int instr)
++{
++	if (instr != 0 && instr != FTS_AGAIN && instr != FTS_FOLLOW &&
++	    instr != FTS_NOINSTR && instr != FTS_SKIP) {
++		errno = EINVAL;
++		return (1);
++	}
++	p->fts_instr = instr;
++	return (0);
++}
++
++FTSENT *
++fts_children(register FTS *sp, int instr)
++{
++	register FTSENT *p;
++	int fd;
++
++	if (instr != 0 && instr != FTS_NAMEONLY) {
++		errno = EINVAL;
++		return (NULL);
++	}
++
++	/* Set current node pointer. */
++	p = sp->fts_cur;
++
++	/*
++	 * Errno set to 0 so user can distinguish empty directory from
++	 * an error.
++	 */
++	errno = 0;
++
++	/* Fatal errors stop here. */
++	if (ISSET(FTS_STOP))
++		return (NULL);
++
++	/* Return logical hierarchy of user's arguments. */
++	if (p->fts_info == FTS_INIT)
++		return (p->fts_link);
++
++	/*
++	 * If not a directory being visited in pre-order, stop here.  Could
++	 * allow FTS_DNR, assuming the user has fixed the problem, but the
++	 * same effect is available with FTS_AGAIN.
++	 */
++	if (p->fts_info != FTS_D /* && p->fts_info != FTS_DNR */)
++		return (NULL);
++
++	/* Free up any previous child list. */
++	if (sp->fts_child != NULL)
++		fts_lfree(sp->fts_child);
++
++	if (instr == FTS_NAMEONLY) {
++		SET(FTS_NAMEONLY);
++		instr = BNAMES;
++	} else
++		instr = BCHILD;
++
++	/*
++	 * If using chdir on a relative path and called BEFORE fts_read does
++	 * its chdir to the root of a traversal, we can lose -- we need to
++	 * chdir into the subdirectory, and we don't know where the current
++	 * directory is, so we can't get back so that the upcoming chdir by
++	 * fts_read will work.
++	 */
++	if (p->fts_level != FTS_ROOTLEVEL || p->fts_accpath[0] == '/' ||
++	    ISSET(FTS_NOCHDIR))
++		return (sp->fts_child = fts_build(sp, instr));
++
++	if ((fd = open(".", O_RDONLY, 0)) < 0)
++		return (NULL);
++	sp->fts_child = fts_build(sp, instr);
++	if (fchdir(fd))
++		return (NULL);
++	(void)close(fd);
++	return (sp->fts_child);
++}
++
++/*
++ * This is the tricky part -- do not casually change *anything* in here.  The
++ * idea is to build the linked list of entries that are used by fts_children
++ * and fts_read.  There are lots of special cases.
++ *
++ * The real slowdown in walking the tree is the stat calls.  If FTS_NOSTAT is
++ * set and it's a physical walk (so that symbolic links can't be directories),
++ * we can do things quickly.  First, if it's a 4.4BSD file system, the type
++ * of the file is in the directory entry.  Otherwise, we assume that the number
++ * of subdirectories in a node is equal to the number of links to the parent.
++ * The former skips all stat calls.  The latter skips stat calls in any leaf
++ * directories and for any files after the subdirectories in the directory have
++ * been found, cutting the stat calls by about 2/3.
++ */
++static FTSENT *
++internal_function
++fts_build(register FTS *sp, int type)
++{
++	register struct dirent *dp;
++	register FTSENT *p, *head;
++	register int nitems;
++	FTSENT *cur, *tail;
++	DIR *dirp;
++	void *oldaddr;
++	int cderrno, descend, len, level, nlinks, saved_errno,
++	    nostat, doadjust;
++	size_t maxlen;
++	char *cp;
++
++	/* Set current node pointer. */
++	cur = sp->fts_cur;
++
++	/*
++	 * Open the directory for reading.  If this fails, we're done.
++	 * If being called from fts_read, set the fts_info field.
++	 */
++#if defined FTS_WHITEOUT && 0
++	if (ISSET(FTS_WHITEOUT))
++		oflag = DTF_NODUP|DTF_REWIND;
++	else
++		oflag = DTF_HIDEW|DTF_NODUP|DTF_REWIND;
++#else
++# define opendir2(path, flag) opendir(path)
++#endif
++       if ((dirp = opendir2(cur->fts_accpath, oflag)) == NULL) {
++		if (type == BREAD) {
++			cur->fts_info = FTS_DNR;
++			cur->fts_errno = errno;
++		}
++		return (NULL);
++	}
++
++	/*
++	 * Nlinks is the number of possible entries of type directory in the
++	 * directory if we're cheating on stat calls, 0 if we're not doing
++	 * any stat calls at all, -1 if we're doing stats on everything.
++	 */
++	if (type == BNAMES) {
++		nlinks = 0;
++		/* Be quiet about nostat, GCC. */
++		nostat = 0;
++	} else if (ISSET(FTS_NOSTAT) && ISSET(FTS_PHYSICAL)) {
++		nlinks = cur->fts_nlink - (ISSET(FTS_SEEDOT) ? 0 : 2);
++		nostat = 1;
++	} else {
++		nlinks = -1;
++		nostat = 0;
++	}
++
++#ifdef notdef
++	(void)printf("nlinks == %d (cur: %d)\n", nlinks, cur->fts_nlink);
++	(void)printf("NOSTAT %d PHYSICAL %d SEEDOT %d\n",
++	    ISSET(FTS_NOSTAT), ISSET(FTS_PHYSICAL), ISSET(FTS_SEEDOT));
++#endif
++	/*
++	 * If we're going to need to stat anything or we want to descend
++	 * and stay in the directory, chdir.  If this fails we keep going,
++	 * but set a flag so we don't chdir after the post-order visit.
++	 * We won't be able to stat anything, but we can still return the
++	 * names themselves.  Note, that since fts_read won't be able to
++	 * chdir into the directory, it will have to return different path
++	 * names than before, i.e. "a/b" instead of "b".  Since the node
++	 * has already been visited in pre-order, have to wait until the
++	 * post-order visit to return the error.  There is a special case
++	 * here, if there was nothing to stat then it's not an error to
++	 * not be able to stat.  This is all fairly nasty.  If a program
++	 * needed sorted entries or stat information, they had better be
++	 * checking FTS_NS on the returned nodes.
++	 */
++	cderrno = 0;
++	if (nlinks || type == BREAD) {
++		if (fts_safe_changedir(sp, cur, dirfd(dirp), NULL)) {
++			if (nlinks && type == BREAD)
++				cur->fts_errno = errno;
++			cur->fts_flags |= FTS_DONTCHDIR;
++			descend = 0;
++			cderrno = errno;
++			(void)closedir(dirp);
++			dirp = NULL;
++		} else
++			descend = 1;
++	} else
++		descend = 0;
++
++	/*
++	 * Figure out the max file name length that can be stored in the
++	 * current path -- the inner loop allocates more path as necessary.
++	 * We really wouldn't have to do the maxlen calculations here, we
++	 * could do them in fts_read before returning the path, but it's a
++	 * lot easier here since the length is part of the dirent structure.
++	 *
++	 * If not changing directories set a pointer so that can just append
++	 * each new name into the path.
++	 */
++	len = NAPPEND(cur);
++	if (ISSET(FTS_NOCHDIR)) {
++		cp = sp->fts_path + len;
++		*cp++ = '/';
++	} else {
++		/* GCC, you're too verbose. */
++		cp = NULL;
++	}
++	len++;
++	maxlen = sp->fts_pathlen - len;
++
++	level = cur->fts_level + 1;
++
++	/* Read the directory, attaching each entry to the `link' pointer. */
++	doadjust = 0;
++	for (head = tail = NULL, nitems = 0; dirp && (dp = readdir(dirp));) {
++		if (!ISSET(FTS_SEEDOT) && ISDOT(dp->d_name))
++			continue;
++
++		if ((p = fts_alloc(sp, dp->d_name, strlen (dp->d_name))) == NULL)
++			goto mem1;
++		if (strlen (dp->d_name) >= maxlen) {/* include space for NUL */
++			oldaddr = sp->fts_path;
++			if (fts_palloc(sp, strlen (dp->d_name) + len + 1)) {
++				/*
++				 * No more memory for path or structures.  Save
++				 * errno, free up the current structure and the
++				 * structures already allocated.
++				 */
++mem1:				saved_errno = errno;
++				free(p);
++				fts_lfree(head);
++				(void)closedir(dirp);
++				cur->fts_info = FTS_ERR;
++				SET(FTS_STOP);
++				errno = saved_errno;
++				return (NULL);
++			}
++			/* Did realloc() change the pointer? */
++			if (oldaddr != sp->fts_path) {
++				doadjust = 1;
++				if (ISSET(FTS_NOCHDIR))
++					cp = sp->fts_path + len;
++			}
++			maxlen = sp->fts_pathlen - len;
++		}
++
++		if (len + strlen (dp->d_name) >= USHRT_MAX) {
++			/*
++			 * In an FTSENT, fts_pathlen is a u_short so it is
++			 * possible to wraparound here.  If we do, free up
++			 * the current structure and the structures already
++			 * allocated, then error out with ENAMETOOLONG.
++			 */
++			free(p);
++			fts_lfree(head);
++			(void)closedir(dirp);
++			cur->fts_info = FTS_ERR;
++			SET(FTS_STOP);
++			errno = ENAMETOOLONG;
++			return (NULL);
++		}
++		p->fts_level = level;
++		p->fts_parent = sp->fts_cur;
++		p->fts_pathlen = len + strlen (dp->d_name);
++
++#if defined FTS_WHITEOUT && 0
++		if (dp->d_type == DT_WHT)
++			p->fts_flags |= FTS_ISW;
++#endif
++
++#if 0
++		/* Unreachable code.  cderrno is only ever set to a nonnull
++		   value if dirp is closed at the same time.  But then we
++		   cannot enter this loop.  */
++		if (cderrno) {
++			if (nlinks) {
++				p->fts_info = FTS_NS;
++				p->fts_errno = cderrno;
++			} else
++				p->fts_info = FTS_NSOK;
++			p->fts_accpath = cur->fts_accpath;
++		} else
++#endif
++		if (nlinks == 0
++#if defined DT_DIR && defined _DIRENT_HAVE_D_TYPE
++			   || (nostat &&
++			       dp->d_type != DT_DIR && dp->d_type != DT_UNKNOWN)
++#endif
++		    ) {
++			p->fts_accpath =
++			    ISSET(FTS_NOCHDIR) ? p->fts_path : p->fts_name;
++			p->fts_info = FTS_NSOK;
++		} else {
++			/* Build a file name for fts_stat to stat. */
++			if (ISSET(FTS_NOCHDIR)) {
++				p->fts_accpath = p->fts_path;
++				memmove(cp, p->fts_name, p->fts_namelen + 1);
++			} else
++				p->fts_accpath = p->fts_name;
++			/* Stat it. */
++			p->fts_info = fts_stat(sp, p, 0);
++
++			/* Decrement link count if applicable. */
++			if (nlinks > 0 && (p->fts_info == FTS_D ||
++			    p->fts_info == FTS_DC || p->fts_info == FTS_DOT))
++				--nlinks;
++		}
++
++		/* We walk in directory order so "ls -f" doesn't get upset. */
++		p->fts_link = NULL;
++		if (head == NULL)
++			head = tail = p;
++		else {
++			tail->fts_link = p;
++			tail = p;
++		}
++		++nitems;
++	}
++	if (dirp)
++		(void)closedir(dirp);
++
++	/*
++	 * If realloc() changed the address of the path, adjust the
++	 * addresses for the rest of the tree and the dir list.
++	 */
++	if (doadjust)
++		fts_padjust(sp, head);
++
++	/*
++	 * If not changing directories, reset the path back to original
++	 * state.
++	 */
++	if (ISSET(FTS_NOCHDIR)) {
++		if (len == sp->fts_pathlen || nitems == 0)
++			--cp;
++		*cp = '\0';
++	}
++
++	/*
++	 * If descended after called from fts_children or after called from
++	 * fts_read and nothing found, get back.  At the root level we use
++	 * the saved fd; if one of fts_open()'s arguments is a relative path
++	 * to an empty directory, we wind up here with no other way back.  If
++	 * can't get back, we're done.
++	 */
++	if (descend && (type == BCHILD || !nitems) &&
++	    (cur->fts_level == FTS_ROOTLEVEL ?
++	     FCHDIR(sp, sp->fts_rfd) :
++	     fts_safe_changedir(sp, cur->fts_parent, -1, ".."))) {
++		cur->fts_info = FTS_ERR;
++		SET(FTS_STOP);
++		fts_lfree(head);
++		return (NULL);
++	}
++
++	/* If didn't find anything, return NULL. */
++	if (!nitems) {
++		if (type == BREAD)
++			cur->fts_info = FTS_DP;
++		fts_lfree(head);
++		return (NULL);
++	}
++
++	/* Sort the entries. */
++	if (sp->fts_compar && nitems > 1)
++		head = fts_sort(sp, head, nitems);
++	return (head);
++}
++
++static u_short
++internal_function
++fts_stat(FTS *sp, register FTSENT *p, int follow)
++{
++	register FTSENT *t;
++	register dev_t dev;
++	register ino_t ino;
++	struct stat *sbp, sb;
++	int saved_errno;
++
++	/* If user needs stat info, stat buffer already allocated. */
++	sbp = ISSET(FTS_NOSTAT) ? &sb : p->fts_statp;
++
++#if defined FTS_WHITEOUT && 0
++	/* check for whiteout */
++	if (p->fts_flags & FTS_ISW) {
++		if (sbp != &sb) {
++			memset(sbp, '\0', sizeof (*sbp));
++			sbp->st_mode = S_IFWHT;
++		}
++		return (FTS_W);
++       }
++#endif
++
++	/*
++	 * If doing a logical walk, or application requested FTS_FOLLOW, do
++	 * a stat(2).  If that fails, check for a non-existent symlink.  If
++	 * fail, set the errno from the stat call.
++	 */
++	if (ISSET(FTS_LOGICAL) || follow) {
++		if (stat(p->fts_accpath, sbp)) {
++			saved_errno = errno;
++			if (!lstat(p->fts_accpath, sbp)) {
++				errno = 0;
++				return (FTS_SLNONE);
++			}
++			p->fts_errno = saved_errno;
++			goto err;
++		}
++	} else if (lstat(p->fts_accpath, sbp)) {
++		p->fts_errno = errno;
++err:		memset(sbp, 0, sizeof(struct stat));
++		return (FTS_NS);
++	}
++
++	if (S_ISDIR(sbp->st_mode)) {
++		/*
++		 * Set the device/inode.  Used to find cycles and check for
++		 * crossing mount points.  Also remember the link count, used
++		 * in fts_build to limit the number of stat calls.  It is
++		 * understood that these fields are only referenced if fts_info
++		 * is set to FTS_D.
++		 */
++		dev = p->fts_dev = sbp->st_dev;
++		ino = p->fts_ino = sbp->st_ino;
++		p->fts_nlink = sbp->st_nlink;
++
++		if (ISDOT(p->fts_name))
++			return (FTS_DOT);
++
++		/*
++		 * Cycle detection is done by brute force when the directory
++		 * is first encountered.  If the tree gets deep enough or the
++		 * number of symbolic links to directories is high enough,
++		 * something faster might be worthwhile.
++		 */
++		for (t = p->fts_parent;
++		    t->fts_level >= FTS_ROOTLEVEL; t = t->fts_parent)
++			if (ino == t->fts_ino && dev == t->fts_dev) {
++				p->fts_cycle = t;
++				return (FTS_DC);
++			}
++		return (FTS_D);
++	}
++	if (S_ISLNK(sbp->st_mode))
++		return (FTS_SL);
++	if (S_ISREG(sbp->st_mode))
++		return (FTS_F);
++	return (FTS_DEFAULT);
++}
++
++static FTSENT *
++internal_function
++fts_sort(FTS *sp, FTSENT *head, register int nitems)
++{
++	register FTSENT **ap, *p;
++
++	/*
++	 * Construct an array of pointers to the structures and call qsort(3).
++	 * Reassemble the array in the order returned by qsort.  If unable to
++	 * sort for memory reasons, return the directory entries in their
++	 * current order.  Allocate enough space for the current needs plus
++	 * 40 so don't realloc one entry at a time.
++	 */
++	if (nitems > sp->fts_nitems) {
++		struct _ftsent **a;
++
++		sp->fts_nitems = nitems + 40;
++		if ((a = realloc(sp->fts_array,
++ 		    (size_t)(sp->fts_nitems * sizeof(FTSENT *)))) == NULL) {
++			free(sp->fts_array);
++			sp->fts_array = NULL;
++			sp->fts_nitems = 0;
++			return (head);
++		}
++		sp->fts_array = a;
++	}
++	for (ap = sp->fts_array, p = head; p; p = p->fts_link)
++		*ap++ = p;
++	qsort((void *)sp->fts_array, nitems, sizeof(FTSENT *), sp->fts_compar);
++	for (head = *(ap = sp->fts_array); --nitems; ++ap)
++		ap[0]->fts_link = ap[1];
++	ap[0]->fts_link = NULL;
++	return (head);
++}
++
++static FTSENT *
++internal_function
++fts_alloc(FTS *sp, const char *name, size_t namelen)
++{
++	register FTSENT *p;
++	size_t len;
++
++	/*
++	 * The file name is a variable length array and no stat structure is
++	 * necessary if the user has set the nostat bit.  Allocate the FTSENT
++	 * structure, the file name and the stat structure in one chunk, but
++	 * be careful that the stat structure is reasonably aligned.  Since the
++	 * fts_name field is declared to be of size 1, the fts_name pointer is
++	 * namelen + 2 before the first possible address of the stat structure.
++	 */
++	len = sizeof(FTSENT) + namelen;
++	if (!ISSET(FTS_NOSTAT))
++		len += sizeof(struct stat) + ALIGNBYTES;
++	if ((p = malloc(len)) == NULL)
++		return (NULL);
++
++	/* Copy the name and guarantee NUL termination. */
++	memmove(p->fts_name, name, namelen);
++	p->fts_name[namelen] = '\0';
++
++	if (!ISSET(FTS_NOSTAT))
++		p->fts_statp = (struct stat *)ALIGN(p->fts_name + namelen + 2);
++	p->fts_namelen = namelen;
++	p->fts_path = sp->fts_path;
++	p->fts_errno = 0;
++	p->fts_flags = 0;
++	p->fts_instr = FTS_NOINSTR;
++	p->fts_number = 0;
++	p->fts_pointer = NULL;
++	return (p);
++}
++
++static void
++internal_function
++fts_lfree(register FTSENT *head)
++{
++	register FTSENT *p;
++
++	/* Free a linked list of structures. */
++	while ((p = head)) {
++		head = head->fts_link;
++		free(p);
++	}
++}
++
++/*
++ * Allow essentially unlimited paths; find, rm, ls should all work on any tree.
++ * Most systems will allow creation of paths much longer than MAXPATHLEN, even
++ * though the kernel won't resolve them.  Add the size (not just what's needed)
++ * plus 256 bytes so don't realloc the path 2 bytes at a time.
++ */
++static int
++internal_function
++fts_palloc(FTS *sp, size_t more)
++{
++	char *p;
++
++	sp->fts_pathlen += more + 256;
++	/*
++	 * Check for possible wraparound.  In an FTS, fts_pathlen is
++	 * a signed int but in an FTSENT it is an unsigned short.
++	 * We limit fts_pathlen to USHRT_MAX to be safe in both cases.
++	 */
++	if (sp->fts_pathlen < 0 || sp->fts_pathlen >= USHRT_MAX) {
++		free(sp->fts_path);
++		sp->fts_path = NULL;
++		errno = ENAMETOOLONG;
++		return (1);
++	}
++	p = realloc(sp->fts_path, sp->fts_pathlen);
++	if (p == NULL) {
++		free(sp->fts_path);
++		sp->fts_path = NULL;
++		return 1;
++	}
++	sp->fts_path = p;
++	return 0;
++}
++
++/*
++ * When the path is realloc'd, have to fix all of the pointers in structures
++ * already returned.
++ */
++static void
++internal_function
++fts_padjust(FTS *sp, FTSENT *head)
++{
++	FTSENT *p;
++	char *addr = sp->fts_path;
++
++#define	ADJUST(p) do {							\
++	if ((p)->fts_accpath != (p)->fts_name) {			\
++		(p)->fts_accpath =					\
++		    (char *)addr + ((p)->fts_accpath - (p)->fts_path);	\
++	}								\
++	(p)->fts_path = addr;						\
++} while (0)
++	/* Adjust the current set of children. */
++	for (p = sp->fts_child; p; p = p->fts_link)
++		ADJUST(p);
++
++	/* Adjust the rest of the tree, including the current level. */
++	for (p = head; p->fts_level >= FTS_ROOTLEVEL;) {
++		ADJUST(p);
++		p = p->fts_link ? p->fts_link : p->fts_parent;
++	}
++}
++
++static size_t
++internal_function
++fts_maxarglen(char * const *argv)
++{
++	size_t len, max;
++
++	for (max = 0; *argv; ++argv)
++		if ((len = strlen(*argv)) > max)
++			max = len;
++	return (max + 1);
++}
++
++/*
++ * Change to dir specified by fd or p->fts_accpath without getting
++ * tricked by someone changing the world out from underneath us.
++ * Assumes p->fts_dev and p->fts_ino are filled in.
++ */
++static int
++internal_function
++fts_safe_changedir(FTS *sp, FTSENT *p, int fd, const char *path)
++{
++	int ret, oerrno, newfd;
++	struct stat64 sb;
++
++	newfd = fd;
++	if (ISSET(FTS_NOCHDIR))
++		return (0);
++	if (fd < 0 && (newfd = open(path, O_RDONLY, 0)) < 0)
++		return (-1);
++	if (fstat64(newfd, &sb)) {
++		ret = -1;
++		goto bail;
++	}
++	if (p->fts_dev != sb.st_dev || p->fts_ino != sb.st_ino) {
++		errno = ENOENT;		/* disinformation */
++		ret = -1;
++		goto bail;
++	}
++	ret = fchdir(newfd);
++bail:
++	oerrno = errno;
++	if (fd < 0)
++		(void)close(newfd);
++	errno = oerrno;
++	return (ret);
++}
+diff --git a/libdwfl/fts.h b/libdwfl/fts.h
+new file mode 100644
+index 0000000..ff7b5da
+--- /dev/null
++++ b/libdwfl/fts.h
+@@ -0,0 +1,137 @@
++/*
++ * Copyright (c) 1989, 1993
++ *	The Regents of the University of California.  All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 4. Neither the name of the University nor the names of its contributors
++ *    may be used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
++ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
++ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
++ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
++ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
++ * SUCH DAMAGE.
++ *
++ *	@(#)fts.h	8.3 (Berkeley) 8/14/94
++ */
++
++#include <config.h>
++
++#ifdef HAVE_FTS_H
++# include <fts.h>
++#else
++
++#ifndef	_FTS_H
++#define	_FTS_H 1
++
++#include <features.h>
++#include <sys/types.h>
++
++/* The fts interface is incompatible with the LFS interface which
++   transparently uses the 64-bit file access functions.  */
++#ifdef __USE_FILE_OFFSET64
++# error "<fts.h> cannot be used with -D_FILE_OFFSET_BITS==64"
++#endif
++
++
++typedef struct {
++	struct _ftsent *fts_cur;	/* current node */
++	struct _ftsent *fts_child;	/* linked list of children */
++	struct _ftsent **fts_array;	/* sort array */
++	dev_t fts_dev;			/* starting device # */
++	char *fts_path;			/* path for this descent */
++	int fts_rfd;			/* fd for root */
++	int fts_pathlen;		/* sizeof(path) */
++	int fts_nitems;			/* elements in the sort array */
++	int (*fts_compar) (const void *, const void *); /* compare fn */
++
++#define	FTS_COMFOLLOW	0x0001		/* follow command line symlinks */
++#define	FTS_LOGICAL	0x0002		/* logical walk */
++#define	FTS_NOCHDIR	0x0004		/* don't change directories */
++#define	FTS_NOSTAT	0x0008		/* don't get stat info */
++#define	FTS_PHYSICAL	0x0010		/* physical walk */
++#define	FTS_SEEDOT	0x0020		/* return dot and dot-dot */
++#define	FTS_XDEV	0x0040		/* don't cross devices */
++#define FTS_WHITEOUT	0x0080		/* return whiteout information */
++#define	FTS_OPTIONMASK	0x00ff		/* valid user option mask */
++
++#define	FTS_NAMEONLY	0x0100		/* (private) child names only */
++#define	FTS_STOP	0x0200		/* (private) unrecoverable error */
++	int fts_options;		/* fts_open options, global flags */
++} FTS;
++
++typedef struct _ftsent {
++	struct _ftsent *fts_cycle;	/* cycle node */
++	struct _ftsent *fts_parent;	/* parent directory */
++	struct _ftsent *fts_link;	/* next file in directory */
++	long fts_number;	        /* local numeric value */
++	void *fts_pointer;	        /* local address value */
++	char *fts_accpath;		/* access path */
++	char *fts_path;			/* root path */
++	int fts_errno;			/* errno for this node */
++	int fts_symfd;			/* fd for symlink */
++	u_short fts_pathlen;		/* strlen(fts_path) */
++	u_short fts_namelen;		/* strlen(fts_name) */
++
++	ino_t fts_ino;			/* inode */
++	dev_t fts_dev;			/* device */
++	nlink_t fts_nlink;		/* link count */
++
++#define	FTS_ROOTPARENTLEVEL	-1
++#define	FTS_ROOTLEVEL		 0
++	short fts_level;		/* depth (-1 to N) */
++
++#define	FTS_D		 1		/* preorder directory */
++#define	FTS_DC		 2		/* directory that causes cycles */
++#define	FTS_DEFAULT	 3		/* none of the above */
++#define	FTS_DNR		 4		/* unreadable directory */
++#define	FTS_DOT		 5		/* dot or dot-dot */
++#define	FTS_DP		 6		/* postorder directory */
++#define	FTS_ERR		 7		/* error; errno is set */
++#define	FTS_F		 8		/* regular file */
++#define	FTS_INIT	 9		/* initialized only */
++#define	FTS_NS		10		/* stat(2) failed */
++#define	FTS_NSOK	11		/* no stat(2) requested */
++#define	FTS_SL		12		/* symbolic link */
++#define	FTS_SLNONE	13		/* symbolic link without target */
++#define FTS_W		14		/* whiteout object */
++	u_short fts_info;		/* user flags for FTSENT structure */
++
++#define	FTS_DONTCHDIR	 0x01		/* don't chdir .. to the parent */
++#define	FTS_SYMFOLLOW	 0x02		/* followed a symlink to get here */
++	u_short fts_flags;		/* private flags for FTSENT structure */
++
++#define	FTS_AGAIN	 1		/* read node again */
++#define	FTS_FOLLOW	 2		/* follow symbolic link */
++#define	FTS_NOINSTR	 3		/* no instructions */
++#define	FTS_SKIP	 4		/* discard node */
++	u_short fts_instr;		/* fts_set() instructions */
++
++	struct stat *fts_statp;		/* stat(2) information */
++	char fts_name[1];		/* file name */
++} FTSENT;
++
++FTSENT	*fts_children (FTS *, int);
++int	 fts_close (FTS *);
++FTS	*fts_open (char * const *, int,
++		   int (*)(const FTSENT **, const FTSENT **));
++FTSENT	*fts_read (FTS *);
++int	 fts_set (FTS *, FTSENT *, int);
++
++#endif /* fts.h */
++
++#endif /* HAVE_FTS_H */
+-- 
+1.8.4
+
