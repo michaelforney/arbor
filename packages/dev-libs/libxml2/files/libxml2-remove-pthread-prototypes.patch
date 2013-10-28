@@ -1,0 +1,72 @@
+Reason: Fix build with musl
+Upstream: https://bugzilla.gnome.org/show_bug.cgi?id=704904
+          https://bugzilla.gnome.org/show_bug.cgi?id=704908
+
+From 9e42508dd6838d99a5c524e4bb6d61739f553a69 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Mon, 28 Oct 2013 04:54:36 -0700
+Subject: [PATCH] Remove pthread prototypes
+
+---
+ threads.c | 44 --------------------------------------------
+ 1 file changed, 44 deletions(-)
+
+diff --git a/threads.c b/threads.c
+index f2f2703..da653e7 100644
+--- a/threads.c
++++ b/threads.c
+@@ -45,51 +45,7 @@
+ /* #define DEBUG_THREADS */
+ 
+ #ifdef HAVE_PTHREAD_H
+-
+ static int libxml_is_threaded = -1;
+-#ifdef __GNUC__
+-#ifdef linux
+-#if (__GNUC__ == 3 && __GNUC_MINOR__ >= 3) || (__GNUC__ > 3)
+-extern int pthread_once (pthread_once_t *__once_control,
+-                         void (*__init_routine) (void))
+-	   __attribute((weak));
+-extern void *pthread_getspecific (pthread_key_t __key)
+-	   __attribute((weak));
+-extern int pthread_setspecific (pthread_key_t __key,
+-                                __const void *__pointer)
+-	   __attribute((weak));
+-extern int pthread_key_create (pthread_key_t *__key,
+-                               void (*__destr_function) (void *))
+-	   __attribute((weak));
+-extern int pthread_key_delete (pthread_key_t __key)
+-	   __attribute((weak));
+-extern int pthread_mutex_init ()
+-	   __attribute((weak));
+-extern int pthread_mutex_destroy ()
+-	   __attribute((weak));
+-extern int pthread_mutex_lock ()
+-	   __attribute((weak));
+-extern int pthread_mutex_unlock ()
+-	   __attribute((weak));
+-extern int pthread_cond_init ()
+-	   __attribute((weak));
+-extern int pthread_cond_destroy ()
+-	   __attribute((weak));
+-extern int pthread_cond_wait ()
+-	   __attribute((weak));
+-extern int pthread_equal ()
+-	   __attribute((weak));
+-extern pthread_t pthread_self ()
+-	   __attribute((weak));
+-extern int pthread_key_create ()
+-	   __attribute((weak));
+-extern int pthread_key_delete ()
+-	   __attribute((weak));
+-extern int pthread_cond_signal ()
+-	   __attribute((weak));
+-#endif
+-#endif /* linux */
+-#endif /* __GNUC__ */
+ #endif /* HAVE_PTHREAD_H */
+ 
+ /*
+-- 
+1.8.4
+

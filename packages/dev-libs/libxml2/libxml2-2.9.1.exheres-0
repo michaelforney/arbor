@@ -33,7 +33,10 @@ DEPENDENCIES="
         python? ( dev-lang/python:= )
 "
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-2.9.1-fix_python_paths.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-2.9.1-fix_python_paths.patch
+    "${FILES}"/${PN}-remove-pthread-prototypes.patch
+)
 
 DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-static' '--enable-ipv6' '--with-history'
                                '--with-readline' '--with-threads' '--without-icu' )
