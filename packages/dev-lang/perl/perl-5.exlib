@@ -67,9 +67,11 @@ perl-5_src_prepare() {
 }
 
 perl-5_src_configure() {
+    local perl_base=/usr/${LIBDIR}/perl5
+
     # Binaries are installed to /usr/bin/, with ${SLOT} appended
     # Alternatives manages executables in /usr/bin/
-    # Libraries go into /usr/${LIBDIR}/perl5/${SLOT}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
+    # Libraries go into ${perl_base}/${SLOT}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
     # `man 1` are installed with a version
 
     # -Dfoo = define foo, -Ufoo = undefine foo.
@@ -93,23 +95,23 @@ perl-5_src_configure() {
         # This probably needs some further work... but should be okay for
         # now. At least parrot breaks if we do not have -${osname} in ${archname}
         "$(define archname "${CHOST}")"
-        $(define privlib    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-pure"  )
-        $(define archlib    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-arch"  )
-        $(define bin        "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-bin"   )
-        $(define scriptdir  "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-bin"   )
-        $(define man1dir    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-man/man1"   )
-        $(define sitelib    "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-pure"  )
-        $(define sitearch   "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-arch"  )
-        $(define sitebin    "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-bin"   )
-        $(define sitescript "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-bin"   )
-        $(define siteman1dir "/usr/${LIBDIR}/perl5/site_perl/${SLOT}-man/man1"  )
-        $(define vendorlib  "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-pure")
-        $(define vendorarch "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-arch")
-        $(define vendorbin  "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-bin" )
-        $(define vendorscript "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-bin")
-        $(define vendorman1dir "/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-man/man1")
-        $(define perlpath    "/usr/${LIBDIR}/perl5/core_perl/${SLOT}-bin/${PN}${SLOT}")
-        $(define startperl "#!/usr/${LIBDIR}/perl5/core_perl/${SLOT}-bin/${PN}${SLOT}")
+        $(define privlib        "${perl_base}/core_perl/${SLOT}-pure"               )
+        $(define archlib        "${perl_base}/core_perl/${SLOT}-arch"               )
+        $(define bin            "${perl_base}/core_perl/${SLOT}-bin"                )
+        $(define scriptdir      "${perl_base}/core_perl/${SLOT}-bin"                )
+        $(define man1dir        "${perl_base}/core_perl/${SLOT}-man/man1"           )
+        $(define sitelib        "${perl_base}/site_perl/${SLOT}-pure"               )
+        $(define sitearch       "${perl_base}/site_perl/${SLOT}-arch"               )
+        $(define sitebin        "${perl_base}/site_perl/${SLOT}-bin"                )
+        $(define sitescript     "${perl_base}/site_perl/${SLOT}-bin"                )
+        $(define siteman1dir    "${perl_base}/site_perl/${SLOT}-man/man1"           )
+        $(define vendorlib      "${perl_base}/vendor_perl/${SLOT}-pure"             )
+        $(define vendorarch     "${perl_base}/vendor_perl/${SLOT}-arch"             )
+        $(define vendorbin      "${perl_base}/vendor_perl/${SLOT}-bin"              )
+        $(define vendorscript   "${perl_base}/vendor_perl/${SLOT}-bin"              )
+        $(define vendorman1dir  "${perl_base}/vendor_perl/${SLOT}-man/man1"         )
+        $(define perlpath       "${perl_base}/core_perl/${SLOT}-bin/${PN}${SLOT}"   )
+        $(define startperl      "#!${perl_base}/core_perl/${SLOT}-bin/${PN}${SLOT}" )
         $(define libperl libperl.so.1.${SLOT})
         -Duseshrplib
         -Dmksymlinks
@@ -149,52 +151,54 @@ perl-5_src_test() {
 }
 
 perl-5_src_install() {
+    local perl_base=/usr/${LIBDIR}/perl5
+
     default
 
     edo cd "${IMAGE}"
 
     # Library symlinks
-    local perllibdir=usr/${LIBDIR}/perl5/core_perl/${SLOT}-arch/CORE
+    local perllibdir=${perl_base}/core_perl/${SLOT}-arch/CORE
     dosym libperl.so.1.${SLOT} ${perllibdir}/libperl.so.1
     dosym libperl.so.1         ${perllibdir}/libperl.so
 
-    local perlbindir=usr/${LIBDIR}/perl5/core_perl/${SLOT}-bin
-    local perlmandir=usr/${LIBDIR}/perl5/core_perl/${SLOT}-man/man1
+    local perlbindir=${perl_base}/core_perl/${SLOT}-bin
+    local perlmandir=${perl_base}/core_perl/${SLOT}-man/man1
 
     # Make the actual executable perl${SLOT}, create perl and perl$(ever range 1-3) further down with alternatives
     # Needed because some packages fully resolve the path before hardcoding it
-    edo mv ${perlbindir}/${PN}{,${SLOT}}
-    edo rm ${perlbindir}/${PN}$(ever range 1-3)
+    edo mv ${perlbindir#/}/${PN}{,${SLOT}}
+    edo rm ${perlbindir#/}/${PN}$(ever range 1-3)
 
     # Create & keep site and vendor dirs
-    keepdir /usr/${LIBDIR}/perl5/{site,vendor}_perl/${SLOT}-{arch,bin,man/man1,pure}
+    keepdir ${perl_base}/{site,vendor}_perl/${SLOT}-{arch,bin,man/man1,pure}
 
     # We don't need packlists or perllocal.pod
     edo find usr/${LIBDIR} -type f -name .packlist -or -name perllocal.pod -delete
 
     # Discard man3 manpages (use perldoc)
-    edo rm -r usr/${LIBDIR}/perl5/core_perl/${SLOT}-man/man3
+    edo rm -r ${perl_base#/}/core_perl/${SLOT}-man/man3
 
     # Add alternative for perl tools and manpages
     # perl${SLOT} doesn't have a dash, handle that here
     local perl_alternatives=(
-        /usr/${LIBDIR}/perl5/core_perl/bin   ${SLOT}-bin
-        /usr/${LIBDIR}/perl5/site_perl/bin   ${SLOT}-bin
-        /usr/${LIBDIR}/perl5/vendor_perl/bin ${SLOT}-bin
-        /usr/${LIBDIR}/perl5/core_perl/man   ${SLOT}-man
-        /usr/${LIBDIR}/perl5/site_perl/man   ${SLOT}-man
-        /usr/${LIBDIR}/perl5/vendor_perl/man ${SLOT}-man
-        /usr/bin/perl                        /${perlbindir}/perl${SLOT}
-        /usr/bin/perl$(ever range 1-3)       /${perlbindir}/perl${SLOT}
+        ${perl_base}/core_perl/bin   ${SLOT}-bin
+        ${perl_base}/site_perl/bin   ${SLOT}-bin
+        ${perl_base}/vendor_perl/bin ${SLOT}-bin
+        ${perl_base}/core_perl/man   ${SLOT}-man
+        ${perl_base}/site_perl/man   ${SLOT}-man
+        ${perl_base}/vendor_perl/man ${SLOT}-man
+        /usr/bin/perl                        ${perlbindir}/perl${SLOT}
+        /usr/bin/perl$(ever range 1-3)       ${perlbindir}/perl${SLOT}
     )
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${perl_alternatives[@]}"
 
     # add versioned symlinks to allow acces to non-selected versions
     local bin manpage
-    for bin in ${perlbindir}/* ; do
+    for bin in ${perlbindir#/}/* ; do
         # handled in alternatives
-        [[ ${bin} == ${perlbindir}/perl${SLOT} ]] && continue
+        [[ ${bin} == ${perlbindir#/}/perl${SLOT} ]] && continue
         dosym ${bin##*/} ${bin}-${SLOT}
     done
     dosym perl${SLOT} ${perlbindir}/perl$(ever range 1-3)
@@ -205,15 +209,15 @@ perl-5_src_install() {
     # env.d file for the current eclectic-selected perl version, unversioned directory
     # comes first in PATH (yes, this is the same for all versions, eclectic does deduplication for us)
     hereenvd 47perl-${SLOT} <<EOF
-PATH="/usr/${LIBDIR}/perl5/site_perl/bin:/usr/${LIBDIR}/perl5/vendor_perl/bin:/usr/${LIBDIR}/perl5/core_perl/bin"
-MANPATH="/usr/${LIBDIR}/perl5/site_perl/man:/usr/${LIBDIR}/perl5/vendor_perl/man:/usr/${LIBDIR}/perl5/core_perl/man"
+PATH="${perl_base}/site_perl/bin:${perl_base}/vendor_perl/bin:${perl_base}/core_perl/bin"
+MANPATH="${perl_base}/site_perl/man:${perl_base}/vendor_perl/man:${perl_base}/core_perl/man"
 EOF
 
     # env.d file for this perl's versioned directories, come after the above in PATH
     # The $((99-$(ever range 2))) trickery is to ensure that most recent comes first
     hereenvd 48.$((99-$(ever range 2)))perl-${SLOT} <<EOF
-PATH="/usr/${LIBDIR}/perl5/site_perl/${SLOT}-bin:/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-bin:/usr/${LIBDIR}/perl5/core_perl/${SLOT}-bin"
-MANPATH="/usr/${LIBDIR}/perl5/site_perl/${SLOT}-man:/usr/${LIBDIR}/perl5/vendor_perl/${SLOT}-man:/usr/${LIBDIR}/perl5/core_perl/${SLOT}-man"
+PATH="${perl_base}/site_perl/${SLOT}-bin:${perl_base}/vendor_perl/${SLOT}-bin:${perl_base}/core_perl/${SLOT}-bin"
+MANPATH="${perl_base}/site_perl/${SLOT}-man:${perl_base}/vendor_perl/${SLOT}-man:${perl_base}/core_perl/${SLOT}-man"
 EOF
 }
 
