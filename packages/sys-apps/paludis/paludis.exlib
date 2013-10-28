@@ -69,7 +69,14 @@ if ever is_scm; then
     DEPENDENCIES+="
         build:
             sys-devel/m4
+    "
+fi
+
+if ever at_least scm; then
+    DEPENDENCIES+="
+        build:
             app-doc/asciidoc[>=8.6.3]
+            app-text/tidy
             app-text/xmlto
     "
 else
@@ -99,7 +106,7 @@ src_configure() {
         $(option_enable pink) \
         $(option_enable python) \
         $(option_enable ruby) \
-        $(ever is_scm || option_enable prebuilt-documentation) \
+        $(ever at_least scm || option_enable prebuilt-documentation) \
         $(option_enable search-index) \
         $(option_enable vim-syntax vim ) \
         $(option_enable xml) \
