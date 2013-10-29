@@ -27,9 +27,9 @@ DEPENDENCIES="
             description = [ sys-apps/sysvinit-tools and this package collide. You probably want sys-apps/sysvinit-tools. ]
             resolution = manual
         ]]
-        !sys-apps/util-linux[<2.22-r3] [[
-            description = [ sys-apps/util-linux 2.22-r3 installs sulogin, utmpdump and mesg previously provided by this package ]
-            resolution = upgrade-blocked-before
+        !sys-apps/util-linux[<2.24] [[
+            description = [ sys-apps/util-linux 2.24 installs tools previously provided by this package ]
+            resolution = uninstall-blocked-after
         ]]
 "
 
@@ -90,6 +90,11 @@ src_install() {
 
     # mesg is provided by util-linux
     edo rm "${IMAGE}"/usr/bin/mesg "${IMAGE}"/usr/share/man/man1/mesg.1
+
+    # last and lastb are provided by util-linux
+    edo rm "${IMAGE}"/usr/bin/last{,b} "${IMAGE}"/usr/share/man/man1/last{,b}.1
+
+    edo find "${IMAGE}" -type d -empty -delete
 }
 
 pkg_postinst() {
