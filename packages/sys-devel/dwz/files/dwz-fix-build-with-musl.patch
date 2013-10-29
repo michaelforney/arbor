@@ -1,0 +1,1965 @@
+Reason: Fix build with musl
+Upstream: FIXME
+
+From ee2a9dc5f9907fd98f1b0bf3e231d9c69e93fc8c Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sun, 27 Oct 2013 00:28:38 +0000
+Subject: [PATCH 1/2] Use {err,warn}{,x} instead of error
+
+---
+ dwz.c | 222 ++++++++++++++++++++++++++++++++++--------------------------------
+ 1 file changed, 114 insertions(+), 108 deletions(-)
+
+diff --git a/dwz.c b/dwz.c
+index 8bea643..365ebf2 100644
+--- a/dwz.c
++++ b/dwz.c
+@@ -19,7 +19,7 @@
+ 
+ #include <assert.h>
+ #include <errno.h>
+-#include <error.h>
++#include <err.h>
+ #include <fcntl.h>
+ #include <getopt.h>
+ #include <setjmp.h>
+@@ -947,7 +947,7 @@ read_abbrev (DSO *dso, unsigned char *ptr)
+ 	  if (form == 2
+ 	      || (form > DW_FORM_flag_present && form != DW_FORM_ref_sig8))
+ 	    {
+-	      error (0, 0, "%s: Unknown DWARF %s",
++	      warnx ("%s: Unknown DWARF %s",
+ 		     dso->filename, get_DW_FORM_str (form));
+ 	      htab_delete (h);
+ 	      return NULL;
+@@ -955,7 +955,7 @@ read_abbrev (DSO *dso, unsigned char *ptr)
+ 	}
+       if (read_uleb128 (p) != 0)
+ 	{
+-	  error (0, 0, "%s: DWARF abbreviation does not end with 2 zeros",
++	  warnx ("%s: DWARF abbreviation does not end with 2 zeros",
+ 		 dso->filename);
+ 	  htab_delete (h);
+ 	  return NULL;
+@@ -987,7 +987,7 @@ read_abbrev (DSO *dso, unsigned char *ptr)
+ 	}
+       if (*slot != NULL)
+ 	{
+-	  error (0, 0, "%s: Duplicate DWARF abbreviation %d", dso->filename,
++	  warnx ("%s: Duplicate DWARF abbreviation %d", dso->filename,
+ 		 t->entry);
+ 	  htab_delete (h);
+ 	  return NULL;
+@@ -1013,7 +1013,7 @@ read_debug_line (DSO *dso, dw_cu_ref cu, uint32_t off)
+ 
+   if (off >= debug_sections[DEBUG_LINE].size - 4)
+     {
+-      error (0, 0, "%s: .debug_line reference above end of section",
++      warnx ("%s: .debug_line reference above end of section",
+ 	     dso->filename);
+       return 1;
+     }
+@@ -1024,14 +1024,14 @@ read_debug_line (DSO *dso, dw_cu_ref cu, uint32_t off)
+   culen = read_32 (ptr);
+   if (culen >= 0xfffffff0)
+     {
+-      error (0, 0, "%s: 64-bit DWARF not supported", dso->filename);
++      warnx ("%s: 64-bit DWARF not supported", dso->filename);
+       return 1;
+     }
+   endcu += culen;
+ 
+   if (endcu > endsec)
+     {
+-      error (0, 0, "%s: .debug_line CU does not fit into section",
++      warnx ("%s: .debug_line CU does not fit into section",
+ 	     dso->filename);
+       return 1;
+     }
+@@ -1039,7 +1039,7 @@ read_debug_line (DSO *dso, dw_cu_ref cu, uint32_t off)
+   value = read_16 (ptr);
+   if (value < 2 || value > 4)
+     {
+-      error (0, 0, "%s: DWARF version %d unhandled", dso->filename,
++      warnx ("%s: DWARF version %d unhandled", dso->filename,
+ 	     value);
+       return 1;
+     }
+@@ -1048,7 +1048,7 @@ read_debug_line (DSO *dso, dw_cu_ref cu, uint32_t off)
+   endprol += read_32 (ptr);
+   if (endprol > endcu)
+     {
+-      error (0, 0, "%s: .debug_line CU prologue does not fit into CU",
++      warnx ("%s: .debug_line CU prologue does not fit into CU",
+ 	     dso->filename);
+       return 1;
+     }
+@@ -1085,7 +1085,7 @@ read_debug_line (DSO *dso, dw_cu_ref cu, uint32_t off)
+ 
+       if (value >= dirt_cnt)
+ 	{
+-	  error (0, 0, "%s: Wrong directory table index %u",
++	  warnx ("%s: Wrong directory table index %u",
+ 		 dso->filename, value);
+ 	  return 1;
+ 	}
+@@ -1111,7 +1111,7 @@ read_debug_line (DSO *dso, dw_cu_ref cu, uint32_t off)
+ 
+       if (value >= dirt_cnt)
+ 	{
+-	  error (0, 0, "%s: Wrong directory table index %u",
++	  warnx ("%s: Wrong directory table index %u",
+ 		 dso->filename, value);
+ 	  return 1;
+ 	}
+@@ -1486,7 +1486,7 @@ read_exprloc (DSO *dso, dw_die_ref die, unsigned char *ptr, size_t len,
+ 	  ref = off_htab_lookup (cu, cu->cu_offset + addr);
+ 	  if (ref == NULL)
+ 	    {
+-	      error (0, 0, "%s: Couldn't find DIE referenced by %s",
++	      warnx ("%s: Couldn't find DIE referenced by %s",
+ 		     dso->filename, get_DW_OP_str (op));
+ 	      return 1;
+ 	    }
+@@ -1532,7 +1532,7 @@ read_exprloc (DSO *dso, dw_die_ref die, unsigned char *ptr, size_t len,
+ 	  ref = off_htab_lookup (NULL, addr);
+ 	  if (ref == NULL)
+ 	    {
+-	      error (0, 0, "%s: Couldn't find DIE referenced by %s",
++	      warnx ("%s: Couldn't find DIE referenced by %s",
+ 		     dso->filename, get_DW_OP_str (op));
+ 	      return 1;
+ 	    }
+@@ -1580,7 +1580,7 @@ read_exprloc (DSO *dso, dw_die_ref die, unsigned char *ptr, size_t len,
+ 	    uint32_t leni = read_uleb128 (ptr);
+ 	    if ((uint64_t) (end - ptr) < leni)
+ 	      {
+-		error (0, 0, "%s: DWARF DW_OP_GNU_entry_value with too large"
++		warnx ("%s: DWARF DW_OP_GNU_entry_value with too large"
+ 		       " length", dso->filename);
+ 		return 1;
+ 	      }
+@@ -1611,7 +1611,7 @@ read_exprloc (DSO *dso, dw_die_ref die, unsigned char *ptr, size_t len,
+ 	  ref = off_htab_lookup (cu, cu->cu_offset + addr);
+ 	  if (ref == NULL)
+ 	    {
+-	      error (0, 0, "%s: Couldn't find DIE referenced by %s",
++	      warnx ("%s: Couldn't find DIE referenced by %s",
+ 		     dso->filename, get_DW_OP_str (op));
+ 	      return 1;
+ 	    }
+@@ -1630,7 +1630,7 @@ read_exprloc (DSO *dso, dw_die_ref die, unsigned char *ptr, size_t len,
+ 	    *need_adjust = true;
+ 	  break;
+ 	default:
+-	  error (0, 0, "%s: Unknown DWARF %s",
++	  warnx ("%s: Unknown DWARF %s",
+ 		 dso->filename, get_DW_OP_str (op));
+ 	  return 1;
+ 	}
+@@ -1693,14 +1693,13 @@ read_loclist (DSO *dso, dw_die_ref die, GElf_Addr offset)
+   ptr = debug_sections[DEBUG_LOC].data;
+   if (ptr == NULL)
+     {
+-      error (0, 0, "%s: loclistptr attribute, yet no .debug_loc section",
++      warnx ("%s: loclistptr attribute, yet no .debug_loc section",
+ 	     dso->filename);
+       return 1;
+     }
+   if (offset >= debug_sections[DEBUG_LOC].size)
+     {
+-      error (0, 0,
+-	     "%s: loclistptr offset %Ld outside of .debug_loc section",
++      warnx ("%s: loclistptr offset %Ld outside of .debug_loc section",
+ 	     dso->filename, (long long) offset);
+       return 1;
+     }
+@@ -1751,7 +1750,7 @@ read_loclist (DSO *dso, dw_die_ref die, GElf_Addr offset)
+ 	}
+       else if (((struct debug_loc_adjust *)*slot)->cu != adj.cu)
+ 	{
+-	  error (0, 0, "%s: can't adjust .debug_loc section because multiple "
++	  warnx ("%s: can't adjust .debug_loc section because multiple "
+ 		       "CUs refer to it", dso->filename);
+ 	  return 1;
+ 	}
+@@ -1881,7 +1880,7 @@ checksum_die (DSO *dso, dw_cu_ref cu, dw_die_ref top_die, dw_die_ref die)
+ 	    case DW_FORM_udata:
+ 	      value = read_uleb128 (ptr); handled = true; break;
+ 	    default:
+-	      error (0, 0, "%s: Unhandled %s for %s",
++	      warnx ("%s: Unhandled %s for %s",
+ 		     dso->filename, get_DW_FORM_str (form),
+ 		     get_DW_AT_str (t->attr[i].attr));
+ 	      return 1;
+@@ -1892,7 +1891,7 @@ checksum_die (DSO *dso, dw_cu_ref cu, dw_die_ref top_die, dw_die_ref die)
+ 	      ptr = old_ptr;
+ 	      if (value > cu->cu_nfiles)
+ 		{
+-		  error (0, 0, "%s: Invalid %s file number %d",
++		  warnx ("%s: Invalid %s file number %d",
+ 			 dso->filename, get_DW_AT_str (t->attr[i].attr),
+ 			 (int) value);
+ 		  return 1;
+@@ -1972,7 +1971,7 @@ checksum_die (DSO *dso, dw_cu_ref cu, dw_die_ref top_die, dw_die_ref die)
+ 	      ref = off_htab_lookup (cu, value);
+ 	      if (ref == NULL)
+ 		{
+-		  error (0, 0, "%s: Couldn't find DIE referenced by %s",
++		  warnx ("%s: Couldn't find DIE referenced by %s",
+ 			 dso->filename, get_DW_AT_str (t->attr[i].attr));
+ 		  return 1;
+ 		}
+@@ -2036,7 +2035,7 @@ checksum_die (DSO *dso, dw_cu_ref cu, dw_die_ref top_die, dw_die_ref die)
+ 		= off_htab_lookup (cu, cu->cu_offset + value);
+ 	      if (ref == NULL)
+ 		{
+-		  error (0, 0, "%s: Couldn't find DIE referenced by %s",
++		  warnx ("%s: Couldn't find DIE referenced by %s",
+ 			 dso->filename, get_DW_AT_str (t->attr[i].attr));
+ 		  return 1;
+ 		}
+@@ -3819,7 +3818,7 @@ note_strp_offset (unsigned int off)
+ 	  strp_htab = NULL;
+ 	  max_strp_off = 0;
+ 	  multifile = NULL;
+-	  error (0, 0, ".debug_str too large for multi-file optimization");
++	  warnx (".debug_str too large for multi-file optimization");
+ 	}
+       *slot = (void *) s;
+     }
+@@ -4513,7 +4512,7 @@ read_debug_info (DSO *dso, int kind)
+ 
+       if (ptr + (kind == DEBUG_TYPES ? 23 : 11) > endsec)
+ 	{
+-	  error (0, 0, "%s: %s CU header too small", dso->filename,
++	  warnx ("%s: %s CU header too small", dso->filename,
+ 		 debug_sections[kind].name);
+ 	  goto fail;
+ 	}
+@@ -4522,14 +4521,14 @@ read_debug_info (DSO *dso, int kind)
+       culen = read_32 (ptr);
+       if (culen >= 0xfffffff0)
+ 	{
+-	  error (0, 0, "%s: 64-bit DWARF not supported", dso->filename);
++	  warnx ("%s: 64-bit DWARF not supported", dso->filename);
+ 	  goto fail;
+ 	}
+       endcu += culen;
+ 
+       if (endcu > endsec)
+ 	{
+-	  error (0, 0, "%s: %s too small", dso->filename,
++	  warnx ("%s: %s too small", dso->filename,
+ 		 debug_sections[kind].name);
+ 	  goto fail;
+ 	}
+@@ -4537,7 +4536,7 @@ read_debug_info (DSO *dso, int kind)
+       cu_version = read_16 (ptr);
+       if (cu_version < 2 || cu_version > 4)
+ 	{
+-	  error (0, 0, "%s: DWARF version %d unhandled", dso->filename,
++	  warnx ("%s: DWARF version %d unhandled", dso->filename,
+ 		 cu_version);
+ 	  goto fail;
+ 	}
+@@ -4546,9 +4545,9 @@ read_debug_info (DSO *dso, int kind)
+       if (value >= debug_sections[DEBUG_ABBREV].size)
+ 	{
+ 	  if (debug_sections[DEBUG_ABBREV].data == NULL)
+-	    error (0, 0, "%s: .debug_abbrev not present", dso->filename);
++	    warnx ("%s: .debug_abbrev not present", dso->filename);
+ 	  else
+-	    error (0, 0, "%s: DWARF CU abbrev offset too large",
++	    warnx ("%s: DWARF CU abbrev offset too large",
+ 		   dso->filename);
+ 	  goto fail;
+ 	}
+@@ -4558,14 +4557,14 @@ read_debug_info (DSO *dso, int kind)
+ 	  ptr_size = read_8 (ptr);
+ 	  if (ptr_size != 4 && ptr_size != 8)
+ 	    {
+-	      error (0, 0, "%s: Invalid DWARF pointer size %d",
++	      warnx ("%s: Invalid DWARF pointer size %d",
+ 		     dso->filename, ptr_size);
+ 	      goto fail;
+ 	    }
+ 	}
+       else if (read_8 (ptr) != ptr_size)
+ 	{
+-	  error (0, 0, "%s: DWARF pointer size differs between CUs",
++	  warnx ("%s: DWARF pointer size differs between CUs",
+ 		 dso->filename);
+ 	  goto fail;
+ 	}
+@@ -4708,14 +4707,14 @@ read_debug_info (DSO *dso, int kind)
+ 	    }
+ 	  if (diep == NULL)
+ 	    {
+-	      error (0, 0, "%s: Wrong %s DIE tree", dso->filename,
++	      warnx ("%s: Wrong %s DIE tree", dso->filename,
+ 		     debug_sections[kind].name);
+ 	      goto fail;
+ 	    }
+ 	  t = htab_find_with_hash (abbrev, &tag, tag.entry);
+ 	  if (t == NULL)
+ 	    {
+-	      error (0, 0, "%s: Could not find DWARF abbreviation %d",
++	      warnx ("%s: Could not find DWARF abbreviation %d",
+ 		     dso->filename, tag.entry);
+ 	      goto fail;
+ 	    }
+@@ -4724,7 +4723,7 @@ read_debug_info (DSO *dso, int kind)
+ 	    {
+ 	      if (ndies == max_die_limit)
+ 		{
+-		  error (0, 0, "%s: Too many DIEs, not optimizing",
++		  warnx ("%s: Too many DIEs, not optimizing",
+ 			 dso->filename);
+ 		  goto fail;
+ 		}
+@@ -4791,7 +4790,7 @@ read_debug_info (DSO *dso, int kind)
+ 		  form = read_uleb128 (ptr);
+ 		  if (ptr > endcu)
+ 		    {
+-		      error (0, 0, "%s: Attributes extend beyond end of CU",
++		      warnx ("%s: Attributes extend beyond end of CU",
+ 			     dso->filename);
+ 		      goto fail;
+ 		    }
+@@ -4912,14 +4911,14 @@ read_debug_info (DSO *dso, int kind)
+ 		  form = DW_FORM_block1;
+ 		  break;
+ 		default:
+-		  error (0, 0, "%s: Unknown DWARF %s",
++		  warnx ("%s: Unknown DWARF %s",
+ 			 dso->filename, get_DW_FORM_str (form));
+ 		  goto fail;
+ 		}
+ 
+ 	      if (ptr > endcu)
+ 		{
+-		  error (0, 0, "%s: Attributes extend beyond end of CU",
++		  warnx ("%s: Attributes extend beyond end of CU",
+ 			 dso->filename);
+ 		  goto fail;
+ 		}
+@@ -4928,7 +4927,7 @@ read_debug_info (DSO *dso, int kind)
+ 		{
+ 		  if (len >= (size_t) (endcu - ptr))
+ 		    {
+-		      error (0, 0, "%s: Attributes extend beyond end of CU",
++		      warnx ("%s: Attributes extend beyond end of CU",
+ 			     dso->filename);
+ 		      goto fail;
+ 		    }
+@@ -4942,7 +4941,7 @@ read_debug_info (DSO *dso, int kind)
+ 			  || t->attr[i].attr
+ 			     > DW_AT_GNU_call_site_target_clobbered))
+ 		    {
+-		      error (0, 0, "%s: Unknown DWARF %s with "
++		      warnx ("%s: Unknown DWARF %s with "
+ 				   "block DW_FORM",
+ 			     dso->filename, get_DW_AT_str (t->attr[i].attr));
+ 		      goto fail;
+@@ -4992,7 +4991,7 @@ read_debug_info (DSO *dso, int kind)
+ 	      && cu->cu_die->die_tag != DW_TAG_type_unit)
+ 	  || cu->cu_die->die_sib != NULL)
+ 	{
+-	  error (0, 0, "%s: %s section chunk doesn't contain a single"
++	  warnx ("%s: %s section chunk doesn't contain a single"
+ 			" compile_unit or partial_unit", dso->filename,
+ 		 debug_sections[kind].name);
+ 	  goto fail;
+@@ -5036,7 +5035,7 @@ read_debug_info (DSO *dso, int kind)
+ 	  dw_die_ref ref = off_htab_lookup (cu, cu->cu_offset + type_offset);
+ 	  if (ref == NULL)
+ 	    {
+-	      error (0, 0, "%s: Couldn't find DIE referenced by type_offset",
++	      warnx ("%s: Couldn't find DIE referenced by type_offset",
+ 		     dso->filename);
+ 	      goto fail;
+ 	    }
+@@ -6666,21 +6665,21 @@ read_macro (DSO *dso)
+ 
+       if (ptr + 4 > endsec)
+ 	{
+-	  error (0, 0, "%s: .debug_macro header too small", dso->filename);
++	  warnx ("%s: .debug_macro header too small", dso->filename);
+ 	  return 1;
+ 	}
+ 
+       version = read_16 (ptr);
+       if (version != 4)
+ 	{
+-	  error (0, 0, "%s: Unhandled .debug_macro version %d", dso->filename,
++	  warnx ("%s: Unhandled .debug_macro version %d", dso->filename,
+ 		 version);
+ 	  return 1;
+ 	}
+       flags = read_8 (ptr);
+       if ((flags & ~2U) != 0)
+ 	{
+-	  error (0, 0, "%s: Unhandled .debug_macro flags %d", dso->filename,
++	  warnx ("%s: Unhandled .debug_macro flags %d", dso->filename,
+ 		 flags);
+ 	  return 1;
+ 	}
+@@ -6736,14 +6735,14 @@ read_macro (DSO *dso)
+ 	      can_share = false;
+ 	      break;
+ 	    default:
+-	      error (0, 0, "%s: Unhandled .debug_macro opcode 0x%x",
++	      warnx ("%s: Unhandled .debug_macro opcode 0x%x",
+ 		     dso->filename, op);
+ 	      return 1;
+ 	    }
+ 	}
+       if (op != 0)
+ 	{
+-	  error (0, 0, "%s: .debug_macro section not zero terminated",
++	  warnx ("%s: .debug_macro section not zero terminated",
+ 		 dso->filename);
+ 	  return 1;
+ 	}
+@@ -7294,7 +7293,7 @@ build_abbrevs_for_die (htab_t h, dw_cu_ref cu, dw_die_ref die,
+ 		    case DW_FORM_data8: value = read_64 (ptr); break;
+ 		    case DW_FORM_udata: value = read_uleb128 (ptr); break;
+ 		    default:
+-		      error (0, 0, "Unhandled %s for %s",
++		      warnx ("Unhandled %s for %s",
+ 			     get_DW_FORM_str (form),
+ 			     get_DW_AT_str (reft->attr[i].attr));
+ 		      return 1;
+@@ -7333,7 +7332,7 @@ build_abbrevs_for_die (htab_t h, dw_cu_ref cu, dw_die_ref die,
+ 		      value = read_32 (ptr);
+ 		      break;
+ 		    default:
+-		      error (0, 0, "Unhandled %s for DW_AT_GNU_macros",
++		      warnx ("Unhandled %s for DW_AT_GNU_macros",
+ 			     get_DW_FORM_str (form));
+ 		      return 1;
+ 		    }
+@@ -7342,7 +7341,7 @@ build_abbrevs_for_die (htab_t h, dw_cu_ref cu, dw_die_ref die,
+ 		    htab_find_with_hash (macro_htab, &me, value);
+ 		  if (m->len)
+ 		    {
+-		      error (0, 0, "DW_AT_GNU_macros referencing "
++		      warnx ("DW_AT_GNU_macros referencing "
+ 				   "transparent include");
+ 		      return 1;
+ 		    }
+@@ -8114,7 +8113,7 @@ compute_abbrevs (DSO *dso)
+ 				      &intracuvec);
+       if (off == -1U)
+ 	{
+-	  error (0, 0, "%s: DW_OP_call2 or typed DWARF stack referenced DIE"
++	  warnx ("%s: DW_OP_call2 or typed DWARF stack referenced DIE"
+ 		       " layed out at too big offset", dso->filename);
+ 	  return 1;
+ 	}
+@@ -9439,21 +9438,21 @@ write_aranges (DSO *dso)
+ 
+       if (end - ptr < 12)
+ 	{
+-	  error (0, 0, "%s: Corrupted .debug_aranges section",
++	  warnx ("%s: Corrupted .debug_aranges section",
+ 		 dso->filename);
+ 	  return 1;
+ 	}
+       culen = read_32 (ptr);
+       if (culen >= 0xfffffff0)
+ 	{
+-	  error (0, 0, "%s: 64-bit DWARF not supported", dso->filename);
++	  warnx ("%s: 64-bit DWARF not supported", dso->filename);
+ 	  return 1;
+ 	}
+ 
+       value = read_16 (ptr);
+       if (value != 2)
+ 	{
+-	  error (0, 0, "%s: DWARF version %d in .debug_aranges unhandled",
++	  warnx ("%s: DWARF version %d in .debug_aranges unhandled",
+ 		 dso->filename, value);
+ 	  return 1;
+ 	}
+@@ -9479,7 +9478,7 @@ write_aranges (DSO *dso)
+ 	      break;
+ 	  if (cu == cucur)
+ 	    {
+-	      error (0, 0, "%s: Couldn't find CU for .debug_aranges "
++	      warnx ("%s: Couldn't find CU for .debug_aranges "
+ 			   "offset 0x%x", dso->filename, cuoff);
+ 	      return 1;
+ 	    }
+@@ -9488,7 +9487,7 @@ write_aranges (DSO *dso)
+ 	  && cu->cu_kind == CU_NORMAL
+ 	  && cu->cu_die->die_remove)
+ 	{
+-	  error (0, 0, "%s: Partial unit referenced in .debug_aranges",
++	  warnx ("%s: Partial unit referenced in .debug_aranges",
+ 		 dso->filename);
+ 	  return 1;
+ 	}
+@@ -9889,7 +9888,7 @@ read_dwarf (DSO *dso, bool quieter)
+ 		{
+ 		  if (debug_sections[j].data)
+ 		    {
+-		      error (0, 0, "%s: Found two copies of %s section",
++		      warnx ("%s: Found two copies of %s section",
+ 			     dso->filename, name);
+ 		      return 1;
+ 		    }
+@@ -9909,7 +9908,7 @@ read_dwarf (DSO *dso, bool quieter)
+ 
+ 	    if (debug_sections[j].name == NULL)
+ 	      {
+-		error (0, 0, "%s: Unknown debugging section %s",
++		warnx ("%s: Unknown debugging section %s",
+ 		       dso->filename, name);
+ 		return 1;
+ 	      }
+@@ -9921,21 +9920,21 @@ read_dwarf (DSO *dso, bool quieter)
+     init_endian (dso->ehdr.e_ident[EI_DATA]);
+   else
+     {
+-      error (0, 0, "%s: Wrong ELF data enconding", dso->filename);
++      warnx ("%s: Wrong ELF data enconding", dso->filename);
+       return 1;
+     }
+ 
+   if (debug_sections[DEBUG_INFO].data == NULL)
+     {
+       if (!quieter)
+-	error (0, 0, "%s: .debug_info section not present",
++	warnx ("%s: .debug_info section not present",
+ 	       dso->filename);
+       return 1;
+     }
+ 
+   if (debug_sections[GNU_DEBUGALTLINK].data != NULL)
+     {
+-      error (0, 0, "%s: .gnu_debugaltlink section already present",
++      warnx ("%s: .gnu_debugaltlink section already present",
+ 	     dso->filename);
+       return 1;
+     }
+@@ -9955,19 +9954,19 @@ fdopen_dso (int fd, const char *name)
+   elf = elf_begin (fd, ELF_C_READ_MMAP, NULL);
+   if (elf == NULL)
+     {
+-      error (0, 0, "cannot open ELF file: %s", elf_errmsg (-1));
++      warnx ("cannot open ELF file: %s", elf_errmsg (-1));
+       goto error_out;
+     }
+ 
+   if (elf_kind (elf) != ELF_K_ELF)
+     {
+-      error (0, 0, "\"%s\" is not an ELF file", name);
++      warnx ("\"%s\" is not an ELF file", name);
+       goto error_out;
+     }
+ 
+   if (gelf_getehdr (elf, &ehdr) == NULL)
+     {
+-      error (0, 0, "cannot get the ELF header: %s",
++      warnx ("cannot get the ELF header: %s",
+ 	     elf_errmsg (-1));
+       goto error_out;
+     }
+@@ -9975,7 +9974,7 @@ fdopen_dso (int fd, const char *name)
+   if (ehdr.e_type != ET_DYN && ehdr.e_type != ET_EXEC
+       && (!rd_multifile || ehdr.e_type != ET_REL))
+     {
+-      error (0, 0, "\"%s\" is not a shared library", name);
++      warnx ("\"%s\" is not a shared library", name);
+       goto error_out;
+     }
+ 
+@@ -9986,7 +9985,8 @@ fdopen_dso (int fd, const char *name)
+ 		+ strlen (name) + 1);
+   if (!dso)
+     {
+-      error (0, ENOMEM, "Could not open DSO");
++      errno = ENOMEM;
++      warn ("Could not open DSO");
+       goto error_out;
+     }
+ 
+@@ -10116,8 +10116,9 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+       shstrtab = (char *) malloc (dso->shdr[dso->ehdr.e_shstrndx].sh_size);
+       if (shstrtab == NULL)
+ 	{
+-	  error (0, ENOMEM, "Failed to adjust .shstrtab for %s",
+-		 dso->filename);
++	  errno = ENOMEM;
++	  warn ("Failed to adjust .shstrtab for %s",
++		dso->filename);
+ 	  return 1;
+ 	}
+     }
+@@ -10132,7 +10133,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+       file = (const char *) filename;
+       if (fd == -1)
+ 	{
+-	  error (0, errno, "Failed to create temporary file for %s",
++	  warn ("Failed to create temporary file for %s",
+ 		 dso->filename);
+ 	  free (shstrtab);
+ 	  return 1;
+@@ -10143,7 +10144,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+       fd = open (file, O_RDWR | O_CREAT, 0600);
+       if (fd == -1)
+ 	{
+-	  error (0, errno, "Failed to open %s for writing", file);
++	  warn ("Failed to open %s for writing", file);
+ 	  free (shstrtab);
+ 	  return 1;
+ 	}
+@@ -10152,7 +10153,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+   elf = elf_begin (fd, ELF_C_WRITE, NULL);
+   if (elf == NULL)
+     {
+-      error (0, 0, "cannot open ELF file: %s", elf_errmsg (-1));
++      warnx ("cannot open ELF file: %s", elf_errmsg (-1));
+       unlink (file);
+       close (fd);
+       free (shstrtab);
+@@ -10182,7 +10183,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+       || gelf_update_ehdr (elf, &ehdr) == 0
+       || gelf_newphdr (elf, ehdr.e_phnum) == 0)
+     {
+-      error (0, 0, "Could not create new ELF headers");
++      warnx ("Could not create new ELF headers");
+       unlink (file);
+       elf_end (elf);
+       close (fd);
+@@ -10264,7 +10265,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+ 
+   if (elf_update (elf, ELF_C_WRITE_MMAP) == -1)
+     {
+-      error (0, 0, "%s: elf_update failed", dso->filename);
++      warnx ("%s: elf_update failed", dso->filename);
+       unlink (file);
+       elf_end (elf);
+       close (fd);
+@@ -10274,7 +10275,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+ 
+   if (elf_end (elf) < 0)
+     {
+-      error (0, 0, "elf_end failed: %s\n", elf_errmsg (elf_errno ()));
++      warnx ("elf_end failed: %s\n", elf_errmsg (elf_errno ()));
+       unlink (file);
+       elf_end (elf);
+       close (fd);
+@@ -10289,7 +10290,7 @@ write_dso (DSO *dso, const char *file, struct stat *st)
+ 
+   if (filename != NULL && rename (filename, dso->filename))
+     {
+-      error (0, errno, "Failed to rename temporary file over %s",
++      warn ("Failed to rename temporary file over %s",
+ 	     dso->filename);
+       unlink (file);
+       /* | (ret & 1) to silence up __wur warning for fchown.  */
+@@ -10687,7 +10688,7 @@ write_multifile (DSO *dso)
+ 	  && multi_endian != (do_read_32 == buf_read_ule32
+ 			      ? ELFDATA2LSB : ELFDATA2MSB)))
+     {
+-      error (0, 0, "Multi-file optimization not allowed for different"
++      warnx ("Multi-file optimization not allowed for different"
+ 		   "pointer sizes or endianity");
+       multifile = NULL;
+       return 1;
+@@ -10738,7 +10739,7 @@ write_multifile (DSO *dso)
+ 				  + debug_sections[DEBUG_MACRO].new_size)
+ 		  < multi_macro_off)
+ 	{
+-	  error (0, 0, "Multifile temporary files too large");
++	  warnx ("Multifile temporary files too large");
+ 	  multifile = NULL;
+ 	  ret = 1;
+ 	}
+@@ -10768,7 +10769,7 @@ write_multifile (DSO *dso)
+ 	      || (strp_htab != NULL && write_multifile_strp ())
+ 	      || (line_htab != NULL && write_multifile_line ()))
+ 	    {
+-	      error (0, 0, "Error writing multi-file temporary files");
++	      warnx ("Error writing multi-file temporary files");
+ 	      ret = 1;
+ 	    }
+ 	  else
+@@ -10894,13 +10895,13 @@ dwz (const char *file, const char *outfile, struct file_result *res,
+   fd = open (file, O_RDONLY);
+   if (fd < 0)
+     {
+-      error (0, errno, "Failed to open input file %s", file);
++      warn ("Failed to open input file %s", file);
+       return 1;
+     }
+   if (fstat (fd, &st) < 0)
+     {
+       close (fd);
+-      error (0, errno, "Failed to stat input file %s", file);
++      warn ("Failed to stat input file %s", file);
+       return 1;
+     }
+ 
+@@ -10965,7 +10966,8 @@ dwz (const char *file, const char *outfile, struct file_result *res,
+   obstack_alloc_failed_handler = dwz_oom;
+   if (setjmp (oom_buf))
+     {
+-      error (0, ENOMEM, "%s: Could not allocate memory", dso->filename);
++      errno = ENOMEM;
++      warn ("%s: Could not allocate memory", dso->filename);
+ 
+       cleanup ();
+       ret = 1;
+@@ -11002,7 +11004,7 @@ dwz (const char *file, const char *outfile, struct file_result *res,
+ 		  + debug_sections[DEBUG_TYPES].size)
+ 	{
+ 	  if (!quiet || outfile != NULL)
+-	    error (0, 0, "%s: DWARF compression not beneficial "
++	    warnx ("%s: DWARF compression not beneficial "
+ 			 "- old size %ld new size %ld", dso->filename,
+ 		   (unsigned long) (debug_sections[DEBUG_INFO].size
+ 				    + debug_sections[DEBUG_ABBREV].size
+@@ -11050,7 +11052,7 @@ dwz (const char *file, const char *outfile, struct file_result *res,
+ 			    free (p1);
+ 			  else if (p2)
+ 			    free (p2);
+-			  error (0, 0, "Could not compute relative multifile "
++			  warnx ("Could not compute relative multifile "
+ 				       "pathname from %s to %s",
+ 				 file, multifile);
+ 			  goto failure;
+@@ -11139,7 +11141,7 @@ dwz (const char *file, const char *outfile, struct file_result *res,
+ 
+   if (elf_end (dso->elf) < 0)
+     {
+-      error (0, 0, "elf_end failed: %s\n", elf_errmsg (elf_errno ()));
++      warnx ("elf_end failed: %s\n", elf_errmsg (elf_errno ()));
+       ret = 1;
+     }
+   close (fd);
+@@ -11186,7 +11188,7 @@ optimize_multifile (void)
+       init_endian (multi_endian);
+       if (write_multifile_line ())
+ 	{
+-	  error (0, 0, "Error writing multi-file temporary files");
++	  warnx ("Error writing multi-file temporary files");
+ 	  return -1;
+ 	}
+     }
+@@ -11217,7 +11219,7 @@ optimize_multifile (void)
+       || debug_sections[DEBUG_STR].data == MAP_FAILED
+       || debug_sections[DEBUG_MACRO].data == MAP_FAILED)
+     {
+-      error (0, 0, "Error mmapping multi-file temporary files");
++      warnx ("Error mmapping multi-file temporary files");
+     fail:
+       cleanup ();
+       if (elf)
+@@ -11268,7 +11270,8 @@ optimize_multifile (void)
+ #endif
+   if (setjmp (oom_buf))
+     {
+-      error (0, ENOMEM, "%s: Could not allocate memory", dso->filename);
++      errno = ENOMEM;
++      warn ("%s: Could not allocate memory", dso->filename);
+       goto fail;
+     }
+   else
+@@ -11352,14 +11355,14 @@ optimize_multifile (void)
+   fd = open (multifile, O_RDWR | O_CREAT, 0600);
+   if (fd < 0)
+     {
+-      error (0, errno, "Failed to open multi-file common file %s", multifile);
++      warn ("Failed to open multi-file common file %s", multifile);
+       goto fail;
+     }
+ 
+   elf = elf_begin (fd, ELF_C_WRITE, NULL);
+   if (elf == NULL)
+     {
+-      error (0, 0, "cannot open ELF file: %s", elf_errmsg (-1));
++      warnx ("cannot open ELF file: %s", elf_errmsg (-1));
+       goto fail;
+     }
+ 
+@@ -11399,7 +11402,7 @@ optimize_multifile (void)
+       || memcpy (e_ident, multi_ehdr.e_ident, EI_NIDENT) == NULL
+       || gelf_update_ehdr (elf, &multi_ehdr) == 0)
+     {
+-      error (0, 0, "Could not create new ELF headers");
++      warnx ("Could not create new ELF headers");
+       goto fail;
+     }
+   elf_flagelf (elf, ELF_C_SET, ELF_F_LAYOUT | ELF_F_PERMISSIVE);
+@@ -11491,13 +11494,13 @@ optimize_multifile (void)
+ 
+   if (elf_update (elf, ELF_C_WRITE_MMAP) == -1)
+     {
+-      error (0, 0, "%s: elf_update failed", multifile);
++      warnx ("%s: elf_update failed", multifile);
+       goto fail;
+     }
+ 
+   if (elf_end (elf) < 0)
+     {
+-      error (0, 0, "elf_end failed: %s\n", elf_errmsg (elf_errno ()));
++      warnx ("elf_end failed: %s\n", elf_errmsg (elf_errno ()));
+       goto fail;
+     }
+ 
+@@ -11549,7 +11552,8 @@ read_multifile (int fd)
+   obstack_alloc_failed_handler = dwz_oom;
+   if (setjmp (oom_buf))
+     {
+-      error (0, ENOMEM, "%s: Could not allocate memory", dso->filename);
++      errno = ENOMEM;
++      warn ("%s: Could not allocate memory", dso->filename);
+ 
+     fail:
+       elf_end (dso->elf);
+@@ -11689,10 +11693,10 @@ static struct option dwz_options[] =
+ static void
+ usage (void)
+ {
+-  error (1, 0,
+-	 "Usage:\n"
+-	 "  dwz [-v] [-q] [-h] [-l COUNT] [-L COUNT] [-m COMMONFILE] [-M NAME] [-r] [FILES]\n"
+-	 "  dwz [-v] [-q] [-l COUNT] [-L COUNT] -o OUTFILE FILE\n");
++  errx (1,
++	"Usage:\n"
++	"  dwz [-v] [-q] [-h] [-l COUNT] [-L COUNT] [-m COMMONFILE] [-M NAME] [-r] [FILES]\n"
++	"  dwz [-v] [-q] [-l COUNT] [-L COUNT] -o OUTFILE FILE\n");
+ }
+ 
+ /* Print version and exit.  */
+@@ -11721,7 +11725,7 @@ main (int argc, char *argv[])
+   bool hardlink = false;
+ 
+   if (elf_version (EV_CURRENT) == EV_NONE)
+-    error (1, 0, "library out of date\n");
++    errx (1, "library out of date\n");
+ 
+   while (1)
+     {
+@@ -11763,14 +11767,14 @@ main (int argc, char *argv[])
+ 	case 'l':
+ 	  l = strtoul (optarg, &end, 0);
+ 	  if (*end != '\0' || optarg == end || (unsigned int) l != l)
+-	    error (1, 0, "invalid argument -l %s", optarg);
++	    errx (1, "invalid argument -l %s", optarg);
+ 	  low_mem_die_limit = l;
+ 	  break;
+ 
+ 	case 'L':
+ 	  l = strtoul (optarg, &end, 0);
+ 	  if (*end != '\0' || optarg == end || (unsigned int) l != l)
+-	    error (1, 0, "invalid argument -L %s", optarg);
++	    errx (1, "invalid argument -L %s", optarg);
+ 	  max_die_limit = l;
+ 	  break;
+ 
+@@ -11781,13 +11785,13 @@ main (int argc, char *argv[])
+     }
+ 
+   if (multifile_relative && multifile_name)
+-    error (1, 0, "-M and -r options can't be specified together");
++    errx (1, "-M and -r options can't be specified together");
+ 
+   if (optind == argc || optind + 1 == argc)
+     {
+       if (multifile != NULL)
+ 	{
+-	  error (0, 0, "Too few files for multifile optimization");
++	  warnx ("Too few files for multifile optimization");
+ 	  multifile = NULL;
+ 	}
+       ret = dwz (optind == argc ? "a.out" : argv[optind], outfile,
+@@ -11806,10 +11810,12 @@ main (int argc, char *argv[])
+       bool hardlinks = false;
+       int successcount = 0;
+ 
+-      if (resa == NULL)
+-	error (1, ENOMEM, "failed to allocate result array");
++      if (resa == NULL) {
++	errno = ENOMEM;
++	err (1, "failed to allocate result array");
++      }
+       if (outfile != NULL)
+-	error (1, 0, "-o option not allowed for multiple files");
++	errx (1, "-o option not allowed for multiple files");
+       if (multifile)
+ 	{
+ 	  char buf[sizeof "/tmp/dwz.debug_abbrev.XXXXXX"];
+@@ -11839,7 +11845,7 @@ main (int argc, char *argv[])
+ 	      || multi_str_fd == -1
+ 	      || multi_macro_fd == -1)
+ 	    {
+-	      error (0, 0, "Could not create multifile temporary files");
++	      warnx ("Could not create multifile temporary files");
+ 	      multifile = NULL;
+ 	    }
+ 	}
+@@ -11862,7 +11868,7 @@ main (int argc, char *argv[])
+ 	}
+       if (multifile && successcount < 2)
+ 	{
+-	  error (0, 0, "Too few files for multifile optimization");
++	  warnx ("Too few files for multifile optimization");
+ 	  multifile = NULL;
+ 	}
+       if (multifile)
+-- 
+1.8.4
+
+
+From 7566f66cc60c1ec292adcdf1e1947575ef7f7ef1 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Tue, 29 Oct 2013 21:26:24 +0000
+Subject: [PATCH 2/2] Add obstack fallback
+
+---
+ Makefile  |   5 +
+ obstack.c | 486 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ obstack.h | 512 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 1003 insertions(+)
+ create mode 100644 obstack.c
+ create mode 100644 obstack.h
+
+diff --git a/Makefile b/Makefile
+index fbac9b5..d42c5b5 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,5 @@
+ CFLAGS = -O2 -g
++HAVE_OBSTACK = 1
+ DWZ_VERSION := $(shell cat VERSION)
+ override CFLAGS += -Wall -W -D_FILE_OFFSET_BITS=64 -DDWZ_VERSION='"$(DWZ_VERSION)"'
+ prefix = /usr
+@@ -7,6 +8,10 @@ bindir = $(exec_prefix)/bin
+ datarootdir = $(prefix)/share
+ mandir = $(datarootdir)/man
+ OBJECTS = dwz.o hashtab.o sha1.o dwarfnames.o
++ifeq ($(HAVE_OBSTACK), 0)
++OBJECTS += obstack.o
++override CFLAGS += -I.
++endif
+ dwz: $(OBJECTS)
+ 	$(CC) $(LDFLAGS) -o $@ $^ -lelf
+ install: dwz
+diff --git a/obstack.c b/obstack.c
+new file mode 100644
+index 0000000..2ba0378
+--- /dev/null
++++ b/obstack.c
+@@ -0,0 +1,486 @@
++/* obstack.c - subroutines used implicitly by object stack macros
++
++   Copyright (C) 1988-1994, 1996-2006, 2009-2013 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++#include "obstack.h"
++
++/* NOTE BEFORE MODIFYING THIS FILE: This version number must be
++   incremented whenever callers compiled using an old obstack.h can no
++   longer properly call the functions in this obstack.c.  */
++#define OBSTACK_INTERFACE_VERSION 1
++
++/* Comment out all this code if we are using the GNU C Library, and are not
++   actually compiling the library itself, and the installed library
++   supports the same library interface we do.  This code is part of the GNU
++   C Library, but also included in many other GNU distributions.  Compiling
++   and linking in this code is a waste when using the GNU C library
++   (especially if it is a shared library).  Rather than having every GNU
++   program understand 'configure --with-gnu-libc' and omit the object
++   files, it is simpler to just do this in the source for each such file.  */
++
++#include <stdio.h>              /* Random thing to get __GNU_LIBRARY__.  */
++#if !defined _LIBC && defined __GNU_LIBRARY__ && __GNU_LIBRARY__ > 1
++# include <gnu-versions.h>
++# if _GNU_OBSTACK_INTERFACE_VERSION == OBSTACK_INTERFACE_VERSION
++#  define ELIDE_CODE
++# endif
++#endif
++
++#include <stddef.h>
++
++#ifndef ELIDE_CODE
++
++# include <stdint.h>
++
++/* Determine default alignment.  */
++union fooround
++{
++  uintmax_t i;
++  long double d;
++  void *p;
++};
++struct fooalign
++{
++  char c;
++  union fooround u;
++};
++/* If malloc were really smart, it would round addresses to DEFAULT_ALIGNMENT.
++   But in fact it might be less smart and round addresses to as much as
++   DEFAULT_ROUNDING.  So we prepare for it to do that.  */
++enum
++  {
++    DEFAULT_ALIGNMENT = offsetof (struct fooalign, u),
++    DEFAULT_ROUNDING = sizeof (union fooround)
++  };
++
++/* When we copy a long block of data, this is the unit to do it with.
++   On some machines, copying successive ints does not work;
++   in such a case, redefine COPYING_UNIT to 'long' (if that works)
++   or 'char' as a last resort.  */
++# ifndef COPYING_UNIT
++#  define COPYING_UNIT int
++# endif
++
++
++/* The functions allocating more room by calling 'obstack_chunk_alloc'
++   jump to the handler pointed to by 'obstack_alloc_failed_handler'.
++   This can be set to a user defined function which should either
++   abort gracefully or use longjump - but shouldn't return.  This
++   variable by default points to the internal function
++   'print_and_abort'.  */
++static _Noreturn void print_and_abort (void);
++void (*obstack_alloc_failed_handler) (void) = print_and_abort;
++
++/* Exit value used when 'print_and_abort' is used.  */
++# include <stdlib.h>
++int obstack_exit_failure = EXIT_FAILURE;
++
++# ifdef _LIBC
++#  if SHLIB_COMPAT (libc, GLIBC_2_0, GLIBC_2_3_4)
++/* A looong time ago (before 1994, anyway; we're not sure) this global variable
++   was used by non-GNU-C macros to avoid multiple evaluation.  The GNU C
++   library still exports it because somebody might use it.  */
++struct obstack *_obstack_compat;
++compat_symbol (libc, _obstack_compat, _obstack, GLIBC_2_0);
++#  endif
++# endif
++
++/* Define a macro that either calls functions with the traditional malloc/free
++   calling interface, or calls functions with the mmalloc/mfree interface
++   (that adds an extra first argument), based on the state of use_extra_arg.
++   For free, do not use ?:, since some compilers, like the MIPS compilers,
++   do not allow (expr) ? void : void.  */
++
++# define CALL_CHUNKFUN(h, size) \
++  (((h) -> use_extra_arg) \
++   ? (*(h)->chunkfun) ((h)->extra_arg, (size)) \
++   : (*(struct _obstack_chunk *(*) (long)) (h)->chunkfun) ((size)))
++
++# define CALL_FREEFUN(h, old_chunk) \
++  do { \
++    if ((h) -> use_extra_arg) \
++      (*(h)->freefun) ((h)->extra_arg, (old_chunk)); \
++    else \
++      (*(void (*) (void *)) (h)->freefun) ((old_chunk)); \
++  } while (0)
++
++
++/* Initialize an obstack H for use.  Specify chunk size SIZE (0 means default).
++   Objects start on multiples of ALIGNMENT (0 means use default).
++   CHUNKFUN is the function to use to allocate chunks,
++   and FREEFUN the function to free them.
++
++   Return nonzero if successful, calls obstack_alloc_failed_handler if
++   allocation fails.  */
++
++int
++_obstack_begin (struct obstack *h,
++                int size, int alignment,
++                void *(*chunkfun) (long),
++                void (*freefun) (void *))
++{
++  register struct _obstack_chunk *chunk; /* points to new chunk */
++
++  if (alignment == 0)
++    alignment = DEFAULT_ALIGNMENT;
++  if (size == 0)
++    /* Default size is what GNU malloc can fit in a 4096-byte block.  */
++    {
++      /* 12 is sizeof (mhead) and 4 is EXTRA from GNU malloc.
++         Use the values for range checking, because if range checking is off,
++         the extra bytes won't be missed terribly, but if range checking is on
++         and we used a larger request, a whole extra 4096 bytes would be
++         allocated.
++
++         These number are irrelevant to the new GNU malloc.  I suspect it is
++         less sensitive to the size of the request.  */
++      int extra = ((((12 + DEFAULT_ROUNDING - 1) & ~(DEFAULT_ROUNDING - 1))
++                    + 4 + DEFAULT_ROUNDING - 1)
++                   & ~(DEFAULT_ROUNDING - 1));
++      size = 4096 - extra;
++    }
++
++  h->chunkfun = (struct _obstack_chunk * (*)(void *, long)) chunkfun;
++  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
++  h->chunk_size = size;
++  h->alignment_mask = alignment - 1;
++  h->use_extra_arg = 0;
++
++  chunk = h->chunk = CALL_CHUNKFUN (h, h -> chunk_size);
++  if (!chunk)
++    (*obstack_alloc_failed_handler) ();
++  h->next_free = h->object_base = __PTR_ALIGN ((char *) chunk, chunk->contents,
++                                               alignment - 1);
++  h->chunk_limit = chunk->limit
++    = (char *) chunk + h->chunk_size;
++  chunk->prev = 0;
++  /* The initial chunk now contains no empty object.  */
++  h->maybe_empty_object = 0;
++  h->alloc_failed = 0;
++  return 1;
++}
++
++int
++_obstack_begin_1 (struct obstack *h, int size, int alignment,
++                  void *(*chunkfun) (void *, long),
++                  void (*freefun) (void *, void *),
++                  void *arg)
++{
++  register struct _obstack_chunk *chunk; /* points to new chunk */
++
++  if (alignment == 0)
++    alignment = DEFAULT_ALIGNMENT;
++  if (size == 0)
++    /* Default size is what GNU malloc can fit in a 4096-byte block.  */
++    {
++      /* 12 is sizeof (mhead) and 4 is EXTRA from GNU malloc.
++         Use the values for range checking, because if range checking is off,
++         the extra bytes won't be missed terribly, but if range checking is on
++         and we used a larger request, a whole extra 4096 bytes would be
++         allocated.
++
++         These number are irrelevant to the new GNU malloc.  I suspect it is
++         less sensitive to the size of the request.  */
++      int extra = ((((12 + DEFAULT_ROUNDING - 1) & ~(DEFAULT_ROUNDING - 1))
++                    + 4 + DEFAULT_ROUNDING - 1)
++                   & ~(DEFAULT_ROUNDING - 1));
++      size = 4096 - extra;
++    }
++
++  h->chunkfun = (struct _obstack_chunk * (*)(void *,long)) chunkfun;
++  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
++  h->chunk_size = size;
++  h->alignment_mask = alignment - 1;
++  h->extra_arg = arg;
++  h->use_extra_arg = 1;
++
++  chunk = h->chunk = CALL_CHUNKFUN (h, h -> chunk_size);
++  if (!chunk)
++    (*obstack_alloc_failed_handler) ();
++  h->next_free = h->object_base = __PTR_ALIGN ((char *) chunk, chunk->contents,
++                                               alignment - 1);
++  h->chunk_limit = chunk->limit
++    = (char *) chunk + h->chunk_size;
++  chunk->prev = 0;
++  /* The initial chunk now contains no empty object.  */
++  h->maybe_empty_object = 0;
++  h->alloc_failed = 0;
++  return 1;
++}
++
++/* Allocate a new current chunk for the obstack *H
++   on the assumption that LENGTH bytes need to be added
++   to the current object, or a new object of length LENGTH allocated.
++   Copies any partial object from the end of the old chunk
++   to the beginning of the new one.  */
++
++void
++_obstack_newchunk (struct obstack *h, int length)
++{
++  register struct _obstack_chunk *old_chunk = h->chunk;
++  register struct _obstack_chunk *new_chunk;
++  register long new_size;
++  register long obj_size = h->next_free - h->object_base;
++  register long i;
++  long already;
++  char *object_base;
++
++  /* Compute size for new chunk.  */
++  new_size = (obj_size + length) + (obj_size >> 3) + h->alignment_mask + 100;
++  if (new_size < h->chunk_size)
++    new_size = h->chunk_size;
++
++  /* Allocate and initialize the new chunk.  */
++  new_chunk = CALL_CHUNKFUN (h, new_size);
++  if (!new_chunk)
++    (*obstack_alloc_failed_handler) ();
++  h->chunk = new_chunk;
++  new_chunk->prev = old_chunk;
++  new_chunk->limit = h->chunk_limit = (char *) new_chunk + new_size;
++
++  /* Compute an aligned object_base in the new chunk */
++  object_base =
++    __PTR_ALIGN ((char *) new_chunk, new_chunk->contents, h->alignment_mask);
++
++  /* Move the existing object to the new chunk.
++     Word at a time is fast and is safe if the object
++     is sufficiently aligned.  */
++  if (h->alignment_mask + 1 >= DEFAULT_ALIGNMENT)
++    {
++      for (i = obj_size / sizeof (COPYING_UNIT) - 1;
++           i >= 0; i--)
++        ((COPYING_UNIT *)object_base)[i]
++          = ((COPYING_UNIT *)h->object_base)[i];
++      /* We used to copy the odd few remaining bytes as one extra COPYING_UNIT,
++         but that can cross a page boundary on a machine
++         which does not do strict alignment for COPYING_UNITS.  */
++      already = obj_size / sizeof (COPYING_UNIT) * sizeof (COPYING_UNIT);
++    }
++  else
++    already = 0;
++  /* Copy remaining bytes one by one.  */
++  for (i = already; i < obj_size; i++)
++    object_base[i] = h->object_base[i];
++
++  /* If the object just copied was the only data in OLD_CHUNK,
++     free that chunk and remove it from the chain.
++     But not if that chunk might contain an empty object.  */
++  if (! h->maybe_empty_object
++      && (h->object_base
++          == __PTR_ALIGN ((char *) old_chunk, old_chunk->contents,
++                          h->alignment_mask)))
++    {
++      new_chunk->prev = old_chunk->prev;
++      CALL_FREEFUN (h, old_chunk);
++    }
++
++  h->object_base = object_base;
++  h->next_free = h->object_base + obj_size;
++  /* The new chunk certainly contains no empty object yet.  */
++  h->maybe_empty_object = 0;
++}
++# ifdef _LIBC
++libc_hidden_def (_obstack_newchunk)
++# endif
++
++/* Return nonzero if object OBJ has been allocated from obstack H.
++   This is here for debugging.
++   If you use it in a program, you are probably losing.  */
++
++/* Suppress -Wmissing-prototypes warning.  We don't want to declare this in
++   obstack.h because it is just for debugging.  */
++int _obstack_allocated_p (struct obstack *h, void *obj);
++
++int
++_obstack_allocated_p (struct obstack *h, void *obj)
++{
++  register struct _obstack_chunk *lp;   /* below addr of any objects in this chunk */
++  register struct _obstack_chunk *plp;  /* point to previous chunk if any */
++
++  lp = (h)->chunk;
++  /* We use >= rather than > since the object cannot be exactly at
++     the beginning of the chunk but might be an empty object exactly
++     at the end of an adjacent chunk.  */
++  while (lp != 0 && ((void *) lp >= obj || (void *) (lp)->limit < obj))
++    {
++      plp = lp->prev;
++      lp = plp;
++    }
++  return lp != 0;
++}
++
++/* Free objects in obstack H, including OBJ and everything allocate
++   more recently than OBJ.  If OBJ is zero, free everything in H.  */
++
++# undef obstack_free
++
++void
++__obstack_free (struct obstack *h, void *obj)
++{
++  register struct _obstack_chunk *lp;   /* below addr of any objects in this chunk */
++  register struct _obstack_chunk *plp;  /* point to previous chunk if any */
++
++  lp = h->chunk;
++  /* We use >= because there cannot be an object at the beginning of a chunk.
++     But there can be an empty object at that address
++     at the end of another chunk.  */
++  while (lp != 0 && ((void *) lp >= obj || (void *) (lp)->limit < obj))
++    {
++      plp = lp->prev;
++      CALL_FREEFUN (h, lp);
++      lp = plp;
++      /* If we switch chunks, we can't tell whether the new current
++         chunk contains an empty object, so assume that it may.  */
++      h->maybe_empty_object = 1;
++    }
++  if (lp)
++    {
++      h->object_base = h->next_free = (char *) (obj);
++      h->chunk_limit = lp->limit;
++      h->chunk = lp;
++    }
++  else if (obj != 0)
++    /* obj is not in any of the chunks! */
++    abort ();
++}
++
++# ifdef _LIBC
++/* Older versions of libc used a function _obstack_free intended to be
++   called by non-GCC compilers.  */
++strong_alias (obstack_free, _obstack_free)
++# endif
++
++int
++_obstack_memory_used (struct obstack *h)
++{
++  register struct _obstack_chunk* lp;
++  register int nbytes = 0;
++
++  for (lp = h->chunk; lp != 0; lp = lp->prev)
++    {
++      nbytes += lp->limit - (char *) lp;
++    }
++  return nbytes;
++}
++
++/* Define the error handler.  */
++# include <libintl.h>
++# ifndef _
++#  define _(msgid) gettext (msgid)
++# endif
++
++# ifdef _LIBC
++#  include <libio/iolibio.h>
++# endif
++
++static _Noreturn void
++print_and_abort (void)
++{
++  /* Don't change any of these strings.  Yes, it would be possible to add
++     the newline to the string and use fputs or so.  But this must not
++     happen because the "memory exhausted" message appears in other places
++     like this and the translation should be reused instead of creating
++     a very similar string which requires a separate translation.  */
++# ifdef _LIBC
++  (void) __fxprintf (NULL, "%s\n", _("memory exhausted"));
++# else
++  fprintf (stderr, "%s\n", _("memory exhausted"));
++# endif
++  exit (obstack_exit_failure);
++}
++
++/* obstack_printf */
++# include <errno.h>
++
++char *
++vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
++{
++    size_t bufsize = *lengthp;
++
++    if (resultbuf && (*lengthp = snprintf(resultbuf, bufsize, format, args)) <= bufsize)
++        return resultbuf;
++
++    if ((*lengthp = vasprintf (&resultbuf, format, args)) == (size_t) -1)
++        return NULL;
++
++    return resultbuf;
++}
++
++/* Grow an obstack with formatted output.  Return the number of bytes
++   added to OBS.  No trailing nul byte is added, and the object should
++   be closed with obstack_finish before use.
++
++   Upon memory allocation error, call obstack_alloc_failed_handler.
++   Upon other error, return -1.  */
++int
++obstack_printf (struct obstack *obs, const char *format, ...)
++{
++  va_list args;
++  int result;
++
++  va_start (args, format);
++  result = obstack_vprintf (obs, format, args);
++  va_end (args);
++  return result;
++}
++
++/* Grow an obstack with formatted output.  Return the number of bytes
++   added to OBS.  No trailing nul byte is added, and the object should
++   be closed with obstack_finish before use.
++
++   Upon memory allocation error, call obstack_alloc_failed_handler.
++   Upon other error, return -1.  */
++int
++obstack_vprintf (struct obstack *obs, const char *format, va_list args)
++{
++  /* If we are close to the end of the current obstack chunk, use a
++     stack-allocated buffer and copy, to reduce the likelihood of a
++     small-size malloc.  Otherwise, print directly into the
++     obstack.  */
++  enum { CUTOFF = 1024 };
++  char buf[CUTOFF];
++  char *base = obstack_next_free (obs);
++  size_t len = obstack_room (obs);
++  char *str;
++
++  if (len < CUTOFF)
++    {
++      base = buf;
++      len = CUTOFF;
++    }
++  str = vasnprintf (base, &len, format, args);
++  if (!str)
++    {
++      if (errno == ENOMEM)
++        obstack_alloc_failed_handler ();
++      return -1;
++    }
++  if (str == base && str != buf)
++    /* The output was already computed in place, but we need to
++       account for its size.  */
++    obstack_blank_fast (obs, len);
++  else
++    {
++      /* The output exceeded available obstack space or we used buf;
++         copy the resulting string.  */
++      obstack_grow (obs, str, len);
++      if (str != buf)
++        free (str);
++    }
++  return len;
++}
++
++#endif  /* !ELIDE_CODE */
+diff --git a/obstack.h b/obstack.h
+new file mode 100644
+index 0000000..dddcdf8
+--- /dev/null
++++ b/obstack.h
+@@ -0,0 +1,512 @@
++/* obstack.h - object stack macros
++   Copyright (C) 1988-1994, 1996-1999, 2003-2006, 2009-2013 Free Software
++   Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++/* Summary:
++
++All the apparent functions defined here are macros. The idea
++is that you would use these pre-tested macros to solve a
++very specific set of problems, and they would run fast.
++Caution: no side-effects in arguments please!! They may be
++evaluated MANY times!!
++
++These macros operate a stack of objects.  Each object starts life
++small, and may grow to maturity.  (Consider building a word syllable
++by syllable.)  An object can move while it is growing.  Once it has
++been "finished" it never changes address again.  So the "top of the
++stack" is typically an immature growing object, while the rest of the
++stack is of mature, fixed size and fixed address objects.
++
++These routines grab large chunks of memory, using a function you
++supply, called 'obstack_chunk_alloc'.  On occasion, they free chunks,
++by calling 'obstack_chunk_free'.  You must define them and declare
++them before using any obstack macros.
++
++Each independent stack is represented by a 'struct obstack'.
++Each of the obstack macros expects a pointer to such a structure
++as the first argument.
++
++One motivation for this package is the problem of growing char strings
++in symbol tables.  Unless you are "fascist pig with a read-only mind"
++--Gosper's immortal quote from HAKMEM item 154, out of context--you
++would not like to put any arbitrary upper limit on the length of your
++symbols.
++
++In practice this often means you will build many short symbols and a
++few long symbols.  At the time you are reading a symbol you don't know
++how long it is.  One traditional method is to read a symbol into a
++buffer, realloc()ating the buffer every time you try to read a symbol
++that is longer than the buffer.  This is beaut, but you still will
++want to copy the symbol from the buffer to a more permanent
++symbol-table entry say about half the time.
++
++With obstacks, you can work differently.  Use one obstack for all symbol
++names.  As you read a symbol, grow the name in the obstack gradually.
++When the name is complete, finalize it.  Then, if the symbol exists already,
++free the newly read name.
++
++The way we do this is to take a large chunk, allocating memory from
++low addresses.  When you want to build a symbol in the chunk you just
++add chars above the current "high water mark" in the chunk.  When you
++have finished adding chars, because you got to the end of the symbol,
++you know how long the chars are, and you can create a new object.
++Mostly the chars will not burst over the highest address of the chunk,
++because you would typically expect a chunk to be (say) 100 times as
++long as an average object.
++
++In case that isn't clear, when we have enough chars to make up
++the object, THEY ARE ALREADY CONTIGUOUS IN THE CHUNK (guaranteed)
++so we just point to it where it lies.  No moving of chars is
++needed and this is the second win: potentially long strings need
++never be explicitly shuffled. Once an object is formed, it does not
++change its address during its lifetime.
++
++When the chars burst over a chunk boundary, we allocate a larger
++chunk, and then copy the partly formed object from the end of the old
++chunk to the beginning of the new larger chunk.  We then carry on
++accreting characters to the end of the object as we normally would.
++
++A special macro is provided to add a single char at a time to a
++growing object.  This allows the use of register variables, which
++break the ordinary 'growth' macro.
++
++Summary:
++        We allocate large chunks.
++        We carve out one object at a time from the current chunk.
++        Once carved, an object never moves.
++        We are free to append data of any size to the currently
++          growing object.
++        Exactly one object is growing in an obstack at any one time.
++        You can run one obstack per control block.
++        You may have as many control blocks as you dare.
++        Because of the way we do it, you can "unwind" an obstack
++          back to a previous state. (You may remove objects much
++          as you would with a stack.)
++*/
++
++
++/* Don't do the contents of this file more than once.  */
++
++#ifndef _OBSTACK_H
++#define _OBSTACK_H 1
++
++
++#include <stddef.h>
++#include <stdarg.h>
++
++/* If B is the base of an object addressed by P, return the result of
++   aligning P to the next multiple of A + 1.  B and P must be of type
++   char *.  A + 1 must be a power of 2.  */
++
++#define __BPTR_ALIGN(B, P, A) ((B) + (((P) - (B) + (A)) & ~(A)))
++
++/* Similar to _BPTR_ALIGN (B, P, A), except optimize the common case
++   where pointers can be converted to integers, aligned as integers,
++   and converted back again.  If ptrdiff_t is narrower than a
++   pointer (e.g., the AS/400), play it safe and compute the alignment
++   relative to B.  Otherwise, use the faster strategy of computing the
++   alignment relative to 0.  */
++
++#define __PTR_ALIGN(B, P, A)                                                \
++  __BPTR_ALIGN (sizeof (ptrdiff_t) < sizeof (void *) ? (B) : (char *) 0, \
++                P, A)
++
++#include <string.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++struct _obstack_chunk           /* Lives at front of each chunk. */
++{
++  char  *limit;                 /* 1 past end of this chunk */
++  struct _obstack_chunk *prev;  /* address of prior chunk or NULL */
++  char  contents[4];            /* objects begin here */
++};
++
++struct obstack          /* control current object in current chunk */
++{
++  long  chunk_size;             /* preferred size to allocate chunks in */
++  struct _obstack_chunk *chunk; /* address of current struct obstack_chunk */
++  char  *object_base;           /* address of object we are building */
++  char  *next_free;             /* where to add next char to current object */
++  char  *chunk_limit;           /* address of char after current chunk */
++  union
++  {
++    ptrdiff_t tempint;
++    void *tempptr;
++  } temp;                       /* Temporary for some macros.  */
++  int   alignment_mask;         /* Mask of alignment for each object. */
++  /* These prototypes vary based on 'use_extra_arg', and we use
++     casts to the prototypeless function type in all assignments,
++     but having prototypes here quiets -Wstrict-prototypes.  */
++  struct _obstack_chunk *(*chunkfun) (void *, long);
++  void (*freefun) (void *, struct _obstack_chunk *);
++  void *extra_arg;              /* first arg for chunk alloc/dealloc funcs */
++  unsigned use_extra_arg:1;     /* chunk alloc/dealloc funcs take extra arg */
++  unsigned maybe_empty_object:1;/* There is a possibility that the current
++                                   chunk contains a zero-length object.  This
++                                   prevents freeing the chunk if we allocate
++                                   a bigger chunk to replace it. */
++  unsigned alloc_failed:1;      /* No longer used, as we now call the failed
++                                   handler on error, but retained for binary
++                                   compatibility.  */
++};
++
++/* Declare the external functions we use; they are in obstack.c.  */
++
++extern void _obstack_newchunk (struct obstack *, int);
++extern int _obstack_begin (struct obstack *, int, int,
++                            void *(*) (long), void (*) (void *));
++extern int _obstack_begin_1 (struct obstack *, int, int,
++                             void *(*) (void *, long),
++                             void (*) (void *, void *), void *);
++extern int _obstack_memory_used (struct obstack *);
++
++/* The default name of the function for freeing a chunk is 'obstack_free',
++   but gnulib users can override this by defining '__obstack_free'.  */
++#ifndef __obstack_free
++# define __obstack_free obstack_free
++#endif
++extern void __obstack_free (struct obstack *obstack, void *block);
++
++
++/* Error handler called when 'obstack_chunk_alloc' failed to allocate
++   more memory.  This can be set to a user defined function which
++   should either abort gracefully or use longjump - but shouldn't
++   return.  The default action is to print a message and abort.  */
++extern void (*obstack_alloc_failed_handler) (void);
++
++/* Exit value used when 'print_and_abort' is used.  */
++extern int obstack_exit_failure;
++
++/* Pointer to beginning of object being allocated or to be allocated next.
++   Note that this might not be the final address of the object
++   because a new chunk might be needed to hold the final size.  */
++
++#define obstack_base(h) ((void *) (h)->object_base)
++
++/* Size for allocating ordinary chunks.  */
++
++#define obstack_chunk_size(h) ((h)->chunk_size)
++
++/* Pointer to next byte not yet allocated in current chunk.  */
++
++#define obstack_next_free(h)    ((h)->next_free)
++
++/* Mask specifying low bits that should be clear in address of an object.  */
++
++#define obstack_alignment_mask(h) ((h)->alignment_mask)
++
++/* To prevent prototype warnings provide complete argument list.  */
++#define obstack_init(h)                                         \
++  _obstack_begin ((h), 0, 0,                                    \
++                  (void *(*) (long)) obstack_chunk_alloc,       \
++                  (void (*) (void *)) obstack_chunk_free)
++
++#define obstack_begin(h, size)                                  \
++  _obstack_begin ((h), (size), 0,                               \
++                  (void *(*) (long)) obstack_chunk_alloc,       \
++                  (void (*) (void *)) obstack_chunk_free)
++
++#define obstack_specify_allocation(h, size, alignment, chunkfun, freefun)  \
++  _obstack_begin ((h), (size), (alignment),                                \
++                  (void *(*) (long)) (chunkfun),                           \
++                  (void (*) (void *)) (freefun))
++
++#define obstack_specify_allocation_with_arg(h, size, alignment, chunkfun, freefun, arg) \
++  _obstack_begin_1 ((h), (size), (alignment),                           \
++                    (void *(*) (void *, long)) (chunkfun),              \
++                    (void (*) (void *, void *)) (freefun), (arg))
++
++#define obstack_chunkfun(h, newchunkfun) \
++  ((h) -> chunkfun = (struct _obstack_chunk *(*)(void *, long)) (newchunkfun))
++
++#define obstack_freefun(h, newfreefun) \
++  ((h) -> freefun = (void (*)(void *, struct _obstack_chunk *)) (newfreefun))
++
++#define obstack_1grow_fast(h,achar) (*((h)->next_free)++ = (achar))
++
++#define obstack_blank_fast(h,n) ((h)->next_free += (n))
++
++#define obstack_memory_used(h) _obstack_memory_used (h)
++
++#if defined __GNUC__
++/* NextStep 2.0 cc is really gcc 1.93 but it defines __GNUC__ = 2 and
++   does not implement __extension__.  But that compiler doesn't define
++   __GNUC_MINOR__.  */
++# if __GNUC__ < 2 || (__NeXT__ && !__GNUC_MINOR__)
++#  define __extension__
++# endif
++
++/* For GNU C, if not -traditional,
++   we can define these macros to compute all args only once
++   without using a global variable.
++   Also, we can avoid using the 'temp' slot, to make faster code.  */
++
++# define obstack_object_size(OBSTACK)                                   \
++  __extension__                                                         \
++  ({ struct obstack const *__o = (OBSTACK);                             \
++     (unsigned) (__o->next_free - __o->object_base); })
++
++# define obstack_room(OBSTACK)                                          \
++  __extension__                                                         \
++  ({ struct obstack const *__o = (OBSTACK);                             \
++     (unsigned) (__o->chunk_limit - __o->next_free); })
++
++# define obstack_make_room(OBSTACK,length)                              \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->chunk_limit - __o->next_free < __len)                       \
++     _obstack_newchunk (__o, __len);                                    \
++   (void) 0; })
++
++# define obstack_empty_p(OBSTACK)                                       \
++  __extension__                                                         \
++  ({ struct obstack const *__o = (OBSTACK);                             \
++     (__o->chunk->prev == 0                                             \
++      && __o->next_free == __PTR_ALIGN ((char *) __o->chunk,            \
++                                        __o->chunk->contents,           \
++                                        __o->alignment_mask)); })
++
++# define obstack_grow(OBSTACK,where,length)                             \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->next_free + __len > __o->chunk_limit)                       \
++     _obstack_newchunk (__o, __len);                                    \
++   memcpy (__o->next_free, where, __len);                               \
++   __o->next_free += __len;                                             \
++   (void) 0; })
++
++# define obstack_grow0(OBSTACK,where,length)                            \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->next_free + __len + 1 > __o->chunk_limit)                   \
++     _obstack_newchunk (__o, __len + 1);                                \
++   memcpy (__o->next_free, where, __len);                               \
++   __o->next_free += __len;                                             \
++   *(__o->next_free)++ = 0;                                             \
++   (void) 0; })
++
++# define obstack_1grow(OBSTACK,datum)                                   \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   if (__o->next_free + 1 > __o->chunk_limit)                           \
++     _obstack_newchunk (__o, 1);                                        \
++   obstack_1grow_fast (__o, datum);                                     \
++   (void) 0; })
++
++/* These assume that the obstack alignment is good enough for pointers
++   or ints, and that the data added so far to the current object
++   shares that much alignment.  */
++
++# define obstack_ptr_grow(OBSTACK,datum)                                \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   if (__o->next_free + sizeof (void *) > __o->chunk_limit)             \
++     _obstack_newchunk (__o, sizeof (void *));                          \
++   obstack_ptr_grow_fast (__o, datum); })                               \
++
++# define obstack_int_grow(OBSTACK,datum)                                \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   if (__o->next_free + sizeof (int) > __o->chunk_limit)                \
++     _obstack_newchunk (__o, sizeof (int));                             \
++   obstack_int_grow_fast (__o, datum); })
++
++# define obstack_ptr_grow_fast(OBSTACK,aptr)                            \
++__extension__                                                           \
++({ struct obstack *__o1 = (OBSTACK);                                    \
++   void *__p1 = __o1->next_free;                                        \
++   *(const void **) __p1 = (aptr);                                      \
++   __o1->next_free += sizeof (const void *);                            \
++   (void) 0; })
++
++# define obstack_int_grow_fast(OBSTACK,aint)                            \
++__extension__                                                           \
++({ struct obstack *__o1 = (OBSTACK);                                    \
++   void *__p1 = __o1->next_free;                                        \
++   *(int *) __p1 = (aint);                                              \
++   __o1->next_free += sizeof (int);                                     \
++   (void) 0; })
++
++# define obstack_blank(OBSTACK,length)                                  \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   int __len = (length);                                                \
++   if (__o->chunk_limit - __o->next_free < __len)                       \
++     _obstack_newchunk (__o, __len);                                    \
++   obstack_blank_fast (__o, __len);                                     \
++   (void) 0; })
++
++# define obstack_alloc(OBSTACK,length)                                  \
++__extension__                                                           \
++({ struct obstack *__h = (OBSTACK);                                     \
++   obstack_blank (__h, (length));                                       \
++   obstack_finish (__h); })
++
++# define obstack_copy(OBSTACK,where,length)                             \
++__extension__                                                           \
++({ struct obstack *__h = (OBSTACK);                                     \
++   obstack_grow (__h, (where), (length));                               \
++   obstack_finish (__h); })
++
++# define obstack_copy0(OBSTACK,where,length)                            \
++__extension__                                                           \
++({ struct obstack *__h = (OBSTACK);                                     \
++   obstack_grow0 (__h, (where), (length));                              \
++   obstack_finish (__h); })
++
++/* The local variable is named __o1 to avoid a name conflict
++   when obstack_blank is called.  */
++# define obstack_finish(OBSTACK)                                        \
++__extension__                                                           \
++({ struct obstack *__o1 = (OBSTACK);                                    \
++   void *__value = (void *) __o1->object_base;                          \
++   if (__o1->next_free == __value)                                      \
++     __o1->maybe_empty_object = 1;                                      \
++   __o1->next_free                                                      \
++     = __PTR_ALIGN (__o1->object_base, __o1->next_free,                 \
++                    __o1->alignment_mask);                              \
++   if (__o1->next_free - (char *)__o1->chunk                            \
++       > __o1->chunk_limit - (char *)__o1->chunk)                       \
++     __o1->next_free = __o1->chunk_limit;                               \
++   __o1->object_base = __o1->next_free;                                 \
++   __value; })
++
++# define obstack_free(OBSTACK, OBJ)                                     \
++__extension__                                                           \
++({ struct obstack *__o = (OBSTACK);                                     \
++   void *__obj = (OBJ);                                                 \
++   if (__obj > (void *)__o->chunk && __obj < (void *)__o->chunk_limit)  \
++     __o->next_free = __o->object_base = (char *)__obj;                 \
++   else (__obstack_free) (__o, __obj); })
++
++#else /* not __GNUC__ */
++
++# define obstack_object_size(h) \
++ (unsigned) ((h)->next_free - (h)->object_base)
++
++# define obstack_room(h)                \
++ (unsigned) ((h)->chunk_limit - (h)->next_free)
++
++# define obstack_empty_p(h) \
++ ((h)->chunk->prev == 0                                                 \
++  && (h)->next_free == __PTR_ALIGN ((char *) (h)->chunk,                \
++                                    (h)->chunk->contents,               \
++                                    (h)->alignment_mask))
++
++/* Note that the call to _obstack_newchunk is enclosed in (..., 0)
++   so that we can avoid having void expressions
++   in the arms of the conditional expression.
++   Casting the third operand to void was tried before,
++   but some compilers won't accept it.  */
++
++# define obstack_make_room(h,length)                                    \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->next_free + (h)->temp.tempint > (h)->chunk_limit)              \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint), 0) : 0))
++
++# define obstack_grow(h,where,length)                                   \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->next_free + (h)->temp.tempint > (h)->chunk_limit)              \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint), 0) : 0),              \
++  memcpy ((h)->next_free, where, (h)->temp.tempint),                    \
++  (h)->next_free += (h)->temp.tempint)
++
++# define obstack_grow0(h,where,length)                                  \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->next_free + (h)->temp.tempint + 1 > (h)->chunk_limit)          \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint + 1), 0) : 0),          \
++  memcpy ((h)->next_free, where, (h)->temp.tempint),                    \
++  (h)->next_free += (h)->temp.tempint,                                  \
++  *((h)->next_free)++ = 0)
++
++# define obstack_1grow(h,datum)                                         \
++( (((h)->next_free + 1 > (h)->chunk_limit)                              \
++   ? (_obstack_newchunk ((h), 1), 0) : 0),                              \
++  obstack_1grow_fast (h, datum))
++
++# define obstack_ptr_grow(h,datum)                                      \
++( (((h)->next_free + sizeof (char *) > (h)->chunk_limit)                \
++   ? (_obstack_newchunk ((h), sizeof (char *)), 0) : 0),                \
++  obstack_ptr_grow_fast (h, datum))
++
++# define obstack_int_grow(h,datum)                                      \
++( (((h)->next_free + sizeof (int) > (h)->chunk_limit)                   \
++   ? (_obstack_newchunk ((h), sizeof (int)), 0) : 0),                   \
++  obstack_int_grow_fast (h, datum))
++
++# define obstack_ptr_grow_fast(h,aptr)                                  \
++  (((const void **) ((h)->next_free += sizeof (void *)))[-1] = (aptr))
++
++# define obstack_int_grow_fast(h,aint)                                  \
++  (((int *) ((h)->next_free += sizeof (int)))[-1] = (aint))
++
++# define obstack_blank(h,length)                                        \
++( (h)->temp.tempint = (length),                                         \
++  (((h)->chunk_limit - (h)->next_free < (h)->temp.tempint)              \
++   ? (_obstack_newchunk ((h), (h)->temp.tempint), 0) : 0),              \
++  obstack_blank_fast (h, (h)->temp.tempint))
++
++# define obstack_alloc(h,length)                                        \
++ (obstack_blank ((h), (length)), obstack_finish ((h)))
++
++# define obstack_copy(h,where,length)                                   \
++ (obstack_grow ((h), (where), (length)), obstack_finish ((h)))
++
++# define obstack_copy0(h,where,length)                                  \
++ (obstack_grow0 ((h), (where), (length)), obstack_finish ((h)))
++
++# define obstack_finish(h)                                              \
++( ((h)->next_free == (h)->object_base                                   \
++   ? (((h)->maybe_empty_object = 1), 0)                                 \
++   : 0),                                                                \
++  (h)->temp.tempptr = (h)->object_base,                                 \
++  (h)->next_free                                                        \
++    = __PTR_ALIGN ((h)->object_base, (h)->next_free,                    \
++                   (h)->alignment_mask),                                \
++  (((h)->next_free - (char *) (h)->chunk                                \
++    > (h)->chunk_limit - (char *) (h)->chunk)                           \
++   ? ((h)->next_free = (h)->chunk_limit) : 0),                          \
++  (h)->object_base = (h)->next_free,                                    \
++  (h)->temp.tempptr)
++
++# define obstack_free(h,obj)                                            \
++( (h)->temp.tempint = (char *) (obj) - (char *) (h)->chunk,             \
++  ((((h)->temp.tempint > 0                                              \
++    && (h)->temp.tempint < (h)->chunk_limit - (char *) (h)->chunk))     \
++   ? (int) ((h)->next_free = (h)->object_base                           \
++            = (h)->temp.tempint + (char *) (h)->chunk)                  \
++   : (((__obstack_free) ((h), (h)->temp.tempint + (char *) (h)->chunk), 0), 0)))
++
++#endif /* not __GNUC__ */
++
++#ifdef __cplusplus
++}       /* C++ */
++#endif
++
++extern int obstack_printf (struct obstack *obs, const char *format, ...)
++    __attribute__((format(printf,2,3), __nonnull__(1,2)));
++
++extern int obstack_vprintf (struct obstack *obs, const char *format, va_list args)
++    __attribute__((format(printf,2,0), __nonnull__(1,2)));
++
++#endif /* obstack.h */
+-- 
+1.8.4
+

@@ -8,6 +8,18 @@ SLOT="0"
 PLATFORMS="~amd64 ~x86"
 MYOPTIONS=""
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-fix-build-with-musl.patch )
 DEFAULT_SRC_COMPILE_PARAMS=( CFLAGS="${CFLAGS}" )
 DEFAULT_SRC_INSTALL_PARAMS=( exec_prefix=/usr/$(exhost --target) )
+
+src_compile() {
+    local have_obstack=
+
+    case $(exhost --target) in
+        *-*-*musl*) have_obstack=0 ;;
+        *)          have_obstack=1 ;;
+    esac
+
+    emake CFLAGS="${CFLAGS}" HAVE_OBSTACK=${have_obstack}
+}
 
