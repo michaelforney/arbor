@@ -23,7 +23,10 @@ DEPENDENCIES="
 
 WORK=${WORKBASE}/${MY_PNV}
 
-DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/${PN}-20121221-floodlocale.patch )
+DEFAULT_SRC_PREPARE_PATCHES=(
+    "${FILES}"/${PN}-20121221-floodlocale.patch
+    "${FILES}"/${PN}-fix-build-with-musl.patch
+)
 
 src_prepare() {
     default
