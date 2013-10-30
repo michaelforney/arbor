@@ -183,7 +183,7 @@ systemd_src_prepare() {
             -e "/^userunitdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^tmpfilesdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^sysctldir=/s:/lib/:/${LIBDIR}/:" \
-            -e "/^linksdir=/s:/lib/:/${LIBDIR}/:" \
+            -e "/^networkdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^usergeneratordir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^catalogdir=/s:/lib/:/${LIBDIR}/:" \
             -e "/^kernelinstalldir = /s:/lib/:/${LIBDIR}/:" \
@@ -486,8 +486,8 @@ EOF
     keepdir /usr/${LIBDIR}/systemd/system-sleep
 
     # udev link-config rules files
-    keepdir /etc/net/links
-    keepdir /usr/${LIBDIR}/net/links
+    keepdir /etc/systemd/network
+    keepdir /usr/${LIBDIR}/systemd/network
 
     # Keep the administrator's udev rules dir.
     keepdir /etc/udev/rules.d
