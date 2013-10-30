@@ -13,3 +13,11 @@ DEPENDENCIES="
         app-editors/vim"
 MYOPTIONS=""
 
+src_install() {
+    local host=$(exhost --target)
+
+    default
+    dodir /usr/${host}
+    edo mv "${IMAGE}"/usr/{bin,${host}/bin}
+}
+
