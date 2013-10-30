@@ -1,0 +1,151 @@
+From 4b5a6dfff76d2e89f32663e68f87b9dc453f4221 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Fri, 18 Oct 2013 17:41:42 +0000
+Subject: [PATCH 1/4] Fix argument order in xmlto invocations
+
+This worked on glibc-based systems because glibc's getopt permutes argv
+as it scans by default instead of conforming to POSIX.
+---
+ src/clients/cave/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/clients/cave/Makefile.am b/src/clients/cave/Makefile.am
+index d502557..e59587a 100644
+--- a/src/clients/cave/Makefile.am
++++ b/src/clients/cave/Makefile.am
+@@ -113,7 +113,7 @@ $(command_MANS_txts) : man-cave
+ 	xmlto man $<
+ 
+ .xml.html-man-fragment : $(man_MANS_xmls)
+-	xmlto html $< -o $@-dir
++	xmlto -o $@-dir html $<
+ 	sed \
+ 	    -e '1s,^.*\(<div class="refnamediv">\),\1,' \
+ 	    -e '$$s,</body>.*,,' -e '$$s,</div><div class="navfooter"><hr></div>,,' \
+-- 
+1.8.4
+
+
+From 4dd098ea3452cc29be7c510c6c2ec5a82c142f79 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Fri, 27 Sep 2013 23:48:06 -0700
+Subject: [PATCH 2/4] Fix build without HAVE_CANONICALIZE_FILE_NAME
+
+---
+ paludis/util/fs_path.cc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/paludis/util/fs_path.cc b/paludis/util/fs_path.cc
+index b3857ea..1440f45 100644
+--- a/paludis/util/fs_path.cc
++++ b/paludis/util/fs_path.cc
+@@ -232,12 +232,12 @@ FSPath::realpath() const
+ #else
+     char r[PATH_MAX + 1];
+     std::memset(r, 0, PATH_MAX + 1);
+-    if (! exists())
++    if (! stat().exists())
+         throw FSError("Could not resolve path '" + _imp->path + "'");
+     if (! ::realpath(_imp->path.c_str(), r))
+         throw FSError("Could not resolve path '" + _imp->path + "'");
+     FSPath result(r);
+-    if (! result.exists())
++    if (! result.stat().exists())
+         throw FSError("Could not resolve path '" + _imp->path + "'");
+     return result;
+ #endif
+@@ -258,12 +258,12 @@ FSPath::realpath_if_exists() const
+ #else
+     char r[PATH_MAX + 1];
+     std::memset(r, 0, PATH_MAX + 1);
+-    if (! exists())
++    if (! stat().exists())
+         return *this;
+     if (! ::realpath(_imp->path.c_str(), r))
+         return *this;
+     FSPath result(r);
+-    if (! result.exists())
++    if (! result.stat().exists())
+         return *this;
+     return result;
+ #endif
+-- 
+1.8.4
+
+
+From 858aa7e00b5648c9e2b972b2601b99ee03e71de8 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sat, 28 Sep 2013 00:01:40 -0700
+Subject: [PATCH 3/4] Use SIGCHLD instead of SIGCLD
+
+SIGCLD is a synonym anyway and is not specified by POSIX.
+---
+ paludis/util/process.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/paludis/util/process.cc b/paludis/util/process.cc
+index 833a238..0a5a312 100644
+--- a/paludis/util/process.cc
++++ b/paludis/util/process.cc
+@@ -791,13 +791,13 @@ Process::run()
+     {
+         if (_imp->as_main_process)
+         {
+-            /* Ignore CLD. POSIX may or may not say that if we do this, our child will
++            /* Ignore CHLD. POSIX may or may not say that if we do this, our child will
+              * not become a zombie. */
+             struct sigaction act;
+             sigemptyset(&act.sa_mask);
+             act.sa_handler = SIG_IGN;
+             act.sa_flags = 0;
+-            sigaction(SIGCLD, &act, nullptr);
++            sigaction(SIGCHLD, &act, nullptr);
+ 
+             pid_t p(fork());
+             if (-1 == p)
+-- 
+1.8.4
+
+
+From 98746a3e276028ae03a2a81c72692c871efbbc09 Mon Sep 17 00:00:00 2001
+From: Michael Forney <mforney@mforney.org>
+Date: Sat, 26 Oct 2013 12:56:46 -0700
+Subject: [PATCH 4/4] Use std::thread::hardware_concurrency instead of
+ get_nprocs
+
+---
+ src/clients/cave/cmd_generate_metadata.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/clients/cave/cmd_generate_metadata.cc b/src/clients/cave/cmd_generate_metadata.cc
+index b33813a..b3425f8 100644
+--- a/src/clients/cave/cmd_generate_metadata.cc
++++ b/src/clients/cave/cmd_generate_metadata.cc
+@@ -41,12 +41,12 @@
+ #include <paludis/metadata_key.hh>
+ #include <paludis/notifier_callback.hh>
+ #include <paludis/slot.hh>
+-#include <sys/sysinfo.h>
+ #include <cstdlib>
+ #include <iostream>
+ #include <algorithm>
+ #include <mutex>
+ #include <map>
++#include <thread>
+ #include <unistd.h>
+ 
+ #include "command_command_line.hh"
+@@ -307,8 +307,8 @@ GenerateMetadataCommand::run(
+         ScopedNotifierCallback display_callback_holder(env.get(), NotifierCallbackFunction(std::cref(callback)));
+         ThreadPool pool;
+ 
+-        int n_procs(get_nprocs());
+-        if (n_procs < 1)
++        unsigned n_procs(std::thread::hardware_concurrency());
++        if (n_procs == 0)
+             n_procs = 1;
+ 
+         for (int n(0), n_end(n_procs) ; n != n_end ; ++n)
+-- 
+1.8.4
+

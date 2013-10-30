@@ -11,6 +11,8 @@ DOWNLOADS=""
 
 PLATFORMS="~amd64 ~arm ~x86"
 
+DEFAULT_SRC_PREPARE_PATCHES=( "${FILES}"/paludis-fix-build-with-musl.patch )
+
 src_prepare() {
     edo ./autotools_prepare.bash
     autotools_src_prepare
