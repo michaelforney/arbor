@@ -1,10 +1,25 @@
 # Copyright 2009 Mike Kelly
 # Distributed under the terms of the GNU General Public License v2
 
+# exparams
+#   classes ( format: C and/or PYTHON_ABIS ) ( defaults to C )
+#     which classes should we build for? Defaults to 'C'. Any value listed must be in
+#     $MULTIBUILD_CLASSES, in make.defaults in their profiles.
+#
+#   multiunpack ( format: true or false ) ( defaults to false )
+#     unpack separately for each target. for packages that can't support out-of-source builds. if at
+#     all possible, make it support out-of-source builds instead.
+#
+#   skip_nondefault_tests ( format: true or false ) ( defaults to false )
+#     skip tests for non-native targets, while still running the native tests. if at all possible
+#     fix the non-native tests instead. this exparam makes no sense for python that doesn't really
+#     have a concept of native targets.
+#
+#   work ( format: path ) ( defaults to ${PNV} if multiunpack is true and nothing otherwise )
+#     for use with the multiunpack exparam. path to WORK relative from the dir where the sources are
+#     unpacked.
 require multibuild
 
-# Which classes should we build for? Defaults to 'C'. Any value listed must be in $MULTIBUILD_CLASSES,
-# in make.defaults in their profiles.
 myexparam classes=[ C ]
 exparam -v EASY_MULTIBUILD_CLASSES classes[@]
 
