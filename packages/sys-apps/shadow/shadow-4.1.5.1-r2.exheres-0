@@ -7,7 +7,7 @@ require pam
 
 SUMMARY="User and group management related utilities"
 HOMEPAGE="http://pkg-${PN}.alioth.debian.org"
-DOWNLOADS="http://pkg-${PN}.alioth.debian.org/releases/${PNV}.tar.bz2"
+DOWNLOADS="${HOMEPAGE}/releases/${PNV}.tar.bz2"
 
 UPSTREAM_RELEASE_NOTES="http://pkg-${PN}.alioth.debian.org/releases/${PNV}.NEWS"
 
@@ -29,6 +29,10 @@ DEPENDENCIES="
         attr? ( sys-apps/attr )
         sys-libs/cracklib[>=2.8.3]
         sys-libs/pam[>=1.0.1]
+        !sys-apps/util-linux[<2.24] [[
+            description = [ sys-apps/util-linux 2.24 installs nologin previously provided by this package ]
+            resolution = uninstall-blocked-after
+        ]]
 "
 
 DEFAULT_SRC_PREPARE_PATCHES=(
@@ -102,7 +106,10 @@ src_install() {
     edo find "${IMAGE}"/usr/share/man '(' -name 'limits.5*' -o -name 'suauth.5*' ')' -delete
 
     # Remove manpages that are handled by other packages
-    edo find "${IMAGE}"/usr/share/man '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 ')' -delete
+    edo find "${IMAGE}"/usr/share/man '(' -name id.1 -o -name passwd.5 -o -name getspnam.3 -o -name nologin.8 ')' -delete
+
+    # Remove nologin which is installed by util-linux[>=2.24]
+    edo rm "${IMAGE}"/sbin/nologin
 
     edo find "${IMAGE}" -type d -empty -delete
 }

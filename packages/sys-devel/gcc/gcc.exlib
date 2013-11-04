@@ -305,11 +305,8 @@ EOF
                 $(option_enable fortran libquadmath)                                                \
                 $(option_enable fortran libquadmath-support)                                        \
                 $(option_with graphite cloog)                                                       \
-                $(if ! ever at_least 4.8_pre20130303 ; then
-                    option_with graphite ppl
-                else
-                    option_with graphite isl
-                  fi)                                                                               \
+                $(ever at_least 4.8_pre20130303                                                     \
+                    || option_with graphite ppl)                                                    \
                 $(if ever at_least 4.6 && optionq graphite ; then
                     if ! ever at_least 4.8_pre20130303 ; then
                         option_enable graphite cloog-backend ${cloog_backend}

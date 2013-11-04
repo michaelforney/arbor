@@ -1,0 +1,17 @@
+Upstream: yes, ported from 80815
+Reason: allow kde/rocs to build
+Source: Franz Detro <franz.detro@native-instruments.de>
+
+Index: boost/spirit/home/qi/stream/stream.hpp
+===================================================================
+--- boost/spirit/home/qi/stream/stream.hpp	(revision 80814)
++++ boost/spirit/home/qi/stream/stream.hpp	(revision 80815)
+@@ -58,7 +58,7 @@
+           , typename Skipper, typename Attribute>
+         bool parse(Iterator& first, Iterator const& last
+           , Context& /*context*/, Skipper const& skipper
+-          , Attribute& attr) const
++          , Attribute& attr_) const
+         {
+             typedef qi::detail::iterator_source<Iterator> source_device;
+             typedef boost::iostreams::stream<source_device> instream;
