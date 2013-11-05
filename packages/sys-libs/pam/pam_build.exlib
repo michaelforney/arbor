@@ -47,11 +47,6 @@ DEFAULT_SRC_PREPARE_PATCHES=(
     "${FILES}"/${PN}-Add-missing-include-to-paths.h.patch
 )
 
-DEFAULT_SRC_CONFIGURE_PARAMS=( '--disable-audit' '--disable-prelude' '--disable-regenerate-docu'
-                               '--disable-selinux' '--enable-cracklib' '--enable-db=no'
-                               '--enable-nls' )
-DEFAULT_SRC_CONFIGURE_OPTION_ENABLES=( nis )
-
 DEFAULT_SRC_INSTALL_EXTRA_DOCS=( doc/txt/* )
 
 pam_build_pkg_pretend() {
@@ -81,10 +76,18 @@ pam_build_src_configure() {
     BUILD_CFLAGS="${!build_cflags}"                                 \
     BUILD_CPPFLAGS="${!build_cppflags}"                             \
     BUILD_LDFLAGS="${!build_ldflags}"                               \
-    econf                                                           \
-        "--includedir=/usr/$(exhost --target)/include/security"     \
-        "--enable-isadir=/usr/$(exhost --target)/lib/security"      \
-        "--enable-securedir=/usr/$(exhost --target)/lib/security"
+    econf \
+        --includedir=/usr/$(exhost --target)/include/security \
+        --disable-audit \
+        --disable-prelude \
+        --disable-regenerate-docu \
+        --disable-selinux \
+        --enable-cracklib \
+        --enable-db=no \
+        --enable-isadir=/usr/$(exhost --target)/lib/security \
+        --enable-nls \
+        --enable-securedir=/usr/$(exhost --target)/lib/security \
+        $(option_enable nis)
 }
 
 pam_build_src_test() {
