@@ -3,11 +3,10 @@
 # Copyright 2008, 2009, 2010 Ingmar Vanhassel
 # Copyright 2008, 2009 Mike Kelly
 # Copyright 2010 Ali Polatel
+# Copyright 2013 Benedikt Morbach <moben@exherbo.org>
 # Distributed under the terms of the GNU General Public License v2
 # Based in part upon 'perl-5.8.8-r4.ebuild' from Gentoo, which is:
 #     Copyright 1999-2007 Gentoo Foundation
-
-MY_PVM=$(ever range 1-3)
 
 require alternatives flag-o-matic
 
@@ -21,7 +20,7 @@ DOWNLOADS="mirror://cpan/src/5.0/${PNV}.tar.bz2"
 
 REMOTE_IDS="cpan:${PN} freecode:${PN}"
 
-UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${PN}/pod/${PN}$(ever delete_all ${MY_PVM})delta.pod"
+UPSTREAM_CHANGELOG="http://search.cpan.org/dist/${PN}/pod/${PN}$(ever delete_all $(ever range 1-3))delta.pod"
 UPSTREAM_DOCUMENTATION=
 
 LICENCES="|| ( Artistic GPL-1 GPL-2 GPL-3 )"
@@ -68,16 +67,15 @@ perl-5_src_prepare() {
 }
 
 perl-5_src_configure() {
-    # Binaries are installed to /usr/bin/, with ${MY_PVM} appended
+    local host=$(exhost --target)
+    local perl_base=/usr/${host}/lib/perl5
+
+    # Binaries are installed to /usr/bin/, with ${SLOT} appended
     # Alternatives manages executables in /usr/bin/
-    # Libraries go into /usr/${LIBDIR}/perl5/${MY_PVM}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
+    # Libraries go into ${perl_base}/${SLOT}/${CHOST%%-*}-linux/CORE/, which is appended to LDPATH
     # `man 1` are installed with a version
 
     # -Dfoo = define foo, -Ufoo = undefine foo.
-
-    # This probably needs some further work... but should be okay for
-    # now. At least parrot breaks if we don't have -${osname} in ${archname}
-    local archname="${CHOST%%-*}-linux"
 
     # -O3 breaks ext/XS/APItest/t/exception.t and maybe other stuff
     replace-flags -O3 -O2
@@ -87,23 +85,36 @@ perl-5_src_configure() {
         -des
         $(define cf_by Exherbo)
         "$(define cc     "${CC}"    )"
+        "$(define cpp    "${CPP}"   )"
         "$(define ar     "${AR}"    )"
         "$(define nm     "${NM}"    )"
         "$(define ranlib "${RANLIB}")"
-        $(define prefix       /usr)
-        $(define vendorprefix /usr)
-        $(define siteprefix   /usr)
+        $(define prefix       /usr/${host})
+        $(define vendorprefix /usr/${host})
+        $(define siteprefix   /usr/${host})
         "$(define optimize "${CFLAGS}"  )"
         "$(define ldflags  "${LDFLAGS}" )"
-        "$(define archname "${archname}")"
-        "$(define privlib    "/usr/${LIBDIR}/perl5/${MY_PVM}"                        )"
-        "$(define archlib    "/usr/${LIBDIR}/perl5/${MY_PVM}/${archname}"            )"
-        "$(define sitelib    "/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}"              )"
-        "$(define sitearch   "/usr/${LIBDIR}/perl5/site_perl/${MY_PVM}/${archname}"  )"
-        "$(define vendorlib  "/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}"            )"
-        "$(define vendorarch "/usr/${LIBDIR}/perl5/vendor_perl/${MY_PVM}/${archname}")"
-        $(define scriptdir /usr/bin)
-        $(define libperl libperl.so.1.${MY_PVM})
+        # This probably needs some further work... but should be okay for
+        # now. At least parrot breaks if we do not have -${osname} in ${archname}
+        "$(define archname "${CHOST}")"
+        $(define privlib        "${perl_base}/core_perl/${SLOT}-pure"               )
+        $(define archlib        "${perl_base}/core_perl/${SLOT}-arch"               )
+        $(define bin            "${perl_base}/core_perl/${SLOT}-bin"                )
+        $(define scriptdir      "${perl_base}/core_perl/${SLOT}-bin"                )
+        $(define man1dir        "${perl_base}/core_perl/${SLOT}-man/man1"           )
+        $(define sitelib        "${perl_base}/site_perl/${SLOT}-pure"               )
+        $(define sitearch       "${perl_base}/site_perl/${SLOT}-arch"               )
+        $(define sitebin        "${perl_base}/site_perl/${SLOT}-bin"                )
+        $(define sitescript     "${perl_base}/site_perl/${SLOT}-bin"                )
+        $(define siteman1dir    "${perl_base}/site_perl/${SLOT}-man/man1"           )
+        $(define vendorlib      "${perl_base}/vendor_perl/${SLOT}-pure"             )
+        $(define vendorarch     "${perl_base}/vendor_perl/${SLOT}-arch"             )
+        $(define vendorbin      "${perl_base}/vendor_perl/${SLOT}-bin"              )
+        $(define vendorscript   "${perl_base}/vendor_perl/${SLOT}-bin"              )
+        $(define vendorman1dir  "${perl_base}/vendor_perl/${SLOT}-man/man1"         )
+        $(define perlpath       "${perl_base}/core_perl/${SLOT}-bin/${PN}${SLOT}"   )
+        $(define startperl      "#!${perl_base}/core_perl/${SLOT}-bin/${PN}${SLOT}" )
+        $(define libperl libperl.so.1.${SLOT})
         -Duseshrplib
         -Dmksymlinks
         -Duselargefiles
@@ -119,7 +130,7 @@ perl-5_src_configure() {
 
 perl-5_src_test() {
     # This is necessary for the ExtUtils::Embed tests
-    edo ln -s libperl.so.1{.${MY_PVM},}
+    edo ln -s libperl.so.1{.${SLOT},}
     edo ln -s libperl.so{.1,}
 
     # This is necessary for t/cachepropagate-unix.t
@@ -142,69 +153,73 @@ perl-5_src_test() {
 }
 
 perl-5_src_install() {
+    local host=$(exhost --target)
+    local perl_base=/usr/${host}/lib/perl5
+
     default
 
     edo cd "${IMAGE}"
 
-    # see configure
-    local archname="${CHOST%%-*}-linux"
-
     # Library symlinks
-    local perllibdir="/usr/${LIBDIR}/perl5/${MY_PVM}/${archname}/CORE/"
-    dosym libperl.so.1.${MY_PVM} ${perllibdir}/libperl.so.1
-    dosym libperl.so.1           ${perllibdir}/libperl.so
+    local perllibdir=${perl_base}/core_perl/${SLOT}-arch/CORE
+    dosym libperl.so.1.${SLOT} ${perllibdir}/libperl.so.1
+    dosym libperl.so.1         ${perllibdir}/libperl.so
 
-    # We only want /usr/bin/perl5.8.8, not /usr/bin/perl (without the dash, standard across distros)
-    nonfatal edo rm usr/bin/perl
+    local perlbindir=${perl_base}/core_perl/${SLOT}-bin
+    local perlmandir=${perl_base}/core_perl/${SLOT}-man/man1
 
-    # Version executables
-    local executable
-    for executable in usr/bin/*; do
-        if egrep -q '^#!/usr/bin/perl( +.*)?$' "${executable}"; then
-            edo sed -i -e '/^#!\/usr\/bin\/perl$/s/perl/perl'${MY_PVM}/ "${executable}"
-        fi
-    done
+    # Make the actual executable perl${SLOT}, create perl and perl$(ever range 1-3) further down with alternatives
+    # Needed because some packages fully resolve the path before hardcoding it
+    edo mv ${perlbindir#/}/${PN}{,${SLOT}}
+    edo rm ${perlbindir#/}/${PN}$(ever range 1-3)
 
     # Create & keep site and vendor dirs
-    keepdir /usr/${LIBDIR}/perl5/{site,vendor}_perl/${MY_PVM}/${archname}
+    keepdir ${perl_base}/{site,vendor}_perl/${SLOT}-{arch,bin,man/man1,pure}
 
     # We don't need packlists or perllocal.pod
-    edo find usr/${LIBDIR} -type f -name .packlist -or -name perllocal.pod -delete
+    edo find usr/${host}/lib -type f -name .packlist -or -name perllocal.pod -delete
 
     # Discard man3 manpages (use perldoc)
-    edo rm -r usr/share/man/man3
-
-    # Add alternative for Module-Build's config_data
-    local Module_Build_pv Module_Build_alternatives=()
-    exparam -v Module_Build_pv Module_Build_pv
-    [[ -z ${Module_Build_pv} ]] && die "Module_Build_pv exparam is not set"
-
-    Module_Build_alternatives+=(
-        /usr/bin/config_data              config_data-perl-${MY_PVM}
-        /usr/share/man/man1/config_data.1 config_data-perl-${MY_PVM}.1
-    )
-    alternatives_for config_data        \
-        ${Module_Build_pv}_perl-${SLOT} \
-        ${Module_Build_pv}              \
-        "${Module_Build_alternatives[@]}"
+    edo rm -r ${perl_base#/}/core_perl/${SLOT}-man/man3
 
     # Add alternative for perl tools and manpages
-    # perl${MY_PVM} doesn't have a dash, handle that here
-    local perl_alternatives=( /usr/bin/perl perl${MY_PVM} )
-    local bin manpage manfile
-
-    for bin in usr/bin/* ; do
-        # skip perl${PVM} and config_data-perl-${MY_PVM}
-        [[ ${bin} == *${MY_PVM} ]] && continue
-        perl_alternatives+=( "/${bin}" "${bin##*/}-${MY_PVM}" )
-    done
-    for manpage in usr/share/man/man1/*.1; do
-        # skip config_data-perl-${MY_PVM}.1
-        [[ ${manpage} == *${MY_PVM}.1 ]] && continue
-        manfile=${manpage##*/}
-        perl_alternatives+=( "/${manpage}" "${manfile/%.1/-${MY_PVM}.1}" )
-    done
+    # perl${SLOT} doesn't have a dash, handle that here
+    local perl_alternatives=(
+        ${perl_base}/core_perl/bin   ${SLOT}-bin
+        ${perl_base}/site_perl/bin   ${SLOT}-bin
+        ${perl_base}/vendor_perl/bin ${SLOT}-bin
+        ${perl_base}/core_perl/man   ${SLOT}-man
+        ${perl_base}/site_perl/man   ${SLOT}-man
+        ${perl_base}/vendor_perl/man ${SLOT}-man
+        /usr/${host}/bin/perl        ${perlbindir}/perl${SLOT}
+    )
 
     alternatives_for ${PN} ${SLOT} ${SLOT} "${perl_alternatives[@]}"
+
+    # add versioned symlinks to allow acces to non-selected versions
+    local bin manpage
+    for bin in ${perlbindir#/}/* ; do
+        # handled in alternatives
+        [[ ${bin} == ${perlbindir#/}/perl${SLOT} ]] && continue
+        dosym ${bin##*/} ${bin}-${SLOT}
+    done
+    dosym perl${SLOT} ${perlbindir}/perl$(ever range 1-3)
+    for manpage in ${perlmandir}/*.1; do
+        dosym ${manpage##*/} ${manpage/%.1/-${SLOT}.1}
+    done
+
+    # env.d file for the current eclectic-selected perl version, unversioned directory
+    # comes first in PATH (yes, this is the same for all versions, eclectic does deduplication for us)
+    hereenvd 47perl-${SLOT} <<EOF
+PATH="${perl_base}/site_perl/bin:${perl_base}/vendor_perl/bin:${perl_base}/core_perl/bin"
+MANPATH="${perl_base}/site_perl/man:${perl_base}/vendor_perl/man:${perl_base}/core_perl/man"
+EOF
+
+    # env.d file for this perl's versioned directories, come after the above in PATH
+    # The $((99-$(ever range 2))) trickery is to ensure that most recent comes first
+    hereenvd 48.$((99-$(ever range 2)))perl-${SLOT} <<EOF
+PATH="${perl_base}/site_perl/${SLOT}-bin:${perl_base}/vendor_perl/${SLOT}-bin:${perl_base}/core_perl/${SLOT}-bin"
+MANPATH="${perl_base}/site_perl/${SLOT}-man:${perl_base}/vendor_perl/${SLOT}-man:${perl_base}/core_perl/${SLOT}-man"
+EOF
 }
 
